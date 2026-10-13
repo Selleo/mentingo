@@ -18,9 +18,7 @@
             "id": "1de90584-f578-53e3-8489-f34c4f8567cb",
             "title": "Recognize phishing",
             "lessonType": "content",
-            "objectives": [
-              "Inspect links safely"
-            ]
+            "objectives": ["Inspect links safely"]
           }
         ]
       }

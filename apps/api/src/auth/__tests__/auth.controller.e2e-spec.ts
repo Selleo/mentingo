@@ -6,17 +6,25 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { EnvService } from "src/env/services/env.service";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, formFieldAnswers, magicLinkTokens, resetTokens } from "src/storage/schema";
+import {
+  createTokens,
+  formFieldAnswers,
+  magicLinkTokens,
+  notificationAccountActionIntents,
+  resetTokens,
+  users,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
-import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
@@ -26,6 +34,7 @@ import type { DatabasePg } from "src/common";
 
 describe("AuthController (e2e)", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
   let authService: AuthService;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -34,7 +43,8 @@ describe("AuthController (e2e)", () => {
   let settingsService: SettingsService;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, runAsTenant, defaultTenantId } = await createE2ETest();
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     authService = app.get(AuthService);
     settingsService = app.get(SettingsService);
@@ -124,7 +134,7 @@ describe("AuthController (e2e)", () => {
         language: SUPPORTED_LANGUAGES.EN,
       };
 
-      await authService.register(existingUser);
+      await inTenant(() => authService.register(existingUser));
 
       await request(app.getHttpServer()).post("/api/auth/register").send(existingUser).expect(409);
     });
@@ -161,13 +171,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "pl",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "pl",
+        }),
+      );
 
       const userSettings = await settingsService.getUserSettings(registeredUser.id);
 
@@ -350,13 +362,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       await settingsService.updateCompanyInformation({
         companyName: "Acme Corp",
@@ -372,13 +386,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       const { otpauth } = await authService.generateMFASecret(registeredUser.id);
 
@@ -393,13 +409,15 @@ describe("AuthController (e2e)", () => {
 
       const user = userFactory.build();
       const password = "Password123@";
-      await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
@@ -437,13 +455,15 @@ describe("AuthController (e2e)", () => {
       const user = await userFactory.build();
       const password = "Password123@";
 
-      await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       let refreshToken = "";
 
@@ -866,11 +886,13 @@ describe("AuthController (e2e)", () => {
 
       const password = "Password123@";
 
-      await authService.createPassword({
-        createToken: token,
-        password,
-        language: "pl",
-      });
+      await inTenant(() =>
+        authService.createPassword({
+          createToken: token,
+          password,
+          language: "pl",
+        }),
+      );
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
@@ -944,11 +966,13 @@ describe("AuthController (e2e)", () => {
         reminderCount: 0,
       });
 
-      await authService.createPassword({
-        createToken: token,
-        password: "Password123@",
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.createPassword({
+          createToken: token,
+          password: "Password123@",
+          language: "en",
+        }),
+      );
 
       const [remainingToken] = await db
         .select()
@@ -968,7 +992,7 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/magic-link/create", () => {
-    it("should create a magic link token as a hash and send the token in email", async () => {
+    it("stores an opaque magic-link intent without issuing a token before delivery", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
@@ -981,31 +1005,24 @@ describe("AuthController (e2e)", () => {
         .send({ email: user.email })
         .expect(201);
 
-      const emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
-      const email = emailAdapter.getLastEmail();
-
-      expect(email).toBeDefined();
-      expect(email?.to).toBe(user.email);
-      expect(email?.subject).toBeDefined();
-      expect(email?.html || email?.text).toContain("/auth/login?token=");
-      expect(email?.html || email?.text).toContain(`${DEFAULT_TEST_TENANT_HOST}/auth/login?token=`);
-
-      const tokenMatch = (email?.html ?? email?.text ?? "").match(
-        /\/auth\/login\?token=([^"&\s]+)/,
-      );
-      expect(tokenMatch).not.toBeNull();
-
-      const token = tokenMatch?.[1];
-      expect(token).toBeDefined();
-
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+      const [intent] = await db
+        .select()
+        .from(notificationAccountActionIntents)
+        .where(eq(notificationAccountActionIntents.userId, user.id));
+      expect(intent).toMatchObject({
+        kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+        recipientEmail: user.email,
+        tokenTtlMs: 15 * 60 * 1000,
+        encryptedToken: null,
+        authTokenId: null,
+        tokenCreatedAt: null,
+      });
       const [storedToken] = await db
         .select()
         .from(magicLinkTokens)
         .where(eq(magicLinkTokens.userId, user.id));
-
-      expect(storedToken).toBeDefined();
-      expect(storedToken?.tokenHash).toBe(hashToken(token!));
-      expect(storedToken?.expiryDate).toBeDefined();
+      expect(storedToken).toBeUndefined();
     });
 
     it("should return success for archived users without sending a magic link", async () => {
@@ -1032,7 +1049,7 @@ describe("AuthController (e2e)", () => {
       expect(storedToken).toBeUndefined();
     });
 
-    it("should return success when magic link token creation fails", async () => {
+    it("returns success when magic-link intent creation fails", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
@@ -1040,7 +1057,9 @@ describe("AuthController (e2e)", () => {
           email: `magiclink-token-failure-${nanoid(8)}@example.com`,
         });
 
-      jest.spyOn(authService, "createMagicLinkToken").mockRejectedValueOnce(new Error("boom"));
+      jest
+        .spyOn(app.get(NotificationAccountActionService), "createNotificationAccountActionIntent")
+        .mockRejectedValueOnce(new Error("boom"));
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/magic-link/create")
@@ -1062,6 +1081,45 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("GET /api/auth/magic-link/verify", () => {
+    it("rejects an automation-issued link after the account email changes", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({ email: `magiclink-email-change-${nanoid(8)}@example.com` });
+
+      const token = await authService.createMagicLinkToken(user.id);
+
+      const [storedToken] = await db
+        .select({ id: magicLinkTokens.id })
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      await db.insert(notificationAccountActionIntents).values({
+        userId: user.id,
+        kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+        recipientEmail: user.email,
+        applicationOrigin: "https://tenant1.lms.localhost",
+        tokenTtlMs: 15 * 60 * 1000,
+        authTokenId: storedToken.id,
+      });
+
+      await db
+        .update(users)
+        .set({ email: `magiclink-new-${nanoid(8)}@example.com` })
+        .where(eq(users.id, user.id));
+
+      await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token })
+        .expect(401);
+
+      const [remainingToken] = await db
+        .select({ id: magicLinkTokens.id })
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.id, storedToken.id));
+      expect(remainingToken).toBeDefined();
+    });
+
     it("should log in with a valid magic link and remove the consumed token", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })

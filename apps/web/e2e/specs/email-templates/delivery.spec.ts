@@ -22,9 +22,8 @@ test("send test delivers unsaved content with sample variables only to the curre
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
     const user = (await apiClient.api.authControllerCurrentUser()).data.data;
-    const defaults = await factory.getDefault();
-    const sample = defaults.variables.find(
-      (variable) => variable.key === EMAIL_TEMPLATE_DATA.variable,
+    const sample = template.placeholders!.find(
+      (placeholder) => placeholder.name === EMAIL_TEMPLATE_DATA.variable,
     )!.sampleValue;
     const subject = `E2E delivery ${randomUUID()}`;
     await openEmailTemplateFlow(page, template.id!);
@@ -46,7 +45,7 @@ test("send test delivers unsaved content with sample variables only to the curre
     expect(bodies).toContain(`Unsaved invitation: ${sample}`);
     expect(bodies).not.toContain(`{{ ${EMAIL_TEMPLATE_DATA.variable} }}`);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(subject);
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeEnabled();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeEnabled();
     const saved = await factory.getById(template.id!);
     expect(saved.subject).toEqual(template.subject);
     expect(saved.content).toEqual(template.content);

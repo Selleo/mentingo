@@ -679,20 +679,6 @@ export class SettingsController {
     );
   }
 
-  @Patch("admin/user-email-triggers/:triggerKey")
-  @Validate({
-    request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
-  })
-  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
-  async updateUserEmailTriggers(
-    @Param("triggerKey") triggerKey: string,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    return new BaseResponse(
-      await this.settingsService.updateUserEmailTriggers(triggerKey, currentUser),
-    );
-  }
-
   @Patch("admin/config-warning-dismissed")
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({

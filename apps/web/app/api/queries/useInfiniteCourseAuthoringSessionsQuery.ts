@@ -20,13 +20,7 @@ export const infiniteCourseAuthoringSessionsQueryOptions = (
   { courseId, tenantScope, keyword, perPage = 20 }: InfiniteCourseAuthoringSessionsParams,
   options: QueryOptions = { enabled: true },
 ) => ({
-  queryKey: [
-    INFINITE_COURSE_AUTHORING_SESSIONS_QUERY_KEY,
-    courseId,
-    tenantScope,
-    keyword,
-    perPage,
-  ],
+  queryKey: [INFINITE_COURSE_AUTHORING_SESSIONS_QUERY_KEY, courseId, tenantScope, keyword, perPage],
   queryFn: async ({ pageParam }: { pageParam: number }) =>
     listAuthoringSessions(courseId, { page: pageParam, perPage, ...(keyword && { keyword }) }),
   getNextPageParam: (lastPage: Awaited<ReturnType<typeof listAuthoringSessions>>) => {

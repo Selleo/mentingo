@@ -18,6 +18,7 @@ describe("email variable highlighting", () => {
       value: () => new DOMRect(0, 0, 1, 16),
     });
   });
+
   const variables = [
     { key: "course_name", label: "Course", type: "text" as const, sampleValue: "Example" },
   ];

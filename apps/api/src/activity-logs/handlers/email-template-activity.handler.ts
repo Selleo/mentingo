@@ -56,7 +56,7 @@ export class EmailTemplateActivityHandler implements IEventHandler<EmailTemplate
       }).after;
       context = eventContext ?? null;
     } else if (event instanceof DeleteEmailTemplateEvent) {
-      context = { name: resource.name ?? "", event: resource.event };
+      context = { name: resource.name ?? "" };
     } else {
       const metadata = buildActivityLogMetadata({
         previous: previous ?? {},

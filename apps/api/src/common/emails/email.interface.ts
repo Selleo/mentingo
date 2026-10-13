@@ -1,3 +1,4 @@
+import type { UUIDType } from "src/common";
 export type Attachment = {
   filename: string;
   content?: string | Buffer;
@@ -16,3 +17,5 @@ export type Email = {
   | { text: string; html?: never }
   | { text: string; html: string }
 );
+
+export type BrandedEmailSendOptions = { tenantId: UUIDType };

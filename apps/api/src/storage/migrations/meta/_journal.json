@@ -1485,6 +1485,20 @@
       "when": 1790867136970,
       "tag": "0211_course_authoring_tenant_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 212,
+      "version": "7",
+      "when": 1791830012768,
+      "tag": "0212_notification_automations",
+      "breakpoints": true
+    },
+    {
+      "idx": 213,
+      "version": "7",
+      "when": 1791830021994,
+      "tag": "0213_notification_automations_tenant_rls",
+      "breakpoints": true
     }
   ]
 }

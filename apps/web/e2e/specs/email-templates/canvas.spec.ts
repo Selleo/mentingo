@@ -9,12 +9,14 @@ import {
 } from "../../data/test-data/email-template.data";
 import {
   appendEmailTextFlow,
+  clickEmailBlockActionFlow,
   insertEmailTextFlow,
   reorderEmailBlockFlow,
   insertEmailVariableFlow,
   uploadEmailImageFlow,
 } from "../../flows/email-templates/canvas.flow";
 import { openEmailTemplateFlow, editEmailTextFlow } from "../../flows/email-templates/editor.flow";
+import { saveEmailDraftFlow } from "../../flows/email-templates/template-actions.flow";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -29,17 +31,15 @@ test("canvas composition persists insertion, duplication, removal and pointer re
     });
     await openEmailTemplateFlow(page, template.id!);
     await appendEmailTextFlow(page, { index: 2, text: "Added" });
-    await page
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)
-      .nth(2)
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.DUPLICATE_BLOCK)
-      .click();
+    await clickEmailBlockActionFlow(page, {
+      index: 2,
+      action: EMAIL_TEMPLATES_HANDLES.DUPLICATE_BLOCK,
+    });
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)).toHaveCount(4);
-    await page
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)
-      .nth(3)
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.REMOVE_BLOCK)
-      .click();
+    await clickEmailBlockActionFlow(page, {
+      index: 3,
+      action: EMAIL_TEMPLATES_HANDLES.REMOVE_BLOCK,
+    });
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)).toHaveCount(3);
     await insertEmailTextFlow(page, { index: 1, text: "Between" });
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)).toHaveText([
@@ -55,8 +55,8 @@ test("canvas composition persists insertion, duplication, removal and pointer re
       "Between",
       "Last",
     ]);
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => (await factory.getById(template.id!)).content.en)
       .toMatchObject(emailTemplateDocument("Added", "First", "Between", "Last"));
@@ -100,9 +100,9 @@ test("variable insertion and mobile preview preserve unsaved content without sav
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.PREVIEW).click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SETTINGS)).toBeVisible();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PALETTE)).toBeVisible();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeEnabled();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeEnabled();
     expect((await factory.getById(template.id!)).content).toEqual(template.content);
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
+    await saveEmailDraftFlow(page);
     await expect
       .poll(async () => (await factory.getById(template.id!)).content.en)
       .toMatchObject(emailTemplateDocument(expected));
@@ -128,8 +128,8 @@ test("an uploaded image remains visible after saving and reopening", async ({
     await expect
       .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
       .toBeGreaterThan(0);
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => (await factory.getById(template.id!)).content.en?.content.at(-1))
       .toMatchObject({

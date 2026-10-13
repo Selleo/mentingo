@@ -1,18 +1,22 @@
-import { EMAIL_TEMPLATE_EVENTS, getEmailTemplateDefinition } from "@repo/email-templates";
+import {
+  EMAIL_TEMPLATE_EVENTS,
+  getEmailTemplateDefinition,
+  getBuiltInTemplatePublication,
+} from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
-import { EmailTemplateTestService } from "./email-template-test.service";
+import { EmailTemplateTestDeliveryService } from "./email-template-test-delivery.service";
 import { EmailTemplateValidationService } from "./email-template-validation.service";
 
-import type { EmailTemplateService } from "./email-template.service";
+import type { EmailTemplateManagementService } from "./email-template-management.service";
 import type { EmailService } from "src/common/emails/emails.service";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { QueueService } from "src/queue";
 
-describe("EmailTemplateTestService", () => {
+describe("EmailTemplateTestDeliveryService", () => {
   const definition = getEmailTemplateDefinition(EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY);
   const body = {
-    event: definition.event,
+    placeholders: getBuiltInTemplatePublication("password_recovery").placeholders,
     language: SUPPORTED_LANGUAGES.EN,
     baseLanguage: SUPPORTED_LANGUAGES.EN,
     subject: definition.subjects,
@@ -29,9 +33,12 @@ describe("EmailTemplateTestService", () => {
   const previewEmailTemplate = jest.fn();
   const renderSampleEmailTemplate = jest.fn();
   const sendEmailWithLogo = jest.fn();
-  const service = new EmailTemplateTestService(
+  const service = new EmailTemplateTestDeliveryService(
     { enqueue } as unknown as QueueService,
-    { previewEmailTemplate, renderSampleEmailTemplate } as unknown as EmailTemplateService,
+    {
+      previewEmailTemplate,
+      renderSampleEmailTemplate,
+    } as unknown as EmailTemplateManagementService,
     { sendEmailWithLogo } as unknown as EmailService,
     new EmailTemplateValidationService(),
   );
@@ -43,7 +50,7 @@ describe("EmailTemplateTestService", () => {
 
   it("takes the recipient exclusively from the authenticated administrator", async () => {
     expect(
-      await service.enqueueTestEmailTemplate(
+      await service.enqueueEmailTemplateTest(
         { ...body, recipient: "attacker@example.com" } as typeof body,
         actor,
       ),
@@ -60,7 +67,7 @@ describe("EmailTemplateTestService", () => {
 
   it("rejects invalid unsaved content before queueing", async () => {
     await expect(
-      service.enqueueTestEmailTemplate(
+      service.enqueueEmailTemplateTest(
         {
           ...body,
           subject: { en: "{{ unsupported_variable }}" },
@@ -71,9 +78,9 @@ describe("EmailTemplateTestService", () => {
     expect(enqueue).not.toHaveBeenCalled();
   });
 
-  it("requires an actionable authentication link even for test emails", async () => {
+  it("does not infer sensitive event fields from authored placeholder names", async () => {
     await expect(
-      service.enqueueTestEmailTemplate(
+      service.enqueueEmailTemplateTest(
         {
           ...body,
           content: {
@@ -92,8 +99,8 @@ describe("EmailTemplateTestService", () => {
         },
         actor,
       ),
-    ).rejects.toThrow("emailTemplates.errors.missingMandatoryVariables");
-    expect(enqueue).not.toHaveBeenCalled();
+    ).resolves.toEqual({ jobId: "job-1" });
+    expect(enqueue).toHaveBeenCalledTimes(1);
   });
 
   it("sends the unsaved sample rendering without resolving the published override", async () => {

@@ -1,18 +1,11 @@
-import { Inject, Injectable } from "@nestjs/common";
-import {
-  EMAIL_TEMPLATE_EVENTS,
-  CreatePasswordReminderEmail,
-  PasswordRecoveryEmail,
-} from "@repo/email-templates";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 
-import { hashToken } from "src/auth/utils/hash-auth-token";
+import { Inject, Injectable } from "@nestjs/common";
+import { AUTOMATION_EVENT_KINDS } from "@repo/shared";
+
+import { NotificationEvent } from "src/automation-execution/events/notification-event";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { DatabasePg } from "src/common";
-import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
-import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
-import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
-import { processInBatches } from "src/common/utils/processInBatches";
 import {
   USER_PASSWORD_EMAIL_TYPES,
   UserPasswordEmailsEvent,
@@ -22,170 +15,118 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 import { UserPasswordEmailRepository } from "src/user/repositories/user-password-email.repository";
 
+import type { NotificationRecipient } from "src/automation-execution/automation-execution.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   BulkUserPasswordEmailResponse,
   BulkUserPasswordEmailsResponse,
 } from "src/user/schemas/userPasswordEmail.schema";
-import type {
-  PreparedUserPasswordEmail,
-  UserCreatePasswordTokenInsert,
-  UserPasswordEmailRecipient,
-  UserPasswordEmailTokenInsert,
-} from "src/user/user.types";
+import type { UserPasswordEmailRecipient } from "src/user/user.types";
 
 @Injectable()
 export class UserPasswordEmailService {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly userPasswordEmailRepository: UserPasswordEmailRepository,
-    private readonly emailService: EmailService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly notificationAccountActionService: NotificationAccountActionService,
   ) {}
 
   async sendBulkPasswordResetEmails(
     userIds: UUIDType[],
-    currentUser: CurrentUserType,
+    actor: CurrentUserType,
   ): Promise<BulkUserPasswordEmailResponse> {
-    const uniqueUserIds = this.getUniqueUserIds(userIds);
+    return this.sendBulkByType(userIds, actor, USER_PASSWORD_EMAIL_TYPES.RESET);
+  }
 
-    const tenantOrigin = await this.userPasswordEmailRepository.findTenantOrigin(
-      currentUser.tenantId,
-    );
+  async sendBulkPasswordCreationEmails(
+    userIds: UUIDType[],
+    actor: CurrentUserType,
+  ): Promise<BulkUserPasswordEmailResponse> {
+    return this.sendBulkByType(userIds, actor, USER_PASSWORD_EMAIL_TYPES.CREATION);
+  }
 
+  private async sendBulkByType(
+    userIds: UUIDType[],
+    actor: CurrentUserType,
+    type: UserPasswordEmailType,
+  ) {
+    const uniqueUserIds = [...new Set(userIds)];
     const recipients = await this.userPasswordEmailRepository.findRecipientsByIds(uniqueUserIds, {
-      hasCredentials: true,
+      hasCredentials: type === "reset",
     });
-
-    const preparedResetEmails = this.preparePasswordResetEmails(recipients, tenantOrigin);
-
     const result = {
-      sentCount: preparedResetEmails.emails.length,
-      skippedCount: uniqueUserIds.length - preparedResetEmails.emails.length,
+      sentCount: recipients.length,
+      skippedCount: uniqueUserIds.length - recipients.length,
     };
+    if (recipients.length === 0) {
+      return result;
+    }
 
-    if (!preparedResetEmails.emails.length) return result;
-
-    await this.db.transaction(async (trx) => {
-      await this.userPasswordEmailRepository.insertResetTokens(preparedResetEmails.tokenRows, trx);
-
-      await this.publishPasswordEmailsEvent(
-        USER_PASSWORD_EMAIL_TYPES.RESET,
-        currentUser,
-        preparedResetEmails.emails,
-        result,
-        trx,
-      );
+    const origin = await this.userPasswordEmailRepository.findTenantOrigin(actor.tenantId);
+    await this.db.transaction(async (tx) => {
+      await this.publishRecipients(recipients, type, origin, tx);
+      await this.publishActivity(type, actor, recipients, result, tx);
     });
-
     return result;
   }
 
   async sendBulkPasswordEmails(
     userIds: UUIDType[],
-    currentUser: CurrentUserType,
+    actor: CurrentUserType,
   ): Promise<BulkUserPasswordEmailsResponse> {
-    const uniqueUserIds = this.getUniqueUserIds(userIds);
-
+    const uniqueUserIds = [...new Set(userIds)];
     const recipients = await this.userPasswordEmailRepository.findRecipientsByIds(uniqueUserIds);
-
-    const tenantOrigin = await this.userPasswordEmailRepository.findTenantOrigin(
-      currentUser.tenantId,
-    );
-
-    const resetRecipients = recipients.filter(({ hasCredentials }) => hasCredentials);
-    const creationRecipients = recipients.filter(({ hasCredentials }) => !hasCredentials);
-
-    const preparedResetEmails = this.preparePasswordResetEmails(resetRecipients, tenantOrigin);
-    const preparedCreationEmails = this.preparePasswordCreationEmails(
-      creationRecipients,
-      tenantOrigin,
-    );
-
-    const passwordResetSentCount = preparedResetEmails.emails.length;
-    const passwordCreationSentCount = preparedCreationEmails.emails.length;
-    const sentCount = passwordResetSentCount + passwordCreationSentCount;
-
+    const resetRecipients = recipients.filter((recipient) => recipient.hasCredentials);
+    const creationRecipients = recipients.filter((recipient) => !recipient.hasCredentials);
     const result = {
-      sentCount,
-      skippedCount: uniqueUserIds.length - sentCount,
-      passwordResetSentCount,
-      passwordCreationSentCount,
+      sentCount: recipients.length,
+      skippedCount: uniqueUserIds.length - recipients.length,
+      passwordResetSentCount: resetRecipients.length,
+      passwordCreationSentCount: creationRecipients.length,
     };
+    if (recipients.length === 0) {
+      return result;
+    }
 
-    if (!sentCount) return result;
-
-    await this.db.transaction(async (trx) => {
-      await this.userPasswordEmailRepository.insertResetTokens(preparedResetEmails.tokenRows, trx);
-      await this.userPasswordEmailRepository.replaceCreateTokens(
-        preparedCreationEmails.tokenRows,
-        trx,
+    const origin = await this.userPasswordEmailRepository.findTenantOrigin(actor.tenantId);
+    await this.db.transaction(async (tx) => {
+      await this.publishRecipientBatch(
+        resetRecipients,
+        USER_PASSWORD_EMAIL_TYPES.RESET,
+        actor,
+        origin,
+        tx,
       );
-
-      if (passwordResetSentCount > 0) {
-        await this.publishPasswordEmailsEvent(
-          USER_PASSWORD_EMAIL_TYPES.RESET,
-          currentUser,
-          preparedResetEmails.emails,
-          { sentCount: passwordResetSentCount, skippedCount: 0 },
-          trx,
-        );
-      }
-
-      if (passwordCreationSentCount > 0) {
-        await this.publishPasswordEmailsEvent(
-          USER_PASSWORD_EMAIL_TYPES.CREATION,
-          currentUser,
-          preparedCreationEmails.emails,
-          { sentCount: passwordCreationSentCount, skippedCount: 0 },
-          trx,
-        );
-      }
+      await this.publishRecipientBatch(
+        creationRecipients,
+        USER_PASSWORD_EMAIL_TYPES.CREATION,
+        actor,
+        origin,
+        tx,
+      );
     });
-
     return result;
   }
 
-  async sendBulkPasswordCreationEmails(
-    userIds: UUIDType[],
-    currentUser: CurrentUserType,
-  ): Promise<BulkUserPasswordEmailResponse> {
-    const uniqueUserIds = this.getUniqueUserIds(userIds);
+  private async publishRecipientBatch(
+    recipients: UserPasswordEmailRecipient[],
+    type: UserPasswordEmailType,
+    actor: CurrentUserType,
+    origin: string,
+    transaction: DatabasePg,
+  ): Promise<void> {
+    if (recipients.length === 0) return;
 
-    const recipients = await this.userPasswordEmailRepository.findRecipientsByIds(uniqueUserIds, {
-      hasCredentials: false,
-    });
-
-    const tenantOrigin = await this.userPasswordEmailRepository.findTenantOrigin(
-      currentUser.tenantId,
+    await this.publishRecipients(recipients, type, origin, transaction);
+    await this.publishActivity(
+      type,
+      actor,
+      recipients,
+      { sentCount: recipients.length, skippedCount: 0 },
+      transaction,
     );
-
-    const preparedCreationEmails = this.preparePasswordCreationEmails(recipients, tenantOrigin);
-
-    const result = {
-      sentCount: preparedCreationEmails.emails.length,
-      skippedCount: uniqueUserIds.length - preparedCreationEmails.emails.length,
-    };
-
-    if (!preparedCreationEmails.emails.length) return result;
-
-    await this.db.transaction(async (trx) => {
-      await this.userPasswordEmailRepository.replaceCreateTokens(
-        preparedCreationEmails.tokenRows,
-        trx,
-      );
-
-      await this.publishPasswordEmailsEvent(
-        USER_PASSWORD_EMAIL_TYPES.CREATION,
-        currentUser,
-        preparedCreationEmails.emails,
-        result,
-        trx,
-      );
-    });
-
-    return result;
   }
 
   async sendForgotPasswordEmail(email: string, dbInstance?: DatabasePg): Promise<void> {
@@ -193,153 +134,85 @@ export class UserPasswordEmailService {
       email,
       dbInstance,
     );
+    if (!recipient) {
+      return;
+    }
 
-    if (!recipient) return;
+    const origin = await this.userPasswordEmailRepository.findTenantOrigin(recipient.tenantId);
+    if (dbInstance) {
+      await this.publishRecipients([recipient], "reset", origin, dbInstance);
+      return;
+    }
 
-    const tenantOrigin = await this.userPasswordEmailRepository.findTenantOrigin(
-      recipient.tenantId,
+    await this.db.transaction((transaction) =>
+      this.publishRecipients([recipient], "reset", origin, transaction),
     );
-
-    const preparedResetEmails = this.preparePasswordResetEmails([recipient], tenantOrigin);
-
-    await this.userPasswordEmailRepository.insertResetTokens(
-      preparedResetEmails.tokenRows,
-      dbInstance,
-    );
-
-    await this.sendPreparedEmails(preparedResetEmails.emails);
   }
 
-  private getUniqueUserIds(userIds: UUIDType[]) {
-    return [...new Set(userIds)];
-  }
-
-  private preparePasswordResetEmails(
+  private async publishRecipients(
     recipients: UserPasswordEmailRecipient[],
-    tenantOrigin: string,
+    type: UserPasswordEmailType,
+    origin: string,
+    transaction: DatabasePg,
   ) {
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 1);
-
-    const tokenRows: UserPasswordEmailTokenInsert[] = [];
-    const emails: PreparedUserPasswordEmail[] = [];
-
+    const notificationRecipients: NotificationRecipient[] = [];
     for (const recipient of recipients) {
-      const resetToken = nanoid(64);
-
-      tokenRows.push({
-        userId: recipient.id,
-        tokenHash: hashToken(resetToken),
-        expiryDate,
-      });
-
-      const emailTemplate = new PasswordRecoveryEmail({
+      const accountActionIntentId =
+        await this.notificationAccountActionService.createNotificationAccountActionIntent(
+          {
+            userId: recipient.id,
+            kind: type === "reset" ? "reset_password" : "create_password",
+            applicationOrigin: origin,
+            tokenTtlMs: type === "reset" ? 3600000 : 365 * 86400000,
+            usesCalendarYearExpiry: type === "creation",
+            revokePreviousPasswordSetupTokens: type === "creation",
+            reminderCount: 0,
+          },
+          transaction,
+        );
+      notificationRecipients.push({
+        itemId: recipient.id,
+        email: recipient.email,
         name: recipient.firstName,
-        resetLink: buildCreateNewPasswordLink(tenantOrigin, { resetToken }),
-        ...recipient.defaultEmailSettings,
-      });
-
-      emails.push({
-        userId: recipient.id,
-        to: recipient.email,
-        tenantId: recipient.tenantId,
-        subject: getEmailSubject("passwordRecoveryEmail", recipient.defaultEmailSettings.language),
-        template: {
-          event: EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY,
-          language: recipient.defaultEmailSettings.language,
-          variables: {
-            name: recipient.firstName,
-            reset_link: buildCreateNewPasswordLink(tenantOrigin, { resetToken }),
-          },
+        language: recipient.defaultEmailSettings.language,
+        eventFields: {
+          name: recipient.firstName,
+          userFirstName: recipient.firstName,
+          userLastName: recipient.lastName ?? "",
+          userEmail: recipient.email,
         },
-        text: emailTemplate.text,
-        html: emailTemplate.html,
+        accountActionIntentId,
       });
     }
-
-    return { tokenRows, emails };
+    await this.outboxPublisher.publish(
+      new NotificationEvent(
+        randomUUID(),
+        type === USER_PASSWORD_EMAIL_TYPES.RESET
+          ? AUTOMATION_EVENT_KINDS.PASSWORD_RECOVERY
+          : AUTOMATION_EVENT_KINDS.PASSWORD_REMINDER,
+        notificationRecipients,
+      ),
+      transaction,
+    );
   }
 
-  private preparePasswordCreationEmails(
-    recipients: UserPasswordEmailRecipient[],
-    tenantOrigin: string,
-  ) {
-    const expiryDate = new Date();
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-
-    const tokenRows: UserCreatePasswordTokenInsert[] = [];
-    const emails: PreparedUserPasswordEmail[] = [];
-
-    for (const recipient of recipients) {
-      const createToken = nanoid(64);
-
-      tokenRows.push({
-        userId: recipient.id,
-        tokenHash: hashToken(createToken),
-        expiryDate,
-        reminderCount: 0,
-      });
-
-      const emailTemplate = new CreatePasswordReminderEmail({
-        createPasswordLink: buildCreateNewPasswordLink(tenantOrigin, { createToken }),
-        ...recipient.defaultEmailSettings,
-      });
-
-      emails.push({
-        userId: recipient.id,
-        to: recipient.email,
-        tenantId: recipient.tenantId,
-        subject: getEmailSubject("passwordReminderEmail", recipient.defaultEmailSettings.language),
-        template: {
-          event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
-          language: recipient.defaultEmailSettings.language,
-          variables: {
-            create_password_link: buildCreateNewPasswordLink(tenantOrigin, { createToken }),
-          },
-        },
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-      });
-    }
-
-    return { tokenRows, emails };
-  }
-
-  private async publishPasswordEmailsEvent(
+  private async publishActivity(
     type: UserPasswordEmailType,
     actor: CurrentUserType,
-    emails: PreparedUserPasswordEmail[],
+    recipients: UserPasswordEmailRecipient[],
     result: BulkUserPasswordEmailResponse,
-    dbInstance: DatabasePg,
+    transaction: DatabasePg,
   ) {
     await this.outboxPublisher.publish(
       new UserPasswordEmailsEvent({
         actor,
         tenantId: actor.tenantId,
         type,
-        emails,
-        recipients: emails.map(({ userId, to }) => ({ userId, email: to })),
+        recipients: recipients.map((item) => ({ userId: item.id, email: item.email })),
         sentCount: result.sentCount,
         skippedCount: result.skippedCount,
       }),
-      dbInstance,
-    );
-  }
-
-  private async sendPreparedEmails(emails: PreparedUserPasswordEmail[]) {
-    await processInBatches(
-      emails,
-      ({ to, subject, text, html, tenantId, template }) =>
-        this.emailService.sendEmailWithLogo(
-          {
-            to,
-            subject,
-            text,
-            html,
-          },
-          { tenantId, template },
-        ),
-      { batchSize: EMAIL_BATCH_SIZE },
+      transaction,
     );
   }
 }

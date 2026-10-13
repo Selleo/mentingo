@@ -163,7 +163,9 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
                 try {
                   await this.contextBridge.acceptRealtimeEvent(subscription.tenantId, event);
                 } catch {
-                  this.logger.warn("A live context request will be replayed by the durable scanner");
+                  this.logger.warn(
+                    "A live context request will be replayed by the durable scanner",
+                  );
                 }
               }
               await this.deliverEvent(subscription, event);

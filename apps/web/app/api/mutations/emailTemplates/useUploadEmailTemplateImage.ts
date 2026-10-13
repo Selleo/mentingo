@@ -8,7 +8,8 @@ export function useUploadEmailTemplateImage() {
   const feedback = useEmailTemplateMutationFeedback("emailTemplates.ui.uploaded", false);
   return useMutation({
     mutationFn: async (file: File) =>
-      (await ApiClient.api.emailTemplateControllerUploadEmailTemplateImage({ file })).data.data,
+      (await ApiClient.api.emailTemplateManagementControllerUploadEmailTemplateImage({ file })).data
+        .data,
     ...feedback,
   });
 }

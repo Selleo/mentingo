@@ -4,19 +4,20 @@ import { Worker } from "bullmq";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import { EmailTemplateTestService } from "./services/email-template-test.service";
+import { EmailTemplateTestDeliveryService } from "./services/email-template-test-delivery.service";
 
 import type { EmailTemplateTestJobData } from "./email-template.types";
 
 @Injectable()
 export class EmailTemplateTestWorker implements OnModuleDestroy {
   private readonly logger = new Logger(EmailTemplateTestWorker.name);
+
   private readonly worker: Worker<EmailTemplateTestJobData>;
 
   constructor(
     queueService: QueueService,
     tenantRunner: TenantDbRunnerService,
-    testService: EmailTemplateTestService,
+    testService: EmailTemplateTestDeliveryService,
   ) {
     this.worker = new Worker<EmailTemplateTestJobData>(
       QUEUE_NAMES.EMAIL_TEMPLATE_TEST,

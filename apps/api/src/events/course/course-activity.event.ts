@@ -4,6 +4,9 @@ import type { ActorUserType } from "src/common/types/actor-user.type";
 type CourseCompletedDetails = {
   courseId: UUIDType;
   userName: string;
+  userFirstName: string;
+  userLastName: string;
+  userEmail: string;
   courseTitle: string;
 };
 

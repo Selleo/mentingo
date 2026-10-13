@@ -123,7 +123,6 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
         .send({ ...previewBody(definition), language })
         .expect(201);
       expect(response.body.data).toMatchObject({
-        event: definition.event,
         language,
         subject: expect.any(String),
         html: expect.any(String),

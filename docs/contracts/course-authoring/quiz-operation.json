@@ -179,10 +179,7 @@
             "answerSets": [
               {
                 "preferredAnswer": "verify",
-                "acceptedAnswers": [
-                  "verify",
-                  "check"
-                ]
+                "acceptedAnswers": ["verify", "check"]
               }
             ]
           }
@@ -210,10 +207,7 @@
             "answerSets": [
               {
                 "preferredAnswer": "verify",
-                "acceptedAnswers": [
-                  "verify",
-                  "check"
-                ]
+                "acceptedAnswers": ["verify", "check"]
               }
             ]
           }

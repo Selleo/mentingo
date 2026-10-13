@@ -46,7 +46,7 @@ describe("EmailTemplateAssetService", () => {
   });
 
   it("validates populated locales and skips absent translations", async () => {
-    await service.validateEmailTemplateAssets({ en: document, pl: undefined }, tenantId);
+    await service.assertEmailTemplateAssetsAccessible({ en: document, pl: undefined }, tenantId);
     expect(findEmailTemplateAsset).toHaveBeenCalledTimes(1);
     expect(findEmailTemplateAsset).toHaveBeenCalledWith(id, tenantId);
   });
