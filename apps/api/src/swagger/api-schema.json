@@ -20684,6 +20684,595 @@
         }
       }
     },
+    "/api/luma/authoring/courses/{courseId}/sessions": {
+      "post": {
+        "operationId": "CourseAuthoringController_openAuthoringSession",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenAuthoringSessionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenAuthoringSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "CourseAuthoringController_listAuthoringSessions",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAuthoringSessionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}": {
+      "get": {
+        "operationId": "CourseAuthoringController_getAuthoringSession",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthoringSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/turns": {
+      "get": {
+        "operationId": "CourseAuthoringController_getOlderAuthoringTurns",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "beforeRequestId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOlderAuthoringTurnsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/commands": {
+      "post": {
+        "operationId": "CourseAuthoringController_sendAuthoringCommand",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAuthoringCommandBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendAuthoringCommandResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/assets/{assetId}": {
+      "get": {
+        "operationId": "CourseAuthoringController_previewAuthoringAsset",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/gif": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications": {
+      "post": {
+        "operationId": "CourseAuthoringController_applyAuthoringProposals",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyAuthoringProposalsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyAuthoringProposalsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications/{exportId}": {
+      "get": {
+        "operationId": "CourseAuthoringController_getAuthoringApplication",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "exportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthoringApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/sources": {
+      "post": {
+        "operationId": "CourseAuthoringController_uploadAuthoringSource",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "commandId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "commandId",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadAuthoringSourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/events": {
+      "get": {
+        "operationId": "CourseAuthoringController_getAuthoringEvents",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "afterSequence",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthoringEventsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/courses/{courseId}/context": {
+      "get": {
+        "operationId": "CourseAuthoringController_getAuthoringCourseContext",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "lessonIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthoringCourseContextResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/authoring/link-preview": {
+      "get": {
+        "operationId": "CourseAuthoringLinkPreviewController_getAuthoringLinkPreview",
+        "parameters": [
+          {
+            "name": "url",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 2048,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthoringLinkPreviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/phishing/configuration": {
       "get": {
         "operationId": "PhishingController_getPhishingConfiguration",
@@ -21523,595 +22112,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReorderResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions": {
-      "post": {
-        "operationId": "CourseAuthoringController_openAuthoringSession",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OpenAuthoringSessionBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OpenAuthoringSessionResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "CourseAuthoringController_listAuthoringSessions",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "type": "number"
-            }
-          },
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListAuthoringSessionsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}": {
-      "get": {
-        "operationId": "CourseAuthoringController_getAuthoringSession",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthoringSessionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/turns": {
-      "get": {
-        "operationId": "CourseAuthoringController_getOlderAuthoringTurns",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "beforeRequestId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetOlderAuthoringTurnsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/commands": {
-      "post": {
-        "operationId": "CourseAuthoringController_sendAuthoringCommand",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendAuthoringCommandBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SendAuthoringCommandResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/assets/{assetId}": {
-      "get": {
-        "operationId": "CourseAuthoringController_previewAuthoringAsset",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "assetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "revision",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "image/png": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              },
-              "image/jpeg": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              },
-              "image/webp": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              },
-              "image/gif": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications": {
-      "post": {
-        "operationId": "CourseAuthoringController_applyAuthoringProposals",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyAuthoringProposalsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApplyAuthoringProposalsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications/{exportId}": {
-      "get": {
-        "operationId": "CourseAuthoringController_getAuthoringApplication",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "exportId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthoringApplicationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/sources": {
-      "post": {
-        "operationId": "CourseAuthoringController_uploadAuthoringSource",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "commandId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": [
-                  "commandId",
-                  "file"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadAuthoringSourceResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/events": {
-      "get": {
-        "operationId": "CourseAuthoringController_getAuthoringEvents",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "afterSequence",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthoringEventsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/courses/{courseId}/context": {
-      "get": {
-        "operationId": "CourseAuthoringController_getAuthoringCourseContext",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "lessonIds",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthoringCourseContextResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/luma/authoring/link-preview": {
-      "get": {
-        "operationId": "CourseAuthoringLinkPreviewController_getAuthoringLinkPreview",
-        "parameters": [
-          {
-            "name": "url",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "maxLength": 2048,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthoringLinkPreviewResponse"
                 }
               }
             }
