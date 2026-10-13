@@ -21,7 +21,10 @@ const parameterHelp: Record<string, string> = {
   resourceId:
     "Resource ID from the upload response's data.resourceId, or an existing lesson attachment. A fresh upload is attached when inserted into content.",
   groupId:
-    "ID of a group already assigned to the course; find it with list_course_group_deadlines.",
+    "ID of an existing group, returned by list_groups, get_group, or course group discovery.",
+  userId: "ID of an existing user, returned by list_users or global_search.",
+  searchQuery: "Text to find across accessible Mentingo content, users, categories, and groups.",
+  confirmName: "Exact current name of the login document to remove.",
   dueDate: "ISO 8601 date and time with timezone, or null to clear the group's course deadline.",
   uploadId: "ID returned when the video upload was initialized.",
   expectedRevision:
@@ -36,7 +39,8 @@ const parameterHelp: Record<string, string> = {
   title: "Content title in the selected language.",
   description: "Content body or description in the selected language.",
   summary: "Short summary in the selected language.",
-  content: "Article or news body in the selected language.",
+  content:
+    "Complete article/news Tiptap HTML in the selected language. For local files, first call request_generic_file_upload with resource=articles/news, targetId and language, then use contentInsertion templates with the uploaded resource ID. Preserve existing content and use a fresh expectedRevision.",
   confirmTitle: "Exact current title of the item, required to confirm deletion.",
   confirmLanguage: "Exact language code of the translation to remove.",
   confirmCourseId: "Repeat the exact courseId to confirm removal from the path.",

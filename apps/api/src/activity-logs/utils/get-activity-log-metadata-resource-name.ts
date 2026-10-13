@@ -8,6 +8,7 @@ type ResourceNameFields = {
 };
 
 const resourceNameFields: Partial<Record<ActivityLogResourceType, ResourceNameFields>> = {
+  [ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION]: { snapshot: "name", deletionContext: "name" },
   [ACTIVITY_LOG_RESOURCE_TYPES.COURSE]: { snapshot: "title", deletionContext: "courseTitle" },
   [ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER]: { snapshot: "title", deletionContext: "chapterName" },
   [ACTIVITY_LOG_RESOURCE_TYPES.LESSON]: { snapshot: "title", deletionContext: "lessonName" },

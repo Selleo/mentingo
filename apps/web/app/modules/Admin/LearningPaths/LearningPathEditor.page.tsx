@@ -1,67 +1,97 @@
-import { useLoaderData, useLocation, useParams } from "@remix-run/react";
+import { useLocation, useParams } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUserSuspense } from "~/api/queries";
-import { learningPathQueryOptions, useLearningPath } from "~/api/queries/useLearningPaths";
-import { queryClient } from "~/api/queryClient";
+import { useLearningPathSuspense } from "~/api/queries/useLearningPaths";
 import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { PageWrapper } from "~/components/PageWrapper";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { LearningPathEditorForm } from "./components/LearningPathEditorForm";
 
-import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { LearningPathEditorLearningPath } from "./types";
+import type { MetaFunction } from "@remix-run/react";
 import type { SupportedLanguages } from "@repo/shared";
 
 export const meta: MetaFunction = ({ matches }) =>
   setPageTitle(matches, "pages.adminLearningPathEditor");
 
-export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
-  if (!params.id || params.id === "new") return null;
-
-  const { language } = useLanguageStore.getState();
-
-  return queryClient.fetchQuery(learningPathQueryOptions(params.id, { language }));
-};
-
-export default function LearningPathEditorPage() {
-  const { t } = useTranslation();
-  const { id } = useParams();
-  const { pathname } = useLocation();
-
-  const loaderLearningPath = useLoaderData<typeof clientLoader>();
-
-  const { permissions } = usePermissions();
-  const { data: currentUser } = useCurrentUserSuspense();
-
-  const isCreateMode = pathname.endsWith("/admin/development-paths/new");
+function LearningPathEditor({
+  id,
+  learningPath,
+}: {
+  id?: string;
+  learningPath: LearningPathEditorLearningPath | null;
+}) {
   const appLanguage = useLanguageStore((state) => state.language);
 
   const [editorLanguage, setEditorLanguage] = useState<SupportedLanguages>(
-    loaderLearningPath?.data.baseLanguage ?? appLanguage,
+    learningPath?.baseLanguage ?? appLanguage,
   );
 
-  const { data: learningPathResponse } = useLearningPath(
-    id ?? "",
-    { language: editorLanguage },
-    { enabled: Boolean(id) && !isCreateMode },
+  return learningPath && id ? (
+    <LocalizedLearningPathEditor
+      id={id}
+      editorLanguage={editorLanguage}
+      setEditorLanguage={setEditorLanguage}
+    />
+  ) : (
+    <LearningPathEditorContent
+      id={id}
+      learningPath={learningPath}
+      editorLanguage={editorLanguage}
+      setEditorLanguage={setEditorLanguage}
+    />
   );
+}
 
-  const effectiveLearningPath = learningPathResponse?.data ?? loaderLearningPath?.data ?? null;
+function LocalizedLearningPathEditor({
+  id,
+  editorLanguage,
+  setEditorLanguage,
+}: {
+  id: string;
+  editorLanguage: SupportedLanguages;
+  setEditorLanguage: (language: SupportedLanguages) => void;
+}) {
+  const { data: learningPath } = useLearningPathSuspense(id, { language: editorLanguage });
+
+  return (
+    <LearningPathEditorContent
+      id={id}
+      learningPath={learningPath.data}
+      editorLanguage={editorLanguage}
+      setEditorLanguage={setEditorLanguage}
+    />
+  );
+}
+
+function LearningPathEditorContent({
+  id,
+  learningPath,
+  editorLanguage,
+  setEditorLanguage,
+}: {
+  id?: string;
+  learningPath: LearningPathEditorLearningPath | null;
+  editorLanguage: SupportedLanguages;
+  setEditorLanguage: (language: SupportedLanguages) => void;
+}) {
+  const { t } = useTranslation();
+  const { permissions } = usePermissions();
+  const { data: currentUser } = useCurrentUserSuspense();
+  const isCreateMode = learningPath === null;
 
   const { effectiveLanguage, formKey, selectorProps } = getLocalizedResourceLanguage({
     value: editorLanguage,
     onChange: setEditorLanguage,
-    baseLanguage: effectiveLearningPath?.baseLanguage,
-    availableLocales: effectiveLearningPath?.availableLocales,
-    formKeyParts: [
-      id ?? "new",
-      effectiveLearningPath?.title ?? "",
-      effectiveLearningPath?.description ?? "",
-    ],
+    baseLanguage: learningPath?.baseLanguage,
+    availableLocales: learningPath?.availableLocales,
+    formKeyParts: [id ?? "new", learningPath?.title ?? "", learningPath?.description ?? ""],
   });
 
   return (
@@ -87,9 +117,35 @@ export default function LearningPathEditorPage() {
         id={id}
         isCreateMode={isCreateMode}
         languageSelectorProps={selectorProps}
-        learningPath={effectiveLearningPath}
+        learningPath={learningPath}
         permissions={permissions}
       />
     </PageWrapper>
+  );
+}
+
+function ExistingLearningPathEditor({ id }: { id: string }) {
+  const language = useLanguageStore((state) => state.language);
+  const { data: learningPath } = useLearningPathSuspense(id, { language });
+
+  return <LearningPathEditor key={id} id={id} learningPath={learningPath.data} />;
+}
+
+function LearningPathEditorRoute() {
+  const { id } = useParams();
+  const { pathname } = useLocation();
+
+  if (!id || pathname.endsWith("/admin/development-paths/new")) {
+    return <LearningPathEditor learningPath={null} />;
+  }
+
+  return <ExistingLearningPathEditor id={id} />;
+}
+
+export default function LearningPathEditorPage() {
+  return (
+    <RequireAuthenticatedUser>
+      <LearningPathEditorRoute />
+    </RequireAuthenticatedUser>
   );
 }

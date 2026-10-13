@@ -1,4 +1,5 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 import { ApiClient } from "../api-client";
 
@@ -13,11 +14,20 @@ export const courseLookupQueryOptions = (idOrSlug: string, language: SupportedLa
   queryOptions({
     queryKey: getCourseLookupQueryKey(idOrSlug, language),
     queryFn: async () => {
-      const response = await ApiClient.api.courseControllerLookupCourse({
-        id: idOrSlug,
-        language,
-      });
+      try {
+        const response = await ApiClient.api.courseControllerLookupCourse({
+          id: idOrSlug,
+          language,
+        });
 
-      return response.data.data;
+        return response.data.data;
+      } catch (error) {
+        if (isAxiosError(error) && error.response?.status === 404) return null;
+        throw error;
+      }
     },
   });
+
+export function useCourseLookupSuspense(idOrSlug: string, language: SupportedLanguages) {
+  return useSuspenseQuery(courseLookupQueryOptions(idOrSlug, language));
+}

@@ -1,4 +1,4 @@
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -16,19 +16,17 @@ import {
 } from "~/api/mutations/useLearningPathMutations";
 import { useCurrentUserSuspense } from "~/api/queries";
 import { useGroupsQuery } from "~/api/queries/admin/useGroups";
-import { useLearningPaths } from "~/api/queries/useLearningPaths";
+import { useLearningPathsSuspense } from "~/api/queries/useLearningPaths";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import type { LearningPathListItem } from "../types";
-import type { CreateLearningPathBody, GetLearningPathsResponse } from "~/api/generated-api";
+import type { CreateLearningPathBody } from "~/api/generated-api";
 
 export function useAdminLearningPathsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("searchQuery") ?? "";
-
-  const loaderLearningPaths = useLoaderData<GetLearningPathsResponse>();
 
   const appLanguage = useLanguageStore((state) => state.language);
 
@@ -41,7 +39,7 @@ export function useAdminLearningPathsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(searchParams.get("create") === "1");
   const createCardRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
+  const { data: learningPaths } = useLearningPathsSuspense({
     language: appLanguage,
     searchQuery,
   });

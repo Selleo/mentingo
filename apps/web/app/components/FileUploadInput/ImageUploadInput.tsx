@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
 import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
@@ -40,6 +41,7 @@ const ImageUploadInput = ({
   inputTestId,
 }: ImageUploadProps) => {
   const { t } = useTranslation();
+  const safeImageUrl = useRichTextMediaUrl(imageUrl || field.value);
   const isSmall = size === IMAGE_UPLOAD_SIZES.SMALL;
   const fallbackDetails =
     variant === "video"
@@ -57,9 +59,9 @@ const ImageUploadInput = ({
           { "h-36": size === IMAGE_UPLOAD_SIZES.COMPACT, "h-20 border": isSmall },
         )}
       >
-        {imageUrl && (
+        {safeImageUrl && (
           <img
-            src={imageUrl || field.value}
+            src={safeImageUrl}
             alt="Uploaded"
             className={cn(
               "h-full w-full",

@@ -35,12 +35,14 @@ export function SupportModeBanner() {
   }, [expiresAt]);
 
   useEffect(() => {
-    if (!currentUser?.isSupportMode || minutesLeft > 0) return;
+    // The user query can resolve after this banner mounts. Display state still
+    // contains the previous countdown until the effect above updates it.
+    if (!currentUser?.isSupportMode || !expiresAt || getMinutesLeft(expiresAt) > 0) return;
 
     exitSupportMode().catch(() => {
       window.location.assign("/auth/login");
     });
-  }, [currentUser?.isSupportMode, exitSupportMode, minutesLeft]);
+  }, [currentUser?.isSupportMode, exitSupportMode, expiresAt, minutesLeft]);
 
   if (!currentUser?.isSupportMode || !currentUser.supportContext) {
     return null;

@@ -1,8 +1,10 @@
 import { Body, Container, Font, Head, Html, Img, Section } from "@react-email/components";
 
+import { getEmailCardBackground } from "@repo/shared";
+
 import { getBaseEmailStyles } from "../utils";
 
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 
 export type EmailLayoutProps = {
   primaryColor: string;
@@ -49,50 +51,102 @@ export const EmailLayout = ({
       <Body
         style={{ ...styles.body, fontFamily: '"Open Sans", Arial, sans-serif', color: "#222222" }}
       >
-        <Section style={{ backgroundColor: primaryColor, height: "50px" }} />
         <table
           role="presentation"
           width="100%"
           cellPadding="0"
           cellSpacing="0"
-          style={{ borderCollapse: "collapse" }}
+          style={{
+            backgroundColor: "#fafafa",
+            borderCollapse: "collapse",
+            borderSpacing: 0,
+            tableLayout: "fixed",
+          }}
         >
+          <colgroup>
+            <col />
+            <col className="email-card-column" style={{ width: "500px" }} />
+            <col />
+          </colgroup>
+          <tbody style={{ backgroundColor: primaryColor }}>
+            <tr style={{ backgroundColor: primaryColor }}>
+              <td
+                colSpan={3}
+                height="50"
+                style={{ ...sideCellStyle, backgroundColor: primaryColor }}
+              >
+                &nbsp;
+              </td>
+            </tr>
+          </tbody>
           <tbody>
             <tr>
-              <td style={{ ...sideCellStyle, backgroundColor: primaryColor }}>&nbsp;</td>
+              <td height="1" style={{ ...sideCellStyle, backgroundColor: primaryColor }}>
+                &nbsp;
+              </td>
               <td
                 rowSpan={2}
                 width="500"
                 className="email-card-column"
-                style={{ width: "500px", padding: 0, verticalAlign: "top" }}
+                style={{
+                  width: "500px",
+                  padding: 0,
+                  verticalAlign: "top",
+                  backgroundColor: "#fafafa",
+                  backgroundImage: getEmailCardBackground(primaryColor),
+                }}
               >
-                <Section style={{ backgroundColor: primaryColor }}>
-                  <Container style={{ ...styles.headerContainer, width: "100%" }}>
-                    {headerContent}
-                  </Container>
-                </Section>
-                <Container style={{ ...styles.buttonContainer, width: "100%" }}>
+                <Container
+                  style={{
+                    ...styles.headerContainer,
+                    width: "100%",
+                    borderRadius: "1.5rem",
+                  }}
+                >
+                  {headerContent}
                   {lowerContent}
-                  {borderCircleUrl && (
+                  {borderCircleUrl ? (
                     <Img
                       src={borderCircleUrl}
                       height="50"
                       width="auto"
                       alt=""
-                      style={{ display: "block" }}
+                      style={{ display: "block", borderBottomLeftRadius: "1.5rem" }}
                     />
+                  ) : (
+                    <Section style={{ height: "50px" }} />
                   )}
                 </Container>
               </td>
-              <td style={{ ...sideCellStyle, backgroundColor: primaryColor }}>&nbsp;</td>
+              <td height="1" style={{ ...sideCellStyle, backgroundColor: primaryColor }}>
+                &nbsp;
+              </td>
             </tr>
             <tr>
-              <td style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>&nbsp;</td>
-              <td style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>&nbsp;</td>
+              <td height="1" style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>
+                &nbsp;
+              </td>
+              <td height="1" style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>
+                &nbsp;
+              </td>
             </tr>
           </tbody>
         </table>
-        <Section style={styles.footerSection}>{footerContent}</Section>
+        {Children.toArray(footerContent).length > 0 ? (
+          <Section style={styles.footerSection}>{footerContent}</Section>
+        ) : (
+          <Section
+            style={{
+              height: "50px",
+              backgroundColor: "#ffffff",
+              fontSize: "1px",
+              lineHeight: "1px",
+            }}
+            aria-hidden="true"
+          >
+            &nbsp;
+          </Section>
+        )}
       </Body>
     </Html>
   );

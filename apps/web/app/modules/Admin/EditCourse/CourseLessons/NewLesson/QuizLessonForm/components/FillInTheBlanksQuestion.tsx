@@ -35,6 +35,7 @@ type FillInTheBlankQuestionProps = {
   questionIndex: number;
   questionType: QuestionType;
   isStructureLocked?: boolean;
+  readOnly?: boolean;
   baseLanguageQuestion?: Question;
 };
 
@@ -82,6 +83,7 @@ const FillInTheBlanksQuestion = ({
   questionIndex,
   questionType,
   isStructureLocked = false,
+  readOnly = false,
   baseLanguageQuestion,
 }: FillInTheBlankQuestionProps) => {
   const [newWord, setNewWord] = useState("");
@@ -93,6 +95,7 @@ const FillInTheBlanksQuestion = ({
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const baseLanguagePromptPreview = getBaseLanguageFillPromptPreview(baseLanguageQuestion);
+  const canModifyQuestionStructure = !isStructureLocked && !readOnly;
 
   const editor = useEditor(
     {
@@ -106,9 +109,10 @@ const FillInTheBlanksQuestion = ({
           placeholder: baseLanguagePromptPreview ?? "",
         }),
       ],
+      editable: !readOnly,
       content: form.getValues(`questions.${questionIndex}.description`) || "",
     },
-    [baseLanguagePromptPreview],
+    [baseLanguagePromptPreview, readOnly],
   );
 
   const onDeleteQuestion = () => {
@@ -141,7 +145,7 @@ const FillInTheBlanksQuestion = ({
   }
 
   const handleRemoveWord = (index: number) => {
-    if (isStructureLocked) return;
+    if (!canModifyQuestionStructure) return;
 
     const optionToRemove = currentOptions[index];
 
@@ -200,7 +204,7 @@ const FillInTheBlanksQuestion = ({
       .run();
   };
   const handleAddWord = () => {
-    if (isStructureLocked) return;
+    if (!canModifyQuestionStructure) return;
 
     const trimmedWord = newWord.trim();
 
@@ -224,7 +228,7 @@ const FillInTheBlanksQuestion = ({
   };
 
   const handleRemoveQuestion = () => {
-    if (isStructureLocked) return;
+    if (!canModifyQuestionStructure) return;
 
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
@@ -422,36 +426,43 @@ const FillInTheBlanksQuestion = ({
                     key={optionId}
                     className={cn(
                       "flex items-center justify-between gap-x-1 rounded-lg border border-primary-500 pr-3",
+                      readOnly && "pl-3",
                       option.isCorrect ? "bg-success-100" : "bg-primary-100",
                     )}
                   >
-                    <div className="flex items-center">
-                      <button
-                        type="button"
-                        data-testid={QUIZ_LESSON_FORM_HANDLES.dragWordButton(
-                          questionIndex,
-                          option.optionText,
-                        )}
-                        data-option-id={optionId}
-                        className="pl-1.5 pr-1"
-                        draggable={isDraggable}
-                        onDragStart={(event) => handleDragStart(option, event)}
-                        aria-label={t("adminCourseView.curriculum.lesson.other.dragWord")}
-                      >
-                        <Icon name="DragAndDropIcon" className="cursor-move" />
-                      </button>
+                    <div className={cn("flex items-center", readOnly && "gap-x-2")}>
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          data-testid={QUIZ_LESSON_FORM_HANDLES.dragWordButton(
+                            questionIndex,
+                            option.optionText,
+                          )}
+                          data-option-id={optionId}
+                          className="pl-1.5 pr-1"
+                          draggable={isDraggable}
+                          onDragStart={(event) => handleDragStart(option, event)}
+                          aria-label={t("adminCourseView.curriculum.lesson.other.dragWord")}
+                        >
+                          <Icon name="DragAndDropIcon" className="cursor-move" />
+                        </button>
+                      )}
                       {option.isCorrect && <Icon name="Success" />}
-                      <Input
-                        value={option.optionText}
-                        placeholder={baseLanguageOption?.optionText}
-                        draggable={isDraggable}
-                        onDragStart={(event) => handleDragStart(option, event)}
-                        onChange={(event) => handleUpdateWord(index, event.target.value)}
-                        className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
-                        onDrop={(event) => event.preventDefault()}
-                      />
+                      {readOnly ? (
+                        <span className="py-1 text-primary-500">{option.optionText}</span>
+                      ) : (
+                        <Input
+                          value={option.optionText}
+                          placeholder={baseLanguageOption?.optionText}
+                          draggable={isDraggable}
+                          onDragStart={(event) => handleDragStart(option, event)}
+                          onChange={(event) => handleUpdateWord(index, event.target.value)}
+                          className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
+                          onDrop={(event) => event.preventDefault()}
+                        />
+                      )}
                     </div>
-                    {!isStructureLocked && (
+                    {canModifyQuestionStructure && (
                       <Button
                         onClick={() => handleRemoveWord(index)}
                         type="button"
@@ -463,7 +474,7 @@ const FillInTheBlanksQuestion = ({
                   </div>
                 );
               })}
-              {!isStructureLocked && (
+              {canModifyQuestionStructure && (
                 <div className="flex items-center">
                   {!isAddingWord && (
                     <Button
@@ -479,7 +490,7 @@ const FillInTheBlanksQuestion = ({
                 </div>
               )}
             </div>
-            {isAddingWord && !isStructureLocked && (
+            {isAddingWord && canModifyQuestionStructure && (
               <div
                 className={cn(
                   "flex items-center gap-2",
@@ -516,7 +527,7 @@ const FillInTheBlanksQuestion = ({
                 {errors?.questions?.[questionIndex]?.options?.message}
               </p>
             )}
-            {!isStructureLocked && (
+            {canModifyQuestionStructure && (
               <Button
                 data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"

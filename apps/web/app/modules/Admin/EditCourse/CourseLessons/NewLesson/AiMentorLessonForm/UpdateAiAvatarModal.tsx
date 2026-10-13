@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -38,6 +39,7 @@ const UpdateAiAvatarModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const [draftFile, setDraftFile] = useState<File | null>(null);
   const [draftPreview, setDraftPreview] = useState<string | null>(currentPreview);
+  const safeAvatarPreview = useRichTextMediaUrl(draftPreview);
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -125,7 +127,7 @@ const UpdateAiAvatarModal = ({
             {draftPreview && (
               <div className="relative">
                 <Avatar className="size-32 overflow-hidden border shadow-sm">
-                  <AvatarImage src={draftPreview} />
+                  <AvatarImage src={safeAvatarPreview} />
                   <AvatarFallback>
                     <Icon name="AiMentor" className="size-12 text-primary" />
                   </AvatarFallback>

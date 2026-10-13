@@ -8,9 +8,11 @@ import { EMAIL_TEMPLATE_VARIABLE_DRAG_TYPE } from "../emailTemplates.constants";
 import { getEmailTemplateVariableRanges } from "../emailTemplateVariableHighlight.utils";
 
 import type { EmailTemplateVariables } from "../emailTemplates.types";
+import type { ReactNode } from "react";
 
 export type EmailTemplateTextFieldProps = {
   label: string;
+  leadingIcon?: ReactNode;
   testId?: string;
   value: string;
   onChange: (value: string) => void;
@@ -24,6 +26,7 @@ export type EmailTemplateTextFieldProps = {
 
 export function EmailTemplateTextField({
   label,
+  leadingIcon,
   testId,
   value,
   onChange,
@@ -61,14 +64,27 @@ export function EmailTemplateTextField({
       <Label htmlFor={id} className={cn({ "sr-only": compact, "text-xs": dense })}>
         {label}
       </Label>
-      <div className={cn("relative flex flex-col gap-2", { "sm:flex-row": !stacked })}>
+      <div
+        className={cn("relative flex flex-col gap-2", {
+          "sm:flex-row": !stacked,
+          "rounded-lg bg-neutral-50/60": Boolean(leadingIcon),
+        })}
+      >
+        {leadingIcon && (
+          <span
+            className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-neutral-400"
+            aria-hidden="true"
+          >
+            {leadingIcon}
+          </span>
+        )}
         {highlightVariables && (
           <div
             ref={highlightOverlayRef}
             aria-hidden="true"
             className={cn(
               "body-base pointer-events-none absolute inset-0 overflow-hidden whitespace-pre rounded-lg border border-transparent px-3 py-2 text-sm text-neutral-950",
-              { "opacity-50": disabled, "py-1": dense },
+              { "opacity-50": disabled, "py-1": dense, "pl-10": Boolean(leadingIcon) },
             )}
           >
             {highlightBoundaries.slice(0, -1).map((from, index) => (
@@ -90,6 +106,8 @@ export function EmailTemplateTextField({
           data-testid={testId}
           ref={inputRef}
           className={cn({
+            "pl-10 bg-transparent border-neutral-200 transition-colors hover:border-neutral-300 focus-visible:border-primary-400 focus-visible:ring-1":
+              Boolean(leadingIcon),
             "h-8": compact || dense,
             "py-1": dense,
             "bg-transparent text-transparent caret-neutral-950": highlightVariables,

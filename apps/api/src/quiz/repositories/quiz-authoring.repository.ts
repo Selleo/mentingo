@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
+import { ENTITY_TYPES, sanitizeQuizQuestionTitle, type SupportedLanguages } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -348,7 +348,7 @@ export class QuizAuthoringRepository {
       values.map((question) => ({
         ...question,
         prompt: buildJsonbField(language, question.prompt),
-        title: buildJsonbField(language, question.title),
+        title: buildJsonbField(language, sanitizeQuizQuestionTitle(question.title)),
         description:
           question.description == null ? null : buildJsonbField(language, question.description),
       })),
@@ -406,7 +406,13 @@ export class QuizAuthoringRepository {
         maximumPoints: question.maximumPoints,
         gradingMode: question.gradingMode,
         prompt: setJsonbField(assessmentQuestions.prompt, language, question.prompt, true, true),
-        title: setJsonbField(assessmentQuestions.title, language, question.title, true, true),
+        title: setJsonbField(
+          assessmentQuestions.title,
+          language,
+          sanitizeQuizQuestionTitle(question.title),
+          true,
+          true,
+        ),
         description:
           question.description == null
             ? deleteJsonbField(assessmentQuestions.description, language)

@@ -967,6 +967,9 @@ export class StudentLessonProgressService {
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        userFirstName: sql<string>`${users.firstName}`,
+        userLastName: sql<string>`${users.lastName}`,
+        userEmail: sql<string>`${users.email}`,
         courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
         groupName: this.localizationService.getLocalizedSqlField(groups.name, undefined, groups),
         completedAt: sql<string>`${studentCourses.completedAt}`,

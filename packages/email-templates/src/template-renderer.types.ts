@@ -14,7 +14,7 @@ export type EmailTemplateBranding = {
 };
 
 export type RenderEmailTemplateInput = {
-  event: EmailTemplateEvent;
+  event?: EmailTemplateEvent;
   document: EmailTemplateDocument;
   subject: string;
   variables: Readonly<Record<string, EmailTemplateVariableValue>>;

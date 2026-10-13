@@ -15,14 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
+import { ReadOnlyFrame } from "~/modules/Admin/EditCourse/CourseLessons/components/ReadOnlyFrame";
 
 import { AiMentorQualityCheckDialog } from "../AiMentorGeneration/AiMentorQualityCheckDialog";
 import { useAiMentorConfigurationValidation } from "../AiMentorGeneration/useAiMentorConfigurationValidation";
@@ -59,6 +62,7 @@ type AiMentorConfigurationDialogProps = {
     validation?: AiMentorValidationResult,
   ) => void;
   isValidating?: boolean;
+  readOnly?: boolean;
 };
 
 export const AiMentorConfigurationDialog = ({
@@ -74,10 +78,11 @@ export const AiMentorConfigurationDialog = ({
   onValidateConfiguration,
   onImproveWithAi,
   isValidating = false,
+  readOnly = false,
 }: AiMentorConfigurationDialogProps) => {
   const { t } = useTranslation();
   const [pendingType, setPendingType] = useState<AiMentorType | null>(null);
-  const canEditStructure = language === baseLanguage;
+  const canEditStructure = !readOnly && language === baseLanguage;
   const form = useForm<AiMentorConfigurationDraft>({
     resolver: zodResolver(aiMentorConfigurationSchema(t)),
     defaultValues: value ?? createEmptyAiMentorConfiguration(),
@@ -186,23 +191,37 @@ export const AiMentorConfigurationDialog = ({
               className="flex min-h-0 flex-1 flex-col"
             >
               <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 [-webkit-overflow-scrolling:touch] sm:px-6">
-                <AiMentorConfigurationFields
-                  canEditStructure={canEditStructure}
-                  onTypeChange={handleTypeChange}
-                />
+                {readOnly ? (
+                  <ReadOnlyFrame testId="curriculum-ai-mentor-configuration-read-only">
+                    <AiMentorConfigurationFields canEditStructure={false} onTypeChange={() => {}} />
+                  </ReadOnlyFrame>
+                ) : (
+                  <AiMentorConfigurationFields
+                    canEditStructure={canEditStructure}
+                    onTypeChange={handleTypeChange}
+                  />
+                )}
               </div>
 
-              <AiMentorConfigurationDialogFooter
-                canEditStructure={canEditStructure}
-                canImprove={Boolean(onImproveWithAi) && Boolean(value)}
-                canValidate={Boolean(onValidateConfiguration) && Boolean(value)}
-                isAiBusy={isValidating || isCheckingQuality}
-                isSaving={isSaving}
-                submitLabelKey={submitLabelKey}
-                onCancel={() => onOpenChange(false)}
-                onImprove={handleImprove}
-                onValidate={() => void handleValidate()}
-              />
+              {readOnly ? (
+                <DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:py-4">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    {t("common.button.close")}
+                  </Button>
+                </DialogFooter>
+              ) : (
+                <AiMentorConfigurationDialogFooter
+                  canEditStructure={canEditStructure}
+                  canImprove={Boolean(onImproveWithAi) && Boolean(value)}
+                  canValidate={Boolean(onValidateConfiguration) && Boolean(value)}
+                  isAiBusy={isValidating || isCheckingQuality}
+                  isSaving={isSaving}
+                  submitLabelKey={submitLabelKey}
+                  onCancel={() => onOpenChange(false)}
+                  onImprove={handleImprove}
+                  onValidate={() => void handleValidate()}
+                />
+              )}
             </form>
           </Form>
         </DialogContent>

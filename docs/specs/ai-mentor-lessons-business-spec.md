@@ -166,3 +166,39 @@ Voice regression coverage verifies streamed response event handling, direct canc
 Voice mentor client VAD uses a 600 ms speech-end redemption period and a 0.18 negative speech threshold to tolerate brief confidence drops during quiet speech. The speech-start threshold stays at 0.42; finite dictation retains its 700 ms redemption and 0.24 end threshold. These settings require live acoustic validation and do not classify coughs or gate interruptions on transcripts.
 
 Voice Practice regression coverage includes socket target serialization, owned/ready/active attempt checks, cross-user and cross-tenant rejection, stale replay rejection, retained lesson settings, spoken-turn routing, late-response suppression, voice availability, and stopping capture before feedback. These are deterministic tests with provider and microphone doubles; they do not establish live provider behavior or browser microphone compatibility.
+
+### Supporting context in course-generated Mentors
+
+Course authoring explicitly maps relevant selected legal materials, regulations
+and organizational procedures to a Mentor's supporting files. The Mentor can
+refer to information taught earlier without duplicating the earlier lesson.
+Its persisted setup should also include the source-backed facts, deadlines,
+constraints and decision criteria needed for the scenario, with available legal
+authority, jurisdiction and date. These details belong in the internal behavior
+fields rather than the learner-facing task description.
+
+Selected source files and available course content attach through the existing
+application flow. Public research pages do not automatically become files;
+essential supported research facts and their URLs belong in the Mentor briefing.
+This guidance applies to new Mentor lessons and scoped updates. Live generated
+quality and document retrieval remain unverified.
+
+The Fine-tune behavior section remains expandable in read-only proposal review.
+Regression coverage verifies mouse and keyboard expansion while its fields remain
+read-only. Five focused dialog tests, the web TypeScript check and scoped ESLint
+pass; 61 focused AI writer/contract tests cover the supporting-context guidance.
+
+### Targeted references from course authoring
+
+Course authoring may synthesize a concise reference file for one Mentor from
+permitted course and source material. It includes the facts and constraints the
+Mentor needs, with source attribution and available jurisdiction/as-of dates.
+This internal file is distinct from the learner task description. It is shown
+as a file card in review and prepared for retrieval before application.
+
+When a targeted file exists, application omits the broad original-source and
+course-content snapshot for that operation. Legacy proposals retain those
+attachments. Generated reference links can be replaced by later authoring
+updates without removing manually attached files. Public research is usable in
+the brief only where authoring supplied permitted evidence; creating the file
+does not grant additional research or document permissions.

@@ -1,14 +1,13 @@
-import { ConflictException } from "@nestjs/common";
 import {
-  EMAIL_TEMPLATE_DEFINITIONS,
+  VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS,
   EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT,
   EMAIL_TEMPLATE_STATUSES,
+  getBuiltInTemplatePublication,
 } from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import {
   AddEmailTemplateLanguageEvent,
-  ArchiveEmailTemplateEvent,
   CreateEmailTemplateEvent,
   DeleteEmailTemplateEvent,
   PublishEmailTemplateEvent,
@@ -17,8 +16,8 @@ import {
   UpdateEmailTemplateEvent,
 } from "src/events";
 
+import { EmailTemplateManagementService } from "./email-template-management.service";
 import { EmailTemplateValidationService } from "./email-template-validation.service";
-import { EmailTemplateService } from "./email-template.service";
 
 import type { EmailTemplateAssetService } from "./email-template-asset.service";
 import type { EmailTemplateRecord } from "../email-template.types";
@@ -26,17 +25,24 @@ import type { EmailTemplateRepository } from "../repositories/email-template.rep
 import type { SupportedLanguages } from "@repo/shared";
 import type { EmailService } from "src/common/emails/emails.service";
 
-describe("EmailTemplateService mutation validation", () => {
+describe("EmailTemplateManagementService mutation validation", () => {
   const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.password_recovery;
   let template: EmailTemplateRecord;
   let lockHeld: boolean;
+  const transaction = {} as never;
   const updateEmailTemplate = jest.fn();
   const publishEmailTemplate = jest.fn();
   const createEmailTemplate = jest.fn();
   const deleteEmailTemplate = jest.fn();
   const removeEmailTemplateLanguage = jest.fn();
-  const findEmailTemplateOverridePageWithTotal = jest.fn();
+  const findCustomEmailTemplatePageWithCount = jest.fn();
   const publishEvent = jest.fn();
+  const dependencies = {
+    removeUnusedEmailTagMappingsFromAutomations: jest.fn(),
+    assertEmailTemplateCanBeArchived: jest.fn(),
+    prepareAutomationsForEmailTemplatePublication: jest.fn(),
+    cancelPendingEmailTemplateDeliveries: jest.fn(),
+  };
   const createActor = () => ({
     userId: "00000000-0000-4000-8000-000000000004",
     email: "admin@example.com",
@@ -44,7 +50,7 @@ describe("EmailTemplateService mutation validation", () => {
     permissions: [],
     tenantId: template.tenantId,
   });
-  let service: EmailTemplateService;
+  let service: EmailTemplateManagementService;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,6 +59,10 @@ describe("EmailTemplateService mutation validation", () => {
       id: "00000000-0000-4000-8000-000000000001",
       tenantId: "00000000-0000-4000-8000-000000000002",
       event: definition.event,
+      triggerEventKind: null,
+      placeholders: getBuiltInTemplatePublication("password_recovery").placeholders,
+      publication: getBuiltInTemplatePublication("password_recovery"),
+      publicationVersion: 1,
       name: definition.name,
       subject: definition.subjects,
       content: definition.defaultDocuments,
@@ -69,7 +79,7 @@ describe("EmailTemplateService mutation validation", () => {
       withLockedEmailTemplate: jest.fn(async (_id, callback) => {
         lockHeld = true;
         try {
-          return await callback(template);
+          return await callback(template, transaction);
         } finally {
           lockHeld = false;
         }
@@ -77,10 +87,10 @@ describe("EmailTemplateService mutation validation", () => {
       updateEmailTemplate,
       updateEmailTemplateTranslations: updateEmailTemplate,
       publishEmailTemplate,
-      createEmailTemplate,
-      deleteEmailTemplate,
+      insertEmailTemplate: createEmailTemplate,
+      softDeleteEmailTemplate: deleteEmailTemplate,
       removeEmailTemplateLanguage,
-      findEmailTemplateOverridePageWithTotal,
+      findCustomEmailTemplatePageWithCount,
     };
     updateEmailTemplate.mockImplementation(async (_id, values) => {
       expect(lockHeld).toBe(true);
@@ -107,15 +117,16 @@ describe("EmailTemplateService mutation validation", () => {
         return template;
       },
     );
-    service = new EmailTemplateService(
+    service = new EmailTemplateManagementService(
       repository as unknown as EmailTemplateRepository,
       new EmailTemplateValidationService(),
       {} as EmailService,
       {
-        validateEmailTemplateAssets: jest.fn().mockResolvedValue(undefined),
+        assertEmailTemplateAssetsAccessible: jest.fn().mockResolvedValue(undefined),
       } as unknown as EmailTemplateAssetService,
       { publish: publishEvent } as never,
       { transaction: jest.fn(async (callback) => callback()) } as never,
+      dependencies,
     );
   });
 
@@ -137,7 +148,7 @@ describe("EmailTemplateService mutation validation", () => {
 
     await service.createEmailTemplate(
       {
-        event: definition.event,
+        placeholders: getBuiltInTemplatePublication("password_recovery").placeholders,
         name: definition.name,
         subject: definition.subjects,
         content: definition.defaultDocuments,
@@ -163,11 +174,12 @@ describe("EmailTemplateService mutation validation", () => {
     expect(publishEvent.mock.calls[0][0].data.resource.id).toBe(template.id);
   });
 
-  it("rejects an incomplete update using the status read under the lock", async () => {
-    await expect(service.updateEmailTemplate(template.id, { subject: { en: "" } })).rejects.toThrow(
-      "emailTemplates.errors.incompleteBaseLanguage",
-    );
-    expect(updateEmailTemplate).not.toHaveBeenCalled();
+  it("saves an incomplete draft while keeping the current publication", async () => {
+    const publication = structuredClone(template.publication);
+    const result = await service.updateEmailTemplate(template.id, { subject: { en: "" } });
+    expect(result.subject.en).toBe("");
+    expect(template.publication).toEqual(publication);
+    expect(result.hasUnpublishedChanges).toBe(true);
   });
 
   it("preserves other locales when administrators save independent translations", async () => {
@@ -201,29 +213,31 @@ describe("EmailTemplateService mutation validation", () => {
     "paginates page $page with $overrideCount overrides",
     async ({ page, overrideCount, returnedOverrides, defaultStart, defaultEnd }) => {
       const perPage = 5;
-      findEmailTemplateOverridePageWithTotal.mockResolvedValue({
+      findCustomEmailTemplatePageWithCount.mockResolvedValue({
         templates: Array.from({ length: returnedOverrides }, () => template),
         totalItems: overrideCount,
       });
 
-      const result = await service.getEmailTemplates(page, perPage);
-      const expectedDefaults = EMAIL_TEMPLATE_DEFINITIONS.slice(defaultStart, defaultEnd);
+      const result = await service.listEmailTemplates(page, perPage);
+      const expectedDefaults = VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.slice(defaultStart, defaultEnd);
 
-      expect(findEmailTemplateOverridePageWithTotal).toHaveBeenCalledWith(
+      expect(findCustomEmailTemplatePageWithCount).toHaveBeenCalledWith(
         (page - 1) * perPage,
         perPage,
+        "",
+        SUPPORTED_LANGUAGES.EN,
       );
       expect(result.data.map(({ source }) => source)).toEqual([
         ...Array.from({ length: returnedOverrides }, () => "override"),
         ...expectedDefaults.map(() => "default"),
       ]);
       expect(result.data.slice(returnedOverrides).map(({ event }) => event)).toEqual(
-        expectedDefaults.map(({ event }) => event),
+        expectedDefaults,
       );
       expect(result.pagination).toEqual({
         page,
         perPage,
-        totalItems: overrideCount + EMAIL_TEMPLATE_DEFINITIONS.length,
+        totalItems: overrideCount + VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.length,
       });
     },
   );
@@ -334,13 +348,45 @@ describe("EmailTemplateService mutation validation", () => {
     expect(publishEvent).toHaveBeenCalledTimes(1);
     expect(publishEvent.mock.calls[0][0]).toBeInstanceOf(RestoreEmailTemplateEvent);
     expect(publishEvent.mock.calls[0][0].data).toMatchObject({ actor, changedFields: ["status"] });
+    expect(dependencies.assertEmailTemplateCanBeArchived).toHaveBeenCalledWith(
+      template.id,
+      transaction,
+    );
+    expect(lockHeld).toBe(false);
+  });
+
+  it.each([EMAIL_TEMPLATE_STATUSES.DRAFT, EMAIL_TEMPLATE_STATUSES.PUBLISHED])(
+    "rejects restoring a %s template without changing it",
+    async (status) => {
+      template.status = status;
+
+      await expect(service.restoreEmailTemplate(template.id)).rejects.toThrow(
+        "emailTemplates.errors.restoreRequiresArchived",
+      );
+
+      expect(updateEmailTemplate).not.toHaveBeenCalled();
+      expect(dependencies.assertEmailTemplateCanBeArchived).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not restore an archived template referenced by an enabled automation", async () => {
+    template.status = EMAIL_TEMPLATE_STATUSES.ARCHIVED;
+    dependencies.assertEmailTemplateCanBeArchived.mockRejectedValueOnce(
+      new Error("emailTemplates.errors.usedByAutomations"),
+    );
+
+    await expect(service.restoreEmailTemplate(template.id)).rejects.toThrow(
+      "emailTemplates.errors.usedByAutomations",
+    );
+
+    expect(updateEmailTemplate).not.toHaveBeenCalled();
     expect(lockHeld).toBe(false);
   });
 
   it("records a base-language change as a template update", async () => {
     const actor = createActor();
 
-    await service.updateBaseLanguage(template.id, { baseLanguage: "pl" }, actor);
+    await service.updateEmailTemplateBaseLanguage(template.id, { baseLanguage: "pl" }, actor);
 
     expect(publishEvent.mock.calls[0][0]).toBeInstanceOf(UpdateEmailTemplateEvent);
     expect(publishEvent.mock.calls[0][0].data).toMatchObject({
@@ -382,33 +428,31 @@ describe("EmailTemplateService mutation validation", () => {
     expect(lockHeld).toBe(false);
   });
 
-  it("records the automatic archive when publishing replaces another template", async () => {
+  it("publishes only the selected resource without archiving another template", async () => {
     template.status = EMAIL_TEMPLATE_STATUSES.DRAFT;
-    const actor = createActor();
-    const archived = {
-      ...template,
-      id: "00000000-0000-4000-8000-000000000005",
-      status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
-    };
-    publishEmailTemplate.mockResolvedValueOnce({ template, archivedTemplates: [archived] });
-
-    await service.publishEmailTemplate(template.id, actor);
-
-    expect(publishEvent.mock.calls[0][0]).toBeInstanceOf(ArchiveEmailTemplateEvent);
-    expect(publishEvent.mock.calls[1][0]).toBeInstanceOf(PublishEmailTemplateEvent);
-    expect(publishEvent.mock.calls[0][0].data.resource.id).toBe(archived.id);
-    expect(publishEvent.mock.calls[0][0].data.previous.status).toBe(
-      EMAIL_TEMPLATE_STATUSES.PUBLISHED,
+    await service.publishEmailTemplate(template.id, createActor());
+    expect(publishEvent).toHaveBeenCalledTimes(1);
+    expect(publishEvent.mock.calls[0][0]).toBeInstanceOf(PublishEmailTemplateEvent);
+    expect(publishEmailTemplate).toHaveBeenCalledWith(
+      template.id,
+      expect.objectContaining({ placeholders: template.placeholders, subject: template.subject }),
+      transaction,
     );
-    expect(lockHeld).toBe(false);
   });
 
-  it("maps a publication uniqueness violation to a conflict and releases the lock", async () => {
-    publishEmailTemplate.mockRejectedValueOnce({ code: "23505" });
-    await expect(service.publishEmailTemplate(template.id)).rejects.toEqual(
-      new ConflictException("emailTemplates.errors.publicationConflict"),
+  it("passes explicit automation consent and the selected language to publication preparation", async () => {
+    const actor = createActor();
+    const options = { confirmedAutomationIds: [template.id], language: SUPPORTED_LANGUAGES.PL };
+
+    await service.publishEmailTemplate(template.id, actor, options);
+
+    expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
+      template.id,
+      expect.any(Object),
+      transaction,
+      options,
+      actor,
     );
-    expect(lockHeld).toBe(false);
   });
 
   it("does not report an outbox write failure as a publication conflict", async () => {
@@ -446,4 +490,42 @@ describe("EmailTemplateService mutation validation", () => {
     expect(createEmailTemplate.mock.calls[0][0]).not.toHaveProperty("id");
     expect(publishEmailTemplate).not.toHaveBeenCalled();
   });
+  it("keeps pending deliveries when saving a draft, then cancels after publication", async () => {
+    await service.updateEmailTemplate(template.id, { subject: { en: "New draft" } });
+    expect(dependencies.cancelPendingEmailTemplateDeliveries).not.toHaveBeenCalled();
+    await service.publishEmailTemplate(template.id);
+    expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
+      template.id,
+      expect.objectContaining({ subject: { ...definition.subjects, en: "New draft" } }),
+      transaction,
+      {},
+      undefined,
+    );
+    expect(dependencies.cancelPendingEmailTemplateDeliveries).toHaveBeenCalledWith(
+      template.id,
+      transaction,
+    );
+  });
+  it("blocks incompatible publication before the published content changes", async () => {
+    dependencies.prepareAutomationsForEmailTemplatePublication.mockRejectedValueOnce(
+      new Error("Enabled automation mapping incompatible"),
+    );
+    await expect(service.publishEmailTemplate(template.id)).rejects.toThrow(
+      "Enabled automation mapping incompatible",
+    );
+    expect(publishEmailTemplate).not.toHaveBeenCalled();
+    expect(dependencies.cancelPendingEmailTemplateDeliveries).not.toHaveBeenCalled();
+  });
+  it.each(["archiveEmailTemplate", "deleteEmailTemplate"] as const)(
+    "blocks %s while an enabled automation depends on it",
+    async (method) => {
+      dependencies.assertEmailTemplateCanBeArchived.mockRejectedValueOnce(
+        new Error("Enabled automation dependency"),
+      );
+      await expect(service[method](template.id)).rejects.toThrow("Enabled automation dependency");
+      expect(updateEmailTemplate).not.toHaveBeenCalled();
+      expect(deleteEmailTemplate).not.toHaveBeenCalled();
+      expect(dependencies.cancelPendingEmailTemplateDeliveries).not.toHaveBeenCalled();
+    },
+  );
 });

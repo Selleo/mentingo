@@ -27,7 +27,7 @@ import {
   LEARNER_TRANSCRIPT_STATUSES,
   type StartAudioPayload,
   TRANSCRIPTION_MODES,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   AI_MENTOR_PRACTICE_STATUSES,

@@ -39,6 +39,7 @@ import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schem
 
 describe("Activity Logs E2E", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
 
   let adminChapterService: AdminChapterService;
   let announcementsService: AnnouncementsService;
@@ -62,7 +63,12 @@ describe("Activity Logs E2E", () => {
   let currentAdminUser: CurrentUserType;
 
   beforeAll(async () => {
-    const { app: testAppInstance } = await createE2ETest({ enableActivityLogs: true });
+    const {
+      app: testAppInstance,
+      runAsTenant,
+      defaultTenantId,
+    } = await createE2ETest({ enableActivityLogs: true });
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testAppInstance;
 
     db = app.get(DB);
@@ -454,7 +460,9 @@ describe("Activity Logs E2E", () => {
       const student = await userFactory.withUserSettings(db).create();
       const course = await createCourse();
 
-      await courseService.enrollCourses(course.id, { studentIds: [student.id] }, currentAdminUser);
+      await inTenant(() =>
+        courseService.enrollCourses(course.id, { studentIds: [student.id] }, currentAdminUser),
+      );
 
       const logs = await waitForLogs(
         { resourceId: course.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE },

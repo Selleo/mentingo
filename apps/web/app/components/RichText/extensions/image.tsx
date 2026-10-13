@@ -28,6 +28,7 @@ const getImageDataAttributes = (attrs: ImageEmbedAttrs) => ({
   "data-node-type": IMAGE_NODE_TYPE,
   "data-src": attrs.src ?? "",
   "data-alt": attrs.alt ?? "",
+  ...(attrs.assetId ? { "data-authoring-asset-id": attrs.assetId } : {}),
   ...(attrs.resourceId ? { "data-resource-id": attrs.resourceId } : {}),
 });
 
@@ -36,7 +37,17 @@ const ImageEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
   const attrs = normalizeImageEmbedAttributes(node.attrs);
 
-  if (!attrs.src) return null;
+  if (!attrs.src && !attrs.assetId) return null;
+
+  const imageLabel = attrs.alt || attrs.src || t("courseAuthoring.review.generatedImage");
+  const imageContent = (
+    <>
+      <ImageIcon className="size-4 shrink-0 text-primary-700" aria-hidden />
+      <span className="truncate" title={imageLabel}>
+        {imageLabel}
+      </span>
+    </>
+  );
 
   const handleRemove = () =>
     void removeResourceNode({
@@ -47,46 +58,64 @@ const ImageEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
   return (
     <NodeViewWrapper className="image-node">
-      <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
-        <Button
-          type="button"
-          size="xs"
-          variant="ghost"
-          className="rounded-full text-neutral-500 hover:bg-neutral-200"
-          aria-label={t("richText.image.ariaLabel.drag")}
-          data-drag-handle
-        >
-          <GripVertical className="size-4" aria-hidden />
-        </Button>
-        <a
-          {...getImageDataAttributes(attrs)}
-          href={attrs.src}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-w-0 items-center gap-2 underline"
-          contentEditable={false}
-        >
-          <ImageIcon className="size-4 text-primary-700" aria-hidden />
-          <span className="truncate">{attrs.alt || attrs.src}</span>
-        </a>
-        <Button
-          type="button"
-          onClick={handleRemove}
-          aria-label={t("richText.image.ariaLabel.remove")}
-          size="xs"
-          variant="ghost"
-        >
-          <X className="size-3.5" aria-hidden />
-        </Button>
+      <div
+        role={!attrs.src ? "status" : undefined}
+        aria-busy={!attrs.src || undefined}
+        className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700"
+      >
+        {editor.isEditable && (
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            className="rounded-full text-neutral-500 hover:bg-neutral-200"
+            aria-label={t("richText.image.ariaLabel.drag")}
+            data-drag-handle
+          >
+            <GripVertical className="size-4" aria-hidden />
+          </Button>
+        )}
+        {attrs.src ? (
+          <a
+            {...getImageDataAttributes(attrs)}
+            href={attrs.src}
+            data-read-only-allow={!editor.isEditable || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-w-0 items-center gap-2 underline"
+            contentEditable={false}
+          >
+            {imageContent}
+          </a>
+        ) : (
+          <span
+            className="inline-flex min-w-0 items-center gap-2 underline"
+            contentEditable={false}
+          >
+            {imageContent}
+          </span>
+        )}
+        {editor.isEditable && (
+          <Button
+            type="button"
+            onClick={handleRemove}
+            aria-label={t("richText.image.ariaLabel.remove")}
+            size="xs"
+            variant="ghost"
+          >
+            <X className="size-3.5" aria-hidden />
+          </Button>
+        )}
       </div>
     </NodeViewWrapper>
   );
 };
 
-const ImageViewerView = ({ node }: NodeViewProps) => {
+const ImageViewerView = (props: NodeViewProps) => {
+  const { node } = props;
   const attrs = normalizeImageEmbedAttributes(node.attrs);
 
-  if (!attrs.src) return null;
+  if (!attrs.src) return <ImageEditorView {...props} />;
 
   return (
     <NodeViewWrapper className="image-node">
@@ -118,6 +147,9 @@ const baseImageNodeConfig: NodeConfig = {
       resourceId: {
         default: null,
       },
+      assetId: {
+        default: null,
+      },
     };
   },
 
@@ -131,9 +163,10 @@ const baseImageNodeConfig: NodeConfig = {
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { src, alt, resourceId, ...rest } = HTMLAttributes as Record<string, unknown>;
+    const { src, alt, resourceId, assetId, ...rest } = HTMLAttributes as Record<string, unknown>;
 
     const normalizedAttributes = normalizeImageEmbedAttributes({
+      assetId: typeof assetId === "string" ? assetId : null,
       src: typeof src === "string" ? src : null,
       alt: typeof alt === "string" ? alt : null,
       resourceId: typeof resourceId === "string" ? resourceId : null,

@@ -12,6 +12,7 @@ import {
   openEmailTemplateFlow,
   selectEmailLanguageFlow,
 } from "../../flows/email-templates/editor.flow";
+import { saveEmailDraftFlow } from "../../flows/email-templates/template-actions.flow";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -32,14 +33,15 @@ test("translations persist independently and a complete saved translation can be
     await editEmailTemplateFlow(page, { name: "Polish name", subject: "Polish subject" });
     await appendEmailTextFlow(page, { index: 0, text: "Polish body" });
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE)).toBeDisabled();
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE)).toBeEnabled();
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE).click();
     await expect
       .poll(async () => (await factory.getById(template.id!)).baseLanguage)
       .toBe(EMAIL_TEMPLATE_DATA.polish);
     await page.reload();
+    await selectEmailLanguageFlow(page, EMAIL_TEMPLATE_DATA.polish);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue("Polish subject");
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK)).toHaveText(["Polish body"]);
     await selectEmailLanguageFlow(page, EMAIL_TEMPLATE_DATA.english);
@@ -73,8 +75,8 @@ test("saving English preserves another administrator's Polish changes", async ({
       subject: { pl: "Updated Polish subject" },
       content: { pl: emailTemplateDocument("Updated Polish body") },
     });
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => (await factory.getById(template.id!)).content)
       .toMatchObject({

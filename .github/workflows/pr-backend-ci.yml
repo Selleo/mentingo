@@ -231,13 +231,13 @@ jobs:
         run: docker rm -f rustfs || true
 
   e2e:
-    name: Backend E2E (shard ${{ matrix.shard }}/4)
+    name: Backend E2E (shard ${{ matrix.shard }}/6)
     needs: [lint, build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6]
 
     services:
       postgres:
@@ -314,7 +314,9 @@ jobs:
         run: pnpm -w packages:build
 
       - name: Run E2E tests
-        run: pnpm --filter=api exec jest --config ./test/jest-e2e.json --shard=${{ matrix.shard }}/4
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+        run: pnpm --filter=api exec jest --config ./test/jest-e2e.json --shard=${{ matrix.shard }}/6
 
       - name: Stop RustFS
         if: always()

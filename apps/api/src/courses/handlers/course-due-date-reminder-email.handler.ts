@@ -1,7 +1,5 @@
-import { Logger } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import { Injectable, Logger } from "@nestjs/common";
 import {
-  CourseDueDateReminderEmail,
   EMAIL_TEMPLATE_EVENTS,
   getCourseDueDateReminderEmailTranslations,
 } from "@repo/email-templates";
@@ -15,15 +13,17 @@ import { format } from "date-fns";
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent, CourseDueDateReminderEmailEvent } from "src/events";
+import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
+import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { CourseDueDateReminderRecipient } from "../types/course-due-date-reminder.types";
+import type { IEventHandler } from "@nestjs/cqrs";
 
-@EventsHandler(CourseDueDateReminderEmailEvent)
+@Injectable()
 export class CourseDueDateReminderEmailHandler
   implements IEventHandler<CourseDueDateReminderEmailEvent>
 {
@@ -33,15 +33,27 @@ export class CourseDueDateReminderEmailHandler
     private readonly emailService: EmailService,
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly outboxPublisher: OutboxPublisher,
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly notificationCollectorService: NotificationCollectorService,
+    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
+
+  onModuleInit() {
+    this.outboxNotificationPreparationService.register(async (event) => {
+      if (!(event instanceof CourseDueDateReminderEmailEvent)) {
+        return [];
+      }
+
+      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
+    });
+  }
 
   async handle(event: CourseDueDateReminderEmailEvent) {
     const { recipients } = event.courseDueDateReminderEmailData;
 
     await processInBatches(recipients, (recipient) => this.sendCourseDueDateReminder(recipient), {
       batchSize: EMAIL_BATCH_SIZE,
-      throwOnError: false,
+      throwOnError: true,
       onItemError: (error, recipient) => {
         const reason = error instanceof Error ? error.stack : String(error);
 
@@ -61,31 +73,17 @@ export class CourseDueDateReminderEmailHandler
   private async sendCourseDueDateReminderEmail(recipient: CourseDueDateReminderRecipient) {
     const formattedDueDate = format(new Date(recipient.dueDate), "dd.MM.yyyy");
 
-    const { text, html } = new CourseDueDateReminderEmail({
-      courseName: recipient.courseName,
-      courseLink: `${recipient.tenantHost.replace(/\/$/, "")}/course/${recipient.courseId}`,
-      dueDate: formattedDueDate,
-      daysBeforeDueDate: recipient.daysBeforeDueDate,
-      ...recipient.defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: recipient.studentEmail,
-        subject: getEmailSubject(
-          "courseDueDateReminderEmail",
-          recipient.defaultEmailSettings.language,
-          { courseName: recipient.courseName },
-        ),
-        text,
-        html,
-      },
+    await this.notificationCollectorService.captureNotificationRecipient(
+      { to: recipient.studentEmail },
       {
         tenantId: recipient.tenantId,
         template: {
           event: EMAIL_TEMPLATE_EVENTS.COURSE_DUE_DATE_REMINDER,
           language: recipient.defaultEmailSettings.language,
           variables: {
+            userEmail: recipient.studentEmail,
+            userFirstName: recipient.studentFirstName,
+            userLastName: recipient.studentLastName,
             course_name: recipient.courseName,
             course_link: `${recipient.tenantHost.replace(/\/$/, "")}/course/${recipient.courseId}`,
             due_date: formattedDueDate,
@@ -106,7 +104,7 @@ export class CourseDueDateReminderEmailHandler
       recipient.daysBeforeDueDate,
     );
 
-    await this.tenantRunner.runWithTenant(recipient.tenantId, async () => {
+    await this.tenantDbRunnerService.runWithTenant(recipient.tenantId, async () => {
       const announcement = await this.announcementsRepository.createAnnouncement({
         groupId: null,
         title: { [language]: heading },

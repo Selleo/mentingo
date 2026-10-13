@@ -1,5 +1,6 @@
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
@@ -7,39 +8,59 @@ import { cn } from "~/lib/utils";
 import { ConfigurationTextField } from "./fields/AiMentorConfigurationFieldInputs";
 
 import type { AiMentorType } from "@repo/shared";
-import type { RefObject } from "react";
 
 type AiMentorFineTuneConfigurationFieldsProps = {
   type: AiMentorType;
   hasOptionalError: boolean;
-  optionalFieldsRef: RefObject<HTMLDetailsElement>;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 };
 
 export const AiMentorFineTuneConfigurationFields = ({
   type,
   hasOptionalError,
-  optionalFieldsRef,
+  isOpen,
+  onOpenChange,
 }: AiMentorFineTuneConfigurationFieldsProps) => {
   const { t } = useTranslation();
+  const contentId = useId();
+  const triggerId = `${contentId}-trigger`;
 
   return (
-    <details
-      ref={optionalFieldsRef}
-      className={cn("group rounded-lg border bg-white", {
+    <div
+      className={cn("rounded-lg border bg-white", {
         "border-error-500": hasOptionalError,
         "border-neutral-200": !hasOptionalError,
       })}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 [&::-webkit-details-marker]:hidden">
+      <button
+        id={triggerId}
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => onOpenChange(!isOpen)}
+        className="flex w-full cursor-pointer items-center justify-between rounded-lg px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+      >
         <span className="flex items-center gap-3">
           <SlidersHorizontal className="size-4 text-neutral-500" />
           <span className="text-sm font-semibold text-neutral-900">
             {t("adminCourseView.curriculum.lesson.aiMentorConfiguration.fineTuneBehavior")}
           </span>
         </span>
-        <ChevronDown className="size-4 text-neutral-500 transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="space-y-4 border-t border-neutral-100 px-4 py-4">
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("size-4 text-neutral-500 transition-transform", {
+            "rotate-180": isOpen,
+          })}
+        />
+      </button>
+      <div
+        id={contentId}
+        role="region"
+        aria-labelledby={triggerId}
+        hidden={!isOpen}
+        className="space-y-4 border-t border-neutral-100 px-4 py-4"
+      >
         {type === AI_MENTOR_TYPE.TEACHER ? (
           <ConfigurationTextField
             name="feedbackGuidance"
@@ -88,6 +109,6 @@ export const AiMentorFineTuneConfigurationFields = ({
           optional
         />
       </div>
-    </details>
+    </div>
   );
 };

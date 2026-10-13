@@ -1,11 +1,10 @@
-import { redirect, useLocation, useNavigate, useParams } from "@remix-run/react";
+import { Navigate, useLocation, useNavigate, useParams } from "@remix-run/react";
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
   LIVE_TRAINING_SESSION_STATUSES,
 } from "@repo/shared";
-import { isAxiosError } from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTraining } from "~/api/mutations/live-training/useDeleteLiveTraining";
@@ -13,20 +12,17 @@ import { useEndLiveTrainingSession } from "~/api/mutations/live-training/useEndL
 import { useJoinLiveTrainingSession } from "~/api/mutations/live-training/useJoinLiveTrainingSession";
 import { useStartLiveTrainingSession } from "~/api/mutations/live-training/useStartLiveTrainingSession";
 import { useUpdateLiveTraining } from "~/api/mutations/live-training/useUpdateLiveTraining";
-import { currentUserQueryOptions } from "~/api/queries";
-import {
-  liveTrainingQueryOptions,
-  useLiveTraining,
-} from "~/api/queries/live-training/useLiveTraining";
+import { LIVE_TRAINING_QUERY_KEY } from "~/api/queries/live-training/useLiveTraining";
+import { useLiveTrainingSuspense } from "~/api/queries/live-training/useLiveTrainingSuspense";
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
-import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
-import { queryClient } from "~/api/queryClient";
+import { usePublicGlobalSettingsSuspense } from "~/api/queries/usePublicGlobalSettingsSuspense";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/components/ui/use-toast";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LiveTrainingDeleteDialog } from "~/modules/LiveTraining/components/LiveTrainingDeleteDialog";
 import { LiveTrainingRoom } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingRoom";
@@ -40,11 +36,11 @@ import {
   isLiveTrainingEditFormDirty,
   isLiveTrainingEditFormValid,
 } from "~/modules/LiveTraining/utils/liveTrainingEditForm";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import { LIVE_TRAINING_HANDLES } from "../../../e2e/data/live-training/handles";
 
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import { LiveTrainingErrorBoundary } from "./components/LiveTrainingErrorBoundary";
+
 import type { JoinCurrentSessionResponse } from "~/api/generated-api";
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
 
@@ -73,56 +69,43 @@ function LiveTrainingPageSkeleton() {
   );
 }
 
-export const clientLoader = async ({ params, request }: ClientLoaderFunctionArgs) => {
-  const [currentUserResponse, globalSettingsResponse] = await Promise.all([
-    queryClient.ensureQueryData(currentUserQueryOptions),
-    queryClient.ensureQueryData(globalSettingsQueryOptions),
-  ]);
-
-  const currentUser = currentUserResponse?.data;
-  const globalSettings = globalSettingsResponse?.data;
-
-  if (!currentUser) {
-    saveEntryToNavigationHistory(request);
-    throw redirect("/auth/login");
-  }
-
-  const canReadLiveTraining = canReadLiveTrainingPage(
-    currentUser.permissions,
-    Boolean(globalSettings?.liveTrainingEnabled),
-  );
-
-  if (!canReadLiveTraining) {
-    throw redirect("/");
-  }
-
-  if (!params.id) {
-    throw redirect("/calendar");
-  }
-
-  const { language } = useLanguageStore.getState();
-
-  try {
-    await queryClient.fetchQuery(liveTrainingQueryOptions(params.id, language, { retry: false }));
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 403) {
-      throw redirect("/");
-    }
-
-    if (!isAxiosError(error) || error.response?.status === 400 || error.response?.status === 404) {
-      throw redirect("/calendar");
-    }
-
-    throw error;
-  }
-
-  return null;
-};
-
 export default function LiveTrainingPage() {
+  return (
+    <RequireAuthenticatedUser>
+      <LiveTrainingAccess />
+    </RequireAuthenticatedUser>
+  );
+}
+
+function LiveTrainingAccess() {
+  const { id } = useParams();
+  const language = useLanguageStore((state) => state.language);
+  const { data: currentUser } = useCurrentUserSuspense();
+  const { data: globalSettings } = usePublicGlobalSettingsSuspense();
+
+  if (
+    !canReadLiveTrainingPage(currentUser.permissions, Boolean(globalSettings?.liveTrainingEnabled))
+  ) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!id) return <Navigate to="/calendar" replace />;
+
+  return (
+    <LiveTrainingErrorBoundary
+      key={`${id}:${language}`}
+      queryKey={[...LIVE_TRAINING_QUERY_KEY, id, language]}
+    >
+      <Suspense fallback={<LiveTrainingPageSkeleton />}>
+        <LiveTrainingContent id={id} />
+      </Suspense>
+    </LiveTrainingErrorBoundary>
+  );
+}
+
+function LiveTrainingContent({ id }: { id: string }) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -133,14 +116,10 @@ export default function LiveTrainingPage() {
   >(null);
   const language = useLanguageStore((state) => state.language);
   const { data: currentUser } = useCurrentUserSuspense();
-  const {
-    data: liveTraining,
-    isLoading,
-    refetch: refetchLiveTraining,
-  } = useLiveTraining(id, language, {
-    enabled: Boolean(id),
-    retry: false,
-  });
+  const { data: liveTraining, refetch: refetchLiveTraining } = useLiveTrainingSuspense(
+    id,
+    language,
+  );
   const { data: liveKitConfigured } = useLiveKitConfigured();
   const isOnlineDeliveryAvailable = Boolean(liveKitConfigured?.enabled);
   const { mutateAsync: deleteLiveTraining, isPending: isDeleting } = useDeleteLiveTraining();
@@ -383,9 +362,7 @@ export default function LiveTrainingPage() {
       ]}
       data-testid={LIVE_TRAINING_HANDLES.PAGE}
     >
-      {isLoading && <LiveTrainingPageSkeleton />}
-
-      {!isLoading && liveTraining && visibleActions && (
+      {liveTraining && visibleActions && (
         <div className="grid gap-5">
           <LiveTrainingSessionStage
             liveTraining={liveTraining}

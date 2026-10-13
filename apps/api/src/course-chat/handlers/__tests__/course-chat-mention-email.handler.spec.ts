@@ -45,6 +45,8 @@ describe("CourseChatMentionEmailHandler", () => {
       } as never,
       tenantRunner as never,
       dbAdmin as never,
+      {} as never,
+      {} as never,
     );
 
     await handler.handle(

@@ -1,0 +1,15 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": "src/mcp/.*\\.e2e-spec\\.ts$",
+  "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+  "setupFiles": ["<rootDir>/test/mcp-http-environment.ts", "<rootDir>/test/jest-console-setup.ts"],
+  "moduleNameMapper": { "^src/(.*)$": "<rootDir>/src/$1" },
+  "globalSetup": "<rootDir>/test/mcp-http-global-setup.ts",
+  "setupFilesAfterEnv": ["<rootDir>/test/jest-e2e-setup.ts"],
+  "verbose": true,
+  "testTimeout": 60000,
+  "maxWorkers": 1,
+  "forceExit": true
+}

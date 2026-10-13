@@ -39,7 +39,7 @@ A user chooses the appropriate auth path from the login area. For email/password
 
 For registration, Mentingo checks tenant settings first. If registration is invite-only, the registration page explains that an invitation is required and offers a link to sign in. If SSO is enforced or registration is invite-only, the API blocks self-registration. Otherwise, the registration flow validates identity fields, password rules, language, and tenant registration-form answers before creating the account and signing the user in.
 
-For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.
+For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. A magic-link request expires from the time it was made; if the account email changes, a pending link is not sent to the former address and an already issued automation link cannot be used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.
 
 When an organization provides an account with a temporary password, Mentingo takes the user to a dedicated password-change screen after sign-in and MFA. The rest of the platform remains unavailable until the user saves a compliant replacement password or logs out. A password reset also fulfils this requirement, so users can recover safely without administrator intervention.
 
@@ -58,6 +58,8 @@ When an organization provides an account with a temporary password, Mentingo tak
 Web E2E tests cover sign-in/sign-out, auth-page navigation, invalid credentials, public registration validation, the invite-only registration explanation and login link, invite password creation, password recovery, magic-link login, and MFA setup/verification.
 
 Backend E2E tests cover registration validation, duplicate accounts, language behavior, registration checkbox answers, login cookies, invalid credentials, login rate limiting, logout cookie clearing, refresh tokens, current-user data, password reset, create-password flows, magic-link token hashing and consumption, and MFA issuer behavior.
+
+Focused API service tests cover expiry from the original request time and cancellation when the account or queued recipient email changes. A backend E2E regression covers rejection of an automation-issued link after an account email change; it has not been run against the shared development database.
 
 Password-change enforcement is covered by API E2E assertions that a flagged user cannot use normal protected endpoints, can change their own password, and regains access after the change.
 

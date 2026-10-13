@@ -10,8 +10,11 @@ export function useUpdateEmailTemplateBaseLanguage() {
 
   return useMutation({
     mutationFn: async ({ id, body }: UpdateEmailTemplateBaseLanguageVariables) => {
-      await ApiClient.api.emailTemplateControllerUpdateBaseLanguage(id, body);
-      return (await ApiClient.api.emailTemplateControllerGetEmailTemplate(id)).data.data;
+      await ApiClient.api.emailTemplateManagementControllerUpdateEmailTemplateBaseLanguage(
+        id,
+        body,
+      );
+      return (await ApiClient.api.emailTemplateManagementControllerGetEmailTemplate(id)).data.data;
     },
     ...feedback,
   });

@@ -14,14 +14,15 @@ test("admin opens the system catalog from Manage and cannot edit defaults", asyn
     await openEmailCatalogFromNavigationFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await page
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(EMAIL_TEMPLATE_DATA.event))
-      .getByRole("link")
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(EMAIL_TEMPLATE_DATA.builtInTemplateKey))
       .click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toBeDisabled();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.NAME)).toBeDisabled();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toHaveCount(0);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toHaveCount(0);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toHaveCount(0);
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)).toHaveCount(0);
+    await page.keyboard.press("Escape");
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PALETTE_BLOCK("text"))).toBeDisabled();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.EDIT_BLOCK).first()).toBeDisabled();
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.PREVIEW).click();
@@ -36,13 +37,13 @@ for (const role of [USER_ROLE.student, USER_ROLE.contentCreator]) {
     await withReadonlyPage(role, async ({ page }) => {
       for (const route of [
         EMAIL_TEMPLATE_DATA.listPath,
-        `${EMAIL_TEMPLATE_DATA.listPath}/defaults/${EMAIL_TEMPLATE_DATA.event}`,
+        `${EMAIL_TEMPLATE_DATA.listPath}/defaults/${EMAIL_TEMPLATE_DATA.builtInTemplateKey}`,
       ]) {
         await page.goto(route);
         await expect(page).not.toHaveURL(new RegExp(`${route}$`));
         await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toHaveCount(0);
         await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.EDITOR)).toHaveCount(0);
-        await expect(page.getByTestId(NAVIGATION_HANDLES.EMAIL_TEMPLATES_LINK)).toHaveCount(0);
+        await expect(page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK)).toHaveCount(0);
       }
     });
   });

@@ -27,8 +27,8 @@ test("course table of contents shows lesson types on icon hover, not below title
       await page.getByTestId(`${prefix}-chapter`).click();
 
       const lessonLink = page.getByRole("link", { name: new RegExp(lessons.firstLesson.title) });
-      await expect(lessonLink).toHaveText(lessons.firstLesson.title);
       await expect(lessonLink.getByTestId("lesson-title")).toHaveText(lessons.firstLesson.title);
+      await expect(lessonLink.getByText("Content", { exact: true })).toHaveCount(0);
 
       await lessonLink.getByRole("img", { name: "Content" }).hover();
       await expect(page.getByRole("tooltip")).toHaveText("Content");

@@ -35,11 +35,11 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { CourseGenerationComposerCenterContent } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerCenterContent";
 import { AiMentorPracticeMessages } from "~/modules/AiMentorPractice/components/AiMentorPracticeMessages";
 import { createAiMentorChatTransport } from "~/modules/Courses/Lesson/AiMentorLesson/aiMentorChatTransport";
 import { LessonComposerCenterContent } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerCenterContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { VoiceTextComposer } from "~/modules/Voice/components/VoiceTextComposer";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../../../../e2e/data/ai-mentor-practice/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
@@ -141,7 +141,7 @@ function ScenarioComposer({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <CourseGenerationComposerCenterContent
+        <VoiceTextComposer
           isVoiceMode={false}
           input={scenario}
           currentPlaceholder={currentPlaceholder}

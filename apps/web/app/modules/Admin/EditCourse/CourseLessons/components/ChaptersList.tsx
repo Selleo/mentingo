@@ -28,6 +28,11 @@ import {
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { cn } from "~/lib/utils";
 import { LessonCardList } from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCardList";
+import { REVIEW_CHANGE_KIND } from "~/modules/CourseAuthoring/review/curriculumReview.constants";
+import {
+  ReviewCardMarker,
+  reviewAccentClass,
+} from "~/modules/CourseAuthoring/review/ReviewChangeBadge";
 
 import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../../EditCourse.types";
@@ -41,6 +46,7 @@ import {
 import type { Chapter, Lesson } from "../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type React from "react";
+import type { CurriculumReviewDecorations } from "~/modules/CourseAuthoring/review/curriculumReview.types";
 
 const getDisabledFreemiumTooltipKey = (reason: ChapterFreemiumDisabledReason | null) => {
   if (reason === CHAPTER_FREEMIUM_DISABLED_REASON.COURSE_LOCKED) {
@@ -59,6 +65,7 @@ const getDisabledFreemiumTooltipKey = (reason: ChapterFreemiumDisabledReason | n
 };
 
 interface ChapterCardProps {
+  chapterNumber: number;
   chapter: Chapter;
   baseLanguageChapter?: Chapter;
   isOpen: boolean;
@@ -73,11 +80,16 @@ interface ChapterCardProps {
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
   isCourseGenerationLocked: boolean;
+  isReadOnlyPreview?: boolean;
+  onPreviewLessonSelect?: (chapter: Chapter, lesson: Lesson) => void;
+  isPreviewLessonReady?: (lesson: Lesson) => boolean;
+  review?: CurriculumReviewDecorations;
   coursePriceInCents?: number;
   unregisteredUserCoursesAccessibility: boolean;
 }
 
 const ChapterCard = ({
+  chapterNumber,
   chapter,
   baseLanguageChapter,
   isOpen,
@@ -92,9 +104,15 @@ const ChapterCard = ({
   language,
   baseLanguage,
   isCourseGenerationLocked,
+  isReadOnlyPreview,
+  onPreviewLessonSelect,
+  isPreviewLessonReady,
+  review,
   coursePriceInCents,
   unregisteredUserCoursesAccessibility,
 }: ChapterCardProps) => {
+  const reviewMarker = review?.chapter(chapter.id);
+  const isRemovedInReview = reviewMarker?.kind === REVIEW_CHANGE_KIND.REMOVED;
   const { id: courseId } = useParams();
 
   const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
@@ -108,7 +126,7 @@ const ChapterCard = ({
   const isBaseLanguage = language === baseLanguage;
   const {
     isPaidCourse,
-    isDisabled: isFreemiumSwitchDisabled,
+    isDisabled: isFreemiumSwitchDisabledByCourse,
     disabledReason,
   } = getChapterFreemiumAccessState({
     chapter,
@@ -116,6 +134,7 @@ const ChapterCard = ({
     isCourseGenerationLocked,
     unregisteredUserCoursesAccessibility,
   });
+  const isFreemiumSwitchDisabled = Boolean(isReadOnlyPreview) || isFreemiumSwitchDisabledByCourse;
 
   const freemiumCopyKey = isPaidCourse ? "freemium" : "public";
 
@@ -125,9 +144,15 @@ const ChapterCard = ({
   );
 
   const disabledFreemiumTooltip = useMemo(() => {
+    if (isReadOnlyPreview) {
+      return t("courseAuthoring.livePreview.readOnly", {
+        defaultValue: "Draft preview is read-only until you apply it.",
+      });
+    }
+
     const tooltipKey = getDisabledFreemiumTooltipKey(disabledReason);
     return tooltipKey ? t(tooltipKey) : null;
-  }, [disabledReason, t]);
+  }, [disabledReason, isReadOnlyPreview, t]);
 
   const addLessonLogic = useCallback(() => {
     if (isCourseGenerationLocked) return;
@@ -160,8 +185,45 @@ const ChapterCard = ({
     [openLeaveModal, addLessonLogic, isCurrentFormDirty, isBaseLanguage, isCourseGenerationLocked],
   );
 
+  const baseLanguageAddLessonButton = isReadOnlyPreview ? (
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Button
+              data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
+              variant="outline"
+              onClick={handleAddLessonClick}
+              disabled
+            >
+              <Icon name="Plus" className="mr-2 text-primary-800" />
+              {t("adminCourseView.curriculum.lesson.button.addLesson")}
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent variant="black">{disabledFreemiumTooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    <Button
+      data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
+      variant="outline"
+      onClick={handleAddLessonClick}
+      disabled={!isBaseLanguage || isCourseGenerationLocked}
+    >
+      <Icon name="Plus" className="mr-2 text-primary-800" />
+      {t("adminCourseView.curriculum.lesson.button.addLesson")}
+    </Button>
+  );
+
   const onClickChapterCard = useCallback(() => {
-    if (isCourseGenerationLocked) return;
+    if (isCourseGenerationLocked && !isReadOnlyPreview) return;
+
+    if (isReadOnlyPreview) {
+      setSelectedChapter(chapter);
+      setSelectedLesson(null);
+      return;
+    }
 
     if (isCurrentFormDirty) {
       setPendingChapter(chapter);
@@ -182,6 +244,7 @@ const ChapterCard = ({
     setIsLeavingContent,
     setSelectedLesson,
     isCourseGenerationLocked,
+    isReadOnlyPreview,
   ]);
 
   const onAccordionClick = useCallback(
@@ -251,9 +314,13 @@ const ChapterCard = ({
     <AccordionItem key={chapter.id} data-chapter-id={chapter.id} value={chapter.id} className="p-0">
       <Card
         data-testid={CURRICULUM_HANDLES.chapterCard(chapter.id)}
-        className={cn("mb-4 flex h-full border p-4", {
-          "border-primary-500": isOpen || selectedChapter?.id === chapter.id,
-        })}
+        className={cn(
+          "mb-4 flex h-full border p-4",
+          {
+            "border-primary-500": isOpen || selectedChapter?.id === chapter.id,
+          },
+          reviewAccentClass(reviewMarker?.kind),
+        )}
         onClick={onClickChapterCard}
       >
         <div className="flex w-full">
@@ -263,17 +330,24 @@ const ChapterCard = ({
               <hgroup className="flex w-full flex-col-reverse">
                 <h3
                   className={cn("body-base-md break-all", {
-                    "text-neutral-500": isUsingBaseLanguageTitle,
-                    "text-neutral-950": !isUsingBaseLanguageTitle,
+                    "text-neutral-500": isUsingBaseLanguageTitle || isRemovedInReview,
+                    "text-neutral-950": !isUsingBaseLanguageTitle && !isRemovedInReview,
+                    "line-through": isRemovedInReview,
                   })}
                 >
                   {displayTitle}
+                  {reviewMarker?.previousTitle && (
+                    <span className="body-sm ml-2 text-neutral-500 line-through">
+                      {reviewMarker.previousTitle}
+                    </span>
+                  )}
                 </h3>
                 <div className="body-sm-md text-neutral-800">
-                  {t("adminCourseView.curriculum.other.chapter")} {chapter.displayOrder} •{" "}
+                  {t("adminCourseView.curriculum.other.chapter")} {chapterNumber} •{" "}
                   {t("adminCourseView.curriculum.other.lessonNumber")} {chapter.lessons.length}
                 </div>
               </hgroup>
+              <ReviewCardMarker marker={reviewMarker} />
               <AccordionTrigger
                 className="cursor-pointer p-2"
                 data-testid={CURRICULUM_HANDLES.chapterAccordion(chapter.id)}
@@ -293,6 +367,10 @@ const ChapterCard = ({
                 chapter={chapter}
                 baseLanguageChapter={baseLanguageChapter}
                 isCourseGenerationLocked={isCourseGenerationLocked}
+                isReadOnlyPreview={isReadOnlyPreview}
+                onPreviewLessonSelect={onPreviewLessonSelect}
+                isPreviewLessonReady={isPreviewLessonReady}
+                review={review}
               />
             </AccordionContent>
             <div className="mt-3 flex items-center justify-between">
@@ -328,15 +406,7 @@ const ChapterCard = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <Button
-                    data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
-                    variant="outline"
-                    onClick={handleAddLessonClick}
-                    disabled={!isBaseLanguage || isCourseGenerationLocked}
-                  >
-                    <Icon name="Plus" className="mr-2 text-primary-800" />
-                    {t("adminCourseView.curriculum.lesson.button.addLesson")}
-                  </Button>
+                  baseLanguageAddLessonButton
                 )}
               </div>
 
@@ -419,6 +489,10 @@ type ChaptersListProps = {
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
   isCourseGenerationLocked: boolean;
+  isReadOnlyPreview?: boolean;
+  onPreviewLessonSelect?: (chapter: Chapter, lesson: Lesson) => void;
+  isPreviewLessonReady?: (lesson: Lesson) => boolean;
+  review?: CurriculumReviewDecorations;
   coursePriceInCents?: number;
   unregisteredUserCoursesAccessibility: boolean;
 };
@@ -459,6 +533,10 @@ const ChaptersList = ({
   baseLanguage,
   language,
   isCourseGenerationLocked,
+  isReadOnlyPreview,
+  onPreviewLessonSelect,
+  isPreviewLessonReady,
+  review,
   coursePriceInCents,
   unregisteredUserCoursesAccessibility,
 }: ChaptersListProps) => {
@@ -471,6 +549,11 @@ const ChaptersList = ({
   useEffect(() => {
     setChapterList(chapters);
   }, [chapters]);
+
+  const reviewOpenChapterId = review?.openChapterId;
+  useEffect(() => {
+    if (reviewOpenChapterId) setOpenItem(reviewOpenChapterId);
+  }, [reviewOpenChapterId]);
 
   useEffect(() => {
     if (canRefetchChapterList) {
@@ -533,6 +616,7 @@ const ChaptersList = ({
           <SortableList.Item id={chapter.sortableId} data-id={chapter.id}>
             <ChapterCard
               key={chapter.sortableId}
+              chapterNumber={chapterList.findIndex((item) => item.id === chapter.id) + 1}
               chapter={chapter}
               baseLanguageChapter={baseLanguageChapters?.find(({ id }) => id === chapter.id)}
               isOpen={openItem === chapter.sortableId}
@@ -546,16 +630,24 @@ const ChaptersList = ({
               language={language}
               baseLanguage={baseLanguage}
               isCourseGenerationLocked={isCourseGenerationLocked}
+              isReadOnlyPreview={isReadOnlyPreview}
+              onPreviewLessonSelect={onPreviewLessonSelect}
+              isPreviewLessonReady={isPreviewLessonReady}
+              review={review}
               coursePriceInCents={coursePriceInCents}
               unregisteredUserCoursesAccessibility={unregisteredUserCoursesAccessibility}
               dragTrigger={
-                <SortableList.DragHandle>
-                  <Icon
-                    data-testid={CURRICULUM_HANDLES.chapterDragHandle(chapter.id)}
-                    name="DragAndDropIcon"
-                    className="cursor-move"
-                  />
-                </SortableList.DragHandle>
+                isReadOnlyPreview ? (
+                  <span className="size-6 shrink-0" aria-hidden="true" />
+                ) : (
+                  <SortableList.DragHandle>
+                    <Icon
+                      data-testid={CURRICULUM_HANDLES.chapterDragHandle(chapter.id)}
+                      name="DragAndDropIcon"
+                      className="cursor-move"
+                    />
+                  </SortableList.DragHandle>
+                )
               }
             />
           </SortableList.Item>

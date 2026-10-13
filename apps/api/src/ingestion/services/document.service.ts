@@ -29,6 +29,18 @@ export class DocumentService {
     });
   }
 
+  async replaceCourseAuthoringMentorContext(
+    documentIds: UUIDType[],
+    aiMentorLessonId: UUIDType,
+    tenantId: UUIDType,
+  ) {
+    await this.documentRepository.replaceCourseAuthoringMentorContext({
+      documentIds,
+      aiMentorLessonId,
+      tenantId,
+    });
+  }
+
   async createDocument(file: Express.Multer.File, sha256: string, trx?: DatabasePg) {
     const { mimetype, originalname, size } = file;
 
