@@ -4,6 +4,7 @@ import {
   LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
+import type { TSchema } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
@@ -18,7 +19,7 @@ import {
   updateLiveTrainingMaxParallelSessionsSchema,
 } from "src/settings/schemas/update-settings.schema";
 
-function strict<T extends import("@sinclair/typebox").TSchema>(schema: T): T {
+function strict<T extends TSchema>(schema: T): T {
   function clone(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(clone);
     if (!value || typeof value !== "object") return value;
