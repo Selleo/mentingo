@@ -1,7 +1,9 @@
+import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { DB } from "src/storage/db/db.providers";
 import { courses, groups, learningPaths, users } from "src/storage/schema";
 
 import { REPORT_LIMITS } from "../constants/reports.constants";
@@ -20,9 +22,10 @@ import type { ReportOptions } from "../schemas/reports.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 
+@Injectable()
 export class ReportsQueryOptionsRepository {
   constructor(
-    private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 

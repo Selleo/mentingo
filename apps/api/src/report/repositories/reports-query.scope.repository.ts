@@ -1,9 +1,10 @@
-import { ForbiddenException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { and, asc, eq, exists, inArray, or, sql } from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
+import { DB } from "src/storage/db/db.providers";
 import {
   courses,
   groupManagerGroups,
@@ -37,8 +38,9 @@ import type { ReportDefinition } from "../schemas/reports.schema";
 import type { SQL } from "drizzle-orm";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
+@Injectable()
 export class ReportsQueryScopeRepository {
-  constructor(private readonly db: DatabasePg) {}
+  constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   buildSavedQueryAvailabilityPredicate(queryJson: SQL, access: ReportsAccess): SQL<boolean> {
     return buildSavedQueryAvailability(this.db, queryJson, access);

@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { DB } from "src/storage/db/db.providers";
 
 import { executeReportQuery } from "./reports-query.executor";
 import { ReportsQueryOptionsRepository } from "./reports-query.options.repository";
@@ -19,16 +20,12 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ReportsQueryRepository {
-  private readonly reportsQueryScopeRepository: ReportsQueryScopeRepository;
-  private readonly reportsQueryOptionsRepository: ReportsQueryOptionsRepository;
-
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
-  ) {
-    this.reportsQueryScopeRepository = new ReportsQueryScopeRepository(db);
-    this.reportsQueryOptionsRepository = new ReportsQueryOptionsRepository(db, localizationService);
-  }
+    private readonly reportsQueryScopeRepository: ReportsQueryScopeRepository,
+    private readonly reportsQueryOptionsRepository: ReportsQueryOptionsRepository,
+  ) {}
 
   async findAccessScope(
     actor: CurrentUserType,

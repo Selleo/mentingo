@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, inArray, isNotNull, isNull, lt, lte, or } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { DB } from "src/storage/db/db.providers";
 import { reportsExports, users } from "src/storage/schema";
 
 import { REPORT_EXPORT_STATUS, REPORT_FAILURE_CODE } from "../constants/reports.constants";
@@ -24,7 +25,7 @@ export interface ReportExportCompletion {
 
 @Injectable()
 export class ReportsExportsRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async createPending(input: NewReportExportRecord): Promise<ReportExportRecord> {
     const [record] = await this.db

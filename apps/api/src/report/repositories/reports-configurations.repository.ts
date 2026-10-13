@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, desc, eq, getTableColumns, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { DB } from "src/storage/db/db.providers";
 import { reportsConfigurations } from "src/storage/schema";
 
 import {
@@ -26,11 +27,10 @@ export type ReportConfigurationListRecord = ReportConfigurationRecord &
 
 @Injectable()
 export class ReportsConfigurationsRepository {
-  private readonly reportsQueryScopeRepository: ReportsQueryScopeRepository;
-
-  constructor(@Inject("DB") private readonly db: DatabasePg) {
-    this.reportsQueryScopeRepository = new ReportsQueryScopeRepository(db);
-  }
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly reportsQueryScopeRepository: ReportsQueryScopeRepository,
+  ) {}
 
   findVisibleWithAvailability(
     tenantId: UUIDType,

@@ -26,12 +26,9 @@ import type { DatabasePg } from "src/common";
 /** One statement checks every saved configuration against the actor's current scope. */
 export function buildSavedQueryAvailability(
   db: DatabasePg,
-  storedQuery: SQL,
+  query: SQL,
   access: ReportsAccess,
 ): SQL<boolean> {
-  // Older writes can contain JSON encoded as a JSONB string by the Postgres driver.
-  const query = sql`CASE WHEN jsonb_typeof(${storedQuery}) = 'string'
-    THEN (${storedQuery} #>> '{}')::jsonb ELSE ${storedQuery} END`;
   const scope = buildAccessibleReferences(db, access);
   const conditions = readFilterConditions(query);
   const groupReferences = sql`(

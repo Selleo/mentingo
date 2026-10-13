@@ -16,7 +16,9 @@ import { ReportsQueryService } from "./reports-query.service";
 import { ReportRepository } from "./repositories/report.repository";
 import { ReportsConfigurationsRepository } from "./repositories/reports-configurations.repository";
 import { ReportsExportsRepository } from "./repositories/reports-exports.repository";
+import { ReportsQueryOptionsRepository } from "./repositories/reports-query.options.repository";
 import { ReportsQueryRepository } from "./repositories/reports-query.repository";
+import { ReportsQueryScopeRepository } from "./repositories/reports-query.scope.repository";
 
 @Module({
   imports: [LocalizationModule, PermissionsModule, QueueModule, S3Module],
@@ -25,6 +27,8 @@ import { ReportsQueryRepository } from "./repositories/reports-query.repository"
     ReportRepository,
     ReportService,
     ReportsQueryRepository,
+    ReportsQueryOptionsRepository,
+    ReportsQueryScopeRepository,
     ReportsQueryService,
     ReportsConfigurationsRepository,
     ReportsConfigurationsService,
