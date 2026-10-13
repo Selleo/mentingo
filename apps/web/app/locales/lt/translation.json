@@ -6287,6 +6287,7 @@
       "unsupported": "Kai kurių išsaugotų pakeitimų nepavyksta parodyti. Įkelkite naujausią versiją.",
       "earlierRequests": "Ankstesnės užklausos ({{count}})",
       "webSearchPrompt": "Ieškoti internete?",
+      "deepResearchPrompt": "Įjungti išsamų tyrimą?",
       "allow": "Leisti",
       "skip": "Praleisti",
       "deny": "Neleisti",

@@ -6304,6 +6304,7 @@
       "unsupported": "Some saved updates cannot be displayed. Refresh to load the latest version.",
       "earlierRequests": "Earlier requests ({{count}})",
       "webSearchPrompt": "Search the web?",
+      "deepResearchPrompt": "Enable deep research?",
       "allow": "Allow",
       "skip": "Skip",
       "deny": "Deny",

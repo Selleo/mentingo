@@ -6279,6 +6279,7 @@
       "unsupported": "Einige gespeicherte Änderungen können nicht angezeigt werden. Lade die neuesten Daten.",
       "earlierRequests": "Frühere Anfragen ({{count}})",
       "webSearchPrompt": "Im Web suchen?",
+      "deepResearchPrompt": "Vertiefte Recherche aktivieren?",
       "allow": "Erlauben",
       "skip": "Überspringen",
       "deny": "Ablehnen",

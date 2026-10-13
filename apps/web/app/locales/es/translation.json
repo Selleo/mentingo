@@ -6235,6 +6235,7 @@
       "unsupported": "Algunos cambios guardados no se pueden mostrar. Actualiza para cargar la versión más reciente.",
       "earlierRequests": "Solicitudes anteriores ({{count}})",
       "webSearchPrompt": "¿Buscar en la web?",
+      "deepResearchPrompt": "¿Activar la investigación profunda?",
       "allow": "Permitir",
       "skip": "Omitir",
       "deny": "Denegar",

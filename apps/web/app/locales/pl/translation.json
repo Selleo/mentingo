@@ -6347,6 +6347,7 @@
       "unsupported": "Niektórych zapisanych zmian nie można wyświetlić. Odśwież, aby pobrać najnowszą wersję.",
       "earlierRequests": "Wcześniejsze prośby ({{count}})",
       "webSearchPrompt": "Szukać w internecie?",
+      "deepResearchPrompt": "Włączyć pogłębiony research?",
       "allow": "Zezwól",
       "skip": "Pomiń",
       "deny": "Odmów",

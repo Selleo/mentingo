@@ -6291,6 +6291,7 @@
       "unsupported": "Některé uložené změny nelze zobrazit. Načtěte nejnovější verzi.",
       "earlierRequests": "Předchozí požadavky ({{count}})",
       "webSearchPrompt": "Prohledat web?",
+      "deepResearchPrompt": "Povolit hloubkový výzkum?",
       "allow": "Povolit",
       "skip": "Přeskočit",
       "deny": "Odmítnout",

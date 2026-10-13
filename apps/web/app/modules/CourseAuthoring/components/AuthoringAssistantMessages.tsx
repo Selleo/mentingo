@@ -244,7 +244,12 @@ const AuthoringQuestionCard = ({
     );
   }
 
-  const prompt = capability ? t("courseAuthoring.conversation.webSearchPrompt") : question.prompt;
+  let prompt = question.prompt;
+  if (question.capability === "deep_research") {
+    prompt = t("courseAuthoring.conversation.deepResearchPrompt");
+  } else if (question.capability === "web_search") {
+    prompt = t("courseAuthoring.conversation.webSearchPrompt");
+  }
 
   if (capability) {
     return (

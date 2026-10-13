@@ -6028,6 +6028,7 @@
       "unsupported": "Certains changements enregistrés ne peuvent pas être affichés. Actualisez pour charger la dernière version.",
       "earlierRequests": "Demandes précédentes ({{count}})",
       "webSearchPrompt": "Rechercher sur le Web ?",
+      "deepResearchPrompt": "Activer la recherche approfondie ?",
       "allow": "Autoriser",
       "skip": "Ignorer",
       "deny": "Refuser",
