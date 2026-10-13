@@ -7132,6 +7132,7 @@
             "required": false,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -16197,6 +16198,271 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/report/query": {
+      "post": {
+        "operationId": "ReportController_runReport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunReportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report/options": {
+      "get": {
+        "operationId": "ReportController_getReportOptions",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReportOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report/configurations": {
+      "get": {
+        "operationId": "ReportController_listReportConfigurations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListReportConfigurationsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ReportController_createReportConfiguration",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReportConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report/configurations/{id}": {
+      "patch": {
+        "operationId": "ReportController_updateReportConfiguration",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReportConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateReportConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ReportController_deleteReportConfiguration",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/report/exports": {
+      "post": {
+        "operationId": "ReportController_createReportExport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportExportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReportExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report/exports/{id}": {
+      "get": {
+        "operationId": "ReportController_getReportExport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReportExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report/exports/{id}/download": {
+      "get": {
+        "operationId": "ReportController_downloadReportExport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -155617,6 +155883,3842 @@
               "users",
               "categories",
               "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RunReportBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "view": {
+            "anyOf": [
+              {
+                "const": "organisation",
+                "type": "string"
+              },
+              {
+                "const": "developmentPaths",
+                "type": "string"
+              },
+              {
+                "const": "course",
+                "type": "string"
+              },
+              {
+                "const": "learner",
+                "type": "string"
+              }
+            ]
+          },
+          "timezone": {
+            "minLength": 1,
+            "maxLength": 100,
+            "type": "string"
+          },
+          "groupIds": {
+            "maxItems": 100,
+            "default": [],
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "subjectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "filter": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "match": {
+                "anyOf": [
+                  {
+                    "const": "all",
+                    "type": "string"
+                  },
+                  {
+                    "const": "any",
+                    "type": "string"
+                  }
+                ]
+              },
+              "rules": {
+                "minItems": 1,
+                "maxItems": 30,
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "field": {
+                          "anyOf": [
+                            {
+                              "const": "groupId",
+                              "type": "string"
+                            },
+                            {
+                              "const": "learner",
+                              "type": "string"
+                            },
+                            {
+                              "const": "courseId",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pathId",
+                              "type": "string"
+                            },
+                            {
+                              "const": "status",
+                              "type": "string"
+                            },
+                            {
+                              "const": "progress",
+                              "type": "string"
+                            },
+                            {
+                              "const": "enrolledAt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "completedAt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "score",
+                              "type": "string"
+                            },
+                            {
+                              "const": "attempts",
+                              "type": "string"
+                            },
+                            {
+                              "const": "certificate",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lastActivity",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "operator": {
+                          "anyOf": [
+                            {
+                              "const": "eq",
+                              "type": "string"
+                            },
+                            {
+                              "const": "neq",
+                              "type": "string"
+                            },
+                            {
+                              "const": "in",
+                              "type": "string"
+                            },
+                            {
+                              "const": "contains",
+                              "type": "string"
+                            },
+                            {
+                              "const": "gte",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lte",
+                              "type": "string"
+                            },
+                            {
+                              "const": "between",
+                              "type": "string"
+                            },
+                            {
+                              "const": "isEmpty",
+                              "type": "string"
+                            },
+                            {
+                              "const": "isNotEmpty",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "maxLength": 200,
+                              "type": "string"
+                            },
+                            {
+                              "minimum": 0,
+                              "maximum": 1000000,
+                              "type": "number"
+                            },
+                            {
+                              "minItems": 1,
+                              "maxItems": 30,
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "maxLength": 200,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "minimum": 0,
+                                    "maximum": 1000000,
+                                    "type": "number"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "field",
+                        "operator"
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "match": {
+                          "anyOf": [
+                            {
+                              "const": "all",
+                              "type": "string"
+                            },
+                            {
+                              "const": "any",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "rules": {
+                          "minItems": 1,
+                          "maxItems": 30,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "anyOf": [
+                                  {
+                                    "const": "groupId",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "learner",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "courseId",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pathId",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "status",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "progress",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "enrolledAt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "completedAt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "score",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "attempts",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "certificate",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lastActivity",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "operator": {
+                                "anyOf": [
+                                  {
+                                    "const": "eq",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "neq",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "in",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "contains",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "gte",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lte",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "between",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "isEmpty",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "isNotEmpty",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "value": {
+                                "anyOf": [
+                                  {
+                                    "maxLength": 200,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "minimum": 0,
+                                    "maximum": 1000000,
+                                    "type": "number"
+                                  },
+                                  {
+                                    "minItems": 1,
+                                    "maxItems": 30,
+                                    "type": "array",
+                                    "items": {
+                                      "anyOf": [
+                                        {
+                                          "maxLength": 200,
+                                          "type": "string"
+                                        },
+                                        {
+                                          "minimum": 0,
+                                          "maximum": 1000000,
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "operator"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "match",
+                        "rules"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "match",
+              "rules"
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "page": {
+            "minimum": 1,
+            "default": 1,
+            "type": "integer"
+          },
+          "pageSize": {
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "view",
+          "timezone",
+          "groupIds",
+          "language",
+          "page",
+          "pageSize"
+        ]
+      },
+      "RunReportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "learner": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email"
+                      ]
+                    },
+                    "course": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "title"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "path": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "title"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "notStarted",
+                          "type": "string"
+                        },
+                        {
+                          "const": "inProgress",
+                          "type": "string"
+                        },
+                        {
+                          "const": "completed",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "progress": {
+                      "anyOf": [
+                        {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "score": {
+                      "anyOf": [
+                        {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "attempts": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "certificate": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "anyOf": [
+                            {
+                              "const": "active",
+                              "type": "string"
+                            },
+                            {
+                              "const": "expired",
+                              "type": "string"
+                            },
+                            {
+                              "const": "revoked",
+                              "type": "string"
+                            },
+                            {
+                              "const": "notEarned",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "issuedAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "issuedAt"
+                      ]
+                    },
+                    "enrolledAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lastActivityAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "groupIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    },
+                    "pathCourses": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "courseId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "courseTitle": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "notStarted",
+                                "type": "string"
+                              },
+                              {
+                                "const": "inProgress",
+                                "type": "string"
+                              },
+                              {
+                                "const": "completed",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "progress": {
+                            "anyOf": [
+                              {
+                                "minimum": 0,
+                                "maximum": 100,
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "enrolledAt": {
+                            "anyOf": [
+                              {
+                                "format": "date-time",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "completedAt": {
+                            "anyOf": [
+                              {
+                                "format": "date-time",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "courseId",
+                          "courseTitle",
+                          "status",
+                          "progress",
+                          "enrolledAt",
+                          "completedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "learner",
+                    "course",
+                    "path",
+                    "status",
+                    "progress",
+                    "score",
+                    "attempts",
+                    "certificate",
+                    "enrolledAt",
+                    "completedAt",
+                    "lastActivityAt",
+                    "groupIds",
+                    "pathCourses"
+                  ]
+                }
+              },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "learners": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "platformCourses": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "activeLearners30d": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "courseEnrollments": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "courseCompletions": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "courseCompletionRate": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "averageProgress": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "averageScore": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "activeCertificates": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "certificatesIssued": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "developmentPathsCompleted": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "learners",
+                  "platformCourses",
+                  "activeLearners30d",
+                  "courseEnrollments",
+                  "courseCompletions",
+                  "courseCompletionRate",
+                  "averageProgress",
+                  "averageScore",
+                  "activeCertificates",
+                  "certificatesIssued",
+                  "developmentPathsCompleted"
+                ]
+              },
+              "breakdowns": {
+                "type": "object",
+                "properties": {
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "learners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseEnrollments": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCompletions": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "completionRate": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "learners",
+                        "courseEnrollments",
+                        "courseCompletions",
+                        "completionRate"
+                      ]
+                    }
+                  },
+                  "courses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "learners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseEnrollments": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCompletions": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "completionRate": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "learners",
+                        "courseEnrollments",
+                        "courseCompletions",
+                        "completionRate"
+                      ]
+                    }
+                  },
+                  "paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "learners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseEnrollments": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCompletions": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "completionRate": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "learners",
+                        "courseEnrollments",
+                        "courseCompletions",
+                        "completionRate"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "groups",
+                  "courses",
+                  "paths"
+                ]
+              },
+              "total": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "page": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "pageSize": {
+                "minimum": 1,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "capturedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "rows",
+              "metrics",
+              "breakdowns",
+              "total",
+              "page",
+              "pageSize",
+              "capturedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetReportOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "learners": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "canManageShared": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "groups",
+              "learners",
+              "courses",
+              "paths",
+              "canManageShared"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListReportConfigurationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "visibility": {
+                  "anyOf": [
+                    {
+                      "const": "personal",
+                      "type": "string"
+                    },
+                    {
+                      "const": "shared",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "query": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "view": {
+                      "anyOf": [
+                        {
+                          "const": "organisation",
+                          "type": "string"
+                        },
+                        {
+                          "const": "developmentPaths",
+                          "type": "string"
+                        },
+                        {
+                          "const": "course",
+                          "type": "string"
+                        },
+                        {
+                          "const": "learner",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "timezone": {
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "type": "string"
+                    },
+                    "groupIds": {
+                      "maxItems": 100,
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "filter": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "match": {
+                          "anyOf": [
+                            {
+                              "const": "all",
+                              "type": "string"
+                            },
+                            {
+                              "const": "any",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "rules": {
+                          "minItems": 1,
+                          "maxItems": 30,
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "groupId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "learner",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "courseId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pathId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "status",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "progress",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "enrolledAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "completedAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "score",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "attempts",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "certificate",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lastActivity",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "operator": {
+                                    "anyOf": [
+                                      {
+                                        "const": "eq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "neq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "in",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "gte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isEmpty",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isNotEmpty",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "value": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      },
+                                      {
+                                        "minItems": 1,
+                                        "maxItems": 30,
+                                        "type": "array",
+                                        "items": {
+                                          "anyOf": [
+                                            {
+                                              "maxLength": 200,
+                                              "type": "string"
+                                            },
+                                            {
+                                              "minimum": 0,
+                                              "maximum": 1000000,
+                                              "type": "number"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "operator"
+                                ]
+                              },
+                              {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "match": {
+                                    "anyOf": [
+                                      {
+                                        "const": "all",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "any",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "rules": {
+                                    "minItems": 1,
+                                    "maxItems": 30,
+                                    "type": "array",
+                                    "items": {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "field": {
+                                          "anyOf": [
+                                            {
+                                              "const": "groupId",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "courseId",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "pathId",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "status",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "progress",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "enrolledAt",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "completedAt",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "score",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "attempts",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "certificate",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "lastActivity",
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        "operator": {
+                                          "anyOf": [
+                                            {
+                                              "const": "eq",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "neq",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "in",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "contains",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "gte",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "lte",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "between",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "isEmpty",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "isNotEmpty",
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        "value": {
+                                          "anyOf": [
+                                            {
+                                              "maxLength": 200,
+                                              "type": "string"
+                                            },
+                                            {
+                                              "minimum": 0,
+                                              "maximum": 1000000,
+                                              "type": "number"
+                                            },
+                                            {
+                                              "minItems": 1,
+                                              "maxItems": 30,
+                                              "type": "array",
+                                              "items": {
+                                                "anyOf": [
+                                                  {
+                                                    "maxLength": 200,
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "minimum": 0,
+                                                    "maximum": 1000000,
+                                                    "type": "number"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "field",
+                                        "operator"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "match",
+                                  "rules"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "match",
+                        "rules"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "view",
+                    "timezone",
+                    "groupIds"
+                  ]
+                },
+                "ownerId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "isAvailable": {
+                  "type": "boolean"
+                },
+                "failureCode": {
+                  "anyOf": [
+                    {
+                      "const": "reports.errors.scopeDenied",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "visibility",
+                "query",
+                "ownerId",
+                "isAvailable",
+                "failureCode",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateReportConfigurationBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 120,
+            "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "personal",
+                "type": "string"
+              },
+              {
+                "const": "shared",
+                "type": "string"
+              }
+            ]
+          },
+          "query": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "view": {
+                "anyOf": [
+                  {
+                    "const": "organisation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "developmentPaths",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  },
+                  {
+                    "const": "learner",
+                    "type": "string"
+                  }
+                ]
+              },
+              "timezone": {
+                "minLength": 1,
+                "maxLength": 100,
+                "type": "string"
+              },
+              "groupIds": {
+                "maxItems": 100,
+                "default": [],
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "filter": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "match": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "any",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "rules": {
+                    "minItems": 1,
+                    "maxItems": 30,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "anyOf": [
+                                {
+                                  "const": "groupId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "learner",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "courseId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "pathId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "status",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "progress",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "enrolledAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "completedAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "score",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "attempts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "certificate",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lastActivity",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "operator": {
+                              "anyOf": [
+                                {
+                                  "const": "eq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "neq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "in",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "gte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isEmpty",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isNotEmpty",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 200,
+                                  "type": "string"
+                                },
+                                {
+                                  "minimum": 0,
+                                  "maximum": 1000000,
+                                  "type": "number"
+                                },
+                                {
+                                  "minItems": 1,
+                                  "maxItems": 30,
+                                  "type": "array",
+                                  "items": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "match": {
+                              "anyOf": [
+                                {
+                                  "const": "all",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "any",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "rules": {
+                              "minItems": 1,
+                              "maxItems": 30,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "groupId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "learner",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "courseId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pathId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "status",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "progress",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "enrolledAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "completedAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "score",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "attempts",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "certificate",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lastActivity",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "operator": {
+                                    "anyOf": [
+                                      {
+                                        "const": "eq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "neq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "in",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "gte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isEmpty",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isNotEmpty",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "value": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      },
+                                      {
+                                        "minItems": 1,
+                                        "maxItems": 30,
+                                        "type": "array",
+                                        "items": {
+                                          "anyOf": [
+                                            {
+                                              "maxLength": 200,
+                                              "type": "string"
+                                            },
+                                            {
+                                              "minimum": 0,
+                                              "maximum": 1000000,
+                                              "type": "number"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "operator"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "match",
+                            "rules"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "match",
+                  "rules"
+                ]
+              }
+            },
+            "required": [
+              "view",
+              "timezone",
+              "groupIds"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "query"
+        ]
+      },
+      "CreateReportConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "visibility": {
+                "anyOf": [
+                  {
+                    "const": "personal",
+                    "type": "string"
+                  },
+                  {
+                    "const": "shared",
+                    "type": "string"
+                  }
+                ]
+              },
+              "query": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "anyOf": [
+                      {
+                        "const": "organisation",
+                        "type": "string"
+                      },
+                      {
+                        "const": "developmentPaths",
+                        "type": "string"
+                      },
+                      {
+                        "const": "course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "learner",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "timezone": {
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "groupIds": {
+                    "maxItems": 100,
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "subjectId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "filter": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "match": {
+                        "anyOf": [
+                          {
+                            "const": "all",
+                            "type": "string"
+                          },
+                          {
+                            "const": "any",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rules": {
+                        "minItems": 1,
+                        "maxItems": 30,
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "anyOf": [
+                                    {
+                                      "const": "groupId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "learner",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "courseId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "pathId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "status",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "progress",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "enrolledAt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "completedAt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "score",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "attempts",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "certificate",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lastActivity",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "operator": {
+                                  "anyOf": [
+                                    {
+                                      "const": "eq",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "neq",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "in",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "contains",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "gte",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lte",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "between",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "isEmpty",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "isNotEmpty",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "value": {
+                                  "anyOf": [
+                                    {
+                                      "maxLength": 200,
+                                      "type": "string"
+                                    },
+                                    {
+                                      "minimum": 0,
+                                      "maximum": 1000000,
+                                      "type": "number"
+                                    },
+                                    {
+                                      "minItems": 1,
+                                      "maxItems": 30,
+                                      "type": "array",
+                                      "items": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 200,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "minimum": 0,
+                                            "maximum": 1000000,
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "operator"
+                              ]
+                            },
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "match": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "any",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "rules": {
+                                  "minItems": 1,
+                                  "maxItems": 30,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "field": {
+                                        "anyOf": [
+                                          {
+                                            "const": "groupId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "learner",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "courseId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "pathId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "status",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "progress",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "enrolledAt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "completedAt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "score",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "attempts",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "certificate",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lastActivity",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "operator": {
+                                        "anyOf": [
+                                          {
+                                            "const": "eq",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "neq",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "in",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "contains",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "gte",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lte",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "between",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "isEmpty",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "isNotEmpty",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 200,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "minimum": 0,
+                                            "maximum": 1000000,
+                                            "type": "number"
+                                          },
+                                          {
+                                            "minItems": 1,
+                                            "maxItems": 30,
+                                            "type": "array",
+                                            "items": {
+                                              "anyOf": [
+                                                {
+                                                  "maxLength": 200,
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "minimum": 0,
+                                                  "maximum": 1000000,
+                                                  "type": "number"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "field",
+                                      "operator"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "match",
+                                "rules"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "match",
+                      "rules"
+                    ]
+                  }
+                },
+                "required": [
+                  "view",
+                  "timezone",
+                  "groupIds"
+                ]
+              },
+              "ownerId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isAvailable": {
+                "type": "boolean"
+              },
+              "failureCode": {
+                "anyOf": [
+                  {
+                    "const": "reports.errors.scopeDenied",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "visibility",
+              "query",
+              "ownerId",
+              "isAvailable",
+              "failureCode",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateReportConfigurationBody": {
+        "additionalProperties": false,
+        "minProperties": 1,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 120,
+            "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "personal",
+                "type": "string"
+              },
+              {
+                "const": "shared",
+                "type": "string"
+              }
+            ]
+          },
+          "query": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "view": {
+                "anyOf": [
+                  {
+                    "const": "organisation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "developmentPaths",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  },
+                  {
+                    "const": "learner",
+                    "type": "string"
+                  }
+                ]
+              },
+              "timezone": {
+                "minLength": 1,
+                "maxLength": 100,
+                "type": "string"
+              },
+              "groupIds": {
+                "maxItems": 100,
+                "default": [],
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "filter": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "match": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "any",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "rules": {
+                    "minItems": 1,
+                    "maxItems": 30,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "anyOf": [
+                                {
+                                  "const": "groupId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "learner",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "courseId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "pathId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "status",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "progress",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "enrolledAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "completedAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "score",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "attempts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "certificate",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lastActivity",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "operator": {
+                              "anyOf": [
+                                {
+                                  "const": "eq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "neq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "in",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "gte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isEmpty",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isNotEmpty",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 200,
+                                  "type": "string"
+                                },
+                                {
+                                  "minimum": 0,
+                                  "maximum": 1000000,
+                                  "type": "number"
+                                },
+                                {
+                                  "minItems": 1,
+                                  "maxItems": 30,
+                                  "type": "array",
+                                  "items": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "match": {
+                              "anyOf": [
+                                {
+                                  "const": "all",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "any",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "rules": {
+                              "minItems": 1,
+                              "maxItems": 30,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "groupId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "learner",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "courseId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pathId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "status",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "progress",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "enrolledAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "completedAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "score",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "attempts",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "certificate",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lastActivity",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "operator": {
+                                    "anyOf": [
+                                      {
+                                        "const": "eq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "neq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "in",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "gte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isEmpty",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isNotEmpty",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "value": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      },
+                                      {
+                                        "minItems": 1,
+                                        "maxItems": 30,
+                                        "type": "array",
+                                        "items": {
+                                          "anyOf": [
+                                            {
+                                              "maxLength": 200,
+                                              "type": "string"
+                                            },
+                                            {
+                                              "minimum": 0,
+                                              "maximum": 1000000,
+                                              "type": "number"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "operator"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "match",
+                            "rules"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "match",
+                  "rules"
+                ]
+              }
+            },
+            "required": [
+              "view",
+              "timezone",
+              "groupIds"
+            ]
+          }
+        }
+      },
+      "UpdateReportConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "visibility": {
+                "anyOf": [
+                  {
+                    "const": "personal",
+                    "type": "string"
+                  },
+                  {
+                    "const": "shared",
+                    "type": "string"
+                  }
+                ]
+              },
+              "query": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "anyOf": [
+                      {
+                        "const": "organisation",
+                        "type": "string"
+                      },
+                      {
+                        "const": "developmentPaths",
+                        "type": "string"
+                      },
+                      {
+                        "const": "course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "learner",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "timezone": {
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "groupIds": {
+                    "maxItems": 100,
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "subjectId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "filter": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "match": {
+                        "anyOf": [
+                          {
+                            "const": "all",
+                            "type": "string"
+                          },
+                          {
+                            "const": "any",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rules": {
+                        "minItems": 1,
+                        "maxItems": 30,
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "anyOf": [
+                                    {
+                                      "const": "groupId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "learner",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "courseId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "pathId",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "status",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "progress",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "enrolledAt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "completedAt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "score",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "attempts",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "certificate",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lastActivity",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "operator": {
+                                  "anyOf": [
+                                    {
+                                      "const": "eq",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "neq",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "in",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "contains",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "gte",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lte",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "between",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "isEmpty",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "isNotEmpty",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "value": {
+                                  "anyOf": [
+                                    {
+                                      "maxLength": 200,
+                                      "type": "string"
+                                    },
+                                    {
+                                      "minimum": 0,
+                                      "maximum": 1000000,
+                                      "type": "number"
+                                    },
+                                    {
+                                      "minItems": 1,
+                                      "maxItems": 30,
+                                      "type": "array",
+                                      "items": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 200,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "minimum": 0,
+                                            "maximum": 1000000,
+                                            "type": "number"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "operator"
+                              ]
+                            },
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "match": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "any",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "rules": {
+                                  "minItems": 1,
+                                  "maxItems": 30,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "field": {
+                                        "anyOf": [
+                                          {
+                                            "const": "groupId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "learner",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "courseId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "pathId",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "status",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "progress",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "enrolledAt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "completedAt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "score",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "attempts",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "certificate",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lastActivity",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "operator": {
+                                        "anyOf": [
+                                          {
+                                            "const": "eq",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "neq",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "in",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "contains",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "gte",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lte",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "between",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "isEmpty",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "isNotEmpty",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "value": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 200,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "minimum": 0,
+                                            "maximum": 1000000,
+                                            "type": "number"
+                                          },
+                                          {
+                                            "minItems": 1,
+                                            "maxItems": 30,
+                                            "type": "array",
+                                            "items": {
+                                              "anyOf": [
+                                                {
+                                                  "maxLength": 200,
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "minimum": 0,
+                                                  "maximum": 1000000,
+                                                  "type": "number"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "field",
+                                      "operator"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "match",
+                                "rules"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "match",
+                      "rules"
+                    ]
+                  }
+                },
+                "required": [
+                  "view",
+                  "timezone",
+                  "groupIds"
+                ]
+              },
+              "ownerId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isAvailable": {
+                "type": "boolean"
+              },
+              "failureCode": {
+                "anyOf": [
+                  {
+                    "const": "reports.errors.scopeDenied",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "visibility",
+              "query",
+              "ownerId",
+              "isAvailable",
+              "failureCode",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateReportExportBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "format": {
+            "anyOf": [
+              {
+                "const": "xlsx",
+                "type": "string"
+              },
+              {
+                "const": "pdf",
+                "type": "string"
+              }
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "query": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "view": {
+                "anyOf": [
+                  {
+                    "const": "organisation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "developmentPaths",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  },
+                  {
+                    "const": "learner",
+                    "type": "string"
+                  }
+                ]
+              },
+              "timezone": {
+                "minLength": 1,
+                "maxLength": 100,
+                "type": "string"
+              },
+              "groupIds": {
+                "maxItems": 100,
+                "default": [],
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "filter": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "match": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "any",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "rules": {
+                    "minItems": 1,
+                    "maxItems": 30,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "anyOf": [
+                                {
+                                  "const": "groupId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "learner",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "courseId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "pathId",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "status",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "progress",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "enrolledAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "completedAt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "score",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "attempts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "certificate",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lastActivity",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "operator": {
+                              "anyOf": [
+                                {
+                                  "const": "eq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "neq",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "in",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "gte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lte",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isEmpty",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "isNotEmpty",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 200,
+                                  "type": "string"
+                                },
+                                {
+                                  "minimum": 0,
+                                  "maximum": 1000000,
+                                  "type": "number"
+                                },
+                                {
+                                  "minItems": 1,
+                                  "maxItems": 30,
+                                  "type": "array",
+                                  "items": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "match": {
+                              "anyOf": [
+                                {
+                                  "const": "all",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "any",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "rules": {
+                              "minItems": 1,
+                              "maxItems": 30,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "groupId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "learner",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "courseId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pathId",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "status",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "progress",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "enrolledAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "completedAt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "score",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "attempts",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "certificate",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lastActivity",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "operator": {
+                                    "anyOf": [
+                                      {
+                                        "const": "eq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "neq",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "in",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "gte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lte",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isEmpty",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "isNotEmpty",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "value": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 200,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "minimum": 0,
+                                        "maximum": 1000000,
+                                        "type": "number"
+                                      },
+                                      {
+                                        "minItems": 1,
+                                        "maxItems": 30,
+                                        "type": "array",
+                                        "items": {
+                                          "anyOf": [
+                                            {
+                                              "maxLength": 200,
+                                              "type": "string"
+                                            },
+                                            {
+                                              "minimum": 0,
+                                              "maximum": 1000000,
+                                              "type": "number"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "operator"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "match",
+                            "rules"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "match",
+                  "rules"
+                ]
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "page": {
+                "minimum": 1,
+                "default": 1,
+                "type": "integer"
+              },
+              "pageSize": {
+                "minimum": 1,
+                "maximum": 100,
+                "default": 25,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "view",
+              "timezone",
+              "groupIds",
+              "language",
+              "page",
+              "pageSize"
+            ]
+          }
+        },
+        "required": [
+          "format",
+          "language",
+          "query"
+        ]
+      },
+      "CreateReportExportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "format": {
+                "anyOf": [
+                  {
+                    "const": "xlsx",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pdf",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "pending",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "failureCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "format",
+              "status",
+              "expiresAt",
+              "failureCode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetReportExportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "format": {
+                "anyOf": [
+                  {
+                    "const": "xlsx",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pdf",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "pending",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "failureCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "format",
+              "status",
+              "expiresAt",
+              "failureCode"
             ]
           }
         },

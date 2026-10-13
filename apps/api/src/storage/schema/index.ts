@@ -156,6 +156,12 @@ import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
+import type {
+  ReportConfigurationVisibility,
+  ReportExportFormat,
+  ReportExportStatus,
+} from "src/report/constants/reports.constants";
+import type { ReportDefinition, ReportsQuery } from "src/report/schemas/reports.schema";
 
 export const users = pgTable(
   "users",
@@ -1434,6 +1440,15 @@ export const studentCourses = pgTable(
   },
   withTenantIdIndex("student_courses", (table) => ({
     unq: unique().on(table.studentId, table.courseId),
+    reportLearnerIdx: index("student_courses_report_learner_idx")
+      .on(table.tenantId, table.studentId, table.courseId)
+      .where(sql`${table.status} = 'enrolled'`),
+    reportEnrollmentIdx: index("student_courses_report_enrollment_idx")
+      .on(table.tenantId, table.enrolledAt, table.id)
+      .where(sql`${table.status} = 'enrolled'`),
+    reportCompletionIdx: index("student_courses_report_completion_idx")
+      .on(table.tenantId, table.completedAt, table.id)
+      .where(sql`${table.status} = 'enrolled' AND ${table.completedAt} IS NOT NULL`),
     courseStatusStudentIdx: index("student_courses_tenant_id_course_status_student_idx").on(
       table.tenantId,
       table.courseId,
@@ -1490,6 +1505,11 @@ export const studentLessonProgress = pgTable(
   },
   withTenantIdIndex("student_lesson_progress", (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
+    reportLearnerChapterIdx: index("student_lesson_progress_report_learner_chapter_idx").on(
+      table.tenantId,
+      table.studentId,
+      table.chapterId,
+    ),
     completedQuizScoreIdx: index("student_lesson_progress_completed_quiz_score_idx")
       .on(table.tenantId, table.lessonId, table.studentId)
       .where(sql`${table.completedAt} IS NOT NULL AND ${table.quizScore} IS NOT NULL`),
@@ -1799,6 +1819,11 @@ export const groupUsers = pgTable(
   },
   withTenantIdIndex("group_users", (table) => ({
     unq: unique().on(table.userId, table.groupId),
+    reportGroupLearnerIdx: index("group_users_report_group_learner_idx").on(
+      table.tenantId,
+      table.groupId,
+      table.userId,
+    ),
     groupUserIdx: index("group_users_group_id_user_id_idx").on(table.groupId, table.userId),
   })),
 );
@@ -2824,6 +2849,11 @@ export const studentLearningPaths = pgTable(
   },
   withTenantIdIndex("student_learning_paths", (table) => ({
     unq: unique().on(table.studentId, table.learningPathId),
+    reportPathLearnerIdx: index("student_learning_paths_report_path_learner_idx").on(
+      table.tenantId,
+      table.learningPathId,
+      table.studentId,
+    ),
   })),
 );
 
@@ -2845,6 +2875,9 @@ export const studentLearningPathCourses = pgTable(
   },
   withTenantIdIndex("student_learning_path_courses", (table) => ({
     unq: unique().on(table.studentId, table.learningPathId, table.courseId),
+    reportLearnerCoursePathIdx: index(
+      "student_learning_path_courses_report_learner_course_path_idx",
+    ).on(table.tenantId, table.studentId, table.courseId, table.learningPathId),
     studentPathIdx: index("student_learning_path_courses_student_path_idx").on(
       table.studentId,
       table.learningPathId,
@@ -3299,4 +3332,49 @@ export const notificationAccountActionIntents = pgTable(
     tokenExpiresAt: timestampWithTimezone({ name: "token_expires_at" }),
   },
   withTenantIdIndex("notification_account_action_intents"),
+);
+
+export const reportsConfigurations = pgTable(
+  "reports_configurations",
+  {
+    ...id,
+    tenantId,
+    ownerId: uuid("owner_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    visibility: text("visibility").$type<ReportConfigurationVisibility>().notNull(),
+    query: jsonb("query").$type<ReportDefinition>().notNull(),
+    ...timestamps,
+  },
+  withTenantIdIndex("reports_configurations", (table) => ({
+    ownerIdx: index("reports_configurations_tenant_owner_idx").on(table.tenantId, table.ownerId),
+    visibilityIdx: index("reports_configurations_tenant_visibility_idx").on(
+      table.tenantId,
+      table.visibility,
+    ),
+  })),
+);
+
+export const reportsExports = pgTable(
+  "reports_exports",
+  {
+    ...id,
+    tenantId,
+    actorId: uuid("actor_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    format: text("format").$type<ReportExportFormat>().notNull(),
+    status: text("status").$type<ReportExportStatus>().notNull(),
+    processingToken: text("processing_token"),
+    query: jsonb("query").$type<ReportsQuery>().notNull(),
+    accessFingerprint: text("access_fingerprint").notNull(),
+    expiresAt: timestampWithTimezone({ name: "expires_at" }),
+    artifactKey: text("artifact_key"),
+    failureCode: text("failure_code"),
+    ...timestamps,
+  },
+  withTenantIdIndex("reports_exports", (table) => ({
+    expiryIdx: index("reports_exports_tenant_expiry_idx").on(table.tenantId, table.expiresAt),
+  })),
 );

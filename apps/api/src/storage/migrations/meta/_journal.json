@@ -1499,6 +1499,20 @@
       "when": 1791830021994,
       "tag": "0213_notification_automations_tenant_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 214,
+      "version": "7",
+      "when": 1791891021815,
+      "tag": "0214_add_reports_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 215,
+      "version": "7",
+      "when": 1791891043395,
+      "tag": "0215_enable_reports_rls",
+      "breakpoints": true
     }
   ]
 }

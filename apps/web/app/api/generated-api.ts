@@ -30405,6 +30405,847 @@ export interface SearchResponse {
   };
 }
 
+export interface RunReportBody {
+  view: "organisation" | "developmentPaths" | "course" | "learner";
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  timezone: string;
+  /**
+   * @maxItems 100
+   * @default []
+   */
+  groupIds: string[];
+  /** @format uuid */
+  subjectId?: string;
+  filter?: {
+    match: "all" | "any";
+    /**
+     * @maxItems 30
+     * @minItems 1
+     */
+    rules: (
+      | {
+          field:
+            | "groupId"
+            | "learner"
+            | "courseId"
+            | "pathId"
+            | "status"
+            | "progress"
+            | "enrolledAt"
+            | "completedAt"
+            | "score"
+            | "attempts"
+            | "certificate"
+            | "lastActivity";
+          operator:
+            | "eq"
+            | "neq"
+            | "in"
+            | "contains"
+            | "gte"
+            | "lte"
+            | "between"
+            | "isEmpty"
+            | "isNotEmpty";
+          value?: string | number | (string | number)[];
+        }
+      | {
+          match: "all" | "any";
+          /**
+           * @maxItems 30
+           * @minItems 1
+           */
+          rules: {
+            field:
+              | "groupId"
+              | "learner"
+              | "courseId"
+              | "pathId"
+              | "status"
+              | "progress"
+              | "enrolledAt"
+              | "completedAt"
+              | "score"
+              | "attempts"
+              | "certificate"
+              | "lastActivity";
+            operator:
+              | "eq"
+              | "neq"
+              | "in"
+              | "contains"
+              | "gte"
+              | "lte"
+              | "between"
+              | "isEmpty"
+              | "isNotEmpty";
+            value?: string | number | (string | number)[];
+          }[];
+        }
+    )[];
+  };
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @min 1
+   * @default 1
+   */
+  page: number;
+  /**
+   * @min 1
+   * @max 100
+   * @default 25
+   */
+  pageSize: number;
+}
+
+export interface RunReportResponse {
+  data: {
+    rows: {
+      id: string;
+      learner: {
+        /** @format uuid */
+        id: string;
+        name: string;
+        email: string;
+      };
+      course: {
+        /** @format uuid */
+        id: string;
+        title: string;
+      } | null;
+      path: {
+        /** @format uuid */
+        id: string;
+        title: string;
+      } | null;
+      status: "notStarted" | "inProgress" | "completed";
+      progress: number | null;
+      score: number | null;
+      /** @min 0 */
+      attempts: number;
+      certificate: {
+        status: "active" | "expired" | "revoked" | "notEarned";
+        issuedAt: string | null;
+      };
+      enrolledAt: string | null;
+      completedAt: string | null;
+      lastActivityAt: string | null;
+      groupIds: string[];
+      pathCourses: {
+        /** @format uuid */
+        courseId: string;
+        courseTitle: string;
+        status: "notStarted" | "inProgress" | "completed";
+        progress: number | null;
+        enrolledAt: string | null;
+        completedAt: string | null;
+      }[];
+    }[];
+    metrics: {
+      /** @min 0 */
+      learners: number;
+      /** @min 0 */
+      platformCourses: number;
+      /** @min 0 */
+      activeLearners30d: number;
+      /** @min 0 */
+      courseEnrollments: number;
+      /** @min 0 */
+      courseCompletions: number;
+      courseCompletionRate: number | null;
+      averageProgress: number | null;
+      averageScore: number | null;
+      /** @min 0 */
+      activeCertificates: number;
+      /** @min 0 */
+      certificatesIssued: number;
+      /** @min 0 */
+      developmentPathsCompleted: number;
+    };
+    breakdowns: {
+      groups: {
+        id: string;
+        label: string;
+        /** @min 0 */
+        learners: number;
+        /** @min 0 */
+        courseEnrollments: number;
+        /** @min 0 */
+        courseCompletions: number;
+        completionRate: number | null;
+      }[];
+      courses: {
+        id: string;
+        label: string;
+        /** @min 0 */
+        learners: number;
+        /** @min 0 */
+        courseEnrollments: number;
+        /** @min 0 */
+        courseCompletions: number;
+        completionRate: number | null;
+      }[];
+      paths: {
+        id: string;
+        label: string;
+        /** @min 0 */
+        learners: number;
+        /** @min 0 */
+        courseEnrollments: number;
+        /** @min 0 */
+        courseCompletions: number;
+        completionRate: number | null;
+      }[];
+    };
+    /** @min 0 */
+    total: number;
+    /** @min 1 */
+    page: number;
+    /**
+     * @min 1
+     * @max 100
+     */
+    pageSize: number;
+    /** @format date-time */
+    capturedAt: string;
+  };
+}
+
+export interface GetReportOptionsResponse {
+  data: {
+    groups: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    learners: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    courses: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    paths: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    canManageShared: boolean;
+  };
+}
+
+export interface ListReportConfigurationsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    visibility: "personal" | "shared";
+    query: {
+      view: "organisation" | "developmentPaths" | "course" | "learner";
+      /**
+       * @minLength 1
+       * @maxLength 100
+       */
+      timezone: string;
+      /**
+       * @maxItems 100
+       * @default []
+       */
+      groupIds: string[];
+      /** @format uuid */
+      subjectId?: string;
+      filter?: {
+        match: "all" | "any";
+        /**
+         * @maxItems 30
+         * @minItems 1
+         */
+        rules: (
+          | {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }
+          | {
+              match: "all" | "any";
+              /**
+               * @maxItems 30
+               * @minItems 1
+               */
+              rules: {
+                field:
+                  | "groupId"
+                  | "learner"
+                  | "courseId"
+                  | "pathId"
+                  | "status"
+                  | "progress"
+                  | "enrolledAt"
+                  | "completedAt"
+                  | "score"
+                  | "attempts"
+                  | "certificate"
+                  | "lastActivity";
+                operator:
+                  | "eq"
+                  | "neq"
+                  | "in"
+                  | "contains"
+                  | "gte"
+                  | "lte"
+                  | "between"
+                  | "isEmpty"
+                  | "isNotEmpty";
+                value?: string | number | (string | number)[];
+              }[];
+            }
+        )[];
+      };
+    };
+    /** @format uuid */
+    ownerId: string;
+    isAvailable: boolean;
+    failureCode: "reports.errors.scopeDenied" | null;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateReportConfigurationBody {
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
+  name: string;
+  visibility: "personal" | "shared";
+  query: {
+    view: "organisation" | "developmentPaths" | "course" | "learner";
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    timezone: string;
+    /**
+     * @maxItems 100
+     * @default []
+     */
+    groupIds: string[];
+    /** @format uuid */
+    subjectId?: string;
+    filter?: {
+      match: "all" | "any";
+      /**
+       * @maxItems 30
+       * @minItems 1
+       */
+      rules: (
+        | {
+            field:
+              | "groupId"
+              | "learner"
+              | "courseId"
+              | "pathId"
+              | "status"
+              | "progress"
+              | "enrolledAt"
+              | "completedAt"
+              | "score"
+              | "attempts"
+              | "certificate"
+              | "lastActivity";
+            operator:
+              | "eq"
+              | "neq"
+              | "in"
+              | "contains"
+              | "gte"
+              | "lte"
+              | "between"
+              | "isEmpty"
+              | "isNotEmpty";
+            value?: string | number | (string | number)[];
+          }
+        | {
+            match: "all" | "any";
+            /**
+             * @maxItems 30
+             * @minItems 1
+             */
+            rules: {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }[];
+          }
+      )[];
+    };
+  };
+}
+
+export interface CreateReportConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    visibility: "personal" | "shared";
+    query: {
+      view: "organisation" | "developmentPaths" | "course" | "learner";
+      /**
+       * @minLength 1
+       * @maxLength 100
+       */
+      timezone: string;
+      /**
+       * @maxItems 100
+       * @default []
+       */
+      groupIds: string[];
+      /** @format uuid */
+      subjectId?: string;
+      filter?: {
+        match: "all" | "any";
+        /**
+         * @maxItems 30
+         * @minItems 1
+         */
+        rules: (
+          | {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }
+          | {
+              match: "all" | "any";
+              /**
+               * @maxItems 30
+               * @minItems 1
+               */
+              rules: {
+                field:
+                  | "groupId"
+                  | "learner"
+                  | "courseId"
+                  | "pathId"
+                  | "status"
+                  | "progress"
+                  | "enrolledAt"
+                  | "completedAt"
+                  | "score"
+                  | "attempts"
+                  | "certificate"
+                  | "lastActivity";
+                operator:
+                  | "eq"
+                  | "neq"
+                  | "in"
+                  | "contains"
+                  | "gte"
+                  | "lte"
+                  | "between"
+                  | "isEmpty"
+                  | "isNotEmpty";
+                value?: string | number | (string | number)[];
+              }[];
+            }
+        )[];
+      };
+    };
+    /** @format uuid */
+    ownerId: string;
+    isAvailable: boolean;
+    failureCode: "reports.errors.scopeDenied" | null;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+  };
+}
+
+export interface UpdateReportConfigurationBody {
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
+  name?: string;
+  visibility?: "personal" | "shared";
+  query?: {
+    view: "organisation" | "developmentPaths" | "course" | "learner";
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    timezone: string;
+    /**
+     * @maxItems 100
+     * @default []
+     */
+    groupIds: string[];
+    /** @format uuid */
+    subjectId?: string;
+    filter?: {
+      match: "all" | "any";
+      /**
+       * @maxItems 30
+       * @minItems 1
+       */
+      rules: (
+        | {
+            field:
+              | "groupId"
+              | "learner"
+              | "courseId"
+              | "pathId"
+              | "status"
+              | "progress"
+              | "enrolledAt"
+              | "completedAt"
+              | "score"
+              | "attempts"
+              | "certificate"
+              | "lastActivity";
+            operator:
+              | "eq"
+              | "neq"
+              | "in"
+              | "contains"
+              | "gte"
+              | "lte"
+              | "between"
+              | "isEmpty"
+              | "isNotEmpty";
+            value?: string | number | (string | number)[];
+          }
+        | {
+            match: "all" | "any";
+            /**
+             * @maxItems 30
+             * @minItems 1
+             */
+            rules: {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }[];
+          }
+      )[];
+    };
+  };
+}
+
+export interface UpdateReportConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    visibility: "personal" | "shared";
+    query: {
+      view: "organisation" | "developmentPaths" | "course" | "learner";
+      /**
+       * @minLength 1
+       * @maxLength 100
+       */
+      timezone: string;
+      /**
+       * @maxItems 100
+       * @default []
+       */
+      groupIds: string[];
+      /** @format uuid */
+      subjectId?: string;
+      filter?: {
+        match: "all" | "any";
+        /**
+         * @maxItems 30
+         * @minItems 1
+         */
+        rules: (
+          | {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }
+          | {
+              match: "all" | "any";
+              /**
+               * @maxItems 30
+               * @minItems 1
+               */
+              rules: {
+                field:
+                  | "groupId"
+                  | "learner"
+                  | "courseId"
+                  | "pathId"
+                  | "status"
+                  | "progress"
+                  | "enrolledAt"
+                  | "completedAt"
+                  | "score"
+                  | "attempts"
+                  | "certificate"
+                  | "lastActivity";
+                operator:
+                  | "eq"
+                  | "neq"
+                  | "in"
+                  | "contains"
+                  | "gte"
+                  | "lte"
+                  | "between"
+                  | "isEmpty"
+                  | "isNotEmpty";
+                value?: string | number | (string | number)[];
+              }[];
+            }
+        )[];
+      };
+    };
+    /** @format uuid */
+    ownerId: string;
+    isAvailable: boolean;
+    failureCode: "reports.errors.scopeDenied" | null;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+  };
+}
+
+export interface CreateReportExportBody {
+  format: "xlsx" | "pdf";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  query: {
+    view: "organisation" | "developmentPaths" | "course" | "learner";
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    timezone: string;
+    /**
+     * @maxItems 100
+     * @default []
+     */
+    groupIds: string[];
+    /** @format uuid */
+    subjectId?: string;
+    filter?: {
+      match: "all" | "any";
+      /**
+       * @maxItems 30
+       * @minItems 1
+       */
+      rules: (
+        | {
+            field:
+              | "groupId"
+              | "learner"
+              | "courseId"
+              | "pathId"
+              | "status"
+              | "progress"
+              | "enrolledAt"
+              | "completedAt"
+              | "score"
+              | "attempts"
+              | "certificate"
+              | "lastActivity";
+            operator:
+              | "eq"
+              | "neq"
+              | "in"
+              | "contains"
+              | "gte"
+              | "lte"
+              | "between"
+              | "isEmpty"
+              | "isNotEmpty";
+            value?: string | number | (string | number)[];
+          }
+        | {
+            match: "all" | "any";
+            /**
+             * @maxItems 30
+             * @minItems 1
+             */
+            rules: {
+              field:
+                | "groupId"
+                | "learner"
+                | "courseId"
+                | "pathId"
+                | "status"
+                | "progress"
+                | "enrolledAt"
+                | "completedAt"
+                | "score"
+                | "attempts"
+                | "certificate"
+                | "lastActivity";
+              operator:
+                | "eq"
+                | "neq"
+                | "in"
+                | "contains"
+                | "gte"
+                | "lte"
+                | "between"
+                | "isEmpty"
+                | "isNotEmpty";
+              value?: string | number | (string | number)[];
+            }[];
+          }
+      )[];
+    };
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    /**
+     * @min 1
+     * @default 1
+     */
+    page: number;
+    /**
+     * @min 1
+     * @max 100
+     * @default 25
+     */
+    pageSize: number;
+  };
+}
+
+export interface CreateReportExportResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    format: "xlsx" | "pdf";
+    status: "pending" | "processing" | "completed" | "failed";
+    expiresAt: string | null;
+    failureCode: string | null;
+  };
+}
+
+export interface GetReportExportResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    format: "xlsx" | "pdf";
+    status: "pending" | "processing" | "completed" | "failed";
+    expiresAt: string | null;
+    failureCode: string | null;
+  };
+}
+
 export type InitScormImportBody =
   | {
       action: "create-course";
@@ -37873,6 +38714,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
         studentId?: string;
       },
       params: RequestParams = {},
@@ -42035,6 +42877,157 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerRunReport
+     * @request POST:/api/report/query
+     */
+    reportControllerRunReport: (data: RunReportBody, params: RequestParams = {}) =>
+      this.request<RunReportResponse, any>({
+        path: `/api/report/query`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerGetReportOptions
+     * @request GET:/api/report/options
+     */
+    reportControllerGetReportOptions: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @maxLength 200 */
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetReportOptionsResponse, any>({
+        path: `/api/report/options`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerListReportConfigurations
+     * @request GET:/api/report/configurations
+     */
+    reportControllerListReportConfigurations: (params: RequestParams = {}) =>
+      this.request<ListReportConfigurationsResponse, any>({
+        path: `/api/report/configurations`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerCreateReportConfiguration
+     * @request POST:/api/report/configurations
+     */
+    reportControllerCreateReportConfiguration: (
+      data: CreateReportConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateReportConfigurationResponse, any>({
+        path: `/api/report/configurations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerUpdateReportConfiguration
+     * @request PATCH:/api/report/configurations/{id}
+     */
+    reportControllerUpdateReportConfiguration: (
+      id: string,
+      data: UpdateReportConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateReportConfigurationResponse, any>({
+        path: `/api/report/configurations/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerDeleteReportConfiguration
+     * @request DELETE:/api/report/configurations/{id}
+     */
+    reportControllerDeleteReportConfiguration: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/report/configurations/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerCreateReportExport
+     * @request POST:/api/report/exports
+     */
+    reportControllerCreateReportExport: (
+      data: CreateReportExportBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateReportExportResponse, any>({
+        path: `/api/report/exports`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerGetReportExport
+     * @request GET:/api/report/exports/{id}
+     */
+    reportControllerGetReportExport: (id: string, params: RequestParams = {}) =>
+      this.request<GetReportExportResponse, any>({
+        path: `/api/report/exports/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReportControllerDownloadReportExport
+     * @request GET:/api/report/exports/{id}/download
+     */
+    reportControllerDownloadReportExport: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/report/exports/${id}/download`,
+        method: "GET",
         ...params,
       }),
 

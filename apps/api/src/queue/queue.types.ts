@@ -22,6 +22,7 @@ export const QUEUE_NAMES = {
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
   VIDEO_METADATA: "video-metadata",
+  REPORT_EXPORT: "report-export",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -93,4 +94,11 @@ export interface VideoMetadataJobData {
   provider: VideoMetadataProvider;
   fileKey?: string;
   bunnyVideoId?: string;
+}
+
+export interface ReportExportJobData {
+  tenantId: UUIDType;
+  exportId: UUIDType;
+  actorId: UUIDType;
+  action?: "generate" | "expire";
 }

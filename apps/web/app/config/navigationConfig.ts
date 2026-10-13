@@ -85,6 +85,12 @@ export const getNavigationConfig = (
               },
             ] as NavigationItem[])
           : []),
+        {
+          label: t("navigationSideBar.reports"),
+          path: "reports",
+          iconName: "FileChartColumnIncreasing",
+          accessRequirement: routeAccessConfig.reports,
+        },
       ],
     },
     ...(isAnyContentFeatureEnabled
