@@ -3,8 +3,7 @@ import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
 } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
-import type { TSchema } from "@sinclair/typebox";
+import { Type, type TSchema } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
