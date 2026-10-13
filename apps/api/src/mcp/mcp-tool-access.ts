@@ -6,18 +6,26 @@ import {
   type PermissionKey,
 } from "@repo/shared";
 
+import { MCP_ADMIN_TOOL_PERMISSIONS } from "./mcp-admin-tools";
+import { MCP_CUSTOMIZATION_TOOL_NAMES } from "./mcp-customization-tools";
+import { MCP_GLOBAL_SEARCH_PERMISSIONS } from "./mcp-search-tools";
+
 import type { SettingsService } from "src/settings/settings.service";
 
 type Settings = Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
 
 export const MCP_CAPABILITIES = {
   SELF: "self",
+  GLOBAL_SEARCH: "global_search",
+  ADMINISTRATION: "administration",
+  PLATFORM_CUSTOMIZATION: "platform_customization",
   COURSE_READ: "course_read",
   COURSE_ENROLLMENT: "course_enrollment",
   CATEGORY_MANAGE: "category_manage",
   COURSE_CREATE: "course_create",
   COURSE_DELETE: "course_delete",
   FILE_UPLOAD: "file_upload",
+  GENERIC_UPLOAD: "generic_upload",
   AUTHORING_UPLOAD: "authoring_upload",
   LIVE_TRAINING: "live_training",
   PATH_CREATE: "path_create",
@@ -33,7 +41,13 @@ export const MCP_CAPABILITIES = {
 export type McpCapability = (typeof MCP_CAPABILITIES)[keyof typeof MCP_CAPABILITIES];
 
 export function capabilityForMcpTool(name: string): McpCapability | null {
+  if (Object.prototype.hasOwnProperty.call(MCP_ADMIN_TOOL_PERMISSIONS, name))
+    return MCP_CAPABILITIES.ADMINISTRATION;
+  if (MCP_CUSTOMIZATION_TOOL_NAMES.some((tool) => tool === name))
+    return MCP_CAPABILITIES.PLATFORM_CUSTOMIZATION;
   switch (name) {
+    case "global_search":
+      return MCP_CAPABILITIES.GLOBAL_SEARCH;
     case "get_my_capabilities":
       return MCP_CAPABILITIES.SELF;
     case "list_courses":
@@ -57,7 +71,7 @@ export function capabilityForMcpTool(name: string): McpCapability | null {
     case "delete_course":
       return MCP_CAPABILITIES.COURSE_DELETE;
     case "request_generic_file_upload":
-      return MCP_CAPABILITIES.FILE_UPLOAD;
+      return MCP_CAPABILITIES.GENERIC_UPLOAD;
     case "request_authoring_upload":
     case "request_editorial_cover_upload":
     case "init_video_upload":
@@ -162,8 +176,16 @@ export function canListMcpTool(
   permissions: PermissionKey[],
   settings: Settings,
 ): boolean {
+  const adminPermissions = Object.entries(MCP_ADMIN_TOOL_PERMISSIONS).find(
+    ([tool]) => tool === name,
+  )?.[1];
+  if (adminPermissions) return hasAnyPermission(permissions, adminPermissions);
   const capability = capabilityForMcpTool(name);
   switch (capability) {
+    case MCP_CAPABILITIES.PLATFORM_CUSTOMIZATION:
+      return permissions.includes(PERMISSIONS.SETTINGS_MANAGE);
+    case MCP_CAPABILITIES.GLOBAL_SEARCH:
+      return hasAnyPermission(permissions, MCP_GLOBAL_SEARCH_PERMISSIONS);
     case MCP_CAPABILITIES.SELF:
       return true;
     case MCP_CAPABILITIES.COURSE_READ:
@@ -176,6 +198,22 @@ export function canListMcpTool(
       return permissions.includes(PERMISSIONS.COURSE_CREATE);
     case MCP_CAPABILITIES.COURSE_DELETE:
       return permissions.includes(PERMISSIONS.COURSE_DELETE);
+    case MCP_CAPABILITIES.GENERIC_UPLOAD:
+      return Boolean(
+        (permissions.includes(PERMISSIONS.FILE_UPLOAD) &&
+          hasAnyPermission(permissions, [
+            PERMISSIONS.COURSE_CREATE,
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ])) ||
+          (settings[FEATURE_SETTINGS_KEYS[FEATURES.ARTICLES]] &&
+            hasAnyPermission(permissions, [
+              PERMISSIONS.ARTICLE_MANAGE,
+              PERMISSIONS.ARTICLE_MANAGE_OWN,
+            ])) ||
+          (settings[FEATURE_SETTINGS_KEYS[FEATURES.NEWS]] &&
+            hasAnyPermission(permissions, [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN])),
+      );
     case MCP_CAPABILITIES.FILE_UPLOAD:
       return permissions.includes(PERMISSIONS.FILE_UPLOAD);
     case MCP_CAPABILITIES.AUTHORING_UPLOAD:

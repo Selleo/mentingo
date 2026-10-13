@@ -7,6 +7,10 @@ import {
   LEARNING_PATH_STATUSES,
   NEWS_STATUS,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -343,12 +347,43 @@ const scormPackageInput = {
 
 export const requestGenericFileUploadInputSchema = Type.Object(
   {
-    resource: Type.Union([Type.Literal(ENTITY_TYPES.COURSE), Type.Literal(ENTITY_TYPES.LESSON)]),
+    resource: Type.Union(
+      [
+        Type.Literal(ENTITY_TYPES.COURSE),
+        Type.Literal(ENTITY_TYPES.LESSON),
+        Type.Literal(ENTITY_TYPES.ARTICLES),
+        Type.Literal(ENTITY_TYPES.NEWS),
+      ],
+      {
+        description:
+          "Use articles or news for files inserted into editorial rich content; course or lesson is the raw generic file flow for course/quiz images.",
+      },
+    ),
+    targetId: Type.Optional(
+      Type.String({
+        format: "uuid",
+        description:
+          "Required for articles/news: ID returned by get_article/get_news or create_article/create_news.",
+      }),
+    ),
+    language: Type.Optional(
+      Type.Enum(SUPPORTED_LANGUAGES, {
+        description:
+          "Required for articles/news: the content language where this file will be inserted.",
+      }),
+    ),
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.Union(
-      ALLOWED_MIME_TYPES.filter((type) => !type.startsWith("video/")).map((type) =>
-        Type.Literal(type),
-      ),
+      [
+        ...new Set([
+          ...ALLOWED_MIME_TYPES.filter((type) => !type.startsWith("video/")),
+          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+          ...ALLOWED_PDF_FILE_TYPES,
+          ...ALLOWED_EXCEL_FILE_TYPES,
+          ...ALLOWED_WORD_FILE_TYPES,
+          ...ALLOWED_PRESENTATION_FILE_TYPES,
+        ]),
+      ].map((type) => Type.Literal(type)),
     ),
     size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
   },

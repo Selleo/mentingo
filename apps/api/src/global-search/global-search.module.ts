@@ -12,5 +12,6 @@ import { SearchIndexModule } from "./search-index.module";
   imports: [FileModule, LocalizationModule, SearchIndexModule],
   controllers: [GlobalSearchController],
   providers: [GlobalSearchService, GlobalSearchRepository],
+  exports: [GlobalSearchService],
 })
 export class GlobalSearchModule {}
