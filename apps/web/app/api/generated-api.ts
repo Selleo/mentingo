@@ -30319,7 +30319,11 @@ export interface GetLearningPathJobStatusResponse {
 
 export interface SearchResponse {
   data: {
+    searchMode?: "keyword" | "hybrid";
+    semanticStatus?: "ready" | "unavailable" | "pending";
     allCourses: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -30329,6 +30333,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     myCourses: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -30338,6 +30344,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     availableCourses: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -30347,6 +30355,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     learningPaths: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -30357,24 +30367,31 @@ export interface SearchResponse {
       }[];
     }[];
     lessons: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
       /** @format uuid */
       courseId: string;
-      matchedAttachmentFileName?: string | null;
     }[];
     news: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
     }[];
     articles: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
     }[];
     qa: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -30393,6 +30410,8 @@ export interface SearchResponse {
       }[];
     }[];
     categories: {
+      matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       /** @format uuid */
       id: string;
       title: string;
@@ -42866,9 +42885,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     globalSearchControllerSearch: (
       query?: {
+        /** @maxLength 500 */
         searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        mode?: "keyword" | "hybrid";
       },
       params: RequestParams = {},
     ) =>

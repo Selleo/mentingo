@@ -1479,6 +1479,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Search by meaning",
+    "hybridSearch": "Hybrid search",
+    "backToKeywords": "Back to keyword search",
+    "semanticUnavailable": "Semantic search is temporarily unavailable. Showing keyword matches.",
+    "semanticPending": "Some content is still being indexed. Results may be incomplete.",
+    "searchFailed": "Search failed. Please try again.",
+    "clear": "Clear search",
+    "loading": "Searching…",
     "notFound": "Unfortunately nothing was found",
     "tryAgain": "Try again using different keywords",
     "search": "Search...",

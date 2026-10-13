@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -170,6 +171,26 @@ export const GlobalSearchContent = ({
                           className={cn(isActive && "rounded-lg bg-primary-100")}
                         >
                           <section.Component item={item as never} onSelect={onSelect} />
+                          {section.resultType !== "users" &&
+                            "matchedPassage" in item &&
+                            typeof item.matchedPassage === "string" &&
+                            item.matchedPassage && (
+                              <p className="line-clamp-2 px-2 pb-1.5 text-xs leading-5 text-neutral-600">
+                                {item.matchedPassage}
+                              </p>
+                            )}
+                          {section.resultType !== "users" &&
+                            section.resultType !== "lessons" &&
+                            "matchedAttachmentFileName" in item &&
+                            typeof item.matchedAttachmentFileName === "string" &&
+                            item.matchedAttachmentFileName && (
+                              <span className="flex items-center gap-1 px-2 pb-1.5 text-xs text-neutral-600">
+                                <FileText className="size-3.5 shrink-0" aria-hidden />
+                                <span className="line-clamp-1">
+                                  {item.matchedAttachmentFileName}
+                                </span>
+                              </span>
+                            )}
                         </li>
                       );
                     })}
@@ -180,7 +201,7 @@ export const GlobalSearchContent = ({
           })()}
         </div>
       ) : (
-        <div className="mx-auto px-6 pt-4">
+        <div role="status" aria-label={t("globalSearch.loading")} className="mx-auto px-6 pt-4">
           <Loader />
         </div>
       )}

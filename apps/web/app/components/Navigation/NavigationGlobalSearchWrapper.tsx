@@ -1,6 +1,8 @@
+import { Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
@@ -33,7 +35,15 @@ export const NavigationGlobalSearchWrapper = ({
 }: NavigationGlobalSearchWrapperProps) => {
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hybridSearch, setHybridSearch] = useState<string | null>(null);
+  const { data: aiConfigured } = useAIConfigured();
+  const isSemanticConfigured = aiConfigured?.enabled === true;
   const debouncedSearch = useDebounce(searchParams, 300);
+  const activeHybridSearch = isSemanticConfigured ? hybridSearch : null;
+  const effectiveSearch = activeHybridSearch ?? debouncedSearch.trim();
+  const mode = activeHybridSearch === null ? "keyword" : "hybrid";
+  const isDebouncing =
+    activeHybridSearch === null && debouncedSearch.trim() !== searchParams.trim();
   const totalItemsRef = useRef(0);
   const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
@@ -60,10 +70,19 @@ export const NavigationGlobalSearchWrapper = ({
 
   useEffect(() => {
     setActiveIndex(0);
-  }, [debouncedSearch]);
+  }, [effectiveSearch, mode]);
+
+  useEffect(() => {
+    if (!isSemanticConfigured) {
+      setHybridSearch(null);
+      totalItemsRef.current = 0;
+    }
+  }, [isSemanticConfigured]);
 
   useEffect(() => {
     setSearchParams("");
+    setHybridSearch(null);
+    totalItemsRef.current = 0;
     if (isGlobalSearchDialogOpen) {
       setActiveIndex(0);
     }
@@ -75,6 +94,8 @@ export const NavigationGlobalSearchWrapper = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.target instanceof HTMLElement && e.target.closest("button, a, [role=button]")) return;
+    if (isDebouncing) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIndex((prev) => (prev + 1) % Math.max(1, totalItemsRef.current));
@@ -140,13 +161,72 @@ export const NavigationGlobalSearchWrapper = ({
           <div className="flex flex-col gap-1 p-3">
             <SearchInput
               value={searchParams}
-              onChange={(e) => setSearchParams(e.target.value)}
-              clearable
+              maxLength={500}
+              onChange={(e) => {
+                setSearchParams(e.target.value.slice(0, 500));
+                setHybridSearch(null);
+                setActiveIndex(0);
+                totalItemsRef.current = 0;
+              }}
+              aria-label={t("globalSearch.search")}
+              rightAdornment={
+                <div className="absolute end-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                  {searchParams.length > 0 && (
+                    <button
+                      type="button"
+                      aria-label={t("globalSearch.clear")}
+                      onClick={() => {
+                        setSearchParams("");
+                        setHybridSearch(null);
+                        totalItemsRef.current = 0;
+                      }}
+                      className="rounded p-1 text-neutral-600 focus-visible:outline focus-visible:outline-primary-500"
+                    >
+                      <X className="size-4" aria-hidden />
+                    </button>
+                  )}
+                  {isSemanticConfigured && (
+                    <button
+                      type="button"
+                      aria-label={t("globalSearch.searchByMeaning")}
+                      title={t("globalSearch.searchByMeaning")}
+                      disabled={searchParams.trim().length < 3}
+                      aria-pressed={mode === "hybrid"}
+                      onClick={() => {
+                        setHybridSearch(searchParams.trim());
+                        setActiveIndex(0);
+                        totalItemsRef.current = 0;
+                      }}
+                      className={cn(
+                        "rounded p-1.5 text-primary-600 hover:bg-primary-50 focus-visible:outline focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
+                        mode === "hybrid" && "bg-primary-100",
+                      )}
+                    >
+                      <Sparkles className="size-4" aria-hidden />
+                    </button>
+                  )}
+                </div>
+              }
               wrapperClassName="w-full max-w-none"
-              className="!max-w-none"
+              className={cn("!max-w-none", {
+                "pr-20": isSemanticConfigured,
+                "pr-10": !isSemanticConfigured,
+              })}
             />
+            {mode === "hybrid" && (
+              <div className="flex items-center justify-between gap-2 px-2 text-xs text-neutral-600">
+                <span>{t("globalSearch.hybridSearch")}</span>
+                <button
+                  type="button"
+                  className="rounded px-2 py-1 text-primary-600 focus-visible:outline focus-visible:outline-primary-500"
+                  onClick={() => setHybridSearch(null)}
+                >
+                  {t("globalSearch.backToKeywords")}
+                </button>
+              </div>
+            )}
             <Separator className="my-2" />
-            {debouncedSearch.length < 3 && (
+            {searchParams.trim().length < 3 && (
               <div className="flex flex-col px-6 pt-4">
                 <span className="text-sm-md text-center ">
                   {companyName
@@ -158,9 +238,11 @@ export const NavigationGlobalSearchWrapper = ({
                 </span>
               </div>
             )}
-            {debouncedSearch.length >= 3 && (
+            {searchParams.trim().length >= 3 && (
               <GlobalSearchResults
-                debouncedSearch={debouncedSearch}
+                debouncedSearch={effectiveSearch}
+                mode={mode}
+                isDebouncing={isDebouncing}
                 onSelect={handleSelect}
                 activeIndex={activeIndex}
                 setTotalItems={(count) => {

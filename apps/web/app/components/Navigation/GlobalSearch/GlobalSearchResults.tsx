@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useGlobalSearch } from "~/api/queries/useGlobalSearch";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -20,23 +21,32 @@ import type { GlobalSearchItem } from "./GlobalSearchContent";
 
 export const GlobalSearchResults = ({
   debouncedSearch,
+  mode = "keyword",
+  isDebouncing = false,
   onSelect,
   activeIndex,
   setTotalItems,
 }: {
   debouncedSearch: string;
+  mode?: "keyword" | "hybrid";
+  isDebouncing?: boolean;
   onSelect: () => void;
   activeIndex: number;
   setTotalItems: (count: number) => void;
 }) => {
   const { data: globalSettings } = useGlobalSettings();
-  const { language } = useLanguageStore();
+  const language = useLanguageStore((state) => state.language);
+  const { t } = useTranslation();
   const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
   const isSearchReady = debouncedSearch.length >= 3;
 
-  const { data: searchResults, isFetching } = useGlobalSearch(
-    { searchQuery: debouncedSearch, language },
-    { enabled: isSearchReady },
+  const {
+    data: searchResults,
+    isFetching,
+    isError,
+  } = useGlobalSearch(
+    { searchQuery: debouncedSearch, language, mode },
+    { enabled: isSearchReady && !isDebouncing },
   );
 
   const tabsToDisplay = useMemo<{ isFetching: boolean; items: GlobalSearchItem[] }>(() => {
@@ -99,17 +109,47 @@ export const GlobalSearchResults = ({
     ];
 
     return {
-      isFetching,
-      items: mapped,
+      isFetching: isFetching || isDebouncing,
+      items: isFetching || isDebouncing || isError ? [] : mapped,
     };
-  }, [isFetching, isLearningPathsEnabled, searchResults]);
+  }, [isFetching, isDebouncing, isError, isLearningPathsEnabled, searchResults]);
+
+  useEffect(() => {
+    if (isFetching || isDebouncing || isError) setTotalItems(0);
+  }, [isFetching, isDebouncing, isError, setTotalItems]);
+
+  if (isError && !isDebouncing) {
+    return (
+      <p role="alert" className="px-6 py-4 text-sm text-neutral-700">
+        {t("globalSearch.searchFailed")}
+      </p>
+    );
+  }
 
   return (
-    <GlobalSearchContent
-      tabsToDisplay={tabsToDisplay}
-      onSelect={onSelect}
-      activeIndex={activeIndex}
-      setTotalItems={setTotalItems}
-    />
+    <>
+      {mode === "hybrid" &&
+        !isFetching &&
+        !isDebouncing &&
+        searchResults?.semanticStatus === "unavailable" && (
+          <p role="status" className="px-2 py-1 text-xs text-neutral-600">
+            {t("globalSearch.semanticUnavailable")}
+          </p>
+        )}
+      {mode === "hybrid" &&
+        !isFetching &&
+        !isDebouncing &&
+        searchResults?.semanticStatus === "pending" && (
+          <p role="status" className="px-2 py-1 text-xs text-neutral-600">
+            {t("globalSearch.semanticPending")}
+          </p>
+        )}
+      <GlobalSearchContent
+        tabsToDisplay={tabsToDisplay}
+        onSelect={onSelect}
+        activeIndex={activeIndex}
+        setTotalItems={setTotalItems}
+      />
+    </>
   );
 };

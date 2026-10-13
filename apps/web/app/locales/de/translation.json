@@ -1478,6 +1478,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Nach Bedeutung suchen",
+    "hybridSearch": "Hybride Suche",
+    "backToKeywords": "Zur Stichwortsuche",
+    "semanticUnavailable": "Die semantische Suche ist vorübergehend nicht verfügbar. Stichworttreffer werden angezeigt.",
+    "semanticPending": "Einige Inhalte werden noch indexiert. Die Ergebnisse können unvollständig sein.",
+    "searchFailed": "Die Suche ist fehlgeschlagen. Bitte erneut versuchen.",
+    "clear": "Suche löschen",
+    "loading": "Suche läuft…",
     "notFound": "Leider wurde nichts gefunden",
     "tryAgain": "Versuchen Sie es erneut mit anderen Schlüsselwörtern",
     "search": "Suchen...",

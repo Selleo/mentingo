@@ -3,9 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
+import type { QueryFunctionContext } from "@tanstack/react-query";
+
 type GlobalSearchParams = {
   searchQuery: string;
   language?: SupportedLanguages;
+  mode?: "keyword" | "hybrid";
 };
 
 type QueryOptions = {
@@ -19,11 +22,15 @@ export const globalSearchQueryOptions = (
   options: QueryOptions = { enabled: true },
 ) => ({
   queryKey: [...GLOBAL_SEARCH_QUERY_KEY, searchParams],
-  queryFn: async () => {
-    const response = await ApiClient.api.globalSearchControllerSearch({
-      searchQuery: searchParams.searchQuery,
-      language: searchParams.language ?? SUPPORTED_LANGUAGES.EN,
-    });
+  queryFn: async ({ signal }: QueryFunctionContext) => {
+    const response = await ApiClient.api.globalSearchControllerSearch(
+      {
+        searchQuery: searchParams.searchQuery,
+        mode: searchParams.mode ?? "keyword",
+        language: searchParams.language ?? SUPPORTED_LANGUAGES.EN,
+      },
+      { signal },
+    );
 
     return response.data.data;
   },

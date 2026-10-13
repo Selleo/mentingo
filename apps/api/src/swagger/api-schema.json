@@ -16147,6 +16147,7 @@
             "required": false,
             "in": "query",
             "schema": {
+              "maxLength": 500,
               "type": "string"
             }
           },
@@ -16183,6 +16184,23 @@
                 },
                 {
                   "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "keyword",
+                  "type": "string"
+                },
+                {
+                  "const": "hybrid",
                   "type": "string"
                 }
               ]
@@ -155525,11 +155543,52 @@
           "data": {
             "type": "object",
             "properties": {
+              "searchMode": {
+                "anyOf": [
+                  {
+                    "const": "keyword",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hybrid",
+                    "type": "string"
+                  }
+                ]
+              },
+              "semanticStatus": {
+                "anyOf": [
+                  {
+                    "const": "ready",
+                    "type": "string"
+                  },
+                  {
+                    "const": "unavailable",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pending",
+                    "type": "string"
+                  }
+                ]
+              },
               "allCourses": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155568,6 +155627,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155606,6 +155678,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155644,6 +155729,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155689,15 +155787,7 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "courseId": {
-                      "format": "uuid",
+                    "matchedPassage": {
                       "type": "string"
                     },
                     "matchedAttachmentFileName": {
@@ -155709,6 +155799,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -155723,6 +155824,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155742,6 +155856,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155761,6 +155888,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"
@@ -155837,6 +155977,19 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "matchedPassage": {
+                      "type": "string"
+                    },
+                    "matchedAttachmentFileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "id": {
                       "format": "uuid",
                       "type": "string"

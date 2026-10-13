@@ -1478,6 +1478,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Ieškoti pagal prasmę",
+    "hybridSearch": "Hibridinė paieška",
+    "backToKeywords": "Grįžti prie paieškos pagal žodžius",
+    "semanticUnavailable": "Semantinė paieška laikinai nepasiekiama. Rodomi paieškos pagal žodžius rezultatai.",
+    "semanticPending": "Dalis turinio dar indeksuojama. Rezultatai gali būti neišsamūs.",
+    "searchFailed": "Paieška nepavyko. Bandykite dar kartą.",
+    "clear": "Išvalyti paiešką",
+    "loading": "Ieškoma…",
     "notFound": "Deja, nieko nerasta",
     "tryAgain": "Bandykite dar kartą naudodami kitus raktinius žodžius",
     "search": "Ieškoti...",

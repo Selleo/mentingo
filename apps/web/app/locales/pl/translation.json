@@ -1723,6 +1723,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Szukaj według znaczenia",
+    "hybridSearch": "Wyszukiwanie hybrydowe",
+    "backToKeywords": "Wróć do wyszukiwania słów",
+    "semanticUnavailable": "Wyszukiwanie semantyczne jest chwilowo niedostępne. Wyświetlamy dopasowania słów.",
+    "semanticPending": "Część treści jest nadal indeksowana. Wyniki mogą być niepełne.",
+    "searchFailed": "Wyszukiwanie nie powiodło się. Spróbuj ponownie.",
+    "clear": "Wyczyść wyszukiwanie",
+    "loading": "Wyszukiwanie…",
     "notFound": "Niestety nic nie znaleziono",
     "tryAgain": "Spróbuj ponownie użyć innych słów kluczowych",
     "search": "Szukaj...",

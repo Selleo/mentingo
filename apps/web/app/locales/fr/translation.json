@@ -1474,6 +1474,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Rechercher par sens",
+    "hybridSearch": "Recherche hybride",
+    "backToKeywords": "Revenir à la recherche par mots-clés",
+    "semanticUnavailable": "La recherche sémantique est temporairement indisponible. Les résultats par mots-clés sont affichés.",
+    "semanticPending": "Une partie du contenu est encore en cours d’indexation. Les résultats peuvent être incomplets.",
+    "searchFailed": "La recherche a échoué. Veuillez réessayer.",
+    "clear": "Effacer la recherche",
+    "loading": "Recherche en cours…",
     "notFound": "Malheureusement, rien n'a été trouvé",
     "tryAgain": "Réessayez en utilisant des mots clés différents",
     "search": "Rechercher...",

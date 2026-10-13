@@ -1472,6 +1472,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Buscar por significado",
+    "hybridSearch": "Búsqueda híbrida",
+    "backToKeywords": "Volver a la búsqueda por palabras clave",
+    "semanticUnavailable": "La búsqueda semántica no está disponible temporalmente. Se muestran coincidencias de palabras clave.",
+    "semanticPending": "Parte del contenido todavía se está indexando. Los resultados pueden estar incompletos.",
+    "searchFailed": "La búsqueda ha fallado. Inténtalo de nuevo.",
+    "clear": "Borrar búsqueda",
+    "loading": "Buscando…",
     "notFound": "Lamentablemente no se encontró nada",
     "tryAgain": "Inténtalo de nuevo usando palabras clave diferentes.",
     "search": "Buscar...",

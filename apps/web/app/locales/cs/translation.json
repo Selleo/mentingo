@@ -1484,6 +1484,14 @@
     }
   },
   "globalSearch": {
+    "searchByMeaning": "Hledat podle významu",
+    "hybridSearch": "Hybridní vyhledávání",
+    "backToKeywords": "Zpět na hledání klíčových slov",
+    "semanticUnavailable": "Sémantické vyhledávání je dočasně nedostupné. Zobrazují se shody klíčových slov.",
+    "semanticPending": "Část obsahu se stále indexuje. Výsledky mohou být neúplné.",
+    "searchFailed": "Vyhledávání se nezdařilo. Zkuste to znovu.",
+    "clear": "Vymazat hledání",
+    "loading": "Vyhledávání…",
     "notFound": "Bohužel se nic nenašlo",
     "tryAgain": "Zkuste to znovu pomocí jiných klíčových slov",
     "search": "Vyhledávání...",
