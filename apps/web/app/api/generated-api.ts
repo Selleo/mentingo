@@ -2547,7 +2547,6 @@ export interface GetBetaCourseByIdResponse {
           options?: {
             /** @format uuid */
             id?: string;
-            /** @maxLength 250 */
             optionText: string;
             displayOrder: number | null;
             isStudentAnswer?: boolean | null;
@@ -37459,6 +37458,275 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseAuthoringControllerOpenAuthoringSession
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions
+     */
+    courseAuthoringControllerOpenAuthoringSession: (
+      courseId: string,
+      data: OpenAuthoringSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<OpenAuthoringSessionResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerListAuthoringSessions
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions
+     */
+    courseAuthoringControllerListAuthoringSessions: (
+      courseId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        keyword?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAuthoringSessionsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringSession
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}
+     */
+    courseAuthoringControllerGetAuthoringSession: (
+      courseId: string,
+      sessionId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringSessionResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetOlderAuthoringTurns
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/turns
+     */
+    courseAuthoringControllerGetOlderAuthoringTurns: (
+      courseId: string,
+      sessionId: string,
+      query?: {
+        /** @format uuid */
+        beforeRequestId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetOlderAuthoringTurnsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/turns`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerSendAuthoringCommand
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/commands
+     */
+    courseAuthoringControllerSendAuthoringCommand: (
+      courseId: string,
+      sessionId: string,
+      data: SendAuthoringCommandBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendAuthoringCommandResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/commands`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerPreviewAuthoringAsset
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/assets/{assetId}
+     */
+    courseAuthoringControllerPreviewAuthoringAsset: (
+      courseId: string,
+      sessionId: string,
+      assetId: string,
+      query?: {
+        /** @min 1 */
+        revision?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<File, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/assets/${assetId}`,
+        method: "GET",
+        query: query,
+        format: "blob",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerApplyAuthoringProposals
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications
+     */
+    courseAuthoringControllerApplyAuthoringProposals: (
+      courseId: string,
+      sessionId: string,
+      data: ApplyAuthoringProposalsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApplyAuthoringProposalsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringApplication
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications/{exportId}
+     */
+    courseAuthoringControllerGetAuthoringApplication: (
+      courseId: string,
+      sessionId: string,
+      exportId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringApplicationResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications/${exportId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerUploadAuthoringSource
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/sources
+     */
+    courseAuthoringControllerUploadAuthoringSource: (
+      courseId: string,
+      sessionId: string,
+      data: {
+        /** @format uuid */
+        commandId: string;
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadAuthoringSourceResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/sources`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringEvents
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/events
+     */
+    courseAuthoringControllerGetAuthoringEvents: (
+      courseId: string,
+      sessionId: string,
+      query?: {
+        /** @min 0 */
+        afterSequence?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringEventsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringCourseContext
+     * @request GET:/api/luma/authoring/courses/{courseId}/context
+     */
+    courseAuthoringControllerGetAuthoringCourseContext: (
+      courseId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        lessonIds?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringCourseContextResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/context`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringLinkPreviewControllerGetAuthoringLinkPreview
+     * @request GET:/api/luma/authoring/link-preview
+     */
+    courseAuthoringLinkPreviewControllerGetAuthoringLinkPreview: (
+      query: {
+        /**
+         * @minLength 1
+         * @maxLength 2048
+         */
+        url: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringLinkPreviewResponse, any>({
+        path: `/api/luma/authoring/link-preview`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name PhishingControllerGetPhishingConfiguration
      * @request GET:/api/phishing/configuration
      */
@@ -37906,275 +38174,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerOpenAuthoringSession
-     * @request POST:/api/luma/authoring/courses/{courseId}/sessions
-     */
-    courseAuthoringControllerOpenAuthoringSession: (
-      courseId: string,
-      data: OpenAuthoringSessionBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<OpenAuthoringSessionResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerListAuthoringSessions
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions
-     */
-    courseAuthoringControllerListAuthoringSessions: (
-      courseId: string,
-      query?: {
-        /** @min 1 */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        keyword?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListAuthoringSessionsResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerGetAuthoringSession
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}
-     */
-    courseAuthoringControllerGetAuthoringSession: (
-      courseId: string,
-      sessionId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAuthoringSessionResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerGetOlderAuthoringTurns
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/turns
-     */
-    courseAuthoringControllerGetOlderAuthoringTurns: (
-      courseId: string,
-      sessionId: string,
-      query?: {
-        /** @format uuid */
-        beforeRequestId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetOlderAuthoringTurnsResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/turns`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerSendAuthoringCommand
-     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/commands
-     */
-    courseAuthoringControllerSendAuthoringCommand: (
-      courseId: string,
-      sessionId: string,
-      data: SendAuthoringCommandBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SendAuthoringCommandResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/commands`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerPreviewAuthoringAsset
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/assets/{assetId}
-     */
-    courseAuthoringControllerPreviewAuthoringAsset: (
-      courseId: string,
-      sessionId: string,
-      assetId: string,
-      query?: {
-        /** @min 1 */
-        revision?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<File, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/assets/${assetId}`,
-        method: "GET",
-        query: query,
-        format: "blob",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerApplyAuthoringProposals
-     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications
-     */
-    courseAuthoringControllerApplyAuthoringProposals: (
-      courseId: string,
-      sessionId: string,
-      data: ApplyAuthoringProposalsBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<ApplyAuthoringProposalsResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerGetAuthoringApplication
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications/{exportId}
-     */
-    courseAuthoringControllerGetAuthoringApplication: (
-      courseId: string,
-      sessionId: string,
-      exportId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAuthoringApplicationResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications/${exportId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerUploadAuthoringSource
-     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/sources
-     */
-    courseAuthoringControllerUploadAuthoringSource: (
-      courseId: string,
-      sessionId: string,
-      data: {
-        /** @format uuid */
-        commandId: string;
-        /** @format binary */
-        file: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UploadAuthoringSourceResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/sources`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerGetAuthoringEvents
-     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/events
-     */
-    courseAuthoringControllerGetAuthoringEvents: (
-      courseId: string,
-      sessionId: string,
-      query?: {
-        /** @min 0 */
-        afterSequence?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAuthoringEventsResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/events`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringControllerGetAuthoringCourseContext
-     * @request GET:/api/luma/authoring/courses/{courseId}/context
-     */
-    courseAuthoringControllerGetAuthoringCourseContext: (
-      courseId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        lessonIds?: string[];
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAuthoringCourseContextResponse, any>({
-        path: `/api/luma/authoring/courses/${courseId}/context`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseAuthoringLinkPreviewControllerGetAuthoringLinkPreview
-     * @request GET:/api/luma/authoring/link-preview
-     */
-    courseAuthoringLinkPreviewControllerGetAuthoringLinkPreview: (
-      query: {
-        /**
-         * @minLength 1
-         * @maxLength 2048
-         */
-        url: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAuthoringLinkPreviewResponse, any>({
-        path: `/api/luma/authoring/link-preview`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

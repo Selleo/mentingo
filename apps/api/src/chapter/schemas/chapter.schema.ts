@@ -2,7 +2,7 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { lessonForChapterSchema, lessonSchema } from "src/lesson/lesson.schema";
+import { lessonForChapterSchema, lessonInputSchema, lessonSchema } from "src/lesson/lesson.schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 export const chapterSchema = Type.Object({
@@ -22,7 +22,13 @@ export const chapterSchema = Type.Object({
 });
 
 export const createChapterSchema = Type.Intersect([
-  Type.Omit(chapterSchema, ["id", "lessonCount", "completedLessonCount", "displayOrder"]),
+  Type.Omit(
+    Type.Object({
+      ...chapterSchema.properties,
+      lessons: Type.Optional(Type.Array(lessonInputSchema)),
+    }),
+    ["id", "lessonCount", "completedLessonCount", "displayOrder"],
+  ),
   Type.Object({
     courseId: UUIDSchema,
   }),
