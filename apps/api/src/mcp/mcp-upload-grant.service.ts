@@ -25,6 +25,7 @@ import {
   ENTITY_TYPES,
   MAX_COURSE_TRAILER_VIDEO_SIZE,
   PERMISSIONS,
+  type PermissionKey,
   RESOURCE_VISIBILITY,
   SCORM_IMPORT_ACTION,
   SUPPORTED_LANGUAGES,
@@ -228,7 +229,7 @@ export class McpUploadGrantService {
 
   private async validateActiveUploadPermission(
     actor: CurrentUserType,
-    permission: import("@repo/shared").PermissionKey,
+    permission: PermissionKey,
   ): Promise<void> {
     const email = await this.tokenService.resolveIdentity(actor.userId, actor.tenantId);
     if (!email) throw new UnauthorizedException("Upload user is no longer active");
