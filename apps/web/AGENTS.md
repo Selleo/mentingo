@@ -70,6 +70,7 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - Read `DESIGN_VARIANT`/`IS_MONO_DESIGN` from `~/config/designVariant` only in switch points, and never read `import.meta.env.VITE_DESIGN_VARIANT` directly. A switch point is for markup that differs between variants: do not render both versions and hide one with `hidden`/`mono:hidden`.
   - For a small difference (an icon, a prop such as `forceMount`), choose it with `IS_MONO_DESIGN` in the component, e.g. `const RemoveIcon = IS_MONO_DESIGN ? CircleX : XIcon;`.
   - For a different layout, fork the component into a `mono/` folder, choose it in one place, and keep the same props and `data-testid` values.
+  - Exception: `Badge` (`app/components/ui/badge.tsx`) picks a separate mono cva with `IS_MONO_DESIGN` because its variants look entirely different in mono. As a result, call-site `className` still wins over its mono styles, so call sites need no `mono:` repeats. Keep both cva configs in sync when adding a variant.
 - Do not use client or customer names in variant names, code, comments, or docs.
 
 ## Important Flows

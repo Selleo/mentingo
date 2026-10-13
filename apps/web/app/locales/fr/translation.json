@@ -5079,7 +5079,9 @@
   "pagination": {
     "showing": "Affichage de {{startItem}}-{{endItem}} sur {{totalItems}} résultats",
     "rowsPerPage": "Lignes par page :",
-    "itemsRange": "{{startItem}}-{{endItem}} sur {{totalItems}} éléments",
+    "itemsRange_one": "{{startItem}}-{{endItem}} sur {{count}} élément",
+    "itemsRange_many": "{{startItem}}-{{endItem}} sur {{count}} éléments",
+    "itemsRange_other": "{{startItem}}-{{endItem}} sur {{count}} éléments",
     "previous": "Précédent",
     "next": "Suivant",
     "noData": "Aucune donnée trouvée"

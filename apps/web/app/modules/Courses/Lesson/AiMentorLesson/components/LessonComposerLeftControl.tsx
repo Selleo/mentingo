@@ -23,7 +23,7 @@ export function LessonComposerLeftControl({
       type="button"
       variant={isVoiceMode ? "ghost" : "default"}
       onClick={isVoiceMode ? onCloseVoiceMode : onToggleEmojiPicker}
-      className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 text-neutral-700 shadow-sm mono:text-neutral-700 mono:hover:bg-white mono:hover:opacity-90 mono:focus-visible:bg-white mono:active:bg-white"
+      className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 text-neutral-700 shadow-sm mono:rounded-full mono:text-neutral-700 mono:hover:bg-white mono:hover:opacity-90 mono:focus-visible:bg-white mono:active:bg-white"
       aria-label={isVoiceMode ? closeVoiceModeLabel : addEmojiLabel}
     >
       <AnimatePresence initial={false} mode="wait">

@@ -6,11 +6,10 @@ Glossary for the web app's interface design.
 
 - **Design variant** — the interface design of a web build, set at build time with `VITE_DESIGN_VARIANT`. Every tenant served by the build shares it.
 - **Default variant** — the current UI. Must stay visually unchanged.
-- **Mono variant** — monospace UI text, 4px controls, 8px surfaces, flat cards, blue brand by default. It restyles shared components and redesigns only the redesigned layouts below.
+- **Mono variant** — monospace UI text, 4px controls, 8px surfaces, flat cards, blue brand by default. It restyles shared components and the app shell; page layouts stay as in the default variant.
 - **Mono classes** — `mono:`-prefixed Tailwind classes in a component's own file. They apply only under `data-design-variant="mono"`.
 - **Variant fork** — a mono copy of a component in a `mono/` folder, used only when markup differs and chosen in one switch point.
-- **Redesigned layout** — the logged-in app shell (sidebar + top bar), the page header and the auth pages. The courses page keeps its layout.
-- **Top bar** — part of the mono app shell: global search on the left, user menu on the right. The tenant logo stays in the sidebar.
+- **App shell** — the logged-in sidebar with the tenant logo, global search, navigation and user menu. Mono restyles it without changing its structure.
 
 ## Brand color
 
@@ -18,7 +17,7 @@ Glossary for the web app's interface design.
 
 ## Typography
 
-- **UI text** — headings, navigation, tables, form values: Noto Sans Mono Condensed in mono. The Figma file uses Roboto Mono as a stand-in.
+- **UI text** — headings, navigation, tables, form values: Noto Sans Mono at condensed width in mono.
 - **Control text** — button labels, status badges, table headers: Roboto in mono.
 - **Long-form content** — editor content such as lessons, articles and news: Roboto in mono, never monospace.
 

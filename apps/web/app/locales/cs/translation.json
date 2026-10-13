@@ -5491,7 +5491,10 @@
   "pagination": {
     "showing": "Zobrazuje se {{startItem}}-{{endItem}} z {{totalItems}} výsledků",
     "rowsPerPage": "Řádků na stránku:",
-    "itemsRange": "{{startItem}}-{{endItem}} z {{totalItems}} položek",
+    "itemsRange_one": "{{startItem}}-{{endItem}} z {{count}} položky",
+    "itemsRange_few": "{{startItem}}-{{endItem}} z {{count}} položek",
+    "itemsRange_many": "{{startItem}}-{{endItem}} z {{count}} položky",
+    "itemsRange_other": "{{startItem}}-{{endItem}} z {{count}} položek",
     "previous": "Předchozí",
     "next": "Další",
     "noData": "Nebyla nalezena žádná data"

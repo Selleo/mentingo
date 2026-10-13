@@ -68,7 +68,7 @@ export const GroupUnenrollModal = ({
           <Button
             variant="outline"
             disabled={!enrolledGroups?.length}
-            className="gap-2 text-error-700 hover:text-error-700 mono:text-error-500 mono:hover:text-error-500"
+            className="gap-2 text-error-700 hover:text-error-700 mono:text-error-500 mono:hover:bg-error-50 mono:hover:text-error-500 mono:focus-visible:bg-error-50 mono:active:bg-error-100"
           >
             <Minus className="size-4 text-error-700 mono:text-current" />
             {t("adminCourseView.enrolled.unenrollGroups")}

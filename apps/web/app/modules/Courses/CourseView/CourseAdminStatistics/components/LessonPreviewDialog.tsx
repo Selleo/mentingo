@@ -208,7 +208,7 @@ export default function LessonPreviewDialog({
                   data-testid={COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_TASK_DESCRIPTION_BUTTON}
                   type="button"
                   variant="outline"
-                  className="h-9 min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 sm:text-sm"
+                  className="h-9 min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 sm:text-sm mono:text-neutral-800 mono:hover:border-primary-200 mono:hover:text-primary-800"
                   disabled={!hasTaskDescription}
                   onClick={() => setShowTaskDialog(true)}
                 >
@@ -226,6 +226,7 @@ export default function LessonPreviewDialog({
                         variant="outline"
                         className={cn(
                           "h-9 w-full min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 disabled:pointer-events-none disabled:text-neutral-400 sm:text-sm",
+                          "mono:text-neutral-800 mono:hover:border-primary-200 mono:hover:text-primary-800",
                           {
                             "border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800":
                               aiMentorEvaluation?.passed === true,

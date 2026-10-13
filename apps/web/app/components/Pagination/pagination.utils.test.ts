@@ -30,6 +30,10 @@ describe("getPaginationRange", () => {
   it("shows every page when there are only a few", () => {
     expect(describeRange(2, 3)).toEqual(["1", "2", "3"]);
   });
+
+  it("keeps the last page reachable when the current page is past the end", () => {
+    expect(describeRange(5, 4)).toEqual(["1", "...2", "4"]);
+  });
 });
 
 describe("getItemsPerPageOptions", () => {

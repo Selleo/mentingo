@@ -303,6 +303,7 @@ video library for the tenant before starting the API container.
     - `AWS_ECR_REGISTRY`: The full URI for the `tenant/<client>/api` ECR repository.
     - `AWS_ECR_REGISTRY_WEB`: The full URI for the `tenant/<client>/ui` ECR repository.
     - (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY`, `POSTHOG_KEY`, `POSTHOG_HOST` and Sentry keys as needed).
+    - (Optional) To build the web image with the `mono` interface design, add a repository variable (not a secret) `VITE_DESIGN_VARIANT` set to `mono`. Leave it unset for the default design.
 
 3.  If you want your E2E tests to work, create environment called `e2e` and then add these secrets:
 
@@ -432,6 +433,7 @@ video library for the tenant before starting the API container.
               VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
               VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
               VITE_POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
+              VITE_DESIGN_VARIANT: ${{ vars.VITE_DESIGN_VARIANT }}
             run: |
               docker build -f ./web.Dockerfile \
                 --build-arg VERSION=$IMAGE_TAG \
@@ -439,6 +441,7 @@ video library for the tenant before starting the API container.
                 --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
                 --build-arg VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY \
                 --build-arg VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST \
+                --build-arg VITE_DESIGN_VARIANT=$VITE_DESIGN_VARIANT \
                 -t $ECR_REGISTRY:$IMAGE_TAG .
               docker tag $ECR_REGISTRY:$IMAGE_TAG $ECR_REGISTRY:latest
               docker push $ECR_REGISTRY:$IMAGE_TAG

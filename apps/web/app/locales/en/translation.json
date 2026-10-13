@@ -5356,7 +5356,8 @@
   "pagination": {
     "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",
     "rowsPerPage": "Rows per page:",
-    "itemsRange": "{{startItem}}-{{endItem}} of {{totalItems}} items",
+    "itemsRange_one": "{{startItem}}-{{endItem}} of {{count}} item",
+    "itemsRange_other": "{{startItem}}-{{endItem}} of {{count}} items",
     "previous": "Previous",
     "next": "Next",
     "noData": "No data found"

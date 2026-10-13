@@ -12,7 +12,7 @@ import { version } from "~/../version.json";
 
 import { PlatformFavicon } from "./components/PlatformFavicon";
 import { Toaster } from "./components/ui/toaster";
-import { DESIGN_VARIANT } from "./config/designVariant";
+import { DESIGN_VARIANT, IS_MONO_DESIGN } from "./config/designVariant";
 import { useNavigationTracker } from "./hooks/useNavigationTracker";
 import css from "./index.css?url";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
@@ -21,12 +21,17 @@ import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
 
 import type { LinksFunction } from "@remix-run/node";
 
+// Loaded only in mono builds, so default builds don't fetch fonts they never use
+const MONO_FONTS_URL =
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wdth,wght@62.5..100,400..600&family=Roboto:wght@400;500;600&display=swap";
+
 export const links: LinksFunction = () => {
   return [
     { rel: "icon", href: "/app-signet.svg", type: "image/svg+xml" },
     { rel: "shortcut icon", href: "/app-signet.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", href: "/app-signet.svg" },
     { rel: "manifest", href: "/api/settings/manifest.webmanifest" },
+    ...(IS_MONO_DESIGN ? [{ rel: "stylesheet", href: MONO_FONTS_URL }] : []),
     { rel: "stylesheet", href: css },
   ];
 };

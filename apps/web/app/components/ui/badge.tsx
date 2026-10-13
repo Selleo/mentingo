@@ -120,12 +120,7 @@ export const Badge = ({
       )}
       {...props}
     >
-      {icon && (
-        <Icon
-          name={icon}
-          {...(iconClasses && { className: cn(iconClasses, children && "mono:size-3.5") })}
-        />
-      )}
+      {icon && <Icon name={icon} {...(iconClasses && { className: iconClasses })} />}
       {children ? children : null}
     </div>
   );

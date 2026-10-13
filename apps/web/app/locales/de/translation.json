@@ -5483,7 +5483,8 @@
   "pagination": {
     "showing": "Es werden {{startItem}}-{{endItem}} von {{totalItems}} Ergebnissen angezeigt",
     "rowsPerPage": "Zeilen pro Seite:",
-    "itemsRange": "{{startItem}}-{{endItem}} von {{totalItems}} Einträgen",
+    "itemsRange_one": "{{startItem}}-{{endItem}} von {{count}} Eintrag",
+    "itemsRange_other": "{{startItem}}-{{endItem}} von {{count}} Einträgen",
     "previous": "Vorherige",
     "next": "Nächste",
     "noData": "Keine Daten gefunden"

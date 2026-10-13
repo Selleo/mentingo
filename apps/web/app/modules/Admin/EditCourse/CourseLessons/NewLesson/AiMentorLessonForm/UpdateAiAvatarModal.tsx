@@ -136,7 +136,7 @@ const UpdateAiAvatarModal = ({
                   type="button"
                   size="icon"
                   onClick={handleRemove}
-                  className="absolute left-0 bottom-0 text-contrast bg-primary size-8 rounded-full shadow-md"
+                  className="absolute left-0 bottom-0 text-contrast bg-primary size-8 rounded-full shadow-md mono:rounded-full"
                   title={t("common.button.delete")}
                 >
                   <Minus className="size-8" />

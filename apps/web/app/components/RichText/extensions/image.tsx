@@ -68,7 +68,7 @@ const ImageEditorView = ({ node, editor, getPos }: NodeViewProps) => {
             type="button"
             size="xs"
             variant="ghost"
-            className="rounded-full text-neutral-500 hover:bg-neutral-200"
+            className="rounded-full text-neutral-500 hover:bg-neutral-200 mono:rounded-full"
             aria-label={t("richText.image.ariaLabel.drag")}
             data-drag-handle
           >

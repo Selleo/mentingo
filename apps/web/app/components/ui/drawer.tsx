@@ -26,7 +26,7 @@ const DrawerOverlay = React.forwardRef<
     className={cn(
       "fixed inset-0 z-50 bg-black/80",
       "mono:bg-neutral-700 mono:opacity-70",
-      className
+      className,
     )}
     {...props}
   />

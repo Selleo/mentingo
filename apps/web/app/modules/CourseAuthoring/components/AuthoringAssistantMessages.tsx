@@ -144,7 +144,7 @@ const AuthoringQuestionCard = ({
           type="button"
           variant="outline"
           size="xs"
-          className="h-7 border-primary-300 bg-primary-50 px-2.5 font-medium text-primary-800 hover:border-primary-500 hover:bg-primary-100"
+          className="h-7 border-primary-300 bg-primary-50 px-2.5 font-medium text-primary-800 hover:border-primary-500 hover:bg-primary-100 mono:text-primary-800 mono:hover:border-primary-500 mono:hover:bg-primary-100 mono:hover:text-accent-foreground"
           disabled={submitting || !onAnswer}
           onClick={() => void submit("allow")}
         >
@@ -154,7 +154,7 @@ const AuthoringQuestionCard = ({
           type="button"
           variant="outline"
           size="xs"
-          className="h-7 border-neutral-300 bg-white px-2.5 text-neutral-700 hover:border-neutral-500 hover:bg-neutral-100"
+          className="h-7 border-neutral-300 bg-white px-2.5 text-neutral-700 hover:border-neutral-500 hover:bg-neutral-100 mono:text-neutral-700 mono:hover:border-neutral-500 mono:hover:bg-neutral-100 mono:hover:text-accent-foreground mono:focus-visible:bg-neutral-100 mono:active:bg-neutral-100"
           disabled={submitting || !onAnswer}
           onClick={() => void submit("deny")}
         >

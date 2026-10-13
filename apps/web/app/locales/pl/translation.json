@@ -5393,7 +5393,10 @@
   "pagination": {
     "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",
     "rowsPerPage": "Liczba wierszy na stronie:",
-    "itemsRange": "{{startItem}}-{{endItem}} z {{totalItems}} elementów",
+    "itemsRange_one": "{{startItem}}-{{endItem}} z {{count}} elementu",
+    "itemsRange_few": "{{startItem}}-{{endItem}} z {{count}} elementów",
+    "itemsRange_many": "{{startItem}}-{{endItem}} z {{count}} elementów",
+    "itemsRange_other": "{{startItem}}-{{endItem}} z {{count}} elementów",
     "previous": "Poprzedni",
     "next": "Następny",
     "noData": "Nie znaleziono danych"

@@ -5487,7 +5487,10 @@
   "pagination": {
     "showing": "Rodoma {{startItem}}-{{endItem}} iš {{totalItems}} rezultatų",
     "rowsPerPage": "Eilučių puslapyje:",
-    "itemsRange": "{{startItem}}-{{endItem}} iš {{totalItems}} įrašų",
+    "itemsRange_one": "{{startItem}}-{{endItem}} iš {{count}} įrašo",
+    "itemsRange_few": "{{startItem}}-{{endItem}} iš {{count}} įrašų",
+    "itemsRange_many": "{{startItem}}-{{endItem}} iš {{count}} įrašo",
+    "itemsRange_other": "{{startItem}}-{{endItem}} iš {{count}} įrašų",
     "previous": "Ankstesnis",
     "next": "Kitas",
     "noData": "Duomenų nerasta"

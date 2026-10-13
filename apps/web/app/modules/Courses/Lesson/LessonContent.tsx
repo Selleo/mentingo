@@ -247,7 +247,7 @@ export const LessonContent = ({
               <div className="flex flex-row gap-x-4">
                 <Button
                   variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0 mono:disabled:opacity-0"
                   disabled={isPreviousDisabled || isFirstLesson}
                   onClick={handlePrevious}
                 >
@@ -257,7 +257,7 @@ export const LessonContent = ({
                   data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
                   variant="outline"
                   disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0 mono:disabled:opacity-0"
                   onClick={handleNext}
                 >
                   <Icon name="ArrowRight" className="h-auto w-4" />

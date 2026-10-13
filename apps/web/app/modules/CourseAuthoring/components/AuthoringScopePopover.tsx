@@ -131,7 +131,7 @@ export const AuthoringScopePopover = ({
           type="button"
           variant="outline"
           size="sm"
-          className="max-w-52 gap-1.5 border-neutral-200 bg-white text-neutral-700 shadow-none hover:bg-primary-50 hover:text-primary-800"
+          className="max-w-52 gap-1.5 border-neutral-200 bg-white text-neutral-700 shadow-none hover:bg-primary-50 hover:text-primary-800 mono:text-neutral-700 mono:hover:border-primary-500 mono:hover:text-primary-800"
           disabled={disabled}
           data-vaul-no-drag
           data-testid="course-authoring-scope-trigger"

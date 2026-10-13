@@ -111,11 +111,7 @@ export const CourseEnrolled = ({
 
   const queryParams = useMemo(() => {
     const sort = tanstackSortingToParam(sorting) as UsersEnrolledSearchParams["sort"];
-    // TEMP design test: keep the fake "Group number …" options out of the API request.
-    const realGroups = searchParams.groups?.filter(
-      ({ value }) => !value.startsWith("Group number"),
-    );
-    return { ...searchParams, groups: realGroups?.length ? realGroups : undefined, sort };
+    return { ...searchParams, sort };
   }, [searchParams, sorting]);
 
   const { data: usersResponse } = useAllUsersEnrolledSuspense(courseId, queryParams);
@@ -299,12 +295,7 @@ export const CourseEnrolled = ({
       testId: COURSE_ENROLLED_HANDLES.GROUPS_FILTER,
       optionTestId: (option) => COURSE_ENROLLED_HANDLES.groupFilterOption(option.value),
       options:
-        [
-          ...(groupData ?? []),
-          { id: "Group number one", name: "Group number one" },
-          { id: "Group number two", name: "Group number two" },
-          { id: "Group number three", name: "Group number three" },
-        ].map((item) => ({
+        groupData.map((item) => ({
           value: item.id,
           label: item.name,
         })) ?? [],

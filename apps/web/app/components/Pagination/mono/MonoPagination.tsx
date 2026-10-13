@@ -85,7 +85,7 @@ export const MonoPagination = ({
             </Select>
           </div>
         )}
-        <span>{t("pagination.itemsRange", { startItem, endItem, totalItems })}</span>
+        <span>{t("pagination.itemsRange", { startItem, endItem, count: totalItems })}</span>
       </div>
       <div className="flex items-center justify-center gap-2 sm:justify-start">
         <Button

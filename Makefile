@@ -72,6 +72,7 @@ docker-build-web:
 		--build-arg VITE_SLACK_OAUTH_ENABLED=$${VITE_SLACK_OAUTH_ENABLED:-} \
 		--build-arg VITE_POSTHOG_KEY=$${VITE_POSTHOG_KEY:-} \
 		--build-arg VITE_POSTHOG_HOST=$${VITE_POSTHOG_HOST:-} \
+		--build-arg VITE_DESIGN_VARIANT=$${VITE_DESIGN_VARIANT:-} \
 		-t $(WEB_IMAGE) .
 
 .PHONY: docker-build
