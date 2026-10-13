@@ -314,6 +314,8 @@ jobs:
         run: pnpm -w packages:build
 
       - name: Run E2E tests
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
         run: pnpm --filter=api exec jest --config ./test/jest-e2e.json --shard=${{ matrix.shard }}/4
 
       - name: Stop RustFS
