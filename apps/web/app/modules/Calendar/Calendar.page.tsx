@@ -2,26 +2,25 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { redirect } from "@remix-run/react";
+import { Navigate } from "@remix-run/react";
 import { CALENDAR_EVENT_SOURCE_TYPES, PERMISSIONS } from "@repo/shared";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useSyncMicrosoftCalendar } from "~/api/mutations/calendar/useSyncMicrosoftCalendar";
-import { currentUserQueryOptions } from "~/api/queries";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
 import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
+import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CALENDAR_HANDLES } from "../../../e2e/data/live-training/handles";
@@ -50,7 +49,6 @@ import type {
 } from "@fullcalendar/core";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: calendarStyles }];
 
@@ -80,26 +78,25 @@ const getCalendarView = (viewType: string) => {
   }
 };
 
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  const currentUserResponse = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-  const currentUser = currentUserResponse?.data;
-
-  if (!currentUser) {
-    saveEntryToNavigationHistory(request);
-    throw redirect("/auth/login");
-  }
-
-  const canReadCalendar = hasPermission(currentUser.permissions, PERMISSIONS.CALENDAR_READ);
-
-  if (!canReadCalendar) {
-    throw redirect("/");
-  }
-
-  return null;
-};
-
 export default function CalendarPage() {
+  return (
+    <RequireAuthenticatedUser>
+      <CalendarAccess />
+    </RequireAuthenticatedUser>
+  );
+}
+
+function CalendarAccess() {
+  const { data: currentUser } = useCurrentUserSuspense();
+
+  if (!hasPermission(currentUser.permissions, PERMISSIONS.CALENDAR_READ)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <CalendarContent />;
+}
+
+function CalendarContent() {
   const { t } = useTranslation();
   const [calendarState, dispatchCalendarAction] = useReducer(calendarReducer, initialCalendarState);
   const calendarRef = useRef<FullCalendar>(null);

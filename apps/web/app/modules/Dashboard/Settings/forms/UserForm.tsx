@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useUpdateUser } from "~/api/mutations/useUpdateUser";
-import { currentUserQueryOptions, useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
-import { queryClient } from "~/api/queryClient";
+import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -20,11 +19,6 @@ import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
 import type { UpdateUserBody } from "~/api/generated-api";
-
-export const clientLoader = async () => {
-  await queryClient.prefetchQuery(currentUserQueryOptions);
-  return null;
-};
 
 const updateUserSchema = z.object({
   email: z.string().email(),

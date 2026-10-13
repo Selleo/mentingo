@@ -14,8 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import { useDeleteCategory } from "~/api/mutations/admin/useDeleteCategory";
 import { useDeleteManyCategories } from "~/api/mutations/admin/useDeleteManyCategories";
-import { useCategoriesSuspense, usersQueryOptions } from "~/api/queries";
-import { queryClient } from "~/api/queryClient";
+import { useCategoriesSuspense } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import {
@@ -52,12 +51,6 @@ import { getCategoriesColumns } from "./categories.columns";
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.categories");
-
-export const clientLoader = async () => {
-  await queryClient.prefetchQuery(usersQueryOptions());
-
-  return null;
-};
 
 const Categories = () => {
   const { t } = useTranslation();

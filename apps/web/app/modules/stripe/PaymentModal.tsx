@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { courseQueryOptions } from "~/api/queries";
-import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
+import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
 import { Button } from "~/components/ui/button";
@@ -14,11 +14,6 @@ import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
 import { useStripePromise } from "./hooks/useStripePromise";
-
-export const clientLoader = async () => {
-  await queryClient.prefetchQuery(currentUserQueryOptions);
-  return null;
-};
 
 type PaymentModalProps = {
   coursePrice: number;
@@ -37,7 +32,7 @@ export function PaymentModal({
   courseDescription,
   coursePriceId,
 }: PaymentModalProps) {
-  const { data: currentUser } = useCurrentUser();
+  const { data: currentUser } = useCurrentUserSessionSuspense();
   const [showCheckout, setShowCheckout] = useState(false);
   const stripePromise = useStripePromise();
   const { t } = useTranslation();

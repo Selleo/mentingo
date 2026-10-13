@@ -1,15 +1,13 @@
-import { type MetaFunction, Outlet, redirect, useLocation, useNavigate } from "@remix-run/react";
+import { type MetaFunction, Outlet, useLocation, useNavigate } from "@remix-run/react";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { Suspense, useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
-import { currentUserQueryOptions } from "~/api/queries";
-import { queryClient } from "~/api/queryClient";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
@@ -17,22 +15,6 @@ import Loader from "../common/Loader/Loader";
 import type { PropsWithChildren } from "react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.admin");
-
-export const clientLoader = async ({ request }: { request: Request }) => {
-  try {
-    const user = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-    if (!user) {
-      saveEntryToNavigationHistory(request);
-
-      throw redirect("/auth/login");
-    }
-  } catch (error) {
-    throw redirect("/auth/login");
-  }
-
-  return null;
-};
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
   const { permissions } = usePermissions();
@@ -93,11 +75,13 @@ const AdminLayout = () => {
       })}
     >
       <Suspense fallback={<Loader />}>
-        <AdminGuard>
-          <RouteGuard>
-            <Outlet />
-          </RouteGuard>
-        </AdminGuard>
+        <RequireAuthenticatedUser>
+          <AdminGuard>
+            <RouteGuard>
+              <Outlet />
+            </RouteGuard>
+          </AdminGuard>
+        </RequireAuthenticatedUser>
       </Suspense>
     </main>
   );
