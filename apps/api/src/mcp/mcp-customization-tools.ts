@@ -28,7 +28,6 @@ export const MCP_CUSTOMIZATION_TOOL_NAMES = [
   "update_platform_age_limit",
   "update_platform_featured_course",
   "update_platform_live_training_capacity",
-  "toggle_platform_email_trigger",
   "request_platform_image_upload",
   "remove_platform_image",
   "list_platform_login_documents",
@@ -225,20 +224,6 @@ export function registerMcpCustomizationTools(
           ),
         ),
       })),
-  );
-  server.registerTool(
-    "toggle_platform_email_trigger",
-    {
-      description:
-        "Toggle a learner notification email trigger. Read current customization first; each call flips the boolean, so do not retry blindly.",
-      inputSchema: asMcpInputSchema(Schemas.customizationEmailTriggerInputSchema),
-      annotations: { ...write, idempotentHint: false },
-    },
-    async (input) =>
-      run(permissions, async (actor) => {
-        const updated = await service.updateUserEmailTriggers(input.trigger, actor);
-        return { settings: customizationSettings(updated) };
-      }),
   );
   server.registerTool(
     "request_platform_image_upload",

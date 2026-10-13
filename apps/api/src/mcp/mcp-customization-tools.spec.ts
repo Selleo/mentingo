@@ -163,14 +163,11 @@ describe("MCP platform customization", () => {
     });
   });
 
-  it("retains explicit toggles with retry keys and actor-bound image removal", async () => {
+  it("retains explicit feature toggles with retry keys and actor-bound image removal", async () => {
     const { handlers, service } = setup();
     expect(Value.Check(Schemas.customizationFlagInputSchema, { setting: "calendarEnabled" })).toBe(
       false,
     );
-    expect(
-      Value.Check(Schemas.customizationEmailTriggerInputSchema, { trigger: "userFirstLogin" }),
-    ).toBe(false);
     await handlers.get("toggle_platform_customization_flag")!({
       setting: "calendarEnabled",
       idempotencyKey: "calendar-op",

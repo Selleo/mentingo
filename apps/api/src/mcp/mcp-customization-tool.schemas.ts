@@ -9,10 +9,7 @@ import { UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { updateRegistrationFormSchema } from "src/settings/schemas/registration-form.schema";
-import {
-  companyInformationJSONSchema,
-  userEmailTriggersJSONSchema,
-} from "src/settings/schemas/settings.schema";
+import { companyInformationJSONSchema } from "src/settings/schemas/settings.schema";
 import {
   updateAgeLimitSchema,
   updateDefaultCourseCurrencySchema,
@@ -42,13 +39,6 @@ export const customizationAgeLimitInputSchema = strict(updateAgeLimitSchema);
 export const customizationFeaturedCourseInputSchema = strict(updateFeaturedCourseSchema);
 export const customizationLiveTrainingCapacityInputSchema = strict(
   updateLiveTrainingMaxParallelSessionsSchema,
-);
-export const customizationEmailTriggerInputSchema = Type.Object(
-  {
-    trigger: Type.KeyOf(userEmailTriggersJSONSchema),
-    idempotencyKey: Type.String({ minLength: 1, maxLength: 200 }),
-  },
-  { additionalProperties: false },
 );
 export const customizationFlagInputSchema = Type.Object(
   {

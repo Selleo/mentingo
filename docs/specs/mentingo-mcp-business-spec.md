@@ -30,7 +30,7 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Maintain content in the languages available for the target course or editorial resource.
 - Search accessible courses, lessons, development paths, news, articles, Q&A, users, categories, and groups in a supported language.
 - Read and update existing users, group memberships, and roles; create, read, and update groups and translations. User creation/import, archiving/deletion, group deletion, and credential operations are excluded.
-- Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, email triggers, branding images, and public login documents. SSO and MFA settings are excluded.
+- Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, branding images, and public login documents. SSO and MFA settings are excluded.
 - Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
 ## End-User Value
