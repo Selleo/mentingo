@@ -11,6 +11,7 @@
     "platformLogo": "Logotipo de la plataforma",
     "title": "¿Conectar {{clientName}} con Mentingo?",
     "description": "Este asistente puede usar Mentingo según tus permisos actuales.",
+    "searchDescription": "Permite que este asistente busque información accesible de cursos, artículos de conocimiento, noticias y preguntas y respuestas, y devuelva enlaces a Mentingo. No puede modificar contenido, obtener contenido de lecciones ni utilizar herramientas de administración.",
     "signedInAs": "Sesión iniciada como {{email}}",
     "redirectUri": "Se enviará acceso a: {{redirectUri}}",
     "allow": "Permitir",

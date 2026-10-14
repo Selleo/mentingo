@@ -75,8 +75,13 @@ import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
 import { registerMcpCustomizationTools } from "./mcp-customization-tools";
 import { registerMcpGenericUploadTool } from "./mcp-generic-upload-tools";
-import { MCP_GLOBAL_SEARCH_PERMISSIONS, registerMcpSearchTools } from "./mcp-search-tools";
+import {
+  MCP_CONTENT_SEARCH_PERMISSIONS,
+  MCP_GLOBAL_SEARCH_PERMISSIONS,
+  registerMcpSearchTools,
+} from "./mcp-search-tools";
 import { canListMcpTool } from "./mcp-tool-access";
+import { canUseMcpToolWithScopes, MCP_SCOPES } from "./mcp-tool-scope";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 import * as McpToolSchemas from "./mcp-tool.schemas";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
@@ -175,12 +180,20 @@ export class McpHttpService {
   ): McpServer {
     const server = new McpServer(
       { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
-      { instructions: MCP_UPLOAD_INSTRUCTIONS_SERVER },
+      {
+        instructions: actor.grant.scopes.includes(MCP_SCOPES.SEARCH)
+          ? "Search accessible Mentingo content and use the canonical result URLs. This connection cannot modify content or retrieve lesson content."
+          : MCP_UPLOAD_INSTRUCTIONS_SERVER,
+      },
     );
     const registerTool = server.registerTool.bind(server);
     server.registerTool = ((name: string, config: unknown, callback: unknown) => {
       const tool = Reflect.apply(registerTool, server, [name, config, callback]) as RegisteredTool;
-      if (!canListMcpTool(name, permissions, settings)) tool.disable();
+      const permissionsAllow =
+        name === "global_search" && actor.grant.scopes.includes(MCP_SCOPES.SEARCH)
+          ? hasAnyPermission(permissions, MCP_CONTENT_SEARCH_PERMISSIONS)
+          : canListMcpTool(name, permissions, settings);
+      if (!canUseMcpToolWithScopes(name, actor.grant.scopes) || !permissionsAllow) tool.disable();
       return tool;
     }) as typeof server.registerTool;
 
@@ -3180,6 +3193,10 @@ export class McpHttpService {
       server,
       (permissions, operation) => this.run(actor, permissions, operation),
       this.globalSearchService,
+      {
+        resource: actor.grant.resource,
+        searchOnly: actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
+      },
     );
 
     return server;
@@ -3199,6 +3216,9 @@ export class McpHttpService {
       permissions: [],
     };
     try {
+      if (!canUseMcpToolWithScopes(call?.tool ?? "unknown", actor.grant.scopes)) {
+        throw new ForbiddenException("MCP integration scope does not allow this tool");
+      }
       const access = await this.permissionsService.getUserAccess(actor.grant.userId);
       if (
         requiredPermissions.length > 0 &&

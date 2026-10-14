@@ -11,6 +11,7 @@
     "platformLogo": "Logo de la plateforme",
     "title": "Connecter {{clientName}} à Mentingo ?",
     "description": "Cet assistant peut utiliser Mentingo selon vos autorisations actuelles.",
+    "searchDescription": "Autorisez cet assistant à rechercher les informations accessibles sur les cours, les articles de connaissances, les actualités et les questions-réponses, et à fournir des liens vers Mentingo. Il ne peut pas modifier le contenu, récupérer le contenu des leçons ni utiliser les outils d’administration.",
     "signedInAs": "Connecté en tant que {{email}}",
     "redirectUri": "L'accès sera envoyé à : {{redirectUri}}",
     "allow": "Autoriser",

@@ -10,6 +10,7 @@ import { REDIS_CLIENT, type RedisClient } from "src/redis";
 import { ACCESS_TTL, CLIENT_TTL, CODE_TTL, CONSENT_TTL, REFRESH_TTL } from "./mcp-oauth.constants";
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
+import { MCP_SCOPES, isMcpScopeSet } from "./mcp-tool-scope";
 
 import type { McpConsentDetails } from "./mcp-oauth-consent.schema";
 import type {
@@ -42,8 +43,7 @@ export class McpOAuthService {
       getAuthorizationCode: (code) => this.getCode(code),
       revokeAuthorizationCode: async (code) =>
         (await this.redis.del(`mcp:oauth:code:${digest(code.authorizationCode)}`)) > 0,
-      validateScope: async (_user, _client, scope) =>
-        scope?.length === 1 && scope[0] === "authoring" ? scope : false,
+      validateScope: async (_user, _client, scope) => (isMcpScopeSet(scope) ? scope : false),
       validateRedirectUri: async (uri, client) => client.redirectUris?.includes(uri) ?? false,
       generateAccessToken: async () => randomBytes(32).toString("base64url"),
       generateRefreshToken: async () => randomBytes(32).toString("base64url"),
@@ -79,7 +79,7 @@ export class McpOAuthService {
       resource: resource.url,
       authorization_servers: [resource.origin],
       bearer_methods_supported: ["header"],
-      scopes_supported: ["authoring"],
+      scopes_supported: Object.values(MCP_SCOPES),
     };
   }
 
@@ -95,7 +95,7 @@ export class McpOAuthService {
       grant_types_supported: ["authorization_code", "refresh_token"],
       token_endpoint_auth_methods_supported: ["none"],
       code_challenge_methods_supported: ["S256"],
-      scopes_supported: ["authoring"],
+      scopes_supported: Object.values(MCP_SCOPES),
     };
   }
 
@@ -148,6 +148,7 @@ export class McpOAuthService {
 
   async authorizationPage(req: Request, res: Response): Promise<void> {
     const query = this.stringParams(req.query);
+    const scope = query.scope ?? MCP_SCOPES.AUTHORING;
     const resource = await this.resources.fromRequest(req);
     const client = query.client_id ? await this.getClient(query.client_id, "") : null;
     if (
@@ -157,7 +158,8 @@ export class McpOAuthService {
       !client.redirectUris?.includes(query.redirect_uri) ||
       query.resource !== resource.url ||
       query.response_type !== "code" ||
-      (query.scope !== undefined && query.scope !== "authoring") ||
+      (req.query.scope !== undefined && typeof req.query.scope !== "string") ||
+      !isMcpScopeSet([scope]) ||
       query.code_challenge_method !== "S256" ||
       !/^[A-Za-z0-9_-]{43,128}$/.test(query.code_challenge ?? "") ||
       !query.state
@@ -181,7 +183,7 @@ export class McpOAuthService {
       `mcp:oauth:consent:${digest(nonce)}`,
       JSON.stringify({
         userId: user.userId,
-        query: { ...query, scope: "authoring" },
+        query: { ...query, scope },
       } satisfies ConsentRequest),
       { EX: CONSENT_TTL },
     );
@@ -196,7 +198,11 @@ export class McpOAuthService {
     const raw = await this.redis.get(`mcp:oauth:consent:${digest(nonce)}`);
     if (!raw) throw new NotFoundException("Connection request expired or invalid");
     const consent = JSON.parse(raw) as ConsentRequest;
-    if (consent.userId !== user.userId || consent.query.resource !== resource.url) {
+    if (
+      consent.userId !== user.userId ||
+      consent.query.resource !== resource.url ||
+      !isMcpScopeSet([consent.query.scope ?? MCP_SCOPES.AUTHORING])
+    ) {
       throw new NotFoundException("Connection request expired or invalid");
     }
     const client = consent.query.client_id
@@ -210,6 +216,7 @@ export class McpOAuthService {
       clientId: client.id,
       redirectUri: consent.query.redirect_uri,
       accountEmail: user.email,
+      scope: consent.query.scope === MCP_SCOPES.SEARCH ? MCP_SCOPES.SEARCH : MCP_SCOPES.AUTHORING,
     };
   }
 
@@ -227,7 +234,11 @@ export class McpOAuthService {
       return;
     }
     const consent = JSON.parse(raw) as ConsentRequest;
-    if (consent.userId !== user.userId || consent.query.resource !== resource.url) {
+    if (
+      consent.userId !== user.userId ||
+      consent.query.resource !== resource.url ||
+      !isMcpScopeSet([consent.query.scope ?? MCP_SCOPES.AUTHORING])
+    ) {
       res.status(403).json({ error: "access_denied" });
       return;
     }
@@ -239,7 +250,11 @@ export class McpOAuthService {
     const oauthRequest = new OAuth2Server.Request({
       method: "GET",
       headers: {},
-      query: { ...consent.query, allowed: decision === "approve" ? "true" : "false" },
+      query: {
+        ...consent.query,
+        scope: consent.query.scope ?? MCP_SCOPES.AUTHORING,
+        allowed: decision === "approve" ? "true" : "false",
+      },
       body: {},
     });
     const oauthResponse = new OAuth2Server.Response();
@@ -266,10 +281,19 @@ export class McpOAuthService {
       res.status(400).json({ error: "invalid_target" });
       return;
     }
+    const requestedScope = req.body?.scope;
+    if (requestedScope !== undefined && !isMcpScopeSet([requestedScope])) {
+      res.status(400).json({ error: "invalid_scope" });
+      return;
+    }
     if (req.body?.grant_type === "authorization_code") {
       const code = typeof req.body.code === "string" ? await this.getCode(req.body.code) : false;
       if (!code || (code.user as McpUser).resource !== resource.url) {
         res.status(400).json({ error: "invalid_grant" });
+        return;
+      }
+      if (requestedScope !== undefined && requestedScope !== code.scope?.[0]) {
+        res.status(400).json({ error: "invalid_scope" });
         return;
       }
     }
@@ -280,6 +304,12 @@ export class McpOAuthService {
           : false;
       if (!refresh || (refresh.user as McpUser).resource !== resource.url) {
         res.status(400).json({ error: "invalid_grant" });
+        return;
+      }
+      // The OAuth library rotates before checking the requested scope. Reject
+      // scope changes first so escalation attempts cannot consume a valid grant.
+      if (requestedScope !== undefined && requestedScope !== refresh.scope?.[0]) {
+        res.status(400).json({ error: "invalid_scope" });
         return;
       }
     }
@@ -397,6 +427,7 @@ export class McpOAuthService {
     client: OAuth2Server.Client,
     user: OAuth2Server.User,
   ): Promise<OAuth2Server.AuthorizationCode> {
+    if (!isMcpScopeSet(code.scope)) throw new Error("Invalid MCP authorization scope");
     const result = { ...code, client, user } as OAuth2Server.AuthorizationCode;
     await this.redis.set(
       `mcp:oauth:code:${digest(code.authorizationCode)}`,
@@ -410,6 +441,7 @@ export class McpOAuthService {
     const raw = await this.redis.get(`mcp:oauth:code:${digest(code)}`);
     if (!raw) return false;
     const stored = JSON.parse(raw) as StoredCode;
+    if (!isMcpScopeSet(stored.scope)) return false;
     return { ...stored, expiresAt: new Date(stored.expiresAt) } as OAuth2Server.AuthorizationCode;
   }
 
@@ -418,6 +450,7 @@ export class McpOAuthService {
     client: OAuth2Server.Client,
     user: OAuth2Server.User,
   ): Promise<OAuth2Server.Token> {
+    if (!isMcpScopeSet(token.scope)) throw new Error("Invalid MCP token scope");
     const mcpUser = user as McpUser;
     const email = await this.mcpTokens.resolveIdentity(mcpUser.userId, mcpUser.tenantId);
     const resource = await this.resources.forTenant(mcpUser.tenantId);
@@ -427,7 +460,7 @@ export class McpOAuthService {
       tenantId: mcpUser.tenantId,
       clientId: client.id,
       resource: mcpUser.resource,
-      scopes: token.scope ?? ["authoring"],
+      scopes: token.scope,
     });
     if (token.refreshToken && token.refreshTokenExpiresAt) {
       const refresh: OAuth2Server.RefreshToken = {
@@ -450,6 +483,7 @@ export class McpOAuthService {
     const raw = await this.redis.get(`mcp:oauth:refresh:${digest(token)}`);
     if (!raw) return false;
     const stored = JSON.parse(raw) as StoredRefresh;
+    if (!isMcpScopeSet(stored.scope)) return false;
     if (new Date(stored.refreshTokenExpiresAt).getTime() <= Date.now()) return false;
     if (
       !(await this.mcpTokens.resolveIdentity(

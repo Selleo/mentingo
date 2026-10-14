@@ -51,6 +51,36 @@ Choose HTTP/Streamable HTTP transport if the client asks. Start its sign-in flow
 
 Authentication uses your Mentingo account. You do not need to paste an integration administrator API key into the assistant. Use your client's disconnect controls when finished; clients that support token revocation can use Mentingo's OAuth revocation endpoint.
 
+## Search-only integrations
+
+Clients such as the Mentingo Slack assistant can request the OAuth `search` scope.
+Mentingo advertises both `search` and `authoring` through the same OAuth discovery
+metadata and uses the same MCP endpoint. The consent page explicitly describes
+search-only access. Clients that omit a scope keep the existing `authoring` default.
+
+A `search` token discovers only `global_search`, and only when the connected account
+has access to supported content. The same scope check applies to tool execution:
+calling a hidden write, administration or lesson tool directly is rejected. A refresh
+cannot upgrade a search grant to authoring. Do not infer capabilities from a client
+name or from `readOnlyHint`; the token's granted scope and the account's current
+permissions jointly decide access.
+
+Search-only results include course metadata, news, knowledge articles and Q&A. They
+exclude lessons, users, groups, categories and development paths. Course passages and
+attachment matches are omitted because a hybrid course hit may originate from a
+resource document. Editorial passages still follow the existing content permissions.
+Both keyword and hybrid search can be requested with the optional `mode` argument.
+
+MCP search results include canonical `url` fields using the tenant bound to the OAuth
+resource. For example, courses link to `/course/<id>`, articles to `/articles/<id>`, news
+to `/news/<id>`, and Q&A to `/qa?qaId=<id>`. The model can cite these links without
+inventing routes or guessing the tenant. Opening a link still uses the viewer's normal
+Mentingo login and access checks; a URL does not grant access. File download URLs are
+never constructed from IDs by this integration.
+
+The broader `authoring` search retains its existing groups and receives matching
+navigation URLs. These MCP additions do not change the REST global-search response.
+
 ## Check your access
 
 After connecting, return to the assistant and ask:

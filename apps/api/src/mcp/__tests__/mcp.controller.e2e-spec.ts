@@ -28,6 +28,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { McpTokenService } from "../mcp-token.service";
+import { MCP_SCOPES } from "../mcp-tool-scope";
 
 import type { UserWithCredentials } from "../../../test/factory/user.factory";
 import type { INestApplication } from "@nestjs/common";
@@ -108,13 +109,17 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     return response;
   }
 
-  async function issueClient(user: UserWithCredentials, host: string): Promise<Client> {
+  async function issueClient(
+    user: UserWithCredentials,
+    host: string,
+    scopes: string[] = [MCP_SCOPES.AUTHORING],
+  ): Promise<Client> {
     const token = await app.get(McpTokenService).issue({
       userId: user.id,
       tenantId: user.tenantId,
       clientId: "mcp-http-e2e",
       resource: `http://${host}/api/mcp`,
-      scopes: ["authoring"],
+      scopes,
     });
     return { token, host, tenantId: user.tenantId, user };
   }
@@ -203,6 +208,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       });
       articleId = article.id;
       newsId = news.id;
+      await app.get(SearchIndexService).refreshArticle(article.id);
+      await app.get(SearchIndexService).refreshNews(news.id);
       const course = await createCourseFactory(db).create({
         authorId: adminUser.id,
         title: "MCP localized hidden course",
@@ -307,6 +314,76 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       .set("Accept", "application/json, text/event-stream")
       .send({ jsonrpc: "2.0", id: ++seq, method: "tools/list" })
       .expect(401);
+  });
+
+  it("restricts an administrator's search token to global search at discovery and invocation", async () => {
+    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
+    const tools = (await rpc(search, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(tools).toEqual(["global_search"]);
+    // Explicit calls cannot regain the administrator's broader account permissions.
+    await rejectedCall("create_course", { title: "Forbidden search scope course" }, search);
+    await rejectedCall("list_users", {}, search);
+    await rejectedCall("get_lesson", { lessonId: randomUUID() }, search);
+    await rejectedCall("get_my_capabilities", {}, search);
+
+    const authoringTools = (await rpc(admin, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(authoringTools).toEqual(
+      expect.arrayContaining(["global_search", "create_course", "list_users", "get_lesson"]),
+    );
+  });
+
+  it("returns canonical tenant content links without lesson or directory groups for search scope", async () => {
+    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
+    const result = await call("global_search", { searchQuery: "MCP", language: "en" }, search);
+    for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
+      expect(result).not.toHaveProperty(excluded);
+    expect(result.allCourses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: draftCourseId,
+          url: `http://${admin.host}/course/${draftCourseId}`,
+        }),
+      ]),
+    );
+    expect(result.articles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: articleId,
+          url: `http://${admin.host}/articles/${articleId}`,
+        }),
+      ]),
+    );
+    expect(result.news).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: newsId, url: `http://${admin.host}/news/${newsId}` }),
+      ]),
+    );
+    for (const group of ["allCourses", "myCourses", "availableCourses"])
+      for (const course of result[group]) {
+        expect(course).not.toHaveProperty("matchedPassage");
+        expect(course).not.toHaveProperty("matchedAttachmentFileName");
+      }
+    expect(JSON.stringify(result)).not.toContain(target.email);
+    expect(JSON.stringify(result)).not.toContain(foreign.host);
+  });
+
+  it("rechecks current permissions for a search token instead of granting search access by scope", async () => {
+    const extra = await runAsTenant(admin.tenantId, () =>
+      createUserFactory(db)
+        .withAdminSettings(db)
+        .create({ tenantId: admin.tenantId, roleSlug: SYSTEM_ROLE_SLUGS.ADMIN }),
+    );
+    const search = await issueClient(extra, admin.host, [MCP_SCOPES.SEARCH]);
+    await baseDb.delete(permissionUserRoles).where(eq(permissionUserRoles.userId, extra.id));
+    const tools = (await rpc(search, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(tools).toEqual([]);
+    await rejectedCall("global_search", { searchQuery: "MCP", language: "en" }, search);
   });
 
   it("reads and updates existing users while rejecting archive and creation inputs", async () => {

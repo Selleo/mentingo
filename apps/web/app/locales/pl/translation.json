@@ -11,6 +11,7 @@
     "platformLogo": "Logo platformy",
     "title": "Połączyć {{clientName}} z Mentingo?",
     "description": "Ten asystent może korzystać z Mentingo zgodnie z Twoimi uprawnieniami.",
+    "searchDescription": "Zezwól temu asystentowi na wyszukiwanie dostępnych informacji o kursach, artykułów wiedzy, aktualności oraz pytań i odpowiedzi i zwracanie linków do Mentingo. Nie może zmieniać treści, pobierać treści lekcji ani używać narzędzi administracyjnych.",
     "signedInAs": "Zalogowano jako {{email}}",
     "redirectUri": "Dostęp zostanie przesłany do: {{redirectUri}}",
     "allow": "Zezwól",

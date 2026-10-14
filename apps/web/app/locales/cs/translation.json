@@ -11,6 +11,7 @@
     "platformLogo": "Logo platformy",
     "title": "Připojit {{clientName}} k Mentingo?",
     "description": "Tento asistent může používat Mentingo podle vašich aktuálních oprávnění.",
+    "searchDescription": "Povolte tomuto asistentovi vyhledávat dostupné informace o kurzech, znalostní články, novinky a otázky a odpovědi a vracet odkazy do Mentingo. Nemůže měnit obsah, získávat obsah lekcí ani používat nástroje pro správu.",
     "signedInAs": "Přihlášeni jako {{email}}",
     "redirectUri": "Přístup bude odeslán na: {{redirectUri}}",
     "allow": "Povolit",

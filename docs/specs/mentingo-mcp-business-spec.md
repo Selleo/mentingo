@@ -31,6 +31,8 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Search accessible courses, lessons, development paths, news, articles, Q&A, users, categories, and groups in a supported language.
 - Read and update existing users, group memberships, and roles; create, read, and update groups and translations. User creation/import, archiving/deletion, group deletion, and credential operations are excluded.
 - Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, branding images, and public login documents. SSO and MFA settings are excluded.
+- Open search results directly in the connected tenant using links returned by Mentingo.
+- Connect an assistant for content search only, with explicit consent and current account access; keep content editing and administration unavailable to that connection.
 - Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
 ## End-User Value
@@ -43,9 +45,16 @@ The editor connects their assistant, asks it to inspect the available content, a
 
 MCP writes take effect directly; this connection does not create a separate proposal awaiting approval inside Mentingo. To prepare training for review, explicitly request a draft course. Publication behaviour differs across content types: article creation publishes immediately, while news creation defaults to a draft.
 
-The editor adds the remote `https://<tenant-host>/api/mcp` endpoint in a supported MCP client. The client discovers Mentingo's OAuth metadata, registers as a public client, and opens Mentingo's connection page in the web app. The editor signs in with the existing Mentingo browser session and chooses Allow or Deny. The client can omit an explicit scope request; Mentingo assigns the internal `authoring` scope after consent. The client exchanges the one-use authorization code using PKCE. Mentingo stores the resulting opaque access and refresh grants in Redis, bound to the user, tenant, client, resource URL, scope, and expiry.
+The editor adds the remote `https://<tenant-host>/api/mcp` endpoint in a supported MCP client. The client discovers Mentingo's OAuth metadata, registers as a public client, and opens Mentingo's connection page in the web app. The editor signs in with the existing Mentingo browser session and chooses Allow or Deny. The client can request a search-only connection, which the consent page identifies before approval. A client that omits an explicit scope retains the existing `authoring` connection. The client exchanges the one-use authorization code using PKCE. Mentingo stores the resulting opaque access and refresh grants in Redis, bound to the user, tenant, client, resource URL, scope, and expiry.
 
 Each MCP HTTP request validates the access grant, active user and tenant, and resource audience. Mentingo reloads current roles, permissions, and tenant feature switches before advertising tools, then reloads permissions again for each tool call. Domain services still enforce ownership and entity rules. The MCP transport's session ID never serves as an authorization credential.
+
+A search-only assistant helps users find accessible course information, knowledge articles,
+news and Q&A, then open the result in Mentingo through a tenant-specific link. This
+connection cannot edit content, inspect lesson content or use administration tools, even
+when its paired account has broader permissions. Search-only course results exclude
+matched passages and attachment filenames that may come from supporting resources.
+Opening a returned link requires the viewer's own normal Mentingo access.
 
 Mutations that publish, delete, reorder, or change pricing, certificates, or media position check the current entity revision under a tenant-scoped row lock. Destructive calls also require exact title, type, ID, or child-ID confirmation as appropriate. Retried creates and path course additions require an idempotency key scoped to the tenant, user, client, tool, and input. MCP calls record the client, tool, entity ID where available, outcome, and request ID through the existing activity log queue. MCP errors return stable codes, HTTP status, and a readable message without leaking untranslated internal message keys.
 
@@ -77,6 +86,12 @@ Customization uses the existing platform services and upload validators. Boolean
 - Changes are persisted through existing domain services and their outbox, search, and resource behavior where those services provide it.
 
 ## Test Evidence
+
+Focused scope and OAuth tests cover search-only discovery, direct-call rejection,
+account-permission intersection, scope preservation and refresh escalation rejection.
+Result-shaping tests cover canonical tenant URLs and exclusion of lesson and directory
+data. Consent-page tests distinguish search-only approval from authoring approval.
+The real HTTP MCP suite includes the search-token flow against isolated infrastructure.
 
 Local validation includes the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
 

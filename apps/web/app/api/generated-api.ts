@@ -34868,6 +34868,7 @@ export interface GetConsentResponse {
     clientId: string;
     redirectUri: string;
     accountEmail: string;
+    scope: "authoring" | "search";
   };
 }
 

@@ -1,10 +1,13 @@
 import { Type, type Static } from "@sinclair/typebox";
 
+import { MCP_SCOPES } from "./mcp-tool-scope";
+
 export const mcpConsentDetailsSchema = Type.Object({
   clientName: Type.String(),
   clientId: Type.String(),
   redirectUri: Type.String(),
   accountEmail: Type.String(),
+  scope: Type.Enum(MCP_SCOPES),
 });
 
 export type McpConsentDetails = Static<typeof mcpConsentDetailsSchema>;

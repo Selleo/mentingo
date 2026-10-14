@@ -28,11 +28,12 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
       .set("Referer", `http://${host}/`);
   }
 
-  async function consent() {
+  async function consent(scope?: string) {
     const verifier = randomBytes(32).toString("base64url");
     const response = await http("/api/oauth/authorize")
       .set("Cookie", cookie)
       .query({
+        ...(scope ? { scope } : {}),
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: "code",
@@ -47,8 +48,8 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
     return { nonce: nonce!, verifier };
   }
 
-  async function authorizationCode() {
-    const pending = await consent();
+  async function authorizationCode(scope?: string) {
+    const pending = await consent(scope);
     const approved = await http("/api/oauth/authorize", "post")
       .set("Cookie", cookie)
       .type("form")
@@ -192,5 +193,48 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
       .set("Accept", "application/json, text/event-stream")
       .send({ jsonrpc: "2.0", id: 2, method: "tools/list" })
       .expect(401);
+  });
+
+  it("keeps a real search OAuth grant restricted through consent, exchange and refresh", async () => {
+    const auth = await authorizationCode("search");
+    const issued = await exchange(auth.code, auth.verifier).expect(200);
+    expect(issued.body.scope).toBe("search");
+    const refresh = issued.body.refresh_token as string;
+    const escalation = await http("/api/oauth/token", "post")
+      .type("form")
+      .send({
+        grant_type: "refresh_token",
+        refresh_token: refresh,
+        client_id: clientId,
+        resource: `http://${host}/api/mcp`,
+        scope: "authoring",
+      })
+      .expect(400);
+    expect(escalation.body.error).toBe("invalid_scope");
+    const renewed = await http("/api/oauth/token", "post")
+      .type("form")
+      .send({
+        grant_type: "refresh_token",
+        refresh_token: refresh,
+        client_id: clientId,
+        resource: `http://${host}/api/mcp`,
+      })
+      .expect(200);
+    expect(renewed.body.scope).toBe("search");
+    const listed = await http("/api/mcp", "post")
+      .set("Authorization", `Bearer ${renewed.body.access_token}`)
+      .set("Accept", "application/json, text/event-stream")
+      .send({ jsonrpc: "2.0", id: 3, method: "tools/list" })
+      .expect(200);
+    const body = listed.body?.jsonrpc
+      ? listed.body
+      : JSON.parse(
+          listed.text
+            .split(/\r?\n/)
+            .find((line: string) => line.startsWith("data:"))!
+            .slice(5)
+            .trim(),
+        );
+    expect(body.result.tools.map((tool: { name: string }) => tool.name)).toEqual(["global_search"]);
   });
 });

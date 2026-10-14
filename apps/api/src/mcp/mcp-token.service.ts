@@ -10,6 +10,7 @@ import { DB_ADMIN } from "src/storage/db/db.providers";
 import { credentials, tenants, users } from "src/storage/schema";
 
 import { McpResourceService } from "./mcp-resource.service";
+import { isMcpScopeSet } from "./mcp-tool-scope";
 
 import type { McpAccessGrant, McpToolActor } from "./mcp.types";
 
@@ -31,6 +32,7 @@ export class McpTokenService {
   }
 
   async store(token: string, grant: Omit<McpAccessGrant, "expiresAt">): Promise<void> {
+    if (!isMcpScopeSet(grant.scopes)) throw new Error("Invalid MCP token scope");
     const resource = await this.resources.forTenant(grant.tenantId);
     if (grant.resource !== resource.url) {
       throw new Error("MCP resource does not match the tenant");
@@ -57,11 +59,11 @@ export class McpTokenService {
       return null;
     }
 
+    if (!grant || !isMcpScopeSet(grant.scopes)) return null;
     if (grant.expiresAt <= Date.now() || (expectedResource && grant.resource !== expectedResource))
       return null;
     const resource = await this.resources.forTenant(grant.tenantId);
     if (grant.resource !== resource.url) return null;
-    if (!grant.scopes.includes("authoring")) return null;
     const email = await this.resolveIdentity(grant.userId, grant.tenantId);
     return email ? { grant, email } : null;
   }

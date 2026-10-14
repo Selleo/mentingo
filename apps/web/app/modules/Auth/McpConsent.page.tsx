@@ -34,7 +34,15 @@ export default function McpConsentPage() {
               ? t("mcpConnection.title", { clientName: data.clientName })
               : t("mcpConnection.unavailableTitle")}
           </CardTitle>
-          {data && <CardDescription>{t("mcpConnection.description")}</CardDescription>}
+          {data && (
+            <CardDescription>
+              {t(
+                data.scope === "search"
+                  ? "mcpConnection.searchDescription"
+                  : "mcpConnection.description",
+              )}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading && (

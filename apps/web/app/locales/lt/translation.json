@@ -11,6 +11,7 @@
     "platformLogo": "Platformos logotipas",
     "title": "Prijungti {{clientName}} prie Mentingo?",
     "description": "Šis asistentas gali naudotis Mentingo pagal jūsų dabartinius leidimus.",
+    "searchDescription": "Leiskite šiam asistentui ieškoti prieinamos kursų informacijos, žinių straipsnių, naujienų bei klausimų ir atsakymų ir pateikti nuorodas į Mentingo. Jis negali keisti turinio, gauti pamokų turinio ar naudoti administravimo įrankių.",
     "signedInAs": "Prisijungta kaip {{email}}",
     "redirectUri": "Prieiga bus siunčiama į: {{redirectUri}}",
     "allow": "Leisti",

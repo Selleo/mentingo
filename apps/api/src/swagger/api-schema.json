@@ -178080,13 +178080,26 @@
               },
               "accountEmail": {
                 "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "const": "authoring",
+                    "type": "string"
+                  },
+                  {
+                    "const": "search",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "clientName",
               "clientId",
               "redirectUri",
-              "accountEmail"
+              "accountEmail",
+              "scope"
             ]
           }
         },
