@@ -55,7 +55,9 @@ Authentication uses your Mentingo account. You do not need to paste an integrati
 Standard clients can connect without choosing scopes. An omitted OAuth `scope`
 becomes `account:access`, which exposes the MCP tools allowed by the connected
 account's current permissions and the organisation's enabled features. It never
-adds account permissions. Every new authorization requires consent, including
+adds account permissions. The protected-resource challenge requests `account:access`
+for standard clients; discovery still lists every supported optional scope so clients
+can deliberately request a narrower grant. Every new authorization requires consent, including
 repeat connections; the consent screen explains that account access includes reads
 and changes.
 

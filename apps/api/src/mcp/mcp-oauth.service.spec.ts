@@ -321,6 +321,39 @@ describe("McpOAuthService explicit scopes", () => {
     );
   });
 
+  it("keeps student scope discoverable and accepts explicit scope selection from a Slack client", async () => {
+    const redis = buildRedis();
+    await storeClient(redis, "scoped-client");
+    const tokens = jest.fn();
+    const service = buildService(
+      redis,
+      tenantA,
+      { userId, tenantId: tenantA },
+      "actor@example.com",
+      tokens,
+    );
+    const resourceScopes = (await service.metadata({} as Request)).scopes_supported;
+    const serverScopes = (await service.serverMetadata({} as Request)).scopes_supported;
+    expect(resourceScopes).toContain("student:read");
+    expect(serverScopes).toContain("student:read");
+    const explicitScope = ["student:read"]
+      .filter(
+        (scope) =>
+          resourceScopes.includes(scope as (typeof resourceScopes)[number]) &&
+          serverScopes.includes(scope as (typeof serverScopes)[number]),
+      )
+      .join(" ");
+    const res = buildRes();
+    await service.authorizationPage(authorizationRequest(explicitScope), res);
+    const nonce = new URL(responseRedirect(res), "https://tenant.example.com").searchParams.get(
+      "consent",
+    )!;
+    expect((await service.consentDetails(authorizationRequest(), nonce)).scopes).toEqual([
+      "student:read",
+    ]);
+    expect(tokens).not.toHaveBeenCalled();
+  });
+
   it.each([
     "account:access",
     "student:read",
