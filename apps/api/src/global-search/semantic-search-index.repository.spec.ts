@@ -45,7 +45,11 @@ describe("semantic search activation revision guard", () => {
     await expect(repository.replace(source as never, [], [])).rejects.toThrow(
       "Tenant context is required",
     );
+    await expect(repository.previewPendingCount(50)).rejects.toThrow("Tenant context is required");
     await expect(repository.findPending(50)).rejects.toThrow("Tenant context is required");
+    await expect(repository.synchronizeResourceDocuments()).rejects.toThrow(
+      "Tenant context is required",
+    );
     await expect(repository.cleanupDeleted()).rejects.toThrow("Tenant context is required");
     expect(Object.values(db).every((method) => method.mock.calls.length === 0)).toBe(true);
   });

@@ -96,7 +96,17 @@ export const NavigationGlobalSearchWrapper = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.target instanceof HTMLElement && e.target.closest("button, a, [role=button]")) return;
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (isSemanticConfigured && searchParams.trim().length >= 3 && !e.repeat) {
+        setHybridSearch(searchParams.trim());
+        setActiveIndex(0);
+        totalItemsRef.current = 0;
+      }
+      return;
+    }
     if (isDebouncing) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -190,21 +200,33 @@ export const NavigationGlobalSearchWrapper = ({
                   {isSemanticConfigured && (
                     <button
                       type="button"
-                      aria-label={t("globalSearch.searchByMeaning")}
-                      title={t("globalSearch.searchByMeaning")}
+                      aria-label={t("globalSearch.aiSearch")}
+                      title={
+                        mode === GLOBAL_SEARCH_MODES.HYBRID
+                          ? t("globalSearch.backToKeywords")
+                          : `${t("globalSearch.aiSearch")} (${isMac ? "⌘" : "Ctrl+"}Enter)`
+                      }
+                      aria-keyshortcuts="Meta+Enter Control+Enter"
                       disabled={searchParams.trim().length < 3}
                       aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
                       onClick={() => {
-                        setHybridSearch(searchParams.trim());
+                        setHybridSearch(
+                          mode === GLOBAL_SEARCH_MODES.HYBRID ? null : searchParams.trim(),
+                        );
                         setActiveIndex(0);
                         totalItemsRef.current = 0;
                       }}
                       className={cn(
-                        "rounded p-1.5 text-primary-600 hover:bg-primary-50 focus-visible:outline focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
-                        mode === GLOBAL_SEARCH_MODES.HYBRID && "bg-primary-100",
+                        "inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
+                        {
+                          "border-primary-600 bg-primary-600 text-white hover:bg-primary-700":
+                            mode === GLOBAL_SEARCH_MODES.HYBRID,
+                          "border-primary-100 bg-primary-50 text-primary-700 hover:bg-primary-100":
+                            mode === GLOBAL_SEARCH_MODES.KEYWORD,
+                        },
                       )}
                     >
-                      <Sparkles className="size-4" aria-hidden />
+                      <Sparkles className="size-5" strokeWidth={1.75} aria-hidden />
                     </button>
                   )}
                 </div>
@@ -215,18 +237,6 @@ export const NavigationGlobalSearchWrapper = ({
                 "pr-10": !isSemanticConfigured,
               })}
             />
-            {mode === GLOBAL_SEARCH_MODES.HYBRID && (
-              <div className="flex items-center justify-between gap-2 px-2 text-xs text-neutral-600">
-                <span>{t("globalSearch.hybridSearch")}</span>
-                <button
-                  type="button"
-                  className="rounded px-2 py-1 text-primary-600 focus-visible:outline focus-visible:outline-primary-500"
-                  onClick={() => setHybridSearch(null)}
-                >
-                  {t("globalSearch.backToKeywords")}
-                </button>
-              </div>
-            )}
             <Separator className="my-2" />
             {searchParams.trim().length < 3 && (
               <div className="flex flex-col px-6 pt-4">
@@ -253,7 +263,16 @@ export const NavigationGlobalSearchWrapper = ({
               />
             )}
           </div>
-          <div className="flex items-center justify-end gap-[12px] border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
+          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
+            {isSemanticConfigured && (
+              <div className="mr-auto flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-800">
+                <kbd className="inline-flex h-5 items-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-700">
+                  {isMac ? "⌘↵" : "Ctrl+↵"}
+                </kbd>
+                <Sparkles className="size-3.5 text-primary-600" aria-hidden />
+                <span>{t("globalSearch.aiSearch")}</span>
+              </div>
+            )}
             <div className="text-md flex h-5 items-center gap-[6px]">
               <KeyboardArrows />
               <span className="details text-neutral-800">{t("globalSearch.navigate")}</span>

@@ -1483,7 +1483,7 @@
     }
   },
   "globalSearch": {
-    "searchByMeaning": "Nach Bedeutung suchen",
+    "aiSearch": "KI-Suche",
     "hybridSearch": "Hybride Suche",
     "backToKeywords": "Zur Stichwortsuche",
     "semanticUnavailable": "Die semantische Suche ist vorübergehend nicht verfügbar. Stichworttreffer werden angezeigt.",

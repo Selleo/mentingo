@@ -1728,7 +1728,7 @@
     }
   },
   "globalSearch": {
-    "searchByMeaning": "Szukaj według znaczenia",
+    "aiSearch": "Wyszukiwanie AI",
     "hybridSearch": "Wyszukiwanie hybrydowe",
     "backToKeywords": "Wróć do wyszukiwania słów",
     "semanticUnavailable": "Wyszukiwanie semantyczne jest chwilowo niedostępne. Wyświetlamy dopasowania słów.",

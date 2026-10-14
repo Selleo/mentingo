@@ -1484,7 +1484,7 @@
     }
   },
   "globalSearch": {
-    "searchByMeaning": "Search by meaning",
+    "aiSearch": "AI search",
     "hybridSearch": "Hybrid search",
     "backToKeywords": "Back to keyword search",
     "semanticUnavailable": "Semantic search is temporarily unavailable. Showing keyword matches.",

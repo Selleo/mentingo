@@ -11,6 +11,7 @@ import { sql } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
+import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-library.constants";
 import { DB } from "src/storage/db/db.providers";
 
 import { SEARCH_DOCUMENT_TYPES, SEARCH_ENTITY_TYPES } from "./global-search.constants";
@@ -38,7 +39,12 @@ export class HybridSearchRepository {
     actor: CurrentUserType,
     metadataOnly = false,
   ): Promise<MatchRow[]> {
-    const eligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(actor)} AND ${metadataOnly ? sql`s.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})` : sql`true`}`;
+    const sourceEligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(
+      actor,
+    )}`;
+    const eligibility = sql`${sourceEligibility} AND ${metadataOnly
+      ? sql`s.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})`
+      : sql`true`}`;
     const result = await this.db.execute(sql`
       WITH q AS (SELECT to_tsquery('simple', ${normalizeSearchTerm(query)}) AS value), hits AS (
         SELECT s.entity_id, s.language, ts_rank(s.search_vector, q.value) AS rank,
@@ -186,15 +192,7 @@ export class HybridSearchRepository {
         WHERE s.tenant_id = ${actor.tenantId} AND (${eligibility})
           AND s.document_type NOT LIKE 'answer_option:%'
           AND s.document_type NOT LIKE 'question_solution_explanation:%'
-          AND (s.metadata->>'resourceId' IS NULL OR EXISTS (
-            SELECT 1 FROM resources r JOIN resource_entity re ON re.resource_id = r.id
-            WHERE r.id::text = s.metadata->>'resourceId' AND r.archived = false
-              AND r.visibility <> ${RESOURCE_VISIBILITY.HIDDEN}
-              AND (r.visibility = ${RESOURCE_VISIBILITY.PUBLIC} OR r.uploaded_by_id = ${actor.userId}
-                OR ${hasPermission(actor.permissions, PERMISSIONS.RESOURCE_LIBRARY_MANAGE)})
-              AND re.entity_id = s.entity_id AND re.entity_type = s.entity_type
-              AND re.relationship_type = 'attachment'
-          ))
+          AND ${this.sourceAccess(actor)}
           AND NOT EXISTS (SELECT 1 FROM search_chunks c WHERE ${this.currentSource(actor)}
             AND c.embedding IS NOT NULL AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
             AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
@@ -204,16 +202,41 @@ export class HybridSearchRepository {
   }
 
   /** A source can disappear or change before its asynchronous indexing job completes. */
+  private fileParentAccess(actor: CurrentUserType): SQL {
+    const canManageArticles = hasAnyPermission(actor.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ]);
+    const canManageNews = hasPermission(actor.permissions, PERMISSIONS.NEWS_MANAGE);
+    const canManageOwnNews = hasPermission(actor.permissions, PERMISSIONS.NEWS_MANAGE_OWN);
+    return sql`
+      (s.entity_type <> ${SEARCH_ENTITY_TYPES.ARTICLE} OR EXISTS (
+        SELECT 1 FROM articles a WHERE a.id = s.entity_id AND a.tenant_id = s.tenant_id
+          AND a.archived = false AND (${canManageArticles}
+            OR (a.is_public = true AND a.published_at IS NOT NULL))
+      )) AND (s.entity_type <> ${SEARCH_ENTITY_TYPES.NEWS} OR EXISTS (
+        SELECT 1 FROM news n WHERE n.id = s.entity_id AND n.tenant_id = s.tenant_id
+          AND n.archived = false AND (${canManageNews}
+            OR (${canManageOwnNews} AND n.author_id = ${actor.userId})
+            OR (n.is_public = true AND n.published_at IS NOT NULL))
+      ))
+    `;
+  }
+
   private sourceAccess(actor: CurrentUserType): SQL {
     return sql`(s.metadata->>'resourceId' IS NULL OR EXISTS (
       SELECT 1 FROM resources r JOIN resource_entity re ON re.resource_id = r.id
       WHERE r.id::text = s.metadata->>'resourceId' AND r.archived = false
+        AND ${this.fileParentAccess(actor)}
         AND r.visibility <> ${RESOURCE_VISIBILITY.HIDDEN}
         AND (r.visibility = ${RESOURCE_VISIBILITY.PUBLIC} OR r.uploaded_by_id = ${actor.userId}
           OR ${hasPermission(actor.permissions, PERMISSIONS.RESOURCE_LIBRARY_MANAGE)})
         AND r.tenant_id = s.tenant_id AND re.tenant_id = s.tenant_id
         AND re.entity_id = s.entity_id AND re.entity_type = s.entity_type
-        AND re.relationship_type = 'attachment'
+        AND re.relationship_type IN (${sql.join(
+          RICH_TEXT_RELATIONSHIP_TYPES.map((type) => sql`${type}`),
+          sql`, `,
+        )})
     ))`;
   }
 
@@ -227,13 +250,17 @@ export class HybridSearchRepository {
         OR EXISTS (
           SELECT 1 FROM resources r JOIN resource_entity re ON re.resource_id = r.id
           WHERE r.id::text = s.metadata->>'resourceId' AND r.archived = false
+            AND ${this.fileParentAccess(actor)}
             AND r.visibility <> ${RESOURCE_VISIBILITY.HIDDEN}
             AND (r.visibility = ${RESOURCE_VISIBILITY.PUBLIC}
               OR r.uploaded_by_id = ${actor.userId}
               OR ${hasPermission(actor.permissions, PERMISSIONS.RESOURCE_LIBRARY_MANAGE)})
             AND r.tenant_id = s.tenant_id AND re.tenant_id = s.tenant_id
             AND re.entity_id = s.entity_id AND re.entity_type = s.entity_type
-            AND re.relationship_type = 'attachment'
+            AND re.relationship_type IN (${sql.join(
+              RICH_TEXT_RELATIONSHIP_TYPES.map((type) => sql`${type}`),
+              sql`, `,
+            )})
             AND c.source_revision = md5(COALESCE(r.reference, '') || ':' || r.updated_at::text || ':' || r.content_type)
         )
       )
