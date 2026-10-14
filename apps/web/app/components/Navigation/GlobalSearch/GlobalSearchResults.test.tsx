@@ -1,10 +1,18 @@
+import {
+  GLOBAL_SEARCH_MODES,
+  type GlobalSearchSemanticStatus,
+  GLOBAL_SEARCH_SEMANTIC_STATUSES,
+} from "@repo/shared";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GlobalSearchResults } from "./GlobalSearchResults";
 
 const search = vi.hoisted(() => ({
-  data: { articles: [{ id: "article", title: "A result" }], semanticStatus: "ready" },
+  data: {
+    articles: [{ id: "article", title: "A result" }],
+    semanticStatus: undefined as GlobalSearchSemanticStatus | undefined,
+  },
   isFetching: false,
   isError: false,
 }));
@@ -34,7 +42,7 @@ vi.mock("./GlobalSearchContent", () => ({
 
 const props = {
   debouncedSearch: "meaning",
-  mode: "hybrid" as const,
+  mode: GLOBAL_SEARCH_MODES.HYBRID,
   onSelect: vi.fn(),
   activeIndex: 0,
   setTotalItems: vi.fn(),
@@ -44,16 +52,16 @@ describe("hybrid search feedback", () => {
   beforeEach(() => {
     search.isFetching = false;
     search.isError = false;
-    search.data.semanticStatus = "ready";
+    search.data.semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.READY;
   });
   it("shows keyword fallback with results when semantic search is unavailable", () => {
-    search.data.semanticStatus = "unavailable";
+    search.data.semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE;
     render(<GlobalSearchResults {...props} />);
     expect(screen.getByRole("status")).toHaveTextContent("globalSearch.semanticUnavailable");
     expect(screen.getByText("A result")).toBeInTheDocument();
   });
   it("shows incomplete index coverage", () => {
-    search.data.semanticStatus = "pending";
+    search.data.semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
     render(<GlobalSearchResults {...props} />);
     expect(screen.getByRole("status")).toHaveTextContent("globalSearch.semanticPending");
   });

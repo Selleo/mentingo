@@ -1,3 +1,4 @@
+import { GLOBAL_SEARCH_MODES } from "@repo/shared";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -76,7 +77,11 @@ describe("global search mode", () => {
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(request()).toEqual({ query: "policy", mode: "keyword", isDebouncing: false });
+    expect(request()).toEqual({
+      query: "policy",
+      mode: GLOBAL_SEARCH_MODES.KEYWORD,
+      isDebouncing: false,
+    });
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.clear" }));
     expect(input).toHaveValue("");
   });
@@ -99,10 +104,10 @@ describe("global search mode", () => {
       vi.advanceTimersByTime(300);
     });
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.searchByMeaning" }));
-    expect(request().mode).toBe("hybrid");
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
     aiConfiguration.data = { enabled: false };
     view.rerender(<NavigationGlobalSearchWrapper />);
-    expect(request().mode).toBe("keyword");
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
     expect(
       screen.queryByRole("button", { name: "globalSearch.searchByMeaning" }),
     ).not.toBeInTheDocument();
@@ -118,19 +123,31 @@ describe("global search mode", () => {
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(request()).toEqual({ query: "old query", mode: "keyword", isDebouncing: false });
+    expect(request()).toEqual({
+      query: "old query",
+      mode: GLOBAL_SEARCH_MODES.KEYWORD,
+      isDebouncing: false,
+    });
     fireEvent.change(input, { target: { value: "  current meaning  " } });
     expect(request().isDebouncing).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.searchByMeaning" }));
-    expect(request()).toEqual({ query: "current meaning", mode: "hybrid", isDebouncing: false });
+    expect(request()).toEqual({
+      query: "current meaning",
+      mode: GLOBAL_SEARCH_MODES.HYBRID,
+      isDebouncing: false,
+    });
     fireEvent.change(input, { target: { value: "new query" } });
-    expect(request().mode).toBe("keyword");
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
     expect(request().isDebouncing).toBe(true);
     expect(screen.queryByText("globalSearch.hybridSearch")).not.toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(request()).toEqual({ query: "new query", mode: "keyword", isDebouncing: false });
+    expect(request()).toEqual({
+      query: "new query",
+      mode: GLOBAL_SEARCH_MODES.KEYWORD,
+      isDebouncing: false,
+    });
   });
 
   it("does not let Enter on the sparkle button select a result", () => {
@@ -143,7 +160,7 @@ describe("global search mode", () => {
     fireEvent.keyDown(sparkle, { key: "Enter" });
     expect(selectResult).not.toHaveBeenCalled();
     fireEvent.click(sparkle);
-    expect(request().mode).toBe("hybrid");
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
   });
 
   it("requires three trimmed characters and clears the mode with the query", () => {
@@ -180,6 +197,6 @@ describe("global search mode", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.searchByMeaning" }));
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.backToKeywords" }));
-    expect(request().mode).toBe("keyword");
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
   });
 });

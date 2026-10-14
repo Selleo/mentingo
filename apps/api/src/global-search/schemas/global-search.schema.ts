@@ -1,4 +1,8 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  SUPPORTED_LANGUAGES,
+  GLOBAL_SEARCH_MODES,
+  GLOBAL_SEARCH_SEMANTIC_STATUSES,
+} from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema, baseResponse } from "src/common";
@@ -6,7 +10,12 @@ import { UUIDSchema, baseResponse } from "src/common";
 export const globalSearchQuerySchema = Type.Object({
   searchQuery: Type.String({ maxLength: 500 }),
   language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
-  mode: Type.Optional(Type.Union([Type.Literal("keyword"), Type.Literal("hybrid")])),
+  mode: Type.Optional(
+    Type.Union([
+      Type.Literal(GLOBAL_SEARCH_MODES.KEYWORD),
+      Type.Literal(GLOBAL_SEARCH_MODES.HYBRID),
+    ]),
+  ),
 });
 
 const passageProperties = {
@@ -60,9 +69,18 @@ const groupSearchResultSchema = Type.Object({
 });
 
 export const globalSearchResponseSchema = Type.Object({
-  searchMode: Type.Optional(Type.Union([Type.Literal("keyword"), Type.Literal("hybrid")])),
+  searchMode: Type.Optional(
+    Type.Union([
+      Type.Literal(GLOBAL_SEARCH_MODES.KEYWORD),
+      Type.Literal(GLOBAL_SEARCH_MODES.HYBRID),
+    ]),
+  ),
   semanticStatus: Type.Optional(
-    Type.Union([Type.Literal("ready"), Type.Literal("unavailable"), Type.Literal("pending")]),
+    Type.Union([
+      Type.Literal(GLOBAL_SEARCH_SEMANTIC_STATUSES.READY),
+      Type.Literal(GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE),
+      Type.Literal(GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING),
+    ]),
   ),
   allCourses: Type.Array(courseSearchResultSchema),
   myCourses: Type.Array(courseSearchResultSchema),

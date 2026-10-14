@@ -1,3 +1,4 @@
+import { GLOBAL_SEARCH_MODES } from "@repo/shared";
 import { Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,7 +42,8 @@ export const NavigationGlobalSearchWrapper = ({
   const debouncedSearch = useDebounce(searchParams, 300);
   const activeHybridSearch = isSemanticConfigured ? hybridSearch : null;
   const effectiveSearch = activeHybridSearch ?? debouncedSearch.trim();
-  const mode = activeHybridSearch === null ? "keyword" : "hybrid";
+  const mode =
+    activeHybridSearch === null ? GLOBAL_SEARCH_MODES.KEYWORD : GLOBAL_SEARCH_MODES.HYBRID;
   const isDebouncing =
     activeHybridSearch === null && debouncedSearch.trim() !== searchParams.trim();
   const totalItemsRef = useRef(0);
@@ -191,7 +193,7 @@ export const NavigationGlobalSearchWrapper = ({
                       aria-label={t("globalSearch.searchByMeaning")}
                       title={t("globalSearch.searchByMeaning")}
                       disabled={searchParams.trim().length < 3}
-                      aria-pressed={mode === "hybrid"}
+                      aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
                       onClick={() => {
                         setHybridSearch(searchParams.trim());
                         setActiveIndex(0);
@@ -199,7 +201,7 @@ export const NavigationGlobalSearchWrapper = ({
                       }}
                       className={cn(
                         "rounded p-1.5 text-primary-600 hover:bg-primary-50 focus-visible:outline focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
-                        mode === "hybrid" && "bg-primary-100",
+                        mode === GLOBAL_SEARCH_MODES.HYBRID && "bg-primary-100",
                       )}
                     >
                       <Sparkles className="size-4" aria-hidden />
@@ -213,7 +215,7 @@ export const NavigationGlobalSearchWrapper = ({
                 "pr-10": !isSemanticConfigured,
               })}
             />
-            {mode === "hybrid" && (
+            {mode === GLOBAL_SEARCH_MODES.HYBRID && (
               <div className="flex items-center justify-between gap-2 px-2 text-xs text-neutral-600">
                 <span>{t("globalSearch.hybridSearch")}</span>
                 <button

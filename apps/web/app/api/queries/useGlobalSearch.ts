@@ -1,4 +1,9 @@
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguages,
+  type GlobalSearchMode,
+  GLOBAL_SEARCH_MODES,
+} from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -8,7 +13,7 @@ import type { QueryFunctionContext } from "@tanstack/react-query";
 type GlobalSearchParams = {
   searchQuery: string;
   language?: SupportedLanguages;
-  mode?: "keyword" | "hybrid";
+  mode?: GlobalSearchMode;
 };
 
 type QueryOptions = {
@@ -26,7 +31,7 @@ export const globalSearchQueryOptions = (
     const response = await ApiClient.api.globalSearchControllerSearch(
       {
         searchQuery: searchParams.searchQuery,
-        mode: searchParams.mode ?? "keyword",
+        mode: searchParams.mode ?? GLOBAL_SEARCH_MODES.KEYWORD,
         language: searchParams.language ?? SUPPORTED_LANGUAGES.EN,
       },
       { signal },

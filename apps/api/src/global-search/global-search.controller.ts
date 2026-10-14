@@ -1,5 +1,10 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { PERMISSIONS, SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguages,
+  GLOBAL_SEARCH_MODES,
+} from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse } from "src/common";
@@ -65,7 +70,7 @@ export class GlobalSearchController {
         searchQuery,
         language ?? SUPPORTED_LANGUAGES.EN,
         currentUser,
-        mode ?? "keyword",
+        mode ?? GLOBAL_SEARCH_MODES.KEYWORD,
       ),
     );
   }

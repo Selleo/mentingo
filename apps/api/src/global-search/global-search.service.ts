@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shared";
 
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { FileService } from "src/file/file.service";
@@ -30,7 +30,7 @@ export class GlobalSearchService {
     searchQuery: string,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
-    mode: GlobalSearchMode = "keyword",
+    mode: GlobalSearchMode = GLOBAL_SEARCH_MODES.KEYWORD,
   ): Promise<GlobalSearchResponse> {
     const trimmedQuery = searchQuery.trim();
 
@@ -40,22 +40,22 @@ export class GlobalSearchService {
 
     let embedding: number[] | undefined;
     let semanticStatus: GlobalSearchResponse["semanticStatus"];
-    if (mode === "hybrid") {
+    if (mode === GLOBAL_SEARCH_MODES.HYBRID) {
       try {
         embedding = await this.semanticSearchEmbeddingService.embedQuery(trimmedQuery);
       } catch {
-        semanticStatus = "unavailable";
+        semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE;
       }
       if (embedding) {
         semanticStatus = (await this.hybridSearchRepository.hasCurrentChunks(currentUser))
-          ? "ready"
-          : "pending";
+          ? GLOBAL_SEARCH_SEMANTIC_STATUSES.READY
+          : GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
       }
     }
     const findMatches = async (
       entityType: Parameters<GlobalSearchRepository["findMatches"]>[0],
     ) => {
-      if (mode === "keyword") {
+      if (mode === GLOBAL_SEARCH_MODES.KEYWORD) {
         return this.globalSearchRepository.findMatches(entityType, language, trimmedQuery);
       }
       const keyword = await this.hybridSearchRepository.findKeywordMatches(

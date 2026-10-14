@@ -1,3 +1,8 @@
+import {
+  type GlobalSearchMode,
+  GLOBAL_SEARCH_MODES,
+  GLOBAL_SEARCH_SEMANTIC_STATUSES,
+} from "@repo/shared";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,14 +26,14 @@ import type { GlobalSearchItem } from "./GlobalSearchContent";
 
 export const GlobalSearchResults = ({
   debouncedSearch,
-  mode = "keyword",
+  mode = GLOBAL_SEARCH_MODES.KEYWORD,
   isDebouncing = false,
   onSelect,
   activeIndex,
   setTotalItems,
 }: {
   debouncedSearch: string;
-  mode?: "keyword" | "hybrid";
+  mode?: GlobalSearchMode;
   isDebouncing?: boolean;
   onSelect: () => void;
   activeIndex: number;
@@ -128,18 +133,18 @@ export const GlobalSearchResults = ({
 
   return (
     <>
-      {mode === "hybrid" &&
+      {mode === GLOBAL_SEARCH_MODES.HYBRID &&
         !isFetching &&
         !isDebouncing &&
-        searchResults?.semanticStatus === "unavailable" && (
+        searchResults?.semanticStatus === GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE && (
           <p role="status" className="px-2 py-1 text-xs text-neutral-600">
             {t("globalSearch.semanticUnavailable")}
           </p>
         )}
-      {mode === "hybrid" &&
+      {mode === GLOBAL_SEARCH_MODES.HYBRID &&
         !isFetching &&
         !isDebouncing &&
-        searchResults?.semanticStatus === "pending" && (
+        searchResults?.semanticStatus === GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING && (
           <p role="status" className="px-2 py-1 text-xs text-neutral-600">
             {t("globalSearch.semanticPending")}
           </p>

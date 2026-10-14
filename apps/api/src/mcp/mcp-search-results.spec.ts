@@ -1,3 +1,4 @@
+import { GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shared";
 import { shapeMcpSearchResults } from "./mcp-search-results";
 
 import type { McpLinkedSearchResponse } from "./mcp-search-results.types";
@@ -5,8 +6,8 @@ import type { GlobalSearchResponse } from "src/global-search/schemas/global-sear
 
 function response(): GlobalSearchResponse {
   return {
-    searchMode: "hybrid",
-    semanticStatus: "ready",
+    searchMode: GLOBAL_SEARCH_MODES.HYBRID,
+    semanticStatus: GLOBAL_SEARCH_SEMANTIC_STATUSES.READY,
     allCourses: [
       {
         id: "all/id?",
@@ -73,8 +74,8 @@ describe("MCP search result presentation", () => {
         "semanticStatus",
       ].sort(),
     );
-    expect(results.searchMode).toBe("hybrid");
-    expect(results.semanticStatus).toBe("ready");
+    expect(results.searchMode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
+    expect(results.semanticStatus).toBe(GLOBAL_SEARCH_SEMANTIC_STATUSES.READY);
     expect(results.allCourses[0]).not.toHaveProperty("matchedPassage");
     expect(results.allCourses[0]).not.toHaveProperty("matchedAttachmentFileName");
     expect(results.news[0].matchedPassage).toBe("Allowed news snippet");
@@ -104,9 +105,9 @@ describe("MCP search result presentation", () => {
 
   it("preserves authoring search data and keyword fallback status without rewriting source", () => {
     const source = response();
-    source.semanticStatus = "unavailable";
+    source.semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE;
     const results = shapeMcpSearchResults(source, context) as McpLinkedSearchResponse;
-    expect(results.semanticStatus).toBe("unavailable");
+    expect(results.semanticStatus).toBe(GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE);
     expect(results.users[0].email).toBe("private@example.test");
     expect(results.lessons[0].matchedPassage).toBe("Lesson body");
     expect(source.users[0]).not.toHaveProperty("url");

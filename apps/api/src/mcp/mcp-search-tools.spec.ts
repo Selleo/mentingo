@@ -1,4 +1,4 @@
-import { PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, GLOBAL_SEARCH_MODES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import { REQUIRED_PERMISSIONS_KEY } from "src/common/decorators/require-permission.decorator";
@@ -57,8 +57,12 @@ describe("MCP global search", () => {
   it("requires a supported language and bounded query, rejecting additional arguments", () => {
     const valid = { searchQuery: "onboarding", language: SUPPORTED_LANGUAGES.PL };
     expect(Value.Check(globalSearchInputSchema, valid)).toBe(true);
-    expect(Value.Check(globalSearchInputSchema, { ...valid, mode: "hybrid" })).toBe(true);
-    expect(Value.Check(globalSearchInputSchema, { ...valid, mode: "keyword" })).toBe(true);
+    expect(
+      Value.Check(globalSearchInputSchema, { ...valid, mode: GLOBAL_SEARCH_MODES.HYBRID }),
+    ).toBe(true);
+    expect(
+      Value.Check(globalSearchInputSchema, { ...valid, mode: GLOBAL_SEARCH_MODES.KEYWORD }),
+    ).toBe(true);
     for (const args of [
       { searchQuery: "onboarding" },
       { ...valid, language: "xx" },
@@ -115,8 +119,17 @@ describe("MCP global search", () => {
     });
     expect(run).toHaveBeenCalledWith(MCP_GLOBAL_SEARCH_PERMISSIONS, expect.any(Function));
     expect(search).toHaveBeenCalledWith("onboarding", SUPPORTED_LANGUAGES.DE, user);
-    await handler({ searchQuery: "onboarding", language: SUPPORTED_LANGUAGES.PL, mode: "hybrid" });
-    expect(search).toHaveBeenLastCalledWith("onboarding", SUPPORTED_LANGUAGES.PL, user, "hybrid");
+    await handler({
+      searchQuery: "onboarding",
+      language: SUPPORTED_LANGUAGES.PL,
+      mode: GLOBAL_SEARCH_MODES.HYBRID,
+    });
+    expect(search).toHaveBeenLastCalledWith(
+      "onboarding",
+      SUPPORTED_LANGUAGES.PL,
+      user,
+      GLOBAL_SEARCH_MODES.HYBRID,
+    );
     registerMcpSearchTools(
       server,
       run as McpToolRunner,
