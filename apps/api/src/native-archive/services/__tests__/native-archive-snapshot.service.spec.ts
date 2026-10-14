@@ -7,7 +7,7 @@ import { NativeArchiveSnapshotService } from "../native-archive-snapshot.service
 import type { NativeArchiveLiveTrainingLessonSnapshot } from "../../native-archive.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 const COURSE_ID = "f594d687-096b-4599-84bf-1f296afdb1e1" as UUIDType;
 const TRAINING_ID = "95287b72-b41d-4eb5-9f77-40c55fc6fc97" as UUIDType;
@@ -73,6 +73,7 @@ describe("NativeArchiveSnapshotService", () => {
       archiveRepository as never,
       { getCourseById: jest.fn().mockResolvedValue(course) } as never,
       { buildSourceSnapshot: jest.fn().mockResolvedValue(pathCourseSnapshot) } as never,
+      {} as never,
       { listFileKeysByPrefix: jest.fn().mockResolvedValue([]) } as never,
       {} as never,
     );
@@ -135,6 +136,7 @@ describe("NativeArchiveSnapshotService", () => {
       archiveRepository as never,
       masterCourseRepository as never,
       masterCourseSnapshotService as never,
+      {} as never,
       { getFileContentType: jest.fn().mockResolvedValue("application/pdf") } as never,
       {} as never,
     );
@@ -178,6 +180,7 @@ describe("NativeArchiveSnapshotService", () => {
       { findUserManagePermissions: jest.fn().mockResolvedValue({ global: true }) } as never,
       { getCourseById: jest.fn().mockResolvedValue(course) } as never,
       { buildSourceSnapshot: jest.fn().mockResolvedValue(snapshot) } as never,
+      {} as never,
       storage as never,
       {} as never,
     );
@@ -196,7 +199,7 @@ describe("NativeArchiveSnapshotService", () => {
     const tenantHost = "https://tenant1.lms.localhost";
     const snapshot = {
       ...sourceSnapshot,
-      lessons: sourceSnapshot.lessons.map((lesson) => ({
+      lessons: sourceSnapshot.lessons.map((lesson: SourceSnapshot["lessons"][number]) => ({
         ...lesson,
         type: LESSON_TYPES.CONTENT,
         fileS3Key: "bunny-video-id",
@@ -213,6 +216,7 @@ describe("NativeArchiveSnapshotService", () => {
       { findUserManagePermissions: jest.fn().mockResolvedValue({ global: true }) } as never,
       masterCourseRepository as never,
       { buildSourceSnapshot: jest.fn().mockResolvedValue(snapshot) } as never,
+      masterCourseRepository as never,
       {} as never,
       bunnyStreamService as never,
     );

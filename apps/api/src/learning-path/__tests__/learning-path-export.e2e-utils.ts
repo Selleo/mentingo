@@ -4,6 +4,7 @@ import request from "supertest";
 import { learningPathCourses } from "src/storage/schema";
 
 import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { truncateTables } from "../../../test/helpers/test-helpers";
 import type { INestApplication } from "@nestjs/common";
@@ -14,6 +15,9 @@ export const TARGET_HOST = "https://tenant-2.local";
 export const PASSWORD = "Password123@";
 
 export const TABLES_TO_TRUNCATE: Parameters<typeof truncateTables>[1] = [
+  "outbox_events",
+  "course_transfer_operations",
+  "course_transfer_streams",
   "learning_path_entity_map",
   "learning_path_exports",
   "learning_path_courses",
@@ -39,29 +43,6 @@ export const ensureCookieArray = (cookies: string | string[]) => {
   const accessTokenCookie = normalizedCookies.find((cookie) => cookie.startsWith("access_token="));
   return accessTokenCookie ? [accessTokenCookie] : normalizedCookies;
 };
-
-const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export async function waitFor<T>(
-  fetcher: () => Promise<T>,
-  predicate: (value: T) => boolean,
-  timeoutMs = 15000,
-  intervalMs = 250,
-): Promise<T> {
-  const start = Date.now();
-  let lastValue = await fetcher();
-
-  while (!predicate(lastValue)) {
-    if (Date.now() - start >= timeoutMs) {
-      throw new Error("Timed out waiting for condition");
-    }
-
-    await sleep(intervalMs);
-    lastValue = await fetcher();
-  }
-
-  return lastValue;
-}
 
 type LearningPathExportTestUtilsParams = {
   app: INestApplication;
@@ -89,7 +70,8 @@ export const createLearningPathExportTestUtils = ({
 
     const exportJobId = exportResponse.body.data.jobs[0].reason as string;
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -119,7 +101,8 @@ export const createLearningPathExportTestUtils = ({
   };
 
   const getExportedLearningPath = async (learningPathId: string, sourceCookie: string[]) => {
-    const exportsList = await waitFor(
+    const exportsList = await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())

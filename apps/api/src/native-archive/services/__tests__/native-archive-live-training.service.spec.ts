@@ -5,7 +5,7 @@ import { NativeArchiveLiveTrainingService } from "../native-archive-live-trainin
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 const actor = {
   userId: "2cf24dba-5fb0-42bb-9af4-eec6990d01a2",

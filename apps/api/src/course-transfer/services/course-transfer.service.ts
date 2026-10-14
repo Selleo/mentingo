@@ -113,9 +113,12 @@ export class CourseTransferService {
   async requestSync(request: CourseTransferSyncRequest): Promise<void> {
     if (!request.relationships.length) return;
 
-    await this.courseTransferRelationshipRepository.markSourceAsMaster(
-      request.kind,
-      request.sourceId,
+    await this.tenantDbRunnerService.transactionWithHandle((transaction) =>
+      this.courseTransferRelationshipRepository.markSourceAsMaster(
+        request.kind,
+        request.sourceId,
+        transaction,
+      ),
     );
 
     const failures: unknown[] = [];

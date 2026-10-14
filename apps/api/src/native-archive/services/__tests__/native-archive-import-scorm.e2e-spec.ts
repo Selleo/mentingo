@@ -14,7 +14,7 @@ import { chapters, courses, lessons, scormPackages, scormScos } from "src/storag
 import { createE2ETest } from "../../../../test/create-e2e-test";
 import { createUserFactory } from "../../../../test/factory/user.factory";
 import { cookieFor } from "../../../../test/helpers/test-helpers";
-import { SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE } from "../../../courses/master-course-scorm.constants";
+import { COURSE_TRANSFER_SCORM_PACKAGE_UUID_NAMESPACE } from "../../../course-transfer/course-transfer.constants";
 import { NativeArchiveImportService } from "../native-archive-import.service";
 
 import {
@@ -64,7 +64,7 @@ describe("Native archive SCORM import (e2e)", () => {
     const targetCourseId = uuidv5(`native-archive:${fixture.sourceCourseId}`, actor.tenantId);
     const expectedPackageId = uuidv5(
       `master-course:${targetCourseId}:scorm-package:${fixture.sourcePackageId}`,
-      SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
+      COURSE_TRANSFER_SCORM_PACKAGE_UUID_NAMESPACE,
     );
 
     await db.insert(scormPackages).values({
