@@ -1513,6 +1513,34 @@
       "when": 1791891043395,
       "tag": "0215_enable_reports_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 216,
+      "version": "7",
+      "when": 1791901876358,
+      "tag": "0216_add_search_chunks",
+      "breakpoints": true
+    },
+    {
+      "idx": 217,
+      "version": "7",
+      "when": 1791901881945,
+      "tag": "0217_enable_search_chunks_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1791901884369,
+      "tag": "0218_require_pgvector_iterative_scan",
+      "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1791901898718,
+      "tag": "0219_add_search_chunks_hnsw_cosine_index",
+      "breakpoints": true
     }
   ]
 }

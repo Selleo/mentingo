@@ -5,6 +5,7 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 export const QUEUE_NAMES = {
   AUTOMATION_EMAIL: "automation-email",
   EMAIL_TEMPLATE_TEST: "email-template-test",
+  SEMANTIC_SEARCH_INDEX: "semantic-search-index",
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",

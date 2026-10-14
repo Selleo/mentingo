@@ -18,7 +18,7 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Content administrators update knowledge articles, news, Q&A, and development paths within their existing access.
 - HR administrators find and update existing learners, maintain group memberships and roles, and create or translate groups using their existing access.
 - Platform administrators customize branding, registration preferences, feature availability, and company information using their existing access.
-- Learners and editors search accessible content in their chosen language and use returned IDs to continue their work.
+- Learners search and read accessible courses, articles, news and Q&A through a limited student connection. Editors use separately approved management scopes to inspect and maintain content.
 
 ## Feature Functions
 
@@ -31,6 +31,9 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Search accessible courses, lessons, development paths, news, articles, Q&A, users, categories, and groups in a supported language.
 - Read and update existing users, group memberships, and roles; create, read, and update groups and translations. User creation/import, archiving/deletion, group deletion, and credential operations are excluded.
 - Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, branding images, and public login documents. SSO and MFA settings are excluded.
+- Open search results directly in the connected tenant using links returned by Mentingo.
+- Connect a learner assistant with the exclusive `student:read` scope for search and eight reader list/get tools, keeping authoring, administration, lesson bodies and file URLs unavailable.
+- Connect standard assistants with account access and explicit consent; optionally cap a connection with per-domain read/write scopes instead. Both follow existing account permissions.
 - Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
 ## End-User Value
@@ -43,9 +46,61 @@ The editor connects their assistant, asks it to inspect the available content, a
 
 MCP writes take effect directly; this connection does not create a separate proposal awaiting approval inside Mentingo. To prepare training for review, explicitly request a draft course. Publication behaviour differs across content types: article creation publishes immediately, while news creation defaults to a draft.
 
-The editor adds the remote `https://<tenant-host>/api/mcp` endpoint in a supported MCP client. The client discovers Mentingo's OAuth metadata, registers as a public client, and opens Mentingo's connection page in the web app. The editor signs in with the existing Mentingo browser session and chooses Allow or Deny. The client can omit an explicit scope request; Mentingo assigns the internal `authoring` scope after consent. The client exchanges the one-use authorization code using PKCE. Mentingo stores the resulting opaque access and refresh grants in Redis, bound to the user, tenant, client, resource URL, scope, and expiry.
+The editor adds the remote `https://<tenant-host>/api/mcp` endpoint in a supported MCP client. The client discovers Mentingo's OAuth metadata, registers as a public client, and opens Mentingo's connection page in the web app. The editor signs in with the existing Mentingo browser session and chooses Allow or Deny. Standard clients can omit scopes to request `account:access`, which allows the supported tools permitted by the account and organisation settings. Every authorization requires explicit consent, including repeated connections. The consent page explains account access or lists optional granular caps. Empty, unknown or duplicate scopes are rejected. `account:access` and the learner scope `student:read` are each exclusive and cannot be combined with management scopes. Management read/write scopes are separate and do not implicitly include each other. The initial MCP authentication challenge requests `account:access` so standard SDK clients do not combine mutually exclusive scopes. Discovery retains every supported optional scope, including `student:read`, for deliberate client selection. The client exchanges the one-use authorization code using PKCE. Mentingo stores the resulting opaque access and refresh grants in Redis, bound to the user, tenant, client, resource URL, scope, and expiry.
 
 Each MCP HTTP request validates the access grant, active user and tenant, and resource audience. Mentingo reloads current roles, permissions, and tenant feature switches before advertising tools, then reloads permissions again for each tool call. Domain services still enforce ownership and entity rules. The MCP transport's session ID never serves as an authorization credential.
+
+A student assistant helps users find accessible course information, knowledge articles,
+news and Q&A, then read bounded learner content or open it in Mentingo. It exposes
+`global_search`, `list_courses`, `get_course`,
+`list_articles`, `get_article`, `list_news`,
+`get_news`, `list_qa_entries` and `get_qa_entry`.
+
+These reader tool names are shared with account and granular management connections. Discovery supplies the input schema for the selected resource view. `student:read` always uses learner projections; account and granular read grants select management behavior only with that resource's management permissions, otherwise learner behavior. Course lookup uses `courseId`, Q&A uses `qaId`, and article/news lookup uses `id`.
+
+The student actor retains the same user and tenant identity but has only the
+intersection of the account's current permissions and default student permissions.
+Elevated role shortcuts are excluded; no permissions or enrollments are added.
+Course reads return metadata only and reject drafts, archived courses and unenrolled
+private courses, even if the connected account is the author. They exclude chapter
+and lesson bodies, assessments, authoring configuration and file URLs. Article/news
+reads require published, learner-visible content in an available language; Q&A reads
+require the requested language. Their returned original text is sanitized, excludes
+embedded resource objects and signed URLs, and is capped at 16,000 characters with a
+truncation marker. List titles cap at 500 characters and summaries/course descriptions
+at 2,000. Course, article and Q&A lists accept bounded pages of at most 25; news keeps
+its learner API's fixed page size.
+
+Student global search skips lesson, development path and directory retrieval. Course
+matches use only title/description documents, in keyword and hybrid modes, so hidden
+lesson/file text cannot cause a course match. Course search passages and attachment
+filenames are omitted. Eligible editorial file text shares the same permission-filtered
+FTS retrieval in keyword and hybrid modes; hybrid adds semantic matching. Both depend
+on background indexing for extracted file text. Files remain subject to visibility
+checks and no result constructs a download URL. Canonical source links use the tenant
+bound to the OAuth grant; opening them requires the viewer's own Mentingo access.
+
+Each Slack workspace pairs to one Mentingo account. All Slack participants therefore
+share that account's learner visibility and enrollments, rather than acquiring their
+own personal Mentingo permissions. Per-person enrollment isolation requires separate
+account linking.
+
+Optionally capped management requests use `search:read`, `courses:read`, `courses:write`,
+`categories:read`, `categories:write`, `articles:read`, `articles:write`, `news:read`,
+`news:write`, `qa:read`, `qa:write`, `learning_paths:read`, `learning_paths:write`,
+`users:read`, `users:write`, `groups:read`, `groups:write`, `platform:read`,
+`platform:write` and `files:write` as appropriate. `search:read` follows current
+account permissions, using the learner search projection without management access. Management reads may expose
+drafts, configuration and other authoring data when the account has access.
+`readOnlyHint` indicates absence of mutations, not student-safe output.
+
+Previously issued `authoring` and `search` access/refresh grants preserve their
+existing access until reconnect, subject to expiry, revocation and current account
+permissions. Legacy authoring has a frozen explicit management tool catalog;
+legacy search remains limited to global search. Their existing payload views remain
+unchanged, and no new authorization/consent flow may issue those legacy scopes. A code exchange or
+refresh cannot change its approved scope set. Reconnection with a new authorization
+and explicit consent is required to change scopes.
 
 Mutations that publish, delete, reorder, or change pricing, certificates, or media position check the current entity revision under a tenant-scoped row lock. Destructive calls also require exact title, type, ID, or child-ID confirmation as appropriate. Retried creates and path course additions require an idempotency key scoped to the tenant, user, client, tool, and input. MCP calls record the client, tool, entity ID where available, outcome, and request ID through the existing activity log queue. MCP errors return stable codes, HTTP status, and a readable message without leaking untranslated internal message keys.
 
@@ -65,7 +120,7 @@ SCORM grants bind a ZIP file and exact authoring metadata to `POST /api/scorm/co
 
 The implemented tool set also includes permission-aware global search, platform customization, existing-user management, and group creation and maintenance. Its content tools cover course discovery, category lookup and management, course creation and updates with the native API schemas, course settings and publication/pricing/certificate/media changes, group assignment deadlines, chapter and lesson discovery, ordering and deletion, content, quiz, AI Mentor, embed, and live training lesson creation and edits, lesson resource discovery, placement and detachment, Q&A entry CRUD, article section and published article/content edits, draft and published news discovery and edits, development path metadata, certificate settings and course ordering, multipart authoring uploads, resumable video uploads, and SCORM course/lesson imports through multipart or TUS. Article creation through MCP follows the existing web API: it immediately publishes an article with the default title and empty content. The agent then calls `update_article` to fill it in. News creation defaults to a draft, while development path creation accepts the statuses supported by its API. Article and news updates can set public visibility. SCORM creation and package attachment complete when the local agent sends the ZIP through the existing API route.
 
-Customization uses the existing platform services and upload validators. Boolean preferences are exposed as explicit toggle operations with required retry keys. Platform images, user avatars, and login documents use scoped, one-use upload grants for their native multipart endpoints. Branding images retain the native 10 MiB limit, user avatars retain 5 MiB plus square/1024-pixel constraints, and login documents retain the file service limit of 1 GiB. No separate MCP byte limit applies. Login documents can be listed, added, or removed with exact-name confirmation; the native service does not support replacing a document in place. Global search reuses the existing platform search service and its per-result permissions, enrollment, ownership, tenant, and localization rules; it is not a separate semantic search engine.
+Customization uses the existing platform services and upload validators. Boolean preferences are exposed as explicit toggle operations with required retry keys. Platform images, user avatars, and login documents use scoped, one-use upload grants for their native multipart endpoints. Branding images retain the native 10 MiB limit, user avatars retain 5 MiB plus square/1024-pixel constraints, and login documents retain the file service limit of 1 GiB. No separate MCP byte limit applies. Login documents can be listed, added, or removed with exact-name confirmation; the native service does not support replacing a document in place. Global search reuses the platform search service and its per-result permissions, enrollment, ownership, tenant, and localization rules. Keyword and hybrid retrieval search indexed metadata and eligible extracted file text; hybrid mode also uses semantic matching.
 
 ## Key Technical Context
 
@@ -78,6 +133,18 @@ Customization uses the existing platform services and upload validators. Boolean
 
 ## Test Evidence
 
-Local validation includes the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
+New focused tests cover explicit scope validation, the exclusive student catalog,
+management discovery and direct-call rejection, legacy-grant preservation, scope
+preservation and refresh escalation rejection. Student-tool tests cover bound account
+identity, metadata projection, published article mode, feature checks, content limits,
+file URL exclusion and Q&A language availability. Learner course access and global
+search tests cover ownership shortcuts, metadata-only course matching and content-only
+retrieval. Focused OAuth tests additionally cover default account access, mandatory
+consent and legacy refresh rejection of account-access upgrades; frontend tests
+cover the account-access explanation and approval controls. Local checks do not
+establish live client/provider behavior. Historical database-backed coverage is
+listed below.
+
+Prior local validation included the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
 
 Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. Browser-based MCP, third-party clients, and deployed behavior remain unverified. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.

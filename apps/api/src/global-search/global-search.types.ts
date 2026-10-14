@@ -71,6 +71,14 @@ export type MatchRow = {
   entityId: UUIDType;
   languages: SupportedLanguages[];
   rank: number;
+  matchedPassage?: string;
+  matchedAttachmentFileName?: string | null;
+};
+
+/** Internal retrieval count controls bounded retries when many chunks share one entity. */
+export type SemanticCandidateMatchRow = Omit<MatchRow, "entityId"> & {
+  entityId: MatchRow["entityId"] | null;
+  candidateCount: number;
 };
 
 export const GLOBAL_SEARCH_LESSON_ACCESS = {
@@ -81,3 +89,6 @@ export const GLOBAL_SEARCH_LESSON_ACCESS = {
 
 export type GlobalSearchLessonAccess =
   (typeof GLOBAL_SEARCH_LESSON_ACCESS)[keyof typeof GLOBAL_SEARCH_LESSON_ACCESS];
+
+/** Trusted integration projection and learner visibility controls. */
+export type GlobalSearchReadOptions = { contentOnly?: boolean; learnerOnly?: boolean };

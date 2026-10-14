@@ -2349,6 +2349,47 @@ export const searchDocuments = pgTable(
   })),
 );
 
+export const searchChunks = pgTable(
+  "search_chunks",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    documentType: text("document_type").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
+    chunkIndex: integer("chunk_index").notNull(),
+    content: text("content").notNull(),
+    searchVector: tsvector("search_vector").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+    sourceHash: text("source_hash").notNull(),
+    sourceRevision: text("source_revision").notNull().default(""),
+    embeddingModel: text("embedding_model").notNull(),
+    indexVersion: integer("index_version").notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  },
+  withTenantIdIndex("search_chunks", (table) => ({
+    embeddingHnswIdx: index("search_chunks_embedding_hnsw_idx")
+      .using("hnsw", table.embedding.op("vector_cosine_ops"))
+      .with({ m: 16, ef_construction: 64 }),
+    vectorIdx: index("search_chunks_vector_idx").using("gin", table.searchVector),
+    entityIdx: index("search_chunks_entity_idx").on(
+      table.tenantId,
+      table.entityType,
+      table.entityId,
+    ),
+    sourceUniqueIdx: uniqueIndex("search_chunks_source_unique_idx").on(
+      table.tenantId,
+      table.entityType,
+      table.entityId,
+      table.documentType,
+      table.language,
+      table.chunkIndex,
+    ),
+  })),
+);
+
 export const questionsAndAnswers = pgTable(
   "questions_and_answers",
   {
