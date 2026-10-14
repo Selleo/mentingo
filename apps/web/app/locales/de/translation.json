@@ -4787,6 +4787,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Sie sind nicht berechtigt, hier ein Video hochzuladen",
+      "uploadTargetNotFound": "Das Element, zu dem Sie das Video hochladen, wurde nicht gefunden",
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "fileEmpty": "Datei-Upload fehlgeschlagen – die Datei ist leer",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
@@ -5134,8 +5136,41 @@
     "adminLearningPaths": "Entwicklungspfade",
     "adminLearningPathEditor": "Entwicklungspfad Editor"
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Zum Duplizieren dieses Kurses benötigen Sie die Berechtigung, ihn zu verwalten",
+      "sourceCourseNotFound": "Der zu duplizierende Kurs wurde nicht gefunden",
+      "sourceCategoryMissing": "Der zu duplizierende Kurs hat keine Kategorie",
+      "targetCourseNotFound": "Der duplizierte Kurs wurde nicht gefunden",
+      "tenantMissing": "Der Tenant dieses Kurses wurde nicht gefunden"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Alle Organisationen auf dieser Seite auswählen",
+    "selectOrganization": "{{name}} auswählen",
+    "columns": {
+      "organization": "Organisation",
+      "status": "Status"
+    },
+    "searchPlaceholder": "Organisationen suchen",
+    "selectedCount": "Ausgewählt: {{count}}",
+    "clearSelection": "Auswahl aufheben",
+    "shareButton": "Teilen",
+    "shareWithCountButton": "Mit {{count}} teilen",
+    "sharingButton": "Teilen...",
+    "emptySearch": "Keine Organisationen entsprechen Ihrer Suche",
+    "emptyList": "Es gibt keine weiteren Organisationen zum Teilen",
+    "status": {
+      "shared": "Geteilt",
+      "inProgress": "In Bearbeitung",
+      "paused": "Pausiert",
+      "failed": "Fehlgeschlagen"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Die Freigabe für diesen Tenant ist pausiert",
+      "transferFailed": "Die Übertragung ist fehlgeschlagen. Wiederholen Sie die Freigabe, um fortzufahren.",
       "sourceCourseNotFound": "Quellkurs nicht gefunden",
       "sourceAuthorNotFound": "Autor des Quellkurses nicht gefunden",
       "sourceCategoryNotFound": "Quellkurs-Kategorie nicht gefunden",
@@ -5158,6 +5193,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Zu exportierender Entwicklungspfad nicht gefunden",
       "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
       "exportLinkMissing": "Entwicklungspfad-Exportverknuepfung nicht gefunden",
       "noCourses": "Der Entwicklungspfad muss vor dem Export mindestens einen Kurs enthalten",

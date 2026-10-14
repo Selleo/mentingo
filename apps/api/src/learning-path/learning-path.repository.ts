@@ -1,13 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
-  COURSE_ORIGIN_TYPES,
   LEARNING_PATH_STATUSES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   PERMISSIONS,
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_CERTIFICATE_STATUSES,
   SUPPORTED_LANGUAGES,
-  TENANT_STATUSES,
   type LearningPathEnrollmentType,
   type LearningPathProgressStatus,
   type LearningPathEntityType,
@@ -15,7 +13,6 @@ import {
 } from "@repo/shared";
 import {
   and,
-  asc,
   count,
   countDistinct,
   desc,
@@ -53,7 +50,6 @@ import {
   learningPathEntityMap,
   learningPathExports,
   learningPaths,
-  masterCourseExports,
   permissionRoles,
   permissionUserRoles,
   studentCourses,
@@ -774,77 +770,6 @@ export class LearningPathRepository {
     return { learningPath, courseLinks };
   }
 
-  async getLearningPathExportSourceSnapshot(sourceTenantId: UUIDType, learningPathId: UUIDType) {
-    const [learningPath] = await this.dbAdmin
-      .select({
-        ...getTableColumns(learningPaths),
-      })
-      .from(learningPaths)
-      .where(and(eq(learningPaths.id, learningPathId), eq(learningPaths.tenantId, sourceTenantId)))
-      .limit(1);
-
-    if (!learningPath) return null;
-
-    const courseLinks = await this.dbAdmin
-      .select({
-        id: learningPathCourses.id,
-        learningPathId: learningPathCourses.learningPathId,
-        courseId: learningPathCourses.courseId,
-        displayOrder: learningPathCourses.displayOrder,
-        createdAt: learningPathCourses.createdAt,
-        updatedAt: learningPathCourses.updatedAt,
-      })
-      .from(learningPathCourses)
-      .innerJoin(
-        courses,
-        and(eq(courses.id, learningPathCourses.courseId), eq(courses.tenantId, sourceTenantId)),
-      )
-      .where(eq(learningPathCourses.learningPathId, learningPathId))
-      .orderBy(learningPathCourses.displayOrder);
-
-    return { learningPath, courseLinks };
-  }
-
-  async findLearningPathExportByPair(
-    sourceTenantId: UUIDType,
-    sourceLearningPathId: UUIDType,
-    targetTenantId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [exportLink] = await dbInstance
-      .select()
-      .from(learningPathExports)
-      .where(
-        and(
-          eq(learningPathExports.sourceTenantId, sourceTenantId),
-          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
-          eq(learningPathExports.targetTenantId, targetTenantId),
-        ),
-      )
-      .limit(1);
-
-    return exportLink;
-  }
-
-  async createLearningPathExport(
-    sourceTenantId: UUIDType,
-    sourceLearningPathId: UUIDType,
-    targetTenantId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [createdExport] = await dbInstance
-      .insert(learningPathExports)
-      .values({
-        sourceTenantId,
-        sourceLearningPathId,
-        targetTenantId,
-        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
-      })
-      .returning();
-
-    return createdExport;
-  }
-
   async getLearningPathExportsForManagingTenant(
     sourceTenantId: UUIDType,
     sourceLearningPathId: UUIDType,
@@ -869,122 +794,7 @@ export class LearningPathRepository {
       );
   }
 
-  async getLearningPathExportCandidates(
-    sourceTenantId: UUIDType,
-    sourceLearningPathId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    return dbInstance
-      .select({
-        id: tenants.id,
-        name: tenants.name,
-        host: tenants.host,
-        exportId: learningPathExports.id,
-        targetLearningPathId: learningPathExports.targetLearningPathId,
-        syncStatus: learningPathExports.syncStatus,
-        lastSyncedAt: learningPathExports.lastSyncedAt,
-      })
-      .from(tenants)
-      .leftJoin(
-        learningPathExports,
-        and(
-          eq(learningPathExports.sourceTenantId, sourceTenantId),
-          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
-          eq(learningPathExports.targetTenantId, tenants.id),
-        ),
-      )
-      .where(and(ne(tenants.id, sourceTenantId), eq(tenants.status, TENANT_STATUSES.ACTIVE)))
-      .orderBy(asc(tenants.name));
-  }
-
-  async getCourseById(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
-    const [course] = await dbInstance
-      .select()
-      .from(courses)
-      .where(eq(courses.id, courseId))
-      .limit(1);
-
-    return course;
-  }
-
-  async findTargetAuthor(dbInstance: DatabasePg = this.db) {
-    const [targetAuthor] = await dbInstance
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(
-          isNull(users.deletedAt),
-          userHasAnyPermissionsCondition(dbInstance, users.id, users.tenantId, [
-            PERMISSIONS.LEARNING_PATH_CREATE,
-            PERMISSIONS.LEARNING_PATH_UPDATE,
-            PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
-            PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
-            PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
-            PERMISSIONS.COURSE_UPDATE,
-            PERMISSIONS.COURSE_UPDATE_OWN,
-          ]),
-        ),
-      )
-      .limit(1);
-
-    return targetAuthor;
-  }
-
-  async markCourseAsMaster(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
-    await dbInstance
-      .update(courses)
-      .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
-      .where(eq(courses.id, courseId));
-  }
-
-  async markLearningPathAsMaster(learningPathId: UUIDType, dbInstance: DatabasePg = this.db) {
-    await dbInstance
-      .update(learningPaths)
-      .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
-      .where(eq(learningPaths.id, learningPathId));
-  }
-
-  async findMasterCourseExportByPair(
-    sourceTenantId: UUIDType,
-    sourceCourseId: UUIDType,
-    targetTenantId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [exportLink] = await dbInstance
-      .select()
-      .from(masterCourseExports)
-      .where(
-        and(
-          eq(masterCourseExports.sourceTenantId, sourceTenantId),
-          eq(masterCourseExports.sourceCourseId, sourceCourseId),
-          eq(masterCourseExports.targetTenantId, targetTenantId),
-        ),
-      )
-      .limit(1);
-
-    return exportLink;
-  }
-
-  async createMasterCourseExportLink(
-    sourceTenantId: UUIDType,
-    sourceCourseId: UUIDType,
-    targetTenantId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [createdExport] = await dbInstance
-      .insert(masterCourseExports)
-      .values({
-        sourceTenantId,
-        sourceCourseId,
-        targetTenantId,
-        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
-      })
-      .returning();
-
-    return createdExport;
-  }
-
-  async getActiveLearningPathExportsBySourcePath(
+  async getSyncableLearningPathExportsBySourcePath(
     sourceLearningPathId: UUIDType,
     dbInstance: DatabasePg = this.db,
   ) {
@@ -994,66 +804,9 @@ export class LearningPathRepository {
       .where(
         and(
           eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
-          eq(learningPathExports.syncStatus, MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+          ne(learningPathExports.syncStatus, MASTER_COURSE_EXPORT_SYNC_STATUSES.PAUSED),
         ),
       );
-  }
-
-  async getLearningPathExportById(exportId: UUIDType, dbInstance: DatabasePg = this.db) {
-    const [exportLink] = await dbInstance
-      .select()
-      .from(learningPathExports)
-      .where(eq(learningPathExports.id, exportId))
-      .limit(1);
-
-    return exportLink;
-  }
-
-  async markLearningPathExportSyncSuccess(
-    exportId: UUIDType,
-    targetLearningPathId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    await dbInstance
-      .update(learningPathExports)
-      .set({
-        targetLearningPathId,
-        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
-        lastSyncedAt: sql`CURRENT_TIMESTAMP`,
-      })
-      .where(eq(learningPathExports.id, exportId));
-  }
-
-  async markLearningPathExportSyncFailed(exportId: UUIDType, dbInstance: DatabasePg = this.db) {
-    await dbInstance
-      .update(learningPathExports)
-      .set({ syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.FAILED })
-      .where(eq(learningPathExports.id, exportId));
-  }
-
-  async upsertLearningPathEntityMap(
-    exportId: UUIDType,
-    entityType: LearningPathEntityType,
-    sourceEntityId: UUIDType,
-    targetEntityId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    await dbInstance
-      .insert(learningPathEntityMap)
-      .values({
-        exportId,
-        entityType,
-        sourceEntityId,
-        targetEntityId,
-      })
-      .onConflictDoUpdate({
-        target: [
-          learningPathEntityMap.exportId,
-          learningPathEntityMap.entityType,
-          learningPathEntityMap.sourceEntityId,
-        ],
-        set: { targetEntityId },
-      });
   }
 
   async getLearningPathEntityMappings(
@@ -1748,60 +1501,6 @@ export class LearningPathRepository {
           eq(learningPathCourses.courseId, courseId),
         ),
       );
-  }
-
-  async getTargetLearningPathBySourceId(
-    sourceTenantId: UUIDType,
-    sourceLearningPathId: UUIDType,
-    targetTenantId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [exportLink] = await dbInstance
-      .select({
-        id: learningPathExports.targetLearningPathId,
-      })
-      .from(learningPathExports)
-      .where(
-        and(
-          eq(learningPathExports.sourceTenantId, sourceTenantId),
-          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
-          eq(learningPathExports.targetTenantId, targetTenantId),
-        ),
-      )
-      .limit(1);
-
-    if (!exportLink?.id) return null;
-
-    return this.findLearningPathById(exportLink.id, dbInstance);
-  }
-
-  async createTargetLearningPath(
-    values: typeof learningPaths.$inferInsert,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [createdLearningPath] = await dbInstance.insert(learningPaths).values(values).returning();
-
-    return createdLearningPath;
-  }
-
-  async updateTargetLearningPath(
-    pathId: UUIDType,
-    updates: Partial<typeof learningPaths.$inferInsert>,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [updatedLearningPath] = await dbInstance
-      .update(learningPaths)
-      .set(updates)
-      .where(eq(learningPaths.id, pathId))
-      .returning();
-
-    return updatedLearningPath;
-  }
-
-  async deleteLearningPathCoursesByPathId(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
-    await dbInstance
-      .delete(learningPathCourses)
-      .where(eq(learningPathCourses.learningPathId, pathId));
   }
 
   async deleteStudentLearningPathCourseLinksByPathId(

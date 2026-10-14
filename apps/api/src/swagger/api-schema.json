@@ -6712,6 +6712,30 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -15918,6 +15942,30 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -37202,6 +37250,14 @@
                 "syncStatus": {
                   "anyOf": [
                     {
+                      "const": "pending",
+                      "type": "string"
+                    },
+                    {
+                      "const": "processing",
+                      "type": "string"
+                    },
+                    {
                       "const": "active",
                       "type": "string"
                     },
@@ -37282,6 +37338,14 @@
                         {
                           "anyOf": [
                             {
+                              "const": "pending",
+                              "type": "string"
+                            },
+                            {
+                              "const": "processing",
+                              "type": "string"
+                            },
+                            {
                               "const": "active",
                               "type": "string"
                             },
@@ -37346,10 +37410,36 @@
               "tenants",
               "summary"
             ]
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetMasterCourseJobStatusResponse": {
@@ -155327,6 +155417,14 @@
                 "syncStatus": {
                   "anyOf": [
                     {
+                      "const": "pending",
+                      "type": "string"
+                    },
+                    {
+                      "const": "processing",
+                      "type": "string"
+                    },
+                    {
                       "const": "active",
                       "type": "string"
                     },
@@ -155407,6 +155505,14 @@
                         {
                           "anyOf": [
                             {
+                              "const": "pending",
+                              "type": "string"
+                            },
+                            {
+                              "const": "processing",
+                              "type": "string"
+                            },
+                            {
                               "const": "active",
                               "type": "string"
                             },
@@ -155471,10 +155577,36 @@
               "tenants",
               "summary"
             ]
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetLearningPathJobStatusResponse": {

@@ -43,6 +43,8 @@ When learning paths are enabled, learners with access can open `/development-pat
 
 Administrators and content creators with learning-path authoring access use the learning-path management experience to define localized title and description, status, thumbnail, certificate settings, course order, and sequencing. They can enroll selected learners or groups. Managing-tenant administrators can share a path only with active recipient organizations; inactive organizations are omitted from the selector and rejected by the export API. When the path's courses, enrollment, order, or sequence setting changes, Mentingo synchronizes the course access each enrolled learner should have.
 
+The sharing selector distinguishes queued, processing, failed, and successfully copied destinations. Accepted sharing requests remain stored during temporary queue outages and interrupted workers can be recovered. Administrators can retry failed or older incomplete shares. Retries reuse the same recipient path; when replacing an existing path, its metadata and course membership change together, preserving the previous version if that database update fails. Source synchronization preserves an existing recipient path's publication choice and local author. Learner enrollment reconciliation is requested after the path update commits and retried independently on failure.
+
 In sequence mode, learners receive access to the next course only after prior course requirements are met. When all required courses are completed and certificates are enabled, Mentingo can create a learning-path certificate that learners can view, download, or share.
 
 ## Key Technical Context
@@ -58,10 +60,12 @@ In sequence mode, learners receive access to the next course only after prior co
 - Key permissions include `PERMISSIONS.LEARNING_PATH_READ`, create/update/delete, course update, enrollment, export, and certificate permissions.
 - Content creators receive read-only group access for learning-path group selectors; group management remains restricted to administrators, so the Groups management tab stays hidden.
 - Course access and sequence synchronization use learning-path sync services and background queue processing.
+- Sharing and source edits to path metadata, membership, ordering, and added locales persist transfer requests transactionally. Course and path workers use the shared durable coordinator; duplicate deliveries and expired worker claims cannot independently commit the same transfer generation. Sharing workers validate their source tenant before accessing tenant-scoped records. Child course transfers finish before the target path transaction, and a durable, awaited outbox handler reconciles learner access after commit. This does not yet make all child course updates atomic as one path-wide content revision or guarantee media playback readiness.
 
 ## Test Evidence
 
 - Archive package tests cover ZIP parsing, format version rejection, and destination identifier mapping. Web component tests cover the shared ZIP-only import control and the management view's permission-gated import dialog. A full learning-path import/export E2E test is not yet covered; local import jobs for the reported package completed successfully.
 
 - API E2E coverage verifies the feature gate, create/read/update/delete, localization, own-path permissions, course add/remove/reorder, sequence synchronization, direct and group enrollment/unenrollment, active-recipient export behavior, rejection of inactive recipients, course access retention/removal rules, duplicate sync handling, future group members, and learning-path certificate rendering/share flows.
+- Sharing regressions use the production tenant database proxy and cover retries of failed/incomplete exports, concurrent export requests, recovery of an unlinked legacy target, rollback of target membership plus its reconciliation event, and rollback of source edits when the durable transfer request cannot be saved. Component tests cover queued, failed, retry, processing, and shared states; these are not full-browser retry tests.
 - I did not find a dedicated Playwright learning-path spec under `apps/web/e2e/specs`; frontend behavior is supported by source evidence and strong backend workflow coverage.

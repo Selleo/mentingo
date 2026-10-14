@@ -2982,7 +2982,7 @@ export interface GetMasterCourseExportsResponse {
     /** @format uuid */
     targetTenantId: string;
     targetCourseId: string | null;
-    syncStatus: "active" | "failed" | "paused";
+    syncStatus: "pending" | "processing" | "active" | "failed" | "paused";
     lastSyncedAt: string | null;
   }[];
 }
@@ -2996,7 +2996,7 @@ export interface GetMasterCourseExportCandidatesResponse {
       host: string;
       isExported: boolean;
       targetCourseId: string | null;
-      syncStatus: ("active" | "failed" | "paused") | null;
+      syncStatus: ("pending" | "processing" | "active" | "failed" | "paused") | null;
       lastSyncedAt: string | null;
     }[];
     summary: {
@@ -3005,6 +3005,12 @@ export interface GetMasterCourseExportCandidatesResponse {
       remainingCount: number;
     };
   };
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetMasterCourseJobStatusResponse {
@@ -30282,7 +30288,7 @@ export interface GetLearningPathExportsResponse {
     /** @format uuid */
     targetTenantId: string;
     targetLearningPathId: string | null;
-    syncStatus: "active" | "failed" | "paused";
+    syncStatus: "pending" | "processing" | "active" | "failed" | "paused";
     lastSyncedAt: string | null;
   }[];
 }
@@ -30296,7 +30302,7 @@ export interface GetLearningPathExportCandidatesResponse {
       host: string;
       isExported: boolean;
       targetLearningPathId: string | null;
-      syncStatus: ("active" | "failed" | "paused") | null;
+      syncStatus: ("pending" | "processing" | "active" | "failed" | "paused") | null;
       lastSyncedAt: string | null;
     }[];
     summary: {
@@ -30305,6 +30311,12 @@ export interface GetLearningPathExportCandidatesResponse {
       remainingCount: number;
     };
   };
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetLearningPathJobStatusResponse {
@@ -38515,11 +38527,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetMasterCourseExportCandidates: (
       courseId: string,
+      query?: {
+        search?: string;
+        page?: number;
+        perPage?: number;
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetMasterCourseExportCandidatesResponse, any>({
         path: `/api/course/master/${courseId}/export-candidates`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -42730,11 +42748,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathExportControllerGetLearningPathExportCandidates: (
       learningPathId: string,
+      query?: {
+        search?: string;
+        page?: number;
+        perPage?: number;
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetLearningPathExportCandidatesResponse, any>({
         path: `/api/learning-path/master/${learningPathId}/export-candidates`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

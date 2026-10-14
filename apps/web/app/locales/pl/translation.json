@@ -5081,6 +5081,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Nie masz uprawnień do przesłania wideo w tym miejscu",
+      "uploadTargetNotFound": "Nie znaleziono elementu, do którego przesyłasz wideo",
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
@@ -5843,8 +5845,41 @@
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Aby zduplikować ten kurs, potrzebujesz uprawnień do zarządzania nim",
+      "sourceCourseNotFound": "Nie znaleziono kursu do zduplikowania",
+      "sourceCategoryMissing": "Kurs do zduplikowania nie ma kategorii",
+      "targetCourseNotFound": "Nie znaleziono zduplikowanego kursu",
+      "tenantMissing": "Nie znaleziono tenanta tego kursu"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Zaznacz wszystkie organizacje na tej stronie",
+    "selectOrganization": "Zaznacz {{name}}",
+    "columns": {
+      "organization": "Organizacja",
+      "status": "Status"
+    },
+    "searchPlaceholder": "Szukaj organizacji",
+    "selectedCount": "Wybrano: {{count}}",
+    "clearSelection": "Wyczyść",
+    "shareButton": "Udostępnij",
+    "shareWithCountButton": "Udostępnij ({{count}})",
+    "sharingButton": "Udostępnianie...",
+    "emptySearch": "Żadna organizacja nie pasuje do wyszukiwania",
+    "emptyList": "Brak innych organizacji, którym można udostępnić",
+    "status": {
+      "shared": "Udostępniony",
+      "inProgress": "W toku",
+      "paused": "Wstrzymany",
+      "failed": "Błąd"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Udostępnianie temu tenantowi jest wstrzymane",
+      "transferFailed": "Przesyłanie nie powiodło się. Ponów udostępnianie, aby wznowić.",
       "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
       "sourceAuthorNotFound": "Nie znaleziono autora kursu źródłowego",
       "sourceCategoryNotFound": "Nie znaleziono kategorii kursu źródłowego",
@@ -5867,6 +5902,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Nie znaleziono Ścieżki Rozwoju do eksportu",
       "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
       "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki rozwoju",
       "noCourses": "Ścieżka Rozwoju musi zawierać co najmniej jeden kurs przed eksportem",

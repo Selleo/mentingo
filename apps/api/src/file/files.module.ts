@@ -15,6 +15,8 @@ import { VideoMetadataRepository } from "./video-metadata.repository";
 import { VideoMetadataService } from "./video-metadata.service";
 import { VideoMetadataWorker } from "./video-metadata.worker";
 import { VideoProcessingStateService } from "./video-processing-state.service";
+import { VideoUploadAuthorizationRepository } from "./video-upload-authorization.repository";
+import { VideoUploadAuthorizationService } from "./video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 @Module({
@@ -22,6 +24,8 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
   controllers: [FileController],
   providers: [
     FileService,
+    VideoUploadAuthorizationService,
+    VideoUploadAuthorizationRepository,
     ImageVariantService,
     ThumbnailService,
     BunnyVideoProvider,

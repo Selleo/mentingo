@@ -352,6 +352,19 @@ export class S3Service {
     contentType: string,
     partSize = DEFAULT_TUS_CHUNK_SIZE,
   ): Promise<void> {
+    try {
+      await this.writeMultipartStream(stream, key, contentType, partSize);
+    } finally {
+      stream.destroy();
+    }
+  }
+
+  private async writeMultipartStream(
+    stream: Readable,
+    key: string,
+    contentType: string,
+    partSize: number,
+  ): Promise<void> {
     const { uploadId } = await this.createMultipartUpload(key, contentType);
     const parts: Array<{ ETag: string; PartNumber: number }> = [];
     let buffered = Buffer.alloc(0);

@@ -2665,6 +2665,7 @@
         "lesson": "Leçon introuvable."
       },
       "forbidden": {
+        "updateCourse": "Vous n'êtes pas autorisé à modifier ce cours.",
         "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
       },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
@@ -4528,6 +4529,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Vous n'êtes pas autorisé à téléverser une vidéo ici",
+      "uploadTargetNotFound": "L'élément auquel vous téléversez la vidéo est introuvable",
       "invalidData": "Échec du téléchargement du fichier : données de fichier non valides",
       "fileEmpty": "Échec du téléchargement du fichier : le fichier est vide",
       "contentTypeMismatch": "Le type de contenu du fichier ne correspond pas au type de contenu fourni",
@@ -5519,8 +5522,41 @@
       "missingTenantIdHeader": "En-tête X-Tenant-Id manquant"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Vous devez pouvoir gérer ce cours pour le dupliquer",
+      "sourceCourseNotFound": "Le cours à dupliquer est introuvable",
+      "sourceCategoryMissing": "Le cours à dupliquer n'a pas de catégorie",
+      "targetCourseNotFound": "Le cours dupliqué est introuvable",
+      "tenantMissing": "Le locataire de ce cours est introuvable"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Sélectionner toutes les organisations de cette page",
+    "selectOrganization": "Sélectionner {{name}}",
+    "columns": {
+      "organization": "Organisation",
+      "status": "Statut"
+    },
+    "searchPlaceholder": "Rechercher des organisations",
+    "selectedCount": "Sélectionné : {{count}}",
+    "clearSelection": "Effacer",
+    "shareButton": "Partager",
+    "shareWithCountButton": "Partager avec {{count}}",
+    "sharingButton": "Partage...",
+    "emptySearch": "Aucune organisation ne correspond à votre recherche",
+    "emptyList": "Aucune autre organisation avec laquelle partager",
+    "status": {
+      "shared": "Partagé",
+      "inProgress": "En cours",
+      "paused": "En pause",
+      "failed": "Échec"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Le partage avec ce locataire est suspendu",
+      "transferFailed": "Le transfert a échoué. Relancez le partage pour reprendre.",
       "sourceCourseNotFound": "Cours source introuvable",
       "sourceAuthorNotFound": "Auteur du cours source introuvable",
       "sourceCategoryNotFound": "Catégorie de cours source introuvable",
@@ -5543,6 +5579,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Parcours de développement à exporter introuvable",
       "noTargetTenants": "Sélectionnez au moins un locataire cible",
       "exportLinkMissing": "Lien d'exportation du parcours de développement introuvable",
       "noCourses": "Le parcours de développement doit inclure au moins un cours avant l'export",

@@ -44,7 +44,7 @@ export class CourseDuplicationWorker implements OnModuleDestroy {
     }
 
     await this.tenantDbRunnerService.runWithTenant(job.data.tenantId, () =>
-      this.courseDuplicationService.processDuplicationJob(String(job.id), job.data),
+      this.courseDuplicationService.duplicateCourseFromJob(String(job.id), job.data),
     );
   }
 

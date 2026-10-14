@@ -3,6 +3,8 @@ import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
+import type { Pagination } from "src/common";
+
 export const courseOriginTypeSchema = Type.Enum(COURSE_ORIGIN_TYPES);
 
 export const masterCourseExportBodySchema = Type.Object({
@@ -65,3 +67,7 @@ export type MasterCourseExportLink = Static<typeof masterCourseExportLinkSchema>
 export type MasterCourseExportCandidatesResponse = Static<
   typeof masterCourseExportCandidatesResponseSchema
 >;
+export type MasterCourseExportCandidatesPage = {
+  data: MasterCourseExportCandidatesResponse;
+  pagination: Pagination;
+};

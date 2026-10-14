@@ -4807,6 +4807,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "You don't have permission to upload a video here",
+      "uploadTargetNotFound": "The item you are uploading the video to was not found",
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
@@ -5798,8 +5800,41 @@
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "You need permission to manage this course to duplicate it",
+      "sourceCourseNotFound": "The course to duplicate was not found",
+      "sourceCategoryMissing": "The course to duplicate has no category",
+      "targetCourseNotFound": "The duplicated course was not found",
+      "tenantMissing": "The tenant for this course was not found"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Select all organizations on this page",
+    "selectOrganization": "Select {{name}}",
+    "columns": {
+      "organization": "Organization",
+      "status": "Status"
+    },
+    "searchPlaceholder": "Search organizations",
+    "selectedCount": "Selected: {{count}}",
+    "clearSelection": "Clear",
+    "shareButton": "Share",
+    "shareWithCountButton": "Share with {{count}}",
+    "sharingButton": "Sharing...",
+    "emptySearch": "No organizations match your search",
+    "emptyList": "There are no other organizations to share with",
+    "status": {
+      "shared": "Shared",
+      "inProgress": "In progress",
+      "paused": "Paused",
+      "failed": "Failed"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Sharing with this tenant is paused",
+      "transferFailed": "Transfer failed. Retry sharing to resume.",
       "sourceCourseNotFound": "Source course not found",
       "sourceAuthorNotFound": "Source course author not found",
       "sourceCategoryNotFound": "Source course category not found",
@@ -5822,6 +5857,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Development path to export not found",
       "noTargetTenants": "Select at least one target tenant",
       "exportLinkMissing": "Development path export link not found",
       "noCourses": "Development path must include at least one course before export",

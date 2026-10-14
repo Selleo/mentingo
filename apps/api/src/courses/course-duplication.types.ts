@@ -1,6 +1,6 @@
 import type { LocalizedText } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CourseSelect } from "src/courses/types/master-course.types";
+import type { CourseSelect } from "src/course-transfer/types/course-transfer-graph.types";
 
 export type CourseDuplicationSourceCourse = Pick<
   CourseSelect,

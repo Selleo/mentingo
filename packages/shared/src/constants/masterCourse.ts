@@ -7,6 +7,8 @@ export const COURSE_ORIGIN_TYPES = {
 export type CourseOriginType = (typeof COURSE_ORIGIN_TYPES)[keyof typeof COURSE_ORIGIN_TYPES];
 
 export const MASTER_COURSE_EXPORT_SYNC_STATUSES = {
+  PENDING: "pending",
+  PROCESSING: "processing",
   ACTIVE: "active",
   FAILED: "failed",
   PAUSED: "paused",

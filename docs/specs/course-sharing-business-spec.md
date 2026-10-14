@@ -15,6 +15,7 @@ The managing-tenant administrator selects recipient organizations from the cours
 ## Feature Functions
 
 - Share one course with selected recipient organizations.
+- Track queued, processing, successful, and failed destinations separately; retry failed or previously incomplete shares from the same selector.
 - Create each newly shared course as a draft so the recipient can decide when to launch it.
 - Synchronize later course, chapter, lesson, category, resource, quiz, AI Mentor, and supported SCORM content changes from the source.
 - Copy AI Mentor voice configuration with the shared lesson. Preset settings and localized custom provider voice identifiers are configuration values, so custom voice identifiers are preserved literally and do not require tenant asset copying.
@@ -32,14 +33,18 @@ Central course ownership reduces duplicated authoring and makes training updates
 
 A managing-tenant administrator opens a course's sharing area, selects one or more active organizations, and starts sharing. Inactive organizations are omitted from the selector and cannot be supplied directly through the API. Mentingo creates a separate draft course for each recipient and copies the supported curriculum and resources in the background. The source becomes the centrally managed master, while recipient copies display a shared-course notice and restrict editing to the local controls that remain available, including status and enrollment.
 
-When the source course or its curriculum changes, Mentingo queues synchronization for every active sharing link. The recipient copy receives the latest centrally managed content and learner-facing metadata but keeps its existing draft or published status. A later sync therefore updates what learners see without making a locally published course unavailable. In the recipient’s course overview, centrally owned metadata such as the title, category, description, cover, trailer, and learning outcomes is presented as read-only; local administrators retain controls for rollout, enrollment, and certificate settings.
+Submitting a share confirms acceptance rather than completion. The sharing area refreshes while a destination is queued or processing and displays “shared” only after the recipient copy has been recorded successfully. Failed destinations and older incomplete shares can be selected again without creating a new sharing relationship. Accepted requests are saved before background dispatch, so a temporary queue outage delays processing without losing the request. Interrupted work can be recovered, and exhausted transfer failures remain visible for explicit retry. Automatic job retries keep the destination processing until they finish or are exhausted.
+
+When the source course or its curriculum changes, Mentingo queues synchronization for every active sharing link. The recipient copy receives the latest centrally managed content and learner-facing metadata but keeps its existing draft or published status. The course graph and its sharing mappings change together; if application fails, the previous database revision remains in place. Overlapping transfers cannot commit through an expired worker claim. A later sync therefore updates what learners see without changing a locally published course to draft. In the recipient’s course overview, centrally owned metadata such as the title, category, description, cover, trailer, and learning outcomes is presented as read-only; local administrators retain controls for rollout, enrollment, and certificate settings.
 
 ## Key Technical Context
 
 - The source workflow is exposed in the admin course editor's Sharing tab and is limited in the UI to managing-tenant administrators outside support mode.
 - API export endpoints require `course.export` and the managing-tenant administrator guard; cross-tenant work runs through explicit tenant contexts.
 - `apps/api/src/courses/master-course.service.ts` creates recipient courses as drafts and synchronizes existing recipient courses without owning their status.
-- Source update events enqueue durable BullMQ synchronization jobs through the master-course handler and worker.
+- Source update events persist transfer requests through awaited outbox reactions. The transfer coordinator dispatches BullMQ work from durable operations, renews worker claims, fences target commits, and recovers undispatched or interrupted work. Status survives queue job removal. Processing requires the outbox dispatcher to be enabled.
+- Trailer deletion and video replacement enforce centrally controlled content protection; certificate changes require local course ownership or broader course management permission.
+- Sharing status describes content-copy completion, not verified video playback readiness. Request generations order synchronization; they are not immutable content-version identifiers. Persisted asset identities, asset provenance, provider readiness, and path-wide dependent revisions remain follow-up work in `docs/plans/course-transfer-reliability`.
 - `apps/web/app/modules/Admin/EditCourse/EditCourse.tsx` limits exported copies to the Status and Enrolled tabs, matching the product boundary between central content ownership and local rollout control.
 
 ## Test Evidence
@@ -47,3 +52,5 @@ When the source course or its curriculum changes, Mentingo queues synchronizatio
 API E2E coverage verifies managing-tenant authorization, active-recipient selection, rejection of inactive recipients, initial draft creation, read-only exported content, localized course/category copying, repeated sharing behavior, resource and video handling, category synchronization, and source deletion propagation. Regression coverage also verifies that after a recipient publishes its shared copy, a later source update synchronizes content without changing that published status.
 
 Frontend Playwright coverage verifies that recipient administrators see shared-course metadata and learning outcomes as read-only, cannot open the content editor or add new languages, and retain only the allowed settings tabs.
+
+Sharing E2E fixtures use the production tenant database proxy and restricted application role. Additional HTTP regressions cover exported-trailer protection, ownership checks, and allowed local certificate configuration. Database regressions cover coherent source snapshots, rollback of target content and mappings, and durable requests without immediate queue submission. Unit and component tests cover incomplete-link recovery, automatic retry state, progress polling, and retry selection. Live provider playback and the new retry flow in a full browser session have not been validated by these changes.

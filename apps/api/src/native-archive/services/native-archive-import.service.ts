@@ -6,9 +6,10 @@ import { RagService } from "src/ai/services/rag.service";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { isRecord } from "src/common/utils/object.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
-import { SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE } from "src/courses/master-course-scorm.constants";
-import { MasterCourseRepository } from "src/courses/master-course.repository";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { COURSE_TRANSFER_MODES } from "src/course-transfer/course-transfer.constants";
+import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
+import { CourseTransferService } from "src/course-transfer/services/course-transfer.service";
+import { getTargetScormStorage } from "src/course-transfer/utils/course-transfer-graph.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import { S3Service } from "src/s3/s3.service";
 import { getScormPackagePrefix } from "src/scorm/scorm-storage-paths";
@@ -41,15 +42,15 @@ import type {
 } from "../native-archive.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 @Injectable()
 export class NativeArchiveImportService {
   constructor(
     private readonly nativeArchiveImportRepository: NativeArchiveImportRepository,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
-    private readonly masterCourseRepository: MasterCourseRepository,
-    private readonly masterCourseService: MasterCourseService,
+    private readonly courseTransferGraphRepository: CourseTransferGraphRepository,
+    private readonly courseTransferService: CourseTransferService,
     private readonly nativeArchiveAssetsService: NativeArchiveAssetsService,
     private readonly nativeArchiveValidationService: NativeArchiveValidationService,
     private readonly nativeArchiveLiveTrainingService: NativeArchiveLiveTrainingService,
@@ -295,14 +296,14 @@ export class NativeArchiveImportService {
       throw new BadRequestException("nativeArchive.error.invalidCategory");
     }
 
-    const existingCategory = await this.masterCourseRepository.findCategoryByBaseTitle(
+    const existingCategory = await this.courseTransferGraphRepository.findCategoryByBaseTitle(
       categoryTitle,
       snapshot.category.baseLanguage,
     );
     const categoryId =
       existingCategory?.id ??
       (
-        await this.masterCourseRepository.createCategoryFromSource({
+        await this.courseTransferGraphRepository.createCategoryFromSource({
           title: buildJsonbFieldWithMultipleEntries(snapshot.category.title),
           baseLanguage: snapshot.category.baseLanguage,
           availableLocales: snapshot.category.availableLocales,
@@ -313,17 +314,18 @@ export class NativeArchiveImportService {
     await this.nativeArchiveImportRepository.createCourse(
       buildNativeArchiveCourseInsert(source, actor.userId, categoryId, targetCourseId),
     );
-    await this.masterCourseRepository.ensureCourseSummaryStats(targetCourseId, actor.userId);
+    await this.courseTransferGraphRepository.ensureCourseSummaryStats(targetCourseId, actor.userId);
 
-    const maps = await this.masterCourseService.duplicateCourseIntoExistingCourse({
-      sourceCourseId: source.id,
-      targetCourseId,
-      actorId: actor.userId,
-      tenantId: actor.tenantId,
-      sourceSnapshot: snapshot,
-      targetCategoryId: categoryId,
-      targetCurrency: NATIVE_ARCHIVE_DEFAULT_CURRENCY,
-      uploadedResourceIdsByFileKey: staged.uploadedResourceIdsByFileKey,
+    const maps = await this.courseTransferService.copyCourseIntoExistingCourse({
+      source: { tenantId: actor.tenantId, snapshot },
+      destination: { tenantId: actor.tenantId, courseId: targetCourseId },
+      policy: {
+        mode: COURSE_TRANSFER_MODES.DUPLICATE,
+        actorId: actor.userId,
+        targetCategoryId: categoryId,
+        targetCurrency: NATIVE_ARCHIVE_DEFAULT_CURRENCY,
+        uploadedResourceIdsByFileKey: staged.uploadedResourceIdsByFileKey,
+      },
     });
     await this.nativeArchiveLiveTrainingService.restoreLiveTrainingLessons(
       snapshot,
@@ -378,7 +380,10 @@ export class NativeArchiveImportService {
 
     for (const snapshot of plan.missing) {
       const targetId = plan.courseIdMap.get(snapshot.course.id);
-      if (targetId && !(await this.masterCourseRepository.findCourseByIdInTenant(targetId))) {
+      if (
+        targetId &&
+        !(await this.courseTransferGraphRepository.findCourseByIdInTenant(targetId))
+      ) {
         uncommitted.push({ snapshot, targetId });
       }
     }
@@ -386,11 +391,7 @@ export class NativeArchiveImportService {
     const prefixes = uncommitted.flatMap(({ snapshot, targetId }) => [
       prefixTenantStorageKey(`master-course/${targetId}/`, tenantId),
       ...snapshot.scormPackages.map((pkg) => {
-        const targetPackageId = uuidv5(
-          `master-course:${targetId}:scorm-package:${pkg.id}`,
-          SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
-        );
-
+        const { targetPackageId } = getTargetScormStorage(targetId, tenantId, pkg);
         return `${getScormPackagePrefix(tenantId, targetPackageId)}/`;
       }),
     ]);

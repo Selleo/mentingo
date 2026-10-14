@@ -1,5 +1,4 @@
-import { Inject } from "@nestjs/common";
-import { EventsHandler } from "@nestjs/cqrs";
+import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -14,9 +13,9 @@ import {
   UpdateCourseEvent,
   UpdateLessonEvent,
 } from "src/events";
+import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
+import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
 import { chapters, lessons } from "src/storage/schema";
-
-import type { IEventHandler } from "@nestjs/cqrs";
 
 type SyncEvents =
   | BulkUpdateCourseCategoryEvent
@@ -28,21 +27,31 @@ type SyncEvents =
   | UpdateLessonEvent
   | DeleteLessonEvent;
 
-@EventsHandler(
-  BulkUpdateCourseCategoryEvent,
-  UpdateCourseEvent,
-  CreateChapterEvent,
-  UpdateChapterEvent,
-  DeleteChapterEvent,
-  CreateLessonEvent,
-  UpdateLessonEvent,
-  DeleteLessonEvent,
-)
-export class MasterCourseSyncHandler implements IEventHandler<SyncEvents> {
+@Injectable()
+export class MasterCourseSyncHandler implements OnModuleInit {
   constructor(
     private readonly masterCourseService: MasterCourseService,
     @Inject("DB") private readonly db: DatabasePg,
+    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
   ) {}
+
+  onModuleInit(): void {
+    const events = [
+      BulkUpdateCourseCategoryEvent,
+      UpdateCourseEvent,
+      CreateChapterEvent,
+      UpdateChapterEvent,
+      DeleteChapterEvent,
+      CreateLessonEvent,
+      UpdateLessonEvent,
+      DeleteLessonEvent,
+    ];
+    for (const event of events) {
+      this.outboxDirectHandlerService.registerReaction(event.name, async (payload) => {
+        await this.handle(materializeLegacyEvent(event.name, payload) as SyncEvents);
+      });
+    }
+  }
 
   async handle(event: SyncEvents) {
     if (event instanceof BulkUpdateCourseCategoryEvent) {
@@ -90,14 +99,10 @@ export class MasterCourseSyncHandler implements IEventHandler<SyncEvents> {
       return chapter?.courseId ?? null;
     }
 
-    const lessonId =
-      event instanceof CreateLessonEvent
-        ? event.lessonCreationData.lessonId
-        : event instanceof UpdateLessonEvent
-          ? event.lessonUpdateData.lessonId
-          : null;
-
     if (event instanceof DeleteLessonEvent) return event.deleteLessonData.courseId;
+    let lessonId: string | null = null;
+    if (event instanceof CreateLessonEvent) lessonId = event.lessonCreationData.lessonId;
+    if (event instanceof UpdateLessonEvent) lessonId = event.lessonUpdateData.lessonId;
     if (!lessonId) return null;
 
     const [lesson] = await this.db

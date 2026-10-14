@@ -43,6 +43,7 @@ export interface DocumentIngestionJobData {
 }
 
 export interface MasterCourseExportJobData {
+  operationId?: string;
   sourceCourseId: string;
   sourceTenantId: string;
   targetTenantId: string;
@@ -50,6 +51,7 @@ export interface MasterCourseExportJobData {
 }
 
 export interface MasterCourseSyncJobData {
+  operationId?: string;
   exportId: string;
   sourceCourseId: string;
   sourceTenantId: string;
@@ -58,6 +60,7 @@ export interface MasterCourseSyncJobData {
 }
 
 export interface LearningPathExportJobData {
+  operationId?: string;
   exportId: string;
   sourceLearningPathId: string;
   sourceTenantId: string;
@@ -66,6 +69,7 @@ export interface LearningPathExportJobData {
 }
 
 export interface LearningPathSyncJobData {
+  operationId?: string;
   exportId: string;
   sourceLearningPathId: string;
   sourceTenantId: string;

@@ -23,7 +23,7 @@ export class LearningPathWorker implements OnModuleDestroy {
     this.exportWorker = new Worker(
       QUEUE_NAMES.LEARNING_PATH_EXPORT,
       async (job: Job<LearningPathExportJobData>) => {
-        await this.learningPathExportService.processExportJob(job.data);
+        await this.learningPathExportService.transferFromLegacyExportJob(job.data);
       },
       {
         connection,
@@ -34,7 +34,7 @@ export class LearningPathWorker implements OnModuleDestroy {
     this.syncWorker = new Worker(
       QUEUE_NAMES.LEARNING_PATH_SYNC,
       async (job: Job<LearningPathSyncJobData>) => {
-        await this.learningPathExportService.processSyncJob(job.data);
+        await this.learningPathExportService.transferFromSyncJob(job.data);
       },
       {
         connection,

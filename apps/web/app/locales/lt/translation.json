@@ -4791,6 +4791,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Neturite teisės čia įkelti vaizdo įrašo",
+      "uploadTargetNotFound": "Elementas, į kurį įkeliate vaizdo įrašą, nerastas",
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
@@ -5139,8 +5141,41 @@
     "adminLearningPaths": "Tobulėjimo keliai",
     "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Norėdami dubliuoti šį kursą, turite turėti teisę jį valdyti",
+      "sourceCourseNotFound": "Dubliuojamas kursas nerastas",
+      "sourceCategoryMissing": "Dubliuojamas kursas neturi kategorijos",
+      "targetCourseNotFound": "Dubliuotas kursas nerastas",
+      "tenantMissing": "Šio kurso tenantas nerastas"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Pasirinkti visas šio puslapio organizacijas",
+    "selectOrganization": "Pasirinkti {{name}}",
+    "columns": {
+      "organization": "Organizacija",
+      "status": "Būsena"
+    },
+    "searchPlaceholder": "Ieškoti organizacijų",
+    "selectedCount": "Pasirinkta: {{count}}",
+    "clearSelection": "Išvalyti",
+    "shareButton": "Dalintis",
+    "shareWithCountButton": "Dalintis su {{count}}",
+    "sharingButton": "Bendrinama...",
+    "emptySearch": "Paieškos neatitinka jokia organizacija",
+    "emptyList": "Nėra kitų organizacijų, su kuriomis būtų galima dalintis",
+    "status": {
+      "shared": "Dalinamas",
+      "inProgress": "Vykdoma",
+      "paused": "Pristabdyta",
+      "failed": "Nepavyko"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Bendrinimas su šiuo tenantu pristabdytas",
+      "transferFailed": "Perkėlimas nepavyko. Pakartokite bendrinimą, kad tęstumėte.",
       "sourceCourseNotFound": "Saltinio kursas nerastas",
       "sourceAuthorNotFound": "Saltinio kurso autorius nerastas",
       "sourceCategoryNotFound": "Saltinio kurso kategorija nerasta",
@@ -5163,6 +5198,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Eksportuojamas tobulėjimo kelias nerastas",
       "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
       "exportLinkMissing": "Tobulėjimo kelio eksporto rysys nerastas",
       "noCourses": "Pries eksportuojant tobulėjimo kelyje turi buti bent vienas kursas",

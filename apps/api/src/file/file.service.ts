@@ -74,6 +74,7 @@ import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyVideoReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
+import { VideoUploadAuthorizationService } from "./video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 import type { ResourceRelationshipType } from "./file.constants";
@@ -119,6 +120,7 @@ export class FileService {
     private readonly notificationGateway: VideoUploadNotificationGateway,
     private readonly videoMetadataQueueService: VideoMetadataQueueService,
     private readonly tenantRunner: TenantDbRunnerService,
+    private readonly videoUploadAuthorizationService: VideoUploadAuthorizationService,
   ) {}
 
   async getFileUrl(fileKey: string, options: { quality?: ImageQuality } = {}): Promise<string> {
@@ -426,6 +428,8 @@ export class FileService {
     if (sizeBytes > maxUploadSize) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
+
+    await this.videoUploadAuthorizationService.assertCanUpload(data, currentUser);
 
     const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
 

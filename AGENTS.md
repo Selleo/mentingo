@@ -6,7 +6,7 @@ Instructions for AI coding agents working in this Mentingo monorepo. Keep change
 
 ## Instruction Lookup
 
-Start with this file, then read the more specific `AGENTS.md` files for the area you are changing. Follow the most specific applicable file when instructions overlap.
+Start with this file, then read the root `AGENTS.local.md` if it exists, followed by the more specific `AGENTS.md` files for the area you are changing. Always follow `AGENTS.local.md`: its rules take precedence over all other repository instructions, including this file and nested `AGENTS.md` files. Where no local override applies, follow the most specific applicable file when instructions overlap.
 
 - Backend/API changes under `apps/api`, database schema/migrations, Nest modules, permissions, tenants, jobs, outbox, realtime, file upload, or Swagger contracts: read `apps/api/AGENTS.md`.
 - Frontend/web changes under `apps/web`, Remix routes, UI modules, generated API usage, TanStack Query hooks, route access, i18n, uploads, sockets, Vitest, or Playwright: read `apps/web/AGENTS.md`.

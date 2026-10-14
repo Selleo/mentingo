@@ -4744,6 +4744,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "No tienes permiso para subir un video aquí",
+      "uploadTargetNotFound": "No se encontró el elemento al que estás subiendo el video",
       "invalidData": "Error al cargar el archivo: datos de archivo no válidos",
       "fileEmpty": "Error al cargar el archivo: el archivo está vacío",
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
@@ -5735,8 +5737,41 @@
       "missingTenantIdHeader": "Falta el encabezado X-Tenant-Id"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Necesitas permiso para gestionar este curso para duplicarlo",
+      "sourceCourseNotFound": "No se encontró el curso que se va a duplicar",
+      "sourceCategoryMissing": "El curso que se va a duplicar no tiene categoría",
+      "targetCourseNotFound": "No se encontró el curso duplicado",
+      "tenantMissing": "No se encontró el inquilino de este curso"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Seleccionar todas las organizaciones de esta página",
+    "selectOrganization": "Seleccionar {{name}}",
+    "columns": {
+      "organization": "Organización",
+      "status": "Estado"
+    },
+    "searchPlaceholder": "Buscar organizaciones",
+    "selectedCount": "Seleccionado: {{count}}",
+    "clearSelection": "Borrar",
+    "shareButton": "Compartir",
+    "shareWithCountButton": "Compartir con {{count}}",
+    "sharingButton": "Compartiendo...",
+    "emptySearch": "Ninguna organización coincide con tu búsqueda",
+    "emptyList": "No hay otras organizaciones con las que compartir",
+    "status": {
+      "shared": "Compartido",
+      "inProgress": "En curso",
+      "paused": "En pausa",
+      "failed": "Error"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "El uso compartido con este inquilino está en pausa",
+      "transferFailed": "La transferencia falló. Vuelve a compartir para reanudarla.",
       "sourceCourseNotFound": "Curso fuente no encontrado",
       "sourceAuthorNotFound": "Autor del curso fuente no encontrado",
       "sourceCategoryNotFound": "Categoría del curso fuente no encontrada",
@@ -5759,6 +5794,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "No se encontró la ruta de desarrollo que se va a exportar",
       "noTargetTenants": "Seleccione al menos un inquilino objetivo",
       "exportLinkMissing": "Enlace de exportación de ruta de desarrollo no encontrado",
       "noCourses": "La ruta de desarrollo debe incluir al menos un curso antes de la exportación.",

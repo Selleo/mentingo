@@ -1,5 +1,6 @@
 import { forwardRef, Module } from "@nestjs/common";
 
+import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { SearchIndexModule } from "src/global-search/search-index.module";
@@ -25,6 +26,7 @@ import { LearningPathService } from "./services/learning-path.service";
 @Module({
   imports: [
     forwardRef(() => CourseModule),
+    CourseTransferModule,
     FileModule,
     SearchIndexModule,
     LocalizationModule,

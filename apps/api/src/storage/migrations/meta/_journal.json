@@ -1513,6 +1513,13 @@
       "when": 1791891043395,
       "tag": "0215_enable_reports_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 216,
+      "version": "7",
+      "when": 1791916411824,
+      "tag": "0216_course_transfer_operations",
+      "breakpoints": true
     }
   ]
 }

@@ -4796,6 +4796,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Nemáte oprávnění nahrát sem video",
+      "uploadTargetNotFound": "Položka, ke které nahráváte video, nebyla nalezena",
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
@@ -5143,8 +5145,41 @@
     "adminLearningPaths": "Rozvojové cesty",
     "adminLearningPathEditor": "Editor rozvojové cesty"
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "K duplikování tohoto kurzu potřebujete oprávnění ke správě kurzu",
+      "sourceCourseNotFound": "Kurz k duplikování nebyl nalezen",
+      "sourceCategoryMissing": "Kurz k duplikování nemá kategorii",
+      "targetCourseNotFound": "Duplikovaný kurz nebyl nalezen",
+      "tenantMissing": "Tenant tohoto kurzu nebyl nalezen"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Vybrat všechny organizace na této stránce",
+    "selectOrganization": "Vybrat {{name}}",
+    "columns": {
+      "organization": "Organizace",
+      "status": "Stav"
+    },
+    "searchPlaceholder": "Hledat organizace",
+    "selectedCount": "Vybráno: {{count}}",
+    "clearSelection": "Zrušit výběr",
+    "shareButton": "Sdílet",
+    "shareWithCountButton": "Sdílet s {{count}}",
+    "sharingButton": "Sdílení...",
+    "emptySearch": "Hledání neodpovídá žádná organizace",
+    "emptyList": "Nejsou k dispozici žádné další organizace ke sdílení",
+    "status": {
+      "shared": "Sdíleno",
+      "inProgress": "Probíhá",
+      "paused": "Pozastaveno",
+      "failed": "Selhalo"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Sdílení s tímto tenantem je pozastaveno",
+      "transferFailed": "Přenos se nezdařil. Pro pokračování zopakujte sdílení.",
       "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
       "sourceAuthorNotFound": "Autor zdrojoveho kurzu nebyl nalezen",
       "sourceCategoryNotFound": "Kategorie zdrojoveho kurzu nebyla nalezena",
@@ -5167,6 +5202,7 @@
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Rozvojová cesta k exportu nebyla nalezena",
       "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
       "exportLinkMissing": "Vazba exportu rozvojove cesty nebyla nalezena",
       "noCourses": "Rozvojova cesta musi pred exportem obsahovat alespon jeden kurz",

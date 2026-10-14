@@ -46,6 +46,7 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Inject `DB` from `src/storage/db/db.providers.ts` for normal tenant-scoped queries.
 - Use `DB_ADMIN` only for deliberate cross-tenant/admin operations such as tenant resolution, migrations, seeds, and support-mode tenant lookup.
 - Keep request handlers thin; put domain logic in services and query details in repositories where that pattern exists.
+- Name injected class dependencies using the full class name in camelCase: `courseTransferRepository: CourseTransferRepository`, `outboxPublisher: OutboxPublisher`, and `tenantDbRunnerService: TenantDbRunnerService`. Do not shorten these names to `repository`, `outbox`, `tenantRunner`, or other aliases. Keep the established `db`/`dbAdmin` names for token-injected database connections.
 - Validate controller inputs/outputs with `@Validate(...)` and TypeBox schemas.
 - Return `new BaseResponse(...)` or `new PaginatedResponse(...)` from controllers.
 - Create named exported response types in schema files instead of inline controller return shapes such as `Promise<BaseResponse<{ id: UUIDType }>>`.

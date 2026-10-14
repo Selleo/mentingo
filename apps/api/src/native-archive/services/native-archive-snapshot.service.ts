@@ -3,7 +3,8 @@ import { LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { processInBatches } from "src/common/utils/processInBatches";
-import { MasterCourseSnapshotService } from "src/courses/master-course-snapshot.service";
+import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
+import { CourseTransferSnapshotService } from "src/course-transfer/services/course-transfer-snapshot.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import {
   getAllImageVariantKeys,
@@ -29,7 +30,7 @@ import type {
 } from "../native-archive.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 function cleanRow(row: unknown): NativeArchiveRecord {
   if (!row || typeof row !== "object" || Array.isArray(row)) return {};
@@ -58,7 +59,8 @@ export class NativeArchiveSnapshotService {
   constructor(
     private readonly nativeArchiveSnapshotRepository: NativeArchiveSnapshotRepository,
     private readonly masterCourseRepository: MasterCourseRepository,
-    private readonly masterCourseSnapshotService: MasterCourseSnapshotService,
+    private readonly courseTransferSnapshotService: CourseTransferSnapshotService,
+    private readonly courseTransferGraphRepository: CourseTransferGraphRepository,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
   ) {}
@@ -214,7 +216,7 @@ export class NativeArchiveSnapshotService {
       throw new ForbiddenException("nativeArchive.error.accessDenied");
     }
 
-    const snapshot = await this.masterCourseSnapshotService.buildSourceSnapshot(course);
+    const snapshot = await this.courseTransferSnapshotService.buildSourceSnapshot(course);
 
     if (!snapshot) throw new NotFoundException("nativeArchive.error.categoryNotFound");
 
@@ -352,7 +354,7 @@ export class NativeArchiveSnapshotService {
         sourceReference,
         contentType: "video/mp4",
         open: async () => {
-          const tenantHost = await this.masterCourseRepository.getTenantHost(tenantId);
+          const tenantHost = await this.courseTransferGraphRepository.getTenantHost(tenantId);
           if (!tenantHost) throw new NotFoundException("masterCourse.error.sourceTenantMissing");
 
           const video = await this.bunnyStreamService.downloadMp4Fallback(

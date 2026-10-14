@@ -1383,15 +1383,27 @@ export class CourseController {
   @UseGuards(ManagingTenantAdminGuard)
   @RequirePermission(PERMISSIONS.COURSE_EXPORT)
   @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema, required: true }],
-    response: baseResponse(masterCourseExportCandidatesResponseSchema),
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema, required: true },
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number()) },
+    ],
+    response: paginatedResponse(masterCourseExportCandidatesResponseSchema),
   })
   async getMasterCourseExportCandidates(
     @Param("courseId") courseId: UUIDType,
+    @Query("search") search: string | undefined,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
     @CurrentUser() actor: CurrentUserType,
-  ): Promise<BaseResponse<MasterCourseExportCandidatesResponse>> {
-    return new BaseResponse(
-      await this.masterCourseService.getCourseExportCandidates(courseId, actor),
+  ): Promise<PaginatedResponse<MasterCourseExportCandidatesResponse>> {
+    return new PaginatedResponse(
+      await this.masterCourseService.getCourseExportCandidates(courseId, actor, {
+        search,
+        page,
+        perPage,
+      }),
     );
   }
 
