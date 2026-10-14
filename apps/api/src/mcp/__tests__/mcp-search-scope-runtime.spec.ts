@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 import { toNodeHandler } from "@modelcontextprotocol/node";
 import { createMcpHandler } from "@modelcontextprotocol/server";
-import { PERMISSIONS } from "@repo/shared";
+import { FEATURES, FEATURE_SETTINGS_KEYS, PERMISSIONS } from "@repo/shared";
 import express from "express";
 import request from "supertest";
 
@@ -27,6 +27,13 @@ describe("MCP search scope runtime enforcement", () => {
     },
   };
 
+  const enabledSettings = {
+    [FEATURE_SETTINGS_KEYS[FEATURES.ARTICLES]]: true,
+    [FEATURE_SETTINGS_KEYS[FEATURES.NEWS]]: true,
+    [FEATURE_SETTINGS_KEYS[FEATURES.QA]]: true,
+    learningPathsEnabled: true,
+  };
+
   function runtime() {
     const callContext = new AsyncLocalStorage<McpCallContext>();
     const getUserAccess = jest.fn().mockResolvedValue({
@@ -39,7 +46,7 @@ describe("MCP search scope runtime enforcement", () => {
       settingsService: {
         getGlobalSettings: jest
           .fn()
-          .mockResolvedValue({ articlesEnabled: true, newsEnabled: true, qaEnabled: true }),
+          .mockResolvedValue(enabledSettings),
       },
       auditCall: jest.fn().mockResolvedValue(undefined),
       executeIdempotent: jest.fn((_actor, _context, operation) => operation()),
@@ -53,7 +60,7 @@ describe("MCP search scope runtime enforcement", () => {
       Reflect.apply(Reflect.get(service, "createServer"), service, [
         { ...actor, grant: { ...actor.grant, scopes } },
         permissions,
-        { articlesEnabled: true, newsEnabled: true, qaEnabled: true, learningPathsEnabled: true },
+        enabledSettings,
       ]) as McpServer;
     const app = express();
     app.use(express.json());

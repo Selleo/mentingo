@@ -81,6 +81,29 @@ Other explicit scopes can be combined, for example `courses:read courses:write` 
 course editing. Each tool has an explicit scope mapping; adding a new tool does not
 automatically authorize it for an existing connection.
 
+### Choosing scopes for authoring
+
+Request the read and write scopes needed for the domain you work on. Example scope
+sets for the OAuth `scope` parameter (space-separated):
+
+| Workflow | Scope set |
+| --- | --- |
+| Create/edit courses using existing categories | `courses:read courses:write categories:read` |
+| Create/edit articles and article sections | `articles:read articles:write` |
+| Create/edit news | `news:read news:write` |
+| Manage Q&A | `qa:read qa:write` |
+| Create/edit development paths and their course membership | `learning_paths:read learning_paths:write` |
+
+Add `search:read` for global discovery, `files:write` for upload tools, or
+`categories:write` when the workflow must create or edit categories. A request for
+`files:write` does not allow course/article/news editing; the corresponding domain
+write scope is still needed for those tools. Scope approval never supplies missing
+account permissions. Review the exact scope list on the consent page.
+
+Use `student:read` alone for the Slack bot. Do not request every advertised scope:
+the student view is intentionally exclusive, and management read scopes have a
+broader data view.
+
 ### Existing connections
 
 Existing `authoring` and `search` access and refresh grants keep their previous access
@@ -209,6 +232,6 @@ Before recording, verify course creation/editing permissions and a successful co
 
 ## Validation and further detail
 
-The flow above describes the MCP implementation and consent UI. New student/scope tests have been added but were not run locally for this change; CI is responsible for validation. Repository unit tests cover selected OAuth, permission, upload, and resource-rendering behaviour. This documentation change does not validate production availability, compatibility with a named client, or the complete browser-to-authoring workflow.
+The flow above describes the MCP implementation and consent UI. Local backend and frontend lint/type checks passed, along with 279 focused backend tests and 1,300 frontend tests. The focused backend suite includes SDK routing, OAuth scope and learner projection tests; real database-backed HTTP/OAuth E2E and live provider/client flows were not run in this validation pass. Repository unit tests cover selected OAuth, permission, upload, and resource-rendering behaviour. This documentation change does not validate production availability, compatibility with a named client, or the complete browser-to-authoring workflow.
 
 For scope, source references, and test boundaries, see the [Mentingo MCP business spec](specs/mentingo-mcp-business-spec.md).

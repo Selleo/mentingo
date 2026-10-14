@@ -137,9 +137,10 @@ preservation and refresh escalation rejection. Student-tool tests cover bound ac
 identity, metadata projection, published article mode, feature checks, content limits,
 file URL exclusion and Q&A language availability. Learner course access and global
 search tests cover ownership shortcuts, metadata-only course matching and content-only
-retrieval. These new tests were not run locally for this change; CI validation remains
-pending. The coverage described below is historical and does not establish execution
-of the newly added scope/student tests.
+retrieval. The focused local backend suite passed all 279 tests, including these new cases,
+and all 1,300 frontend tests passed. Backend/frontend lint and type checks also
+passed. Database-backed HTTP/OAuth E2E and live client/provider flows were not
+rerun in this validation pass. Historical database-backed coverage is listed below.
 
 Prior local validation included the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
 

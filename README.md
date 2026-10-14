@@ -128,7 +128,18 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 ### Use Mentingo tools from your AI assistant
 
-Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. The assistant can use Mentingo tools to find and manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files. Changes are made in Mentingo with your account's current permissions, so you can review the results in the platform. Follow the [MCP guide](docs/mcp.md) to connect your assistant and try it out.
+Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. The assistant can find or manage content only through explicitly approved OAuth scopes and your account's current permissions. New connections must request scopes; there is no default `authoring` scope.
+
+| Workflow | Example scopes |
+| --- | --- |
+| Course authoring with existing categories and search | `courses:read courses:write categories:read search:read` |
+| Knowledge article authoring | `articles:read articles:write` |
+| News authoring | `news:read news:write` |
+| Learner assistant / Slack bot | `student:read` |
+
+Add `files:write` when authoring needs uploads, and request other domain scopes only when needed. Write scopes do not automatically grant read access. Management read scopes can expose drafts and authoring details; `student:read` instead exposes limited learner search and list/get tools and cannot be combined with other scopes.
+
+Existing `authoring` and `search` grants retain their current access until reconnect, subject to normal expiry, revocation and account permissions. Changing scopes requires fresh consent. Follow the [MCP guide](docs/mcp.md#explicit-connection-scopes) for the full scope list, client setup and learner restrictions.
 
 ### Enterprise and white-label readiness
 
