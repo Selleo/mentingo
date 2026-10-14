@@ -1,6 +1,6 @@
 # #2036 Hybrid global search
 
-The sparkle action runs PostgreSQL FTS and semantic retrieval together and merges entity rankings with reciprocal rank fusion. Regular typing remains keyword search. The sparkle is shown only when the existing `useAIConfigured` check confirms effective core/OpenAI credentials (including the existing server-key fallback). It stays hidden while configuration is unknown and returns to keyword mode when configuration is removed. Index coverage does not gate the button; pending-index and provider-outage notices continue to work. Reranking is intentionally omitted.
+The sparkle action runs PostgreSQL FTS and semantic retrieval together and merges entity rankings with reciprocal rank fusion. Regular typing uses the same permission-checked FTS over content metadata and indexed file text. The sparkle adds semantic retrieval and rank fusion; it does not change the FTS corpus. The sparkle is shown only when the existing `useAIConfigured` check confirms effective core/OpenAI credentials (including the existing server-key fallback). It stays hidden while configuration is unknown and returns to keyword mode when configuration is removed. Index coverage does not gate the button; pending-index and provider-outage notices continue to work. Reranking is intentionally omitted.
 
 ## Index and model
 
@@ -28,7 +28,7 @@ Only lesson attachments are expanded into file text. PDF, DOCX, and TXT reuse th
 
 Hidden files, assessment answer options/solution explanations, and private AI Mentor context are excluded from semantic indexing. Private file passages are restricted to the uploader or resource-library managers, in addition to lesson access. Files attached to multiple entities/locales currently produce separate source chunk sets; extraction and embeddings can repeat across those sources.
 
-The UI reports incomplete indexing until all eligible visible sources have current chunks. Failed extraction/provider jobs also keep that coverage incomplete; inspect the semantic indexing queue and worker logs to diagnose them. File content contributes to FTS in hybrid mode, including during query-provider outages when current chunks already exist.
+The UI reports incomplete indexing until all eligible visible sources have current chunks. Failed extraction/provider jobs also keep that coverage incomplete; inspect the semantic indexing queue and worker logs to diagnose them. Indexed file content contributes to FTS in both keyword and hybrid modes, including during query-provider outages when current chunks already exist. Hybrid adds semantic matches to the same FTS results.
 
 ## Verification
 

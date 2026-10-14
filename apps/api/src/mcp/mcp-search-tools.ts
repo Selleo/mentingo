@@ -4,6 +4,7 @@ import { Type } from "@sinclair/typebox";
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH } from "src/global-search/global-search.constants";
 import { globalSearchQuerySchema } from "src/global-search/schemas/global-search.schema";
 
+import { MCP_STUDENT_SEARCH_PERMISSIONS } from "./mcp-student-access";
 import { shapeMcpSearchResults } from "./mcp-search-results";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 
@@ -66,9 +67,9 @@ export function registerMcpSearchTools(
   searchService: GlobalSearchService,
   context: McpSearchContext,
 ) {
-  const permissions = context.searchOnly
-    ? MCP_CONTENT_SEARCH_PERMISSIONS
-    : MCP_GLOBAL_SEARCH_PERMISSIONS;
+  let permissions = MCP_GLOBAL_SEARCH_PERMISSIONS;
+  if (context.searchOnly) permissions = MCP_CONTENT_SEARCH_PERMISSIONS;
+  if (context.studentOnly) permissions = MCP_STUDENT_SEARCH_PERMISSIONS;
   server.registerTool(
     "global_search",
     {
@@ -80,9 +81,17 @@ export function registerMcpSearchTools(
     },
     async ({ searchQuery, language, mode }) =>
       run(permissions, async (user) => {
-        const result = mode
-          ? await searchService.search(searchQuery, language, user, mode)
-          : await searchService.search(searchQuery, language, user);
+        let result;
+        if (context.studentOnly) {
+          result = await searchService.search(searchQuery, language, user, mode, {
+            contentOnly: true,
+            learnerOnly: true,
+          });
+        } else if (mode) {
+          result = await searchService.search(searchQuery, language, user, mode);
+        } else {
+          result = await searchService.search(searchQuery, language, user);
+        }
         return shapeMcpSearchResults(result, context);
       }),
   );

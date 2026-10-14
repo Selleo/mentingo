@@ -182,7 +182,7 @@ import {
 } from "./schemas/courseQuery";
 import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
-import type { CourseStatisticsExpressionsParams } from "./course.types";
+import type { CourseReadOptions, CourseStatisticsExpressionsParams } from "./course.types";
 import type { BulkArchiveCourseBody } from "./schemas/bulkArchiveCourse.schema";
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
@@ -1496,6 +1496,7 @@ export class CourseService {
     idOrSlug: UUIDType | string,
     currentUser: CurrentUserType | undefined,
     language: SupportedLanguages,
+    options: CourseReadOptions = {},
   ): Promise<CommonShowCourse> {
     await this.ensureAnonymousCourseAccess(currentUser?.userId);
 
@@ -1516,18 +1517,21 @@ export class CourseService {
 
     if (!courseAccess) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
-    const isManagerPreview = await this.resolveGroupManagerCoursePreview({
-      courseId: id,
-      courseAuthorId: courseAccess.authorId,
-      currentUser,
-    });
+    const isManagerPreview =
+      !options.learnerOnly &&
+      (await this.resolveGroupManagerCoursePreview({
+        courseId: id,
+        courseAuthorId: courseAccess.authorId,
+        currentUser,
+      }));
 
     const canManageCourses =
       hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE) ||
       hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
     const canEditCourse =
-      hasPermission(userPermissions, PERMISSIONS.USER_MANAGE) ||
-      (canManageCourses && userId === courseAccess.authorId);
+      !options.learnerOnly &&
+      (hasPermission(userPermissions, PERMISSIONS.USER_MANAGE) ||
+        (canManageCourses && userId === courseAccess.authorId));
     const isCourseStudentModeActive = userId
       ? await this.isCourseStudentModeEnabled(id, userId)
       : false;
@@ -1595,6 +1599,17 @@ export class CourseService {
     if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const isEnrolled = !!course.enrolled;
+    if (options.learnerOnly) {
+      const canReadCatalog = hasPermission(userPermissions, PERMISSIONS.COURSE_READ);
+      const canReadEnrolled =
+        isEnrolled && hasPermission(userPermissions, PERMISSIONS.COURSE_READ_ASSIGNED);
+      const publishedAccess =
+        course.status === COURSE_STATUSES.PUBLISHED && (canReadCatalog || canReadEnrolled);
+      const privateAccess = course.status === COURSE_STATUSES.PRIVATE && canReadEnrolled;
+      if (course.isArchived || (!publishedAccess && !privateAccess)) {
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
+      }
+    }
     const NON_PUBLIC_STATUSES = ["draft", "private"];
     const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
 

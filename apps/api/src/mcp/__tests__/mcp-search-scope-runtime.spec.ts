@@ -36,6 +36,11 @@ describe("MCP search scope runtime enforcement", () => {
     const service = Object.assign(Object.create(McpHttpService.prototype), {
       callContext,
       permissionsService: { getUserAccess },
+      settingsService: {
+        getGlobalSettings: jest
+          .fn()
+          .mockResolvedValue({ articlesEnabled: true, newsEnabled: true, qaEnabled: true }),
+      },
       auditCall: jest.fn().mockResolvedValue(undefined),
       executeIdempotent: jest.fn((_actor, _context, operation) => operation()),
     }) as McpHttpService;
@@ -82,6 +87,40 @@ describe("MCP search scope runtime enforcement", () => {
       const result = await rpc("tools/call", { name, arguments: {} });
       expect(Boolean(result.error || result.result?.isError)).toBe(true);
     }
+  });
+
+  it("student scope exposes only reader equivalents even for an administrator", async () => {
+    const { rpc } = await catalog([MCP_SCOPES.STUDENT_READ]);
+    const names = (await rpc("tools/list")).result.tools.map((tool: { name: string }) => tool.name);
+    expect(names.sort()).toEqual(
+      [
+        "global_search",
+        "list_student_courses",
+        "get_student_course",
+        "list_student_articles",
+        "get_student_article",
+        "list_student_news",
+        "get_student_news",
+        "list_student_qa_entries",
+        "get_student_qa_entry",
+      ].sort(),
+    );
+    expect(names).not.toEqual(expect.arrayContaining(["get_course", "get_lesson", "list_users"]));
+  });
+  it("caps the current sender's account permissions on each student tool execution", async () => {
+    const { service, callContext } = runtime();
+    const operation = jest.fn().mockResolvedValue({ articles: [] });
+    await callContext.run({ tool: "global_search", requestId: "student", arguments: {} }, () =>
+      Reflect.apply(Reflect.get(service, "run"), service, [
+        { ...actor, grant: { ...actor.grant, scopes: [MCP_SCOPES.STUDENT_READ] } },
+        [PERMISSIONS.ARTICLE_READ_PUBLIC],
+        operation,
+      ]),
+    );
+    const user = operation.mock.calls[0][0];
+    expect(user.userId).toBe(actor.grant.userId);
+    expect(user.permissions).not.toContain(PERMISSIONS.ARTICLE_MANAGE);
+    expect(user.permissions).not.toContain(PERMISSIONS.COURSE_UPDATE);
   });
 
   it("preserves authoring discovery and intersects scope with content permissions", async () => {

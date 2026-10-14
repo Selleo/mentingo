@@ -4,6 +4,7 @@ import type { GlobalSearchResponse } from "src/global-search/schemas/global-sear
 export type McpSearchContext = {
   resource: string;
   searchOnly: boolean;
+  studentOnly?: boolean;
 };
 
 export type McpLinkedSearchResponse = {

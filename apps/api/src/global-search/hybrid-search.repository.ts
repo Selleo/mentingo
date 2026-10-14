@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   LEARNING_PATH_STATUSES,
   PERMISSIONS,
   RESOURCE_VISIBILITY,
@@ -12,7 +13,7 @@ import { hasAnyPermission, hasPermission } from "src/common/permissions/permissi
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { DB } from "src/storage/db/db.providers";
 
-import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
+import { SEARCH_DOCUMENT_TYPES, SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import {
   SEMANTIC_SEARCH_MODEL,
   SEMANTIC_SEARCH_INDEX_VERSION,
@@ -35,8 +36,9 @@ export class HybridSearchRepository {
     entityType: SearchEntityType,
     query: string,
     actor: CurrentUserType,
+    metadataOnly = false,
   ): Promise<MatchRow[]> {
-    const eligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(actor)}`;
+    const eligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(actor)} AND ${metadataOnly ? sql`s.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})` : sql`true`}`;
     const result = await this.db.execute(sql`
       WITH q AS (SELECT to_tsquery('simple', ${normalizeSearchTerm(query)}) AS value), hits AS (
         SELECT s.entity_id, s.language, ts_rank(s.search_vector, q.value) AS rank,
@@ -67,6 +69,7 @@ export class HybridSearchRepository {
     entityType: SearchEntityType,
     embedding: number[],
     actor: CurrentUserType,
+    metadataOnly = false,
   ): Promise<MatchRow[]> {
     return this.db.transaction(async (trx) => {
       // Transaction-local settings use the same connection as every candidate query.
@@ -77,9 +80,14 @@ export class HybridSearchRepository {
       let limit = SEMANTIC_SEARCH_INITIAL_CANDIDATES;
       for (let batch = 0; batch < SEMANTIC_SEARCH_MAX_CANDIDATE_BATCHES; batch++) {
         const result = await trx.execute(
-          this.buildSemanticCandidateQuery(entityType, embedding, actor, limit, [
-            ...matches.keys(),
-          ]),
+          this.buildSemanticCandidateQuery(
+            entityType,
+            embedding,
+            actor,
+            limit,
+            [...matches.keys()],
+            metadataOnly,
+          ),
         );
         const rows = result as unknown as SemanticCandidateMatchRow[];
         const candidateCount = Number(rows[0]?.candidateCount ?? 0);
@@ -118,6 +126,7 @@ export class HybridSearchRepository {
     actor: CurrentUserType,
     limit: number,
     excludedEntityIds: string[] = [],
+    metadataOnly = false,
   ): SQL {
     const vector = `[${embedding.join(",")}]`;
     const unseen = excludedEntityIds.length
@@ -135,6 +144,7 @@ export class HybridSearchRepository {
           AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
           AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}
           AND ${unseen}
+          AND ${metadataOnly ? sql`c.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})` : sql`true`}
           -- OFFSET 0 keeps the source/access check correlated, preserving the HNSW scan.
           AND EXISTS (SELECT 1 FROM search_documents s
             WHERE ${this.currentSource(actor)} AND ${this.eligibility(entityType, actor)}
@@ -244,7 +254,8 @@ export class HybridSearchRepository {
         scope.push(sql`(e.status = 'published' AND e.is_archived = false)`);
       if (can(PERMISSIONS.COURSE_READ_ASSIGNED))
         scope.push(sql`EXISTS (SELECT 1 FROM student_courses sc WHERE sc.course_id = e.id
-          AND sc.student_id = ${actor.userId} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED})`);
+          AND sc.student_id = ${actor.userId} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+          AND e.status IN (${COURSE_STATUSES.PUBLISHED}, ${COURSE_STATUSES.PRIVATE}) AND e.is_archived = false)`);
       return sql`EXISTS (SELECT 1 FROM courses e WHERE e.id = s.entity_id
         AND (${sql.join(scope, sql` OR `)}))`;
     }
@@ -284,6 +295,7 @@ export class HybridSearchRepository {
     }
     if (!any([PERMISSIONS.QA_READ_PUBLIC, PERMISSIONS.QA_MANAGE, PERMISSIONS.QA_MANAGE_OWN]))
       return sql`false`;
-    return sql`EXISTS (SELECT 1 FROM questions_and_answers e WHERE e.id = s.entity_id)`;
+    return sql`EXISTS (SELECT 1 FROM questions_and_answers e WHERE e.id = s.entity_id
+      AND (${can(PERMISSIONS.QA_MANAGE)} OR s.language = ANY(e.available_locales)))`;
   }
 }

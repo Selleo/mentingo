@@ -1,4 +1,5 @@
 import {
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
   GLOBAL_SEARCH_MODES,
   GLOBAL_SEARCH_SEMANTIC_STATUSES,
@@ -43,7 +44,8 @@ describe("global search modes", () => {
   it("keeps keyword searches free of embedding calls", async () => {
     const response = await service.search("policy", SUPPORTED_LANGUAGES.EN, actor);
     expect(embeddings.embedQuery).not.toHaveBeenCalled();
-    expect(keyword.findMatches).toHaveBeenCalledTimes(6);
+    expect(keyword.findMatches).not.toHaveBeenCalled();
+    expect(hybrid.findKeywordMatches).toHaveBeenCalledTimes(6);
     expect(response.searchMode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
   });
 
@@ -84,6 +86,47 @@ describe("global search modes", () => {
     );
     expect(response.semanticStatus).toBe(GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING);
     expect(hybrid.findSemanticMatches).toHaveBeenCalledTimes(6);
+  });
+
+  it("uses the same file FTS candidates in keyword and hybrid modes", async () => {
+    await service.search(
+      "attachment text",
+      SUPPORTED_LANGUAGES.EN,
+      actor,
+      GLOBAL_SEARCH_MODES.KEYWORD,
+    );
+    const keywordCalls = [...hybrid.findKeywordMatches.mock.calls];
+    jest.clearAllMocks();
+    await service.search(
+      "attachment text",
+      SUPPORTED_LANGUAGES.EN,
+      actor,
+      GLOBAL_SEARCH_MODES.HYBRID,
+    );
+    expect(hybrid.findKeywordMatches.mock.calls).toEqual(keywordCalls);
+  });
+
+  it("limits student search to content groups and course metadata sources", async () => {
+    const getCourseRows = jest.fn().mockResolvedValue([]);
+    Object.assign(keyword, { getCourseRows });
+    const learner = {
+      ...actor,
+      permissions: [
+        PERMISSIONS.COURSE_READ,
+        PERMISSIONS.COURSE_READ_ASSIGNED,
+        PERMISSIONS.CATEGORY_READ,
+      ],
+    };
+    await service.search("course", SUPPORTED_LANGUAGES.EN, learner, GLOBAL_SEARCH_MODES.KEYWORD, {
+      contentOnly: true,
+      learnerOnly: true,
+    });
+    expect(hybrid.findKeywordMatches).toHaveBeenCalledTimes(4);
+    expect(hybrid.findKeywordMatches).toHaveBeenCalledWith("course", "course", learner, true);
+    expect(getCourseRows).toHaveBeenCalledWith([], SUPPORTED_LANGUAGES.EN, {
+      enrolledStudentId: actor.userId,
+      learnerVisibleOnly: true,
+    });
   });
 
   it("does not call providers for a short query", async () => {

@@ -34868,7 +34868,35 @@ export interface GetConsentResponse {
     clientId: string;
     redirectUri: string;
     accountEmail: string;
-    scope: "authoring" | "search";
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    scopes: (
+      | "authoring"
+      | "search"
+      | "student:read"
+      | "search:read"
+      | "courses:read"
+      | "courses:write"
+      | "categories:read"
+      | "categories:write"
+      | "articles:read"
+      | "articles:write"
+      | "news:read"
+      | "news:write"
+      | "qa:read"
+      | "qa:write"
+      | "learning_paths:read"
+      | "learning_paths:write"
+      | "users:read"
+      | "users:write"
+      | "groups:read"
+      | "groups:write"
+      | "platform:read"
+      | "platform:write"
+      | "files:write"
+    )[];
   };
 }
 

@@ -12,7 +12,7 @@ import { HybridSearchRepository } from "./hybrid-search.repository";
 import { fuseSearchMatches } from "./hybrid-search.utils";
 import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 
-import type { MatchRow } from "./global-search.types";
+import type { GlobalSearchReadOptions, MatchRow } from "./global-search.types";
 import type { GlobalSearchMode, GlobalSearchResponse } from "./schemas/global-search.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -31,6 +31,7 @@ export class GlobalSearchService {
     language: SupportedLanguages,
     currentUser: CurrentUserType,
     mode: GlobalSearchMode = GLOBAL_SEARCH_MODES.KEYWORD,
+    options: GlobalSearchReadOptions = {},
   ): Promise<GlobalSearchResponse> {
     const trimmedQuery = searchQuery.trim();
 
@@ -55,19 +56,27 @@ export class GlobalSearchService {
     const findMatches = async (
       entityType: Parameters<GlobalSearchRepository["findMatches"]>[0],
     ) => {
-      if (mode === GLOBAL_SEARCH_MODES.KEYWORD) {
-        return this.globalSearchRepository.findMatches(entityType, language, trimmedQuery);
-      }
+      if (
+        options.contentOnly &&
+        (entityType === SEARCH_ENTITY_TYPES.LESSON ||
+          entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
+      )
+        return [];
+      const metadataOnly = Boolean(
+        options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
+      );
       const keyword = await this.hybridSearchRepository.findKeywordMatches(
         entityType,
         trimmedQuery,
         currentUser,
+        metadataOnly,
       );
       if (!embedding) return keyword;
       const semantic = await this.hybridSearchRepository.findSemanticMatches(
         entityType,
         embedding,
         currentUser,
+        metadataOnly,
       );
       return fuseSearchMatches(keyword, semantic);
     };
@@ -102,16 +111,18 @@ export class GlobalSearchService {
       groupsResults,
     ] = await Promise.all([
       this.getAllCourses(courseMatches, language, currentUser),
-      this.getMyCourses(courseMatches, language, currentUser),
+      this.getMyCourses(courseMatches, language, currentUser, options.learnerOnly),
       this.getAvailableCourses(courseMatches, language, currentUser),
-      this.getLearningPaths(learningPathMatches, language, currentUser),
-      this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
+      options.contentOnly ? [] : this.getLearningPaths(learningPathMatches, language, currentUser),
+      options.contentOnly
+        ? []
+        : this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
       this.getNews(newsMatches, language, currentUser),
       this.getArticles(articleMatches, language, currentUser),
       this.getQA(qaMatches, language, currentUser),
-      this.getUsers(trimmedQuery, currentUser),
-      this.getCategories(trimmedQuery, language, currentUser),
-      this.getGroups(trimmedQuery, language, currentUser),
+      options.contentOnly ? [] : this.getUsers(trimmedQuery, currentUser),
+      options.contentOnly ? [] : this.getCategories(trimmedQuery, language, currentUser),
+      options.contentOnly ? [] : this.getGroups(trimmedQuery, language, currentUser),
     ]);
 
     return this.resolveImageUrls({
@@ -205,6 +216,7 @@ export class GlobalSearchService {
     matches: MatchRow[],
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    learnerOnly = false,
   ) {
     if (hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
       return this.globalSearchRepository.getCourseRows(matches, language, {
@@ -216,6 +228,7 @@ export class GlobalSearchService {
 
     return this.globalSearchRepository.getCourseRows(matches, language, {
       enrolledStudentId: currentUser.userId,
+      learnerVisibleOnly: learnerOnly,
     });
   }
 

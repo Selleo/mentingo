@@ -1,3 +1,5 @@
+import { sanitizeRichTextSummary } from "@repo/shared";
+
 import type {
   McpContentSearchResponse,
   McpLinkedSearchResponse,
@@ -15,6 +17,14 @@ export function shapeMcpSearchResults(
     throw new Error("Invalid bound MCP resource");
   }
   const origin = resource.origin;
+  const text = (value: string | undefined) =>
+    value === undefined
+      ? undefined
+      : sanitizeRichTextSummary(value)
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 2000);
   const pathUrl = (path: string, id: string) => `${origin}/${path}/${encodeURIComponent(id)}`;
   const courseUrl = (id: string) => pathUrl("course", id);
   const qaUrl = (id: string) => `${origin}/qa?${new URLSearchParams({ qaId: id }).toString()}`;
@@ -35,7 +45,7 @@ export function shapeMcpSearchResults(
     const content = (row: GlobalSearchResponse["news"][number], url: string) => ({
       id: row.id,
       title: row.title,
-      matchedPassage: row.matchedPassage,
+      matchedPassage: context.studentOnly ? text(row.matchedPassage) : row.matchedPassage,
       matchedAttachmentFileName: row.matchedAttachmentFileName,
       url,
     });

@@ -7,7 +7,7 @@ export const mcpConsentDetailsSchema = Type.Object({
   clientId: Type.String(),
   redirectUri: Type.String(),
   accountEmail: Type.String(),
-  scope: Type.Enum(MCP_SCOPES),
+  scopes: Type.Array(Type.Enum(MCP_SCOPES), { minItems: 1, uniqueItems: true }),
 });
 
 export type McpConsentDetails = Static<typeof mcpConsentDetailsSchema>;

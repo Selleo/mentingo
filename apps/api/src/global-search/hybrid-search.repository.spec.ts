@@ -57,6 +57,7 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       actor,
       200,
       [],
+      false,
     );
     expect(candidates).toHaveBeenNthCalledWith(
       2,
@@ -65,6 +66,7 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       actor,
       400,
       [first],
+      false,
     );
     expect(rows.map((row) => row.entityId)).toEqual([first, second]);
     expect(rows[0]).not.toHaveProperty("candidateCount");
@@ -91,6 +93,7 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       actor,
       1600,
       ids.slice(0, 3),
+      false,
     );
     expect(execute).toHaveBeenCalledTimes(5);
   });

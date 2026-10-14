@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "@remix-run/react";
+import { MCP_SCOPES } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
@@ -37,9 +38,9 @@ export default function McpConsentPage() {
           {data && (
             <CardDescription>
               {t(
-                data.scope === "search"
-                  ? "mcpConnection.searchDescription"
-                  : "mcpConnection.description",
+                data.scopes.includes(MCP_SCOPES.STUDENT_READ)
+                  ? "mcpConnection.studentDescription"
+                  : "mcpConnection.explicitDescription",
               )}
             </CardDescription>
           )}
@@ -68,6 +69,16 @@ export default function McpConsentPage() {
               <p className="mt-2 break-all text-sm text-muted-foreground">
                 {t("mcpConnection.redirectUri", { redirectUri: data.redirectUri })}
               </p>
+              <div className="mt-4 text-sm">
+                <p>{t("mcpConnection.requestedScopes")}</p>
+                <ul className="mt-2 list-inside list-disc">
+                  {data.scopes.map((scope) => (
+                    <li key={scope}>
+                      <code>{scope}</code>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <form
                 method="post"
                 action="/api/oauth/authorize"

@@ -178081,17 +178081,106 @@
               "accountEmail": {
                 "type": "string"
               },
-              "scope": {
-                "anyOf": [
-                  {
-                    "const": "authoring",
-                    "type": "string"
-                  },
-                  {
-                    "const": "search",
-                    "type": "string"
-                  }
-                ]
+              "scopes": {
+                "minItems": 1,
+                "uniqueItems": true,
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "authoring",
+                      "type": "string"
+                    },
+                    {
+                      "const": "search",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "search:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "courses:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "courses:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "categories:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "categories:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "articles:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "articles:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "news:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "news:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "qa:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "qa:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "learning_paths:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "learning_paths:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "groups:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "groups:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "platform:read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "platform:write",
+                      "type": "string"
+                    },
+                    {
+                      "const": "files:write",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             "required": [
@@ -178099,7 +178188,7 @@
               "clientId",
               "redirectUri",
               "accountEmail",
-              "scope"
+              "scopes"
             ]
           }
         },

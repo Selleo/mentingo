@@ -89,3 +89,6 @@ export const GLOBAL_SEARCH_LESSON_ACCESS = {
 
 export type GlobalSearchLessonAccess =
   (typeof GLOBAL_SEARCH_LESSON_ACCESS)[keyof typeof GLOBAL_SEARCH_LESSON_ACCESS];
+
+/** Trusted integration projection and learner visibility controls. */
+export type GlobalSearchReadOptions = { contentOnly?: boolean; learnerOnly?: boolean };

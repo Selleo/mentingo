@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import McpConsentPage from "./McpConsent.page";
 
-const connection = vi.hoisted(() => ({ scope: "search" }));
+const connection = vi.hoisted(() => ({ scopes: ["student:read"] }));
 vi.mock("~/api/queries/useMcpConsent", () => ({
   useMcpConsent: () => ({
     data: {
-      clientName: "Search assistant",
+      clientName: "Assistant",
       accountEmail: "reader@example.test",
       redirectUri: "https://bot.example.test/mentingo/oauth/callback",
-      scope: connection.scope,
+      scopes: connection.scopes,
     },
     isLoading: false,
     error: null,
@@ -19,39 +19,37 @@ vi.mock("~/api/queries/useMcpConsent", () => ({
 }));
 vi.mock("~/api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({ data: {} }) }));
 vi.mock("~/components/PlatformLogo", () => ({ PlatformLogo: () => <div /> }));
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      if (key === "mcpConnection.searchDescription") return "Search only; cannot modify content.";
-      if (key === "mcpConnection.description") return "Use Mentingo with your current permissions.";
-      return key;
-    },
-  }),
-}));
+vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
-describe("MCP consent scope", () => {
-  it("explains the read-only restriction before allowing a search connection", () => {
-    connection.scope = "search";
+describe("MCP consent scopes", () => {
+  it("explains student access and requires an explicit approval", () => {
+    connection.scopes = ["student:read"];
     render(
       <MemoryRouter initialEntries={["/oauth/connect?consent=nonce"]}>
         <McpConsentPage />
       </MemoryRouter>,
     );
-    expect(screen.getByText("Search only; cannot modify content.")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Use Mentingo with your current permissions."),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "mcpConnection.allow" })).toBeInTheDocument();
+    expect(screen.getByText("mcpConnection.studentDescription")).toBeInTheDocument();
+    expect(screen.getByText("student:read")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "mcpConnection.allow" })).toHaveAttribute(
+      "value",
+      "approve",
+    );
+    expect(screen.getByRole("button", { name: "mcpConnection.deny" })).toHaveAttribute(
+      "value",
+      "deny",
+    );
   });
 
-  it("does not promise read-only access for an authoring connection", () => {
-    connection.scope = "authoring";
+  it("shows every granular permission without promising learner visibility", () => {
+    connection.scopes = ["courses:read", "articles:write", "files:write"];
     render(
       <MemoryRouter initialEntries={["/oauth/connect?consent=nonce"]}>
         <McpConsentPage />
       </MemoryRouter>,
     );
-    expect(screen.getByText("Use Mentingo with your current permissions.")).toBeInTheDocument();
-    expect(screen.queryByText("Search only; cannot modify content.")).not.toBeInTheDocument();
+    expect(screen.getByText("mcpConnection.explicitDescription")).toBeInTheDocument();
+    for (const scope of connection.scopes) expect(screen.getByText(scope)).toBeInTheDocument();
+    expect(screen.queryByText("mcpConnection.studentDescription")).not.toBeInTheDocument();
   });
 });

@@ -36,7 +36,7 @@ function buildService() {
 }
 
 describe("McpTokenService integration scopes", () => {
-  it.each(["authoring", "search"])(
+  it.each(["authoring", "search", "student:read", "search:read", "courses:read"])(
     "stores and resolves %s with tenant/resource identity checks",
     async (scope) => {
       const { service, values, resources, identity } = buildService();
@@ -73,12 +73,19 @@ describe("McpTokenService integration scopes", () => {
     },
   );
 
-  it("refuses to issue a token with combined scopes", async () => {
+  it("refuses to combine legacy and explicit scopes", async () => {
     const { service, redis } = buildService();
     await expect(
       service.store("token", { ...grant, scopes: ["search", "authoring"] }),
     ).rejects.toThrow("Invalid MCP token scope");
     expect(redis.set).not.toHaveBeenCalled();
+  });
+
+  it("preserves a granular multi-scope grant without granting student access", async () => {
+    const { service } = buildService();
+    const scopes = ["courses:read", "articles:read", "files:write"];
+    await service.store("token", { ...grant, scopes });
+    expect((await service.resolve("token", resourceUrl))?.grant.scopes).toEqual(scopes);
   });
 
   it("does not let search scope bypass resource, expiry, or active identity checks", async () => {

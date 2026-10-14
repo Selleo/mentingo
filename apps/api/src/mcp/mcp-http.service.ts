@@ -80,6 +80,12 @@ import {
   MCP_GLOBAL_SEARCH_PERMISSIONS,
   registerMcpSearchTools,
 } from "./mcp-search-tools";
+import { asMcpStudentUser, MCP_STUDENT_SEARCH_PERMISSIONS } from "./mcp-student-access";
+import {
+  registerMcpStudentTools,
+  MCP_STUDENT_TOOL_PERMISSIONS,
+  MCP_STUDENT_TOOL_FEATURES,
+} from "./mcp-student-tools";
 import { canListMcpTool } from "./mcp-tool-access";
 import { canUseMcpToolWithScopes, MCP_SCOPES } from "./mcp-tool-scope";
 import { asMcpInputSchema } from "./mcp-tool.schema";
@@ -178,21 +184,52 @@ export class McpHttpService {
     permissions: PermissionKey[],
     settings: Awaited<ReturnType<SettingsService["getGlobalSettings"]>>,
   ): McpServer {
+    const studentOnly = actor.grant.scopes.includes(MCP_SCOPES.STUDENT_READ);
+    const discoveryUser = asMcpStudentUser(
+      {
+        userId: actor.grant.userId,
+        tenantId: actor.grant.tenantId,
+        email: actor.email,
+        roleSlugs: [],
+        permissions,
+      },
+      settings,
+    );
     const server = new McpServer(
       { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
       {
-        instructions: actor.grant.scopes.includes(MCP_SCOPES.SEARCH)
-          ? "Search accessible Mentingo content and use the canonical result URLs. This connection cannot modify content or retrieve lesson content."
-          : MCP_UPLOAD_INSTRUCTIONS_SERVER,
+        instructions:
+          studentOnly || actor.grant.scopes.includes(MCP_SCOPES.SEARCH)
+            ? "Search and read learner-visible Mentingo content using canonical result URLs. Courses are metadata only. This connection cannot modify content, access authoring/admin data, or retrieve lesson content or file URLs."
+            : MCP_UPLOAD_INSTRUCTIONS_SERVER,
       },
     );
     const registerTool = server.registerTool.bind(server);
     server.registerTool = ((name: string, config: unknown, callback: unknown) => {
       const tool = Reflect.apply(registerTool, server, [name, config, callback]) as RegisteredTool;
-      const permissionsAllow =
-        name === "global_search" && actor.grant.scopes.includes(MCP_SCOPES.SEARCH)
-          ? hasAnyPermission(permissions, MCP_CONTENT_SEARCH_PERMISSIONS)
-          : canListMcpTool(name, permissions, settings);
+      const studentPermissions = Object.entries(MCP_STUDENT_TOOL_PERMISSIONS).find(
+        ([tool]) => tool === name,
+      )?.[1];
+      const studentFeature = Object.entries(MCP_STUDENT_TOOL_FEATURES).find(
+        ([tool]) => tool === name,
+      )?.[1];
+      let permissionsAllow = canListMcpTool(name, permissions, settings);
+      if (studentOnly) {
+        if (name === "global_search") {
+          permissionsAllow = hasAnyPermission(
+            discoveryUser.permissions,
+            MCP_STUDENT_SEARCH_PERMISSIONS,
+          );
+        } else {
+          permissionsAllow = Boolean(
+            studentPermissions &&
+              hasAnyPermission(discoveryUser.permissions, studentPermissions) &&
+              (!studentFeature || settings[FEATURE_SETTINGS_KEYS[studentFeature]]),
+          );
+        }
+      } else if (name === "global_search" && actor.grant.scopes.includes(MCP_SCOPES.SEARCH)) {
+        permissionsAllow = hasAnyPermission(permissions, MCP_CONTENT_SEARCH_PERMISSIONS);
+      }
       if (!canUseMcpToolWithScopes(name, actor.grant.scopes) || !permissionsAllow) tool.disable();
       return tool;
     }) as typeof server.registerTool;
@@ -3189,13 +3226,26 @@ export class McpHttpService {
       this.settingsService,
       this.uploadGrantService,
     );
+    registerMcpStudentTools(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      {
+        courses: this.courseService,
+        articles: this.articlesService,
+        news: this.newsService,
+        qa: this.qaService,
+        assertFeatureEnabled: (feature) => this.assertFeatureEnabled(feature),
+      },
+      actor.grant.resource,
+    );
     registerMcpSearchTools(
       server,
       (permissions, operation) => this.run(actor, permissions, operation),
       this.globalSearchService,
       {
         resource: actor.grant.resource,
-        searchOnly: actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
+        searchOnly: studentOnly || actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
+        studentOnly,
       },
     );
 
@@ -3220,20 +3270,22 @@ export class McpHttpService {
         throw new ForbiddenException("MCP integration scope does not allow this tool");
       }
       const access = await this.permissionsService.getUserAccess(actor.grant.userId);
-      if (
-        requiredPermissions.length > 0 &&
-        !hasAnyPermission(access.permissions, requiredPermissions)
-      ) {
-        throw new ForbiddenException("Missing authoring permission");
-      }
-
-      const user: CurrentUserType = {
+      const account: CurrentUserType = {
         userId: actor.grant.userId,
         tenantId: actor.grant.tenantId,
         email: actor.email,
         roleSlugs: access.roleSlugs,
         permissions: access.permissions,
       };
+      const user = actor.grant.scopes.includes(MCP_SCOPES.STUDENT_READ)
+        ? asMcpStudentUser(account, await this.settingsService.getGlobalSettings())
+        : account;
+      if (
+        requiredPermissions.length > 0 &&
+        !hasAnyPermission(user.permissions, requiredPermissions)
+      ) {
+        throw new ForbiddenException("Missing MCP content permission");
+      }
       auditUser = user;
       const result = await this.executeIdempotent(actor, call, () => operation(user));
       await this.auditCall(auditUser, actor, call, "success", result);

@@ -28,7 +28,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { McpTokenService } from "../mcp-token.service";
-import { MCP_SCOPES } from "../mcp-tool-scope";
+import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES } from "../mcp-tool-scope";
 
 import type { UserWithCredentials } from "../../../test/factory/user.factory";
 import type { INestApplication } from "@nestjs/common";
@@ -112,7 +112,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   async function issueClient(
     user: UserWithCredentials,
     host: string,
-    scopes: string[] = [MCP_SCOPES.AUTHORING],
+    scopes: string[] = MCP_REQUESTABLE_SCOPES.filter((scope) => scope !== MCP_SCOPES.STUDENT_READ),
   ): Promise<Client> {
     const token = await app.get(McpTokenService).issue({
       userId: user.id,
@@ -316,28 +316,43 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       .expect(401);
   });
 
-  it("restricts an administrator's search token to global search at discovery and invocation", async () => {
-    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
-    const tools = (await rpc(search, "tools/list")).result.tools.map(
-      (tool: ToolResult) => tool.name,
-    );
-    expect(tools).toEqual(["global_search"]);
-    // Explicit calls cannot regain the administrator's broader account permissions.
-    await rejectedCall("create_course", { title: "Forbidden search scope course" }, search);
-    await rejectedCall("list_users", {}, search);
-    await rejectedCall("get_lesson", { lessonId: randomUUID() }, search);
-    await rejectedCall("get_my_capabilities", {}, search);
+  it.each([MCP_SCOPES.SEARCH, MCP_SCOPES.SEARCH_READ])(
+    "restricts an administrator's %s token to global search at discovery and invocation",
+    async (scope) => {
+      const search = await issueClient(admin.user, admin.host, [scope]);
+      const tools = (await rpc(search, "tools/list")).result.tools.map(
+        (tool: ToolResult) => tool.name,
+      );
+      expect(tools).toEqual(["global_search"]);
+      // Explicit calls cannot regain the administrator's broader account permissions.
+      await rejectedCall("create_course", { title: "Forbidden search scope course" }, search);
+      await rejectedCall("list_users", {}, search);
+      await rejectedCall("get_lesson", { lessonId: randomUUID() }, search);
+      await rejectedCall("get_my_capabilities", {}, search);
 
-    const authoringTools = (await rpc(admin, "tools/list")).result.tools.map(
+      const authoringTools = (await rpc(admin, "tools/list")).result.tools.map(
+        (tool: ToolResult) => tool.name,
+      );
+      expect(authoringTools).toEqual(
+        expect.arrayContaining(["global_search", "create_course", "list_users", "get_lesson"]),
+      );
+    },
+  );
+
+  it("preserves the frozen management catalog for an existing legacy authoring grant", async () => {
+    const legacy = await issueClient(admin.user, admin.host, [MCP_SCOPES.AUTHORING]);
+    const tools = (await rpc(legacy, "tools/list")).result.tools.map(
       (tool: ToolResult) => tool.name,
     );
-    expect(authoringTools).toEqual(
-      expect.arrayContaining(["global_search", "create_course", "list_users", "get_lesson"]),
+    expect(tools).toEqual(
+      expect.arrayContaining(["global_search", "create_course", "get_course", "list_users"]),
     );
+    expect(tools.some((name: string) => name.includes("student"))).toBe(false);
+    await rejectedCall("get_student_course", { courseId: draftCourseId }, legacy);
   });
 
   it("returns canonical tenant content links without lesson or directory groups for search scope", async () => {
-    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
+    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH_READ]);
     const result = await call("global_search", { searchQuery: "MCP", language: "en" }, search);
     for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
       expect(result).not.toHaveProperty(excluded);
@@ -377,7 +392,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         .withAdminSettings(db)
         .create({ tenantId: admin.tenantId, roleSlug: SYSTEM_ROLE_SLUGS.ADMIN }),
     );
-    const search = await issueClient(extra, admin.host, [MCP_SCOPES.SEARCH]);
+    const search = await issueClient(extra, admin.host, [MCP_SCOPES.SEARCH_READ]);
     await baseDb.delete(permissionUserRoles).where(eq(permissionUserRoles.userId, extra.id));
     const tools = (await rpc(search, "tools/list")).result.tools.map(
       (tool: ToolResult) => tool.name,

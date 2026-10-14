@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { McpOAuthService } from "./mcp-oauth.service";
+import { MCP_REQUESTABLE_SCOPES } from "./mcp-tool-scope";
 
 import type { McpClient } from "./mcp-oauth.types";
 import type { Request, Response } from "express";
@@ -131,6 +132,7 @@ describe("McpOAuthService tenant-scoped client lookup", () => {
         code_challenge_method: "S256",
         code_challenge: "A".repeat(43),
         state: "xyz",
+        scope: "courses:read",
       },
       cookies: { access_token: "jwt-token" },
     } as unknown as Request;
@@ -161,6 +163,7 @@ describe("McpOAuthService tenant-scoped client lookup", () => {
         code_challenge_method: "S256",
         code_challenge: "A".repeat(43),
         state: "xyz",
+        scope: "courses:read",
       },
       cookies: { access_token: "jwt-token" },
     } as unknown as Request;
@@ -193,6 +196,7 @@ describe("McpOAuthService.consentDetails", () => {
         userId,
         query: {
           client_id: "client-3",
+          scope: "courses:read",
           redirect_uri: "https://client.example.com/callback",
           resource: "https://tenant.example.com/api/mcp",
         },
@@ -207,7 +211,7 @@ describe("McpOAuthService.consentDetails", () => {
       clientId: "client-3",
       redirectUri: "https://client.example.com/callback",
       accountEmail: "actor@example.com",
-      scope: "authoring",
+      scopes: ["courses:read"],
     });
   });
 });
@@ -278,7 +282,7 @@ function tokenRequest(body: Record<string, unknown>): Request {
   } as unknown as Request;
 }
 
-async function approvedCode(service: McpOAuthService, scope?: string): Promise<string> {
+async function approvedCode(service: McpOAuthService, scope = "search:read"): Promise<string> {
   const pageRes = buildRes();
   await service.authorizationPage(authorizationRequest(scope), pageRes);
   const nonce = new URL(responseRedirect(pageRes), "https://tenant.example.com").searchParams.get(
@@ -286,7 +290,7 @@ async function approvedCode(service: McpOAuthService, scope?: string): Promise<s
   );
   expect(nonce).toBeTruthy();
   const consent = await service.consentDetails(authorizationRequest(scope), nonce!);
-  expect(consent.scope).toBe(scope ?? "authoring");
+  expect(consent.scopes).toEqual(scope.split(" "));
   const approvalRes = buildRes();
   await service.authorize(
     {
@@ -301,25 +305,28 @@ async function approvedCode(service: McpOAuthService, scope?: string): Promise<s
   return callback.searchParams.get("code")!;
 }
 
-describe("McpOAuthService search and authoring scopes", () => {
-  it("advertises both scopes for the resource and authorization server", async () => {
+describe("McpOAuthService explicit scopes", () => {
+  it("advertises only requestable explicit scopes for the resource and authorization server", async () => {
     const service = buildService(
       buildRedis(),
       tenantA,
       { userId, tenantId: tenantA },
       "actor@example.com",
     );
-    expect((await service.metadata({} as Request)).scopes_supported).toEqual([
-      "authoring",
-      "search",
-    ]);
-    expect((await service.serverMetadata({} as Request)).scopes_supported).toEqual([
-      "authoring",
-      "search",
-    ]);
+    expect((await service.metadata({} as Request)).scopes_supported).toEqual(
+      MCP_REQUESTABLE_SCOPES,
+    );
+    expect((await service.serverMetadata({} as Request)).scopes_supported).toEqual(
+      MCP_REQUESTABLE_SCOPES,
+    );
   });
 
-  it.each(["search", "authoring", undefined])(
+  it.each([
+    "student:read",
+    "search:read",
+    "courses:read articles:read",
+    "courses:read courses:write",
+  ])(
     "preserves %s through consent, PKCE exchange, and refresh without scope escalation",
     async (requestedScope) => {
       const redis = buildRedis();
@@ -332,7 +339,7 @@ describe("McpOAuthService search and authoring scopes", () => {
         "actor@example.com",
         tokenStore,
       );
-      const expectedScope = requestedScope ?? "authoring";
+      const expectedScope = requestedScope;
       const code = await approvedCode(service, requestedScope);
       const exchangeRes = buildRes();
       await service.token(
@@ -353,18 +360,18 @@ describe("McpOAuthService search and authoring scopes", () => {
           userId,
           tenantId: tenantA,
           resource: resourceUrl,
-          scopes: [expectedScope],
+          scopes: expectedScope.split(" "),
         }),
       );
       const refreshKey = `mcp:oauth:refresh:${digest(exchange.refresh_token)}`;
-      expect(JSON.parse(redis.store.get(refreshKey)!).scope).toEqual([expectedScope]);
+      expect(JSON.parse(redis.store.get(refreshKey)!).scope).toEqual(expectedScope.split(" "));
 
       const escalationRes = buildRes();
       await service.token(
         tokenRequest({
           grant_type: "refresh_token",
           refresh_token: exchange.refresh_token,
-          scope: expectedScope === "search" ? "authoring" : "search",
+          scope: "platform:write",
         }),
         escalationRes,
       );
@@ -386,34 +393,38 @@ describe("McpOAuthService search and authoring scopes", () => {
       expect(tokenStore).toHaveBeenLastCalledWith(
         refreshed.access_token,
         expect.objectContaining({
-          scopes: [expectedScope],
+          scopes: expectedScope.split(" "),
         }),
       );
       expect(
         JSON.parse(redis.store.get(`mcp:oauth:refresh:${digest(refreshed.refresh_token)}`)!).scope,
-      ).toEqual([expectedScope]);
+      ).toEqual(expectedScope.split(" "));
     },
   );
 
-  it.each(["unknown", "search authoring", "", ["search", "authoring"]])(
-    "rejects an invalid authorization scope %p before creating consent",
-    async (scope) => {
-      const redis = buildRedis();
-      await storeClient(redis, "scoped-client");
-      const service = buildService(
-        redis,
-        tenantA,
-        { userId, tenantId: tenantA },
-        "actor@example.com",
-      );
-      const res = buildRes();
-      await service.authorizationPage(authorizationRequest(scope), res);
-      expect(res.redirect).toHaveBeenCalledWith(303, "/oauth/connect?error=invalid");
-      expect([...redis.store.keys()].some((key) => key.startsWith("mcp:oauth:consent:"))).toBe(
-        false,
-      );
-    },
-  );
+  it.each([
+    undefined,
+    "authoring",
+    "search",
+    "unknown",
+    "student:read courses:read",
+    "courses:read courses:read",
+    "",
+    ["courses:read"],
+  ])("rejects an invalid authorization scope %p before creating consent", async (scope) => {
+    const redis = buildRedis();
+    await storeClient(redis, "scoped-client");
+    const service = buildService(
+      redis,
+      tenantA,
+      { userId, tenantId: tenantA },
+      "actor@example.com",
+    );
+    const res = buildRes();
+    await service.authorizationPage(authorizationRequest(scope), res);
+    expect(res.redirect).toHaveBeenCalledWith(303, "/oauth/connect?error=invalid");
+    expect([...redis.store.keys()].some((key) => key.startsWith("mcp:oauth:consent:"))).toBe(false);
+  });
 
   it("rejects token exchange scope changes without consuming the code", async () => {
     const redis = buildRedis();
@@ -426,7 +437,7 @@ describe("McpOAuthService search and authoring scopes", () => {
       "actor@example.com",
       tokenStore,
     );
-    const code = await approvedCode(service, "search");
+    const code = await approvedCode(service, "search:read");
     const res = buildRes();
     await service.token(
       tokenRequest({
@@ -434,7 +445,7 @@ describe("McpOAuthService search and authoring scopes", () => {
         code,
         redirect_uri: redirectUri,
         code_verifier: verifier,
-        scope: "authoring",
+        scope: "courses:write",
       }),
       res,
     );
@@ -458,7 +469,7 @@ describe("McpOAuthService stored grant validation", () => {
         "actor@example.com",
         tokenStore,
       );
-      const code = await approvedCode(service, "search");
+      const code = await approvedCode(service, "search:read");
       const key = `mcp:oauth:code:${digest(code)}`;
       const stored = JSON.parse(redis.store.get(key)!);
       redis.store.set(key, JSON.stringify({ ...stored, scope }));
@@ -488,7 +499,7 @@ describe("McpOAuthService stored grant validation", () => {
       "actor@example.com",
       tokenStore,
     );
-    const code = await approvedCode(service, "search");
+    const code = await approvedCode(service, "search:read");
     const res = buildRes();
     await service.token(
       tokenRequest({
@@ -514,7 +525,7 @@ describe("McpOAuthService stored grant validation", () => {
       "actor@example.com",
       tokenStore,
     );
-    const code = await approvedCode(service, "search");
+    const code = await approvedCode(service, "search:read");
     const exchangeRes = buildRes();
     await service.token(
       tokenRequest({
@@ -541,5 +552,110 @@ describe("McpOAuthService stored grant validation", () => {
     );
     expect(responseBody(res)).toEqual({ error: "invalid_grant" });
     expect(tokenStore).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("McpOAuthService existing grants", () => {
+  it.each(["authoring", "search"])(
+    "preserves legacy %s on refresh without accepting any new scope",
+    async (legacyScope) => {
+      const redis = buildRedis();
+      await storeClient(redis, "scoped-client");
+      const tokenStore = jest.fn();
+      const service = buildService(
+        redis,
+        tenantA,
+        { userId, tenantId: tenantA },
+        "actor@example.com",
+        tokenStore,
+      );
+      const refreshToken = "legacy-refresh-token";
+      const key = `mcp:oauth:refresh:${digest(refreshToken)}`;
+      redis.store.set(
+        key,
+        JSON.stringify({
+          refreshToken,
+          refreshTokenExpiresAt: new Date(Date.now() + 60000).toISOString(),
+          client: JSON.parse(redis.store.get("mcp:oauth:client:scoped-client")!),
+          user: { userId, tenantId: tenantA, resource: resourceUrl },
+          scope: [legacyScope],
+        }),
+      );
+      const changedRes = buildRes();
+      await service.token(
+        tokenRequest({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          scope: "student:read",
+        }),
+        changedRes,
+      );
+      expect(responseBody(changedRes)).toEqual({ error: "invalid_scope" });
+      expect(redis.store.has(key)).toBe(true);
+      const refreshedRes = buildRes();
+      await service.token(
+        tokenRequest({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          scope: legacyScope,
+        }),
+        refreshedRes,
+      );
+      expect(refreshedRes.status).toHaveBeenCalledWith(200);
+      expect(responseBody(refreshedRes).scope).toBe(legacyScope);
+      expect(tokenStore).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ scopes: [legacyScope] }),
+      );
+    },
+  );
+
+  it("accepts reordered scopes on refresh but rejects narrowing before rotation", async () => {
+    const redis = buildRedis();
+    await storeClient(redis, "scoped-client");
+    const service = buildService(
+      redis,
+      tenantA,
+      { userId, tenantId: tenantA },
+      "actor@example.com",
+    );
+    const code = await approvedCode(service, "courses:read articles:read");
+    const exchangeRes = buildRes();
+    await service.token(
+      tokenRequest({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: redirectUri,
+        code_verifier: verifier,
+      }),
+      exchangeRes,
+    );
+    const refreshToken = responseBody(exchangeRes).refresh_token;
+    const key = `mcp:oauth:refresh:${digest(refreshToken)}`;
+    const narrowedRes = buildRes();
+    await service.token(
+      tokenRequest({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        scope: "courses:read",
+      }),
+      narrowedRes,
+    );
+    expect(responseBody(narrowedRes)).toEqual({ error: "invalid_scope" });
+    expect(redis.store.has(key)).toBe(true);
+    const reorderedRes = buildRes();
+    await service.token(
+      tokenRequest({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        scope: "articles:read courses:read",
+      }),
+      reorderedRes,
+    );
+    expect(reorderedRes.status).toHaveBeenCalledWith(200);
+    expect(responseBody(reorderedRes).scope.split(" ").sort()).toEqual([
+      "articles:read",
+      "courses:read",
+    ]);
   });
 });
