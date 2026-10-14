@@ -142,7 +142,7 @@ In Claude Code, run `/mcp` and select Mentingo. For Codex, run `codex mcp login 
 | Course authoring with existing categories and search | `courses:read courses:write categories:read search:read` |
 | Knowledge article authoring                          | `articles:read articles:write`                           |
 | News authoring                                       | `news:read news:write`                                   |
-| Learner assistant / Slack bot                        | `student:read`                                           |
+| Learner assistant                                 | `student:read`                                           |
 
 Add `files:write` when authoring needs uploads, and request other domain scopes only when needed. Write scopes do not automatically grant read access. Management read scopes can expose drafts and authoring details; `student:read` instead exposes limited learner search and list/get tools and cannot be combined with other scopes.
 

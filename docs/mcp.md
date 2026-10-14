@@ -86,7 +86,7 @@ include its read counterpart.
 Management read scopes can expose authoring information, drafts or configuration
 when the account's existing permissions allow it. `readOnlyHint` describes whether a
 tool mutates data; it does not make its output suitable for students. Use
-`student:read` for the Slack assistant. It cannot be combined with any other scope.
+`student:read` for a learner-limited view. It cannot be combined with any other scope.
 Granular scopes can be combined, for example `courses:read courses:write` for
 course editing. Granular scope mappings determine which tools a capped connection can use. Account access follows the currently supported tool catalog and current account permissions.
 
@@ -109,7 +109,7 @@ Add `search:read` for global discovery, `files:write` for upload tools, or
 write scope is still needed for those tools. Scope approval never supplies missing
 account permissions. Review the exact scope list on the consent page.
 
-Use `student:read` alone for the Slack bot. Do not request every advertised scope:
+Do not request every advertised scope:
 account access and the student view are intentionally exclusive, and management read scopes have a
 broader data view.
 
@@ -152,11 +152,6 @@ summaries/course descriptions at 2,000. Lists return bounded pages: courses, art
 and Q&A accept `pageSize` up to 25; news uses the existing learner API's fixed page
 size. List queries filter titles where supported. No upload or mutation tools are
 available, and direct calls to tools outside the scope are rejected.
-
-A Slack workspace pairs to one Mentingo account. Every participant shares that
-account's learner visibility and enrollments; this does not provide each Slack
-participant's personal Mentingo permissions. Individual account linking would be
-required for personal enrollment isolation.
 
 ### Student search and links
 

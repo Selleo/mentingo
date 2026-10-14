@@ -1,3 +1,4 @@
+import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { SemanticSearchIndexService } from "./semantic-search-index.service";
 
 const source = {
@@ -60,25 +61,29 @@ describe("semantic search indexing", () => {
     expect(embedding.embedTexts).not.toHaveBeenCalled();
   });
 
-  it("extracts actual attachment contents and bounds file size", async () => {
-    const { service, repository, s3, extraction, embedding } = setup();
-    repository.findSource.mockResolvedValue({
-      ...source,
-      resourceReference: "tenant/file.pdf",
-      resourceContentType: "application/pdf",
-    } as never);
-    s3.getFileSize.mockResolvedValue(100);
-    s3.getFileBuffer.mockResolvedValue(Buffer.from("pdf"));
-    extraction.extractText.mockResolvedValue([
-      { pageContent: "Hidden paragraph inside attachment" },
-    ]);
-    await service.process({ ...source, tenantId: "tenant" } as never);
-    expect(embedding.embedTexts).toHaveBeenCalledWith([
-      expect.stringContaining("Hidden paragraph inside attachment"),
-    ]);
-    s3.getFileSize.mockResolvedValue(20 * 1024 * 1024);
-    await expect(service.process({ ...source, tenantId: "tenant" } as never)).rejects.toThrow(
-      "size limit",
-    );
-  });
+  it.each([SEARCH_ENTITY_TYPES.LESSON, SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
+    "extracts %s file contents and bounds file size",
+    async (entityType) => {
+      const { service, repository, s3, extraction, embedding } = setup();
+      repository.findSource.mockResolvedValue({
+        ...source,
+        entityType,
+        resourceReference: "tenant/file.pdf",
+        resourceContentType: "application/pdf",
+      } as never);
+      s3.getFileSize.mockResolvedValue(100);
+      s3.getFileBuffer.mockResolvedValue(Buffer.from("pdf"));
+      extraction.extractText.mockResolvedValue([
+        { pageContent: "Hidden paragraph inside attachment" },
+      ]);
+      await service.process({ ...source, tenantId: "tenant" } as never);
+      expect(embedding.embedTexts).toHaveBeenCalledWith([
+        expect.stringContaining("Hidden paragraph inside attachment"),
+      ]);
+      s3.getFileSize.mockResolvedValue(20 * 1024 * 1024);
+      await expect(service.process({ ...source, tenantId: "tenant" } as never)).rejects.toThrow(
+        "size limit",
+      );
+    },
+  );
 });

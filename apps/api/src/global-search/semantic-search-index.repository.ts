@@ -3,6 +3,7 @@ import { RESOURCE_VISIBILITY } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-library.constants";
 import { dbAls } from "src/storage/db/db-als.store";
 import { MissingTenantContextError } from "src/storage/db/db-errors";
 import { DB } from "src/storage/db/db.providers";
@@ -12,6 +13,7 @@ import {
   SEMANTIC_SEARCH_INDEX_VERSION,
   SEMANTIC_SEARCH_MODEL,
 } from "./semantic-search-index.constants";
+import { semanticSearchResourceSources } from "./semantic-search-resource.utils";
 
 import type { SemanticSearchSource, SemanticSearchSourceKey } from "./semantic-search-index.types";
 
@@ -75,9 +77,36 @@ export class SemanticSearchIndexRepository {
             AND ${resourceEntity.entityType} = ${searchDocuments.entityType}
             AND ${resourceEntity.entityId} = ${searchDocuments.entityId}
             AND ${resourceEntity.resourceId} = ${resources.id}
-            AND ${resourceEntity.relationshipType} = 'attachment'
+            AND ${resourceEntity.relationshipType} IN (${sql.join(
+              RICH_TEXT_RELATIONSHIP_TYPES.map((type) => sql`${type}`),
+              sql`, `,
+            )})
         )
       ))`;
+  }
+
+  async synchronizeResourceDocuments() {
+    const tenantId = this.tenantId();
+    const sources = semanticSearchResourceSources(tenantId);
+    await this.db.transaction(async (trx) => {
+      await trx.execute(sql`${sources}
+        DELETE FROM search_documents s
+        WHERE s.tenant_id = ${tenantId} AND s.metadata->>'semanticResource' = 'true'
+          AND NOT EXISTS (SELECT 1 FROM resource_sources r
+            WHERE r.tenant_id = s.tenant_id AND r.entity_type = s.entity_type
+              AND r.entity_id = s.entity_id AND r.document_type = s.document_type
+              AND r.language = s.language)`);
+      await trx.execute(sql`${sources}
+        INSERT INTO search_documents (tenant_id, entity_type, entity_id, document_type,
+          language, content, search_vector, metadata)
+        SELECT tenant_id, entity_type, entity_id, document_type, language, content,
+          setweight(to_tsvector('simple', content), 'D'), metadata FROM resource_sources
+        ON CONFLICT (tenant_id, entity_type, entity_id, document_type, language)
+        DO UPDATE SET content = EXCLUDED.content, search_vector = EXCLUDED.search_vector,
+          metadata = EXCLUDED.metadata, updated_at = CURRENT_TIMESTAMP
+        WHERE search_documents.content IS DISTINCT FROM EXCLUDED.content
+          OR search_documents.metadata IS DISTINCT FROM EXCLUDED.metadata`);
+    });
   }
 
   async findSource(key: SemanticSearchSourceKey): Promise<SemanticSearchSource | undefined> {
@@ -87,12 +116,11 @@ export class SemanticSearchIndexRepository {
     return source;
   }
 
-  async findPending(limit: number, offset = 0): Promise<SemanticSearchSource[]> {
-    return this.sourceQuery()
-      .where(
-        and(
-          this.eligibleSource(),
-          sql`NOT EXISTS (
+  private pendingSourcesQuery() {
+    return this.sourceQuery().where(
+      and(
+        this.eligibleSource(),
+        sql`NOT EXISTS (
       SELECT 1 FROM ${searchChunks}
       WHERE ${searchChunks.tenantId} = ${searchDocuments.tenantId}
         AND ${searchChunks.entityType} = ${searchDocuments.entityType}
@@ -106,8 +134,12 @@ export class SemanticSearchIndexRepository {
         AND ${searchChunks.embeddingModel} = ${SEMANTIC_SEARCH_MODEL}
         AND ${searchChunks.indexVersion} = ${SEMANTIC_SEARCH_INDEX_VERSION}
     )`,
-        ),
-      )
+      ),
+    );
+  }
+
+  async findPending(limit: number, offset = 0): Promise<SemanticSearchSource[]> {
+    return this.pendingSourcesQuery()
       .orderBy(
         searchDocuments.updatedAt,
         searchDocuments.entityId,
@@ -116,6 +148,30 @@ export class SemanticSearchIndexRepository {
       )
       .limit(limit)
       .offset(offset);
+  }
+
+  async previewPendingCount(limit: number, offset = 0): Promise<number> {
+    const sources = semanticSearchResourceSources(this.tenantId());
+    const pending = this.pendingSourcesQuery();
+    const result = await this.db.execute(sql`${sources}, pending_keys AS (
+      SELECT p.entity_type, p.entity_id, p.document_type, p.language FROM (${pending}) p
+      UNION
+      SELECT r.entity_type, r.entity_id, r.document_type, r.language FROM resource_sources r
+      JOIN resources file ON file.id::text = r.metadata->>'resourceId'
+        AND file.tenant_id = r.tenant_id
+      WHERE NOT EXISTS (SELECT 1 FROM search_chunks c
+        WHERE c.tenant_id = r.tenant_id AND c.entity_type = r.entity_type
+          AND c.entity_id = r.entity_id AND c.document_type = r.document_type
+          AND c.language = r.language AND c.source_hash = md5(r.content)
+          AND c.source_revision = md5(coalesce(file.reference, '') || ':' || file.updated_at::text || ':' || file.content_type)
+          AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
+          AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
+    )
+    SELECT count(*)::integer AS pending FROM (
+      SELECT 1 FROM pending_keys ORDER BY entity_type, entity_id, document_type, language
+      LIMIT ${limit} OFFSET ${offset}
+    ) batch`);
+    return Number(result[0]?.pending ?? 0);
   }
 
   async deleteSource(key: SemanticSearchSourceKey) {
@@ -180,7 +236,10 @@ export class SemanticSearchIndexRepository {
               eq(resourceEntity.resourceId, resources.id),
               eq(resourceEntity.entityType, source.entityType),
               eq(resourceEntity.entityId, source.entityId),
-              eq(resourceEntity.relationshipType, "attachment"),
+              sql`${resourceEntity.relationshipType} IN (${sql.join(
+                RICH_TEXT_RELATIONSHIP_TYPES.map((type) => sql`${type}`),
+                sql`, `,
+              )})`,
             ),
           )
           .where(
@@ -220,7 +279,7 @@ export class SemanticSearchIndexRepository {
           sourceRevision: source.sourceRevision,
           embeddingModel: SEMANTIC_SEARCH_MODEL,
           indexVersion: SEMANTIC_SEARCH_INDEX_VERSION,
-          metadata: source.metadata,
+          metadata: sql`${JSON.stringify(source.metadata)}::text::jsonb`,
         })),
       );
       return true;

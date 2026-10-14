@@ -1489,7 +1489,7 @@
     }
   },
   "globalSearch": {
-    "searchByMeaning": "Hledat podle významu",
+    "aiSearch": "AI vyhledávání",
     "hybridSearch": "Hybridní vyhledávání",
     "backToKeywords": "Zpět na hledání klíčových slov",
     "semanticUnavailable": "Sémantické vyhledávání je dočasně nedostupné. Zobrazují se shody klíčových slov.",

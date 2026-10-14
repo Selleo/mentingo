@@ -25,8 +25,14 @@ export class SemanticSearchIndexQueueService {
 
   async reconcile(tenantId: string, options: SemanticSearchReconcileOptions = {}) {
     const limit = Math.min(options.limit ?? SEMANTIC_SEARCH_BATCH_SIZE, 500);
+    if (options.dryRun) {
+      return {
+        pending: await this.repository.previewPendingCount(limit, options.offset ?? 0),
+        enqueued: 0,
+      };
+    }
+    await this.repository.synchronizeResourceDocuments();
     const sources = await this.repository.findPending(limit, options.offset ?? 0);
-    if (options.dryRun) return { pending: sources.length, enqueued: 0 };
     await this.repository.cleanupDeleted();
     const queue = this.queue.getQueue(QUEUE_NAMES.SEMANTIC_SEARCH_INDEX);
     const counts = await queue.getJobCounts("waiting", "active", "delayed");

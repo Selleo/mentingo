@@ -80,11 +80,6 @@ on background indexing for extracted file text. Files remain subject to visibili
 checks and no result constructs a download URL. Canonical source links use the tenant
 bound to the OAuth grant; opening them requires the viewer's own Mentingo access.
 
-Each Slack workspace pairs to one Mentingo account. All Slack participants therefore
-share that account's learner visibility and enrollments, rather than acquiring their
-own personal Mentingo permissions. Per-person enrollment isolation requires separate
-account linking.
-
 Optionally capped management requests use `search:read`, `courses:read`, `courses:write`,
 `categories:read`, `categories:write`, `articles:read`, `articles:write`, `news:read`,
 `news:write`, `qa:read`, `qa:write`, `learning_paths:read`, `learning_paths:write`,

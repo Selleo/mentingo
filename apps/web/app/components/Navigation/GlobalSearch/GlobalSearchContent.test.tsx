@@ -32,12 +32,13 @@ const renderContent = (resultType: "articles" | "users", isFetching = false) => 
   );
 };
 
-describe("matching passages", () => {
-  it("displays the content passage as escaped text with its attachment filename", () => {
+describe("result presentation", () => {
+  it("keeps result rows unchanged when semantic metadata is present", () => {
     const { container } = renderContent("articles");
-    expect(screen.getByText("<script>safe text</script>")).toBeInTheDocument();
-    expect(screen.getByText("policy.pdf")).toBeInTheDocument();
-    expect(container.querySelector("script")).toBeNull();
+    expect(screen.getByText("Title")).toBeInTheDocument();
+    expect(screen.queryByText("<script>safe text</script>")).not.toBeInTheDocument();
+    expect(screen.queryByText("policy.pdf")).not.toBeInTheDocument();
+    expect(container.querySelector("p")).toBeNull();
   });
   it("does not display passages or attachment metadata for users", () => {
     renderContent("users");

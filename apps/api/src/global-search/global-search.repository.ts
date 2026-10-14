@@ -66,6 +66,10 @@ export class GlobalSearchRepository {
       .where(
         and(
           eq(searchDocuments.entityType, entityType),
+          // New knowledge-file sources are searched through access-checked hybrid retrieval.
+          // Preserve the existing lesson filename behavior in ordinary keyword search.
+          sql`(${searchDocuments.entityType} = ${SEARCH_ENTITY_TYPES.LESSON}
+            OR ${searchDocuments.metadata}->>'semanticResource' IS DISTINCT FROM 'true')`,
           metadataOnly
             ? inArray(searchDocuments.documentType, [
                 SEARCH_DOCUMENT_TYPES.TITLE,

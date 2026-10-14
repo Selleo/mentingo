@@ -1477,7 +1477,7 @@
     }
   },
   "globalSearch": {
-    "searchByMeaning": "Buscar por significado",
+    "aiSearch": "Búsqueda con IA",
     "hybridSearch": "Búsqueda híbrida",
     "backToKeywords": "Volver a la búsqueda por palabras clave",
     "semanticUnavailable": "La búsqueda semántica no está disponible temporalmente. Se muestran coincidencias de palabras clave.",

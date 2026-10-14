@@ -11,11 +11,13 @@ import { dbAls } from "src/storage/db/db-als.store";
 import * as schema from "src/storage/schema";
 
 import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
+import { GlobalSearchRepository } from "./global-search.repository";
 import { HybridSearchRepository } from "./hybrid-search.repository";
 import {
   SEMANTIC_SEARCH_INDEX_VERSION,
   SEMANTIC_SEARCH_MODEL,
 } from "./semantic-search-index.constants";
+import { SemanticSearchIndexQueueService } from "./semantic-search-index.queue.service";
 import { SemanticSearchIndexRepository } from "./semantic-search-index.repository";
 
 import type { DatabasePg } from "src/common";
@@ -213,10 +215,320 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     return id;
   }
 
+  async function contentFile(
+    type: typeof SEARCH_ENTITY_TYPES.ARTICLE | typeof SEARCH_ENTITY_TYPES.NEWS,
+    options: {
+      scopeTenant?: string;
+      visibility?: string;
+      relation?: string;
+      contentType?: string;
+      archived?: boolean;
+    } = {},
+  ) {
+    const scopeTenant = options.scopeTenant ?? tenantId;
+    const entityId = randomUUID();
+    if (type === SEARCH_ENTITY_TYPES.ARTICLE) {
+      const sectionId = randomUUID();
+      await fixtureDb.execute(sql`INSERT INTO article_sections (id, tenant_id, title, available_locales)
+        VALUES (${sectionId}, ${scopeTenant}, '{"en":"Policies"}'::jsonb, ARRAY['en']::text[])`);
+      await fixtureDb.execute(sql`INSERT INTO articles (id, tenant_id, author_id, article_section_id, title, status, published_at, available_locales)
+        VALUES (${entityId}, ${scopeTenant}, ${authorId}, ${sectionId}, '{"en":"Expense guidance"}'::jsonb,
+          'published', now(), ARRAY['en']::text[])`);
+    } else {
+      await fixtureDb.execute(sql`INSERT INTO news (id, tenant_id, author_id, title, status, published_at, available_locales)
+        VALUES (${entityId}, ${scopeTenant}, ${authorId}, '{"en":"Expense guidance"}'::jsonb,
+          'published', now(), ARRAY['en']::text[])`);
+    }
+    const resourceId = randomUUID();
+    await fixtureDb.execute(sql`INSERT INTO resources
+      (id, tenant_id, reference, content_type, visibility, uploaded_by_id, archived, metadata)
+      VALUES (${resourceId}, ${scopeTenant}, 'fixtures/research-guide.pdf',
+        ${options.contentType ?? "application/pdf"}, ${
+          options.visibility ?? RESOURCE_VISIBILITY.PUBLIC
+        },
+        ${authorId}, ${
+          options.archived ?? false
+        }, '{"originalFilename":"research-guide.pdf"}'::jsonb)`);
+    await fixtureDb.execute(sql`INSERT INTO resource_entity (tenant_id, resource_id, entity_type, entity_id, relationship_type)
+      VALUES (${scopeTenant}, ${resourceId}, ${type}, ${entityId}, ${
+        options.relation ?? "attachment"
+      })`);
+    return {
+      entityId,
+      entityType: type,
+      documentType: `resource:${resourceId}`,
+      language: "en" as const,
+      resourceId,
+    };
+  }
+
+  async function synchronizeAndIndexContentFile(key: Awaited<ReturnType<typeof contentFile>>) {
+    const index = new SemanticSearchIndexRepository(fixtureDb);
+    await dbAls.run({ tenantId }, async () => {
+      await index.synchronizeResourceDocuments();
+      const current = await index.findSource(key);
+      expect(current).toBeDefined();
+      expect(current!.metadata.fileName).toBe("research-guide.pdf");
+      expect(
+        await index.replace(
+          current!,
+          ["Reimbursement claims must be submitted within thirty days."],
+          [queryVector],
+        ),
+      ).toBe(true);
+    });
+    const [saved] = await fixtureDb.execute(
+      sql`SELECT metadata, metadata->>'fileName' AS filename FROM search_chunks WHERE entity_id = ${key.entityId}`,
+    );
+    expect(saved.metadata).toEqual(expect.objectContaining({ fileName: "research-guide.pdf" }));
+    expect(saved.filename).toBe("research-guide.pdf");
+    return index;
+  }
+
   async function enterTenantRole(scope = tenantId) {
     await fixtureDb.execute(sql.raw(`SET LOCAL ROLE "${role}"`));
     await fixtureDb.execute(sql`SELECT set_config('app.tenant_id', ${scope}, true)`);
   }
+
+  it("previews unmaterialized file sources without writes and deduplicates indexed source identities", async () => {
+    const article = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE);
+    const newsFile = await contentFile(SEARCH_ENTITY_TYPES.NEWS);
+    await contentFile(SEARCH_ENTITY_TYPES.NEWS, { scopeTenant: otherTenantId });
+    const index = new SemanticSearchIndexRepository(fixtureDb);
+    const queue = { getQueue: jest.fn(), enqueue: jest.fn() };
+    const service = new SemanticSearchIndexQueueService(index, queue as never);
+    await dbAls.run({ tenantId }, async () => {
+      expect(await service.reconcile(tenantId, { dryRun: true, limit: 50 })).toEqual({
+        pending: 2,
+        enqueued: 0,
+      });
+      expect(await index.previewPendingCount(1)).toBe(1);
+      expect(await index.previewPendingCount(1, 1)).toBe(1);
+      expect(await index.previewPendingCount(1, 2)).toBe(0);
+    });
+    expect(await fixtureDb.execute(sql`SELECT id FROM search_documents`)).toEqual([]);
+    expect(queue.getQueue).not.toHaveBeenCalled();
+    expect(queue.enqueue).not.toHaveBeenCalled();
+    await dbAls.run({ tenantId }, async () => {
+      await index.synchronizeResourceDocuments();
+      // Stored pending sources and canonical file sources are the same two identities.
+      expect(await index.previewPendingCount(50)).toBe(2);
+    });
+    await synchronizeAndIndexContentFile(article);
+    await synchronizeAndIndexContentFile(newsFile);
+    expect(await dbAls.run({ tenantId }, () => index.previewPendingCount(50))).toBe(0);
+  });
+
+  it("removes managed file sources for archived article/news parents without recreating them or deleting body content", async () => {
+    const article = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE);
+    const newsFile = await contentFile(SEARCH_ENTITY_TYPES.NEWS);
+    const index = await synchronizeAndIndexContentFile(article);
+    await synchronizeAndIndexContentFile(newsFile);
+    await source({
+      entityId: article.entityId,
+      entityType: SEARCH_ENTITY_TYPES.ARTICLE,
+      documentType: "content",
+      indexed: false,
+      content: "Parent body retained",
+    });
+    await fixtureDb.execute(
+      sql`UPDATE articles SET archived = true WHERE id = ${article.entityId}`,
+    );
+    await fixtureDb.execute(sql`UPDATE news SET archived = true WHERE id = ${newsFile.entityId}`);
+    await dbAls.run({ tenantId }, async () => {
+      await index.synchronizeResourceDocuments();
+      await index.synchronizeResourceDocuments();
+      await index.cleanupDeleted();
+      expect(await index.findSource(article)).toBeUndefined();
+      expect(await index.findSource(newsFile)).toBeUndefined();
+    });
+    expect(
+      await fixtureDb.execute(
+        sql`SELECT id FROM search_documents WHERE document_type LIKE 'resource:%'`,
+      ),
+    ).toEqual([]);
+    expect(await fixtureDb.execute(sql`SELECT id FROM search_chunks`)).toEqual([]);
+    const body = await fixtureDb.execute(
+      sql`SELECT content FROM search_documents WHERE entity_id = ${article.entityId} AND document_type = 'content'`,
+    );
+    expect(body[0].content).toBe("Parent body retained");
+  });
+
+  it("discovers article/news attachments and inline content files without existing search documents", async () => {
+    const files = await Promise.all([
+      contentFile(SEARCH_ENTITY_TYPES.ARTICLE),
+      contentFile(SEARCH_ENTITY_TYPES.NEWS),
+      contentFile(SEARCH_ENTITY_TYPES.ARTICLE, { relation: "content" }),
+      contentFile(SEARCH_ENTITY_TYPES.NEWS, { relation: "content" }),
+    ]);
+    await source({
+      entityId: files[0].entityId,
+      entityType: SEARCH_ENTITY_TYPES.ARTICLE,
+      documentType: "content",
+      indexed: false,
+      content: "Original article body",
+    });
+    const index = new SemanticSearchIndexRepository(fixtureDb);
+    await dbAls.run({ tenantId }, async () => {
+      await index.synchronizeResourceDocuments();
+      const pending = await index.findPending(50);
+      expect(pending.filter((row) => row.documentType.startsWith("resource:"))).toHaveLength(4);
+      for (const file of files) {
+        const current = await index.findSource(file);
+        expect(current?.resourceReference).toBe("fixtures/research-guide.pdf");
+        expect(current?.metadata.resourceId).toBe(file.resourceId);
+        expect(current?.content).toContain("research-guide.pdf");
+      }
+      await index.synchronizeResourceDocuments();
+    });
+    const body = await fixtureDb.execute(
+      sql`SELECT content FROM search_documents WHERE entity_id = ${files[0].entityId} AND document_type = 'content'`,
+    );
+    expect(body[0].content).toBe("Original article body");
+    const discovered = await fixtureDb.execute(
+      sql`SELECT entity_id FROM search_documents WHERE document_type LIKE 'resource:%'`,
+    );
+    expect(discovered).toHaveLength(4);
+  });
+
+  it.each([SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
+    "retrieves chunk-only keyword and semantic passages from %s files",
+    async (type) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC, PERMISSIONS.NEWS_READ_PUBLIC];
+      const file = await contentFile(type, { relation: "content" });
+      const index = await synchronizeAndIndexContentFile(file);
+      const pending = await dbAls.run({ tenantId }, () => index.findPending(50));
+      expect(pending).toEqual([]);
+      await enterTenantRole();
+      const keyword = await repository.findKeywordMatches(type, "reimb", actor);
+      const semantic = await repository.findSemanticMatches(type, queryVector, actor);
+      expect(keyword.map((match) => match.entityId)).toEqual([file.entityId]);
+      expect(semantic.map((match) => match.entityId)).toEqual([file.entityId]);
+      expect(keyword[0].matchedPassage).toContain("thirty days");
+      expect(semantic[0].matchedAttachmentFileName).toBe("research-guide.pdf");
+      const ordinary = new GlobalSearchRepository(fixtureDb, {} as never);
+      expect(await ordinary.findMatches(type, "en", "research")).toEqual([]);
+      expect(
+        (await repository.findKeywordMatches(type, "research", actor)).map(
+          (match) => match.entityId,
+        ),
+      ).toEqual([file.entityId]);
+    },
+  );
+
+  it.each([
+    [SEARCH_ENTITY_TYPES.ARTICLE, "detach"],
+    [SEARCH_ENTITY_TYPES.NEWS, "detach"],
+    [SEARCH_ENTITY_TYPES.ARTICLE, "archive"],
+    [SEARCH_ENTITY_TYPES.NEWS, "archive"],
+  ] as const)(
+    "blocks %s file passages after %s and removes their source/chunks",
+    async (type, change) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC, PERMISSIONS.NEWS_READ_PUBLIC];
+      const file = await contentFile(type);
+      const index = await synchronizeAndIndexContentFile(file);
+      if (change === "detach")
+        await fixtureDb.execute(
+          sql`DELETE FROM resource_entity WHERE resource_id = ${file.resourceId}`,
+        );
+      else
+        await fixtureDb.execute(
+          sql`UPDATE resources SET archived = true WHERE id = ${file.resourceId}`,
+        );
+      await enterTenantRole();
+      expect(await repository.findSemanticMatches(type, queryVector, actor)).toEqual([]);
+      expect(await repository.findKeywordMatches(type, "reimb", actor)).toEqual([]);
+      await fixtureDb.execute(sql`RESET ROLE`);
+      await dbAls.run({ tenantId }, async () => {
+        expect(await index.findSource(file)).toBeUndefined();
+        await index.synchronizeResourceDocuments();
+        await index.cleanupDeleted();
+      });
+      const rows = await fixtureDb.execute(
+        sql`SELECT id FROM search_chunks WHERE entity_id = ${file.entityId}`,
+      );
+      expect(rows).toEqual([]);
+      const docs = await fixtureDb.execute(
+        sql`SELECT id FROM search_documents WHERE entity_id = ${file.entityId}`,
+      );
+      expect(docs).toEqual([]);
+    },
+  );
+
+  it.each([SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
+    "protects private %s file content and permits its uploader",
+    async (type) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC, PERMISSIONS.NEWS_READ_PUBLIC];
+      const file = await contentFile(type, { visibility: RESOURCE_VISIBILITY.PRIVATE });
+      await synchronizeAndIndexContentFile(file);
+      await enterTenantRole();
+      expect(await repository.findSemanticMatches(type, queryVector, actor)).toEqual([]);
+      expect(await repository.findKeywordMatches(type, "reimb", actor)).toEqual([]);
+      const ordinary = new GlobalSearchRepository(fixtureDb, {} as never);
+      expect(await ordinary.findMatches(type, "en", "research")).toEqual([]);
+      const owner = { ...actor, userId: authorId };
+      expect(
+        (await repository.findSemanticMatches(type, queryVector, owner)).map(
+          (match) => match.entityId,
+        ),
+      ).toEqual([file.entityId]);
+      expect(
+        (await repository.findKeywordMatches(type, "reimb", owner)).map((match) => match.entityId),
+      ).toEqual([file.entityId]);
+    },
+  );
+
+  it.each([SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
+    "denies public readers access to files on nonpublic %s parents",
+    async (type) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC, PERMISSIONS.NEWS_READ_PUBLIC];
+      const file = await contentFile(type);
+      await synchronizeAndIndexContentFile(file);
+      const table = type === SEARCH_ENTITY_TYPES.ARTICLE ? "articles" : "news";
+      await fixtureDb.execute(
+        sql`UPDATE ${sql.identifier(table)} SET is_public = false WHERE id = ${file.entityId}`,
+      );
+      await enterTenantRole();
+      expect(await repository.findSemanticMatches(type, queryVector, actor)).toEqual([]);
+      expect(await repository.findKeywordMatches(type, "reimb", actor)).toEqual([]);
+      const ordinary = new GlobalSearchRepository(fixtureDb, {} as never);
+      expect(await ordinary.findMatches(type, "en", "research")).toEqual([]);
+    },
+  );
+
+  it("excludes hidden, archived, unsupported files and cover bindings from discovery", async () => {
+    await contentFile(SEARCH_ENTITY_TYPES.ARTICLE, { visibility: RESOURCE_VISIBILITY.HIDDEN });
+    await contentFile(SEARCH_ENTITY_TYPES.NEWS, { archived: true });
+    await contentFile(SEARCH_ENTITY_TYPES.ARTICLE, { contentType: "image/png" });
+    await contentFile(SEARCH_ENTITY_TYPES.NEWS, { relation: "cover_image" });
+    const index = new SemanticSearchIndexRepository(fixtureDb);
+    await dbAls.run({ tenantId }, () => index.synchronizeResourceDocuments());
+    expect(
+      await fixtureDb.execute(
+        sql`SELECT id FROM search_documents WHERE document_type LIKE 'resource:%'`,
+      ),
+    ).toEqual([]);
+  });
+
+  it("synchronizes only the selected tenant and preserves foreign resource sources under a superuser connection", async () => {
+    const own = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE);
+    const foreign = await contentFile(SEARCH_ENTITY_TYPES.NEWS, { scopeTenant: otherTenantId });
+    const index = new SemanticSearchIndexRepository(fixtureDb);
+    await dbAls.run({ tenantId: otherTenantId }, () => index.synchronizeResourceDocuments());
+    const [foreignBefore] = await fixtureDb.execute(
+      sql`SELECT id, content, updated_at FROM search_documents WHERE tenant_id = ${otherTenantId}`,
+    );
+    await fixtureDb.execute(
+      sql`DELETE FROM resource_entity WHERE resource_id = ${foreign.resourceId}`,
+    );
+    await dbAls.run({ tenantId }, () => index.synchronizeResourceDocuments());
+    const [foreignAfter] = await fixtureDb.execute(
+      sql`SELECT id, content, updated_at FROM search_documents WHERE tenant_id = ${otherTenantId}`,
+    );
+    expect(foreignAfter).toEqual(foreignBefore);
+    const pending = await dbAls.run({ tenantId }, () => index.findPending(50));
+    expect(pending.map((row) => row.entityId)).toEqual([own.entityId]);
+  });
 
   it("retrieves a semantic candidate with no keyword overlap using deterministic vectors", async () => {
     await source();
