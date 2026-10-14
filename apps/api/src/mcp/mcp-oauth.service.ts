@@ -204,10 +204,11 @@ export class McpOAuthService {
     const raw = await this.redis.get(`mcp:oauth:consent:${digest(nonce)}`);
     if (!raw) throw new NotFoundException("Connection request expired or invalid");
     const consent = JSON.parse(raw) as ConsentRequest;
+    const scopes = parseMcpScopes(consent.query.scope);
     if (
       consent.userId !== user.userId ||
       consent.query.resource !== resource.url ||
-      !isRequestableMcpScopeSet(parseMcpScopes(consent.query.scope))
+      !isRequestableMcpScopeSet(scopes)
     ) {
       throw new NotFoundException("Connection request expired or invalid");
     }
@@ -222,7 +223,7 @@ export class McpOAuthService {
       clientId: client.id,
       redirectUri: consent.query.redirect_uri,
       accountEmail: user.email,
-      scopes: parseMcpScopes(consent.query.scope),
+      scopes,
     };
   }
 

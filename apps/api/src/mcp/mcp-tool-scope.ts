@@ -2,6 +2,8 @@ import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES } from "@repo/shared";
 
 export { MCP_REQUESTABLE_SCOPES, MCP_SCOPES };
 
+export type McpScope = (typeof MCP_SCOPES)[keyof typeof MCP_SCOPES];
+
 const studentTools = new Set([
   "global_search",
   "list_student_courses",
@@ -15,7 +17,7 @@ const studentTools = new Set([
 ]);
 
 /** Explicit catalog: a newly registered tool never inherits legacy authoring access. */
-const toolScopes: Record<string, string> = {
+const toolScopes: Record<string, McpScope> = {
   list_courses: MCP_SCOPES.COURSES_READ,
   get_course: MCP_SCOPES.COURSES_READ,
   get_course_settings: MCP_SCOPES.COURSES_READ,
@@ -158,7 +160,7 @@ const toolScopes: Record<string, string> = {
   global_search: MCP_SCOPES.SEARCH_READ,
 };
 
-export function isRequestableMcpScopeSet(scopes: unknown): scopes is string[] {
+export function isRequestableMcpScopeSet(scopes: unknown): scopes is McpScope[] {
   if (!Array.isArray(scopes) || scopes.length === 0 || new Set(scopes).size !== scopes.length)
     return false;
   if (!scopes.every((scope) => MCP_REQUESTABLE_SCOPES.includes(scope))) return false;
@@ -166,7 +168,7 @@ export function isRequestableMcpScopeSet(scopes: unknown): scopes is string[] {
 }
 
 /** Legacy grants remain valid until reconnection but cannot be mixed with new scopes. */
-export function isMcpScopeSet(scopes: unknown): scopes is string[] {
+export function isMcpScopeSet(scopes: unknown): scopes is McpScope[] {
   if (isRequestableMcpScopeSet(scopes)) return true;
   return (
     Array.isArray(scopes) &&
