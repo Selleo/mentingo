@@ -98,6 +98,7 @@ import {
   type AiMentorTeachingStyle,
   type AiMentorType,
   type ResourceVisibility,
+  type VideoProviderType,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -159,6 +160,7 @@ import type {
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
+import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
   ReportConfigurationVisibility,
@@ -2591,6 +2593,48 @@ export const courseTransferStreams = pgTable(
       "course_transfer_streams_revision_check",
       sql`${table.appliedRevision} >= 0 AND ${table.requestedRevision} >= ${table.appliedRevision}`,
     ),
+  }),
+);
+
+export const hostedVideos = pgTable(
+  "hosted_videos",
+  {
+    ...id,
+    ...timestamps,
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    provider: text("provider").$type<VideoProviderType>().notNull(),
+    providerVideoId: text("provider_video_id"),
+    reference: text("reference"),
+    providerConfigurationSignature: text("provider_configuration_signature").notNull(),
+    status: text("status").$type<HostedVideoStatus>().notNull(),
+    statusChangedAt: timestampWithTimezone({ name: "status_changed_at" }).notNull().defaultNow(),
+    copiedFromTenantId: uuid("copied_from_tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    copiedFromReference: text("copied_from_reference"),
+    lastCheckedAt: timestampWithTimezone({ name: "last_checked_at" }),
+  },
+  (table) => ({
+    providerVideoIdx: uniqueIndex("hosted_videos_provider_video_idx").on(
+      table.provider,
+      table.providerVideoId,
+    ),
+    tenantReferenceIdx: index("hosted_videos_tenant_reference_idx").on(
+      table.tenantId,
+      table.reference,
+    ),
+    statusIdx: index("hosted_videos_status_idx").on(table.status),
+    copyIdx: uniqueIndex("hosted_videos_copy_idx")
+      .on(
+        table.tenantId,
+        table.provider,
+        table.providerConfigurationSignature,
+        table.copiedFromTenantId,
+        table.copiedFromReference,
+      )
+      .where(sql`${table.copiedFromReference} IS NOT NULL`),
   }),
 );
 

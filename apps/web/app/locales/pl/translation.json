@@ -2659,6 +2659,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Logowanie przez Google",
+        "description": "Pozwól użytkownikom logować się kontem Google."
+      },
+      "microsoftSignIn": {
+        "title": "Logowanie przez Microsoft",
+        "description": "Pozwól użytkownikom logować się kontem Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Logowanie przez Slack",
+        "description": "Pozwól użytkownikom logować się kontem Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Kalendarz Microsoft",
+        "description": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Płatności",
+        "description": "Klucze Stripe do sprzedaży kursów i weryfikacji webhooków płatności."
+      },
+      "videoStreaming": {
+        "title": "Strumieniowanie wideo",
+        "description": "Biblioteka Bunny Stream do przesyłania, kodowania i odtwarzania wideo."
+      },
+      "artificialIntelligence": {
+        "title": "Sztuczna inteligencja",
+        "description": "Klucze dla mentorów AI, generowania treści i asystenta kursów Luma."
+      },
+      "liveTraining": {
+        "title": "Szkolenia na żywo",
+        "description": "Serwer LiveKit używany do sesji szkoleń na żywo."
+      },
+      "phishingSimulations": {
+        "title": "Symulacje phishingu",
+        "description": "Połączenie z usługą symulacji phishingu."
+      }
+    },
     "name": "Zmienne środowiskowe",
     "keysTitle": "Klucze",
     "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
@@ -5288,6 +5326,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "To wideo jest przetwarzane",
+        "body": "Wkrótce będzie gotowe do obejrzenia. Wróć za kilka minut."
+      },
+      "processingFailed": {
+        "title": "Nie udało się przetworzyć tego wideo",
+        "body": "Skontaktuj się z administratorem."
+      },
       "tooltip": {
         "bunnyMissing": "Wideo jest niedostępne. Sprawdź konfigurację Bunny CDN."
       },

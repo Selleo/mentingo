@@ -1,4 +1,4 @@
-import { VIDEO_AUTOPLAY, type VideoProvider } from "@repo/shared";
+import { VIDEO_AUTOPLAY, type VideoProcessingStatus, type VideoProvider } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "./annotateVideoAutoplayAndBlockIndexesInContent";
@@ -15,6 +15,7 @@ export type ContentResource = {
   description?: string;
   fileName?: string;
   provider?: VideoProvider;
+  videoProcessingStatus?: VideoProcessingStatus;
   videoProgress?: {
     coveragePercent: number;
     isWatched: boolean;
@@ -105,6 +106,12 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
         $(element).attr("data-error", "true");
       } else {
         $(element).removeAttr("data-error");
+      }
+
+      if (resource?.videoProcessingStatus) {
+        $(element).attr("data-processing-status", resource.videoProcessingStatus);
+      } else {
+        $(element).removeAttr("data-processing-status");
       }
 
       if (resource?.resourceEntityId && resource.contentType?.startsWith("video/")) {

@@ -23,6 +23,7 @@ import {
   shouldSyncLesson,
 } from "src/course-transfer/utils/course-transfer-graph.utils";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { HostedVideoCopyService } from "src/file/hosted-video-copy.service";
 import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
 import { isImageVariantReference } from "src/file/image-variants/image-variant.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
@@ -59,6 +60,7 @@ export class CourseTransferAssetService {
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly hostedVideoCopyService: HostedVideoCopyService,
   ) {}
 
   /**
@@ -545,25 +547,14 @@ export class CourseTransferAssetService {
     }
 
     if (params.targetBunnyConfigured) {
-      const sourceVideo = await this.openSourceVideoStream(
-        source,
-        params.sourceTenantId,
-        params.sourceTenantOrigin,
-      );
-      const uploaded = await this.tenantDbRunnerService
-        .runWithTenant(params.targetTenantId, () =>
-          this.bunnyStreamService.uploadStream({
-            title: source.filename ?? "Master course video",
-            stream: sourceVideo.stream,
-            contentType: sourceVideo.contentType,
-          }),
-        )
-        .catch((error) => {
-          sourceVideo.stream.destroy(error instanceof Error ? error : undefined);
-          throw error;
-        });
-
-      return uploaded.fileKey;
+      return this.hostedVideoCopyService.copyVideoToTenantLibrary({
+        sourceTenantId: params.sourceTenantId,
+        sourceReference: source.reference,
+        targetTenantId: params.targetTenantId,
+        title: source.filename ?? "Master course video",
+        openSourceVideo: () =>
+          this.openSourceVideoStream(source, params.sourceTenantId, params.sourceTenantOrigin),
+      });
     }
 
     if (!this.s3Service.isConfigured()) {

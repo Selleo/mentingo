@@ -2430,6 +2430,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Prisijungimas per Google",
+        "description": "Leiskite naudotojams prisijungti su Google paskyra."
+      },
+      "microsoftSignIn": {
+        "title": "Prisijungimas per Microsoft",
+        "description": "Leiskite naudotojams prisijungti su Microsoft paskyra."
+      },
+      "slackSignIn": {
+        "title": "Prisijungimas per Slack",
+        "description": "Leiskite naudotojams prisijungti su Slack paskyra."
+      },
+      "microsoftCalendar": {
+        "title": "Microsoft kalendorius",
+        "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
+      },
+      "payments": {
+        "title": "Mokėjimai",
+        "description": "Stripe raktai kursams parduoti ir mokėjimų webhookams tikrinti."
+      },
+      "videoStreaming": {
+        "title": "Vaizdo transliacija",
+        "description": "Bunny Stream biblioteka vaizdo įrašams įkelti, koduoti ir leisti."
+      },
+      "artificialIntelligence": {
+        "title": "Dirbtinis intelektas",
+        "description": "Raktai AI mentoriams, generavimui ir Luma kursų asistentui."
+      },
+      "liveTraining": {
+        "title": "Tiesioginiai mokymai",
+        "description": "LiveKit serveris tiesioginiams mokymams."
+      },
+      "phishingSimulations": {
+        "title": "Phishing simuliacijos",
+        "description": "Ryšys su phishing simuliacijų paslauga."
+      }
+    },
     "name": "Aplinkos kintamieji",
     "keysTitle": "Raktai",
     "updateSuccessful": "Sėkmingai atnaujintos paslaptys",
@@ -4998,6 +5036,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Šis vaizdo įrašas apdorojamas",
+        "body": "Netrukus jį bus galima peržiūrėti. Grįžkite po kelių minučių."
+      },
+      "processingFailed": {
+        "title": "Šio vaizdo įrašo nepavyko apdoroti",
+        "body": "Susisiekite su administratoriumi."
+      },
       "tooltip": {
         "bunnyMissing": "Vaizdo įrašas nepasiekiamas. Patikrinkite Bunny CDN konfigūraciją."
       },

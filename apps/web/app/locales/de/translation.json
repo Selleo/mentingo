@@ -2430,6 +2430,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Anmeldung mit Google",
+        "description": "Nutzer können sich mit ihrem Google-Konto anmelden."
+      },
+      "microsoftSignIn": {
+        "title": "Anmeldung mit Microsoft",
+        "description": "Nutzer können sich mit ihrem Microsoft-Konto anmelden."
+      },
+      "slackSignIn": {
+        "title": "Anmeldung mit Slack",
+        "description": "Nutzer können sich mit ihrem Slack-Konto anmelden."
+      },
+      "microsoftCalendar": {
+        "title": "Microsoft-Kalender",
+        "description": "Live-Trainings mit Microsoft-Outlook-Kalendern synchronisieren."
+      },
+      "payments": {
+        "title": "Zahlungen",
+        "description": "Stripe-Schlüssel für den Kursverkauf und die Prüfung von Zahlungs-Webhooks."
+      },
+      "videoStreaming": {
+        "title": "Videostreaming",
+        "description": "Bunny-Stream-Bibliothek zum Hochladen, Kodieren und Abspielen von Videos."
+      },
+      "artificialIntelligence": {
+        "title": "Künstliche Intelligenz",
+        "description": "Schlüssel für KI-Mentoren, Generierung und den Luma-Kursassistenten."
+      },
+      "liveTraining": {
+        "title": "Live-Trainings",
+        "description": "LiveKit-Server für Live-Trainings."
+      },
+      "phishingSimulations": {
+        "title": "Phishing-Simulationen",
+        "description": "Verbindung zum Phishing-Simulationsdienst."
+      }
+    },
     "name": "Umgebungsvariablen",
     "keysTitle": "Schlüssel",
     "updateSuccessful": "Geheimnisse erfolgreich aktualisiert",
@@ -4994,6 +5032,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Dieses Video wird verarbeitet",
+        "body": "Es ist in Kürze verfügbar. Schauen Sie in ein paar Minuten wieder vorbei."
+      },
+      "processingFailed": {
+        "title": "Dieses Video konnte nicht verarbeitet werden",
+        "body": "Bitte wenden Sie sich an Ihren Administrator."
+      },
       "tooltip": {
         "bunnyMissing": "Video ist nicht verfügbar. Bitte überprüfen Sie die Bunny CDN-Konfiguration."
       },

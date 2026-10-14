@@ -2423,6 +2423,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Inicio de sesión con Google",
+        "description": "Permite que los usuarios inicien sesión con su cuenta de Google."
+      },
+      "microsoftSignIn": {
+        "title": "Inicio de sesión con Microsoft",
+        "description": "Permite que los usuarios inicien sesión con su cuenta de Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Inicio de sesión con Slack",
+        "description": "Permite que los usuarios inicien sesión con su cuenta de Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Calendario de Microsoft",
+        "description": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Pagos",
+        "description": "Claves de Stripe para vender cursos y verificar los webhooks de pago."
+      },
+      "videoStreaming": {
+        "title": "Transmisión de vídeo",
+        "description": "Biblioteca de Bunny Stream para subir, codificar y reproducir vídeos."
+      },
+      "artificialIntelligence": {
+        "title": "Inteligencia artificial",
+        "description": "Claves para los mentores de IA, la generación y el asistente de cursos Luma."
+      },
+      "liveTraining": {
+        "title": "Formación en directo",
+        "description": "Servidor de LiveKit para las sesiones de formación en directo."
+      },
+      "phishingSimulations": {
+        "title": "Simulaciones de phishing",
+        "description": "Conexión con el servicio de simulación de phishing."
+      }
+    },
     "name": "Variables de entorno",
     "keysTitle": "Claves",
     "updateSuccessful": "Secretos actualizados con éxito",
@@ -4951,6 +4989,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Este vídeo se está procesando",
+        "body": "Estará listo para verse en breve. Vuelve en unos minutos."
+      },
+      "processingFailed": {
+        "title": "No se ha podido procesar este vídeo",
+        "body": "Ponte en contacto con tu administrador."
+      },
       "tooltip": {
         "bunnyMissing": "El vídeo no está disponible. Verifique la configuración de CDN de Bunny."
       },

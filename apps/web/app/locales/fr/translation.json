@@ -2425,6 +2425,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Connexion avec Google",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Google."
+      },
+      "microsoftSignIn": {
+        "title": "Connexion avec Microsoft",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Connexion avec Slack",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Calendrier Microsoft",
+        "description": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Paiements",
+        "description": "Clés Stripe pour vendre des cours et vérifier les webhooks de paiement."
+      },
+      "videoStreaming": {
+        "title": "Streaming vidéo",
+        "description": "Bibliothèque Bunny Stream pour téléverser, encoder et lire les vidéos."
+      },
+      "artificialIntelligence": {
+        "title": "Intelligence artificielle",
+        "description": "Clés pour les mentors IA, la génération et l'assistant de cours Luma."
+      },
+      "liveTraining": {
+        "title": "Formations en direct",
+        "description": "Serveur LiveKit utilisé pour les formations en direct."
+      },
+      "phishingSimulations": {
+        "title": "Simulations de phishing",
+        "description": "Connexion au service de simulation de phishing."
+      }
+    },
     "name": "Variables d'environnement",
     "keysTitle": "Clés",
     "updateSuccessful": "Secrets mis à jour avec succès",
@@ -4736,6 +4774,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Cette vidéo est en cours de traitement",
+        "body": "Elle sera bientôt disponible. Revenez dans quelques minutes."
+      },
+      "processingFailed": {
+        "title": "Cette vidéo n'a pas pu être traitée",
+        "body": "Veuillez contacter votre administrateur."
+      },
       "tooltip": {
         "bunnyMissing": "La vidéo n'est pas disponible. Veuillez vérifier la configuration de Bunny CDN."
       },

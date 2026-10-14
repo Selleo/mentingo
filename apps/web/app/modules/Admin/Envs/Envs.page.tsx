@@ -13,7 +13,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
+import { ENV_GROUPS, SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
 
 import { ENV_PAGE_HANDLES } from "../../../../e2e/data/environment/handles";
 
@@ -21,6 +21,7 @@ import type React from "react";
 
 type SecretKey = keyof typeof SECRET_METADATA;
 type FormValues = Partial<Record<SecretKey, string>>;
+type SecretMetadata = { labelKey: string; descriptionKey?: string; placeholderKey: string };
 
 interface SecretFieldProps {
   name: SecretKey;
@@ -55,11 +56,11 @@ const SecretField = ({
 
   return (
     <div className="w-full" data-testid={ENV_PAGE_HANDLES.field(name)}>
-      <Label className="text-xl" htmlFor={name}>
+      <Label className="body-sm-md text-neutral-950" htmlFor={name}>
         {t(labelKey)}
       </Label>
-      {descriptionKey && <p className="mt-1 text-sm text-neutral-600">{t(descriptionKey)}</p>}
-      <div className="relative">
+      {descriptionKey && <p className="details-md mt-1 text-neutral-600">{t(descriptionKey)}</p>}
+      <div className="relative mt-2">
         <Input
           data-testid={ENV_PAGE_HANDLES.input(name)}
           id={name}
@@ -118,51 +119,53 @@ const Envs = (): React.ReactElement => {
         },
       ]}
     >
-      <div className="flex flex-col gap-16" data-testid={ENV_PAGE_HANDLES.PAGE}>
-        <div className="mx-auto flex h-auto w-full max-w-4xl flex-col gap-6">
+      <form
+        data-testid={ENV_PAGE_HANDLES.FORM}
+        onSubmit={handleSubmit(onSubmit)}
+        className="mx-auto flex w-full max-w-6xl flex-col gap-6"
+      >
+        <div
+          className="flex flex-wrap items-center justify-between gap-4"
+          data-testid={ENV_PAGE_HANDLES.PAGE}
+        >
           <h4 className="h4 font-bold">{t("adminEnvsView.name")}</h4>
-          <div className="rounded-2xl bg-white p-6 drop-shadow">
-            <form
-              data-testid={ENV_PAGE_HANDLES.FORM}
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex size-full flex-col gap-8"
-            >
-              <div className="flex w-full items-center justify-between">
-                <h4 className="h4">{t("adminEnvsView.keysTitle")}</h4>
-                {hasAnyValue ? (
-                  <Button
-                    type="submit"
-                    data-testid={ENV_PAGE_HANDLES.SUBMIT}
-                    className="flex gap-2"
-                  >
-                    <Icon name="Checkmark" className="size-4" />
-                    {t("adminEnvsView.form.save")}
-                  </Button>
-                ) : (
-                  <></>
-                )}
-              </div>
+          {hasAnyValue && (
+            <Button type="submit" data-testid={ENV_PAGE_HANDLES.SUBMIT} className="flex gap-2">
+              <Icon name="Checkmark" className="size-4" />
+              {t("adminEnvsView.form.save")}
+            </Button>
+          )}
+        </div>
 
-              {(Object.keys(SECRET_METADATA) as SecretKey[]).map((key) => {
-                const meta = SECRET_METADATA[key];
-                if (!meta) return null;
+        <div className="columns-1 gap-6 lg:columns-2">
+          {ENV_GROUPS.map((group) => (
+            <section
+              key={group.id}
+              className="mb-6 flex break-inside-avoid flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+            >
+              <header className="flex flex-col gap-1">
+                <h2 className="body-base-md text-neutral-950">{t(group.titleKey)}</h2>
+                <p className="details-md text-neutral-600">{t(group.descriptionKey)}</p>
+              </header>
+              {group.secretNames.map((secretName) => {
+                const meta: SecretMetadata = SECRET_METADATA[secretName];
 
                 return (
                   <SecretField
-                    key={key}
-                    name={key}
+                    key={secretName}
+                    name={secretName}
                     labelKey={meta.labelKey}
-                    descriptionKey={"descriptionKey" in meta ? meta.descriptionKey : undefined}
+                    descriptionKey={meta.descriptionKey}
                     placeholderKey={meta.placeholderKey}
                     register={register}
                     setValue={setValue}
                   />
                 );
               })}
-            </form>
-          </div>
+            </section>
+          ))}
         </div>
-      </div>
+      </form>
     </PageWrapper>
   );
 };

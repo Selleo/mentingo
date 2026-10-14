@@ -2431,6 +2431,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Google sign-in",
+        "description": "Let users sign in with their Google account."
+      },
+      "microsoftSignIn": {
+        "title": "Microsoft sign-in",
+        "description": "Let users sign in with their Microsoft account."
+      },
+      "slackSignIn": {
+        "title": "Slack sign-in",
+        "description": "Let users sign in with their Slack account."
+      },
+      "microsoftCalendar": {
+        "title": "Microsoft Calendar",
+        "description": "Sync live training sessions to Microsoft Outlook calendars."
+      },
+      "payments": {
+        "title": "Payments",
+        "description": "Stripe keys for selling courses and verifying payment webhooks."
+      },
+      "videoStreaming": {
+        "title": "Video streaming",
+        "description": "Bunny Stream library used to upload, encode, and play videos."
+      },
+      "artificialIntelligence": {
+        "title": "Artificial intelligence",
+        "description": "Keys for AI mentors, generation, and the Luma course assistant."
+      },
+      "liveTraining": {
+        "title": "Live training",
+        "description": "LiveKit server used for live training sessions."
+      },
+      "phishingSimulations": {
+        "title": "Phishing simulations",
+        "description": "Connection to the phishing simulation service."
+      }
+    },
     "name": "Environment Variables",
     "keysTitle": "Keys",
     "updateSuccessful": "Successfully updated secrets",
@@ -5014,6 +5052,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "This video is being processed",
+        "body": "It will be ready to watch shortly. Check back in a few minutes."
+      },
+      "processingFailed": {
+        "title": "This video couldn't be processed",
+        "body": "Please contact your administrator."
+      },
       "tooltip": {
         "bunnyMissing": "Video is not available. Please check Bunny CDN configuration."
       },

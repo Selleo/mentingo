@@ -2436,6 +2436,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Přihlášení přes Google",
+        "description": "Umožněte uživatelům přihlásit se účtem Google."
+      },
+      "microsoftSignIn": {
+        "title": "Přihlášení přes Microsoft",
+        "description": "Umožněte uživatelům přihlásit se účtem Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Přihlášení přes Slack",
+        "description": "Umožněte uživatelům přihlásit se účtem Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Kalendář Microsoft",
+        "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Platby",
+        "description": "Klíče Stripe pro prodej kurzů a ověřování platebních webhooků."
+      },
+      "videoStreaming": {
+        "title": "Streamování videa",
+        "description": "Knihovna Bunny Stream pro nahrávání, kódování a přehrávání videí."
+      },
+      "artificialIntelligence": {
+        "title": "Umělá inteligence",
+        "description": "Klíče pro AI mentory, generování obsahu a asistenta kurzů Luma."
+      },
+      "liveTraining": {
+        "title": "Živá školení",
+        "description": "Server LiveKit pro živá školení."
+      },
+      "phishingSimulations": {
+        "title": "Simulace phishingu",
+        "description": "Připojení ke službě simulace phishingu."
+      }
+    },
     "name": "Proměnné prostředí",
     "keysTitle": "Klíče",
     "updateSuccessful": "Tajemství byla úspěšně aktualizována",
@@ -5003,6 +5041,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Toto video se zpracovává",
+        "body": "Brzy bude připravené ke zhlédnutí. Vraťte se za pár minut."
+      },
+      "processingFailed": {
+        "title": "Toto video se nepodařilo zpracovat",
+        "body": "Obraťte se na svého administrátora."
+      },
       "tooltip": {
         "bunnyMissing": "Video není k dispozici. Zkontrolujte konfiguraci Bunny CDN."
       },

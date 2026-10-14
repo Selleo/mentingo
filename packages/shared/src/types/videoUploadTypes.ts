@@ -13,3 +13,11 @@ export const VIDEO_PROVIDERS = {
 } as const;
 
 export type VideoProviderType = (typeof VIDEO_PROVIDERS)[keyof typeof VIDEO_PROVIDERS];
+
+export const VIDEO_PROCESSING_STATUSES = {
+  PROCESSING: "processing",
+  FAILED: "failed",
+} as const;
+
+export type VideoProcessingStatus =
+  (typeof VIDEO_PROCESSING_STATUSES)[keyof typeof VIDEO_PROCESSING_STATUSES];
