@@ -4,8 +4,8 @@ import { Type } from "@sinclair/typebox";
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH } from "src/global-search/global-search.constants";
 import { globalSearchQuerySchema } from "src/global-search/schemas/global-search.schema";
 
-import { MCP_STUDENT_SEARCH_PERMISSIONS } from "./mcp-student-access";
 import { shapeMcpSearchResults } from "./mcp-search-results";
+import { MCP_STUDENT_SEARCH_PERMISSIONS } from "./mcp-student-access";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 
 import type { McpSearchContext } from "./mcp-search-results.types";

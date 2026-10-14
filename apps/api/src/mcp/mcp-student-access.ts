@@ -7,9 +7,10 @@ import {
   FEATURE_SETTINGS_KEYS,
 } from "@repo/shared";
 
-import type { SettingsService } from "src/settings/settings.service";
-type Settings = Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { SettingsService } from "src/settings/settings.service";
+
+type Settings = Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
 
 export const MCP_STUDENT_SEARCH_PERMISSIONS = [
   PERMISSIONS.COURSE_READ,

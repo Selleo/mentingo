@@ -1,5 +1,7 @@
 import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+
 import { asMcpStudentUser } from "./mcp-student-access";
+
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const account: CurrentUserType = {

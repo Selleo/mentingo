@@ -1,4 +1,5 @@
 import { GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shared";
+
 import { shapeMcpSearchResults } from "./mcp-search-results";
 
 import type { McpLinkedSearchResponse } from "./mcp-search-results.types";

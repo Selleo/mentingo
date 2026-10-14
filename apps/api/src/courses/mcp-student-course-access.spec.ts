@@ -1,5 +1,7 @@
 import { COURSE_STATUSES, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+
 import { CourseService } from "./course.service";
+
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const actor: CurrentUserType = {
