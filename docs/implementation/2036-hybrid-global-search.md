@@ -18,18 +18,9 @@ The first batch retrieves up to 200 chunks. If it fills the budget but returns f
 
 A minute-based reconciler reads committed canonical sources and enqueues bounded BullMQ jobs. This is the durable recovery mechanism: it does not enqueue provider work from uncommitted content writes. Tenant ordering and source pagination rotate between cycles. Workers reread current sources, prepare all chunks, then validate revisions and atomically replace a source's chunk set. Readers exclude stale/deleted/detached/archived or newly restricted file content immediately, without waiting for cleanup.
 
-Apply the generated migrations through the existing deployment migration flow. There are no network calls or embeddings inside migrations. Existing sources are picked up automatically by reconciliation; the CLI can accelerate or inspect that work.
+Apply the generated migrations through the existing deployment migration flow. There are no network calls or embeddings inside migrations. Existing sources are picked up automatically by background reconciliation; no manual backfill command is required.
 
-From a configured checkout, using the normal application database/Redis environment:
-
-```sh
-pnpm --filter api search:backfill --tenant <tenant-uuid> --limit 50 --batches 10
-pnpm --filter api search:backfill --tenant <tenant-uuid> --apply --limit 50 --batches 10
-```
-
-The first command is a dry run. The second enqueues work for the application workers. `--offset` selects a position in the current pending-source list; this list moves as workers complete sources, so rerun from offset zero to cover anything skipped. Completed unchanged sources are skipped. Counts describe each bounded batch, not the entire tenant corpus. Queue capacity is bounded to 500 waiting/active/delayed jobs, with indexing concurrency of two per application process, four retry attempts, and exponential backoff. Retained failures can be retried by reconciliation after one day.
-
-Do not run this command against production merely to test it: apply mode starts paid embedding work when application workers consume its jobs. No production backfill was executed during implementation.
+Queue capacity is bounded to 500 waiting/active/delayed jobs, with indexing concurrency of two per application process, four retry attempts, and exponential backoff. Retained failures can be retried by reconciliation after one day.
 
 ## File and visibility boundaries
 

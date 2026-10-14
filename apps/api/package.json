@@ -28,7 +28,6 @@
     "test:e2e:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --watch",
     "db:migrate": "drizzle-kit migrate --config ./drizzle.migrator.config.ts",
     "db:generate": "drizzle-kit generate --config ./drizzle.migrator.config.ts",
-    "search:backfill": "tsx ./scripts/backfill-semantic-search.ts",
     "db:seed": "tsx ./src/seed/seed.ts",
     "db:seed-staging": "node dist/src/seed/seed.js",
     "db:seed-prod": "tsx ./src/seed/seed-prod.ts",
