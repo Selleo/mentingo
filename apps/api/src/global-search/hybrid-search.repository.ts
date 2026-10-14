@@ -83,14 +83,6 @@ export class HybridSearchRepository {
         );
         const rows = result as unknown as SemanticCandidateMatchRow[];
         const candidateCount = Number(rows[0]?.candidateCount ?? 0);
-        if (candidateCount === 0) {
-          // Highly selective filters can starve ANN even when valid matches exist.
-          const remaining = await trx.execute(
-            this.buildExactSemanticQuery(entityType, embedding, actor, [...matches.keys()]),
-          );
-          for (const row of remaining as unknown as MatchRow[]) matches.set(row.entityId, row);
-          break;
-        }
         let recovered = 0;
         for (const row of rows) {
           if (!row.entityId) continue;
@@ -163,41 +155,6 @@ export class HybridSearchRepository {
       SELECT NULL::uuid, ARRAY[]::text[], 0::double precision, NULL::text, NULL::text,
         (SELECT count(*)::integer FROM nearest)
       WHERE NOT EXISTS (SELECT 1 FROM grouped)
-    `;
-  }
-
-  /** Exceptional fallback for ANN starvation; identical access and freshness predicates. */
-  buildExactSemanticQuery(
-    entityType: SearchEntityType,
-    embedding: number[],
-    actor: CurrentUserType,
-    excludedEntityIds: string[] = [],
-  ): SQL {
-    const vector = `[${embedding.join(",")}]`;
-    const unseen = excludedEntityIds.length
-      ? sql`c.entity_id NOT IN (${sql.join(
-          excludedEntityIds.map((id) => sql`${id}::uuid`),
-          sql`, `,
-        )})`
-      : sql`true`;
-    return sql`
-      WITH hits AS (
-        SELECT c.entity_id, c.language, c.embedding <=> ${vector}::vector AS distance,
-          left(c.content, 320) AS passage, c.metadata->>'fileName' AS filename
-        FROM search_chunks c
-        WHERE c.tenant_id = ${actor.tenantId} AND c.entity_type = ${entityType}
-          AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
-          AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}
-          AND ${unseen}
-          AND EXISTS (SELECT 1 FROM search_documents s
-            WHERE ${this.currentSource(actor)} AND ${this.eligibility(entityType, actor)})
-      )
-      SELECT entity_id AS "entityId", array_agg(DISTINCT language) AS languages,
-        1 - min(distance) AS rank,
-        (array_agg(passage ORDER BY distance, language, passage))[1] AS "matchedPassage",
-        (array_agg(filename ORDER BY distance, language, passage))[1] AS "matchedAttachmentFileName"
-      FROM hits WHERE distance <= ${SEMANTIC_SEARCH_MAX_DISTANCE}
-      GROUP BY entity_id ORDER BY min(distance), entity_id LIMIT ${SEMANTIC_SEARCH_ENTITY_LIMIT}
     `;
   }
 

@@ -102,29 +102,36 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       .mockResolvedValueOnce([{ entityId: null, candidateCount: 200 }]);
     const transaction = jest.fn(async (callback) => callback({ execute }));
     const repository = new HybridSearchRepository({ transaction } as unknown as DatabasePg);
-    const exact = jest.spyOn(repository, "buildExactSemanticQuery");
     expect(
       await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, embedding, actor),
     ).toEqual([]);
     expect(execute).toHaveBeenCalledTimes(2);
-    expect(exact).not.toHaveBeenCalled();
   });
 
-  it("recovers remaining entities exactly when ANN returns no candidates under selective filters", async () => {
+  it("returns recovered entities when a later ANN batch has no candidates", async () => {
     const first = "00000000-0000-0000-0000-000000000003";
-    const second = "00000000-0000-0000-0000-000000000004";
     const execute = jest
       .fn()
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([match(first, 200)])
-      .mockResolvedValueOnce([{ entityId: null, candidateCount: 0 }])
-      .mockResolvedValueOnce([{ ...match(second, 0), rank: 0.8 }]);
+      .mockResolvedValueOnce([{ entityId: null, candidateCount: 0 }]);
     const transaction = jest.fn(async (callback) => callback({ execute }));
     const repository = new HybridSearchRepository({ transaction } as unknown as DatabasePg);
-    const exact = jest.spyOn(repository, "buildExactSemanticQuery");
     const rows = await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, embedding, actor);
-    expect(exact).toHaveBeenCalledWith(SEARCH_ENTITY_TYPES.COURSE, embedding, actor, [first]);
-    expect(rows.map((row) => row.entityId)).toEqual([first, second]);
-    expect(execute).toHaveBeenCalledTimes(4);
+    expect(rows.map((row) => row.entityId)).toEqual([first]);
+    expect(execute).toHaveBeenCalledTimes(3);
+  });
+
+  it("returns no semantic matches without another query when ANN has no candidates", async () => {
+    const execute = jest
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ entityId: null, candidateCount: 0 }]);
+    const transaction = jest.fn(async (callback) => callback({ execute }));
+    const repository = new HybridSearchRepository({ transaction } as unknown as DatabasePg);
+    expect(
+      await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, embedding, actor),
+    ).toEqual([]);
+    expect(execute).toHaveBeenCalledTimes(2);
   });
 });
