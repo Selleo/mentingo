@@ -38,3 +38,23 @@ export function asMcpStudentUser(user: CurrentUserType, settings?: Settings): Cu
     roleSlugs: user.roleSlugs.filter((role) => role === SYSTEM_ROLE_SLUGS.STUDENT),
   };
 }
+
+/** Per-resource management permissions, independent of role names. */
+export function hasMcpManagementSearchAccess(permissions: PermissionKey[]): boolean {
+  const managementPermissions: PermissionKey[] = [
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.QA_MANAGE,
+    PERMISSIONS.QA_MANAGE_OWN,
+    PERMISSIONS.USER_MANAGE,
+    PERMISSIONS.CATEGORY_MANAGE,
+    PERMISSIONS.GROUP_MANAGE,
+    PERMISSIONS.LEARNING_PATH_UPDATE,
+    PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+  ];
+  return permissions.some((permission) => managementPermissions.includes(permission));
+}

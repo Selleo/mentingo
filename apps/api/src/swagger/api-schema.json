@@ -178088,6 +178088,10 @@
                 "items": {
                   "anyOf": [
                     {
+                      "const": "account:access",
+                      "type": "string"
+                    },
+                    {
                       "const": "authoring",
                       "type": "string"
                     },

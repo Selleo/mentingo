@@ -322,6 +322,7 @@ describe("McpOAuthService explicit scopes", () => {
   });
 
   it.each([
+    "account:access",
     "student:read",
     "search:read",
     "courses:read articles:read",
@@ -403,7 +404,8 @@ describe("McpOAuthService explicit scopes", () => {
   );
 
   it.each([
-    undefined,
+    "account:access courses:read",
+    "account:access student:read",
     "authoring",
     "search",
     "unknown",
@@ -424,6 +426,34 @@ describe("McpOAuthService explicit scopes", () => {
     await service.authorizationPage(authorizationRequest(scope), res);
     expect(res.redirect).toHaveBeenCalledWith(303, "/oauth/connect?error=invalid");
     expect([...redis.store.keys()].some((key) => key.startsWith("mcp:oauth:consent:"))).toBe(false);
+  });
+
+  it("defaults omitted scopes to account access and requires fresh consent every time", async () => {
+    const redis = buildRedis();
+    await storeClient(redis, "scoped-client");
+    const tokenStore = jest.fn();
+    const service = buildService(
+      redis,
+      tenantA,
+      { userId, tenantId: tenantA },
+      "actor@example.com",
+      tokenStore,
+    );
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = buildRes();
+      await service.authorizationPage(authorizationRequest(), res);
+      const nonce = new URL(responseRedirect(res), "https://tenant.example.com").searchParams.get(
+        "consent",
+      );
+      expect(nonce).toBeTruthy();
+      expect((await service.consentDetails(authorizationRequest(), nonce!)).scopes).toEqual([
+        "account:access",
+      ]);
+    }
+    expect(
+      [...redis.store.keys()].filter((key) => key.startsWith("mcp:oauth:consent:")),
+    ).toHaveLength(2);
+    expect(tokenStore).not.toHaveBeenCalled();
   });
 
   it("rejects token exchange scope changes without consuming the code", async () => {
@@ -556,9 +586,14 @@ describe("McpOAuthService stored grant validation", () => {
 });
 
 describe("McpOAuthService existing grants", () => {
-  it.each(["authoring", "search"])(
-    "preserves legacy %s on refresh without accepting any new scope",
-    async (legacyScope) => {
+  it.each([
+    ["authoring", "student:read"],
+    ["search", "student:read"],
+    ["authoring", "account:access"],
+    ["search", "account:access"],
+  ])(
+    "preserves legacy %s on refresh without upgrading to %s",
+    async (legacyScope, requestedScope) => {
       const redis = buildRedis();
       await storeClient(redis, "scoped-client");
       const tokenStore = jest.fn();
@@ -586,7 +621,7 @@ describe("McpOAuthService existing grants", () => {
         tokenRequest({
           grant_type: "refresh_token",
           refresh_token: refreshToken,
-          scope: "student:read",
+          scope: requestedScope,
         }),
         changedRes,
       );

@@ -20,19 +20,17 @@ describe("MCP integration scope policy", () => {
   it("exposes learner equivalents without management or lesson access", () => {
     for (const tool of [
       "global_search",
-      "list_student_courses",
-      "get_student_course",
-      "list_student_articles",
-      "get_student_article",
-      "list_student_news",
-      "get_student_news",
-      "list_student_qa_entries",
-      "get_student_qa_entry",
+      "list_courses",
+      "get_course",
+      "list_articles",
+      "get_article",
+      "list_news",
+      "get_news",
+      "list_qa_entries",
+      "get_qa_entry",
     ])
       expect(canUseMcpToolWithScopes(tool, [MCP_SCOPES.STUDENT_READ])).toBe(true);
     for (const tool of [
-      "list_courses",
-      "get_course",
       "get_lesson",
       "list_users",
       "get_my_capabilities",
@@ -45,8 +43,16 @@ describe("MCP integration scope policy", () => {
   it("preserves a frozen legacy authoring catalog without implicitly adding new tools", () => {
     expect(canUseMcpToolWithScopes("create_course", [MCP_SCOPES.AUTHORING])).toBe(true);
     expect(canUseMcpToolWithScopes("global_search", [MCP_SCOPES.AUTHORING])).toBe(true);
-    expect(canUseMcpToolWithScopes("get_student_course", [MCP_SCOPES.AUTHORING])).toBe(false);
+    expect(canUseMcpToolWithScopes("get_course", [MCP_SCOPES.AUTHORING])).toBe(true);
     expect(canUseMcpToolWithScopes("unknown", [MCP_SCOPES.AUTHORING])).toBe(false);
+  });
+
+  it("allows general access only to the reviewed catalog", () => {
+    expect(isRequestableMcpScopeSet([MCP_SCOPES.ACCOUNT_ACCESS])).toBe(true);
+    for (const name of ["get_course", "create_course", "get_my_capabilities", "global_search"])
+      expect(canUseMcpToolWithScopes(name, [MCP_SCOPES.ACCOUNT_ACCESS])).toBe(true);
+    expect(canUseMcpToolWithScopes("unknown", [MCP_SCOPES.ACCOUNT_ACCESS])).toBe(false);
+    expect(canUseMcpToolWithScopes("get_student_course", [MCP_SCOPES.ACCOUNT_ACCESS])).toBe(false);
   });
 
   it("combines granular scopes but never assumes write grants read", () => {
@@ -81,6 +87,8 @@ describe("MCP integration scope policy", () => {
     ["search", "authoring"],
     ["courses:read", "courses:read"],
     ["student:read", "courses:read"],
+    ["account:access", "courses:read"],
+    ["account:access", "student:read"],
     ["authoring", "courses:read"],
     ["toString"],
     [1],

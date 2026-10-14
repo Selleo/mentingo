@@ -10,7 +10,7 @@ Mentingo MCP (Model Context Protocol) gives a connected AI assistant access to m
 - Attach supporting files, upload video, and import SCORM packages through the existing upload flows.
 - Manage course publication, certificates, pricing, and assigned-group deadlines when your account permits it.
 
-The tools available to you depend on explicitly approved OAuth scopes, your current account permissions, and the features enabled for your organisation. A connection does not grant additional access. Learner integrations can use `student:read` to search and read a limited student view without content management or administration.
+The tools available to you depend on your approved connection access, your current account permissions, and the features enabled for your organisation. A connection does not grant additional access. Learner integrations can use `student:read` to search and read a limited student view without content management or administration.
 
 ## Connect to Mentingo
 
@@ -26,7 +26,7 @@ Register Mentingo with Claude Code:
 claude mcp add --transport http mentingo https://<tenant-host>/api/mcp
 ```
 
-Before starting OAuth, configure the client to request the explicit scopes needed below. A client must support scope selection; requesting every advertised scope together is invalid because `student:read` is exclusive. Start Claude Code and run `/mcp`, select Mentingo, and follow the browser sign-in and consent flow with those scopes. Check the connection with `claude mcp list`.
+Start Claude Code and run `/mcp`, select Mentingo, and follow the browser sign-in and consent flow. Standard connections use `account:access` when the client omits scopes; review and approve account access on the consent page. Check the connection with `claude mcp list`.
 
 ### Codex CLI
 
@@ -36,7 +36,7 @@ Register Mentingo:
 codex mcp add mentingo --url https://<tenant-host>/api/mcp
 ```
 
-Configure the explicit scopes needed below when starting `codex mcp login mentingo`, using the scope option supported by your installed client version. Complete Mentingo sign-in and review the scope list on the consent page, then check the connection with `codex mcp list`. Missing scopes are rejected rather than defaulted to authoring access.
+Run `codex mcp login mentingo`, complete Mentingo sign-in, and approve account access on the consent page. Check the connection with `codex mcp list`. No manual scope selection is needed for a standard connection.
 
 ### Other MCP clients
 
@@ -46,22 +46,30 @@ In your client's remote MCP settings, add a connection named **Mentingo** with t
 https://<tenant-host>/api/mcp
 ```
 
-Choose HTTP/Streamable HTTP transport if the client asks and configure the explicit OAuth scopes for the intended workflow. Start its sign-in flow; it should discover Mentingo's OAuth metadata and open the consent page. Sign in to the correct account, review the client and redirect address, then choose **Allow**.
+Choose HTTP/Streamable HTTP transport if the client asks and use the standard account connection, or choose optional scopes below to cap access. Start its sign-in flow; it should discover Mentingo's OAuth metadata and open the consent page. Sign in to the correct account, review the client and redirect address, then choose **Allow**.
 
 Authentication uses your Mentingo account. You do not need to paste an integration administrator API key into the assistant. Use your client's disconnect controls when finished; clients that support token revocation can use Mentingo's OAuth revocation endpoint.
 
-## Explicit connection scopes
+## Connection access and optional scope caps
 
-New connections must request a nonempty, explicit set of scopes. There is no default
-`authoring` scope. OAuth discovery advertises only the requestable scopes below, and
-the consent page lists the exact scopes before approval. Unknown, duplicate or omitted
-scopes are rejected. Read and write scopes are separate: a write scope does not
-implicitly include its read counterpart.
+Standard clients can connect without choosing scopes. An omitted OAuth `scope`
+becomes `account:access`, which exposes the MCP tools allowed by the connected
+account's current permissions and the organisation's enabled features. It never
+adds account permissions. Every new authorization requires consent, including
+repeat connections; the consent screen explains that account access includes reads
+and changes.
+
+For a deliberate access cap, request granular scopes or `student:read` instead.
+`account:access` and `student:read` must each be requested alone. Granular scopes can
+be combined with each other. Empty, unknown, duplicate and mixed exclusive scopes
+are rejected. Read and write scopes are separate: a write scope does not implicitly
+include its read counterpart.
 
 | Scope                                         | Intended access                                                                                                              |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `account:access`                              | Standard permission-aware account access; default when scopes are omitted; exclusive                                         |
 | `student:read`                                | Exclusive learner search and the eight learner list/get tools below                                                          |
-| `search:read`                                 | Existing global search with current account permissions, including administrative groups where permitted; not a student view |
+| `search:read`                                 | Global search with current account permissions; learner projection without management permissions, broader results where permitted |
 | `courses:read`, `courses:write`               | Course, chapter and lesson management reads or mutations                                                                     |
 | `categories:read`, `categories:write`         | Category management reads or mutations                                                                                       |
 | `articles:read`, `articles:write`             | Article/section management reads or mutations                                                                                |
@@ -77,22 +85,21 @@ Management read scopes can expose authoring information, drafts or configuration
 when the account's existing permissions allow it. `readOnlyHint` describes whether a
 tool mutates data; it does not make its output suitable for students. Use
 `student:read` for the Slack assistant. It cannot be combined with any other scope.
-Other explicit scopes can be combined, for example `courses:read courses:write` for
-course editing. Each tool has an explicit scope mapping; adding a new tool does not
-automatically authorize it for an existing connection.
+Granular scopes can be combined, for example `courses:read courses:write` for
+course editing. Granular scope mappings determine which tools a capped connection can use. Account access follows the currently supported tool catalog and current account permissions.
 
-### Choosing scopes for authoring
+### Optional caps for authoring
 
-Request the read and write scopes needed for the domain you work on. Example scope
+Use standard account access for normal authoring. To limit a connection deliberately, request the read and write scopes needed for the domain you work on. Example scope
 sets for the OAuth `scope` parameter (space-separated):
 
-| Workflow | Scope set |
-| --- | --- |
-| Create/edit courses using existing categories | `courses:read courses:write categories:read` |
-| Create/edit articles and article sections | `articles:read articles:write` |
-| Create/edit news | `news:read news:write` |
-| Manage Q&A | `qa:read qa:write` |
-| Create/edit development paths and their course membership | `learning_paths:read learning_paths:write` |
+| Workflow                                                  | Scope set                                    |
+| --------------------------------------------------------- | -------------------------------------------- |
+| Create/edit courses using existing categories             | `courses:read courses:write categories:read` |
+| Create/edit articles and article sections                 | `articles:read articles:write`               |
+| Create/edit news                                          | `news:read news:write`                       |
+| Manage Q&A                                                | `qa:read qa:write`                           |
+| Create/edit development paths and their course membership | `learning_paths:read learning_paths:write`   |
 
 Add `search:read` for global discovery, `files:write` for upload tools, or
 `categories:write` when the workflow must create or edit categories. A request for
@@ -101,7 +108,7 @@ write scope is still needed for those tools. Scope approval never supplies missi
 account permissions. Review the exact scope list on the consent page.
 
 Use `student:read` alone for the Slack bot. Do not request every advertised scope:
-the student view is intentionally exclusive, and management read scopes have a
+account access and the student view are intentionally exclusive, and management read scopes have a
 broader data view.
 
 ### Existing connections
@@ -109,26 +116,25 @@ broader data view.
 Existing `authoring` and `search` access and refresh grants keep their previous access
 until the user reconnects, subject to normal expiration, revocation and current
 permissions. `authoring` retains the existing management catalog; `search` retains
-only `global_search` and its previous content projection. Neither legacy grant gains
-the new student tools. New authorization and consent requests cannot request these
+only `global_search` and its previous content projection. Their existing catalog and payload views remain unchanged. New authorization and consent requests cannot request these
 legacy scope names, and a missing scope never creates a legacy grant.
 
 Refreshing or exchanging an authorization code cannot change its approved scope set.
-Changing from a legacy scope, adding explicit scopes, or switching to `student:read`
-requires a fresh authorization and consent flow. Legacy access is preserved; it is
+Changing from a legacy scope, switching to `account:access`, adding granular scopes,
+or switching to `student:read` requires a fresh authorization and consent flow. Legacy access is preserved; it is
 not silently converted into student access.
 
 ## Student integrations
 
-A `student:read` connection discovers `global_search` and these reader equivalents,
+A `student:read` connection discovers `global_search` and these reader tools,
 subject to current account permissions and enabled tenant features:
 
-| Tools                                             | Returned data                                                                                                               |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `list_student_courses`, `get_student_course`      | Available/enrolled course metadata: title, description, category, enrollment, chapter count, price/currency and source link |
-| `list_student_articles`, `get_student_article`    | Published, unarchived articles in an available language; list metadata and bounded article text                             |
-| `list_student_news`, `get_student_news`           | Published learner-visible news in an available language; list metadata and bounded news text                                |
-| `list_student_qa_entries`, `get_student_qa_entry` | Learner-visible Q&A available in the requested language; list titles and bounded answers                                    |
+| Tools                             | Returned data                                                                                                               |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `list_courses`, `get_course`      | Available/enrolled course metadata: title, description, category, enrollment, chapter count, price/currency and source link |
+| `list_articles`, `get_article`    | Published, unarchived articles in an available language; list metadata and bounded article text                             |
+| `list_news`, `get_news`           | Published learner-visible news in an available language; list metadata and bounded news text                                |
+| `list_qa_entries`, `get_qa_entry` | Learner-visible Q&A available in the requested language; list titles and bounded answers                                    |
 
 Mentingo intersects the connected account's **current** permissions with the default
 student permission set; it never grants a missing permission or impersonates another
@@ -151,6 +157,8 @@ participant's personal Mentingo permissions. Individual account linking would be
 required for personal enrollment isolation.
 
 ### Student search and links
+
+The same reader tool names are used for account, granular and student connections. Tool discovery selects each resource view from the approved scope and current permissions: `student:read` always uses learner projections; account and granular read connections use the management view only with that resource's management permissions, otherwise the learner view. Role names do not choose the view. `get_course` uses `courseId`, `get_qa_entry` uses `qaId`, and article/news lookup uses `id`.
 
 Student search is restricted before retrieval to accessible course metadata, news,
 articles and Q&A. It excludes lesson, directory and development-path searches.
@@ -182,7 +190,7 @@ For management connections, the assistant can use `get_my_capabilities` when the
 
 ## Try a first task
 
-Use a management connection with explicit `courses:read courses:write` scopes and a new draft course for your first walkthrough. Course creation and editing permissions are both needed to build its chapters and lessons.
+Use a standard account connection, or a capped management connection with `courses:read courses:write` scopes and a new draft course for your first walkthrough. Course creation and editing permissions are both needed to build its chapters and lessons.
 
 > In Mentingo, create a new draft course named “MCP demo — New starter onboarding”, with English as its base language. Add one chapter named “Your first day” and two content lessons: “Meet the team” and “Working together”. Write a short introduction and three practical tips for each lesson. Do not publish it. Report the course ID and the chapter and lesson IDs you created so I can inspect them in Mentingo.
 
@@ -232,6 +240,6 @@ Before recording, verify course creation/editing permissions and a successful co
 
 ## Validation and further detail
 
-The flow above describes the MCP implementation and consent UI. Local backend and frontend lint/type checks passed, along with 279 focused backend tests and 1,300 frontend tests. The focused backend suite includes SDK routing, OAuth scope and learner projection tests; real database-backed HTTP/OAuth E2E and live provider/client flows were not run in this validation pass. Repository unit tests cover selected OAuth, permission, upload, and resource-rendering behaviour. This documentation change does not validate production availability, compatibility with a named client, or the complete browser-to-authoring workflow.
+The flow above describes the MCP implementation and consent UI. Focused OAuth and consent tests cover default account access, exclusive scopes, PKCE exchange, refresh preservation, rejection of scope escalation and the account-access explanation. Repository tests also cover SDK routing, permissions, learner projections, uploads and resource rendering. Local checks do not establish production availability, compatibility with a named client, or the complete browser-to-authoring workflow.
 
 For scope, source references, and test boundaries, see the [Mentingo MCP business spec](specs/mentingo-mcp-business-spec.md).

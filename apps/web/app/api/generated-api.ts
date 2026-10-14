@@ -34873,6 +34873,7 @@ export interface GetConsentResponse {
      * @uniqueItems true
      */
     scopes: (
+      | "account:access"
       | "authoring"
       | "search"
       | "student:read"

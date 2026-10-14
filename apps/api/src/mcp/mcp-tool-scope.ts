@@ -6,14 +6,14 @@ export type McpScope = (typeof MCP_SCOPES)[keyof typeof MCP_SCOPES];
 
 const studentTools = new Set([
   "global_search",
-  "list_student_courses",
-  "get_student_course",
-  "list_student_articles",
-  "get_student_article",
-  "list_student_news",
-  "get_student_news",
-  "list_student_qa_entries",
-  "get_student_qa_entry",
+  "list_courses",
+  "get_course",
+  "list_articles",
+  "get_article",
+  "list_news",
+  "get_news",
+  "list_qa_entries",
+  "get_qa_entry",
 ]);
 
 /** Explicit catalog: a newly registered tool never inherits legacy authoring access. */
@@ -164,7 +164,10 @@ export function isRequestableMcpScopeSet(scopes: unknown): scopes is McpScope[] 
   if (!Array.isArray(scopes) || scopes.length === 0 || new Set(scopes).size !== scopes.length)
     return false;
   if (!scopes.every((scope) => MCP_REQUESTABLE_SCOPES.includes(scope))) return false;
-  return !scopes.includes(MCP_SCOPES.STUDENT_READ) || scopes.length === 1;
+  return (
+    (!scopes.includes(MCP_SCOPES.STUDENT_READ) && !scopes.includes(MCP_SCOPES.ACCOUNT_ACCESS)) ||
+    scopes.length === 1
+  );
 }
 
 /** Legacy grants remain valid until reconnection but cannot be mixed with new scopes. */
@@ -197,6 +200,6 @@ export function canUseMcpToolWithScopes(name: string, scopes: unknown): boolean 
   if (name === "get_my_capabilities")
     return scopes.some((scope) => scope !== MCP_SCOPES.SEARCH_READ);
   if (!Object.prototype.hasOwnProperty.call(toolScopes, name)) return false;
-  if (scopes[0] === MCP_SCOPES.AUTHORING) return true;
+  if (scopes[0] === MCP_SCOPES.AUTHORING || scopes[0] === MCP_SCOPES.ACCOUNT_ACCESS) return true;
   return scopes.includes(toolScopes[name]);
 }

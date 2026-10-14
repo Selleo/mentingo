@@ -13,6 +13,7 @@
     "description": "Tento asistent může používat Mentingo podle vašich aktuálních oprávnění.",
     "searchDescription": "Povolte tomuto asistentovi vyhledávat dostupné informace o kurzech, znalostní články, novinky a otázky a odpovědi a vracet odkazy do Mentingo. Nemůže měnit obsah, získávat obsah lekcí ani používat nástroje pro správu.",
     "studentDescription": "Pouze přístup studenta: vyhledávání a čtení publikovaných článků, novinek, otázek a odpovědí a dostupných metadat kurzů. Bez lekcí, soukromých souborů, konceptů, správy a změn. Všichni uživatelé Slacku sdílejí přístup studenta připojeného účtu.",
+    "accountDescription": "Povolte tomuto asistentovi používat nástroje Mentingo dostupné pro váš účet, včetně čtení a provádění změn. Vždy platí vaše aktuální oprávnění a nastavení organizace. Před povolením přístupu zkontrolujte účet a adresu přesměrování.",
     "explicitDescription": "Zkontrolujte níže požadovaná oprávnění. Omezují asistenta v rámci oprávnění vašeho účtu; čtení v nástrojích správy může zahrnovat koncepty a administrativní data.",
     "requestedScopes": "Požadovaná oprávnění",
     "signedInAs": "Přihlášeni jako {{email}}",

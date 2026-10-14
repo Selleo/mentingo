@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 
-import { PERMISSIONS, RESOURCE_VISIBILITY } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS, RESOURCE_VISIBILITY } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
@@ -288,6 +288,37 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     ).toEqual([]);
   });
 
+  it("keeps archived enrolled courses searchable without exposing unenrolled archived courses", async () => {
+    actor.permissions = [PERMISSIONS.COURSE_READ, PERMISSIONS.COURSE_READ_ASSIGNED];
+    const enrolledCourseId = await course("private");
+    const unenrolledCourseId = await course();
+    await fixtureDb.execute(sql`UPDATE courses SET is_archived = true
+      WHERE id IN (${enrolledCourseId}, ${unenrolledCourseId})`);
+    await fixtureDb.execute(sql`INSERT INTO student_courses (tenant_id, student_id, course_id, status)
+      VALUES (${tenantId}, ${actor.userId}, ${enrolledCourseId}, ${COURSE_ENROLLMENT.ENROLLED})`);
+    await source({ entityId: enrolledCourseId, content: "Archived policy" });
+    await source({ entityId: unenrolledCourseId, content: "Archived policy" });
+    await enterTenantRole();
+
+    expect(
+      (await repository.findKeywordMatches(SEARCH_ENTITY_TYPES.COURSE, "archived", actor)).map(
+        (match) => match.entityId,
+      ),
+    ).toEqual([enrolledCourseId]);
+    expect(
+      (await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, queryVector, actor)).map(
+        (match) => match.entityId,
+      ),
+    ).toEqual([enrolledCourseId]);
+    const catalogReader = { ...actor, permissions: [PERMISSIONS.COURSE_READ] };
+    expect(
+      await repository.findKeywordMatches(SEARCH_ENTITY_TYPES.COURSE, "archived", catalogReader),
+    ).toEqual([]);
+    expect(
+      await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, queryVector, catalogReader),
+    ).toEqual([]);
+  });
+
   it("applies course eligibility before the 50-candidate limit", async () => {
     actor.permissions = [PERMISSIONS.COURSE_READ];
     for (let index = 0; index < 55; index++) {
@@ -467,6 +498,10 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     await fixtureDb.execute(sql`ANALYZE search_chunks`);
     await fixtureDb.execute(sql`ANALYZE search_documents`);
     await fixtureDb.execute(sql`ANALYZE courses`);
+    // Resolve expected fixture IDs before switching to the restricted application role.
+    const eligible = await fixtureDb.execute(sql`SELECT entity_id FROM ann_fixtures
+      WHERE tenant_id = ${tenantId}::uuid AND status = 'published'`);
+    const eligibleIds = new Set(eligible.map((row) => String(row.entity_id)));
     await enterTenantRole();
     await fixtureDb.execute(sql`SELECT set_config('hnsw.ef_search', '200', true),
       set_config('hnsw.iterative_scan', 'strict_order', true)`);
@@ -487,9 +522,6 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
       queryVector,
       actor,
     );
-    const eligible = await fixtureDb.execute(sql`SELECT entity_id FROM ann_fixtures
-      WHERE tenant_id = ${tenantId}::uuid AND status = 'published'`);
-    const eligibleIds = new Set(eligible.map((row) => String(row.entity_id)));
     expect(ann.length).toBeLessThanOrEqual(50);
     expect(new Set(ann.map((row) => row.entityId)).size).toBe(ann.length);
     for (const row of ann) expect(eligibleIds.has(row.entityId)).toBe(true);

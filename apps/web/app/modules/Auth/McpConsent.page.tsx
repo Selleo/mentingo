@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "@remix-run/react";
 import { MCP_SCOPES } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useMcpConsent } from "~/api/queries/useMcpConsent";
@@ -38,9 +39,16 @@ export default function McpConsentPage() {
           {data && (
             <CardDescription>
               {t(
-                data.scopes.includes(MCP_SCOPES.STUDENT_READ)
-                  ? "mcpConnection.studentDescription"
-                  : "mcpConnection.explicitDescription",
+                match(data.scopes)
+                  .when(
+                    (scopes) => scopes.includes(MCP_SCOPES.ACCOUNT_ACCESS),
+                    () => "mcpConnection.accountDescription",
+                  )
+                  .when(
+                    (scopes) => scopes.includes(MCP_SCOPES.STUDENT_READ),
+                    () => "mcpConnection.studentDescription",
+                  )
+                  .otherwise(() => "mcpConnection.explicitDescription"),
               )}
             </CardDescription>
           )}

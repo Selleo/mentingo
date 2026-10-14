@@ -24,11 +24,12 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createArticleFactory } from "../../../test/factory/article.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createNewsFactory } from "../../../test/factory/news.factory";
+import { createQAFactory } from "../../../test/factory/qa.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { McpTokenService } from "../mcp-token.service";
-import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES } from "../mcp-tool-scope";
+import { MCP_SCOPES } from "../mcp-tool-scope";
 
 import type { UserWithCredentials } from "../../../test/factory/user.factory";
 import type { INestApplication } from "@nestjs/common";
@@ -45,6 +46,7 @@ type ToolResult = Record<string, any>;
 
 /** Exercises the real protocol, auth guards, RLS, domain services and isolated S3 storage. */
 describe("MCP HTTP administrative and upload workflows (e2e)", () => {
+  const originalRateLimiting = process.env.DISABLE_RATE_LIMITING;
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -58,6 +60,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   let articleId: string;
   let newsId: string;
   let draftCourseId: string;
+  let publishedCourseId: string;
+  let draftArticleId: string;
+  let draftNewsId: string;
+  let qaId: string;
   let adminCookie: string;
 
   function http(path: string, method: "post" | "patch" | "get" = "post", client = admin): Test {
@@ -112,7 +118,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   async function issueClient(
     user: UserWithCredentials,
     host: string,
-    scopes: string[] = MCP_REQUESTABLE_SCOPES.filter((scope) => scope !== MCP_SCOPES.STUDENT_READ),
+    scopes: string[] = [MCP_SCOPES.ACCOUNT_ACCESS],
   ): Promise<Client> {
     const token = await app.get(McpTokenService).issue({
       userId: user.id,
@@ -160,6 +166,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   }
 
   beforeAll(async () => {
+    // Protocol workflows issue many requests; throttling has its own policy tests.
+    process.env.DISABLE_RATE_LIMITING = "true";
     const setup = await createE2ETest({ useDbProxy: true });
     app = setup.app;
     app.useLogger(["error"]);
@@ -208,6 +216,35 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       });
       articleId = article.id;
       newsId = news.id;
+      const publishedCourse = await createCourseFactory(db).create({
+        authorId: adminUser.id,
+        title: "MCP learner-visible course",
+        status: "published",
+        thumbnailS3Key: null,
+      });
+      publishedCourseId = publishedCourse.id;
+      const draftArticle = await createArticleFactory(db).create({
+        authorId: adminUser.id,
+        title: "MCP hidden draft article",
+        status: "draft",
+      });
+      draftArticleId = draftArticle.id;
+      const draftNews = await createNewsFactory(db).create({
+        authorId: adminUser.id,
+        title: "MCP hidden draft news",
+        status: "draft",
+      });
+      draftNewsId = draftNews.id;
+      const qa = await createQAFactory(db).create({
+        title: "MCP learner question",
+        description: "<p>A learner-visible answer</p>",
+      });
+      qaId = qa.id;
+      await app.get(SearchIndexService).refreshCourse(publishedCourse.id);
+      await app.get(SearchIndexService).refreshArticle(draftArticle.id);
+      await app.get(SearchIndexService).refreshNews(draftNews.id);
+      await app.get(SearchIndexService).refreshQA(qa.id);
+
       await app.get(SearchIndexService).refreshArticle(article.id);
       await app.get(SearchIndexService).refreshNews(news.id);
       const course = await createCourseFactory(db).create({
@@ -237,6 +274,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
           ...DEFAULT_E2E_GLOBAL_SETTINGS,
           articlesEnabled: true,
           newsEnabled: true,
+          QAEnabled: true,
         }),
       })
       .where(and(eq(settings.tenantId, setup.defaultTenantId), isNull(settings.userId)));
@@ -266,6 +304,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
 
   afterAll(async () => {
     if (app) await app.close();
+    if (originalRateLimiting === undefined) delete process.env.DISABLE_RATE_LIMITING;
+    else process.env.DISABLE_RATE_LIMITING = originalRateLimiting;
   }, 30000);
 
   it("initializes the protocol and lists authorized tools with lifecycle exclusions", async () => {
@@ -339,6 +379,116 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     },
   );
 
+  it("keeps explicit search:read responses account-permission filtered", async () => {
+    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH_READ]);
+    const result = await call("global_search", { searchQuery: "MCP", language: "en" }, search);
+    expect(result).toHaveProperty("lessons");
+    expect(result.allCourses).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: draftCourseId })]),
+    );
+    await rejectedCall("list_courses", {}, search);
+  });
+
+  it("uses the same read tool names for a general student account without granting management access", async () => {
+    const tools = (await rpc(student, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(tools).toEqual(
+      expect.arrayContaining(["list_courses", "get_course", "list_articles", "get_article"]),
+    );
+    expect(tools).not.toEqual(expect.arrayContaining(["create_course", "list_users"]));
+    expect(tools.some((name: string) => name.includes("student"))).toBe(false);
+    const course = await call(
+      "get_course",
+      { courseId: publishedCourseId, language: "en" },
+      student,
+    );
+    expect(course.course).toEqual(expect.objectContaining({ id: publishedCourseId }));
+    expect(course.course).not.toHaveProperty("revision");
+    await rejectedCall("get_course", { courseId: draftCourseId, language: "en" }, student);
+  });
+
+  it("keeps an explicit course read grant from mutating content", async () => {
+    const reader = await issueClient(admin.user, admin.host, [MCP_SCOPES.COURSES_READ]);
+    const tools = (await rpc(reader, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(tools).toEqual(expect.arrayContaining(["list_courses", "get_course"]));
+    expect(tools).not.toContain("create_course");
+    const course = await call("get_course", { courseId: draftCourseId, language: "en" }, reader);
+    expect(course).toEqual(expect.objectContaining({ id: draftCourseId, status: "draft" }));
+    await rejectedCall("create_course", { title: "Forbidden read scope course" }, reader);
+  });
+
+  it("executes all learner list/get tools without exposing an administrator's drafts or authoring data", async () => {
+    const reader = await issueClient(admin.user, admin.host, [MCP_SCOPES.STUDENT_READ]);
+    const tools = (await rpc(reader, "tools/list")).result.tools.map(
+      (tool: ToolResult) => tool.name,
+    );
+    expect(tools.sort()).toEqual(
+      [
+        "global_search",
+        "list_courses",
+        "get_course",
+        "list_articles",
+        "get_article",
+        "list_news",
+        "get_news",
+        "list_qa_entries",
+        "get_qa_entry",
+      ].sort(),
+    );
+    const courseList = await call("list_courses", { language: "en", scope: "available" }, reader);
+    expect(courseList.data).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: publishedCourseId })]),
+    );
+    expect(courseList.data).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: draftCourseId })]),
+    );
+    const course = await call(
+      "get_course",
+      { courseId: publishedCourseId, language: "en" },
+      reader,
+    );
+    expect(course.course).toEqual(
+      expect.objectContaining({
+        id: publishedCourseId,
+        url: `http://${admin.host}/course/${publishedCourseId}`,
+      }),
+    );
+    for (const field of ["lessons", "chapters", "resources", "revision", "status", "authorId"])
+      expect(course.course).not.toHaveProperty(field);
+    await rejectedCall("get_course", { courseId: draftCourseId, language: "en" }, reader);
+    for (const [listTool, getTool, id, hiddenId, key] of [
+      ["list_articles", "get_article", articleId, draftArticleId, "article"],
+      ["list_news", "get_news", newsId, draftNewsId, "news"],
+      ["list_qa_entries", "get_qa_entry", qaId, undefined, "qa"],
+    ] as const) {
+      const listed = await call(listTool, { language: "en" }, reader);
+      expect(listed.data).toEqual(expect.arrayContaining([expect.objectContaining({ id })]));
+      if (hiddenId) {
+        expect(listed.data).not.toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: hiddenId })]),
+        );
+        await rejectedCall(getTool, { id: hiddenId, language: "en" }, reader);
+      }
+      const detailArgs =
+        getTool === "get_qa_entry" ? { qaId: id, language: "en" } : { id, language: "en" };
+      const detail = await call(getTool, detailArgs, reader);
+      expect(detail[key]).toEqual(expect.objectContaining({ id }));
+      expect(detail[key]).not.toHaveProperty("resources");
+    }
+    const result = await call("global_search", { searchQuery: "MCP", language: "en" }, reader);
+    for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
+      expect(result).not.toHaveProperty(excluded);
+    expect(JSON.stringify(result)).not.toContain(draftCourseId);
+    expect(JSON.stringify(result)).not.toContain(draftArticleId);
+    expect(JSON.stringify(result)).not.toContain(draftNewsId);
+    await rejectedCall("create_course", { title: "Forbidden" }, reader);
+    const otherReader = await issueClient(foreign.user, foreign.host, [MCP_SCOPES.STUDENT_READ]);
+    await rejectedCall("get_article", { id: articleId, language: "en" }, otherReader);
+  });
+
   it("preserves the frozen management catalog for an existing legacy authoring grant", async () => {
     const legacy = await issueClient(admin.user, admin.host, [MCP_SCOPES.AUTHORING]);
     const tools = (await rpc(legacy, "tools/list")).result.tools.map(
@@ -348,11 +498,12 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       expect.arrayContaining(["global_search", "create_course", "get_course", "list_users"]),
     );
     expect(tools.some((name: string) => name.includes("student"))).toBe(false);
-    await rejectedCall("get_student_course", { courseId: draftCourseId }, legacy);
+    const draft = await call("get_course", { courseId: draftCourseId, language: "en" }, legacy);
+    expect(draft).toEqual(expect.objectContaining({ id: draftCourseId, status: "draft" }));
   });
 
-  it("returns canonical tenant content links without lesson or directory groups for search scope", async () => {
-    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH_READ]);
+  it("preserves canonical content-only links for an existing legacy search grant", async () => {
+    const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
     const result = await call("global_search", { searchQuery: "MCP", language: "en" }, search);
     for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
       expect(result).not.toHaveProperty(excluded);
@@ -462,7 +613,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       student,
     );
     expect(JSON.stringify(learner)).not.toContain(draftCourseId);
-    expect(learner.users).toEqual([]);
+    expect(learner).not.toHaveProperty("users");
     const other = await call(
       "global_search",
       { searchQuery: "Szkolenie", language: "pl" },

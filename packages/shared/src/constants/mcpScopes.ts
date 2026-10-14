@@ -1,5 +1,6 @@
 /** OAuth scopes narrow account permissions; student access is an exclusive learner projection. */
 export const MCP_SCOPES = {
+  ACCOUNT_ACCESS: "account:access",
   AUTHORING: "authoring",
   SEARCH: "search",
   STUDENT_READ: "student:read",

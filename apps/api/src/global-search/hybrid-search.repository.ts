@@ -255,7 +255,7 @@ export class HybridSearchRepository {
       if (can(PERMISSIONS.COURSE_READ_ASSIGNED))
         scope.push(sql`EXISTS (SELECT 1 FROM student_courses sc WHERE sc.course_id = e.id
           AND sc.student_id = ${actor.userId} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-          AND e.status IN (${COURSE_STATUSES.PUBLISHED}, ${COURSE_STATUSES.PRIVATE}) AND e.is_archived = false)`);
+          AND e.status IN (${COURSE_STATUSES.PUBLISHED}, ${COURSE_STATUSES.PRIVATE}))`);
       return sql`EXISTS (SELECT 1 FROM courses e WHERE e.id = s.entity_id
         AND (${sql.join(scope, sql` OR `)}))`;
     }

@@ -35,3 +35,12 @@ export const getStudentContentInputSchema = Type.Object(
   { id: UUIDSchema, language },
   { additionalProperties: false },
 );
+
+export const getStudentCourseInputSchema = Type.Object(
+  { courseId: UUIDSchema, language },
+  { additionalProperties: false },
+);
+export const getStudentQaInputSchema = Type.Object(
+  { qaId: UUIDSchema, language },
+  { additionalProperties: false },
+);

@@ -12,6 +12,7 @@ import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
 import {
   MCP_REQUESTABLE_SCOPES,
+  MCP_SCOPES,
   isMcpScopeSet,
   isRequestableMcpScopeSet,
   parseMcpScopes,
@@ -154,7 +155,7 @@ export class McpOAuthService {
 
   async authorizationPage(req: Request, res: Response): Promise<void> {
     const query = this.stringParams(req.query);
-    const scope = query.scope;
+    const scope = req.query.scope === undefined ? MCP_SCOPES.ACCOUNT_ACCESS : query.scope;
     const resource = await this.resources.fromRequest(req);
     const client = query.client_id ? await this.getClient(query.client_id, "") : null;
     if (
@@ -164,6 +165,7 @@ export class McpOAuthService {
       !client.redirectUris?.includes(query.redirect_uri) ||
       query.resource !== resource.url ||
       query.response_type !== "code" ||
+      typeof scope !== "string" ||
       (req.query.scope !== undefined && typeof req.query.scope !== "string") ||
       !isRequestableMcpScopeSet(parseMcpScopes(scope)) ||
       query.code_challenge_method !== "S256" ||
@@ -189,7 +191,7 @@ export class McpOAuthService {
       `mcp:oauth:consent:${digest(nonce)}`,
       JSON.stringify({
         userId: user.userId,
-        query: { ...query, scope: scope! },
+        query: { ...query, scope },
       } satisfies ConsentRequest),
       { EX: CONSENT_TTL },
     );

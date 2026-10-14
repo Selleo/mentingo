@@ -107,7 +107,7 @@ describe("student MCP content tools", () => {
 
   it("uses bound learner identity and existing enrollment/catalog services", async () => {
     const { handlers, courses } = setup();
-    await handlers.get("list_student_courses")!({
+    await handlers.get("list_courses")!({
       scope: COURSE_ENROLLMENT_SCOPES.AVAILABLE,
       language: LANGUAGE,
       page: 2,
@@ -124,7 +124,7 @@ describe("student MCP content tools", () => {
       }),
       actor.userId,
     );
-    await handlers.get("list_student_courses")!({
+    await handlers.get("list_courses")!({
       scope: COURSE_ENROLLMENT_SCOPES.ENROLLED,
       language: LANGUAGE,
     });
@@ -133,7 +133,7 @@ describe("student MCP content tools", () => {
 
   it("forces learner access even for an account that owns a course and excludes course internals", async () => {
     const { handlers, courses } = setup();
-    const result = await handlers.get("get_student_course")!({ id: ID, language: LANGUAGE });
+    const result = await handlers.get("get_course")!({ courseId: ID, language: LANGUAGE });
     expect(courses.getCourse).toHaveBeenCalledWith(ID, actor, LANGUAGE, { learnerOnly: true });
     expect(result.structuredContent).toEqual({
       course: {
@@ -150,11 +150,11 @@ describe("student MCP content tools", () => {
     });
   });
 
-  it.each(["get_student_article", "get_student_news", "get_student_qa_entry"])(
+  it.each(["get_article", "get_news", "get_qa_entry"])(
     "%s emits original sanitized text, never injected file URLs or metadata",
     async (name) => {
       const { handlers } = setup();
-      const result = await handlers.get(name)!({ id: ID, language: LANGUAGE });
+      const result = await handlers.get(name)!({ id: ID, qaId: ID, language: LANGUAGE });
       const serialized = JSON.stringify(result.structuredContent);
       expect(serialized).toContain("Safe text Label");
       for (const secret of [
@@ -171,13 +171,13 @@ describe("student MCP content tools", () => {
 
   it("selects published article mode and checks feature flags on every operation", async () => {
     const { handlers, articles, assertFeatureEnabled } = setup();
-    await handlers.get("get_student_article")!({ id: ID, language: LANGUAGE });
+    await handlers.get("get_article")!({ id: ID, language: LANGUAGE });
     expect(articles.getArticle).toHaveBeenCalledWith(ID, LANGUAGE, false, actor);
     expect(assertFeatureEnabled).toHaveBeenCalledWith(FEATURES.ARTICLES);
     assertFeatureEnabled.mockRejectedValueOnce(new Error("Disabled"));
-    await expect(
-      handlers.get("get_student_article")!({ id: ID, language: LANGUAGE }),
-    ).rejects.toThrow("Disabled");
+    await expect(handlers.get("get_article")!({ id: ID, language: LANGUAGE })).rejects.toThrow(
+      "Disabled",
+    );
     expect(articles.getArticle).toHaveBeenCalledTimes(1);
   });
 
@@ -188,7 +188,7 @@ describe("student MCP content tools", () => {
       title: "Long",
       plainContent: "x".repeat(MCP_STUDENT_MAX_TEXT_LENGTH + 100),
     });
-    const result = await handlers.get("get_student_article")!({ id: ID, language: LANGUAGE });
+    const result = await handlers.get("get_article")!({ id: ID, language: LANGUAGE });
     expect(result.structuredContent.article).toMatchObject({
       content: "x".repeat(MCP_STUDENT_MAX_TEXT_LENGTH),
       contentTruncated: true,
@@ -203,12 +203,10 @@ describe("student MCP content tools", () => {
       description: "Private language",
       availableLocales: [],
     });
-    await expect(
-      handlers.get("get_student_qa_entry")!({ id: ID, language: LANGUAGE }),
-    ).rejects.toThrow();
+    await expect(handlers.get("get_qa_entry")!({ qaId: ID, language: LANGUAGE })).rejects.toThrow();
     qa.getAllQA.mockResolvedValueOnce([{ id: ID, title: "Unavailable", availableLocales: [] }]);
     expect(
-      (await handlers.get("list_student_qa_entries")!({ language: LANGUAGE })).structuredContent,
+      (await handlers.get("list_qa_entries")!({ language: LANGUAGE })).structuredContent,
     ).toMatchObject({ data: [], pagination: { totalItems: 0 } });
   });
 });
