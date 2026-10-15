@@ -4210,7 +4210,14 @@
           "noFeedbackDescription": "Šiame vertinime nėra balais vertinamų kriterijų, o jūsų bandyme neaptikta kritinių klaidų.",
           "loadingTitle": "Tikrinamas jūsų bandymas",
           "loadingDescription": "Pokalbis lyginamas su pamokos kriterijais. Tai gali šiek tiek užtrukti.",
-          "openDetails": "Atidaryti vertinimo informaciją"
+          "openDetails": "Atidaryti vertinimo informaciją",
+          "kicker": "AI Mentoriaus įvertinimas",
+          "title": "Pokalbio santrauka",
+          "scoreTotal": "/ {{maxScore}} tšk.",
+          "summary": "{{percentage}} % · išlaikymo riba {{requiredScore}}/{{maxScore}} tšk.",
+          "percentage": "{{percentage}} %",
+          "tipTitle": "AI Mentoriaus pasiūlymas",
+          "tipNote": "Remiantis tuo, ką sakėte šiame pokalbyje"
         },
         "voiceOverlay": {
           "headerEyebrow": "Balso vartotojo sąsaja",

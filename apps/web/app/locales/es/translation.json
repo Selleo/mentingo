@@ -4152,7 +4152,14 @@
           "noFeedbackDescription": "Esta evaluación no tiene criterios puntuados y no se detectaron errores críticos en su intento.",
           "loadingTitle": "Comprobando su intento",
           "loadingDescription": "Estamos comparando la conversación con los criterios de la lección. Esto puede tardar un momento.",
-          "openDetails": "Abrir detalles de evaluación"
+          "openDetails": "Abrir detalles de evaluación",
+          "kicker": "Evaluación del AI Mentor",
+          "title": "Resumen de la conversación",
+          "scoreTotal": "/ {{maxScore}} pts",
+          "summary": "{{percentage}} % · umbral de aprobación {{requiredScore}}/{{maxScore}} pts",
+          "percentage": "{{percentage}} %",
+          "tipTitle": "Sugerencia del AI Mentor",
+          "tipNote": "Basado en lo que dijiste en esta conversación"
         },
         "voiceOverlay": {
           "headerEyebrow": "Interfaz de usuario de voz",

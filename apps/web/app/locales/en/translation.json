@@ -4214,7 +4214,14 @@
           "noFeedbackDescription": "This assessment has no scored criteria, and no blocking errors were detected in your attempt.",
           "loadingTitle": "Checking your attempt",
           "loadingDescription": "Reviewing the conversation against the lesson criteria. This may take a moment.",
-          "openDetails": "Open evaluation details"
+          "openDetails": "Open evaluation details",
+          "kicker": "AI Mentor review",
+          "title": "Conversation summary",
+          "scoreTotal": "/ {{maxScore}} pts",
+          "summary": "{{percentage}}% · passing threshold {{requiredScore}}/{{maxScore}} pts",
+          "percentage": "{{percentage}}%",
+          "tipTitle": "Suggestion from the AI Mentor",
+          "tipNote": "Based on what you said in this conversation"
         },
         "voiceOverlay": {
           "headerEyebrow": "Voice UI",
