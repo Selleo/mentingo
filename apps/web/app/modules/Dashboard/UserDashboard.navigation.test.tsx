@@ -18,6 +18,7 @@ import { RouteGuard } from "~/Guards/RouteGuard";
 import { useNavigationTracker } from "~/hooks/useNavigationTracker";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+import { useSyncUserAfterLogin } from "~/modules/Dashboard/hooks/useSyncUserAfterLogin";
 
 import IndexRedirectPage from "./IndexRedirect.page";
 import UserDashboardLayout from "./UserDashboard.layout";
@@ -25,6 +26,10 @@ import UserDashboardLayout from "./UserDashboard.layout";
 import type { CurrentUserResponse } from "~/api/generated-api";
 
 const mocks = vi.hoisted(() => ({ user: null as CurrentUserResponse["data"] | null }));
+vi.mock("~/modules/Dashboard/hooks/useSyncUserAfterLogin", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./hooks/useSyncUserAfterLogin")>();
+  return { useSyncUserAfterLogin: vi.fn(actual.useSyncUserAfterLogin) };
+});
 vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUser: () => ({ data: mocks.user, isLoading: false }),
   useCurrentUserSuspense: () => ({ data: mocks.user }),
@@ -114,6 +119,15 @@ describe("post-auth navigation", () => {
     sessionStorage.clear();
     useNavigationHistoryStore.getState().clearHistory();
     useCurrentUserStore.setState({ currentUser: mocks.user, hasVerifiedMFA: true });
+  });
+
+  it("has one session synchronization owner for the protected dashboard", () => {
+    vi.mocked(useSyncUserAfterLogin).mockClear();
+    const view = render(router([], "/dashboard"));
+    expect(view.getByText("Dashboard destination")).toBeInTheDocument();
+    // StrictMode renders each owner twice; there must be no nested owner.
+    expect(useSyncUserAfterLogin).toHaveBeenCalledTimes(2);
+    expect(useSyncUserAfterLogin).toHaveBeenCalledWith(mocks.user);
   });
 
   it("settles on the dashboard when the saved destination is /", async () => {

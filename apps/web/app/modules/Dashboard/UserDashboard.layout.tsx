@@ -10,8 +10,6 @@ import { Dashboard } from "~/modules/Dashboard/Dashboard";
 import { resolvePostAuthRedirectPath } from "../Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
-import { useSyncUserAfterLogin } from "./hooks/useSyncUserAfterLogin";
-
 export default function UserDashboardLayout() {
   return (
     <RequireAuthenticatedUser>
@@ -30,8 +28,6 @@ function UserDashboardContent() {
   const consumeLastUnauthorizedEntry = useNavigationHistoryStore(
     (state) => state.consumeLastUnauthorizedEntry,
   );
-
-  useSyncUserAfterLogin(user);
 
   const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
   const canReturnToDestination = isAuthenticated && !user?.requiresPasswordChange;
