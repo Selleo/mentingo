@@ -10,6 +10,7 @@ import { LOGIN_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
 import { SSO_LOGIN_HANDLES } from "../../../../e2e/data/environment/handles";
 
 interface SocialLoginProps {
+  isMagicLinkEnabled?: boolean;
   isSSOEnforced?: boolean;
   isGoogleOAuthEnabled?: boolean;
   isMicrosoftOAuthEnabled?: boolean;
@@ -17,6 +18,7 @@ interface SocialLoginProps {
 }
 
 export function SocialLogin({
+  isMagicLinkEnabled = true,
   isSSOEnforced,
   isGoogleOAuthEnabled,
   isMicrosoftOAuthEnabled,
@@ -33,25 +35,31 @@ export function SocialLogin({
 
   return (
     <>
-      {!isSSOEnforced && (
-        <div className="relative mt-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+      {!isSSOEnforced &&
+        (isMagicLinkEnabled ||
+          isGoogleOAuthEnabled ||
+          isMicrosoftOAuthEnabled ||
+          isSlackOAuthEnabled) && (
+          <div className="relative mt-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                {t("loginView.other.orContinueWith")}
+              </span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              {t("loginView.other.orContinueWith")}
-            </span>
-          </div>
-        </div>
-      )}
+        )}
 
-      <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-        <Link to="/auth/magic-link" data-testid={LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK}>
-          <Icon name="WandSparkles" className="mr-2 size-4" />
-          {t("loginView.other.useMagicLink")}
-        </Link>
-      </Button>
+      {isMagicLinkEnabled && (
+        <Button type="button" variant="outline" className="mt-4 w-full" asChild>
+          <Link to="/auth/magic-link" data-testid={LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK}>
+            <Icon name="WandSparkles" className="mr-2 size-4" />
+            {t("loginView.other.useMagicLink")}
+          </Link>
+        </Button>
+      )}
 
       {isGoogleOAuthEnabled && (
         <ProviderOAuthLoginButton

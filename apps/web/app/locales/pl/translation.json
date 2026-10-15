@@ -1,4 +1,21 @@
 {
+  "loginMethods": {
+    "title": "Metody logowania",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Link do logowania",
+    "password": "Hasło",
+    "configure": "Skonfiguruj {{provider}}",
+    "errors": {
+      "disabled": "Ta metoda logowania jest wyłączona.",
+      "invalidConfiguration": "Nieprawidłowa konfiguracja dostawcy.",
+      "missingConfiguration": "Uzupełnij wszystkie wymagane pola dostawcy.",
+      "lastMethod": "Pozostaw co najmniej jedną działającą metodę logowania.",
+      "save": "Nie udało się zapisać metod logowania.",
+      "load": "Nie udało się pobrać metod logowania."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo platformy",
     "title": "Połączyć {{clientName}} z Mentingo?",
@@ -4109,8 +4126,6 @@
   },
   "loginView": {
     "header": "Logowanie",
-    "subHeader": "Wprowadź swój email, aby zalogować się na swoje konto",
-    "subHeaderSSO": "Zaloguj się za pomocą swojego konta Google/Microsoft",
     "validation": {
       "email": "Nieprawidłowy email",
       "password": "Hasło jest wymagane"

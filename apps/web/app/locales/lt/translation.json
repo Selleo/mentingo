@@ -1,4 +1,21 @@
 {
+  "loginMethods": {
+    "title": "Prisijungimo būdai",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Prisijungimo nuoroda",
+    "password": "Slaptažodis",
+    "configure": "Konfigūruoti {{provider}}",
+    "errors": {
+      "disabled": "Šis prisijungimo būdas išjungtas.",
+      "invalidConfiguration": "Neteisinga teikėjo konfigūracija.",
+      "missingConfiguration": "Užpildykite visus privalomus teikėjo laukus.",
+      "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "save": "Nepavyko išsaugoti prisijungimo būdų.",
+      "load": "Nepavyko įkelti prisijungimo būdų."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platformos logotipas",
     "title": "Prijungti {{clientName}} prie Mentingo?",
@@ -3871,8 +3888,6 @@
   },
   "loginView": {
     "header": "Prisijungti",
-    "subHeader": "Toliau įveskite savo el. pašto adresą, kad prisijungtumėte prie savo paskyros",
-    "subHeaderSSO": "Prisijunkite naudodami „Google“ / „Microsoft“ paskyrą",
     "validation": {
       "email": "Neteisingas el",
       "password": "Reikalingas slaptažodis"

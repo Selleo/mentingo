@@ -1,4 +1,21 @@
 {
+  "loginMethods": {
+    "title": "Způsoby přihlášení",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Přihlašovací odkaz",
+    "password": "Heslo",
+    "configure": "Nastavit {{provider}}",
+    "errors": {
+      "disabled": "Tento způsob přihlášení je vypnutý.",
+      "invalidConfiguration": "Neplatná konfigurace poskytovatele.",
+      "missingConfiguration": "Vyplňte všechna povinná pole poskytovatele.",
+      "lastMethod": "Ponechte zapnutý alespoň jeden použitelný způsob přihlášení.",
+      "save": "Způsoby přihlášení se nepodařilo uložit.",
+      "load": "Způsoby přihlášení se nepodařilo načíst."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo platformy",
     "title": "Připojit {{clientName}} k Mentingo?",
@@ -3876,8 +3893,6 @@
   },
   "loginView": {
     "header": "Přihlášení",
-    "subHeader": "Níže zadejte svůj e-mail a přihlaste se ke svému účtu",
-    "subHeaderSSO": "Přihlaste se pomocí svého účtu Google/Microsoft",
     "validation": {
       "email": "Neplatný email",
       "password": "Je vyžadováno heslo"
