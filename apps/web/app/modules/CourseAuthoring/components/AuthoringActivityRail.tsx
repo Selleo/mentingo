@@ -1,7 +1,6 @@
 /** Renders task progress, asset decisions and connection state for the workspace. */
 import {
   AlertCircle,
-  Check,
   CheckCircle2,
   CircleAlert,
   Clock3,
@@ -28,6 +27,7 @@ import {
   canRetryAuthoringTask,
 } from "../authoringTaskFailure";
 
+import { AuthoringAssetDecision } from "./AuthoringAssetDecision";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
 import { AuthoringSourceChipRow } from "./AuthoringSourceCitation";
 
@@ -65,6 +65,8 @@ type Props = {
   onAnswer: (question: QuestionView, answer: string) => void;
   onAssetAction: (asset: AssetTaskView, action: "asset.retry_submission") => void;
   onSkipAsset: (assetId: string) => void;
+  onRestoreAsset?: (assetId: string) => void;
+  omittedOptionalAssetIds?: string[];
 };
 
 type TaskWorkItem = {
@@ -509,6 +511,8 @@ export const AuthoringActivityRail = ({
   onAnswer,
   onAssetAction,
   onSkipAsset,
+  onRestoreAsset,
+  omittedOptionalAssetIds = [],
 }: Props) => {
   const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -1051,86 +1055,29 @@ export const AuthoringActivityRail = ({
       )}
 
       {assetTasks.some((asset) => ["waiting_author", "failed"].includes(asset.status)) && (
-        <section className="rounded-xl border border-warning-200 bg-warning-50 p-4">
-          <div className="flex items-center gap-2 text-warning-900">
-            <AlertCircle className="size-4" />
-            <h2 className="font-semibold">{t("courseAuthoring.activityRail.assetDecisions")}</h2>
-          </div>
-          <p className="mt-1 text-xs leading-5 text-warning-900">
-            {t("courseAuthoring.activityRail.assetGuidance")}
-          </p>
-          <div className="mt-3 space-y-3">
+        <section className="rounded-xl border border-neutral-200 bg-white px-4">
+          <h2 className="border-b border-neutral-100 py-3 text-xs font-medium text-neutral-800">
+            {t("courseAuthoring.activityRail.assetDecisions")}
+          </h2>
+          <div className="divide-y divide-neutral-100">
             {assetTasks
               .filter((asset) => ["waiting_author", "failed"].includes(asset.status))
-              .map((asset) => {
-                const approveLabel = t("courseAuthoring.activityRail.approveRetry");
-                return (
-                  <div key={asset.taskId} className="rounded-lg bg-white p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-medium">{asset.request.altText}</p>
-                          <Badge
-                            variant={asset.request.required ? "blocked" : "secondaryWithOutline"}
-                            className="text-[10px]"
-                          >
-                            {t(
-                              asset.request.required
-                                ? "courseAuthoring.activityRail.required"
-                                : "courseAuthoring.activityRail.optional",
-                            )}
-                          </Badge>
-                        </div>
-                        <p className="mt-1 text-xs text-neutral-600">
-                          {asset.question ??
-                            t("courseAuthoring.activityRail.assetDecisionFallback")}
-                        </p>
-                      </div>
-                      <Badge variant="inProgress" className="text-[10px]">
-                        {t(
-                          `courseAuthoring.activityRail.assetStatus.${taskStatusKey(asset.status)}`,
-                        )}
-                      </Badge>
-                    </div>
-                    <p className="mt-2 text-xs text-neutral-700">
-                      {t("courseAuthoring.activityRail.generatedVisual", {
-                        content: asset.request.source.content,
-                      })}
-                    </p>
-                    <div className="mt-3 flex flex-wrap justify-end gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="gap-1"
-                        disabled={busy || asset.revision === null || asset.action === null}
-                        onClick={() => {
-                          if (asset.action) onAssetAction(asset, asset.action);
-                        }}
-                      >
-                        <Check className="size-3.5" /> {approveLabel}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={asset.request.required}
-                        onClick={() => onSkipAsset(asset.request.assetId)}
-                      >
-                        {t(
-                          asset.request.required
-                            ? "courseAuthoring.activityRail.requiredScopeChange"
-                            : "courseAuthoring.activityRail.skipOptionalAsset",
-                        )}
-                      </Button>
-                    </div>
-                    {asset.request.required && (
-                      <p className="mt-2 text-right text-xs text-destructive">
-                        {t("courseAuthoring.activityRail.requiredCannotSkip")}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
+              .map((asset) => (
+                <AuthoringAssetDecision
+                  key={asset.taskId}
+                  asset={asset}
+                  omitted={
+                    !asset.request.required &&
+                    omittedOptionalAssetIds.includes(asset.request.assetId)
+                  }
+                  busy={busy}
+                  onRetry={() => {
+                    if (asset.action) onAssetAction(asset, asset.action);
+                  }}
+                  onSkip={() => onSkipAsset(asset.request.assetId)}
+                  onRestore={() => onRestoreAsset?.(asset.request.assetId)}
+                />
+              ))}
           </div>
         </section>
       )}

@@ -3054,15 +3054,6 @@
         "operationId": "GroupController_getUserGroups",
         "parameters": [
           {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "keyword",
             "required": false,
             "in": "query",
@@ -3085,6 +3076,15 @@
             "in": "query",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           },
           {
@@ -3510,6 +3510,23 @@
             }
           },
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -3525,6 +3542,27 @@
                 },
                 {
                   "const": "private",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "isArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
                   "type": "string"
                 }
               ]
@@ -3582,44 +3620,6 @@
                 },
                 {
                   "const": "-enrolledParticipantsCount",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "isArchived",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "true",
-                  "type": "string"
-                },
-                {
-                  "const": "false",
-                  "type": "string"
-                },
-                {
-                  "const": "all",
                   "type": "string"
                 }
               ]
@@ -4023,19 +4023,36 @@
         "operationId": "CourseController_getStudentsWithEnrollmentDate",
         "parameters": [
           {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
               "type": "string"
             }
           },
@@ -4097,23 +4114,6 @@
               "items": {
                 "type": "string"
               }
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
             }
           },
           {
@@ -4619,6 +4619,22 @@
         "operationId": "CourseController_getContentCreatorCourses",
         "parameters": [
           {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "authorId",
             "required": true,
             "in": "query",
@@ -4654,22 +4670,6 @@
             "in": "query",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "title",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
               "type": "string"
             }
           },
@@ -5411,19 +5411,19 @@
         "operationId": "CourseController_enrollCourse",
         "parameters": [
           {
+            "name": "x-test-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "x-test-key",
-            "required": true,
-            "in": "header",
-            "schema": {
               "type": "string"
             }
           }
@@ -5611,15 +5611,6 @@
         "operationId": "CourseController_unenrollCourses",
         "parameters": [
           {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "userIds",
             "required": false,
             "in": "query",
@@ -5628,6 +5619,15 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -5685,6 +5685,30 @@
         "operationId": "CourseController_getCourseLearningTimeStatistics",
         "parameters": [
           {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -5709,30 +5733,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
             }
           },
           {
@@ -5918,15 +5918,6 @@
         "operationId": "CourseController_getCourseStudentsProgress",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -5947,6 +5938,15 @@
             "required": false,
             "in": "query",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -6065,15 +6065,6 @@
         "operationId": "CourseController_getCourseStudentsQuizResults",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -6098,19 +6089,28 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "search",
             "required": false,
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
             "schema": {
               "format": "uuid",
               "type": "string"
             }
           },
           {
-            "name": "search",
+            "name": "groupId",
             "required": false,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -6220,15 +6220,6 @@
         "operationId": "CourseController_getCourseStudentsAiMentorResults",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -6253,19 +6244,28 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "search",
             "required": false,
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
             "schema": {
               "format": "uuid",
               "type": "string"
             }
           },
           {
-            "name": "search",
+            "name": "groupId",
             "required": false,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -6375,15 +6375,6 @@
         "operationId": "CourseController_createLanguage",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6419,6 +6410,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -6493,15 +6493,6 @@
         "operationId": "CourseController_generateTranslations",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6537,6 +6528,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -7081,15 +7081,6 @@
             }
           },
           {
-            "name": "studentId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -7125,6 +7116,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -8573,15 +8573,6 @@
         "operationId": "CertificatesController_getAllCertificates",
         "parameters": [
           {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -8603,6 +8594,15 @@
             "required": false,
             "in": "query",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -9143,16 +9143,7 @@
     "/api/certificates/share": {
       "get": {
         "operationId": "CertificatesController_getCertificateSharePage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -9163,16 +9154,7 @@
     "/api/certificates/share-image": {
       "get": {
         "operationId": "CertificatesController_getCertificateShareImage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -9646,15 +9628,6 @@
         "operationId": "AdminAiThreadsController_getAdminAiThreadMessages",
         "parameters": [
           {
-            "name": "threadId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -9672,6 +9645,15 @@
               "minimum": 1,
               "maximum": 100,
               "type": "integer"
+            }
+          },
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -11394,16 +11376,7 @@
     "/api/announcements/{id}/read": {
       "patch": {
         "operationId": "AnnouncementsController_markAnnouncementAsRead",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
@@ -11420,16 +11393,7 @@
     "/api/announcements/{id}": {
       "delete": {
         "operationId": "AnnouncementsController_deleteAnnouncement",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
@@ -11715,7 +11679,7 @@
     },
     "/api/stripe/webhook": {
       "post": {
-        "operationId": "StripeWebhookController_handleWebhook",
+        "operationId": "StripeController_handleWebhook",
         "parameters": [
           {
             "name": "stripe-signature",
@@ -15542,19 +15506,36 @@
         "operationId": "LearningPathEnrollmentController_getStudentsWithEnrollmentDate",
         "parameters": [
           {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "learningPathId",
             "required": true,
             "in": "path",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
               "type": "string"
             }
           },
@@ -15616,23 +15597,6 @@
               "items": {
                 "type": "string"
               }
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
             }
           }
         ],
@@ -16060,16 +16024,7 @@
     "/api/learning-path/certificates/share": {
       "get": {
         "operationId": "LearningPathCertificateController_getCertificateSharePage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -16080,16 +16035,7 @@
     "/api/learning-path/certificates/share-image": {
       "get": {
         "operationId": "LearningPathCertificateController_getCertificateShareImage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -16562,16 +16508,7 @@
       },
       "head": {
         "operationId": "ScormController_getTusUpload",
-        "parameters": [
-          {
-            "name": "packageId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -16580,16 +16517,7 @@
       },
       "patch": {
         "operationId": "ScormController_patchTusUpload",
-        "parameters": [
-          {
-            "name": "packageId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -18446,6 +18374,23 @@
             }
           },
           {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "active",
+                  "type": "string"
+                },
+                {
+                  "const": "inactive",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "sort",
             "required": false,
             "in": "query",
@@ -18465,23 +18410,6 @@
                 },
                 {
                   "const": "-activityCountLast14Days",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "active",
-                  "type": "string"
-                },
-                {
-                  "const": "inactive",
                   "type": "string"
                 }
               ]
@@ -21148,6 +21076,15 @@
         "operationId": "CourseAuthoringController_previewAuthoringAsset",
         "parameters": [
           {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -21172,15 +21109,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "revision",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer"
             }
           }
         ],
@@ -21373,6 +21301,15 @@
         "operationId": "CourseAuthoringController_getAuthoringEvents",
         "parameters": [
           {
+            "name": "afterSequence",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -21388,15 +21325,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "afterSequence",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "type": "integer"
             }
           }
         ],
@@ -21418,15 +21346,6 @@
         "operationId": "CourseAuthoringController_getAuthoringCourseContext",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "lessonIds",
             "required": false,
             "in": "query",
@@ -21435,6 +21354,15 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           },
           {
@@ -34941,7 +34869,6 @@
                                         "type": "string"
                                       },
                                       "optionText": {
-                                        "maxLength": 250,
                                         "type": "string"
                                       },
                                       "displayOrder": {
@@ -39025,7 +38952,6 @@
                               "optionText": {
                                 "anyOf": [
                                   {
-                                    "maxLength": 250,
                                     "type": "string"
                                   },
                                   {

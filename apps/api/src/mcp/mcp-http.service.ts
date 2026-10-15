@@ -3331,14 +3331,14 @@ export class McpHttpService {
         status === 400
           ? "INVALID_ARGUMENT"
           : status === 401
-          ? "UNAUTHENTICATED"
-          : status === 403
-          ? "PERMISSION_DENIED"
-          : status === 404
-          ? "NOT_FOUND"
-          : status === 409
-          ? "CONFLICT"
-          : "INTERNAL";
+            ? "UNAUTHENTICATED"
+            : status === 403
+              ? "PERMISSION_DENIED"
+              : status === 404
+                ? "NOT_FOUND"
+                : status === 409
+                  ? "CONFLICT"
+                  : "INTERNAL";
       const message = error instanceof HttpException ? error.message : "Operation failed";
       const failure = { code, status, message, requestId: call?.requestId };
       return {

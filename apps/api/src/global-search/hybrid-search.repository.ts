@@ -42,9 +42,11 @@ export class HybridSearchRepository {
     const sourceEligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(
       actor,
     )}`;
-    const eligibility = sql`${sourceEligibility} AND ${metadataOnly
-      ? sql`s.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})`
-      : sql`true`}`;
+    const eligibility = sql`${sourceEligibility} AND ${
+      metadataOnly
+        ? sql`s.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})`
+        : sql`true`
+    }`;
     const result = await this.db.execute(sql`
       WITH q AS (SELECT to_tsquery('simple', ${normalizeSearchTerm(query)}) AS value), hits AS (
         SELECT s.entity_id, s.language, ts_rank(s.search_vector, q.value) AS rank,

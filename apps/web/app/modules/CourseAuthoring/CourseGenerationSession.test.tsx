@@ -10,6 +10,7 @@ import type { AuthoringChatMessage } from "./authoringChatTransport";
 import type { AssetRequestView, CurriculumPreviewActions } from "./courseAuthoring.types";
 
 const state = vi.hoisted(() => ({
+  missingDependency: false,
   assetRequests: [] as AssetRequestView[],
   questionCapability: "web_search",
   questionAnswer: "allow",
@@ -72,7 +73,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
                   operationId: "lesson-operation",
                   targetId: "lesson-target",
                   type: "lesson.create",
-                  dependencies: [],
+                  dependencies: state.missingDependency ? ["missing-chapter-operation"] : [],
                   payload: {
                     lessonType: "content",
                     title: "Smoke lesson",
@@ -396,6 +397,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     state.sourceRecords = [];
     state.progressRecords = [];
     state.sourceSelection = null;
+    state.missingDependency = false;
     state.refetchCalls = 0;
     state.refetchFails = false;
     state.contextRefetchCalls = 0;
@@ -606,12 +608,14 @@ describe("CourseGenerationSession proposal decisions", () => {
   });
 
   it.each([
-    [false, false],
-    [true, false],
-    [true, true],
+    [false, false, false, false],
+    [true, false, false, false],
+    [true, true, false, false],
+    [false, false, true, false],
+    [true, false, false, true],
   ])(
-    "passes current optional image choices to Apply (grouped: %s, restored: %s)",
-    async (grouped, restored) => {
+    "passes current optional image choices to Apply (grouped: %s, restored: %s, reopened: %s)",
+    async (grouped, restored, reopened, waiting) => {
       state.groupedReview = true;
       state.renderWork = true;
       const request: AssetRequestView = {
@@ -628,7 +632,7 @@ describe("CourseGenerationSession proposal decisions", () => {
           taskId: "image-task",
           requestId: "request-1",
           kind: "asset",
-          status: "failed",
+          status: waiting ? "waiting_author" : "failed",
           errorCode: null,
           outputId: null,
         },
@@ -642,7 +646,7 @@ describe("CourseGenerationSession proposal decisions", () => {
       ];
       const onPreviewProposalInCurriculum = vi.fn();
       const user = userEvent.setup();
-      renderWith().render(
+      const rendered = renderWith().render(
         <CourseGenerationSession
           courseId="course"
           language="en"
@@ -652,12 +656,23 @@ describe("CourseGenerationSession proposal decisions", () => {
         />,
       );
       let actions: CurriculumPreviewActions | undefined;
+      if (waiting) await user.click(screen.getByRole("button", { name: "Skip image" }));
       if (grouped) {
         await user.click(screen.getByRole("button", { name: "Review grouped changes" }));
         actions = onPreviewProposalInCurriculum.mock.calls[0][1];
       }
-      await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
-      if (restored) await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
+      if (!waiting) await user.click(screen.getByRole("button", { name: "Skip image" }));
+      expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Undo skip" })).toBeVisible();
+      if (restored) await user.click(screen.getByRole("button", { name: "Undo skip" }));
+      if (reopened) {
+        rendered.unmount();
+        renderWith().render(
+          <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+        );
+        expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Undo skip" })).toBeVisible();
+      }
       if (grouped) {
         await act(async () => {
           await actions?.applyReview?.({
@@ -692,6 +707,31 @@ describe("CourseGenerationSession proposal decisions", () => {
       targetId: "content-proposal",
     });
     expect(state.applyCalls).toHaveLength(0);
+  });
+
+  it("refreshes once and opens incomplete grouped content for inspection without applying", async () => {
+    state.groupedReview = true;
+    state.missingDependency = true;
+    const onPreviewProposalInCurriculum = vi.fn();
+    renderWith().render(
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
+      />,
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    await waitFor(() => expect(onPreviewProposalInCurriculum).toHaveBeenCalledOnce());
+    expect(state.refetchCalls).toBe(1);
+    expect(onPreviewProposalInCurriculum.mock.calls[0][0]).toMatchObject({
+      missingDependencies: [
+        { operationId: "lesson-operation", dependencyId: "missing-chapter-operation" },
+      ],
+    });
+    expect(state.applyCalls).toHaveLength(0);
+    expect(state.toastCalls).toHaveLength(0);
   });
 
   it("opens later grouped review after an earlier application reaches applied", async () => {

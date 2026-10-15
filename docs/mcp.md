@@ -67,21 +67,21 @@ be combined with each other. Empty, unknown, duplicate and mixed exclusive scope
 are rejected. Read and write scopes are separate: a write scope does not implicitly
 include its read counterpart.
 
-| Scope                                         | Intended access                                                                                                              |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `account:access`                              | Standard permission-aware account access; default when scopes are omitted; exclusive                                         |
-| `student:read`                                | Exclusive learner search and the eight learner list/get tools below                                                          |
+| Scope                                         | Intended access                                                                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `account:access`                              | Standard permission-aware account access; default when scopes are omitted; exclusive                                               |
+| `student:read`                                | Exclusive learner search and the eight learner list/get tools below                                                                |
 | `search:read`                                 | Global search with current account permissions; learner projection without management permissions, broader results where permitted |
-| `courses:read`, `courses:write`               | Course, chapter and lesson management reads or mutations                                                                     |
-| `categories:read`, `categories:write`         | Category management reads or mutations                                                                                       |
-| `articles:read`, `articles:write`             | Article/section management reads or mutations                                                                                |
-| `news:read`, `news:write`                     | News management reads or mutations                                                                                           |
-| `qa:read`, `qa:write`                         | Q&A management reads or mutations                                                                                            |
-| `learning_paths:read`, `learning_paths:write` | Development path management reads or mutations                                                                               |
-| `users:read`, `users:write`                   | Supported existing-user and own-profile reads or mutations                                                                   |
-| `groups:read`, `groups:write`                 | Supported group reads or mutations                                                                                           |
-| `platform:read`, `platform:write`             | Platform customization reads or mutations                                                                                    |
-| `files:write`                                 | Supported uploads, still subject to native target/file authorization                                                         |
+| `courses:read`, `courses:write`               | Course, chapter and lesson management reads or mutations                                                                           |
+| `categories:read`, `categories:write`         | Category management reads or mutations                                                                                             |
+| `articles:read`, `articles:write`             | Article/section management reads or mutations                                                                                      |
+| `news:read`, `news:write`                     | News management reads or mutations                                                                                                 |
+| `qa:read`, `qa:write`                         | Q&A management reads or mutations                                                                                                  |
+| `learning_paths:read`, `learning_paths:write` | Development path management reads or mutations                                                                                     |
+| `users:read`, `users:write`                   | Supported existing-user and own-profile reads or mutations                                                                         |
+| `groups:read`, `groups:write`                 | Supported group reads or mutations                                                                                                 |
+| `platform:read`, `platform:write`             | Platform customization reads or mutations                                                                                          |
+| `files:write`                                 | Supported uploads, still subject to native target/file authorization                                                               |
 
 Management read scopes can expose authoring information, drafts or configuration
 when the account's existing permissions allow it. `readOnlyHint` describes whether a

@@ -6,10 +6,12 @@ describe("prefix search query normalization", () => {
   });
 
   it("produces an empty tsquery rather than an invalid prefix for punctuation only", () => {
-    expect(normalizeSearchTerm("!!! () ... \" \\")).toBe("");
+    expect(normalizeSearchTerm('!!! () ... " \\')).toBe("");
   });
 
   it("preserves multilingual words and treats punctuation as word boundaries", () => {
-    expect(normalizeSearchTerm("Zażółć ISO-27001? 東京")).toBe("Zażółć:* & ISO:* & 27001:* & 東京:*");
+    expect(normalizeSearchTerm("Zażółć ISO-27001? 東京")).toBe(
+      "Zażółć:* & ISO:* & 27001:* & 東京:*",
+    );
   });
 });
