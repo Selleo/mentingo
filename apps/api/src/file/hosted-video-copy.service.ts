@@ -111,14 +111,14 @@ export class HostedVideoCopyService {
   }
 
   private async reuploadFailedCopy(failedCopy: HostedVideo, request: HostedVideoCopyRequest) {
-    const claimedCopy = await this.hostedVideoRepository.reclaimFailedCopy(failedCopy.id);
-    if (!claimedCopy) throw new HostedVideoCopyInProgressError(request.sourceReference);
+    const reclaimed = await this.hostedVideoRepository.reclaimFailedCopy(failedCopy.id);
+    if (!reclaimed) throw new HostedVideoCopyInProgressError(request.sourceReference);
 
-    if (claimedCopy.providerVideoId) {
-      await this.deleteProviderVideo(request.targetTenantId, claimedCopy.providerVideoId);
+    if (reclaimed.detachedProviderVideoId) {
+      await this.deleteProviderVideo(request.targetTenantId, reclaimed.detachedProviderVideoId);
     }
 
-    return this.uploadClaimedCopy(claimedCopy, request);
+    return this.uploadClaimedCopy(reclaimed.copy, request);
   }
 
   private reuseCopy(copy: HostedVideo, request: HostedVideoCopyRequest): string {

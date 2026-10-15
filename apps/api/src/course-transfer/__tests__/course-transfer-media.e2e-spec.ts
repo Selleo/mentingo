@@ -15,8 +15,10 @@ import { match } from "ts-pattern";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { COURSE_TRANSFER_KINDS } from "src/course-transfer/course-transfer.constants";
 import { MasterCourseService } from "src/courses/master-course.service";
+import { HostedVideoCopyService } from "src/file/hosted-video-copy.service";
 import { HostedVideoStatusService } from "src/file/hosted-video-status.service";
 import { HOSTED_VIDEO_STATUSES } from "src/file/hosted-video.constants";
+import { HostedVideoCopyInProgressError } from "src/file/hosted-video.errors";
 import { buildHostedVideoCopyMarker } from "src/file/hosted-video.utils";
 import {
   BUNNY_API_VIDEO_STATUSES,
@@ -433,6 +435,41 @@ describe("Course transfer media (e2e)", () => {
       expect(reuploadedCopy.providerVideoId).not.toBe(failedCopy.providerVideoId);
       expect(syncedLesson.fileS3Key).toBe(reuploadedCopy.reference);
       expect(await findTargetHostedVideos()).toHaveLength(1);
+    });
+
+    it("makes a concurrent transfer wait while a failed copy uploads again instead of reusing its deleted video", async () => {
+      const sourceReference = buildSourceVideoReference(VIDEO_STORAGES.BUNNY);
+      const { courseId } = await createCourseWithLessonVideo(sourceReference);
+      await exportCourseToTenant(app, sourceHttp, courseId, target);
+      const [failedCopy] = await findTargetHostedVideos();
+      await dbAdmin
+        .update(hostedVideos)
+        .set({ status: HOSTED_VIDEO_STATUSES.FAILED })
+        .where(eq(hostedVideos.id, failedCopy.id));
+      let releaseDelete!: () => void;
+      const deleteReleased = new Promise<void>((resolve) => (releaseDelete = resolve));
+      bunnyStreamServiceMock.delete.mockImplementationOnce(async () => {
+        await deleteReleased;
+        return { success: true };
+      });
+
+      const retriedSync = syncExportedCourse(courseId);
+      while (!bunnyStreamServiceMock.delete.mock.calls.length) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      const concurrentCopy = app.get(HostedVideoCopyService).copyVideoToTenantLibrary({
+        sourceTenantId: source.id,
+        sourceReference,
+        targetTenantId: target.id,
+        title: "concurrent transfer",
+        openSourceVideo: jest.fn(),
+      });
+
+      await expect(concurrentCopy).rejects.toBeInstanceOf(HostedVideoCopyInProgressError);
+      releaseDelete();
+      await retriedSync;
+      const reuploadedCopy = await findHostedVideo(failedCopy.id);
+      expect(reuploadedCopy.reference).not.toBe(failedCopy.reference);
     });
 
     it("adopts the provider video when the create response is lost", async () => {

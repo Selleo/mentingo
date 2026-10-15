@@ -73,14 +73,33 @@ export class HostedVideoRepository {
     return copy;
   }
 
+  /**
+   * Claims a failed copy for another upload and detaches its broken provider video, so no
+   * concurrent transfer reuses that reference while the copy uploads again.
+   */
   async reclaimFailedCopy(id: UUIDType) {
-    const [copy] = await this.dbAdmin
-      .update(hostedVideos)
-      .set({ status: HOSTED_VIDEO_STATUSES.UPLOADING, statusChangedAt: sql`now()` })
-      .where(and(eq(hostedVideos.id, id), eq(hostedVideos.status, HOSTED_VIDEO_STATUSES.FAILED)))
-      .returning();
+    return this.dbAdmin.transaction(async (trx) => {
+      const [failedCopy] = await trx
+        .select({ providerVideoId: hostedVideos.providerVideoId })
+        .from(hostedVideos)
+        .where(and(eq(hostedVideos.id, id), eq(hostedVideos.status, HOSTED_VIDEO_STATUSES.FAILED)))
+        .for("update");
 
-    return copy;
+      if (!failedCopy) return undefined;
+
+      const [copy] = await trx
+        .update(hostedVideos)
+        .set({
+          status: HOSTED_VIDEO_STATUSES.UPLOADING,
+          statusChangedAt: sql`now()`,
+          providerVideoId: null,
+          reference: null,
+        })
+        .where(eq(hostedVideos.id, id))
+        .returning();
+
+      return { copy, detachedProviderVideoId: failedCopy.providerVideoId };
+    });
   }
 
   async recordCreatedVideo(id: UUIDType, providerVideoId: string, reference: string) {

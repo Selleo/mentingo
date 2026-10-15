@@ -638,14 +638,14 @@ export class LearningPathService {
         trx,
       );
 
-      if (learningPath && (sequenceEnabledChanged || includesCertificateChanged)) {
-        await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
-      }
-
       await this.learningPathExportService.queueSyncForSourceLearningPath(
         learningPathId,
         "update-learning-path",
       );
+
+      if (learningPath && (sequenceEnabledChanged || includesCertificateChanged)) {
+        await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+      }
 
       return learningPath;
     });
@@ -800,6 +800,11 @@ export class LearningPathService {
         trx,
       );
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "add-learning-path-course",
+      );
+
       await Promise.all(
         addedCourses.map((course) =>
           this.publishLearningPathCourseAddedEvent(
@@ -809,11 +814,6 @@ export class LearningPathService {
             trx,
           ),
         ),
-      );
-
-      await this.learningPathExportService.queueSyncForSourceLearningPath(
-        learningPathId,
-        "add-learning-path-course",
       );
 
       return addedCourses;
@@ -1193,16 +1193,16 @@ export class LearningPathService {
         trx,
       );
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "remove-learning-path-course",
+      );
+
       await this.publishLearningPathCourseRemovedEvent(
         learningPathId,
         courseId,
         currentUser.tenantId,
         trx,
-      );
-
-      await this.learningPathExportService.queueSyncForSourceLearningPath(
-        learningPathId,
-        "remove-learning-path-course",
       );
 
       return removedCourse;
@@ -1254,14 +1254,14 @@ export class LearningPathService {
         await this.learningPathRepository.setDisplayOrder(learningPathId, courseId, index + 1, trx);
       }
 
-      if (learningPath.sequenceEnabled) {
-        await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
-      }
-
       await this.learningPathExportService.queueSyncForSourceLearningPath(
         learningPathId,
         "reorder-learning-path-courses",
       );
+
+      if (learningPath.sequenceEnabled) {
+        await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+      }
 
       return {
         learningPathId,
