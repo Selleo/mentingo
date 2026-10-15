@@ -202,6 +202,7 @@ export const curriculumPreviewFromProposal = (
   proposal: ProposalView,
   context?: CourseContext | null,
   delta?: AuthoringApplicationDelta,
+  inspectIncomplete = false,
 ): CurriculumPreview | null => {
   proposal = normalizePreviewProposal(proposal, context, delta);
   const chapters = new Map<string, CurriculumPreview["outline"][number]>(
@@ -297,11 +298,25 @@ export const curriculumPreviewFromProposal = (
         (left.displayOrder ?? Number.MAX_SAFE_INTEGER) -
         (right.displayOrder ?? Number.MAX_SAFE_INTEGER),
     );
-  orderCourseAuthoringOperations(proposal.operations);
+  const ids = new Set(proposal.operations.map((operation) => operation.operationId));
+  const missingDependencies = proposal.operations.flatMap((operation) =>
+    operation.dependencies
+      .filter((id) => !ids.has(id))
+      .map((dependencyId) => ({
+        operationId: operation.operationId,
+        dependencyId,
+      })),
+  );
+  const inspectionOperations = proposal.operations.map((operation) => ({
+    ...operation,
+    dependencies: operation.dependencies.filter((id) => ids.has(id)),
+  }));
+  orderCourseAuthoringOperations(inspectIncomplete ? inspectionOperations : proposal.operations);
   return {
     proposalId: proposal.id,
     status: proposal.decision === "accepted" ? "accepted" : "pending",
-    operations: proposal.operations,
+    operations: inspectIncomplete ? inspectionOperations : proposal.operations,
+    ...(inspectIncomplete && missingDependencies.length > 0 ? { missingDependencies } : {}),
     outline,
   };
 };
@@ -312,6 +327,7 @@ export const curriculumPreviewFromProposals = (
   context?: CourseContext | null,
   reviewGroupId?: string,
   delta?: AuthoringApplicationDelta,
+  inspectIncomplete = false,
 ): CurriculumPreview | null => {
   const visibleProposals = proposals.filter(
     (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
@@ -346,6 +362,7 @@ export const curriculumPreviewFromProposals = (
     },
     context,
     delta,
+    inspectIncomplete,
   );
   if (!preview) return null;
   return {
@@ -506,7 +523,13 @@ export const latestCurriculumPreview = (
     ) {
       return null;
     }
-    return curriculumPreviewFromProposal(latestProposal);
+    try {
+      // A single proposal can depend on siblings that the grouped review will include.
+      return curriculumPreviewFromProposal(latestProposal, undefined, undefined, true);
+    } catch (error) {
+      if (error instanceof CourseAuthoringOrderError) return null;
+      throw error;
+    }
   }
 
   const latestPreview = previews.at(-1);

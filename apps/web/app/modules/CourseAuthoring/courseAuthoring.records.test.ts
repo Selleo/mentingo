@@ -1536,6 +1536,25 @@ it("merges identical shared chapter prerequisites across independently reviewabl
   missingDependency[1].operations[1].dependencies = ["unknown-operation"];
   expect(() => curriculumPreviewFromProposals(missingDependency)).toThrow("missingDependency");
 
+  const inspection = curriculumPreviewFromProposals(
+    missingDependency,
+    null,
+    undefined,
+    undefined,
+    true,
+  );
+  expect(inspection?.missingDependencies).toEqual([
+    {
+      operationId: "lesson-create-second",
+      dependencyId: "unknown-operation",
+    },
+  ]);
+  expect(
+    inspection?.operations?.find((operation) => operation.operationId === "lesson-create-second")
+      ?.dependencies,
+  ).toEqual([]);
+  expect(missingDependency[1].operations[1].dependencies).toEqual(["unknown-operation"]);
+
   const dependencyCycle = structuredClone(proposals);
   dependencyCycle[0].operations[1].dependencies.push("lesson-create-second");
   dependencyCycle[1].operations[1].dependencies.push("lesson-create-first");

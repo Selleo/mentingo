@@ -4,6 +4,7 @@
  * a drawer, route or later inline host. Unmounting does not send a stop command.
  */
 import { Link } from "@remix-run/react";
+import { CourseAuthoringOrderError } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { ArrowLeft, CloudOff, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,6 +27,11 @@ import { cn } from "~/lib/utils";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../e2e/data/curriculum/handles";
 
+import {
+  assetSelectionKey,
+  readOmittedAssets,
+  writeOmittedAssets,
+} from "./authoringAssetSelection";
 import {
   activeAssistantRequestIds,
   activeChatRequestId,
@@ -53,6 +59,7 @@ import { useCourseAuthoringChat } from "./hooks/useCourseAuthoringChat";
 import { useCourseAuthoringSession } from "./hooks/useCourseAuthoringSession";
 import { useCourseAuthoringSocket } from "./hooks/useCourseAuthoringSocket";
 import { targetedMentorOperationIds } from "./mentorReferenceFiles";
+import { prepareCurriculumPreview } from "./review/prepareCurriculumPreview";
 import { toReviewProposals } from "./review/reviewProposals";
 
 import type { AuthoringChatMessage } from "./authoringChatTransport";
@@ -219,11 +226,24 @@ export const CourseGenerationSession = ({
     omitOptionalAssetIds: string[];
     commandId: string;
   } | null>(null);
-  const [omittedOptionalAssetIds, setOmittedOptionalAssetIds] = useState<string[]>([]);
-  const omittedOptionalAssetIdsRef = useRef<string[]>([]);
+  const omissionKey = assetSelectionKey(id, sessionId);
+  const [assetSelection, setAssetSelection] = useState(() => ({
+    key: omissionKey,
+    ids: readOmittedAssets(omissionKey),
+  }));
+  const omittedOptionalAssetIds =
+    assetSelection.key === omissionKey ? assetSelection.ids : readOmittedAssets(omissionKey);
+  const setOmittedOptionalAssetIds = (update: string[] | ((current: string[]) => string[])) => {
+    setAssetSelection((current) => {
+      const ids = current.key === omissionKey ? current.ids : readOmittedAssets(omissionKey);
+      return { key: omissionKey, ids: typeof update === "function" ? update(ids) : update };
+    });
+  };
+  const omittedOptionalAssetIdsRef = useRef<string[]>(omittedOptionalAssetIds);
   useEffect(() => {
     omittedOptionalAssetIdsRef.current = omittedOptionalAssetIds;
-  }, [omittedOptionalAssetIds]);
+    writeOmittedAssets(omissionKey, omittedOptionalAssetIds);
+  }, [omissionKey, omittedOptionalAssetIds]);
   const [selectedProposalIds, setSelectedProposalIds] = useState<string[]>([]);
   const [appliedProposalIds, setAppliedProposalIds] = useState<Set<string>>(
     () => new Set(trackedApplication?.confirmed ? trackedApplication.proposalIds : []),
@@ -829,12 +849,19 @@ export const CourseGenerationSession = ({
       } = {},
     ) => {
       const latestSession = authoringSessionRef.current;
-      const latestProposals = latestSession
-        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks).proposals
-        : proposals;
+      const latestProjection = latestSession
+        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks)
+        : projection;
+      const latestProposals = latestSession ? latestProjection.proposals : proposals;
       if (
         selectedProposalIds.length > 0 &&
-        requestGenerationPending(latestSession?.tasks ?? [], requestId, latestProposals)
+        requestGenerationPending(
+          latestSession?.tasks ?? [],
+          requestId,
+          latestProposals,
+          latestProjection.assetTasks,
+          omittedOptionalAssetIdsRef.current,
+        )
       ) {
         throw new Error(t("courseAuthoring.errors.proposalNotReady"));
       }
@@ -942,7 +969,7 @@ export const CourseGenerationSession = ({
       if (applicableIds.length > 0)
         await applySelected(applicableIds, acknowledgeAssessmentChanges, []);
     },
-    [appliedProposalIds, applySelected, commandMutation, projection.proposals, t, toast],
+    [appliedProposalIds, applySelected, commandMutation, projection, t, toast],
   );
   /** Reviews a single result and starts its native apply, including required same-request changes. */
   const applyProposal = useCallback(
@@ -965,40 +992,83 @@ export const CourseGenerationSession = ({
     },
     [applySelected, decideProposal, projection.proposals, reviewGroupAndApply, session?.tasks],
   );
-  /** Saves explicit rejection decisions without changing omitted items into rejected items. */
+  /** Refresh missing dependencies once and preserve precise preview diagnostics. */
   const preparePreview = useCallback(
-    (build: () => CurriculumPreview | null) => {
+    async (
+      build: (snapshot?: AuthoringSession, inspectIncomplete?: boolean) => CurriculumPreview | null,
+    ) => {
       try {
-        return build();
-      } catch {
+        return await prepareCurriculumPreview(build, async () => {
+          const refreshed = await refetchSnapshot();
+          const current = authoringSessionRef.current;
+          return current && refreshed && current.snapshotSequence > refreshed.snapshotSequence
+            ? current
+            : refreshed;
+        });
+      } catch (error) {
+        console.error("Course authoring preview failed", {
+          sessionId,
+          code: error instanceof CourseAuthoringOrderError ? error.code : "previewBuildFailed",
+          operationIds: projection.proposals.flatMap((proposal) =>
+            proposal.operations.map((operation) => operation.operationId),
+          ),
+          error,
+        });
         toast({
           variant: "destructive",
-          description: t("courseAuthoring.errors.previewUnavailable"),
+          description: t(
+            error instanceof CourseAuthoringOrderError
+              ? `courseAuthoring.errors.${error.code}`
+              : "courseAuthoring.errors.previewBuildFailed",
+          ),
         });
         return null;
       }
     },
-    [t, toast],
+    [projection.proposals, refetchSnapshot, sessionId, t, toast],
   );
   /** Opens a request's proposals in curriculum review mode, bound to one batch apply. */
   const previewProposalGroupInCurriculum = useCallback(
-    (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
-      if (requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals)) return;
+    async (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
+      if (
+        requestGenerationPending(
+          session?.tasks ?? [],
+          requestId,
+          projection.proposals,
+          projection.assetTasks,
+          omittedOptionalAssetIdsRef.current,
+        )
+      )
+        return;
       const appliedIds = new Set([
         ...appliedProposalIds,
         ...Object.entries(applicationStatusByProposalId)
           .filter(([, status]) => status === "applied")
           .map(([proposalId]) => proposalId),
       ]);
-      const currentProposals = excludeAppliedProposals(proposals, appliedIds);
-      const preview = preparePreview(() =>
-        curriculumPreviewFromProposals(
+      let currentProposals = excludeAppliedProposals(proposals, appliedIds);
+      const preview = await preparePreview((snapshot, inspectIncomplete) => {
+        if (snapshot) {
+          const refreshed = projectWorkspaceRecords(snapshot.records, snapshot.tasks);
+          const refreshedProposals = excludeAppliedProposals(
+            refreshed.proposals.filter((item) =>
+              snapshot.tasks.some(
+                (task) => task.taskId === item.taskId && task.requestId === requestId,
+              ),
+            ),
+            appliedIds,
+          );
+          // Older requests can live outside the current snapshot's history window.
+          if (refreshedProposals.length > 0) currentProposals = refreshedProposals;
+        }
+        return curriculumPreviewFromProposals(
           currentProposals,
           context,
           `request-${requestId}`,
-          session?.applicationDelta,
-        ),
-      );
+          snapshot?.applicationDelta ?? session?.applicationDelta,
+          inspectIncomplete,
+        );
+      });
       if (!preview || !onPreviewProposalInCurriculum) return;
       const reviewable = currentProposals.filter(
         (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
@@ -1038,6 +1108,7 @@ export const CourseGenerationSession = ({
       context,
       onPreviewProposalInCurriculum,
       projection.sources,
+      projection.assetTasks,
       projection.proposals,
       session?.tasks,
       session?.records,
@@ -1049,7 +1120,7 @@ export const CourseGenerationSession = ({
   );
   /** Opens one result in review mode; grouped results open with their whole request. */
   const previewProposalInCurriculum = useCallback(
-    (proposal: ProposalView) => {
+    async (proposal: ProposalView) => {
       const requestId = session?.tasks.find((task) => task.taskId === proposal.taskId)?.requestId;
       if (requestId) {
         const proposals = projection.proposals.filter((item) =>
@@ -1057,12 +1128,24 @@ export const CourseGenerationSession = ({
             (task) => task.taskId === item.taskId && task.requestId === requestId,
           ),
         );
-        previewProposalGroupInCurriculum(requestId, proposals, proposal.id);
+        await previewProposalGroupInCurriculum(requestId, proposals, proposal.id);
         return;
       }
-      const preview = preparePreview(() =>
-        curriculumPreviewFromProposal(proposal, context, session?.applicationDelta),
-      );
+      const preview = await preparePreview((snapshot, inspectIncomplete) => {
+        const latest = snapshot
+          ? (projectWorkspaceRecords(snapshot.records, snapshot.tasks).proposals.find(
+              (item) => item.id === proposal.id,
+            ) ?? proposal)
+          : proposal;
+        return latest
+          ? curriculumPreviewFromProposal(
+              latest,
+              context,
+              snapshot?.applicationDelta ?? session?.applicationDelta,
+              inspectIncomplete,
+            )
+          : null;
+      });
       if (!preview || !onPreviewProposalInCurriculum) return;
       onPreviewProposalInCurriculum(
         {
@@ -1362,11 +1445,13 @@ export const CourseGenerationSession = ({
             }
             onAnswer={answerQuestion}
             onAssetAction={actOnAsset}
+            omittedOptionalAssetIds={omittedOptionalAssetIds}
+            onRestoreAsset={(assetId) =>
+              setOmittedOptionalAssetIds((current) => current.filter((id) => id !== assetId))
+            }
             onSkipAsset={(assetId) =>
               setOmittedOptionalAssetIds((current) =>
-                current.includes(assetId)
-                  ? current.filter((id) => id !== assetId)
-                  : [...current, assetId],
+                current.includes(assetId) ? current : [...current, assetId],
               )
             }
           />
@@ -1384,7 +1469,13 @@ export const CourseGenerationSession = ({
   );
   const visibleTasks = (session?.tasks ?? []).filter((task) => !sourceTaskIds.has(task.taskId));
   const generationPending = (requestId: string) =>
-    requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals);
+    requestGenerationPending(
+      session?.tasks ?? [],
+      requestId,
+      projection.proposals,
+      projection.assetTasks,
+      omittedOptionalAssetIds,
+    );
   const requestIdByTaskId = new Map(visibleTasks.map((task) => [task.taskId, task.requestId]));
   const proposalsByRequest = projection.proposals.reduce<Map<string, ProposalView[]>>(
     (groups, proposal) => {
@@ -1584,6 +1675,11 @@ export const CourseGenerationSession = ({
               targetLabelById={targetLabelById}
               applicationStatusByProposalId={applicationStatusByProposalId}
               readyAssetIds={projection.readyAssetIds}
+              failedOptionalAssetIds={projection.assetTasks
+                .filter(
+                  (asset) => asset.status === "failed" && !asset.request.required && !asset.ready,
+                )
+                .map((asset) => asset.request.assetId)}
               omittedOptionalAssetIds={omittedOptionalAssetIds}
               onOmittedOptionalAssetIdsChange={setOmittedOptionalAssetIds}
             />

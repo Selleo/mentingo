@@ -746,6 +746,49 @@ describe("ProposalReview", () => {
     expect(onApply).toHaveBeenCalledWith(["proposal-assets"], false, ["asset-1"]);
   });
 
+  it("automatically omits a failed optional visual and allows applying text", async () => {
+    const user = userEvent.setup();
+    const onApply = vi.fn();
+    const proposal: ProposalView = {
+      ...attemptedQuizProposal,
+      id: "proposal-assets",
+      summary: "Add optional diagram",
+      assetRequests: [
+        {
+          assetId: "asset-1",
+          operationId: "operation-asset",
+          purpose: "diagram",
+          required: false,
+          altText: "Safety diagram",
+          source: { type: "generated", content: "A safety diagram", visualQuery: "safety" },
+        },
+      ],
+      assetIds: ["asset-1"],
+    };
+
+    renderWith().render(
+      <ProposalReview
+        proposals={[proposal]}
+        readyAssetIds={[]}
+        failedOptionalAssetIds={["asset-1"]}
+        onAccept={vi.fn()}
+        onReject={vi.fn()}
+        onRegenerate={vi.fn()}
+        onApply={onApply}
+      />,
+    );
+
+    await user.click(screen.getByLabelText("Select Add optional diagram"));
+    const applyButton = screen.getByRole("button", { name: "Apply selected" });
+    expect(
+      screen.getByRole("checkbox", { name: "Omit optional asset Safety diagram" }),
+    ).toBeChecked();
+    expect(applyButton).toBeEnabled();
+    await user.click(applyButton);
+
+    expect(onApply).toHaveBeenCalledWith(["proposal-assets"], false, ["asset-1"]);
+  });
+
   it("does not offer omission for an unavailable required visual", async () => {
     const user = userEvent.setup();
     const proposal: ProposalView = {

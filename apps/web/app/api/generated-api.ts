@@ -2461,7 +2461,6 @@ export interface GetBetaCourseByIdResponse {
           options?: {
             /** @format uuid */
             id?: string;
-            /** @maxLength 250 */
             optionText: string;
             displayOrder: number | null;
             isStudentAnswer?: boolean | null;

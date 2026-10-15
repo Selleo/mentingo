@@ -1346,6 +1346,8 @@ describe("AuthoringAssistantMessages", () => {
           onAnswerQuestion={onAnswerQuestion}
         />,
       );
+      expect(screen.getByText("Enable deep research?")).toBeInTheDocument();
+      expect(screen.queryByText("Search the web?")).not.toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: answer === "allow" ? "Allow" : "Deny" }));
       expect(onAnswerQuestion).toHaveBeenCalledWith(question, answer);
       expect(

@@ -35030,7 +35030,6 @@
                                         "type": "string"
                                       },
                                       "optionText": {
-                                        "maxLength": 250,
                                         "type": "string"
                                       },
                                       "displayOrder": {
@@ -39156,7 +39155,6 @@
                               "optionText": {
                                 "anyOf": [
                                   {
-                                    "maxLength": 250,
                                     "type": "string"
                                   },
                                   {

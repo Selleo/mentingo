@@ -41,9 +41,21 @@ export const adminQuestionSchema = Type.Object({
   language: Type.Optional(supportedLanguagesSchema),
 });
 
+// Canonical quizzes store unrestricted answer text. The legacy editor's input
+// limit must not prevent reading a course created through canonical authoring.
+export const adminOptionResponseSchema = Type.Object({
+  ...adminOptionSchema.properties,
+  optionText: Type.String(),
+});
+
+export const adminQuestionResponseSchema = Type.Object({
+  ...adminQuestionSchema.properties,
+  options: Type.Optional(Type.Array(adminOptionResponseSchema)),
+});
+
 export const optionSchema = Type.Object({
   id: UUIDSchema,
-  optionText: Type.Union([Type.String({ maxLength: 250 }), Type.Null()]),
+  optionText: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Union([Type.Number(), Type.Null()]),
   isStudentAnswer: Type.Union([Type.Boolean(), Type.Null()]),
   studentAnswer: Type.Union([Type.String(), Type.Null()]),
@@ -52,7 +64,7 @@ export const optionSchema = Type.Object({
 });
 
 export const questionSchema = Type.Object({
-  ...adminQuestionSchema.properties,
+  ...adminQuestionResponseSchema.properties,
   id: UUIDSchema,
   solutionExplanation: Type.Union([Type.String(), Type.Null()]),
   options: Type.Optional(Type.Array(optionSchema)),
@@ -106,7 +118,7 @@ export const adminLessonSchema = Type.Object({
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
-  questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  questions: Type.Optional(Type.Array(adminQuestionResponseSchema)),
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
   aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
   scormPackageLanguages: Type.Optional(Type.Array(supportedLanguagesSchema)),
@@ -123,14 +135,19 @@ export const lessonSchema = Type.Object({
   fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   avatarReferenceUrl: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  questions: Type.Optional(Type.Array(adminQuestionResponseSchema)),
   aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
   liveTrainingId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   updatedAt: Type.Optional(Type.String()),
 });
 
+export const lessonInputSchema = Type.Object({
+  ...lessonSchema.properties,
+  questions: Type.Optional(Type.Array(adminQuestionSchema)),
+});
+
 export const createAiMentorLessonSchema = Type.Intersect([
-  Type.Omit(lessonSchema, ["id", "displayOrder", "type", "aiMentor"]),
+  Type.Omit(lessonInputSchema, ["id", "displayOrder", "type", "aiMentor"]),
   Type.Object({
     chapterId: UUIDSchema,
     displayOrder: Type.Optional(Type.Number()),
@@ -155,7 +172,7 @@ export const updateAiMentorLessonSchema = Type.Intersect([
 ]);
 
 export const createLessonSchema = Type.Intersect([
-  Type.Omit(lessonSchema, ["id", "displayOrder"]),
+  Type.Omit(lessonInputSchema, ["id", "displayOrder"]),
   Type.Object({
     chapterId: UUIDSchema,
     displayOrder: Type.Optional(Type.Number()),

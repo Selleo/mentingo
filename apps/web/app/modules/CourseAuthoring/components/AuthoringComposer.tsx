@@ -1,4 +1,5 @@
 /** Provides the default text-first entry point for an AI course generation request. */
+import { VoiceLevelBars } from "@mentingo/voice";
 import { ArrowUp, LoaderCircle, Mic, Square, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -17,7 +18,6 @@ import { match } from "ts-pattern";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
-import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../../e2e/data/curriculum/handles";

@@ -323,6 +323,8 @@ export type ProposalView = {
 };
 
 export type CurriculumPreview = {
+  /** Missing edges are removed only from inspection; original Apply proposals stay unchanged. */
+  missingDependencies?: Array<{ operationId: string; dependencyId: string }>;
   proposalId: string;
   /** The durable items represented by a combined course-level review preview. */
   proposalIds?: string[];
