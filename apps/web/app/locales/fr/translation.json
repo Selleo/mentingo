@@ -5574,7 +5574,8 @@
       "sourceCourseNotFound": "Le cours à dupliquer est introuvable",
       "sourceCategoryMissing": "Le cours à dupliquer n'a pas de catégorie",
       "targetCourseNotFound": "Le cours dupliqué est introuvable",
-      "tenantMissing": "Le locataire de ce cours est introuvable"
+      "tenantMissing": "Le locataire de ce cours est introuvable",
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué"
     }
   },
   "tenantSharing": {
@@ -5620,7 +5621,8 @@
       "targetCourseMissing": "Cours cible introuvable",
       "videoStorageNotConfigured": "Le stockage vidéo n'est pas configuré pour ce locataire",
       "sourceVideoMissing": "Vidéo source introuvable",
-      "exportedCourseReadonly": "Le cours exporté est en lecture seule"
+      "exportedCourseReadonly": "Le cours exporté est en lecture seule",
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être partagé"
     }
   },
   "learningPathExport": {

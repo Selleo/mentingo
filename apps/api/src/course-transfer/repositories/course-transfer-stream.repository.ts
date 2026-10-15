@@ -1,9 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, inArray, lt, lte, ne, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB_ADMIN } from "src/storage/db/db.providers";
-import { courseTransferOperations, courseTransferStreams } from "src/storage/schema";
+import {
+  courseTransferDependencies,
+  courseTransferOperations,
+  courseTransferStreams,
+} from "src/storage/schema";
 
 import {
   COURSE_TRANSFER_LEASE_SECONDS,
@@ -12,16 +16,18 @@ import {
 } from "../course-transfer.constants";
 
 import type {
+  CourseTransferDependency,
   CourseTransferErrorCode,
   CourseTransferLease,
   CourseTransferStatus,
   CourseTransferStreamKey,
 } from "../course-transfer.types";
 
-const UNFINISHED_OPERATION = or(
-  eq(courseTransferOperations.status, COURSE_TRANSFER_STATUSES.PENDING),
-  eq(courseTransferOperations.status, COURSE_TRANSFER_STATUSES.PROCESSING),
-);
+const UNFINISHED_OPERATION = inArray(courseTransferOperations.status, [
+  COURSE_TRANSFER_STATUSES.PENDING,
+  COURSE_TRANSFER_STATUSES.PROCESSING,
+  COURSE_TRANSFER_STATUSES.WAITING_FOR_DEPENDENCIES,
+]);
 const LEASE_IS_LIVE = sql<boolean>`${courseTransferStreams.leaseExpiresAt} > clock_timestamp()`;
 const LEASE_EXPIRY = sql`clock_timestamp() + ${COURSE_TRANSFER_LEASE_SECONDS} * interval '1 second'`;
 const RECOVERY_DEADLINE = sql`clock_timestamp() + ${COURSE_TRANSFER_RECOVERY_SECONDS} * interval '1 second'`;
@@ -195,7 +201,7 @@ export class CourseTransferStreamRepository {
   async setOperationStatus(
     operationId: string,
     status: CourseTransferStatus,
-    errorCode: CourseTransferErrorCode,
+    errorCode: CourseTransferErrorCode | null,
     transaction: DatabasePg,
   ) {
     await transaction
@@ -279,6 +285,98 @@ export class CourseTransferStreamRepository {
       .returning({ requestedRevision: courseTransferStreams.requestedRevision });
 
     return stream;
+  }
+
+  async upsertDependencies(
+    operationId: string,
+    dependencies: CourseTransferDependency[],
+    transaction: DatabasePg,
+  ) {
+    if (!dependencies.length) return;
+
+    await transaction
+      .insert(courseTransferDependencies)
+      .values(
+        dependencies.map((dependency) => ({
+          operationId,
+          dependencyStreamId: dependency.streamId,
+          requiredRevision: dependency.requiredRevision,
+          sourceId: dependency.sourceId,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [
+          courseTransferDependencies.operationId,
+          courseTransferDependencies.dependencyStreamId,
+        ],
+        set: { requiredRevision: sql`excluded.required_revision`, updatedAt: sql`now()` },
+      });
+  }
+
+  async findDependencyStates(operationId: string, transaction: DatabasePg) {
+    return transaction
+      .select({
+        sourceId: courseTransferDependencies.sourceId,
+        requiredRevision: courseTransferDependencies.requiredRevision,
+        appliedRevision: courseTransferStreams.appliedRevision,
+        latestOperationStatus: courseTransferOperations.status,
+      })
+      .from(courseTransferDependencies)
+      .innerJoin(
+        courseTransferStreams,
+        eq(courseTransferStreams.id, courseTransferDependencies.dependencyStreamId),
+      )
+      .leftJoin(
+        courseTransferOperations,
+        eq(courseTransferOperations.id, courseTransferStreams.latestOperationId),
+      )
+      .where(eq(courseTransferDependencies.operationId, operationId));
+  }
+
+  async findWaitingDependents(streamId: string, appliedRevision: number, transaction: DatabasePg) {
+    return transaction
+      .select({
+        operationId: courseTransferOperations.id,
+        sourceTenantId: courseTransferStreams.sourceTenantId,
+      })
+      .from(courseTransferDependencies)
+      .innerJoin(
+        courseTransferOperations,
+        eq(courseTransferOperations.id, courseTransferDependencies.operationId),
+      )
+      .innerJoin(
+        courseTransferStreams,
+        eq(courseTransferStreams.id, courseTransferOperations.streamId),
+      )
+      .where(
+        and(
+          eq(courseTransferDependencies.dependencyStreamId, streamId),
+          lte(courseTransferDependencies.requiredRevision, appliedRevision),
+          eq(courseTransferOperations.status, COURSE_TRANSFER_STATUSES.WAITING_FOR_DEPENDENCIES),
+        ),
+      );
+  }
+
+  /** Lets the recovery run reach operations waiting on a stream whose transfer just failed. */
+  async markWaitingDependentsDueForRecovery(streamId: string, transaction: DatabasePg) {
+    const waitingStreamIds = transaction
+      .select({ streamId: courseTransferOperations.streamId })
+      .from(courseTransferDependencies)
+      .innerJoin(
+        courseTransferOperations,
+        eq(courseTransferOperations.id, courseTransferDependencies.operationId),
+      )
+      .where(
+        and(
+          eq(courseTransferDependencies.dependencyStreamId, streamId),
+          eq(courseTransferOperations.status, COURSE_TRANSFER_STATUSES.WAITING_FOR_DEPENDENCIES),
+        ),
+      );
+
+    await transaction
+      .update(courseTransferStreams)
+      .set({ nextRecoveryAt: sql`clock_timestamp()` })
+      .where(inArray(courseTransferStreams.id, waitingStreamIds));
   }
 
   async findStalledStreamsForUpdate(transaction: DatabasePg) {

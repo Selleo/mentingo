@@ -1,4 +1,6 @@
 import type {
+  COURSE_TRANSFER_CLAIM_OUTCOMES,
+  COURSE_TRANSFER_DEPENDENCY_STATES,
   COURSE_TRANSFER_ERROR_CODES,
   COURSE_TRANSFER_JOB_STATES,
   COURSE_TRANSFER_KINDS,
@@ -8,6 +10,7 @@ import type {
 import type { MasterCourseExportSyncStatus } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
+import type { courseTransferOperations, courseTransferStreams } from "src/storage/schema";
 
 export type CourseTransferKind = (typeof COURSE_TRANSFER_KINDS)[keyof typeof COURSE_TRANSFER_KINDS];
 
@@ -45,7 +48,32 @@ export interface CourseTransferLeasedTransfer {
     transaction: DatabasePg,
     writeDestination: () => Promise<string>,
   ): Promise<string>;
+  /** Parks the operation until every dependency is applied, releasing the lease meanwhile. */
+  waitForDependencies(dependencies: CourseTransferDependency[]): Promise<null>;
 }
+
+/** A transfer another operation needs applied, at least up to `requiredRevision`. */
+export interface CourseTransferDependency {
+  streamId: string;
+  requiredRevision: number;
+  sourceId: UUIDType;
+}
+
+export type CourseTransferTargetOrDependency =
+  | { targetId: UUIDType; dependency?: never }
+  | { targetId?: never; dependency: CourseTransferDependency };
+
+export type CourseTransferStreamRecord = typeof courseTransferStreams.$inferSelect;
+
+export type CourseTransferOperationRecord = typeof courseTransferOperations.$inferSelect;
+
+export type CourseTransferDependencyState =
+  (typeof COURSE_TRANSFER_DEPENDENCY_STATES)[keyof typeof COURSE_TRANSFER_DEPENDENCY_STATES];
+
+export type CourseTransferClaim =
+  | { outcome: typeof COURSE_TRANSFER_CLAIM_OUTCOMES.LEASED; lease: CourseTransferLease }
+  | { outcome: typeof COURSE_TRANSFER_CLAIM_OUTCOMES.ALREADY_APPLIED; targetId: string }
+  | { outcome: typeof COURSE_TRANSFER_CLAIM_OUTCOMES.WAITING_FOR_DEPENDENCIES };
 
 export interface CourseTransferRelationship {
   kind: CourseTransferKind;

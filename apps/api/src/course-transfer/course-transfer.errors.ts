@@ -18,3 +18,10 @@ export class CourseTransferFailedError extends Error {
     this.name = CourseTransferFailedError.name;
   }
 }
+
+export class CourseTransferForeignAssetError extends Error {
+  constructor(reference: string) {
+    super(`Source asset ${reference} belongs to another tenant`);
+    this.name = CourseTransferForeignAssetError.name;
+  }
+}

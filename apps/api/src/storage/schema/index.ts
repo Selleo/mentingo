@@ -2662,6 +2662,31 @@ export const courseTransferOperations = pgTable(
   }),
 );
 
+export const courseTransferDependencies = pgTable(
+  "course_transfer_dependencies",
+  {
+    ...id,
+    ...timestamps,
+    operationId: uuid("operation_id")
+      .references(() => courseTransferOperations.id, { onDelete: "cascade" })
+      .notNull(),
+    dependencyStreamId: uuid("dependency_stream_id")
+      .references(() => courseTransferStreams.id, { onDelete: "cascade" })
+      .notNull(),
+    requiredRevision: integer("required_revision").notNull(),
+    sourceId: uuid("source_id").notNull(),
+  },
+  (table) => ({
+    operationDependencyIdx: uniqueIndex("course_transfer_dependencies_operation_stream_idx").on(
+      table.operationId,
+      table.dependencyStreamId,
+    ),
+    dependencyStreamIdx: index("course_transfer_dependencies_stream_idx").on(
+      table.dependencyStreamId,
+    ),
+  }),
+);
+
 export const masterCourseExports = pgTable(
   "master_course_exports",
   {

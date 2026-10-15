@@ -1517,15 +1517,8 @@
     {
       "idx": 216,
       "version": "7",
-      "when": 1791916411824,
-      "tag": "0216_course_transfer_operations",
-      "breakpoints": true
-    },
-    {
-      "idx": 217,
-      "version": "7",
-      "when": 1791988752765,
-      "tag": "0217_hosted_video_registry",
+      "when": 1792052060825,
+      "tag": "0216_course_transfer_reliability",
       "breakpoints": true
     }
   ]

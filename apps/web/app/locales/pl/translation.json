@@ -5897,7 +5897,8 @@
       "sourceCourseNotFound": "Nie znaleziono kursu do zduplikowania",
       "sourceCategoryMissing": "Kurs do zduplikowania nie ma kategorii",
       "targetCourseNotFound": "Nie znaleziono zduplikowanego kursu",
-      "tenantMissing": "Nie znaleziono tenanta tego kursu"
+      "tenantMissing": "Nie znaleziono tenanta tego kursu",
+      "foreignSourceAsset": "Ten kurs używa pliku należącego do innej organizacji, więc nie można go zduplikować"
     }
   },
   "tenantSharing": {
@@ -5943,7 +5944,8 @@
       "targetCourseMissing": "Nie znaleziono kursu docelowego",
       "videoStorageNotConfigured": "Magazyn wideo nie jest skonfigurowany dla tego tenanta",
       "sourceVideoMissing": "Nie znaleziono wideo źródłowego",
-      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu"
+      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu",
+      "foreignSourceAsset": "Ten kurs używa pliku należącego do innej organizacji, więc nie można go udostępnić"
     }
   },
   "learningPathExport": {

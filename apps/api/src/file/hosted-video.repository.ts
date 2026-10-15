@@ -100,6 +100,20 @@ export class HostedVideoRepository {
       .where(eq(hostedVideos.id, id));
   }
 
+  /** Settles an upload only while it is still uploading, so a live worker's result is never overwritten. */
+  async settleUploadingCopy(
+    id: UUIDType,
+    settlement: { status: HostedVideoStatus; providerVideoId?: string; reference?: string },
+  ) {
+    const [settled] = await this.dbAdmin
+      .update(hostedVideos)
+      .set({ ...settlement, statusChangedAt: sql`now()` })
+      .where(and(eq(hostedVideos.id, id), eq(hostedVideos.status, HOSTED_VIDEO_STATUSES.UPLOADING)))
+      .returning({ id: hostedVideos.id });
+
+    return settled;
+  }
+
   /** Marks unfinished videos not checked since the cutoff as checked and returns them. */
   async claimUnfinishedVideosForStatusCheck(checkedBefore: Date, limit: number) {
     const unfinishedVideoIds = this.dbAdmin

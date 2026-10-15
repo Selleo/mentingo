@@ -247,6 +247,17 @@ export class BunnyStreamService {
     }
   }
 
+  async findVideosByTitle(title: string): Promise<BunnyVideoDetails[]> {
+    const cfg = await this.getConfig();
+    const httpClient = this.createHttpClient(cfg);
+
+    const { data } = await httpClient.get<{ items?: BunnyVideoDetails[] }>("/videos", {
+      params: { search: title, itemsPerPage: 10 },
+    });
+
+    return data.items ?? [];
+  }
+
   async getVideo(videoId: string): Promise<BunnyVideoDetails> {
     const cfg = await this.getConfig();
     const httpClient = this.createHttpClient(cfg);

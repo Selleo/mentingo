@@ -5,10 +5,18 @@ import { match, P } from "ts-pattern";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import { HOSTED_VIDEO_STATUSES } from "./hosted-video.constants";
+import {
+  HOSTED_VIDEO_STATUSES,
+  HOSTED_VIDEO_UPLOAD_STALE_AFTER_MS,
+} from "./hosted-video.constants";
 import { HostedVideoCopyInProgressError } from "./hosted-video.errors";
 import { HostedVideoRepository } from "./hosted-video.repository";
-import { buildBunnyVideoReference } from "./video-metadata.utils";
+import { buildHostedVideoCopyMarker, buildHostedVideoCopyTitle } from "./hosted-video.utils";
+import { BUNNY_API_VIDEO_STATUSES } from "./video-metadata.constants";
+import {
+  buildBunnyVideoReference,
+  mapBunnyApiStatusToHostedVideoStatus,
+} from "./video-metadata.utils";
 
 import type {
   HostedVideo,
@@ -44,6 +52,38 @@ export class HostedVideoCopyService {
         this.reuploadFailedCopy(failedCopy, request),
       )
       .otherwise((usableCopy) => this.reuseCopy(usableCopy, request));
+  }
+
+  /**
+   * Settles an upload whose worker stopped: adopts the provider video it created, or fails the
+   * copy so the next transfer uploads it again.
+   */
+  async reconcileStaleUpload(copy: HostedVideo): Promise<void> {
+    const uploadAgeMs = Date.now() - new Date(copy.statusChangedAt).getTime();
+    if (uploadAgeMs < HOSTED_VIDEO_UPLOAD_STALE_AFTER_MS) return;
+
+    const providerVideoId = copy.providerVideoId ?? (await this.findCreatedProviderVideoId(copy));
+
+    if (!providerVideoId) {
+      await this.hostedVideoRepository.settleUploadingCopy(copy.id, {
+        status: HOSTED_VIDEO_STATUSES.FAILED,
+      });
+      return;
+    }
+
+    const providerVideo = await this.tenantDbRunnerService.runWithTenant(copy.tenantId, () =>
+      this.bunnyStreamService.getVideo(providerVideoId),
+    );
+
+    const status = match(Number(providerVideo.status))
+      .with(BUNNY_API_VIDEO_STATUSES.CREATED, () => HOSTED_VIDEO_STATUSES.FAILED)
+      .otherwise((bunnyStatus) => mapBunnyApiStatusToHostedVideoStatus(bunnyStatus));
+
+    await this.hostedVideoRepository.settleUploadingCopy(copy.id, {
+      status,
+      providerVideoId,
+      reference: buildBunnyVideoReference(providerVideoId),
+    });
   }
 
   private async buildCopyIdentity(
@@ -88,10 +128,7 @@ export class HostedVideoCopyService {
   }
 
   private async uploadClaimedCopy(copy: HostedVideo, request: HostedVideoCopyRequest) {
-    const { guid: providerVideoId } = await this.tenantDbRunnerService.runWithTenant(
-      request.targetTenantId,
-      () => this.bunnyStreamService.createVideo(request.title),
-    );
+    const providerVideoId = await this.createProviderVideo(copy, request);
     const reference = buildBunnyVideoReference(providerVideoId);
     await this.hostedVideoRepository.recordCreatedVideo(copy.id, providerVideoId, reference);
 
@@ -119,6 +156,38 @@ export class HostedVideoCopyService {
 
     await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.PROCESSING);
     return reference;
+  }
+
+  /**
+   * Creates the copy's provider video. When the create response is lost, the video is looked up
+   * by its title marker instead of being created a second time.
+   */
+  private async createProviderVideo(
+    copy: HostedVideo,
+    request: HostedVideoCopyRequest,
+  ): Promise<string> {
+    try {
+      const { guid } = await this.tenantDbRunnerService.runWithTenant(request.targetTenantId, () =>
+        this.bunnyStreamService.createVideo(buildHostedVideoCopyTitle(request.title, copy.id)),
+      );
+      return guid;
+    } catch (error) {
+      // A failed lookup leaves the copy uploading, so the stale-upload check can look again.
+      const createdProviderVideoId = await this.findCreatedProviderVideoId(copy);
+      if (createdProviderVideoId) return createdProviderVideoId;
+
+      await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.FAILED);
+      throw error;
+    }
+  }
+
+  private async findCreatedProviderVideoId(copy: HostedVideo): Promise<string | undefined> {
+    const marker = buildHostedVideoCopyMarker(copy.id);
+    const providerVideos = await this.tenantDbRunnerService.runWithTenant(copy.tenantId, () =>
+      this.bunnyStreamService.findVideosByTitle(marker),
+    );
+
+    return providerVideos.find(({ title }) => title?.endsWith(marker))?.guid;
   }
 
   private async deleteProviderVideo(tenantId: UUIDType, providerVideoId: string) {

@@ -9,6 +9,7 @@ export const COURSE_TRANSFER_KINDS = {
 export const COURSE_TRANSFER_STATUSES = {
   PENDING: "pending",
   PROCESSING: "processing",
+  WAITING_FOR_DEPENDENCIES: "waiting-for-dependencies",
   COMPLETED: "completed",
   FAILED: "failed",
   SUPERSEDED: "superseded",
@@ -18,6 +19,19 @@ export const COURSE_TRANSFER_ERROR_CODES = {
   TRANSFER_FAILED: "transfer-failed",
   RELATIONSHIP_PAUSED: "relationship-paused",
   RELATIONSHIP_MISSING: "relationship-missing",
+  DEPENDENCY_FAILED: "dependency-failed",
+} as const;
+
+export const COURSE_TRANSFER_DEPENDENCY_STATES = {
+  APPLIED: "applied",
+  PENDING: "pending",
+  FAILED: "failed",
+} as const;
+
+export const COURSE_TRANSFER_CLAIM_OUTCOMES = {
+  LEASED: "leased",
+  ALREADY_APPLIED: "already-applied",
+  WAITING_FOR_DEPENDENCIES: "waiting-for-dependencies",
 } as const;
 
 export const COURSE_TRANSFER_MODES = {

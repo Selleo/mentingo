@@ -5193,7 +5193,8 @@
       "sourceCourseNotFound": "Dubliuojamas kursas nerastas",
       "sourceCategoryMissing": "Dubliuojamas kursas neturi kategorijos",
       "targetCourseNotFound": "Dubliuotas kursas nerastas",
-      "tenantMissing": "Šio kurso tenantas nerastas"
+      "tenantMissing": "Šio kurso tenantas nerastas",
+      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima dubliuoti"
     }
   },
   "tenantSharing": {
@@ -5239,7 +5240,8 @@
       "targetCourseMissing": "Tikslinis kursas nerastas",
       "videoStorageNotConfigured": "Vaizdo irasu saugykla siam tenantui nesukonfiguruota",
       "sourceVideoMissing": "Saltinio vaizdo irasas nerastas",
-      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
+      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas",
+      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima bendrinti"
     }
   },
   "learningPathExport": {

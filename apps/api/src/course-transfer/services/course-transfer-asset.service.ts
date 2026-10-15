@@ -1,7 +1,12 @@
 import { createHash } from "crypto";
 import path from "path";
 
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ENTITY_TYPES } from "@repo/shared";
 import { match } from "ts-pattern";
 
@@ -13,6 +18,7 @@ import {
   COURSE_TRANSFER_RESOURCE_REFERENCE_KINDS,
   COURSE_TRANSFER_SCORM_COPY_BATCH_SIZE,
 } from "src/course-transfer/course-transfer.constants";
+import { CourseTransferForeignAssetError } from "src/course-transfer/course-transfer.errors";
 import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
 import {
   buildInternalResourceFieldKey,
@@ -26,7 +32,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { HostedVideoCopyService } from "src/file/hosted-video-copy.service";
 import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
 import { isImageVariantReference } from "src/file/image-variants/image-variant.utils";
-import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
+import { findStorageKeyTenantId, prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import {
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
@@ -76,10 +82,12 @@ export class CourseTransferAssetService {
       .with(COURSE_TRANSFER_MODES.SYNC, () => ({
         source: "masterCourse.error.sourceTenantMissing",
         destination: "masterCourse.error.targetTenantMissing",
+        foreignAsset: "masterCourse.error.foreignSourceAsset",
       }))
       .with(COURSE_TRANSFER_MODES.DUPLICATE, () => ({
         source: "courseDuplication.error.tenantMissing",
         destination: "courseDuplication.error.tenantMissing",
+        foreignAsset: "courseDuplication.error.foreignSourceAsset",
       }))
       .exhaustive();
 
@@ -91,27 +99,30 @@ export class CourseTransferAssetService {
     if (!sourceHost) throw new NotFoundException(errors.source);
 
     const resourceCollection = this.buildSourceResourceCollection(snapshot);
-
-    await this.copySourceResourceReferences(resourceCollection, {
-      targetCourseId: destination.courseId,
-      sourceTenantId,
-      sourceTenantOrigin: sourceHost,
-      targetTenantId: destination.tenantId,
-      uploadedResourceIdsByFileKey:
-        policy.mode === COURSE_TRANSFER_MODES.DUPLICATE
-          ? policy.uploadedResourceIdsByFileKey
-          : undefined,
-    });
-
     const scormScopeId = match(policy)
       .with({ mode: COURSE_TRANSFER_MODES.SYNC }, ({ exportId }) => exportId)
       .with({ mode: COURSE_TRANSFER_MODES.DUPLICATE }, () => destination.courseId)
       .exhaustive();
-    const scormPackages = await this.prepareScormPackages(
-      snapshot,
-      destination.tenantId,
-      scormScopeId,
-    );
+
+    const scormPackages = await this.copySourceAssets(async () => {
+      await this.copySourceResourceReferences(resourceCollection, {
+        targetCourseId: destination.courseId,
+        sourceTenantId,
+        sourceTenantOrigin: sourceHost,
+        targetTenantId: destination.tenantId,
+        uploadedResourceIdsByFileKey:
+          policy.mode === COURSE_TRANSFER_MODES.DUPLICATE
+            ? policy.uploadedResourceIdsByFileKey
+            : undefined,
+      });
+
+      return this.prepareScormPackages(
+        snapshot,
+        sourceTenantId,
+        destination.tenantId,
+        scormScopeId,
+      );
+    }, errors.foreignAsset);
 
     return {
       snapshot,
@@ -122,14 +133,41 @@ export class CourseTransferAssetService {
     };
   }
 
+  /** Turns an attempt to copy another tenant's asset into the caller's translated error. */
+  private async copySourceAssets<T>(copyAssets: () => Promise<T>, foreignAssetError: string) {
+    try {
+      return await copyAssets();
+    } catch (error) {
+      if (error instanceof CourseTransferForeignAssetError) {
+        throw new ForbiddenException(foreignAssetError);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Storage credentials reach every tenant, so a raw key namespaced under another tenant must
+   * never be copied. Keys without a tenant prefix predate tenant namespacing and stay allowed.
+   */
+  private assertSourceTenantOwnsReference(reference: string, sourceTenantId: UUIDType) {
+    const ownerTenantId = findStorageKeyTenantId(reference);
+    if (ownerTenantId && ownerTenantId !== sourceTenantId) {
+      throw new CourseTransferForeignAssetError(reference);
+    }
+  }
+
   private async prepareScormPackages(
     snapshot: SourceSnapshot,
+    sourceTenantId: UUIDType,
     targetTenantId: UUIDType,
     scopeId: UUIDType,
   ): Promise<CourseTransferPreparedScormPackage[]> {
     const preparedPackages: CourseTransferPreparedScormPackage[] = [];
 
     for (const sourcePackage of snapshot.scormPackages) {
+      this.assertSourceTenantOwnsReference(sourcePackage.originalFileReference, sourceTenantId);
+      this.assertSourceTenantOwnsReference(sourcePackage.extractedFilesReference, sourceTenantId);
+
       const target = getTargetScormStorage(scopeId, targetTenantId, sourcePackage);
       await this.copyScormPackageStorage({
         sourceOriginalFileReference: sourcePackage.originalFileReference,
@@ -477,6 +515,7 @@ export class CourseTransferAssetService {
     });
 
     if (isImageVariantReference(source.reference)) {
+      this.assertSourceTenantOwnsReference(source.reference, params.sourceTenantId);
       await this.copyImageVariantReference(source.reference, targetReference);
       params.copiedReferences.set(source.reference, targetReference);
       return targetReference;
@@ -491,6 +530,7 @@ export class CourseTransferAssetService {
       return source.reference;
     }
 
+    this.assertSourceTenantOwnsReference(source.reference, params.sourceTenantId);
     await this.s3Service.copyFile(
       source.reference,
       targetReference,
@@ -536,6 +576,10 @@ export class CourseTransferAssetService {
   ) {
     if (source.reference.startsWith("http://") || source.reference.startsWith("https://")) {
       return source.reference;
+    }
+
+    if (this.isCopyableS3Reference(source.reference)) {
+      this.assertSourceTenantOwnsReference(source.reference, params.sourceTenantId);
     }
 
     if (

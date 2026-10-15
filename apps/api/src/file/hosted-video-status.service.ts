@@ -6,6 +6,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { HostedVideoCopyService } from "./hosted-video-copy.service";
 import {
   HOSTED_VIDEO_PROCESSING_TIMEOUT_MS,
   HOSTED_VIDEO_STATUS_CHECK_BATCH_SIZE,
@@ -13,7 +14,10 @@ import {
   HOSTED_VIDEO_STATUSES,
 } from "./hosted-video.constants";
 import { HostedVideoRepository } from "./hosted-video.repository";
-import { mapBunnyStatusToHostedVideoStatus } from "./video-metadata.utils";
+import {
+  mapBunnyApiStatusToHostedVideoStatus,
+  mapBunnyWebhookStatusToHostedVideoStatus,
+} from "./video-metadata.utils";
 
 import type { HostedVideo, HostedVideoStatus } from "./hosted-video.types";
 import type { VideoProcessingStatus, VideoProviderType } from "@repo/shared";
@@ -25,6 +29,7 @@ export class HostedVideoStatusService {
 
   constructor(
     private readonly hostedVideoRepository: HostedVideoRepository,
+    private readonly hostedVideoCopyService: HostedVideoCopyService,
     private readonly bunnyStreamService: BunnyStreamService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
@@ -53,11 +58,11 @@ export class HostedVideoStatusService {
     );
   }
 
-  async recordBunnyStatus(hostedVideo: HostedVideo, bunnyStatus: number): Promise<void> {
-    await this.hostedVideoRepository.updateStatus(
-      hostedVideo.id,
-      mapBunnyStatusToHostedVideoStatus(bunnyStatus),
-    );
+  async recordBunnyWebhookStatus(hostedVideo: HostedVideo, bunnyStatus: number): Promise<void> {
+    const status = mapBunnyWebhookStatusToHostedVideoStatus(bunnyStatus);
+    if (!status) return;
+
+    await this.hostedVideoRepository.updateStatus(hostedVideo.id, status);
   }
 
   async recordProviderVideoReady(provider: VideoProviderType, providerVideoId: string) {
@@ -90,11 +95,17 @@ export class HostedVideoStatusService {
       return;
     }
 
-    if (hostedVideo.status !== HOSTED_VIDEO_STATUSES.PROCESSING || !hostedVideo.providerVideoId) {
-      return;
-    }
+    await match(hostedVideo.status)
+      .with(HOSTED_VIDEO_STATUSES.UPLOADING, () =>
+        this.hostedVideoCopyService.reconcileStaleUpload(hostedVideo),
+      )
+      .with(HOSTED_VIDEO_STATUSES.PROCESSING, () => this.recordProviderStatus(hostedVideo))
+      .otherwise(() => undefined);
+  }
 
+  private async recordProviderStatus(hostedVideo: HostedVideo): Promise<void> {
     const { providerVideoId } = hostedVideo;
+    if (!providerVideoId) return;
 
     await match(hostedVideo.provider)
       .with(VIDEO_PROVIDERS.BUNNY, async () => {
@@ -102,7 +113,10 @@ export class HostedVideoStatusService {
           hostedVideo.tenantId,
           () => this.bunnyStreamService.getVideo(providerVideoId),
         );
-        await this.recordBunnyStatus(hostedVideo, Number(bunnyVideo.status));
+        await this.hostedVideoRepository.updateStatus(
+          hostedVideo.id,
+          mapBunnyApiStatusToHostedVideoStatus(Number(bunnyVideo.status)),
+        );
       })
       .otherwise(() => undefined);
   }

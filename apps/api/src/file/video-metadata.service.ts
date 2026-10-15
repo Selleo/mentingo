@@ -15,7 +15,7 @@ import { VideoMetadataRepository } from "./video-metadata.repository";
 import { VideoMetadataRetryableError } from "./video-metadata.types";
 import {
   getBunnyVideoId,
-  isBunnyVideoReadyStatus,
+  isBunnyApiVideoReadyStatus,
   isValidVideoDuration,
   parseFfprobeDuration,
 } from "./video-metadata.utils";
@@ -73,7 +73,7 @@ export class VideoMetadataService {
     if (!videoId) throw new Error("Bunny video metadata job is missing a video ID");
 
     const video = await this.bunnyStreamService.getVideo(videoId);
-    if (!isBunnyVideoReadyStatus(video.status) || !isValidVideoDuration(Number(video.length))) {
+    if (!isBunnyApiVideoReadyStatus(video.status) || !isValidVideoDuration(Number(video.length))) {
       throw new VideoMetadataRetryableError(`Bunny video ${videoId} is not ready`);
     }
 

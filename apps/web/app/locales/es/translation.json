@@ -5789,7 +5789,8 @@
       "sourceCourseNotFound": "No se encontró el curso que se va a duplicar",
       "sourceCategoryMissing": "El curso que se va a duplicar no tiene categoría",
       "targetCourseNotFound": "No se encontró el curso duplicado",
-      "tenantMissing": "No se encontró el inquilino de este curso"
+      "tenantMissing": "No se encontró el inquilino de este curso",
+      "foreignSourceAsset": "Este curso usa un archivo que pertenece a otra organización, por lo que no se puede duplicar"
     }
   },
   "tenantSharing": {
@@ -5835,7 +5836,8 @@
       "targetCourseMissing": "Curso objetivo no encontrado",
       "videoStorageNotConfigured": "El almacenamiento de vídeo no está configurado para este inquilino",
       "sourceVideoMissing": "Vídeo fuente no encontrado",
-      "exportedCourseReadonly": "El curso exportado es de solo lectura"
+      "exportedCourseReadonly": "El curso exportado es de solo lectura",
+      "foreignSourceAsset": "Este curso usa un archivo que pertenece a otra organización, por lo que no se puede compartir"
     }
   },
   "learningPathExport": {

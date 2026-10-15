@@ -118,7 +118,6 @@ describe("Master course export and sync (e2e)", () => {
     downloadMp4Fallback: jest.Mock;
     getMediaConfigurationSignature: jest.Mock;
     isConfigured: jest.Mock;
-    uploadStream: jest.Mock;
   };
 
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -159,10 +158,6 @@ describe("Master course export and sync (e2e)", () => {
       }),
       getMediaConfigurationSignature: jest.fn().mockResolvedValue("source-target-same"),
       isConfigured: jest.fn().mockResolvedValue(false),
-      uploadStream: jest.fn().mockResolvedValue({
-        fileKey: "bunny-target-upload",
-        bunnyGuid: "target-upload",
-      }),
     };
 
     const mockCacheManager = {
@@ -2029,7 +2024,6 @@ describe("Master course export and sync (e2e)", () => {
 
     expect(targetLesson.fileS3Key).toBe(sourceBunnyReference);
     expect(mockBunnyStreamService.downloadMp4Fallback).not.toHaveBeenCalled();
-    expect(mockBunnyStreamService.uploadStream).not.toHaveBeenCalled();
   });
 
   it("streams Bunny source videos into target S3 when target tenant does not use Bunny", async () => {

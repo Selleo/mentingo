@@ -5852,7 +5852,8 @@
       "sourceCourseNotFound": "The course to duplicate was not found",
       "sourceCategoryMissing": "The course to duplicate has no category",
       "targetCourseNotFound": "The duplicated course was not found",
-      "tenantMissing": "The tenant for this course was not found"
+      "tenantMissing": "The tenant for this course was not found",
+      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be duplicated"
     }
   },
   "tenantSharing": {
@@ -5898,7 +5899,8 @@
       "targetCourseMissing": "Target course not found",
       "videoStorageNotConfigured": "Video storage is not configured for this tenant",
       "sourceVideoMissing": "Source video not found",
-      "exportedCourseReadonly": "Exported course is read-only"
+      "exportedCourseReadonly": "Exported course is read-only",
+      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be shared"
     }
   },
   "learningPathExport": {

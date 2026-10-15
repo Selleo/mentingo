@@ -5197,7 +5197,8 @@
       "sourceCourseNotFound": "Kurz k duplikování nebyl nalezen",
       "sourceCategoryMissing": "Kurz k duplikování nemá kategorii",
       "targetCourseNotFound": "Duplikovaný kurz nebyl nalezen",
-      "tenantMissing": "Tenant tohoto kurzu nebyl nalezen"
+      "tenantMissing": "Tenant tohoto kurzu nebyl nalezen",
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat"
     }
   },
   "tenantSharing": {
@@ -5243,7 +5244,8 @@
       "targetCourseMissing": "Cilovy kurz nebyl nalezen",
       "videoStorageNotConfigured": "Ukladani videa neni pro tohoto tenanta nakonfigurovano",
       "sourceVideoMissing": "Zdrojove video nebylo nalezeno",
-      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
+      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni",
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze sdílet"
     }
   },
   "learningPathExport": {

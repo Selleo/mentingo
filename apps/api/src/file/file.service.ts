@@ -73,7 +73,7 @@ import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
-import { isBunnyVideoReadyStatus } from "./video-metadata.utils";
+import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadAuthorizationService } from "./video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
@@ -1047,7 +1047,7 @@ export class FileService {
 
     await this.assertValidBunnyWebhookSignature(data.tenantId, webhookSignature);
 
-    if (!isBunnyVideoReadyStatus(status)) {
+    if (!isBunnyWebhookReadyStatus(status)) {
       return { ignored: true };
     }
 
@@ -1096,7 +1096,7 @@ export class FileService {
     }
 
     await this.assertValidBunnyWebhookSignature(hostedVideo.tenantId, webhookSignature);
-    await this.hostedVideoStatusService.recordBunnyStatus(hostedVideo, bunnyStatus);
+    await this.hostedVideoStatusService.recordBunnyWebhookStatus(hostedVideo, bunnyStatus);
 
     return { success: true };
   }

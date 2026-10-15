@@ -33,6 +33,7 @@ import type {
   CourseTransferExportCandidatesQuery,
   CourseTransferCopyCourseInput,
   CourseTransferCopyCourseResult,
+  CourseTransferDependency,
   CourseTransferExportRequest,
   CourseTransferExportResult,
   CourseTransferJob,
@@ -46,6 +47,7 @@ import type {
   CourseTransferStreamKey,
   CourseTransferSyncPolicy,
   CourseTransferSyncRequest,
+  CourseTransferTargetOrDependency,
 } from "../course-transfer.types";
 import type { CourseTransferPreparedLearningPathCourse } from "../types/course-transfer-graph.types";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -153,8 +155,11 @@ export class CourseTransferService {
     }
   }
 
-  /** Transfers the sharing relationship named by a worker job into its destination tenant. */
-  async transferFromJob(job: CourseTransferJob): Promise<UUIDType> {
+  /**
+   * Transfers the sharing relationship named by a worker job into its destination tenant.
+   * Resolves to null when the transfer waits for other transfers, such as a path's courses.
+   */
+  async transferFromJob(job: CourseTransferJob): Promise<UUIDType | null> {
     if (!this.hasValidJobIds(job)) {
       throw new BadRequestException(COURSE_TRANSFER_RELATIONSHIP_ERRORS[job.kind].invalidJob);
     }
@@ -305,7 +310,7 @@ export class CourseTransferService {
   private transferRelationshipUnderLease(
     relationship: CourseTransferRelationship,
     operationId: string,
-  ): Promise<UUIDType> {
+  ): Promise<UUIDType | null> {
     return this.courseTransferCoordinator.transferUnderLease(
       operationId,
       (leasedTransfer) =>
@@ -357,10 +362,14 @@ export class CourseTransferService {
     );
   }
 
+  /**
+   * Links the path's courses in one destination commit. Courses without a destination yet are
+   * requested as their own transfers first, and the path waits until they are applied.
+   */
   private async transferLearningPathToDestination(
     relationship: CourseTransferRelationship,
     leasedTransfer: CourseTransferLeasedTransfer,
-  ): Promise<UUIDType> {
+  ): Promise<UUIDType | null> {
     const snapshot = await this.courseTransferSnapshotService.readLearningPath({
       tenantId: relationship.sourceTenantId,
       learningPathId: relationship.sourceId,
@@ -371,15 +380,22 @@ export class CourseTransferService {
     }
 
     const courses: CourseTransferPreparedLearningPathCourse[] = [];
+    const pendingCourseTransfers: CourseTransferDependency[] = [];
 
     for (const { courseId } of snapshot.courseLinks) {
-      const targetCourseId = await this.transferCourseOfLearningPath({
+      const courseTransfer = await this.findOrRequestCourseOfLearningPath({
         kind: COURSE_TRANSFER_KINDS.COURSE,
         sourceTenantId: relationship.sourceTenantId,
         sourceId: courseId,
         targetTenantId: relationship.targetTenantId,
       });
-      courses.push({ sourceCourseId: courseId, targetCourseId });
+
+      if (courseTransfer.dependency) pendingCourseTransfers.push(courseTransfer.dependency);
+      else courses.push({ sourceCourseId: courseId, targetCourseId: courseTransfer.targetId });
+    }
+
+    if (pendingCourseTransfers.length) {
+      return leasedTransfer.waitForDependencies(pendingCourseTransfers);
     }
 
     return this.writeInDestinationTenant(relationship, leasedTransfer, (transaction) =>
@@ -396,45 +412,37 @@ export class CourseTransferService {
     );
   }
 
-  private async transferCourseOfLearningPath(
+  private async findOrRequestCourseOfLearningPath(
     pair: CourseTransferRelationshipPair,
-  ): Promise<UUIDType> {
-    const { relationship, operationId } = await this.tenantDbRunnerService.runWithTenant(
-      pair.sourceTenantId,
-      () =>
-        this.tenantDbRunnerService.transactionWithHandle(async (transaction) => {
-          const sourceCourse = await this.courseTransferSnapshotService.findSourceCourse(
-            pair.sourceId,
-          );
-          if (!sourceCourse) throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
-          if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
-            throw new BadRequestException("masterCourse.error.exportedCourseCannotBeSource");
-          }
+  ): Promise<CourseTransferTargetOrDependency> {
+    return this.tenantDbRunnerService.runWithTenant(pair.sourceTenantId, () =>
+      this.tenantDbRunnerService.transactionWithHandle(async (transaction) => {
+        const sourceCourse = await this.courseTransferSnapshotService.findSourceCourse(
+          pair.sourceId,
+        );
+        if (!sourceCourse) throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
+        if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
+          throw new BadRequestException("masterCourse.error.exportedCourseCannotBeSource");
+        }
 
-          await this.courseTransferRelationshipRepository.markSourceAsMaster(
-            pair.kind,
-            pair.sourceId,
-            transaction,
-          );
-          const { relationship } =
-            await this.courseTransferRelationshipService.findOrCreateRelationship(
-              pair,
-              transaction,
-            );
-          this.courseTransferRelationshipService.assertRelationshipIsActive(relationship);
+        await this.courseTransferRelationshipRepository.markSourceAsMaster(
+          pair.kind,
+          pair.sourceId,
+          transaction,
+        );
+        const { relationship } =
+          await this.courseTransferRelationshipService.findOrCreateRelationship(pair, transaction);
+        this.courseTransferRelationshipService.assertRelationshipIsActive(relationship);
 
-          const operation = await this.courseTransferCoordinator.recordTransferRequest(
-            this.buildTransferRequest(relationship, {
-              triggerEventType: COURSE_TRANSFER_TRIGGERS.LEARNING_PATH,
-            }),
-            transaction,
-          );
-
-          return { relationship, operationId: operation.id };
-        }),
+        return this.courseTransferCoordinator.findOrRequestTransferTarget(
+          this.buildTransferRequest(relationship, {
+            triggerEventType: COURSE_TRANSFER_TRIGGERS.LEARNING_PATH,
+          }),
+          pair.sourceId,
+          transaction,
+        );
+      }),
     );
-
-    return this.transferRelationshipUnderLease(relationship, operationId);
   }
 
   private writeInDestinationTenant(

@@ -6,6 +6,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { RESOURCE_CATEGORIES } from "../file.constants";
 import { FileService } from "../file.service";
+import { HostedVideoStatusService } from "../hosted-video-status.service";
 import { IMAGE_QUALITY, PWA_ICON_IMAGE_QUALITY } from "../image-variants/image-variant.constants";
 import { ImageVariantService } from "../image-variants/image-variant.service";
 import { BunnyVideoProvider } from "../providers/bunny-video.provider";
@@ -13,6 +14,7 @@ import { S3VideoProvider } from "../providers/s3-video.provider";
 import { ThumbnailService } from "../thumbnail.service";
 import { VideoMetadataQueueService } from "../video-metadata.queue.service";
 import { VideoProcessingStateService } from "../video-processing-state.service";
+import { VideoUploadAuthorizationService } from "../video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "../video-upload-notification.gateway";
 
 type S3ServiceMock = {
@@ -58,6 +60,8 @@ describe("FileService image variant references", () => {
         { provide: VideoUploadNotificationGateway, useValue: {} },
         { provide: VideoMetadataQueueService, useValue: {} },
         { provide: TenantDbRunnerService, useValue: {} },
+        { provide: VideoUploadAuthorizationService, useValue: {} },
+        { provide: HostedVideoStatusService, useValue: {} },
       ],
     }).compile();
 
