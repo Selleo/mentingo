@@ -36688,6 +36688,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     statisticsControllerGetDashboardDeadlineRisks: (
       query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "overdue" | "dueSoon";
         /**
          * @min 1
          * @default 1
@@ -36699,9 +36702,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @default 20
          */
         perPage?: number;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        type?: "overdue" | "dueSoon";
       },
       params: RequestParams = {},
     ) =>
@@ -36753,11 +36753,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        sortBy?: "name" | "dueDate" | "urgency" | "studentCount";
+        sortDirection?: "asc" | "desc";
         urgency?: "overdue" | "dueSoon";
         /** @maxLength 200 */
         search?: string;
-        sortBy?: "name" | "dueDate" | "urgency" | "studentCount";
-        sortDirection?: "asc" | "desc";
         /** @min 1 */
         page?: number;
         /**
@@ -37462,9 +37462,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        isArchived?: "true" | "false" | "all";
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isArchived?: "true" | "false" | "all";
       },
       params: RequestParams = {},
     ) =>
@@ -37600,11 +37600,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-email"
           | "-isEnrolledByGroup";
         groups?: string[];
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         perPage?: number;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -38779,10 +38779,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query?: {
-        /** @format uuid */
-        studentId?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        studentId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -39553,12 +39553,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         userId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         perPage?: number;
         sort?: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -39776,6 +39776,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -39795,6 +39796,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -39987,9 +39989,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         from?: string;
         /** @format date-time */
         to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         type?: "practice" | "ai-mentor";
         status?: "active" | "completed" | "archived";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -40616,13 +40618,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        feed?: "all" | "admin_announcements" | "system";
+        status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        feed?: "all" | "admin_announcements" | "system";
-        status?: "scheduled" | "published";
       },
       params: RequestParams = {},
     ) =>
@@ -40679,11 +40681,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -42898,6 +42900,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -42917,6 +42920,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -43314,10 +43318,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         lessonId?: string;
-        /** @format uuid */
-        scoId?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        scoId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -44014,6 +44018,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         keyword?: string;
         email?: string;
+        resourceType?:
+          | "user"
+          | "course"
+          | "chapter"
+          | "lesson"
+          | "announcement"
+          | "group"
+          | "settings"
+          | "integration"
+          | "category"
+          | "qa"
+          | "news"
+          | "article"
+          | "articleSection"
+          | "live_training"
+          | "learning_path"
+          | "scorm"
+          | "email_template"
+          | "automation";
         from?: string;
         to?: string;
         actionTypes?:
@@ -44097,25 +44120,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "play_scorm"
               | "complete_scorm"
             )[];
-        resourceType?:
-          | "user"
-          | "course"
-          | "chapter"
-          | "lesson"
-          | "announcement"
-          | "group"
-          | "settings"
-          | "integration"
-          | "category"
-          | "qa"
-          | "news"
-          | "article"
-          | "articleSection"
-          | "live_training"
-          | "learning_path"
-          | "scorm"
-          | "email_template"
-          | "automation";
       },
       params: RequestParams = {},
     ) =>
@@ -45097,8 +45101,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseAuthoringControllerGetAuthoringCourseContext: (
       courseId: string,
       query?: {
-        lessonIds?: string[];
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        lessonIds?: string[];
       },
       params: RequestParams = {},
     ) =>

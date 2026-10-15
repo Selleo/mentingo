@@ -43,12 +43,19 @@ const toUpdateRegistrationFormBody = (fields: RegistrationField[]): UpdateRegist
   })),
 });
 
+/** The update endpoint keeps fields missing from the body, so fields added by a test are archived. */
 const restoreRegistrationForm = async (
   apiClient: FixtureApiClient,
   originalFields: RegistrationField[],
 ) => {
+  const originalFieldIds = new Set(originalFields.map((field) => field.id));
+  const { fields: currentFields } = await getRegistrationForm(apiClient);
+  const addedFields = currentFields
+    .filter((field) => !originalFieldIds.has(field.id))
+    .map((field) => ({ ...field, archived: true }));
+
   await apiClient.api.settingsControllerUpdateRegistrationForm(
-    toUpdateRegistrationFormBody(originalFields),
+    toUpdateRegistrationFormBody([...originalFields, ...addedFields]),
   );
 };
 
