@@ -1,7 +1,4 @@
 export const LEARNING_HANDLES = {
-  CURRENT_LESSON_NUMBER: "learning-current-lesson-number",
-  LESSONS_COUNT: "learning-lessons-count",
-  LESSON_TYPE: "learning-lesson-type",
   LESSON_TITLE: "learning-lesson-title",
   NEXT_LESSON_BUTTON: "learning-next-lesson-button",
   QUIZ_FORM: "learning-quiz-form",
@@ -41,6 +38,7 @@ export const LEARNING_HANDLES = {
   AI_MENTOR_VOICE_OVERLAY_RECOVERY_STATUS: "learning-ai-mentor-voice-overlay-recovery-status",
   AI_MENTOR_VOICE_OVERLAY_RESTART_BUTTON: "learning-ai-mentor-voice-overlay-restart-button",
   LESSON_SIDEBAR: "learning-lesson-sidebar",
+  lessonSidebarTypeIcon: (lessonId: string) => `learning-lesson-sidebar-type-${lessonId}`,
   lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
   lessonSidebarBlockedIndicator: (lessonId: string) =>
     `learning-lesson-sidebar-blocked-indicator-${lessonId}`,

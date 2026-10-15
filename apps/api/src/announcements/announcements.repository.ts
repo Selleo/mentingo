@@ -6,6 +6,7 @@ import {
   ANNOUNCEMENT_STATUSES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
+  SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import {
   eq,
@@ -576,6 +577,21 @@ export class AnnouncementsRepository {
       .returning({ id: announcements.id });
   }
 
+  async getAnnouncementEmailContent(announcementId: UUIDType) {
+    // Preserve localized snapshots for recipients selected later by an automation.
+    const languages = sql`(values ${sql.join(
+      Object.values(SUPPORTED_LANGUAGES).map((language) => sql`(${language}::text)`),
+      sql`, `,
+    )}) as notification_languages(language)`;
+    const language = sql<SupportedLanguages>`notification_languages.language`;
+
+    return this.db
+      .select({ language, ...this.getLocalizedAnnouncementFields(language) })
+      .from(announcements)
+      .innerJoin(languages, sql`true`)
+      .where(and(eq(announcements.id, announcementId), isNull(announcements.deletedAt)));
+  }
+
   async getAnnouncementEmailRecipients(announcementId: UUIDType) {
     const [announcement] = await this.getAnnouncementById(announcementId);
 
@@ -632,11 +648,13 @@ export class AnnouncementsRepository {
     return {
       id: users.id,
       email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
       language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
     };
   }
 
-  private getLocalizedAnnouncementFields(language?: SupportedLanguages) {
+  private getLocalizedAnnouncementFields(language?: SupportedLanguages | SQL<unknown>) {
     return {
       title: this.localizationService.getLocalizedSqlField(
         announcements.title,

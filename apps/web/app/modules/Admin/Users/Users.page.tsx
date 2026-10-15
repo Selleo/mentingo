@@ -30,7 +30,7 @@ import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUse
 import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useRoles } from "~/api/queries/admin/useRoles";
-import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
+import { useAllUsersSuspense } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Pagination } from "~/components/Pagination/Pagination";
@@ -85,11 +85,6 @@ const MailKey = ({ className }: { className?: string }) => (
 type ModalTypes = "group" | "role" | "delete" | "archive" | "passwordEmail" | null;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
-
-export const clientLoader = async () => {
-  queryClient.prefetchQuery(usersQueryOptions());
-  return null;
-};
 
 const Users = () => {
   const navigate = useNavigate();

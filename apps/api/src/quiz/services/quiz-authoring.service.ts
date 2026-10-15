@@ -19,6 +19,7 @@ import { preserveExistingQuizAuthoringIds } from "../mappers/quiz-authoring-iden
 import { filterItemsByQuestionId, getBlankMarkerIds } from "../mappers/quiz-authoring-mapper.utils";
 import { mapLocalizedQuizAuthoringReadModelToLegacy } from "../mappers/quiz-authoring-to-legacy.mapper";
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
+import { validateCanonicalQuizQuestions } from "../validators/canonical-quiz-authoring.validator";
 
 import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 
@@ -55,6 +56,73 @@ export class QuizAuthoringService {
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
   ) {}
+
+  /** Canonical authoring entry; shares manual validation and the current transaction context. */
+  async saveCanonicalLesson(input: QuizAuthoringInput, lessonId?: UUIDType) {
+    const issues = validateCanonicalQuizQuestions(input.questions ?? []);
+    if (issues.length)
+      throw new BadRequestException({
+        message: "courseAuthoring.errors.invalidAssessment",
+        issues,
+      });
+    this.validateQuizAuthoringInput(input, {
+      requireChapterId: !lessonId,
+      requireQuestions: true,
+    });
+    if (lessonId) {
+      const existingQuiz = await this.getQuizLessonForAuthoring(lessonId, input.language);
+      if (!existingQuiz) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+      if (!existingQuiz.assessment.availableLocales.includes(input.language)) {
+        throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+      }
+      const existingQuestions = existingQuiz.questions;
+      if (input.language !== existingQuiz.assessment.baseLanguage) {
+        this.validateTranslatedQuizStructure(input.questions ?? [], existingQuestions);
+      }
+      const assessment = this.toAssessmentData(input);
+      const questions = preserveExistingQuizAuthoringIds(input.questions ?? [], existingQuestions);
+      const assessmentRow = await this.quizAuthoringPersistenceService.updateQuizLesson({
+        lessonId,
+        lesson: {
+          language: input.language,
+          title: input.title,
+          description: input.description,
+          thresholdScore: input.thresholdScore,
+          attemptsLimit: input.attemptsLimit,
+          quizCooldownInHours: input.quizCooldownInHours,
+        },
+        assessment: {
+          passingScorePercentage: assessment.passingScorePercentage,
+          attemptLimitMode: assessment.attemptLimitMode,
+          maximumAttempts: assessment.maximumAttempts,
+          attemptCooldown: assessment.attemptCooldown,
+        },
+        questions,
+      });
+      if (!assessmentRow) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+      await this.createPromptImageResources(questions);
+      return assessmentRow;
+    }
+    if (!input.chapterId)
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    const lesson = await this.quizAuthoringPersistenceService.createQuizLesson({
+      language: input.language,
+      lesson: {
+        chapterId: input.chapterId,
+        type: LESSON_TYPES.QUIZ,
+        title: input.title,
+        description: input.description ?? null,
+        thresholdScore: input.thresholdScore,
+        attemptsLimit: input.attemptsLimit,
+        quizCooldownInHours: input.quizCooldownInHours,
+        displayOrder: input.displayOrder,
+      },
+      assessment: this.toAssessmentData(input),
+      questions: input.questions ?? [],
+    });
+    await this.createPromptImageResources(input.questions ?? []);
+    return lesson;
+  }
 
   async createQuizLesson(input: CreateQuizLessonBody) {
     this.validateQuestionTypes(input.questions);

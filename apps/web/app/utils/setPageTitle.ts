@@ -1,12 +1,13 @@
 import { t } from "i18next";
 
-import type { MetaMatches } from "@remix-run/react/dist/routeModules";
-import type { ParentRouteData } from "~/modules/layout";
+import { companyInformationQueryOptions } from "~/api/queries/useCompanyInformation";
+import { queryClient } from "~/api/queryClient";
 
-export const setPageTitle = (matches: MetaMatches<Record<string, unknown>>, tKey: string) => {
+import type { MetaMatches } from "@remix-run/react/dist/routeModules";
+
+export const setPageTitle = (_matches: MetaMatches<Record<string, unknown>>, tKey: string) => {
   const i18n = t(tKey);
-  const parentMatch = matches.find(({ id }) => id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+  const companyShortName = queryClient.getQueryData(companyInformationQueryOptions.queryKey)?.data
     ?.companyShortName;
   const title = companyShortName ? `${companyShortName} - ${i18n}` : i18n;
 

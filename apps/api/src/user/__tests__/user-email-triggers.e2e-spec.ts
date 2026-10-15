@@ -1,434 +1,106 @@
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq, isNull, sql } from "drizzle-orm";
-import { decode } from "html-entities";
+import { randomUUID } from "node:crypto";
 
-import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
-import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
-import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
-import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
-import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
-import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
-import {
-  DEFAULT_EMAIL_TRIGGERS,
-  DEFAULT_GLOBAL_SETTINGS,
-} from "src/settings/constants/settings.constants";
-import { StatisticsService } from "src/statistics/statistics.service";
+import { eq } from "drizzle-orm";
+
+import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
+import { AutomationEmailWorker } from "src/automation-execution/workers/automation-email.worker";
+import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
+import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { chapters, settings, studentCourses } from "src/storage/schema";
-import { NotifyUsersHandler } from "src/user/handlers/notify-users.handler";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { automations, settings, tenants } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
-import { createCourseFactory } from "../../../test/factory/course.factory";
-import { createSettingsFactory } from "../../../test/factory/settings.factory";
-import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
-import { truncateTables } from "../../../test/helpers/test-helpers";
 
-import type { CourseTest } from "../../../test/factory/course.factory";
-import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
 import type { INestApplication } from "@nestjs/common";
-import type { DatabasePg, UUIDType } from "src/common";
-import type { UserEmailTriggersSchema } from "src/settings/schemas/settings.schema";
+import type { DatabasePg } from "src/common";
 
-type TriggerKey = keyof UserEmailTriggersSchema;
-type TriggerCase = {
-  name: string;
-  trigger: TriggerKey;
-  createEvent: () =>
-    | UserFirstLoginEvent
-    | UsersAssignedToCourseEvent
-    | UsersShortInactivityEvent
-    | UsersLongInactivityEvent
-    | UserChapterFinishedEvent
-    | UserCourseFinishedEvent;
-};
-type InactivityEmailCase = {
-  name: string;
-  trigger: "userShortInactivity" | "userLongInactivity";
-  createEvent: () => UsersShortInactivityEvent | UsersLongInactivityEvent;
-  courseSubject: string;
-  daysText: string;
-  platformSubject: string;
-};
-
-const courseTitle = "Email Trigger Course";
-
-describe("User email triggers (e2e)", () => {
+describe("legacy organization email switches migrate to automation state (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
-  let baseDb: DatabasePg;
-  let defaultTenantId: UUIDType;
-  let emailAdapter: EmailTestingAdapter;
-  let notifyUsersHandler: NotifyUsersHandler;
-  let statisticsService: StatisticsService;
-  let settingsFactory: ReturnType<typeof createSettingsFactory>;
-  let userFactory: ReturnType<typeof createUserFactory>;
-  let courseFactory: ReturnType<typeof createCourseFactory>;
-  let student: UserWithCredentials;
-  let course: CourseTest;
-  let chapterId: UUIDType;
-
+  let admin: DatabasePg;
+  let runner: TenantDbRunnerService;
+  let provisioning: DefaultAutomationSetupService;
   beforeAll(async () => {
-    const testContext = await createE2ETest();
-
-    app = testContext.app;
+    ({ app } = await createE2ETest({
+      useDbProxy: true,
+      customProviders: [
+        { provide: AutomationEmailWorker, useValue: { onModuleDestroy: async () => {} } },
+      ],
+    }));
     db = app.get(DB);
-    baseDb = app.get(DB_ADMIN);
-    defaultTenantId = testContext.defaultTenantId;
-    emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
-    notifyUsersHandler = app.get(NotifyUsersHandler);
-    statisticsService = app.get(StatisticsService);
-    settingsFactory = createSettingsFactory(db);
-    userFactory = createUserFactory(db);
-    courseFactory = createCourseFactory(db);
+    admin = app.get(DB_ADMIN);
+    runner = app.get(TenantDbRunnerService);
+    provisioning = app.get(DefaultAutomationSetupService);
   });
-
   afterAll(async () => {
-    await app.close();
+    await app?.close();
   });
-
-  beforeEach(async () => {
-    await settingsFactory.create({ userId: null });
-    emailAdapter.clearEmails();
-
-    student = await userFactory.withUserSettings(db).create({
-      email: "email-trigger-student@example.com",
-      firstName: "Email",
-      lastName: "Trigger",
-      tenantId: defaultTenantId,
+  const tenant = async () => {
+    const [record] = await admin
+      .insert(tenants)
+      .values({ name: "Switch migration", host: `https://switch-${randomUUID()}.local` })
+      .returning();
+    return record.id;
+  };
+  it("uses saved legacy values once, keeps unconditional scenarios enabled, and hides switches from settings reads", async () => {
+    const tenantId = await tenant();
+    await runner.runWithTenant(tenantId, async () => {
+      const legacySettings = {
+        ...DEFAULT_GLOBAL_SETTINGS,
+        userEmailTriggers: { userFirstLogin: true, userCourseAssignment: false },
+      };
+      await db.insert(settings).values({ settings: settingsToJSONBuildObject(legacySettings) });
+      await provisioning.ensureTenantDefaultAutomations();
+      const defaults = await db.select().from(automations);
+      expect(defaults).toHaveLength(22);
+      expect(defaults.find((item) => item.builtInKey === "user_first_login")?.status).toBe(
+        "enabled",
+      );
+      expect(defaults.find((item) => item.builtInKey === "user_assigned_to_course")?.status).toBe(
+        "disabled",
+      );
+      expect(defaults.find((item) => item.builtInKey === "user_short_inactivity")?.status).toBe(
+        "disabled",
+      );
+      expect(defaults.find((item) => item.builtInKey === "welcome")?.status).toBe("enabled");
+      const visible = await app.get(SettingsService).getPublicGlobalSettings();
+      expect(visible).not.toHaveProperty("userEmailTriggers");
+      const firstLogin = defaults.find((item) => item.builtInKey === "user_first_login")!;
+      await db
+        .update(automations)
+        .set({ status: "archived" })
+        .where(eq(automations.id, firstLogin.id));
+      await provisioning.ensureTenantDefaultAutomations();
+      const retained = await db.select().from(automations);
+      expect(retained).toHaveLength(22);
+      expect(retained.find((item) => item.id === firstLogin.id)?.status).toBe("archived");
     });
-
-    course = await courseFactory.create({
-      authorId: student.id,
-      title: courseTitle,
-      description: "Email trigger course description",
-      thumbnailS3Key: null,
+  });
+  it("treats missing organization switches as false without changing unconditional defaults", async () => {
+    const tenantId = await tenant();
+    await runner.runWithTenant(tenantId, async () => {
+      await db.insert(settings).values({ settings: DEFAULT_GLOBAL_SETTINGS });
+      await provisioning.ensureTenantDefaultAutomations();
+      const defaults = await db.select().from(automations);
+      expect(
+        defaults
+          .filter((item) =>
+            [
+              "user_first_login",
+              "user_assigned_to_course",
+              "user_short_inactivity",
+              "user_long_inactivity",
+              "user_finished_chapter",
+              "user_finished_course",
+            ].includes(item.builtInKey ?? ""),
+          )
+          .every((item) => item.status === "disabled"),
+      ).toBe(true);
+      expect(defaults.find((item) => item.builtInKey === "password_recovery")?.status).toBe(
+        "enabled",
+      );
     });
-
-    const [chapter] = await db
-      .insert(chapters)
-      .values({
-        authorId: student.id,
-        courseId: course.id,
-        displayOrder: 1,
-        lessonCount: 1,
-        title: buildJsonbField("en", "Email Trigger Chapter"),
-      })
-      .returning({ id: chapters.id });
-
-    chapterId = chapter.id;
-
-    await db.insert(studentCourses).values({
-      studentId: student.id,
-      courseId: course.id,
-      status: COURSE_ENROLLMENT.ENROLLED,
-    });
   });
-
-  afterEach(async () => {
-    jest.restoreAllMocks();
-
-    await truncateTables(baseDb, [
-      "student_courses",
-      "chapters",
-      "courses",
-      "users",
-      "settings",
-      "categories",
-    ]);
-  });
-
-  const cases: TriggerCase[] = [
-    {
-      name: "first login",
-      trigger: "userFirstLogin",
-      createEvent: () => new UserFirstLoginEvent({ userId: student.id }),
-    },
-    {
-      name: "course assignment",
-      trigger: "userCourseAssignment",
-      createEvent: () =>
-        new UsersAssignedToCourseEvent({ courseId: course.id, studentIds: [student.id] }),
-    },
-    {
-      name: "short inactivity",
-      trigger: "userShortInactivity",
-      createEvent: () =>
-        new UsersShortInactivityEvent({
-          tenantId: defaultTenantId,
-          users: [{ userId: student.id, name: student.firstName, email: student.email }],
-        }),
-    },
-    {
-      name: "long inactivity",
-      trigger: "userLongInactivity",
-      createEvent: () =>
-        new UsersLongInactivityEvent({
-          tenantId: defaultTenantId,
-          users: [{ userId: student.id, name: student.firstName, email: student.email }],
-        }),
-    },
-    {
-      name: "chapter finished",
-      trigger: "userChapterFinished",
-      createEvent: () =>
-        new UserChapterFinishedEvent({
-          actor: {
-            userId: student.id,
-            email: student.email,
-            roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
-            permissions: [],
-            tenantId: defaultTenantId,
-          },
-          chapterId,
-          courseId: course.id,
-          userId: student.id,
-        }),
-    },
-    {
-      name: "course finished",
-      trigger: "userCourseFinished",
-      createEvent: () =>
-        new UserCourseFinishedEvent({
-          actor: {
-            userId: student.id,
-            email: student.email,
-            roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
-            permissions: [],
-            tenantId: defaultTenantId,
-          },
-          courseId: course.id,
-          userId: student.id,
-        }),
-    },
-  ];
-  const inactivityEmailCases: InactivityEmailCase[] = [
-    {
-      name: "short inactivity",
-      trigger: "userShortInactivity",
-      createEvent: () =>
-        new UsersShortInactivityEvent({
-          tenantId: defaultTenantId,
-          users: [{ userId: student.id, name: student.firstName, email: student.email }],
-        }),
-      courseSubject: "Continue your course - Email Trigger Course",
-      daysText: "14 days since last activity",
-      platformSubject: "Continue your journey on the platform",
-    },
-    {
-      name: "long inactivity",
-      trigger: "userLongInactivity",
-      createEvent: () =>
-        new UsersLongInactivityEvent({
-          tenantId: defaultTenantId,
-          users: [{ userId: student.id, name: student.firstName, email: student.email }],
-        }),
-      courseSubject: "Come back to your courses",
-      daysText: "It's been 30 days since your last activity",
-      platformSubject: "Come back to your courses",
-    },
-  ];
-
-  it.each(cases)("sends the $name email when the trigger is enabled", async (testCase) => {
-    await enableOnlyTrigger(testCase.trigger);
-
-    await notifyUsersHandler.handle(testCase.createEvent());
-
-    const [sentEmail] = emailAdapter.getAllEmails();
-
-    expect(emailAdapter.getAllEmails()).toHaveLength(1);
-    expect(sentEmail).toEqual(
-      expect.objectContaining({
-        to: student.email,
-        html: expect.any(String),
-        subject: expect.any(String),
-        text: expect.any(String),
-      }),
-    );
-    expect(sentEmail.subject).not.toBe("");
-    expect(sentEmail.text).not.toBe("");
-    expect(sentEmail.html).not.toBe("");
-  });
-
-  it.each(cases)("does not send the $name email when the trigger is disabled", async (testCase) => {
-    await disableAllTriggers();
-
-    await notifyUsersHandler.handle(testCase.createEvent());
-
-    expect(emailAdapter.getAllEmails()).toHaveLength(0);
-  });
-
-  it.each(inactivityEmailCases)(
-    "renders $name email wording on platform when no recent course is available",
-    async (testCase) => {
-      jest.spyOn(statisticsService, "getRecentCoursesForStudents").mockResolvedValue([]);
-      await enableOnlyTrigger(testCase.trigger);
-
-      await notifyUsersHandler.handle(testCase.createEvent());
-
-      const sentEmail = getSingleSentEmail();
-      const text = normalizeEmailText(sentEmail.text);
-      const html = normalizeEmailHtml(sentEmail.html);
-
-      expect(sentEmail.subject).toBe(testCase.platformSubject);
-      expect(text).toContain(`${testCase.daysText} on platform`);
-      expect(html).toContain(`${testCase.daysText} on platform`);
-      expect(text).not.toContain(`in ${courseTitle}`);
-    },
-  );
-
-  it.each(inactivityEmailCases)(
-    "renders $name email wording in the recent course when a course is available",
-    async (testCase) => {
-      jest.spyOn(statisticsService, "getRecentCoursesForStudents").mockResolvedValue([
-        {
-          studentId: student.id,
-          courseId: course.id,
-          courseName: courseTitle,
-        },
-      ]);
-      await enableOnlyTrigger(testCase.trigger);
-
-      await notifyUsersHandler.handle(testCase.createEvent());
-
-      const sentEmail = getSingleSentEmail();
-      const text = normalizeEmailText(sentEmail.text);
-      const html = normalizeEmailHtml(sentEmail.html);
-
-      expect(sentEmail.subject).toBe(testCase.courseSubject);
-      expect(text).toContain(`${testCase.daysText} in ${courseTitle}`);
-      expect(html).toContain(`${testCase.daysText} in ${courseTitle}`);
-      expect(text).not.toContain(`${testCase.daysText} on platform`);
-    },
-  );
-
-  it("renders recipient-specific short inactivity wording for multiple recipients", async () => {
-    const platformOnlyStudent = await userFactory.withUserSettings(db).create({
-      email: "email-trigger-platform-recipient@example.com",
-      firstName: "Platform",
-      lastName: "Recipient",
-      tenantId: defaultTenantId,
-    });
-
-    jest.spyOn(statisticsService, "getRecentCoursesForStudents").mockResolvedValue([
-      {
-        studentId: student.id,
-        courseId: course.id,
-        courseName: courseTitle,
-      },
-    ]);
-    await enableOnlyTrigger("userShortInactivity");
-
-    await notifyUsersHandler.handle(
-      new UsersShortInactivityEvent({
-        tenantId: defaultTenantId,
-        users: [buildInactiveUser(student), buildInactiveUser(platformOnlyStudent)],
-      }),
-    );
-
-    expect(emailAdapter.getAllEmails()).toHaveLength(2);
-
-    const courseEmail = getSentEmailTo(student.email);
-    const platformEmail = getSentEmailTo(platformOnlyStudent.email);
-
-    expect(courseEmail.subject).toBe(`Continue your course - ${courseTitle}`);
-    expect(normalizeEmailText(courseEmail.text)).toContain(
-      `14 days since last activity in ${courseTitle}`,
-    );
-    expect(platformEmail.subject).toBe("Continue your journey on the platform");
-    expect(normalizeEmailText(platformEmail.text)).toContain(
-      "14 days since last activity on platform",
-    );
-  });
-
-  it("falls back to disabled default email triggers when legacy global settings omit them", async () => {
-    await removeUserEmailTriggersFromGlobalSettings();
-
-    await expect(
-      notifyUsersHandler.handle(new UserFirstLoginEvent({ userId: student.id })),
-    ).resolves.toBeUndefined();
-
-    expect(emailAdapter.getAllEmails()).toHaveLength(0);
-  });
-
-  it("renders localized short inactivity platform wording in the recipient language", async () => {
-    await db
-      .update(settings)
-      .set({ settings: setJsonbField(settings.settings, "language", SUPPORTED_LANGUAGES.PL) })
-      .where(eq(settings.userId, student.id));
-    jest.spyOn(statisticsService, "getRecentCoursesForStudents").mockResolvedValue([]);
-    await enableOnlyTrigger("userShortInactivity");
-
-    await notifyUsersHandler.handle(
-      new UsersShortInactivityEvent({
-        tenantId: defaultTenantId,
-        users: [buildInactiveUser(student)],
-      }),
-    );
-
-    const sentEmail = getSingleSentEmail();
-    const localizedText = "Minęło 14 dni od ostatniej aktywności na platformie";
-
-    expect(sentEmail.subject).toBe("Kontynuuj naukę na platformie");
-    expect(normalizeEmailText(sentEmail.text)).toContain(localizedText);
-    expect(normalizeEmailHtml(sentEmail.html)).toContain(localizedText);
-  });
-
-  const enableOnlyTrigger = async (trigger: TriggerKey) => {
-    await updateUserEmailTriggers({
-      ...DEFAULT_EMAIL_TRIGGERS,
-      [trigger]: true,
-    });
-  };
-
-  const disableAllTriggers = async () => {
-    await updateUserEmailTriggers(DEFAULT_EMAIL_TRIGGERS);
-  };
-
-  const updateUserEmailTriggers = async (userEmailTriggers: UserEmailTriggersSchema) => {
-    await db
-      .update(settings)
-      .set({
-        settings: settingsToJSONBuildObject({
-          ...DEFAULT_GLOBAL_SETTINGS,
-          userEmailTriggers,
-        }),
-      })
-      .where(isNull(settings.userId));
-  };
-
-  const removeUserEmailTriggersFromGlobalSettings = async () => {
-    await db
-      .update(settings)
-      .set({ settings: sql`${settings.settings} - 'userEmailTriggers'` })
-      .where(isNull(settings.userId));
-  };
-
-  const getSingleSentEmail = () => {
-    const [sentEmail] = emailAdapter.getAllEmails();
-
-    expect(emailAdapter.getAllEmails()).toHaveLength(1);
-
-    return sentEmail;
-  };
-
-  const getSentEmailTo = (email: string) => {
-    const sentEmail = emailAdapter.getAllEmails().find((sentEmail) => sentEmail.to === email);
-
-    if (!sentEmail) throw new Error(`Expected email to ${email}`);
-
-    return sentEmail;
-  };
-
-  const buildInactiveUser = (user: UserWithCredentials) => ({
-    userId: user.id,
-    name: user.firstName,
-    email: user.email,
-  });
-
-  const normalizeEmailText = (text?: string) => text?.replace(/\s+/g, " ").trim() ?? "";
-
-  const normalizeEmailHtml = (html?: string) => normalizeEmailText(decode(html ?? ""));
 });

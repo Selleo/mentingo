@@ -1,23 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { DEFAULT_EMAIL_PRIMARY_COLOR, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import sharp from "sharp";
 
 import { DatabasePg } from "src/common";
-import { EmailTemplateRenderingService } from "src/email-templates/services/email-template-rendering.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { EmailAdapter } from "./adapters/email.adapter";
 
-import type { Attachment, Email } from "./email.interface";
+import type { Attachment, Email, BrandedEmailSendOptions } from "./email.interface";
 import type { SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 import type { EmailConfigSchema } from "src/common/configuration/email";
-import type { EmailTemplateSendOptions } from "src/email-templates/email-template.types";
 import type { DefaultEmailSettings } from "src/events/types";
 
 @Injectable()
@@ -28,9 +26,8 @@ export class EmailService {
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private emailAdapter: EmailAdapter,
     private settingsService: SettingsService,
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
     private configService: ConfigService,
-    private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
   ) {
     this.fromEmail = this.configService.get<EmailConfigSchema["SMTP_EMAIL_FROM"]>(
       "email.SMTP_EMAIL_FROM",
@@ -43,9 +40,9 @@ export class EmailService {
 
   async sendEmailWithLogo(
     email: Omit<Email, "from">,
-    options: EmailTemplateSendOptions,
+    options: BrandedEmailSendOptions,
   ): Promise<void> {
-    const { logoBuffer, borderCircleBuffer } = await this.tenantRunner.runWithTenant(
+    const { logoBuffer, borderCircleBuffer } = await this.tenantDbRunnerService.runWithTenant(
       options.tenantId,
       async () => ({
         logoBuffer: await this.settingsService.getPlatformLogoBuffer(),
@@ -53,25 +50,7 @@ export class EmailService {
       }),
     );
 
-    const branding = options.template
-      ? await this.getDefaultEmailProperties(options.tenantId, undefined, options.template.language)
-      : undefined;
-    const customTemplate =
-      options.template && branding
-        ? await this.emailTemplateRenderingService.renderPublishedEmailTemplate(
-            options.tenantId,
-            options.template,
-            {
-              ...branding,
-              logoUrl: logoBuffer ? "cid:logo" : undefined,
-              borderCircleUrl: borderCircleBuffer ? "cid:border-circle" : undefined,
-            },
-          )
-        : undefined;
-    const attachments: Attachment[] = [
-      ...(email.attachments ?? []),
-      ...(customTemplate?.attachments ?? []),
-    ];
+    const attachments: Attachment[] = [...(email.attachments ?? [])];
 
     if (logoBuffer) {
       attachments.push({
@@ -93,9 +72,6 @@ export class EmailService {
 
     const payload = {
       ...(email as Email),
-      ...(customTemplate
-        ? { subject: customTemplate.subject, html: customTemplate.html, text: customTemplate.text }
-        : {}),
       from: this.fromEmail,
       attachments: attachments.length > 0 ? attachments : undefined,
     };
@@ -103,7 +79,7 @@ export class EmailService {
   }
 
   async getEmailPreviewLogo(tenantId: UUIDType): Promise<string | undefined> {
-    return this.tenantRunner.runWithTenant(tenantId, async () => {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       const logo = await this.settingsService.getPlatformLogoBuffer();
       if (!logo) return undefined;
       const previewLogo = await sharp(logo).resize({ height: 64 }).png().toBuffer();
@@ -112,7 +88,7 @@ export class EmailService {
   }
 
   async getEmailPreviewBorderCircle(tenantId: UUIDType): Promise<string | undefined> {
-    return this.tenantRunner.runWithTenant(tenantId, async () => {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       const borderCircle = await this.settingsService.getEmailBorderCircleBuffer();
       return borderCircle ? `data:image/png;base64,${borderCircle.toString("base64")}` : undefined;
     });
@@ -123,12 +99,12 @@ export class EmailService {
     userId?: UUIDType,
     language?: SupportedLanguages,
   ): Promise<DefaultEmailSettings> {
-    return this.tenantRunner.runWithTenant(tenantId, async () => {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       const globalSettings = await this.settingsService.getGlobalSettings();
       const companyName = globalSettings.companyInformation?.companyName || "Mentingo.com";
 
       return {
-        primaryColor: globalSettings.primaryColor || "#4796FD",
+        primaryColor: globalSettings.primaryColor || DEFAULT_EMAIL_PRIMARY_COLOR,
         companyName,
         language:
           language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
@@ -142,7 +118,7 @@ export class EmailService {
         'language',
         ${userSettingsColumn}->>'language',
         'primaryColor',
-        COALESCE(NULLIF(${globalSettingsColumn}->>'primaryColor', ''), '#4796FD'),
+        COALESCE(NULLIF(${globalSettingsColumn}->>'primaryColor', ''), ${DEFAULT_EMAIL_PRIMARY_COLOR}),
         'companyName',
         COALESCE(NULLIF(${globalSettingsColumn} #>> '{companyInformation,companyName}', ''), 'Mentingo.com')
       )

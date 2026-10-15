@@ -11,10 +11,12 @@ export function useEmailTemplate(id?: string, event?: EmailTemplateEvent) {
     queryKey: [...EMAIL_TEMPLATES_QUERY_KEY, "detail", id ?? event],
     enabled: Boolean(id || event),
     queryFn: async () => {
-      if (id) return (await ApiClient.api.emailTemplateControllerGetEmailTemplate(id)).data.data;
-      if (event)
-        return (await ApiClient.api.emailTemplateControllerGetDefaultEmailTemplate(event)).data
+      if (id)
+        return (await ApiClient.api.emailTemplateManagementControllerGetEmailTemplate(id)).data
           .data;
+      if (event)
+        return (await ApiClient.api.emailTemplateManagementControllerGetBuiltInEmailTemplate(event))
+          .data.data;
       throw new Error("Missing template identifier");
     },
   });

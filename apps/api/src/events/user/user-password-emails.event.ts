@@ -1,6 +1,5 @@
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
-import type { PreparedUserPasswordEmail } from "src/user/user.types";
 
 export const USER_PASSWORD_EMAIL_TYPES = {
   RESET: "reset",
@@ -19,7 +18,6 @@ export type UserPasswordEmails = {
   actor: ActorUserType;
   tenantId: UUIDType;
   type: UserPasswordEmailType;
-  emails: PreparedUserPasswordEmail[];
   recipients: UserPasswordEmailRecipient[];
   sentCount: number;
   skippedCount: number;

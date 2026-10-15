@@ -119,6 +119,9 @@ const generateIndexContent = () => {
 
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-renderer")));
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-renderer.types")));
+      path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./publication.types")));
+      path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./publications")));
+      path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-usage")));
     },
   });
 

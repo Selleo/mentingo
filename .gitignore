@@ -51,7 +51,7 @@ yarn-error.log*
 .pnpm-store
 
 /packages/prompts/src/generated-prompts.ts
-.local-packages
+/.local-packages/
 
 # Release film (.agents/skills/release-film): its local runs, tools and development files
 /.local/

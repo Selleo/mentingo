@@ -91,9 +91,11 @@ export class AiJudgeConfigurationValidatorService {
             model: provider(OPENAI_MODELS.BASIC),
             output: Output.object({ schema }),
             providerOptions: {
-              openai: { reasoningEffort: AI_JUDGE_CONFIGURATION_VALIDATOR_REASONING_EFFORT },
+              openai: {
+                reasoningEffort: AI_JUDGE_CONFIGURATION_VALIDATOR_REASONING_EFFORT,
+                forceReasoning: true,
+              },
             },
-            temperature: 0,
             system,
             prompt,
             telemetry: buildAiTelemetry(

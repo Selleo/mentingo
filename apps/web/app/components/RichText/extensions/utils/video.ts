@@ -12,6 +12,7 @@ import { match } from "ts-pattern";
 
 import { parseFiniteNumberOrNull } from "~/lib/number";
 
+import { safeEmbedUrl } from "./embedUrl";
 import { VIDEO_UPLOAD_NODE_STATUS } from "./videoUploadNode";
 
 import type { VideoUploadNodeStatus } from "./videoUploadNode";
@@ -100,7 +101,7 @@ type VideoEmbedAttrsInput = {
 };
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
-  const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
+  const src = safeEmbedUrl(attrs.src) ?? "";
   const hasError = attrs.hasError === true || attrs.hasError === "true";
 
   const sourceType: VideoSourceType = match(attrs.sourceType)

@@ -1,4 +1,4 @@
-import { AiCapability, AiCapabilityMode, AiCapabilityProvider } from "@japro/luma-sdk";
+import { AiCapability, AiCapabilityMode, AiCapabilityProvider } from "@mentingo/luma-sdk";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
@@ -13,7 +13,6 @@ describe("AiRuntimeService", () => {
       { role: "system" as const, content: "Judge using C1 and B1." },
       { role: "user" as const, content: "Learner response" },
     ],
-    temperature: 0.2,
   };
   const authoringInput = {
     messages: [

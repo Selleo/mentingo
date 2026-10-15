@@ -13,6 +13,7 @@ const FillInTheBlanksButton = ({ node, getPos, editor }: NodeViewProps) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!editor.isEditable) return;
 
     if (getPos && editor) {
       const pos = getPos();
@@ -24,15 +25,17 @@ const FillInTheBlanksButton = ({ node, getPos, editor }: NodeViewProps) => {
 
   return (
     <NodeViewWrapper
-      as="button"
-      type="button"
+      as={editor.isEditable ? "button" : "span"}
+      type={editor.isEditable ? "button" : undefined}
       className={FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}
       data-word={word}
       data-option-id={optionId}
       onClick={handleClick}
     >
       <span>{word}</span>
-      <span className="cursor-pointer" dangerouslySetInnerHTML={{ __html: StringifiedIcons.X }} />
+      {editor.isEditable && (
+        <span className="cursor-pointer" dangerouslySetInnerHTML={{ __html: StringifiedIcons.X }} />
+      )}
     </NodeViewWrapper>
   );
 };

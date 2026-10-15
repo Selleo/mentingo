@@ -1,23 +1,15 @@
 import { Outlet } from "@remix-run/react";
 import { useEffect } from "react";
 
-import { currentUserQueryOptions } from "~/api/queries";
-import { queryClient } from "~/api/queryClient";
+import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
 import { MFAGuard } from "~/Guards/MFAGuard";
+import { useSyncUserAfterLogin } from "~/modules/Dashboard/hooks/useSyncUserAfterLogin";
 
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
-export const clientLoader = async () => {
-  try {
-    await queryClient.ensureQueryData(currentUserQueryOptions);
-  } catch {
-    return null;
-  }
-
-  return null;
-};
-
 export default function AuthLayout() {
+  const { data: user } = useCurrentUserSessionSuspense();
+  useSyncUserAfterLogin(user);
   const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
   useEffect(() => {

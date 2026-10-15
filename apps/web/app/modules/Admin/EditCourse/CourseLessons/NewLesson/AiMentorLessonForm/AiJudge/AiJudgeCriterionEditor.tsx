@@ -141,6 +141,7 @@ export const AiJudgeCriterionEditor = ({
                   onRemove();
                 }}
                 aria-label={t("adminCourseView.curriculum.lesson.aiJudge.removeCriterion")}
+                data-testid={`curriculum-ai-mentor-judge-remove-criterion-${criterionIndex}-button`}
                 className="size-9 text-neutral-500 hover:bg-error-50 hover:text-error-700 focus-visible:text-error-700"
               >
                 <Trash2 className="size-4" />

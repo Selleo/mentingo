@@ -1,4 +1,4 @@
-import { createLumaSocket, LEARNER_TRANSCRIPT_STATUSES } from "@japro/luma-sdk";
+import { createLumaSocket, LEARNER_TRANSCRIPT_STATUSES } from "@mentingo/luma-sdk";
 import {
   AI_MENTOR_PRACTICE_STATUSES,
   AI_MENTOR_TTS_PRESET,
@@ -12,12 +12,12 @@ import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
 import { ExternalAudioService } from "src/audio/external-audio.service";
 
-import type { LearnerTranscriptionPayload, LumaSocket } from "@japro/luma-sdk";
+import type { LearnerTranscriptionPayload, LumaSocket } from "@mentingo/luma-sdk";
 import type { StartAudioBody } from "src/audio/types/audio.types";
 import type { WsUser } from "src/websocket/websocket.types";
 
-jest.mock("@japro/luma-sdk", () => ({
-  ...jest.requireActual("@japro/luma-sdk"),
+jest.mock("@mentingo/luma-sdk", () => ({
+  ...jest.requireActual("@mentingo/luma-sdk"),
   createLumaSocket: jest.fn(),
 }));
 

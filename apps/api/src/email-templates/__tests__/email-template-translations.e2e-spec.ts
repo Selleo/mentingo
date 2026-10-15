@@ -8,7 +8,7 @@ import { emailTemplates } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { ensureTenant } from "../../../test/helpers/tenant-helpers";
-import { EmailTemplateService } from "../services/email-template.service";
+import { EmailTemplateManagementService } from "../services/email-template-management.service";
 
 import type { INestApplication } from "@nestjs/common";
 import type { EmailTemplateDocument } from "@repo/email-templates";
@@ -16,13 +16,13 @@ import type { DatabasePg } from "src/common";
 
 describe("Email template translation updates (e2e)", () => {
   let app: INestApplication;
-  let service: EmailTemplateService;
+  let service: EmailTemplateManagementService;
   let runner: TenantDbRunnerService;
   let tenantId: string;
 
   beforeAll(async () => {
     ({ app } = await createE2ETest({ useDbProxy: true }));
-    service = app.get(EmailTemplateService);
+    service = app.get(EmailTemplateManagementService);
     runner = app.get(TenantDbRunnerService);
     tenantId = await ensureTenant(app.get(DB_ADMIN));
   });
@@ -33,7 +33,7 @@ describe("Email template translation updates (e2e)", () => {
 
   it("preserves independent concurrent name, subject and document edits", async () => {
     const template = await runner.runWithTenant(tenantId, () =>
-      service.copyDefaultEmailTemplate(EMAIL_TEMPLATE_EVENTS.WELCOME),
+      service.createDraftFromBuiltInEmailTemplate(EMAIL_TEMPLATE_EVENTS.WELCOME),
     );
     const [storedTypes] = await runner.runWithTenant(tenantId, () =>
       app

@@ -10,7 +10,7 @@ const apiClient = createFixtureApiClient();
 
 setup("authenticate", async ({ browser }) => {
   const origin = process.env.CI
-    ? "http://localhost:5173"
+    ? "https://localhost:5173"
     : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
   const adminContext = await browser.newContext({ baseURL: origin });
   const adminPage = await adminContext.newPage();

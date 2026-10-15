@@ -7,6 +7,7 @@ import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { CardBadge } from "~/components/CardBadge";
 import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
+import { CourseDescriptionSummary } from "~/components/RichText/CourseDescriptionSummary";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -114,7 +115,7 @@ const CourseCard = ({
           )}
           <div className="flex-grow text-sm text-neutral-500">
             <span className="line-clamp-3">
-              <div dangerouslySetInnerHTML={{ __html: description }} />
+              <CourseDescriptionSummary content={description ?? ""} />
             </span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import DefaultCoursePhoto from "~/assets/svgs/default-photo-course.svg";
+import { CourseDescriptionSummary } from "~/components/RichText/CourseDescriptionSummary";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { UserProfile } from "~/components/UserProfile/UserProfile";
@@ -55,12 +56,11 @@ const CourseCardPreview = ({
                 {title || t("adminCourseView.settings.sideSection.other.untitled")}
               </h1>
               <UserProfile data={data} />
-              <div
+              <CourseDescriptionSummary
                 className="description line-clamp-3 break-words text-left text-gray-500"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    description || t("adminCourseView.settings.sideSection.other.noDescription"),
-                }}
+                content={
+                  description || t("adminCourseView.settings.sideSection.other.noDescription")
+                }
               />
               <div className="mt-5 flex w-full justify-center">
                 <Button className="mx-auto mt-4 w-3/4">

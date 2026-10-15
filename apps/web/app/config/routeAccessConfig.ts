@@ -108,6 +108,7 @@ export const routeAccessConfig = createRouteConfig({
   "news/add": NEWS_EDIT_ACCESS,
   "news/:newsId/edit": NEWS_EDIT_ACCESS,
   dashboard: DASHBOARD_READ_ACCESS,
+  reports: { anyOf: [PERMISSIONS.REPORT_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ] },
   "ai-mentor/practice/:id": {
     allOf: [PERMISSIONS.AI_USE],
   },
@@ -145,12 +146,25 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
+  "admin/beta-courses/:id/authoring": {
+    allOf: [PERMISSIONS.COURSE_AI_GENERATION],
+    anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  },
   "admin/development-paths": LEARNING_PATH_ADMIN_ACCESS,
   "admin/development-paths/new": {
     allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
   },
   "admin/development-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,
+  "admin/automations": {
+    anyOf: [
+      PERMISSIONS.AUTOMATION_MANAGE,
+      PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
+      PERMISSIONS.AUTOMATION_LOG_READ,
+    ],
+  },
+  "admin/automations/*": { allOf: [PERMISSIONS.AUTOMATION_MANAGE] },
+  "admin/automation-logs/*": { allOf: [PERMISSIONS.AUTOMATION_LOG_READ] },
   "admin/email-templates/*": { allOf: [PERMISSIONS.EMAIL_TEMPLATE_MANAGE] },
   "admin/groups/*": {
     allOf: [PERMISSIONS.GROUP_MANAGE],

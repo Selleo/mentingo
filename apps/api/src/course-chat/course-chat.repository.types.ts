@@ -44,6 +44,7 @@ export type CourseChatMentionEmailRecipient = {
   id: UUIDType;
   email: string;
   firstName: string;
+  lastName?: string;
   tenantId: UUIDType;
 };
 

@@ -72,6 +72,8 @@ export type CertificateNotificationRecord = {
   tenantId: UUIDType;
   courseId: UUIDType;
   userEmail: string;
+  userFirstName: string;
+  userLastName: string;
   courseTitle: string | null;
 };
 

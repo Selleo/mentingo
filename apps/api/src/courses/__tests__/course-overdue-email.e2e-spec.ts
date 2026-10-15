@@ -11,6 +11,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { deliverPendingAutomationEmails } from "../../../test/helpers/automation-emails";
 import { truncateAllTables } from "../../../test/helpers/test-helpers";
 
 import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
@@ -31,7 +32,7 @@ describe("Course overdue emails (e2e)", () => {
   let groupFactory: ReturnType<typeof createGroupFactory>;
 
   beforeAll(async () => {
-    const test = await createE2ETest();
+    const test = await createE2ETest({ manualAutomationEmails: true });
 
     app = test.app;
     db = test.db;
@@ -103,14 +104,15 @@ describe("Course overdue emails (e2e)", () => {
       courseService.sendOverdueCoursesEmails(),
     );
 
+    await deliverPendingAutomationEmails(app, defaultTenantId);
     const emails = emailAdapter.getAllEmails();
     expect(emails).toHaveLength(1);
     expect(emails[0]).toMatchObject({
       to: admin.email,
       subject: "Overdue courses notification",
     });
-    expect(emails[0].text).toContain("Overdue Regression Course");
-    expect(emails[0].text).toContain("Overdue Regression Group");
-    expect(emails[0].text).toContain(student.email);
+    expect(emails[0].text?.replace(/\s+/g, " ")).toContain("Overdue Regression Course");
+    expect(emails[0].text?.replace(/\s+/g, " ")).toContain("Overdue Regression Group");
+    expect(emails[0].text?.replace(/\s+/g, " ")).toContain(student.email);
   });
 });

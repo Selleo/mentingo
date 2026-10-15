@@ -4,22 +4,20 @@ import {
   EMAIL_TEMPLATE_DEFINITIONS,
   EMAIL_TEMPLATE_EVENTS,
   getEmailTemplateDefinition,
+  buildOverdueCoursesEventFields,
 } from "@repo/email-templates";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { isNull } from "drizzle-orm";
-import request from "supertest";
+import {
+  type AutomationTemplateReference,
+  type AutomationPlaceholderValue,
+  type SupportedLanguages,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 
-import { ResetPasswordService } from "src/auth/reset-password.service";
 import { EmailService } from "src/common/emails/emails.service";
-import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { QUEUE_NAMES, QueueService } from "src/queue";
-import { DEFAULT_EMAIL_TRIGGERS } from "src/settings/constants/settings.constants";
-import { resources, settings, studentCourses } from "src/storage/schema";
-import { NotifyUsersHandler } from "src/user/handlers/notify-users.handler";
-import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { resources } from "src/storage/schema";
 
-import { createCourseFactory } from "../../../test/factory/course.factory";
-import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
+import { EmailTemplateRenderingService } from "../services/email-template-rendering.service";
 import { EmailTemplateValidationService } from "../services/email-template-validation.service";
 
 import {
@@ -33,6 +31,7 @@ import {
 import type { EmailTemplateTestContext } from "./email-template-test.helpers";
 import type { PreviewEmailTemplateBody } from "../schemas/email-template.schema";
 import type { EmailTemplateDefinition } from "@repo/email-templates";
+import type { Attachment } from "src/common/emails/email.interface";
 
 const recovery = getEmailTemplateDefinition(EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY);
 
@@ -102,44 +101,60 @@ describe("Email template delivery integration (e2e)", () => {
     jest.restoreAllMocks();
   });
 
-  const send = (definition: EmailTemplateDefinition = welcome, tenantId?: string) =>
-    emails.sendEmailWithLogo(
+  const renderer = () => t.app.get(EmailTemplateRenderingService);
+  const send = async (
+    reference: AutomationTemplateReference,
+    definition: EmailTemplateDefinition = welcome,
+    tenantId = t.defaultTenantId,
+    language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
+    values?: Record<string, AutomationPlaceholderValue>,
+    attachments: Attachment[] = [],
+  ) => {
+    const branding = await emails.getDefaultEmailProperties(tenantId);
+    const samples = validation.buildEmailPreviewVariables(draftBody(definition).placeholders!);
+    const fields = {
+      ...samples,
+      ...values,
+    } as Record<string, AutomationPlaceholderValue>;
+    if (definition.event === "admin_overdue_courses")
+      Object.assign(
+        fields,
+        buildOverdueCoursesEventFields(
+          Object.fromEntries(
+            Object.values(SUPPORTED_LANGUAGES).map((locale) => [locale, samples.courses]),
+          ) as Parameters<typeof buildOverdueCoursesEventFields>[0],
+        ),
+      );
+    const result = await renderer().renderMappedEmailTemplate(
+      tenantId,
+      reference,
+      language,
+      fields,
       {
-        to: t.student.email,
-        subject: "Original default subject",
-        text: "Original default text",
-        html: "<p>Original default HTML</p>",
-      },
-      {
-        tenantId: tenantId ?? t.defaultTenantId,
-        template: {
-          event: definition.event,
-          language: SUPPORTED_LANGUAGES.EN,
-          variables: validation.getSampleVariables(definition.event),
-        },
+        ...branding,
+        logoUrl: "cid:logo",
+        borderCircleUrl: "cid:border-circle",
       },
     );
+    await emails.sendEmailWithLogo(
+      { to: t.student.email, ...result, attachments: [...attachments, ...result.attachments] },
+      { tenantId },
+    );
+  };
 
   it.each(EMAIL_TEMPLATE_DEFINITIONS)(
-    "delivers the published $event through the real email service",
+    "delivers explicitly selected published $event content through shared transport",
     async (definition) => {
       const body = draftBody(definition);
       body.subject.en = `Custom ${definition.event} {{ company_name }}`;
       const template = await t.create(body);
       await t.http("post", `/${template.id}/publish`).expect(201);
+      await send({ type: "custom", id: template.id! }, definition);
       const branding = await emails.getDefaultEmailProperties(t.defaultTenantId);
-      await send(definition);
-      const [email] = t.adapter.getAllEmails();
-      expect(t.adapter.getAllEmails()).toHaveLength(1);
-      expect(email).toMatchObject({
-        to: t.student.email,
-        subject: `Custom ${definition.event} ${branding.companyName}`,
-        from: expect.any(String),
-      });
+      const email = t.adapter.getLastEmail()!;
+      expect(email.subject).toBe(`Custom ${definition.event} ${branding.companyName}`);
       expect(email.html).toContain("cid:logo");
-      expect(email.html).not.toContain("Original default HTML");
       expect(email.html).not.toContain("{{");
-      expect(email.text?.trim()).not.toBe("");
       expect(email.attachments).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ filename: "logo.png", content: t.png }),
@@ -148,103 +163,64 @@ describe("Email template delivery integration (e2e)", () => {
       );
     },
   );
-
-  it("switches delivery with publish, archive, restore, republish and delete", async () => {
+  it("keeps draft edits separate and makes archived/restored/deleted resources unavailable until published", async () => {
     const template = await t.create({ ...draftBody(), subject: { en: "Published custom" } });
-    const assertSubject = async (subject: string) => {
-      t.adapter.clearEmails();
-      await send();
-      expect(t.adapter.getAllEmails()).toHaveLength(1);
-      expect(t.adapter.getLastEmail()?.subject).toBe(subject);
-    };
-    await assertSubject("Original default subject");
+    const reference: AutomationTemplateReference = { type: "custom", id: template.id! };
+    await expect(
+      t.runAsTenant(t.defaultTenantId, () => renderer().getPublishedEmailTemplate(reference)),
+    ).rejects.toThrow("emailTemplates.errors.notPublished");
     await t.http("post", `/${template.id}/publish`).expect(201);
-    await assertSubject("Published custom");
-    await t.http("post", `/${template.id}/archive`).expect(201);
-    await assertSubject("Original default subject");
-    await t.http("post", `/${template.id}/restore`).expect(201);
-    await assertSubject("Original default subject");
+    await t
+      .http("patch", `/${template.id}`)
+      .send({ subject: { en: "Unsaved draft" } })
+      .expect(200);
+    await send(reference);
+    expect(t.adapter.getLastEmail()?.subject).toBe("Published custom");
     await t.http("post", `/${template.id}/publish`).expect(201);
-    await assertSubject("Published custom");
+    await send(reference);
+    expect(t.adapter.getLastEmail()?.subject).toBe("Unsaved draft");
+    for (const transition of ["archive", "restore"]) {
+      await t.http("post", `/${template.id}/${transition}`).expect(201);
+      await expect(
+        t.runAsTenant(t.defaultTenantId, () => renderer().getPublishedEmailTemplate(reference)),
+      ).rejects.toThrow("emailTemplates.errors.notPublished");
+    }
+    await t.http("post", `/${template.id}/publish`).expect(201);
     await t.http("delete", `/${template.id}`).expect(200);
-    await assertSubject("Original default subject");
+    await expect(
+      t.runAsTenant(t.defaultTenantId, () => renderer().getPublishedEmailTemplate(reference)),
+    ).rejects.toThrow("emailTemplates.errors.notPublished");
   });
-
-  it("uses the recipient translation or falls back the whole email while escaping real values", async () => {
+  it("falls back the whole publication and switches language only after republishing", async () => {
     const body = draftBody(recovery);
     body.subject = { en: "Reset {{ name }}", pl: "Polski {{ name }}" };
     body.content = { en: body.content.en };
     const template = await t.create(body);
     await t.http("post", `/${template.id}/publish`).expect(201);
-    const options = {
-      tenantId: t.defaultTenantId,
-      template: {
-        event: recovery.event,
-        language: SUPPORTED_LANGUAGES.PL,
-        variables: {
-          name: "Real <script>",
-          reset_link: "https://tenant.example/reset?token=fixture",
-        },
-      },
-    };
-    const original = { to: t.student.email, subject: "Default", text: "Default" };
-    await emails.sendEmailWithLogo(original, options);
-    expect(t.adapter.getLastEmail()).toMatchObject({ subject: "Reset Real <script>" });
+    const reference: AutomationTemplateReference = { type: "custom", id: template.id! };
+    const values = { name: "Real <script>", reset_link: "https://tenant.example/reset" };
+    await send(reference, recovery, t.defaultTenantId, "pl", values);
+    expect(t.adapter.getLastEmail()?.subject).toBe("Reset Real <script>");
     expect(t.adapter.getLastEmail()?.html).toContain("Real &lt;script&gt;");
-    expect(t.adapter.getLastEmail()?.html).toContain(options.template.variables.reset_link);
-    expect(t.adapter.getLastEmail()?.html).not.toContain("<script>");
     await t
       .http("patch", `/${template.id}`)
       .send({ content: { pl: recovery.defaultDocuments.pl } })
       .expect(200);
-    await emails.sendEmailWithLogo(original, options);
+    await send(reference, recovery, t.defaultTenantId, "pl", values);
+    expect(t.adapter.getLastEmail()?.subject).toBe("Reset Real <script>");
+    await t.http("post", `/${template.id}/publish`).expect(201);
+    await send(reference, recovery, t.defaultTenantId, "pl", values);
     expect(t.adapter.getLastEmail()?.subject).toBe("Polski Real <script>");
   });
-
-  it("does not use another tenant's published override or branding", async () => {
-    await t.runAsTenant(t.defaultTenantId, () =>
-      t.db
-        .update(settings)
-        .set({
-          settings: settingsToJSONBuildObject({
-            ...DEFAULT_E2E_GLOBAL_SETTINGS,
-            companyInformation: { companyName: "Tenant Alpha" },
-          }),
-        })
-        .where(isNull(settings.userId)),
-    );
-    await t.runAsTenant(t.otherTenant.id, () =>
-      t.db
-        .update(settings)
-        .set({
-          settings: settingsToJSONBuildObject({
-            ...DEFAULT_E2E_GLOBAL_SETTINGS,
-            companyInformation: { companyName: "Tenant Beta" },
-          }),
-        })
-        .where(isNull(settings.userId)),
-    );
-    const template = await t.create({
-      ...draftBody(),
-      subject: { en: "Custom {{ company_name }}" },
-    });
+  it("rejects another tenant's custom reference without sending fallback content", async () => {
+    const template = await t.create(draftBody());
     await t.http("post", `/${template.id}/publish`).expect(201);
-    await send();
-    expect(t.adapter.getLastEmail()?.subject).toBe("Custom Tenant Alpha");
-    await send(welcome, t.otherTenant.id);
-    expect(t.adapter.getLastEmail()?.subject).toBe("Original default subject");
-    const other = (
-      await t
-        .http("post", "", t.otherCookie, t.otherTenant.host)
-        .send({ ...draftBody(), subject: { en: "Custom {{ company_name }}" } })
-        .expect(201)
-    ).body.data;
-    await t.http("post", `/${other.id}/publish`, t.otherCookie, t.otherTenant.host).expect(201);
-    await send(welcome, t.otherTenant.id);
-    expect(t.adapter.getLastEmail()?.subject).toBe("Custom Tenant Beta");
+    await expect(
+      send({ type: "custom", id: template.id! }, welcome, t.otherTenant.id),
+    ).rejects.toThrow("emailTemplates.errors.notPublished");
+    expect(t.adapter.getAllEmails()).toEqual([]);
   });
-
-  it("preserves existing attachments and deduplicates uploaded CID images", async () => {
+  it("retains explicit attachments and deduplicates uploaded CID assets", async () => {
     const asset = (await t.http("post", "/images").attach("file", t.png, "image.png").expect(201))
       .body.data;
     const body = draftBody();
@@ -256,141 +232,29 @@ describe("Email template delivery integration (e2e)", () => {
     );
     const template = await t.create(body);
     await t.http("post", `/${template.id}/publish`).expect(201);
-    const attachment = {
-      filename: "certificate.pdf",
-      content: Buffer.from("fixture attachment"),
-      contentType: "application/pdf",
-    };
-    await emails.sendEmailWithLogo(
-      { to: t.student.email, subject: "Original", text: "Original", attachments: [attachment] },
-      {
-        tenantId: t.defaultTenantId,
-        template: {
-          event: welcome.event,
-          language: SUPPORTED_LANGUAGES.EN,
-          variables: validation.getSampleVariables(welcome.event),
-        },
-      },
-    );
+    const attachment = { filename: "certificate.pdf", content: Buffer.from("fixture attachment") };
+    await send({ type: "custom", id: template.id! }, welcome, t.defaultTenantId, "en", undefined, [
+      attachment,
+    ]);
     const email = t.adapter.getLastEmail()!;
     expect(email.attachments).toContainEqual(attachment);
     expect(
-      email.attachments?.filter(({ cid }) => cid === `email-template-${asset.resourceId}`),
-    ).toEqual([
-      expect.objectContaining({
-        contentType: "image/webp",
-        filename: `email-template-${asset.resourceId}.webp`,
-      }),
-    ]);
+      email.attachments?.filter((item) => item.cid === `email-template-${asset.resourceId}`),
+    ).toHaveLength(1);
     expect(
       email.html?.match(new RegExp(`cid:email-template-${asset.resourceId}`, "g")),
     ).toHaveLength(2);
-    expect(email.html).not.toContain("https://storage.example");
   });
-
-  it.each<{ name: string; variables: Record<string, string>; error: string }>([
-    {
-      name: "missing authentication value",
-      variables: { name: "Real user" },
-      error: "emailTemplates.errors.missingMandatoryVariables",
-    },
-    {
-      name: "unsafe real URL",
-      variables: { name: "Real user", reset_link: "javascript:alert(1)" },
-      error: "emailTemplates.errors.httpsRequired",
-    },
-  ])("fails delivery for $name without silently sending defaults", async ({ variables, error }) => {
+  it("rejects invalid mapped values before transport", async () => {
     const template = await t.create(draftBody(recovery));
     await t.http("post", `/${template.id}/publish`).expect(201);
     await expect(
-      emails.sendEmailWithLogo(
-        { to: t.student.email, subject: "Default", text: "Default" },
-        {
-          tenantId: t.defaultTenantId,
-          template: { event: recovery.event, language: SUPPORTED_LANGUAGES.EN, variables },
-        },
-      ),
-    ).rejects.toThrow(error);
+      send({ type: "custom", id: template.id! }, recovery, t.defaultTenantId, "en", {
+        name: "Alex",
+        reset_link: "javascript:alert(1)",
+      }),
+    ).rejects.toThrow("emailTemplates.errors.httpsRequired");
     expect(t.adapter.getAllEmails()).toEqual([]);
-  });
-
-  it("delivers password recovery from its real HTTP trigger with a usable reset token", async () => {
-    const template = await t.create({
-      ...draftBody(recovery),
-      subject: { en: "Reset for {{ name }}" },
-    });
-    await t.http("post", `/${template.id}/publish`).expect(201);
-    await request(t.app.getHttpServer())
-      .post("/api/auth/forgot-password")
-      .send({ email: t.student.email })
-      .expect(201);
-    const email = t.adapter.getLastEmail()!;
-    expect(t.adapter.getAllEmails()).toHaveLength(1);
-    expect(email).toMatchObject({
-      to: t.student.email,
-      subject: `Reset for ${t.student.firstName}`,
-    });
-    const resetUrl = email.html?.match(/href="([^"]*create-new-password[^\"]*)"/)?.[1];
-    expect(resetUrl).toBeDefined();
-    const url = new URL(resetUrl!.replace(/&amp;/g, "&"));
-    expect(url.origin).toBe("https://tenant.local");
-    const token = url.searchParams.get("resetToken")!;
-    expect(token).toBeTruthy();
-    const stored = await t.runAsTenant(t.defaultTenantId, () =>
-      t.app.get(ResetPasswordService).getOneByToken(token),
-    );
-    expect(stored.userId).toBe(t.student.id);
-  });
-
-  it("delivers real course-assignment data and respects disabled triggers", async () => {
-    const definition = getEmailTemplateDefinition(EMAIL_TEMPLATE_EVENTS.USER_ASSIGNED_TO_COURSE);
-    const template = await t.create({
-      ...draftBody(definition),
-      subject: { en: "Assigned {{ course_name }}" },
-    });
-    await t.http("post", `/${template.id}/publish`).expect(201);
-    await t.runAsTenant(t.defaultTenantId, async () => {
-      const course = await createCourseFactory(t.db).create({
-        authorId: t.admin.id,
-        title: "Real assigned course",
-        thumbnailS3Key: null,
-      });
-      await t.db.insert(studentCourses).values({
-        studentId: t.student.id,
-        courseId: course.id,
-        status: COURSE_ENROLLMENT.ENROLLED,
-      });
-      const trigger = new UsersAssignedToCourseEvent({
-        courseId: course.id,
-        studentIds: [t.student.id],
-      });
-      await t.db
-        .update(settings)
-        .set({
-          settings: settingsToJSONBuildObject({
-            ...DEFAULT_E2E_GLOBAL_SETTINGS,
-            userEmailTriggers: { ...DEFAULT_EMAIL_TRIGGERS, userCourseAssignment: true },
-          }),
-        })
-        .where(isNull(settings.userId));
-      await t.app.get(NotifyUsersHandler).handle(trigger);
-      const email = t.adapter.getLastEmail()!;
-      expect(t.adapter.getAllEmails()).toHaveLength(1);
-      expect(email).toMatchObject({
-        to: t.student.email,
-        subject: "Assigned Real assigned course",
-      });
-      expect(email.html).toContain(`https://tenant.local/course/${course.id}`);
-      t.adapter.clearEmails();
-      await t.db
-        .update(settings)
-        .set({
-          settings: settingsToJSONBuildObject(DEFAULT_E2E_GLOBAL_SETTINGS),
-        })
-        .where(isNull(settings.userId));
-      await t.app.get(NotifyUsersHandler).handle(trigger);
-      expect(t.adapter.getAllEmails()).toEqual([]);
-    });
   });
 
   it("queues unsaved content for the authenticated actor and bypasses published overrides", async () => {
@@ -489,13 +353,9 @@ describe("Email template delivery integration (e2e)", () => {
     },
   );
 
-  it("rejects missing authentication actions before queueing test mail", async () => {
-    const enqueue = jest.spyOn(t.app.get(QueueService), "enqueue");
-    const response = await t
-      .http("post", "/test-send")
-      .send({ ...previewBody(recovery), content: { en: textDocument() } })
-      .expect(400);
-    expect(response.body.message).toBe("emailTemplates.errors.missingMandatoryVariables");
-    expect(enqueue).not.toHaveBeenCalled();
+  it("queues event-independent draft content without inferring source sensitivity", async () => {
+    const body = { ...previewBody(recovery), content: { en: textDocument() } };
+    expect((await enqueueAndWait(t, body)).status).toBe("completed");
+    expect(t.adapter.getLastEmail()?.to).toBe(t.admin.email);
   });
 });

@@ -50,6 +50,10 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - In components, destructure mutation results at the hook call site, e.g. `const { mutateAsync: updateItem, isPending } = useUpdateItem();`; do not call `mutation.mutateAsync(...)`.
 - In mutation error toasts, use `getTranslatedApiErrorMessage(error, t, fallback)` from `app/api/utils/getTranslatedApiErrorMessage.ts` instead of custom `AxiosError` branches.
 - Add routes in `routes.ts` and update `app/config/routeAccessConfig.ts` for protected pages.
+- Do not add `clientLoader` exports or consume route data with `useLoaderData`/`useRouteLoaderData`.
+- Read route data through query-owned TanStack Query suspense hooks using existing query options, cache keys, and the shared QueryClient. Preserve language/search parameters and explicitly handle query failures where a route redirects on particular errors.
+- Put auth, permission, feature, and destination redirects in route components or reusable guards under a Suspense boundary. Gate protected child components before their queries mount; anonymous sessions are an expected nullable result, not an authentication error.
+- Consume pending navigation history once, after MFA/password requirements complete and before return navigation, so denied destinations cannot cause redirect loops.
 - Use `PERMISSIONS` and permission helpers from `@repo/shared`; do not hardcode role-name UI gates unless the existing feature already does.
 - Reuse `app/components/ui`, `PageWrapper`, form components, and module components before adding new primitives.
 - Use `cn` from `app/lib/utils.ts` for conditional `className` values instead of ternaries, template literals, string concatenation, or array joins.

@@ -31,6 +31,8 @@ import {
 } from "~/components/RichText/extensions/presentation";
 import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
 
+import { AuthoringBlockId } from "./extensions/authoringBlockId";
+
 import type { RichTextResourceNodeOptions } from "./extensions/utils/resourceNode";
 
 const HeadingWithId = Heading.extend({
@@ -126,6 +128,7 @@ const tablePlugins = [
 export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) => [
   ...basePlugins,
   ...tablePlugins,
+  AuthoringBlockId,
   Placeholder.configure({
     includeChildren: true,
     showOnlyCurrent: true,
@@ -147,6 +150,7 @@ export const baseViewerPlugins = [...basePlugins];
 export const contentViewerPlugins = [
   ...basePlugins,
   ...tablePlugins,
+  AuthoringBlockId.configure({ generateIds: false }),
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
   ImageEmbedViewer,

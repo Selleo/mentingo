@@ -125,6 +125,47 @@ export class IngestionProcessingService {
     }
   }
 
+  /** Prepare retrieval content before a course apply; no learner-visible lesson link exists yet. */
+  async prepareUnassignedDocument(file: Express.Multer.File) {
+    return this.prepareDocument(file);
+  }
+
+  /** Prepare a generated course-context file with provenance for safe replacement on Mentor updates. */
+  async prepareUnassignedMentorContextDocument(file: Express.Multer.File) {
+    return this.prepareDocument(file, { courseAuthoringMentorContext: true });
+  }
+
+  private async prepareDocument(file: Express.Multer.File, metadata?: Record<string, unknown>) {
+    const { document, sha256 } = await this.documentService.verifyIfFileExists(file);
+    if (document?.status === DOCUMENT_STATUS.READY) {
+      if (metadata) await this.documentRepository.mergeDocumentMetadata(document.id, metadata);
+      return document.id;
+    }
+    const pages = await this.chunkService.extractText(file);
+    if (!pages.length) throw new Error("ingestion.error.noExtractableText");
+    const chunks = await this.chunkService.chunkPages(pages);
+    const embeddings = await this.embeddingService.embedPages(chunks);
+    if (!chunks.length || embeddings.length !== chunks.length)
+      throw new Error("ingestion.error.incompleteEmbeddings");
+    return this.documentRepository.savePreparedDocument({
+      filename: file.originalname,
+      byteSize: file.size,
+      contentType: file.mimetype,
+      checksum: sha256,
+      metadata,
+      chunks: chunks.map((chunk, index) => ({
+        content: chunk.pageContent,
+        metadata: chunk.metadata?.loc,
+        embedding: embeddings[index],
+      })),
+    });
+  }
+
+  /** Removes old, unlinked authoring material left by failed or interrupted applies. */
+  async cleanExpiredAuthoringDocuments(before: string) {
+    await this.documentRepository.deleteExpiredUnassignedAuthoringDocuments(before);
+  }
+
   private normalizeJobBuffer(
     buffer: Buffer | { data: number[] } | Uint8Array | ArrayBuffer,
   ): Buffer {

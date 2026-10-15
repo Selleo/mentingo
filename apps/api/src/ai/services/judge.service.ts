@@ -83,11 +83,46 @@ export class JudgeService {
           { role: "system", content: system },
           { role: "user", content },
         ],
-        temperature: 0.2,
       },
       () => this.chatService.judge(system, content),
     );
-    const response = evaluateAiJudgeResult(judged, rubric);
+    evaluateAiJudgeResult(judged, rubric);
+    const verified = await Promise.all(
+      judged.triggeredBlockingErrors.map(async (candidate) => {
+        const index = Number(candidate.blockingErrorRef.slice(1)) - 1;
+        const blockingError = rubric.blockingErrors[index];
+        const verificationSystem = await this.promptService.loadPrompt(
+          "judgeBlockingErrorVerificationPrompt",
+          { language: messages.userLanguage, blockingError: blockingError.description },
+        );
+        const verification = await this.aiRuntimeService.judgeMentor(
+          {
+            messages: [
+              { role: "system", content: verificationSystem },
+              { role: "user", content },
+            ],
+          },
+          () => this.chatService.judge(verificationSystem, content),
+        );
+        const checked = evaluateAiJudgeResult(verification, {
+          ...rubric,
+          criteria: [],
+          blockingErrors: [blockingError],
+        });
+        if (!checked.blockingErrors.length) return null;
+        return {
+          blockingErrorRef: candidate.blockingErrorRef,
+          learnerSafeFeedback: checked.blockingErrors[0].learnerSafeFeedback,
+        };
+      }),
+    );
+    const confirmedBlockingErrors = verified.filter(
+      (error): error is NonNullable<typeof error> => error !== null,
+    );
+    const response = evaluateAiJudgeResult(
+      { ...judged, triggeredBlockingErrors: confirmedBlockingErrors },
+      rubric,
+    );
 
     await this.persistJudgement(data.threadId, thread.data.userLanguage, rubric, response);
 

@@ -7,6 +7,7 @@ import {
 
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
+import { MCP_SCOPES } from "./mcp-tool-scope";
 
 import type { McpRequest } from "./mcp.types";
 import type { Response } from "express";
@@ -28,7 +29,10 @@ export class McpAuthGuard implements CanActivate {
 
     if (!actor || actor.grant.tenantId !== resource.tenantId) {
       const metadataUrl = new URL("/.well-known/oauth-protected-resource/api/mcp", resource.origin);
-      response.setHeader("WWW-Authenticate", `Bearer resource_metadata="${metadataUrl.href}"`);
+      response.setHeader(
+        "WWW-Authenticate",
+        `Bearer resource_metadata="${metadataUrl.href}", scope="${MCP_SCOPES.ACCOUNT_ACCESS}"`,
+      );
       throw new UnauthorizedException("unauthorized");
     }
 

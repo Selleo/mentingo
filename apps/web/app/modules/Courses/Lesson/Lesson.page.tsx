@@ -238,7 +238,6 @@ export default function LessonPage() {
                 key={lesson.id}
                 lesson={lesson}
                 course={course}
-                lessonsAmount={currentChapter?.lessons.length ?? 0}
                 handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
                 handleNext={() => handleNextLesson(lessonId, course.chapters)}
                 isFirstLesson={isFirst}

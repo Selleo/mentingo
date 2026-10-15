@@ -1,5 +1,6 @@
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
@@ -7,10 +8,24 @@ import { usePhishingCampaigns } from "~/api/queries/usePhishingCampaigns";
 import { hasAllPermissions, hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { cn } from "~/lib/utils";
+import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
+import { PhishingStatusBadge } from "./PhishingBadges";
 import { PhishingGate } from "./PhishingGate";
+import { PhishingError, PhishingHeader, PhishingLoading } from "./PhishingStates";
+
 function Campaigns() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { data: user } = useCurrentUser();
   const { data, isPending, isError, refetch } = usePhishingCampaigns();
   const canCreate = hasAllPermissions(user?.permissions ?? [], [
@@ -18,51 +33,89 @@ function Campaigns() {
     PERMISSIONS.COURSE_ENROLLMENT,
   ]);
   const canReport = hasPermission(user?.permissions ?? [], PERMISSIONS.PHISHING_REPORT_READ);
+  const openReport = (id: string) => {
+    if (canReport) navigate(`/phishing/${id}`);
+  };
+
+  if (isError) return <PhishingError onRetry={() => void refetch()} />;
+
   return (
-    <PageWrapper>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("phishing.title")}</h1>
-        {canCreate && (
-          <Button asChild>
-            <Link to="/phishing/new">{t("phishing.newCampaign")}</Link>
-          </Button>
-        )}
-      </div>
-      <p className="mb-6 text-neutral-600">{t("phishing.description")}</p>
-      {isPending && <p role="status">{t("phishing.loading")}</p>}
-      {isError && (
-        <p role="alert">
-          {t("phishing.serviceError")}{" "}
-          <Button onClick={() => void refetch()}>{t("phishing.retry")}</Button>
-        </p>
-      )}
-      {data?.length === 0 && <p>{t("phishing.empty")}</p>}
-      <div className="grid gap-4">
-        {data?.map((campaign) => (
-          <article key={campaign.id} className="rounded-lg border p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium">{campaign.name}</h2>
-              <span>{t(`phishing.status.${campaign.status}`)}</span>
-            </div>
-            <p>
-              {new Date(campaign.sendWindow.start).toLocaleString()} –{" "}
-              {new Date(campaign.sendWindow.end).toLocaleString()}
-            </p>
-            {canReport && (
-              <Link className="text-primary-700 underline" to={`/phishing/${campaign.id}`}>
-                {t("phishing.report")}
+    <div className="flex flex-col gap-4">
+      <PhishingHeader
+        title={t("phishing.title")}
+        description={t("phishing.description")}
+        actions={
+          canCreate && (
+            <Button variant="primary" asChild>
+              <Link to="/phishing/new">
+                <Plus className="mr-2 size-4" />
+                {t("phishing.newCampaign")}
               </Link>
-            )}
-          </article>
-        ))}
-      </div>
-    </PageWrapper>
+            </Button>
+          )
+        }
+      />
+      <Table className="border bg-neutral-50" aria-label={t("phishing.title")}>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("phishing.columns.name")}</TableHead>
+            <TableHead className="w-40">{t("phishing.columns.status")}</TableHead>
+            <TableHead>{t("phishing.columns.sendWindow")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isPending && (
+            <TableRow>
+              <TableCell colSpan={3}>
+                <PhishingLoading />
+              </TableCell>
+            </TableRow>
+          )}
+          {!isPending && !data?.length && (
+            <TableRow>
+              <TableCell colSpan={3} className="py-12 text-center text-muted-foreground">
+                {t("phishing.empty")}
+              </TableCell>
+            </TableRow>
+          )}
+          {data?.map((campaign) => (
+            <TableRow
+              key={campaign.id}
+              tabIndex={canReport ? 0 : undefined}
+              onClick={() => openReport(campaign.id)}
+              onKeyDown={(event) => {
+                if (event.target === event.currentTarget && event.key === "Enter") {
+                  openReport(campaign.id);
+                }
+              }}
+              className={cn(
+                canReport &&
+                  "cursor-pointer hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+              )}
+            >
+              <TableCell className="text-sm">{campaign.name}</TableCell>
+              <TableCell>
+                <PhishingStatusBadge status={campaign.status} />
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {formatLocalizedDate(i18n.language, campaign.sendWindow.start)} –{" "}
+                {formatLocalizedDate(i18n.language, campaign.sendWindow.end)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
+
 export default function PhishingPage() {
+  const { t } = useTranslation();
   return (
     <PhishingGate>
-      <Campaigns />
+      <PageWrapper breadcrumbs={[{ title: t("phishing.title"), href: "/phishing" }]}>
+        <Campaigns />
+      </PageWrapper>
     </PhishingGate>
   );
 }

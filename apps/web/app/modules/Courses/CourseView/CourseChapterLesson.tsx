@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { LessonTypeIcon } from "~/modules/Courses/CourseView/LessonTypeIcon";
@@ -47,6 +48,9 @@ export const CourseChapterLesson = ({
     .with({ hasPreviewAccess: true }, () => LESSON_PROGRESS_STATUSES.NOT_STARTED)
     .with({ hasAccess: true }, () => effectiveStatus)
     .otherwise(() => LESSON_PROGRESS_STATUSES.BLOCKED);
+  const lessonTypeLabel = t(getLessonTypeTranslationKey(lesson.type), {
+    defaultValue: lesson.type,
+  });
 
   const lessonElement = (
     <div
@@ -54,7 +58,16 @@ export const CourseChapterLesson = ({
         "opacity-30": !hasAccess,
       })}
     >
-      <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="size-6 shrink-0" role="img" aria-label={lessonTypeLabel}>
+              <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{lessonTypeLabel}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <div className="flex w-full flex-col justify-center">
         <p
           className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left"
@@ -65,9 +78,6 @@ export const CourseChapterLesson = ({
             {lesson.quizQuestionCount ? `(${lesson.quizQuestionCount})` : null}
           </span>
         </p>
-        <span className="details text-neutral-800 text-left">
-          {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
-        </span>
       </div>
       {!isPreviewMode && (
         <ProgressBadge progress={progressBadge[badgeProgress]} className="self-center" />

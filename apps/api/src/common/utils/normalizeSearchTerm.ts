@@ -1,8 +1,5 @@
 export function normalizeSearchTerm(searchTerm: string) {
-  return searchTerm
-    .trim()
-    .split(/\s+/)
-    .map((token) => token.replace(/[':()&|!<>]/g, ""))
+  return (searchTerm.match(/[\p{L}\p{N}_]+/gu) ?? [])
     .map((token) => `${token}:*`)
     .join(" & ");
 }

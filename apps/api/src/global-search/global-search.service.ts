@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shared";
 
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { FileService } from "src/file/file.service";
@@ -8,9 +8,12 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH, SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { GlobalSearchRepository } from "./global-search.repository";
 import { GLOBAL_SEARCH_LESSON_ACCESS } from "./global-search.types";
+import { HybridSearchRepository } from "./hybrid-search.repository";
+import { fuseSearchMatches } from "./hybrid-search.utils";
+import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 
-import type { MatchRow } from "./global-search.types";
-import type { GlobalSearchResponse } from "./schemas/global-search.schema";
+import type { GlobalSearchReadOptions, MatchRow } from "./global-search.types";
+import type { GlobalSearchMode, GlobalSearchResponse } from "./schemas/global-search.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -19,18 +22,64 @@ export class GlobalSearchService {
   constructor(
     private readonly globalSearchRepository: GlobalSearchRepository,
     private readonly fileService: FileService,
+    private readonly hybridSearchRepository: HybridSearchRepository,
+    private readonly semanticSearchEmbeddingService: SemanticSearchEmbeddingService,
   ) {}
 
   async search(
     searchQuery: string,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    mode: GlobalSearchMode = GLOBAL_SEARCH_MODES.KEYWORD,
+    options: GlobalSearchReadOptions = {},
   ): Promise<GlobalSearchResponse> {
     const trimmedQuery = searchQuery.trim();
 
     if (trimmedQuery.length < GLOBAL_SEARCH_MIN_QUERY_LENGTH) {
       return this.emptyResponse();
     }
+
+    let embedding: number[] | undefined;
+    let semanticStatus: GlobalSearchResponse["semanticStatus"];
+    if (mode === GLOBAL_SEARCH_MODES.HYBRID) {
+      try {
+        embedding = await this.semanticSearchEmbeddingService.embedQuery(trimmedQuery);
+      } catch {
+        semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE;
+      }
+      if (embedding) {
+        semanticStatus = (await this.hybridSearchRepository.hasCurrentChunks(currentUser))
+          ? GLOBAL_SEARCH_SEMANTIC_STATUSES.READY
+          : GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
+      }
+    }
+    const findMatches = async (
+      entityType: Parameters<GlobalSearchRepository["findMatches"]>[0],
+    ) => {
+      if (
+        options.contentOnly &&
+        (entityType === SEARCH_ENTITY_TYPES.LESSON ||
+          entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
+      )
+        return [];
+      const metadataOnly = Boolean(
+        options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
+      );
+      const keyword = await this.hybridSearchRepository.findKeywordMatches(
+        entityType,
+        trimmedQuery,
+        currentUser,
+        metadataOnly,
+      );
+      if (!embedding) return keyword;
+      const semantic = await this.hybridSearchRepository.findSemanticMatches(
+        entityType,
+        embedding,
+        currentUser,
+        metadataOnly,
+      );
+      return fuseSearchMatches(keyword, semantic);
+    };
 
     const [
       courseMatches,
@@ -40,16 +89,12 @@ export class GlobalSearchService {
       articleMatches,
       qaMatches,
     ] = await Promise.all([
-      this.globalSearchRepository.findMatches(SEARCH_ENTITY_TYPES.COURSE, language, trimmedQuery),
-      this.globalSearchRepository.findMatches(SEARCH_ENTITY_TYPES.LESSON, language, trimmedQuery),
-      this.globalSearchRepository.findMatches(
-        SEARCH_ENTITY_TYPES.LEARNING_PATH,
-        language,
-        trimmedQuery,
-      ),
-      this.globalSearchRepository.findMatches(SEARCH_ENTITY_TYPES.NEWS, language, trimmedQuery),
-      this.globalSearchRepository.findMatches(SEARCH_ENTITY_TYPES.ARTICLE, language, trimmedQuery),
-      this.globalSearchRepository.findMatches(SEARCH_ENTITY_TYPES.QA, language, trimmedQuery),
+      findMatches(SEARCH_ENTITY_TYPES.COURSE),
+      findMatches(SEARCH_ENTITY_TYPES.LESSON),
+      findMatches(SEARCH_ENTITY_TYPES.LEARNING_PATH),
+      findMatches(SEARCH_ENTITY_TYPES.NEWS),
+      findMatches(SEARCH_ENTITY_TYPES.ARTICLE),
+      findMatches(SEARCH_ENTITY_TYPES.QA),
     ]);
 
     const [
@@ -66,30 +111,47 @@ export class GlobalSearchService {
       groupsResults,
     ] = await Promise.all([
       this.getAllCourses(courseMatches, language, currentUser),
-      this.getMyCourses(courseMatches, language, currentUser),
+      this.getMyCourses(courseMatches, language, currentUser, options.learnerOnly),
       this.getAvailableCourses(courseMatches, language, currentUser),
-      this.getLearningPaths(learningPathMatches, language, currentUser),
-      this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
+      options.contentOnly ? [] : this.getLearningPaths(learningPathMatches, language, currentUser),
+      options.contentOnly
+        ? []
+        : this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
       this.getNews(newsMatches, language, currentUser),
       this.getArticles(articleMatches, language, currentUser),
       this.getQA(qaMatches, language, currentUser),
-      this.getUsers(trimmedQuery, currentUser),
-      this.getCategories(trimmedQuery, language, currentUser),
-      this.getGroups(trimmedQuery, language, currentUser),
+      options.contentOnly ? [] : this.getUsers(trimmedQuery, currentUser),
+      options.contentOnly ? [] : this.getCategories(trimmedQuery, language, currentUser),
+      options.contentOnly ? [] : this.getGroups(trimmedQuery, language, currentUser),
     ]);
 
     return this.resolveImageUrls({
-      allCourses,
-      myCourses,
-      availableCourses,
-      learningPaths: learningPathsResults,
-      lessons: lessonsResults,
-      news: newsResults,
-      articles: articlesResults,
-      qa: qaResults,
+      searchMode: mode,
+      semanticStatus,
+      allCourses: this.withPassages(allCourses, courseMatches),
+      myCourses: this.withPassages(myCourses, courseMatches),
+      availableCourses: this.withPassages(availableCourses, courseMatches),
+      learningPaths: this.withPassages(learningPathsResults, learningPathMatches),
+      lessons: this.withPassages(lessonsResults, lessonMatches),
+      news: this.withPassages(newsResults, newsMatches),
+      articles: this.withPassages(articlesResults, articleMatches),
+      qa: this.withPassages(qaResults, qaMatches),
       users: usersResults,
       categories: categoriesResults,
       groups: groupsResults,
+    });
+  }
+
+  private withPassages<T extends { id: string }>(rows: T[], matches: MatchRow[]): T[] {
+    const byId = new Map(matches.map((match) => [match.entityId, match]));
+    return rows.slice(0, 10).map((row) => {
+      const match = byId.get(row.id as MatchRow["entityId"]);
+      if (!match?.matchedPassage) return row;
+      return {
+        ...row,
+        matchedPassage: match.matchedPassage,
+        matchedAttachmentFileName: match.matchedAttachmentFileName ?? null,
+      };
     });
   }
 
@@ -154,6 +216,7 @@ export class GlobalSearchService {
     matches: MatchRow[],
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    learnerOnly = false,
   ) {
     if (hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
       return this.globalSearchRepository.getCourseRows(matches, language, {
@@ -165,6 +228,7 @@ export class GlobalSearchService {
 
     return this.globalSearchRepository.getCourseRows(matches, language, {
       enrolledStudentId: currentUser.userId,
+      learnerVisibleOnly: learnerOnly,
     });
   }
 

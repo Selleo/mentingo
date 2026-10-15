@@ -3,7 +3,9 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
+  AUTOMATION_EMAIL: "automation-email",
   EMAIL_TEMPLATE_TEST: "email-template-test",
+  SEMANTIC_SEARCH_INDEX: "semantic-search-index",
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",
@@ -14,12 +16,14 @@ export const QUEUE_NAMES = {
   SCORM_IMPORT: "scorm-import",
   NATIVE_ARCHIVE: "native-archive",
   COURSE_DUPLICATION: "course-duplication",
-  LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
+  COURSE_AUTHORING_APPLY: "course-authoring-apply",
+  COURSE_AUTHORING_CONTEXT: "course-authoring-context",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
   AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
   VIDEO_METADATA: "video-metadata",
+  REPORT_EXPORT: "report-export",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -70,16 +74,16 @@ export interface LearningPathSyncJobData {
   triggerEventType: string;
 }
 
-export interface LumaCourseGenerationSyncJobData {
-  courseId: UUIDType;
-  currentUser: CurrentUserType;
-}
-
 export interface CourseDuplicationJobData {
   tenantId: UUIDType;
   sourceCourseId: UUIDType;
   targetCourseId: UUIDType;
   actor: CurrentUserType;
+}
+
+export interface CourseAuthoringContextFulfillmentJob {
+  tenantId: UUIDType;
+  contextRequestId: UUIDType;
 }
 
 export type VideoMetadataProvider = VideoProviderType;
@@ -91,4 +95,11 @@ export interface VideoMetadataJobData {
   provider: VideoMetadataProvider;
   fileKey?: string;
   bunnyVideoId?: string;
+}
+
+export interface ReportExportJobData {
+  tenantId: UUIDType;
+  exportId: UUIDType;
+  actorId: UUIDType;
+  action?: "generate" | "expire";
 }

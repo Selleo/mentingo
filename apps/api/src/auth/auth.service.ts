@@ -11,11 +11,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import {
-  EMAIL_TEMPLATE_EVENTS,
-  CreatePasswordReminderEmail,
-  MagicLinkEmail,
-} from "@repo/email-templates";
-import {
+  AUTOMATION_EVENT_KINDS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
@@ -29,16 +25,16 @@ import { authenticator } from "otplib";
 
 import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
+import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
-import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
 import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
-import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { SessionRevocationService } from "src/redis";
@@ -52,6 +48,7 @@ import {
   credentials,
   formFieldAnswers,
   magicLinkTokens,
+  notificationAccountActionIntents,
   userOnboarding,
   tenants,
   users,
@@ -93,6 +90,7 @@ export class AuthService {
     private readonly permissionsService: PermissionsService,
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly userPasswordEmailService: UserPasswordEmailService,
+    private readonly notificationAccountActionService: NotificationAccountActionService,
   ) {}
 
   public async register({
@@ -138,11 +136,13 @@ export class AuthService {
         await trx.insert(formFieldAnswers).values(registrationAnswers);
       }
 
+      const origin = await this.resolveTenantOrigin(user.tenantId);
       await this.outboxPublisher.publish(
-        new UserWelcomeEvent({
-          email: user.email,
-          userId: user.id,
-          tenantId: user.tenantId,
+        createUserNotificationEvent({
+          kind: AUTOMATION_EVENT_KINDS.WELCOME,
+          user,
+          language,
+          eventFields: { courses_link: `${origin}/courses` },
         }),
         trx,
       );
@@ -626,7 +626,7 @@ export class AuthService {
       .select({
         userId: createTokens.userId,
         email: users.email,
-        oldTokenHash: createTokens.tokenHash,
+        id: createTokens.id,
         tokenExpiryDate: createTokens.expiryDate,
         reminderCount: createTokens.reminderCount,
       })
@@ -647,106 +647,37 @@ export class AuthService {
       );
   }
 
-  private async generateNewTokenAndEmail(userId: UUIDType) {
-    const createToken = nanoid(64);
-
-    const user = await this.userService.getUserById(userId);
-
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      user.tenantId,
-      userId,
-    );
-
-    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
-
-    const emailTemplate = new CreatePasswordReminderEmail({
-      createPasswordLink: buildCreateNewPasswordLink(tenantOrigin, {
-        createToken,
-      }),
-      ...defaultEmailSettings,
-    });
-
-    return { createToken, emailTemplate };
-  }
-
-  private async sendEmailAndUpdateDatabase(
-    tenantId: UUIDType,
-    userId: UUIDType,
-    email: string,
-    oldTokenHash: string,
-    createToken: string,
-    emailTemplate: { text: string; html: string },
-    expiryDate: Date,
-    reminderCount: number,
-  ) {
-    const hashedCreateToken = hashToken(createToken);
-
-    await this.db.transaction(async (transaction) => {
-      try {
-        await transaction.insert(createTokens).values({
-          userId,
-          tokenHash: hashedCreateToken,
-          expiryDate,
-          reminderCount,
-        });
-
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-          tenantId,
-          userId,
-        );
-
-        await this.emailService.sendEmailWithLogo(
-          {
-            to: email,
-            subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-            text: emailTemplate.text,
-            html: emailTemplate.html,
-          },
-          {
-            tenantId,
-            template: {
-              event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
-              language: defaultEmailSettings.language,
-              variables: {
-                create_password_link: buildCreateNewPasswordLink(
-                  await this.resolveTenantOrigin(tenantId),
-                  { createToken },
-                ),
-              },
-            },
-          },
-        );
-
-        await transaction.delete(createTokens).where(eq(createTokens.tokenHash, oldTokenHash));
-      } catch (error) {
-        transaction.rollback();
-
-        throw error;
-      }
-    });
-  }
-
   public async checkTokenExpiryAndSendEmail() {
     const expiryTokens = await this.fetchExpiredTokens();
-
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 24);
-
-    expiryTokens.map(async ({ userId, email, oldTokenHash, reminderCount }) => {
+    for (const { id, userId, reminderCount } of expiryTokens) {
       const user = await this.userService.getUserById(userId);
-      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId);
-
-      await this.sendEmailAndUpdateDatabase(
-        user.tenantId,
-        userId,
-        email,
-        oldTokenHash,
-        createToken,
-        emailTemplate,
-        expiryDate,
-        reminderCount + 1,
-      );
-    });
+      const branding = await this.emailService.getDefaultEmailProperties(user.tenantId, userId);
+      const origin = await this.resolveTenantOrigin(user.tenantId);
+      await this.db.transaction(async (tx) => {
+        const accountActionIntentId =
+          await this.notificationAccountActionService.createNotificationAccountActionIntent(
+            {
+              userId,
+              kind: "create_password",
+              applicationOrigin: origin,
+              tokenTtlMs: 86400000,
+              reminderCount: reminderCount + 1,
+              revokePreviousPasswordSetupTokens: true,
+            },
+            tx,
+          );
+        await this.outboxPublisher.publish(
+          createUserNotificationEvent({
+            kind: AUTOMATION_EVENT_KINDS.PASSWORD_REMINDER,
+            occurrenceId: `password-reminder:${id}:${reminderCount + 1}:${new Date().toISOString().slice(0, 10)}`,
+            user,
+            language: branding.language,
+            accountActionIntentId,
+          }),
+          tx,
+        );
+      });
+    }
   }
 
   public async handleProviderLoginCallback(userCallback: ProviderLoginUserType) {
@@ -870,42 +801,30 @@ export class AuthService {
 
       if (!user || user.archived) return;
 
-      const magicLinkToken = await this.createMagicLinkToken(user.id);
-
-      if (!magicLinkToken) return;
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        user.tenantId,
-        user.id,
-      );
-
-      const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
-      const magicLinkUrl = new URL("/auth/login", tenantOrigin);
-      magicLinkUrl.searchParams.set("token", magicLinkToken);
-
-      const magicLinkEmail = new MagicLinkEmail({
-        magicLink: magicLinkUrl.toString(),
-        ...defaultEmailSettings,
+      const branding = await this.emailService.getDefaultEmailProperties(user.tenantId, user.id);
+      const origin = await this.resolveTenantOrigin(user.tenantId);
+      await this.db.transaction(async (tx) => {
+        const accountActionIntentId =
+          await this.notificationAccountActionService.createNotificationAccountActionIntent(
+            {
+              userId: user.id,
+              kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+              recipientEmail: user.email,
+              applicationOrigin: origin,
+              tokenTtlMs: MAGIC_LINK_EXPIRATION_TIME,
+            },
+            tx,
+          );
+        await this.outboxPublisher.publish(
+          createUserNotificationEvent({
+            kind: AUTOMATION_EVENT_KINDS.MAGIC_LINK,
+            user,
+            language: branding.language,
+            accountActionIntentId,
+          }),
+          tx,
+        );
       });
-
-      const { html, text } = magicLinkEmail;
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: email,
-          subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
-          text,
-          html,
-        },
-        {
-          tenantId: user.tenantId,
-          template: {
-            event: EMAIL_TEMPLATE_EVENTS.MAGIC_LINK,
-            language: defaultEmailSettings.language,
-            variables: { magic_link: magicLinkUrl.toString() },
-          },
-        },
-      );
     } catch {
       return;
     }
@@ -931,9 +850,33 @@ export class AuthService {
       if (magicLinkToken.expiryDate < dateNow)
         throw new UnauthorizedException("magicLink.error.expiredToken");
 
+      const [currentAccount] = await trx
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, magicLinkToken.userId))
+        .for("update");
+
+      if (!currentAccount) throw new UnauthorizedException("magicLink.error.invalidToken");
+
       const user = await this.userService.getUserById(magicLinkToken.userId);
 
       if (user.archived) throw new UnauthorizedException("user.error.archived");
+
+      const [accountAction] = await trx
+        .select({ recipientEmail: notificationAccountActionIntents.recipientEmail })
+        .from(notificationAccountActionIntents)
+        .where(
+          and(
+            eq(notificationAccountActionIntents.authTokenId, magicLinkToken.id),
+            eq(notificationAccountActionIntents.userId, user.id),
+            eq(notificationAccountActionIntents.kind, NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN),
+          ),
+        )
+        .limit(1);
+
+      if (accountAction && accountAction.recipientEmail !== currentAccount.email) {
+        throw new UnauthorizedException("magicLink.error.invalidToken");
+      }
 
       await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
 

@@ -42,8 +42,6 @@ test("student can open lessons out of order from the sidebar when sequence is di
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${thirdLesson.id}$`));
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(thirdLesson.title);
-      await expect(page.getByTestId(LEARNING_HANDLES.CURRENT_LESSON_NUMBER)).toHaveText("3");
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSONS_COUNT)).toHaveText("3");
 
       await expect
         .poll(
@@ -91,8 +89,7 @@ test("student can open an embed lesson and complete it", async ({
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${embedLesson.id}$`));
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(embedLesson.title);
-      await expect(page.getByTestId(LEARNING_HANDLES.CURRENT_LESSON_NUMBER)).toHaveText("1");
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSONS_COUNT)).toHaveText("1");
+
       await expect(page.locator(`iframe[title="${embedLesson.title}"]`)).toBeVisible();
 
       await expect

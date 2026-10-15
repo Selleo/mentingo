@@ -20,11 +20,11 @@ const api = vi.hoisted(() => ({
 vi.mock("~/api/api-client", () => ({
   ApiClient: {
     api: {
-      emailTemplateControllerPreviewEmailTemplate: api.preview,
-      emailTemplateControllerUpdateEmailTemplate: api.save,
-      emailTemplateControllerDeleteEmailTemplate: api.delete,
-      emailTemplateControllerRemoveEmailTemplateLanguage: api.removeLanguage,
-      emailTemplateControllerUploadEmailTemplateImage: api.upload,
+      emailTemplateManagementControllerPreviewEmailTemplate: api.preview,
+      emailTemplateManagementControllerUpdateEmailTemplate: api.save,
+      emailTemplateManagementControllerDeleteEmailTemplate: api.delete,
+      emailTemplateManagementControllerRemoveEmailTemplateLanguage: api.removeLanguage,
+      emailTemplateManagementControllerUploadEmailTemplateImage: api.upload,
     },
   },
 }));
@@ -88,6 +88,36 @@ const imageTemplate: EmailTemplate = {
 describe("EmailTemplateEditor", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("authors placeholders independently of events and saves their declarations", async () => {
+    api.save.mockResolvedValue({ data: { data: template } });
+    const user = userEvent.setup();
+    renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
+    expect(screen.queryByRole("combobox", { name: "Notification event" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Add tag" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Tag name" }), {
+      target: { value: "learner_name" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.click(screen.getByRole("menuitem", { name: "Save draft" }));
+    await waitFor(() =>
+      expect(api.save).toHaveBeenCalledWith(
+        "template-id",
+        expect.objectContaining({
+          placeholders: [
+            {
+              name: "learner_name",
+              label: "",
+              type: "string",
+              required: false,
+              sampleValue: "",
+            },
+          ],
+        }),
+      ),
+    );
+    expect(api.save.mock.calls[0]![1]).not.toHaveProperty("event");
+  });
+
   it("keeps a block selected while editing its content", async () => {
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplateEditor template={imageTemplate} />);
@@ -145,6 +175,7 @@ describe("EmailTemplateEditor", () => {
     await user.click(screen.getByTestId("email-template-language-de"));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirm" }));
     await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.click(screen.getByRole("menuitem", { name: "Save draft" }));
 
     await waitFor(() =>
       expect(api.save).toHaveBeenCalledWith(
@@ -192,7 +223,8 @@ describe("EmailTemplateEditor", () => {
     api.delete.mockResolvedValue({ data: { data: true } });
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
-    await user.click(screen.getByRole("button", { name: "Delete template" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete template" }));
     expect(api.delete).not.toHaveBeenCalled();
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "Delete template" }),
@@ -205,7 +237,8 @@ describe("EmailTemplateEditor", () => {
     api.delete.mockRejectedValue(new Error("Delete failed"));
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
-    await user.click(screen.getByRole("button", { name: "Delete template" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete template" }));
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "Delete template" }),
     );
@@ -228,7 +261,9 @@ describe("EmailTemplateEditor", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Subject" }), {
       target: { value: "Changed subject" },
     });
-    await userEvent.setup().click(screen.getByRole("button", { name: "Save draft" }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.click(screen.getByRole("menuitem", { name: "Save draft" }));
     expect(
       screen.queryByText("Complete the required button and image fields before continuing."),
     ).not.toBeInTheDocument();
@@ -263,12 +298,16 @@ describe("EmailTemplateEditor", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Subject" }), {
       target: { value: "New subject" },
     });
-    await userEvent.setup().click(screen.getByRole("button", { name: "Save draft" }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.click(screen.getByRole("menuitem", { name: "Save draft" }));
     await waitFor(() =>
       expect(save).toHaveBeenCalledWith("template-id", {
         name: {},
         subject: { en: "New subject" },
         content: {},
+        placeholders: [],
+        triggerEventKind: null,
       }),
     );
     await waitFor(() => expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled());

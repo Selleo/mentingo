@@ -5,9 +5,10 @@ import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { outboxEvents } from "src/storage/schema";
 
+import { OUTBOX_NOTIFY_CHANNEL } from "./outbox.constants";
 import { OUTBOX_STATUSES } from "./outbox.types";
 
-import type { OutboxEnvelope, OutboxStatus } from "./outbox.types";
+import type { OutboxEnvelope, OutboxStatus, OutboxPublication } from "./outbox.types";
 
 @Injectable()
 export class OutboxRepository {
@@ -17,12 +18,32 @@ export class OutboxRepository {
 
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
+  async createPending(
+    publication: OutboxPublication,
+    transaction: DatabasePg = this.db,
+    id?: string,
+  ): Promise<void> {
+    await transaction.insert(outboxEvents).values({
+      ...publication,
+      ...(id ? { id } : {}),
+      status: OUTBOX_STATUSES.PENDING,
+      attemptCount: 0,
+    });
+  }
+
+  async notifyPending(transaction: DatabasePg = this.db): Promise<void> {
+    await transaction.execute(sql`SELECT pg_notify(${OUTBOX_NOTIFY_CHANNEL}, '')`);
+  }
+
   async claimNext(): Promise<OutboxEnvelope | null> {
     const [claimResult] = await this.db.execute(sql`
       WITH candidates AS (
         SELECT id
         FROM outbox_events
         WHERE status IN (${OUTBOX_STATUSES.PENDING}, ${OUTBOX_STATUSES.FAILED})
+          AND (status <> ${OUTBOX_STATUSES.FAILED}
+            OR event_type NOT IN ('NotificationEvent', 'AutomationEmailDeliveryRequestedEvent')
+            OR updated_at < NOW() - INTERVAL '5 seconds')
         ORDER BY created_at ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
@@ -50,13 +71,27 @@ export class OutboxRepository {
     return this.normalizeRow(claimResult);
   }
 
-  async markPublished(id: string): Promise<void> {
-    await this.db
+  async recoverNotificationIntake(): Promise<void> {
+    await this.db.execute(sql`
+      UPDATE outbox_events SET status = 'pending', updated_at = NOW()
+      WHERE status = 'processing'
+        AND event_type IN ('NotificationEvent', 'AutomationEmailDeliveryRequestedEvent')
+        AND updated_at < NOW() - INTERVAL '5 minutes'
+    `);
+  }
+
+  async markPublished(
+    id: string,
+    scrubPayload = false,
+    transaction: DatabasePg = this.db,
+  ): Promise<void> {
+    await transaction
       .update(outboxEvents)
       .set({
         status: OUTBOX_STATUSES.PUBLISHED,
         publishedAt: sql`CURRENT_TIMESTAMP`,
         updatedAt: sql`CURRENT_TIMESTAMP`,
+        ...(scrubPayload ? { payload: {} } : {}),
       })
       .where(eq(outboxEvents.id, id));
   }

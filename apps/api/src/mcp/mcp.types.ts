@@ -3,6 +3,8 @@ import type { Request } from "express";
 import type { UUIDType } from "src/common";
 
 export const MCP_UPLOAD_GRANT_KIND = {
+  PLATFORM_ASSET: "platformAsset",
+  USER_AVATAR: "userAvatar",
   THUMBNAIL: "thumbnail",
   CERTIFICATE_SIGNATURE: "certificateSignature",
   COVER: "cover",
@@ -189,7 +191,40 @@ export type McpScormUploadGrant = {
   expiresAt: number;
 };
 
+export type McpPlatformAssetUploadGrant = {
+  kind: typeof MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET;
+  targetType: typeof ENTITY_TYPES.GLOBAL_SETTINGS;
+  targetId: UUIDType;
+  asset:
+    | "platformLogo"
+    | "platformSimpleLogo"
+    | "loginBackground"
+    | "certificateBackground"
+    | "loginDocument";
+  name?: string;
+  userId: UUIDType;
+  tenantId: UUIDType;
+  filename: string;
+  mimeType: string;
+  size: number;
+  expiresAt: number;
+};
+
+export type McpUserAvatarUploadGrant = {
+  kind: typeof MCP_UPLOAD_GRANT_KIND.USER_AVATAR;
+  targetType: typeof ENTITY_TYPES.USER;
+  targetId: UUIDType;
+  userId: UUIDType;
+  tenantId: UUIDType;
+  filename: string;
+  mimeType: string;
+  size: number;
+  expiresAt: number;
+};
+
 export type McpUploadGrant =
+  | McpPlatformAssetUploadGrant
+  | McpUserAvatarUploadGrant
   | McpLessonUploadGrant
   | McpEditorialUploadGrant
   | McpEditorialCoverUploadGrant

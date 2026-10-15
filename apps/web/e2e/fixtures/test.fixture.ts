@@ -107,7 +107,7 @@ const ADMIN_EMAIL = "admin@example.com";
 const ADMIN_PASSWORD = "password";
 const ACCOUNT_PASSWORD = "Password123@";
 const DEFAULT_BASE_URL = process.env.CI
-  ? "http://localhost:5173"
+  ? "https://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
 
 const roleLabelBySlug: Record<UserRole, string> = {

@@ -1,19 +1,15 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { Icon } from "~/components/Icon";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { pauseAllLessonVideos, resumeLessonVideo } from "~/components/VideoPlayer/Video";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
-import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
@@ -32,7 +28,6 @@ type LessonContentProps = {
   course: GetCourseResponse["data"];
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
-  lessonsAmount: number;
   handlePrevious: () => void;
   handleNext: () => void;
   isFirstLesson: boolean;
@@ -45,15 +40,12 @@ export const LessonContent = ({
   course,
   previewUser,
   hideControls = false,
-  lessonsAmount,
   handlePrevious,
   handleNext,
   isFirstLesson,
   lessonLoading,
   isLastLesson,
 }: LessonContentProps) => {
-  const { t } = useTranslation();
-
   const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
@@ -239,98 +231,72 @@ export const LessonContent = ({
   );
 
   return (
-    <TooltipProvider>
-      <div className="flex w-full min-w-0 flex-col items-center h-auto py-10">
-        <div className="flex w-full min-w-0 flex-col px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
-          <div className="flex w-full flex-col pb-6">
-            <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
-              <div className="flex items-center gap-x-2">
-                <p className="body-sm-md text-neutral-800">
-                  {t("studentLessonView.other.lesson")}{" "}
-                  <span data-testid={LEARNING_HANDLES.CURRENT_LESSON_NUMBER}>
-                    {lesson.displayOrder}
-                  </span>
-                  /<span data-testid={LEARNING_HANDLES.LESSONS_COUNT}>{lessonsAmount}</span> –{" "}
-                  <span data-testid={LEARNING_HANDLES.LESSON_TYPE}>
-                    {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
-                  </span>
-                </p>
-                {lesson.type === LessonType.AI_MENTOR && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant="secondary" className="uppercase">
-                        Beta
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      {t("studentLessonView.tooltip.beta")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <p
-                data-testid={LEARNING_HANDLES.LESSON_TITLE}
-                className="h4 text-neutral-950 break-words min-w-0"
-              >
-                {lesson.title}
-              </p>
-            </div>
-            {!hideControls && (
-              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-                <div className="flex flex-row gap-x-4">
-                  <Button
-                    variant="outline"
-                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                    disabled={isPreviousDisabled || isFirstLesson}
-                    onClick={handlePrevious}
-                  >
-                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                  </Button>
-                  <Button
-                    data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
-                    variant="outline"
-                    disabled={isNextDisabled}
-                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                    onClick={handleNext}
-                  >
-                    <Icon name="ArrowRight" className="h-auto w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+    <div className="flex w-full min-w-0 flex-col items-center h-auto py-10">
+      <div className="flex w-full min-w-0 flex-col px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
+        <div className="flex w-full flex-col pb-6">
+          <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
+            <p
+              data-testid={LEARNING_HANDLES.LESSON_TITLE}
+              className="h4 text-neutral-950 break-words min-w-0"
+            >
+              {lesson.title}
+            </p>
           </div>
-
-          <LessonVideoProgressStrip
-            lessonId={lesson.id}
-            description={lesson.description}
-            enabled={shouldUseCoverageCompletion}
-            showRequirementWarning={!lesson.lessonCompleted}
-            store={videoProgressStore}
-          />
-
-          <RequiredVideoLeaveGuard
-            courseId={course.id}
-            userId={user?.id ?? ""}
-            lessonCompleted={Boolean(lesson.lessonCompleted)}
-            enabled={shouldUseCoverageCompletion}
-            store={videoProgressStore}
-            onPause={pauseAllLessonVideos}
-            onContinueWatching={(resourceEntityId) => {
-              if (resourceEntityId) resumeLessonVideo(resourceEntityId);
-            }}
-          />
-
-          <LessonContentRenderer
-            lesson={lesson}
-            user={user}
-            previewUser={previewUser}
-            hideControls={hideControls}
-            lessonLoading={lessonLoading}
-            onVideoEnded={handleVideoEnded}
-            videoCoverageTracking={videoCoverageTracking}
-          />
+          {!hideControls && (
+            <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
+              <div className="flex flex-row gap-x-4">
+                <Button
+                  variant="outline"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  disabled={isPreviousDisabled || isFirstLesson}
+                  onClick={handlePrevious}
+                >
+                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                </Button>
+                <Button
+                  data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
+                  variant="outline"
+                  disabled={isNextDisabled}
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  onClick={handleNext}
+                >
+                  <Icon name="ArrowRight" className="h-auto w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
+
+        <LessonVideoProgressStrip
+          lessonId={lesson.id}
+          description={lesson.description}
+          enabled={shouldUseCoverageCompletion}
+          showRequirementWarning={!lesson.lessonCompleted}
+          store={videoProgressStore}
+        />
+
+        <RequiredVideoLeaveGuard
+          courseId={course.id}
+          userId={user?.id ?? ""}
+          lessonCompleted={Boolean(lesson.lessonCompleted)}
+          enabled={shouldUseCoverageCompletion}
+          store={videoProgressStore}
+          onPause={pauseAllLessonVideos}
+          onContinueWatching={(resourceEntityId) => {
+            if (resourceEntityId) resumeLessonVideo(resourceEntityId);
+          }}
+        />
+
+        <LessonContentRenderer
+          lesson={lesson}
+          user={user}
+          previewUser={previewUser}
+          hideControls={hideControls}
+          lessonLoading={lessonLoading}
+          onVideoEnded={handleVideoEnded}
+          videoCoverageTracking={videoCoverageTracking}
+        />
       </div>
-    </TooltipProvider>
+    </div>
   );
 };

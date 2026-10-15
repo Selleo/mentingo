@@ -1,0 +1,32 @@
+{
+  "operationId": "8e7063d1-1eac-55de-a586-6d49b78f0c09",
+  "targetId": "7d01ec26-9a50-54bd-b760-3a6ba54cd4e1",
+  "language": "en",
+  "baselineHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dependencies": [],
+  "type": "lesson.update",
+  "chapterId": "f2766289-160c-58dd-8407-4321dba4b613",
+  "payload": {
+    "lessonType": "ai_mentor",
+    "title": "Practice verification",
+    "description": "Practice assessing an unexpected request.",
+    "name": "Practice coach",
+    "configurationType": "teacher",
+    "configuration": {
+      "taskGoal": "Explain safe verification.",
+      "expertise": "Security awareness",
+      "contentScope": "Phishing requests",
+      "teachingStyle": "guided_discovery",
+      "feedbackGuidance": null,
+      "openingInstruction": null,
+      "additionalInstructions": null
+    },
+    "judgeConfiguration": null,
+    "sourceVersionIds": [],
+    "avatarAssetId": null,
+    "voiceMode": "preset",
+    "ttsPreset": "female",
+    "customTtsReference": null,
+    "preparedResourceIds": []
+  }
+}

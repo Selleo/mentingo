@@ -8,6 +8,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
+import puppeteer from "puppeteer";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -47,6 +48,7 @@ import type { DatabasePg } from "src/common";
 
 describe("CertificatesController (e2e)", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -59,7 +61,32 @@ describe("CertificatesController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest({ enableActivityLogs: true });
+    const launch = puppeteer.launch.bind(puppeteer);
+    jest.spyOn(puppeteer, "launch").mockImplementation(async (options) => {
+      const browser = await launch(options);
+      const newPage = browser.newPage.bind(browser);
+      jest.spyOn(browser, "newPage").mockImplementation(async () => {
+        const page = await newPage();
+        await page.setRequestInterception(true);
+        page.on("request", (request) => {
+          // This suite checks real PDF/auth contracts, not Tailwind's external CDN availability.
+          const response =
+            request.url() === "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"
+              ? request.respond({ status: 200, contentType: "application/javascript", body: "" })
+              : request.continue();
+          void response.catch(() => {});
+        });
+        return page;
+      });
+      return browser;
+    });
+
+    const {
+      app: testApp,
+      runAsTenant,
+      defaultTenantId,
+    } = await createE2ETest({ enableActivityLogs: true });
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -74,6 +101,7 @@ describe("CertificatesController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
@@ -431,20 +459,22 @@ describe("CertificatesController (e2e)", () => {
         ])
         .returning();
 
-      await certificatesService.applyValidityToExistingCertificates(
-        course.id,
-        {
-          type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
-          value: 1,
-          unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
-        },
-        {
-          userId: admin.id,
-          email: admin.email,
-          tenantId: admin.tenantId,
-          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
-        },
+      await inTenant(() =>
+        certificatesService.applyValidityToExistingCertificates(
+          course.id,
+          {
+            type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
+            value: 1,
+            unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
+          },
+          {
+            userId: admin.id,
+            email: admin.email,
+            tenantId: admin.tenantId,
+            roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+            permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+          },
+        ),
       );
 
       const updatedCertificates = await db.select().from(certificates);
@@ -533,13 +563,15 @@ describe("CertificatesController (e2e)", () => {
         ])
         .returning();
 
-      await certificatesService.applyValidityToExistingCertificates(course.id, null, {
-        userId: admin.id,
-        email: admin.email,
-        tenantId: admin.tenantId,
-        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-        permissions: [PERMISSIONS.COURSE_ENROLLMENT],
-      });
+      await inTenant(() =>
+        certificatesService.applyValidityToExistingCertificates(course.id, null, {
+          userId: admin.id,
+          email: admin.email,
+          tenantId: admin.tenantId,
+          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+        }),
+      );
 
       const updatedCertificates = await db.select().from(certificates);
       const updatedActiveCertificate = updatedCertificates.find(
@@ -1448,7 +1480,7 @@ describe("CertificatesController (e2e)", () => {
         })
         .returning();
 
-      await certificatesService.expireCertificates();
+      await inTenant(() => certificatesService.expireCertificates());
 
       const [activityLog] = await db
         .select()
@@ -1487,7 +1519,7 @@ describe("CertificatesController (e2e)", () => {
         expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       });
 
-      await certificatesService.expireCertificates();
+      await inTenant(() => certificatesService.expireCertificates());
 
       const [activityLog] = await db
         .select()
@@ -1699,6 +1731,7 @@ describe("CertificatesController (e2e)", () => {
           "filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("returns pdf file with custom filename", async () => {
@@ -1738,6 +1771,7 @@ describe("CertificatesController (e2e)", () => {
           "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("allows a group manager to download a managed learner certificate", async () => {
@@ -1788,6 +1822,7 @@ describe("CertificatesController (e2e)", () => {
 
         expect(response.headers["content-type"]).toBe("application/pdf");
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("does not allow a group manager to download an unmanaged learner certificate", async () => {

@@ -14,6 +14,7 @@ import {
 } from "~/components/ui/accordion";
 import { Badge } from "~/components/ui/badge";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -73,143 +74,161 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   if (!course) return null;
 
   return (
-    <div
-      data-testid={LEARNING_HANDLES.LESSON_SIDEBAR}
-      className="sticky top-0 h-auto max-h-fit min-h-screen overflow-y-scroll rounded-lg bg-white"
-    >
-      <div className="flex flex-col gap-y-12">
-        <div className="flex flex-col gap-y-4 px-8 pt-8">
-          <div className="flex justify-between">
-            <CategoryChip category={course.category} className="body-sm-md bg-primary-50" />
+    <TooltipProvider>
+      <div
+        data-testid={LEARNING_HANDLES.LESSON_SIDEBAR}
+        className="sticky top-0 h-auto max-h-fit min-h-screen overflow-y-scroll rounded-lg bg-white"
+      >
+        <div className="flex flex-col gap-y-12">
+          <div className="flex flex-col gap-y-4 px-8 pt-8">
+            <div className="flex justify-between">
+              <CategoryChip category={course.category} className="body-sm-md bg-primary-50" />
+            </div>
+            <h1 className="h6 text-neutral-950">{course.title}</h1>
+            <CourseProgress
+              label={t("studentLessonView.sideSection.other.courseProgress")}
+              completedLessonCount={course.completedChapterCount ?? 0}
+              courseLessonCount={course.courseChapterCount ?? 0}
+              isCompleted={course.completedChapterCount === course.courseChapterCount}
+              redactProgress={isPreviewMode}
+            />
           </div>
-          <h1 className="h6 text-neutral-950">{course.title}</h1>
-          <CourseProgress
-            label={t("studentLessonView.sideSection.other.courseProgress")}
-            completedLessonCount={course.completedChapterCount ?? 0}
-            courseLessonCount={course.courseChapterCount ?? 0}
-            isCompleted={course.completedChapterCount === course.courseChapterCount}
-            redactProgress={isPreviewMode}
-          />
-        </div>
-        <div className="flex flex-col gap-y-4 px-4">
-          <p className="body-lg-md px-4 text-neutral-950">
-            {t("studentLessonView.sideSection.header")}
-          </p>
-          <div className="flex flex-col">
-            <Accordion
-              type="single"
-              collapsible
-              value={activeChapter}
-              onValueChange={handleAccordionChange}
-            >
-              {chapters?.map(
-                ({
-                  id,
-                  title,
-                  lessons,
-                  chapterProgress = CHAPTER_PROGRESS_STATUSES.NOT_STARTED,
-                }) => {
-                  return (
-                    <AccordionItem value={id} key={id}>
-                      <AccordionTrigger
-                        className={cn(
-                          "flex items-start gap-x-4 border border-neutral-200 px-6 py-4 text-start hover:bg-neutral-50 data-[state=closed]:rounded-none data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 data-[state=closed]:border-x-transparent data-[state=closed]:border-t-transparent [&[data-state=closed]>svg]:duration-200 [&[data-state=closed]>svg]:ease-out [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:duration-200 [&[data-state=open]>svg]:ease-out",
-                          {
-                            "data-[state=closed]:border-b-0":
-                              last(course?.chapters)?.id === id || activeChapter !== id,
-                          },
-                        )}
-                      >
-                        <Badge
-                          variant="icon"
-                          icon={
-                            isPreviewMode
+          <div className="flex flex-col gap-y-4 px-4">
+            <p className="body-lg-md px-4 text-neutral-950">
+              {t("studentLessonView.sideSection.header")}
+            </p>
+            <div className="flex flex-col">
+              <Accordion
+                type="single"
+                collapsible
+                value={activeChapter}
+                onValueChange={handleAccordionChange}
+              >
+                {chapters?.map(
+                  ({
+                    id,
+                    title,
+                    lessons,
+                    chapterProgress = CHAPTER_PROGRESS_STATUSES.NOT_STARTED,
+                  }) => {
+                    return (
+                      <AccordionItem value={id} key={id}>
+                        <AccordionTrigger
+                          className={cn(
+                            "flex items-start gap-x-4 border border-neutral-200 px-6 py-4 text-start hover:bg-neutral-50 data-[state=closed]:rounded-none data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 data-[state=closed]:border-x-transparent data-[state=closed]:border-t-transparent [&[data-state=closed]>svg]:duration-200 [&[data-state=closed]>svg]:ease-out [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:duration-200 [&[data-state=open]>svg]:ease-out",
+                            {
+                              "data-[state=closed]:border-b-0":
+                                last(course?.chapters)?.id === id || activeChapter !== id,
+                            },
+                          )}
+                        >
+                          <Badge
+                            variant="icon"
+                            icon={
+                              isPreviewMode
+                                ? getPreviewIcon()
+                                : progressBadge[
+                                    state?.chapterId === id &&
+                                    chapterProgress === CHAPTER_PROGRESS_STATUSES.NOT_STARTED
+                                      ? CHAPTER_PROGRESS_STATUSES.IN_PROGRESS
+                                      : chapterProgress
+                                  ]
+                            }
+                            iconClasses="w-6 h-auto shrink-0"
+                          />
+                          <div className="body-base-md w-full text-start text-neutral-950">
+                            {title}
+                          </div>
+                          <Icon name="CarretDownLarge" className="size-6 text-primary-700" />
+                        </AccordionTrigger>
+                        <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
+                          {lessons?.map(({ id, title, status, type, hasAccess }) => {
+                            const shouldIgnoreEnrollmentBlockedStatus =
+                              isCourseStudentModeActive &&
+                              hasAccess &&
+                              status === LESSON_PROGRESS_STATUSES.BLOCKED;
+
+                            const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
+                              ? LESSON_PROGRESS_STATUSES.NOT_STARTED
+                              : status;
+
+                            const isBlocked = match({
+                              isPreviewMode,
+                              shouldIgnoreEnrollmentBlockedStatus,
+                              hasAccess,
+                              status,
+                            })
+                              .with({ isPreviewMode: true }, () => false)
+                              .with({ shouldIgnoreEnrollmentBlockedStatus: true }, () => false)
+                              .with({ status: LESSON_PROGRESS_STATUSES.BLOCKED }, () => true)
+                              .with({ hasAccess: false }, () => true)
+                              .otherwise(() => false);
+
+                            const badgeStatus: ProgressStatus = isBlocked
+                              ? LESSON_PROGRESS_STATUSES.BLOCKED
+                              : effectiveStatus;
+
+                            const badgeIcon = isPreviewMode
                               ? getPreviewIcon()
-                              : progressBadge[
-                                  state?.chapterId === id &&
-                                  chapterProgress === CHAPTER_PROGRESS_STATUSES.NOT_STARTED
-                                    ? CHAPTER_PROGRESS_STATUSES.IN_PROGRESS
-                                    : chapterProgress
-                                ]
-                          }
-                          iconClasses="w-6 h-auto shrink-0"
-                        />
-                        <div className="body-base-md w-full text-start text-neutral-950">
-                          {title}
-                        </div>
-                        <Icon name="CarretDownLarge" className="size-6 text-primary-700" />
-                      </AccordionTrigger>
-                      <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
-                        {lessons?.map(({ id, title, status, type, hasAccess }) => {
-                          const shouldIgnoreEnrollmentBlockedStatus =
-                            isCourseStudentModeActive &&
-                            hasAccess &&
-                            status === LESSON_PROGRESS_STATUSES.BLOCKED;
+                              : progressBadge[badgeStatus];
 
-                          const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
-                            ? LESSON_PROGRESS_STATUSES.NOT_STARTED
-                            : status;
-
-                          const isBlocked = match({
-                            isPreviewMode,
-                            shouldIgnoreEnrollmentBlockedStatus,
-                            hasAccess,
-                            status,
-                          })
-                            .with({ isPreviewMode: true }, () => false)
-                            .with({ shouldIgnoreEnrollmentBlockedStatus: true }, () => false)
-                            .with({ status: LESSON_PROGRESS_STATUSES.BLOCKED }, () => true)
-                            .with({ hasAccess: false }, () => true)
-                            .otherwise(() => false);
-
-                          const badgeStatus: ProgressStatus = isBlocked
-                            ? LESSON_PROGRESS_STATUSES.BLOCKED
-                            : effectiveStatus;
-
-                          const badgeIcon = isPreviewMode
-                            ? getPreviewIcon()
-                            : progressBadge[badgeStatus];
-
-                          return (
-                            <Link
-                              key={id}
-                              to={isBlocked ? "#" : `/course/${course.slug}/lesson/${id}`}
-                              data-testid={LEARNING_HANDLES.lessonSidebarLessonItem(id)}
-                              className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50 pl-10", {
-                                "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
-                                "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
-                                  lessonId === id,
-                              })}
-                            >
-                              <Badge
-                                data-testid={
-                                  isBlocked
-                                    ? LEARNING_HANDLES.lessonSidebarBlockedIndicator(id)
-                                    : undefined
-                                }
-                                variant="icon"
-                                icon={badgeIcon}
-                                iconClasses="w-6 h-auto shrink-0"
-                              />{" "}
-                              <div className="flex flex-1 flex-col break-words overflow-x-hidden">
-                                <p className="body-sm-md text-neutral-950">{title}</p>
-                                <p className="details text-neutral-800">
-                                  {t(getLessonTypeTranslationKey(type), { defaultValue: type })}
-                                </p>
-                              </div>
-                              <LessonTypeIcon type={type} className="size-6 text-primary-700" />
-                            </Link>
-                          );
-                        })}
-                      </AccordionContent>
-                    </AccordionItem>
-                  );
-                },
-              )}
-            </Accordion>
+                            return (
+                              <Link
+                                key={id}
+                                to={isBlocked ? "#" : `/course/${course.slug}/lesson/${id}`}
+                                data-testid={LEARNING_HANDLES.lessonSidebarLessonItem(id)}
+                                className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50 pl-10", {
+                                  "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
+                                  "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
+                                    lessonId === id,
+                                })}
+                              >
+                                <Badge
+                                  data-testid={
+                                    isBlocked
+                                      ? LEARNING_HANDLES.lessonSidebarBlockedIndicator(id)
+                                      : undefined
+                                  }
+                                  variant="icon"
+                                  icon={badgeIcon}
+                                  iconClasses="w-6 h-auto shrink-0"
+                                />{" "}
+                                <div className="flex flex-1 flex-col break-words overflow-x-hidden">
+                                  <p className="body-sm-md text-neutral-950">{title}</p>
+                                </div>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span
+                                      data-testid={LEARNING_HANDLES.lessonSidebarTypeIcon(id)}
+                                      className="flex size-6 shrink-0 items-center justify-center"
+                                      role="img"
+                                      aria-label={t(getLessonTypeTranslationKey(type), {
+                                        defaultValue: type,
+                                      })}
+                                    >
+                                      <LessonTypeIcon
+                                        type={type}
+                                        className="size-6 text-primary-700"
+                                      />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    {t(getLessonTypeTranslationKey(type), { defaultValue: type })}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </Link>
+                            );
+                          })}
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  },
+                )}
+              </Accordion>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };

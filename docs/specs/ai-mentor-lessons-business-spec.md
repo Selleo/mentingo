@@ -110,9 +110,11 @@ During voice mode, the learner's assistant message is updated as the model produ
 - Judge criteria are optional. When a configured assessment has no criteria, its total maximum score is zero and the scored assessment is satisfied without applying the percentage threshold; the learner passes unless a blocking error is triggered.
 - AI Mentor configuration supports exactly one active subtype: Teacher or Roleplay. The root configuration stores shared opening and additional instructions, while the selected subtype stores only its focused fields. Changing type replaces the previous subtype transactionally.
 - New AI Mentor lessons require a Judge configuration at creation. Generated courses provide a learner-facing task description and the complete structured Teacher-or-Roleplay configuration. Core validates and imports the Mentor and Judge configurations while keeping the task description, relevant context, and TTS preset as separate lesson-level values.
-- At evaluation time, the API loads the localized task goal, criteria, exact score guidance, accepted examples, and blocking errors as one rubric query. The learner transcript is wrapped in an explicit untrusted-submission boundary and passed to the single authoritative generated Judge prompt.
+- At evaluation time, the API loads the localized task goal, criteria, exact score guidance, accepted examples, and blocking errors as one rubric query. The learner transcript is wrapped in an explicit untrusted-submission boundary and passed to the authoritative generated Judge prompt. Proposed blocking errors receive a separate independent evidence check against the same learner statements and one trusted rule, without the first Judge's conclusion. Only corroborated errors override an otherwise passing score; unconfirmed errors are omitted. Invalid verifier references or a failed verifier prevent completion rather than persisting an unverified failure. This check is skipped when no blocking error is proposed.
 - Completed judgements retain immutable criterion titles, blocking-error descriptions, awarded/max scores, statuses, and learner-safe evidence. Creators may later remove rubric criteria or blocking errors without deleting or changing the learner's historical result.
 - Master-course export and synchronization copy the complete localized Judge graph. Synchronization preserves the target configuration identity while replacing its current criteria, score guidance, examples, and blocking errors transactionally.
+- Core Mentor text and voice conversations, generated welcome messages, Judge, summaries, translations, and Mentor/Judge configuration generation and validation default to `gpt-6-luna` in the Core provider. The installed OpenAI adapter requires explicit reasoning support for Luna; Core omits incompatible sampling controls. Embeddings and transcription continue using their specialized models. Luma-hosted capability assignments remain separately configured and are not overridden by Core model defaults.
+- Base Teacher and Roleplay prompts treat opening instructions as opening-turn guidance. Later replies focus on the immediate contribution, avoid repeating goals and assessment checklists, and preserve uncertainty about unconfigured facts. The voice addon reinforces this for existing voice threads. Prompt policy is intended behavior, not a guarantee of model output quality.
 - AI Mentor types, Teacher teaching styles, Roleplay difficulties, and voice mode constants live in `packages/shared/src/constants/aiMentorTypes.ts` and `packages/shared/src/constants/aiMentorVoice.ts`.
 - Learner-name personalization is resolved from the authenticated conversation thread rather than caller-supplied chat content. The name is marked as untrusted prompt data, and the shared policy explicitly preserves the configured Teacher or Roleplay persona.
 - Voice markup v1 separates pronunciation from display with reserved spans such as `⟦say:zero przecinek cztery siedem⟧0,47⟦/say⟧`. Core sends raw markup to Luma, but displays and persists only the decoded display text. Plain HTML remains literal; legacy XML controls are not interpreted. Playback timings highlight matched ranges in the canonical response, never substitute the spoken transcript. Core and Luma must roll out compatible parsers together; configured Langfuse prompts must use the matching syntax.
@@ -128,6 +130,8 @@ During voice mode, the learner's assistant message is updated as the model produ
   -- Practice creation publishes a durable outbox event. A dedicated BullMQ worker creates the structured Roleplay configuration through the shared AI Mentor configuration generator, derives the Judge from that configuration, creates the thread and welcome message, and marks the session ready or failed.
 
 ## Test Evidence
+
+Focused tests cover generated prompt contracts and Core Mentor model settings for welcome and streamed responses. Live output quality, latency, and synthesized speech still require evaluation before rollout. Langfuse production prompts take precedence over bundled YAML, and existing threads retain their stored base system prompt, so rollout must synchronize reviewed prompts and use a fresh thread for base-prompt comparisons.
 
 Voice transcript tests verify the recent-message limit, replacement of streamed replies in place, and karaoke highlighting only on the current mentor reply. Live learner partials update one temporary message; the final transcript replaces that same message using the voice turn identity, including when the chat update arrives later. The finalization effect runs once when a new final transcript arrives, including when no partial was displayed, and never on existing messages when entering voice mode. Scrolling follows new messages instantly, pauses when the learner scrolls back, and resumes at the bottom. A soft top fade appears only where older content is above the viewport. Browser preview checks at desktop and mobile sizes verify that the capped transcript stays below the orb; these checks use sample messages, not live provider audio.
 
@@ -162,3 +166,39 @@ Voice regression coverage verifies streamed response event handling, direct canc
 Voice mentor client VAD uses a 600 ms speech-end redemption period and a 0.18 negative speech threshold to tolerate brief confidence drops during quiet speech. The speech-start threshold stays at 0.42; finite dictation retains its 700 ms redemption and 0.24 end threshold. These settings require live acoustic validation and do not classify coughs or gate interruptions on transcripts.
 
 Voice Practice regression coverage includes socket target serialization, owned/ready/active attempt checks, cross-user and cross-tenant rejection, stale replay rejection, retained lesson settings, spoken-turn routing, late-response suppression, voice availability, and stopping capture before feedback. These are deterministic tests with provider and microphone doubles; they do not establish live provider behavior or browser microphone compatibility.
+
+### Supporting context in course-generated Mentors
+
+Course authoring explicitly maps relevant selected legal materials, regulations
+and organizational procedures to a Mentor's supporting files. The Mentor can
+refer to information taught earlier without duplicating the earlier lesson.
+Its persisted setup should also include the source-backed facts, deadlines,
+constraints and decision criteria needed for the scenario, with available legal
+authority, jurisdiction and date. These details belong in the internal behavior
+fields rather than the learner-facing task description.
+
+Selected source files and available course content attach through the existing
+application flow. Public research pages do not automatically become files;
+essential supported research facts and their URLs belong in the Mentor briefing.
+This guidance applies to new Mentor lessons and scoped updates. Live generated
+quality and document retrieval remain unverified.
+
+The Fine-tune behavior section remains expandable in read-only proposal review.
+Regression coverage verifies mouse and keyboard expansion while its fields remain
+read-only. Five focused dialog tests, the web TypeScript check and scoped ESLint
+pass; 61 focused AI writer/contract tests cover the supporting-context guidance.
+
+### Targeted references from course authoring
+
+Course authoring may synthesize a concise reference file for one Mentor from
+permitted course and source material. It includes the facts and constraints the
+Mentor needs, with source attribution and available jurisdiction/as-of dates.
+This internal file is distinct from the learner task description. It is shown
+as a file card in review and prepared for retrieval before application.
+
+When a targeted file exists, application omits the broad original-source and
+course-content snapshot for that operation. Legacy proposals retain those
+attachments. Generated reference links can be replaced by later authoring
+updates without removing manually attached files. Public research is usable in
+the brief only where authoring supplied permitted evidence; creating the file
+does not grant additional research or document permissions.

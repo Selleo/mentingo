@@ -132,6 +132,45 @@ describe("ChapterController (e2e)", () => {
       .set("Cookie", adminCookies);
   };
 
+  describe("PATCH /api/chapter/chapter-display-order", () => {
+    it("repairs gaps and bounds a generated position to the current chapter count", async () => {
+      const course = await courseFactory.create({ authorId: admin.id, chapterCount: 3 });
+      const first = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        displayOrder: 1,
+      });
+      const moved = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        displayOrder: 3,
+      });
+      const last = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        displayOrder: 4,
+      });
+
+      await request(app.getHttpServer())
+        .patch("/api/chapter/chapter-display-order")
+        .set("Cookie", adminCookies)
+        .send({ chapterId: moved.id, displayOrder: 99 })
+        .expect(200);
+
+      const order = await db
+        .select({ id: chapters.id, displayOrder: chapters.displayOrder })
+        .from(chapters)
+        .where(eq(chapters.courseId, course.id));
+      expect(new Map(order.map((chapter) => [chapter.id, chapter.displayOrder]))).toEqual(
+        new Map([
+          [first.id, 1],
+          [last.id, 2],
+          [moved.id, 3],
+        ]),
+      );
+    });
+  });
+
   describe("DELETE /api/chapter", () => {
     it("deletes student progress together with the chapter", async () => {
       const course = await courseFactory.create({ authorId: admin.id, chapterCount: 1 });

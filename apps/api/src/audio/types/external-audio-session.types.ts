@@ -5,7 +5,7 @@ import type {
   EXTERNAL_AUDIO_OPERATION,
   EXTERNAL_AUDIO_RECOVERY_STATE,
   LumaSocket,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 

@@ -4,10 +4,11 @@ import { cn } from "~/lib/utils";
 type UploadFileCardProps = {
   name: string;
   meta: string;
-  onRemove: () => void;
+  onRemove?: () => void;
   error?: boolean;
   compact?: boolean;
   removeDisabled?: boolean;
+  showRemove?: boolean;
 };
 
 export function UploadFileCard({
@@ -17,6 +18,7 @@ export function UploadFileCard({
   error = false,
   compact = false,
   removeDisabled = false,
+  showRemove = true,
 }: UploadFileCardProps) {
   return (
     <div
@@ -28,21 +30,23 @@ export function UploadFileCard({
         },
       )}
     >
-      <button
-        type="button"
-        aria-label="Remove file"
-        onClick={onRemove}
-        disabled={removeDisabled}
-        className={cn(
-          "absolute inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
-          {
-            "right-2 top-2 size-6": !compact,
-            "right-1.5 top-1.5 size-5": compact,
-          },
-        )}
-      >
-        <Icon name="IconX" className={cn({ "size-4": !compact, "size-3": compact })} />
-      </button>
+      {showRemove && (
+        <button
+          type="button"
+          aria-label="Remove file"
+          onClick={onRemove}
+          disabled={removeDisabled}
+          className={cn(
+            "absolute inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
+            {
+              "right-2 top-2 size-6": !compact,
+              "right-1.5 top-1.5 size-5": compact,
+            },
+          )}
+        >
+          <Icon name="IconX" className={cn({ "size-4": !compact, "size-3": compact })} />
+        </button>
+      )}
 
       <div
         className={cn(

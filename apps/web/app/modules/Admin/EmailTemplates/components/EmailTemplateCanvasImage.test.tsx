@@ -7,7 +7,7 @@ import { EmailTemplateCanvasImage } from "./EmailTemplateCanvasImage";
 
 const api = vi.hoisted(() => ({ getImage: vi.fn() }));
 vi.mock("~/api/api-client", () => ({
-  ApiClient: { api: { emailTemplateControllerGetEmailTemplateImage: api.getImage } },
+  ApiClient: { api: { emailTemplateManagementControllerGetEmailTemplateImage: api.getImage } },
 }));
 
 describe("EmailTemplateCanvasImage", () => {

@@ -84,8 +84,8 @@ import { LessonService } from "./services/lesson.service";
     LocalizationService,
   ],
   exports: [
-    AiJudgeConfigurationService,
     AiMentorConfigurationService,
+    AiJudgeConfigurationService,
     AiJudgeConfigurationGraphService,
     AiJudgeConfigurationTranslationService,
     AiMentorConfigurationGraphService,

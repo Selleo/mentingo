@@ -102,7 +102,9 @@ describe("AiMentorConfigurationGeneratorService", () => {
       creatorBrief: "Create a guided sales Teacher.",
       lessonContext,
     });
-    expect(providerOptions).toEqual({ openai: { reasoningEffort: "medium" } });
+    expect(providerOptions).toEqual({
+      openai: { reasoningEffort: "medium", forceReasoning: true },
+    });
     expect(result).toEqual({ type: AI_MENTOR_TYPE.TEACHER, ...teacherFields });
     expect(aiRuntimeService.generateMentorConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({ configurationType: AI_MENTOR_TYPE.TEACHER }),

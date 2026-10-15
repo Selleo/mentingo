@@ -1,6 +1,9 @@
+import { GLOBAL_SEARCH_MODES } from "@repo/shared";
+import { Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
@@ -33,7 +36,16 @@ export const NavigationGlobalSearchWrapper = ({
 }: NavigationGlobalSearchWrapperProps) => {
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hybridSearch, setHybridSearch] = useState<string | null>(null);
+  const { data: aiConfigured } = useAIConfigured();
+  const isSemanticConfigured = aiConfigured?.enabled === true;
   const debouncedSearch = useDebounce(searchParams, 300);
+  const activeHybridSearch = isSemanticConfigured ? hybridSearch : null;
+  const effectiveSearch = activeHybridSearch ?? debouncedSearch.trim();
+  const mode =
+    activeHybridSearch === null ? GLOBAL_SEARCH_MODES.KEYWORD : GLOBAL_SEARCH_MODES.HYBRID;
+  const isDebouncing =
+    activeHybridSearch === null && debouncedSearch.trim() !== searchParams.trim();
   const totalItemsRef = useRef(0);
   const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
@@ -60,10 +72,19 @@ export const NavigationGlobalSearchWrapper = ({
 
   useEffect(() => {
     setActiveIndex(0);
-  }, [debouncedSearch]);
+  }, [effectiveSearch, mode]);
+
+  useEffect(() => {
+    if (!isSemanticConfigured) {
+      setHybridSearch(null);
+      totalItemsRef.current = 0;
+    }
+  }, [isSemanticConfigured]);
 
   useEffect(() => {
     setSearchParams("");
+    setHybridSearch(null);
+    totalItemsRef.current = 0;
     if (isGlobalSearchDialogOpen) {
       setActiveIndex(0);
     }
@@ -75,6 +96,18 @@ export const NavigationGlobalSearchWrapper = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing) return;
+    if (e.target instanceof HTMLElement && e.target.closest("button, a, [role=button]")) return;
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (isSemanticConfigured && searchParams.trim().length >= 3 && !e.repeat) {
+        setHybridSearch(searchParams.trim());
+        setActiveIndex(0);
+        totalItemsRef.current = 0;
+      }
+      return;
+    }
+    if (isDebouncing) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIndex((prev) => (prev + 1) % Math.max(1, totalItemsRef.current));
@@ -140,13 +173,72 @@ export const NavigationGlobalSearchWrapper = ({
           <div className="flex flex-col gap-1 p-3">
             <SearchInput
               value={searchParams}
-              onChange={(e) => setSearchParams(e.target.value)}
-              clearable
+              maxLength={500}
+              onChange={(e) => {
+                setSearchParams(e.target.value.slice(0, 500));
+                setHybridSearch(null);
+                setActiveIndex(0);
+                totalItemsRef.current = 0;
+              }}
+              aria-label={t("globalSearch.search")}
+              rightAdornment={
+                <div className="absolute end-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                  {searchParams.length > 0 && (
+                    <button
+                      type="button"
+                      aria-label={t("globalSearch.clear")}
+                      onClick={() => {
+                        setSearchParams("");
+                        setHybridSearch(null);
+                        totalItemsRef.current = 0;
+                      }}
+                      className="rounded p-1 text-neutral-600 focus-visible:outline focus-visible:outline-primary-500"
+                    >
+                      <X className="size-4" aria-hidden />
+                    </button>
+                  )}
+                  {isSemanticConfigured && (
+                    <button
+                      type="button"
+                      aria-label={t("globalSearch.aiSearch")}
+                      title={
+                        mode === GLOBAL_SEARCH_MODES.HYBRID
+                          ? t("globalSearch.backToKeywords")
+                          : `${t("globalSearch.aiSearch")} (${isMac ? "⌘" : "Ctrl+"}Enter)`
+                      }
+                      aria-keyshortcuts="Meta+Enter Control+Enter"
+                      disabled={searchParams.trim().length < 3}
+                      aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
+                      onClick={() => {
+                        setHybridSearch(
+                          mode === GLOBAL_SEARCH_MODES.HYBRID ? null : searchParams.trim(),
+                        );
+                        setActiveIndex(0);
+                        totalItemsRef.current = 0;
+                      }}
+                      className={cn(
+                        "inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
+                        {
+                          "border-primary-600 bg-primary-600 text-white hover:bg-primary-700":
+                            mode === GLOBAL_SEARCH_MODES.HYBRID,
+                          "border-primary-100 bg-primary-50 text-primary-700 hover:bg-primary-100":
+                            mode === GLOBAL_SEARCH_MODES.KEYWORD,
+                        },
+                      )}
+                    >
+                      <Sparkles className="size-5" strokeWidth={1.75} aria-hidden />
+                    </button>
+                  )}
+                </div>
+              }
               wrapperClassName="w-full max-w-none"
-              className="!max-w-none"
+              className={cn("!max-w-none", {
+                "pr-20": isSemanticConfigured,
+                "pr-10": !isSemanticConfigured,
+              })}
             />
             <Separator className="my-2" />
-            {debouncedSearch.length < 3 && (
+            {searchParams.trim().length < 3 && (
               <div className="flex flex-col px-6 pt-4">
                 <span className="text-sm-md text-center ">
                   {companyName
@@ -158,9 +250,11 @@ export const NavigationGlobalSearchWrapper = ({
                 </span>
               </div>
             )}
-            {debouncedSearch.length >= 3 && (
+            {searchParams.trim().length >= 3 && (
               <GlobalSearchResults
-                debouncedSearch={debouncedSearch}
+                debouncedSearch={effectiveSearch}
+                mode={mode}
+                isDebouncing={isDebouncing}
                 onSelect={handleSelect}
                 activeIndex={activeIndex}
                 setTotalItems={(count) => {
@@ -169,7 +263,16 @@ export const NavigationGlobalSearchWrapper = ({
               />
             )}
           </div>
-          <div className="flex items-center justify-end gap-[12px] border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
+          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
+            {isSemanticConfigured && (
+              <div className="mr-auto flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-800">
+                <kbd className="inline-flex h-5 items-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-700">
+                  {isMac ? "⌘↵" : "Ctrl+↵"}
+                </kbd>
+                <Sparkles className="size-3.5 text-primary-600" aria-hidden />
+                <span>{t("globalSearch.aiSearch")}</span>
+              </div>
+            )}
             <div className="text-md flex h-5 items-center gap-[6px]">
               <KeyboardArrows />
               <span className="details text-neutral-800">{t("globalSearch.navigate")}</span>

@@ -1,12 +1,12 @@
 import { EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT } from "@repo/email-templates";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { Value } from "@sinclair/typebox/value";
 
-import { createEmailTemplateSchema } from "./email-template.schema";
+import { createEmailTemplateSchema, previewEmailTemplateSchema } from "./email-template.schema";
 
 describe("Email template request schema", () => {
   const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.welcome;
   const valid = {
-    event: definition.event,
     name: { en: "Welcome" },
     subject: { en: "Welcome" },
     content: { en: definition.defaultDocuments.en },
@@ -71,5 +71,43 @@ describe("Email template request schema", () => {
         },
       }),
     ).toBe(true);
+  });
+  it("compiles event-independent placeholder contracts for HTTP authoring and test-send", () => {
+    const compiled = TypeCompiler.Compile(createEmailTemplateSchema);
+    const generic = valid;
+    expect(
+      compiled.Check({
+        ...generic,
+        placeholders: [
+          {
+            name: "items",
+            label: "Items",
+            type: "collection",
+            required: true,
+            sampleValue: [{ title: "Course", details: { count: 2, enabled: true } }],
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(() => TypeCompiler.Compile(previewEmailTemplateSchema)).not.toThrow();
+    expect(
+      compiled.Check({
+        ...generic,
+        placeholders: [
+          {
+            name: "items",
+            label: "Items",
+            type: "collection",
+            required: true,
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(
+      compiled.Check({
+        ...generic,
+        placeholders: [{ name: "items", type: "invalid", required: true }],
+      }),
+    ).toBe(false);
   });
 });

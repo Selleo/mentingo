@@ -44,8 +44,12 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { MAX_FILE_SIZE } from "src/file/file.constants";
+import { FileGuard } from "src/file/guards/file.guard";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { assertPlatformAssetUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
@@ -448,7 +452,15 @@ export class SettingsController {
     )
     logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<void> {
+    if (request.mcpUploadGrant) {
+      assertPlatformAssetUploadGrant(request.mcpUploadGrant, "platformLogo", logo, request.body);
+      await FileGuard.validateFile(logo!, {
+        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
+        maxSize: FILE_SIZE_BASE,
+      });
+    }
     await this.settingsService.uploadPlatformLogo(logo, currentUser);
   }
 
@@ -504,7 +516,20 @@ export class SettingsController {
     )
     logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<void> {
+    if (request.mcpUploadGrant) {
+      assertPlatformAssetUploadGrant(
+        request.mcpUploadGrant,
+        "platformSimpleLogo",
+        logo,
+        request.body,
+      );
+      await FileGuard.validateFile(logo!, {
+        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
+        maxSize: FILE_SIZE_BASE,
+      });
+    }
     await this.settingsService.uploadPlatformSimpleLogo(logo, currentUser);
   }
 
@@ -562,7 +587,20 @@ export class SettingsController {
     )
     loginBackground: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<void> {
+    if (request.mcpUploadGrant) {
+      assertPlatformAssetUploadGrant(
+        request.mcpUploadGrant,
+        "loginBackground",
+        loginBackground,
+        request.body,
+      );
+      await FileGuard.validateFile(loginBackground!, {
+        allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        maxSize: FILE_SIZE_BASE,
+      });
+    }
     await this.settingsService.uploadLoginBackgroundImage(loginBackground, currentUser);
   }
 
@@ -638,7 +676,20 @@ export class SettingsController {
     )
     certificateBackground: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    if (request.mcpUploadGrant) {
+      assertPlatformAssetUploadGrant(
+        request.mcpUploadGrant,
+        "certificateBackground",
+        certificateBackground,
+        request.body,
+      );
+      await FileGuard.validateFile(certificateBackground!, {
+        allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        maxSize: FILE_SIZE_BASE,
+      });
+    }
     return new BaseResponse(
       await this.settingsService.updateCertificateBackground(certificateBackground, currentUser),
     );
@@ -676,20 +727,6 @@ export class SettingsController {
   async updateInviteOnlyRegistration(@CurrentUser() currentUser: CurrentUserType) {
     return new BaseResponse(
       await this.settingsService.updateGlobalInviteOnlyRegistration(currentUser),
-    );
-  }
-
-  @Patch("admin/user-email-triggers/:triggerKey")
-  @Validate({
-    request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
-  })
-  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
-  async updateUserEmailTriggers(
-    @Param("triggerKey") triggerKey: string,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    return new BaseResponse(
-      await this.settingsService.updateUserEmailTriggers(triggerKey, currentUser),
     );
   }
 
@@ -778,7 +815,15 @@ export class SettingsController {
     )
     file: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ) {
+    if (request.mcpUploadGrant) {
+      assertPlatformAssetUploadGrant(request.mcpUploadGrant, "loginDocument", file, request.body);
+      await FileGuard.validateFile(file, {
+        allowedTypes: LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
+        maxSize: MAX_FILE_SIZE,
+      });
+    }
     return this.settingsService.uploadLoginPageFile(uploadedData, file, currentUser);
   }
 

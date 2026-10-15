@@ -4,9 +4,8 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useUpsertUserDetails } from "~/api/mutations";
-import { currentUserQueryOptions, useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
+import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { useUserDetailsSuspense } from "~/api/queries/useUserDetails";
-import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -24,11 +23,6 @@ import { cn } from "~/lib/utils";
 import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
 
 import type { UpsertUserDetailsBody } from "~/api/generated-api";
-
-export const clientLoader = async () => {
-  await queryClient.prefetchQuery(currentUserQueryOptions);
-  return null;
-};
 
 const updateUserDetailsSchema = z.object({
   description: z.string(),

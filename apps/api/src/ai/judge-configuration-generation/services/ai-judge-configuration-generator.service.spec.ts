@@ -71,7 +71,7 @@ describe("AiJudgeConfigurationGeneratorService", () => {
         return `MODE:${id}`;
       }),
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
-      getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
+      getOpenAI: jest.fn().mockResolvedValue((model: string) => model),
     };
     const aiRuntimeService = {
       generateJudgeConfiguration: jest.fn((_input, generateCoreConfiguration) =>
@@ -103,9 +103,13 @@ describe("AiJudgeConfigurationGeneratorService", () => {
       "aiJudgeConfigurationGeneratorCreate",
       {},
     );
-    const [{ system, prompt, providerOptions }] = generateText.mock.calls[0];
+    const [{ model, system, prompt, providerOptions, temperature }] = generateText.mock.calls[0];
+    expect(model).toBe("gpt-6-luna");
+    expect(temperature).toBeUndefined();
     expect(system).toBe("BASE\n\nMODE:aiJudgeConfigurationGeneratorCreate");
-    expect(providerOptions).toEqual({ openai: { reasoningEffort: "medium" } });
+    expect(providerOptions).toEqual({
+      openai: { reasoningEffort: "medium", forceReasoning: true },
+    });
     expect(readPayload(prompt)).toEqual({
       mode: "create",
       creatorBrief: "Assess whether the learner can handle a price objection.",
