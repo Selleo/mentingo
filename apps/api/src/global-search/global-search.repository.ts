@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, LEARNING_PATH_STATUSES } from "@repo/shared";
+import { COURSE_ENROLLMENT, COURSE_STATUSES, LEARNING_PATH_STATUSES } from "@repo/shared";
 import { and, desc, eq, inArray, isNotNull, ne, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -52,6 +52,7 @@ export class GlobalSearchRepository {
     entityType: SearchEntityType,
     language: SupportedLanguages,
     searchQuery: string,
+    metadataOnly = false,
   ): Promise<MatchRow[]> {
     const tsQuery = this.buildTsQuery(searchQuery, language);
 
@@ -65,6 +66,16 @@ export class GlobalSearchRepository {
       .where(
         and(
           eq(searchDocuments.entityType, entityType),
+          // New knowledge-file sources are searched through access-checked hybrid retrieval.
+          // Preserve the existing lesson filename behavior in ordinary keyword search.
+          sql`(${searchDocuments.entityType} = ${SEARCH_ENTITY_TYPES.LESSON}
+            OR ${searchDocuments.metadata}->>'semanticResource' IS DISTINCT FROM 'true')`,
+          metadataOnly
+            ? inArray(searchDocuments.documentType, [
+                SEARCH_DOCUMENT_TYPES.TITLE,
+                SEARCH_DOCUMENT_TYPES.DESCRIPTION,
+              ])
+            : undefined,
           sql`${searchDocuments.searchVector} @@ ${tsQuery}`,
         ),
       )
@@ -81,6 +92,7 @@ export class GlobalSearchRepository {
       enrolledStudentId?: UUIDType;
       publishedOnly?: boolean;
       excludeArchived?: boolean;
+      learnerVisibleOnly?: boolean;
     } = {},
   ) {
     const ids = this.matchIds(matches);
@@ -113,6 +125,12 @@ export class GlobalSearchRepository {
       and(
         inArray(courses.id, ids),
         options.authorId ? eq(courses.authorId, options.authorId) : undefined,
+        options.learnerVisibleOnly
+          ? and(
+              inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+              eq(courses.isArchived, false),
+            )
+          : undefined,
         options.publishedOnly ? eq(courses.status, "published") : undefined,
         options.excludeArchived ? eq(courses.isArchived, false) : undefined,
         options.enrolledStudentId

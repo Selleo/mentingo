@@ -1,5 +1,10 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { PERMISSIONS, SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguages,
+  GLOBAL_SEARCH_MODES,
+} from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse } from "src/common";
@@ -13,6 +18,7 @@ import {
   globalSearchBaseResponseSchema,
   globalSearchQuerySchema,
   type GlobalSearchResponse,
+  type GlobalSearchMode,
 } from "./schemas/global-search.schema";
 
 @Controller("global-search")
@@ -28,6 +34,7 @@ export class GlobalSearchController {
         schema: globalSearchQuerySchema.properties.searchQuery,
       },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "mode", schema: globalSearchQuerySchema.properties.mode },
     ],
     response: globalSearchBaseResponseSchema,
   })
@@ -55,6 +62,7 @@ export class GlobalSearchController {
   async search(
     @Query("searchQuery") searchQuery: string,
     @Query("language") language: SupportedLanguages | undefined,
+    @Query("mode") mode: GlobalSearchMode | undefined,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSearchResponse>> {
     return new BaseResponse(
@@ -62,6 +70,7 @@ export class GlobalSearchController {
         searchQuery,
         language ?? SUPPORTED_LANGUAGES.EN,
         currentUser,
+        mode ?? GLOBAL_SEARCH_MODES.KEYWORD,
       ),
     );
   }

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "search_chunks_embedding_hnsw_idx" ON "search_chunks" USING hnsw ("embedding" vector_cosine_ops) WITH (m=16,ef_construction=64);

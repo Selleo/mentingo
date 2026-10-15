@@ -4,8 +4,11 @@ import { Type } from "@sinclair/typebox";
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH } from "src/global-search/global-search.constants";
 import { globalSearchQuerySchema } from "src/global-search/schemas/global-search.schema";
 
+import { shapeMcpSearchResults } from "./mcp-search-results";
+import { MCP_STUDENT_SEARCH_PERMISSIONS } from "./mcp-student-access";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 
+import type { McpSearchContext } from "./mcp-search-results.types";
 import type { McpToolRunner } from "./mcp-tool-runner.types";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { GlobalSearchService } from "src/global-search/global-search.service";
@@ -32,10 +35,28 @@ export const MCP_GLOBAL_SEARCH_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.GROUP_MANAGE,
 ];
 
+/** SEARCH scope excludes permission alternatives that only expose administrative directories. */
+export const MCP_CONTENT_SEARCH_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.COURSE_READ,
+  PERMISSIONS.COURSE_READ_ASSIGNED,
+  PERMISSIONS.COURSE_UPDATE,
+  PERMISSIONS.COURSE_UPDATE_OWN,
+  PERMISSIONS.NEWS_READ_PUBLIC,
+  PERMISSIONS.NEWS_MANAGE,
+  PERMISSIONS.NEWS_MANAGE_OWN,
+  PERMISSIONS.ARTICLE_READ_PUBLIC,
+  PERMISSIONS.ARTICLE_MANAGE,
+  PERMISSIONS.ARTICLE_MANAGE_OWN,
+  PERMISSIONS.QA_READ_PUBLIC,
+  PERMISSIONS.QA_MANAGE,
+  PERMISSIONS.QA_MANAGE_OWN,
+];
+
 export const globalSearchInputSchema = Type.Object(
   {
     searchQuery: Type.String({ minLength: GLOBAL_SEARCH_MIN_QUERY_LENGTH, maxLength: 500 }),
     language: Type.Required(globalSearchQuerySchema).properties.language,
+    mode: globalSearchQuerySchema.properties.mode,
   },
   { additionalProperties: false },
 );
@@ -44,18 +65,34 @@ export function registerMcpSearchTools(
   server: McpServer,
   run: McpToolRunner,
   searchService: GlobalSearchService,
+  context: McpSearchContext,
 ) {
+  let permissions = MCP_GLOBAL_SEARCH_PERMISSIONS;
+  if (context.searchOnly) permissions = MCP_CONTENT_SEARCH_PERMISSIONS;
+  if (context.studentOnly) permissions = MCP_STUDENT_SEARCH_PERMISSIONS;
   server.registerTool(
     "global_search",
     {
-      description:
-        "Search Mentingo globally in an explicit language. Returns grouped matches with IDs for accessible courses, lessons, development paths, news, articles, Q&A, users, categories and groups. Results follow your current permissions and course access; this is the platform search, not a semantic/vector search.",
+      description: context.searchOnly
+        ? "Search accessible Mentingo course metadata, news, articles and Q&A in an explicit language. Returns grouped matches with IDs and canonical tenant URLs. Course lesson content is excluded. Choose keyword or hybrid mode; results follow your current permissions."
+        : "Search Mentingo globally in an explicit language. Returns grouped matches with IDs and canonical tenant URLs for accessible courses, lessons, development paths, news, articles, Q&A, users, categories and groups. Choose keyword or hybrid mode; results follow your current permissions and course access.",
       inputSchema: asMcpInputSchema(globalSearchInputSchema),
       annotations: { readOnlyHint: true },
     },
-    async ({ searchQuery, language }) =>
-      run(MCP_GLOBAL_SEARCH_PERMISSIONS, async (user) =>
-        searchService.search(searchQuery, language, user),
-      ),
+    async ({ searchQuery, language, mode }) =>
+      run(permissions, async (user) => {
+        let result;
+        if (context.studentOnly) {
+          result = await searchService.search(searchQuery, language, user, mode, {
+            contentOnly: true,
+            learnerOnly: true,
+          });
+        } else if (mode) {
+          result = await searchService.search(searchQuery, language, user, mode);
+        } else {
+          result = await searchService.search(searchQuery, language, user);
+        }
+        return shapeMcpSearchResults(result, context);
+      }),
   );
 }

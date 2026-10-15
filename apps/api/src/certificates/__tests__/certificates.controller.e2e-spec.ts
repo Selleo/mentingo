@@ -8,6 +8,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
+import puppeteer from "puppeteer";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -60,6 +61,26 @@ describe("CertificatesController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
+    const launch = puppeteer.launch.bind(puppeteer);
+    jest.spyOn(puppeteer, "launch").mockImplementation(async (options) => {
+      const browser = await launch(options);
+      const newPage = browser.newPage.bind(browser);
+      jest.spyOn(browser, "newPage").mockImplementation(async () => {
+        const page = await newPage();
+        await page.setRequestInterception(true);
+        page.on("request", (request) => {
+          // This suite checks real PDF/auth contracts, not Tailwind's external CDN availability.
+          const response =
+            request.url() === "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"
+              ? request.respond({ status: 200, contentType: "application/javascript", body: "" })
+              : request.continue();
+          void response.catch(() => {});
+        });
+        return page;
+      });
+      return browser;
+    });
+
     const {
       app: testApp,
       runAsTenant,
@@ -80,6 +101,7 @@ describe("CertificatesController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
@@ -1709,6 +1731,7 @@ describe("CertificatesController (e2e)", () => {
           "filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("returns pdf file with custom filename", async () => {
@@ -1748,6 +1771,7 @@ describe("CertificatesController (e2e)", () => {
           "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("allows a group manager to download a managed learner certificate", async () => {
@@ -1798,6 +1822,7 @@ describe("CertificatesController (e2e)", () => {
 
         expect(response.headers["content-type"]).toBe("application/pdf");
         expect(response.body instanceof Buffer).toBe(true);
+        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
 
       it("does not allow a group manager to download an unmanaged learner certificate", async () => {

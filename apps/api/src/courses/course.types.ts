@@ -7,3 +7,6 @@ export type CourseStatisticsExpressionsParams = {
   language: SupportedLanguages;
   currentUser?: CurrentUserType;
 };
+
+/** Trusted domain read context, never populated from client query parameters. */
+export type CourseReadOptions = { learnerOnly?: boolean };

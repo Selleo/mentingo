@@ -1517,8 +1517,36 @@
     {
       "idx": 216,
       "version": "7",
-      "when": 1792052060825,
-      "tag": "0216_course_transfer_reliability",
+      "when": 1791901876358,
+      "tag": "0216_add_search_chunks",
+      "breakpoints": true
+    },
+    {
+      "idx": 217,
+      "version": "7",
+      "when": 1791901881945,
+      "tag": "0217_enable_search_chunks_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1791901884369,
+      "tag": "0218_require_pgvector_iterative_scan",
+      "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1791901898718,
+      "tag": "0219_add_search_chunks_hnsw_cosine_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1792055706227,
+      "tag": "0220_course_transfer_reliability",
       "breakpoints": true
     }
   ]
