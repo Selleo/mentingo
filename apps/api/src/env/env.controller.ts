@@ -19,6 +19,10 @@ import {
   isEnvSetupResponseSchema,
   isConfiguredResponseSchema,
   lumaConfiguredResponseSchema,
+  loginMethodsSchema,
+  loginMethodSetupSchema,
+  updateLoginMethodSchema,
+  UpdateLoginMethodBody,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 
@@ -26,6 +30,34 @@ import { EnvService } from "src/env/services/env.service";
 @UseGuards(PermissionsGuard)
 export class EnvController {
   constructor(private readonly envService: EnvService) {}
+
+  @Public()
+  @Get("login-methods")
+  @Validate({ response: baseResponse(loginMethodsSchema) })
+  async getLoginMethods() {
+    return new BaseResponse(await this.envService.getLoginMethods());
+  }
+
+  @Get("login-methods/setup")
+  @RequirePermission(PERMISSIONS.ENV_MANAGE)
+  @Validate({ response: baseResponse(loginMethodSetupSchema) })
+  async getLoginMethodSetup() {
+    return new BaseResponse(await this.envService.getLoginMethodSetup());
+  }
+
+  @Post("login-methods")
+  @RequirePermission(PERMISSIONS.ENV_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: updateLoginMethodSchema }],
+    response: baseResponse(loginMethodSetupSchema),
+  })
+  async updateLoginMethod(
+    @Body() data: UpdateLoginMethodBody,
+    @CurrentUser() actor: CurrentUserType,
+  ) {
+    await this.envService.updateLoginMethod(data, actor);
+    return new BaseResponse(await this.envService.getLoginMethodSetup());
+  }
 
   @Post("bulk")
   @RequirePermission(PERMISSIONS.ENV_MANAGE)

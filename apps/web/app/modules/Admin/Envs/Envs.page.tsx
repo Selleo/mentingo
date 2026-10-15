@@ -24,6 +24,7 @@ type FormValues = Partial<Record<SecretKey, string>>;
 type SecretMetadata = { labelKey: string; descriptionKey?: string; placeholderKey: string };
 
 interface SecretFieldProps {
+  createOnly?: boolean;
   name: SecretKey;
   labelKey: string;
   descriptionKey?: string;
@@ -32,7 +33,8 @@ interface SecretFieldProps {
   setValue: UseFormSetValue<FormValues>;
 }
 
-const SecretField = ({
+export const SecretField = ({
+  createOnly = false,
   name,
   labelKey,
   descriptionKey,
@@ -43,16 +45,17 @@ const SecretField = ({
   const { t } = useTranslation();
   const [viewSecret, setViewSecret] = useState(false);
 
-  const { data: secretData, isFetching } = useSecret(name, viewSecret);
+  const { data: secretData, isFetching } = useSecret(name, viewSecret && !createOnly);
 
   useEffect(() => {
+    if (createOnly) return;
     if (viewSecret && secretData?.data.value !== undefined) {
       setValue(name, secretData.data.value);
     }
     if (!viewSecret) {
       setValue(name, "");
     }
-  }, [viewSecret, secretData?.data?.value, name, setValue]);
+  }, [viewSecret, secretData?.data?.value, name, setValue, createOnly]);
 
   return (
     <div className="w-full" data-testid={ENV_PAGE_HANDLES.field(name)}>
@@ -65,7 +68,9 @@ const SecretField = ({
           data-testid={ENV_PAGE_HANDLES.input(name)}
           id={name}
           {...register(name)}
-          disabled={!viewSecret || isFetching}
+          disabled={!createOnly && (!viewSecret || isFetching)}
+          required={createOnly}
+          type={createOnly && !viewSecret ? "password" : "text"}
           placeholder={!viewSecret ? t(placeholderKey) : undefined}
           aria-busy={isFetching}
         />
@@ -106,6 +111,8 @@ const Envs = (): React.ReactElement => {
     await queryClient.invalidateQueries({ queryKey: ["secrets"] });
     await queryClient.invalidateQueries({ queryKey: ["phishing"] });
     await queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey });
+    await queryClient.invalidateQueries({ queryKey: ["loginMethods"] });
+    await queryClient.invalidateQueries({ queryKey: ["loginMethodSetup"] });
     await queryClient.invalidateQueries(stripePublishableKeyQueryOptions());
     await queryClient.invalidateQueries(liveKitConfiguredQueryOptions);
   };

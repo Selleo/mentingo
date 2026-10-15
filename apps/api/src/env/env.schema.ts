@@ -14,6 +14,37 @@ export const getEnvResponseSchema = Type.Object({
   value: Type.String(),
 });
 
+export const loginMethodsSchema = Type.Object({
+  google: Type.Boolean(),
+  microsoft: Type.Boolean(),
+  slack: Type.Boolean(),
+  magicLink: Type.Boolean(),
+  password: Type.Boolean(),
+});
+export const loginMethodSetupSchema = Type.Object({
+  methods: loginMethodsSchema,
+  missing: Type.Object({
+    google: Type.Array(Type.String()),
+    microsoft: Type.Array(Type.String()),
+    slack: Type.Array(Type.String()),
+  }),
+});
+export const updateLoginMethodSchema = Type.Object(
+  {
+    method: Type.Union([
+      Type.Literal("google"),
+      Type.Literal("microsoft"),
+      Type.Literal("slack"),
+      Type.Literal("magicLink"),
+      Type.Literal("password"),
+    ]),
+    enabled: Type.Boolean(),
+    configuration: Type.Optional(bulkUpsertEnvSchema),
+  },
+  { additionalProperties: false },
+);
+export type UpdateLoginMethodBody = Static<typeof updateLoginMethodSchema>;
+
 export const encryptedEnvSchema = Type.Object({
   name: Type.String(),
   ciphertext: Type.String(),

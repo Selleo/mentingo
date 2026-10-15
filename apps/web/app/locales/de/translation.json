@@ -7,6 +7,23 @@
     "readyWorkflow": "Auslöser, E-Mail-Vorlage und Tags enthalten",
     "useTemplate": "Vorlage verwenden"
   },
+  "loginMethods": {
+    "title": "Anmeldemethoden",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Anmeldelink",
+    "password": "Passwort",
+    "configure": "{{provider}} konfigurieren",
+    "errors": {
+      "disabled": "Diese Anmeldemethode ist deaktiviert.",
+      "invalidConfiguration": "Ungültige Anbieterkonfiguration.",
+      "missingConfiguration": "Füllen Sie alle erforderlichen Anbieterfelder aus.",
+      "lastMethod": "Lassen Sie mindestens eine nutzbare Anmeldemethode aktiviert.",
+      "save": "Anmeldemethoden konnten nicht gespeichert werden.",
+      "load": "Anmeldemethoden konnten nicht geladen werden."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Plattformlogo",
     "title": "{{clientName}} mit Mentingo verbinden?",
@@ -3992,8 +4009,6 @@
   },
   "loginView": {
     "header": "Login",
-    "subHeader": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
-    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
     "validation": {
       "email": "Ungültige E-Mail",
       "password": "Passwort ist erforderlich"

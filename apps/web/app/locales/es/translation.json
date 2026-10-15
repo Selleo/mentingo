@@ -7,6 +7,23 @@
     "readyWorkflow": "Incluye desencadenante, plantilla de correo y etiquetas",
     "useTemplate": "Usar plantilla"
   },
+  "loginMethods": {
+    "title": "Métodos de inicio de sesión",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Enlace de acceso",
+    "password": "Contraseña",
+    "configure": "Configurar {{provider}}",
+    "errors": {
+      "disabled": "Este método de acceso está desactivado.",
+      "invalidConfiguration": "Configuración del proveedor no válida.",
+      "missingConfiguration": "Complete todos los campos obligatorios del proveedor.",
+      "lastMethod": "Mantenga al menos un método de acceso utilizable activado.",
+      "save": "No se pudieron guardar los métodos de acceso.",
+      "load": "No se pudieron cargar los métodos de acceso."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logotipo de la plataforma",
     "title": "¿Conectar {{clientName}} con Mentingo?",
@@ -3937,8 +3954,6 @@
   },
   "loginView": {
     "header": "Iniciar sesión",
-    "subHeader": "Ingrese su correo electrónico a continuación para iniciar sesión en su cuenta",
-    "subHeaderSSO": "Inicie sesión con su cuenta Google/Microsoft",
     "validation": {
       "email": "Correo electrónico no válido",
       "password": "Se requiere contraseña"

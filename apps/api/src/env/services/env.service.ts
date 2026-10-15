@@ -131,6 +131,119 @@ export class EnvService {
     return { name: envName, value: plaintext };
   }
 
+  async updateLoginMethod(
+    data: {
+      method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+      enabled: boolean;
+      configuration?: BulkUpsertEnvBody;
+    },
+    actor?: CurrentUserType,
+  ) {
+    return this.envRepository.withLoginMethodsLock(() => this.updateLoginMethodLocked(data, actor));
+  }
+
+  private async updateLoginMethodLocked(
+    data: {
+      method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+      enabled: boolean;
+      configuration?: BulkUpsertEnvBody;
+    },
+    actor?: CurrentUserType,
+  ) {
+    const prefix = {
+      google: "GOOGLE",
+      microsoft: "MICROSOFT",
+      slack: "SLACK",
+      magicLink: null,
+      password: null,
+    }[data.method];
+    const required = prefix ? [`${prefix}_CLIENT_ID`, `${prefix}_CLIENT_SECRET`] : [];
+    const configuration = data.configuration ?? [];
+    if (
+      configuration.some(({ name, value }) => !required.includes(name) || !value.trim()) ||
+      new Set(configuration.map(({ name }) => name)).size !== configuration.length
+    ) {
+      throw new BadRequestException("loginMethods.errors.invalidConfiguration");
+    }
+    if (data.enabled) {
+      for (const key of required) {
+        const value =
+          configuration.find(({ name }) => name === key)?.value ??
+          (await this.readLoginEnvironment(key));
+        if (!value?.trim())
+          throw new BadRequestException("loginMethods.errors.missingConfiguration");
+      }
+    }
+    if (!data.enabled) {
+      const methods = { ...(await this.getLoginMethods()), [data.method]: false };
+      if (await this.envRepository.getEnforceSSO()) methods.password = false;
+      for (const provider of ["google", "microsoft", "slack"] as const) {
+        const prefix = provider.toUpperCase();
+        const credentials = await Promise.all(
+          ["CLIENT_ID", "CLIENT_SECRET"].map((suffix) =>
+            this.readLoginEnvironment(`${prefix}_${suffix}`),
+          ),
+        );
+        if (credentials.some((value) => !value?.trim())) methods[provider] = false;
+      }
+      if (!Object.values(methods).some(Boolean)) {
+        throw new BadRequestException("loginMethods.errors.lastMethod");
+      }
+    }
+    const flag = prefix
+      ? `${prefix}_OAUTH_ENABLED`
+      : data.method === "password"
+        ? "PASSWORD_LOGIN_ENABLED"
+        : "MAGIC_LINK_LOGIN_ENABLED";
+    await this.bulkUpsertEnv(
+      [
+        ...configuration,
+        { name: flag, value: String(data.enabled) },
+        ...(prefix ? [{ name: `VITE_${flag}`, value: String(data.enabled) }] : []),
+      ],
+      actor,
+    );
+  }
+
+  async getLoginMethodSetup() {
+    const missing = { google: [] as string[], microsoft: [] as string[], slack: [] as string[] };
+    for (const provider of ["google", "microsoft", "slack"] as const) {
+      for (const suffix of ["CLIENT_ID", "CLIENT_SECRET"]) {
+        const key = `${provider.toUpperCase()}_${suffix}`;
+        const value = await this.readLoginEnvironment(key);
+        if (!value?.trim()) missing[provider].push(key);
+      }
+    }
+    return { methods: await this.getLoginMethods(), missing };
+  }
+
+  async getLoginMethods() {
+    const read = (key: string) => this.readLoginEnvironment(key);
+    const [password, magicLink, google, microsoft, slack] = await Promise.all([
+      read("PASSWORD_LOGIN_ENABLED"),
+      read("MAGIC_LINK_LOGIN_ENABLED"),
+      read("GOOGLE_OAUTH_ENABLED"),
+      read("MICROSOFT_OAUTH_ENABLED"),
+      read("SLACK_OAUTH_ENABLED"),
+    ]);
+    return {
+      password: password === undefined || password === "true",
+      magicLink: magicLink === undefined || magicLink === "true",
+      google: google === "true",
+      microsoft: microsoft === "true",
+      slack: slack === "true",
+    };
+  }
+
+  private async readLoginEnvironment(key: string) {
+    try {
+      return (await this.getEnv(key)).value;
+    } catch (error) {
+      if (error instanceof NotFoundException) return process.env[key];
+      throw error;
+    }
+  }
+
   async getSSOEnabled() {
     const [google, microsoft, slack] = await Promise.all([
       this.getEnv("VITE_GOOGLE_OAUTH_ENABLED")
