@@ -121,7 +121,12 @@ export default function SettingsPage() {
             )
           }
           organizationContent={
-            globalSettings && <OrganizationTabContent globalSettings={globalSettings} />
+            globalSettings && (
+              <OrganizationTabContent
+                globalSettings={globalSettings}
+                canManageEnvs={canManageEnvs}
+              />
+            )
           }
           customizePlatformContent={
             globalSettings && (

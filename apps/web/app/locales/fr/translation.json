@@ -1,4 +1,21 @@
 {
+  "loginMethods": {
+    "title": "Méthodes de connexion",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Lien de connexion",
+    "password": "Mot de passe",
+    "configure": "Configurer {{provider}}",
+    "errors": {
+      "disabled": "Cette méthode de connexion est désactivée.",
+      "invalidConfiguration": "Configuration du fournisseur invalide.",
+      "missingConfiguration": "Renseignez tous les champs requis du fournisseur.",
+      "lastMethod": "Gardez au moins une méthode de connexion utilisable activée.",
+      "save": "Impossible d’enregistrer les méthodes de connexion.",
+      "load": "Impossible de charger les méthodes de connexion."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo de la plateforme",
     "title": "Connecter {{clientName}} à Mentingo ?",
@@ -3632,8 +3649,6 @@
   },
   "loginView": {
     "header": "Se connecter",
-    "subHeader": "Saisissez vos identifiants pour accéder à votre compte",
-    "subHeaderSSO": "Connectez-vous avec Google ou Microsoft",
     "validation": {
       "email": "E-mail invalide",
       "password": "Le mot de passe est requis"

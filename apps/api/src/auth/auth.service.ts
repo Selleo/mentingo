@@ -34,6 +34,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
+import { EnvService } from "src/env/services/env.service";
 import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
 import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
@@ -77,6 +78,11 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 
 @Injectable()
 export class AuthService {
+  private async assertLoginMethod(method: "password" | "magicLink") {
+    if (!(await this.envService.getLoginMethods())[method]) {
+      throw new UnauthorizedException("loginMethods.errors.disabled");
+    }
+  }
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -93,6 +99,7 @@ export class AuthService {
     private readonly permissionsService: PermissionsService,
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly userPasswordEmailService: UserPasswordEmailService,
+    private readonly envService: EnvService,
   ) {}
 
   public async register({
@@ -103,6 +110,7 @@ export class AuthService {
     language,
     formAnswers,
   }: CreateAccountBody) {
+    await this.assertLoginMethod("password");
     const [existingUser] = await this.db
       .select({ id: users.id })
       .from(users)
@@ -434,6 +442,7 @@ export class AuthService {
   }
 
   public async validateUser(email: string, password: string) {
+    await this.assertLoginMethod("password");
     const [userWithCredentials] = await this.db
       .select({
         id: users.id,
@@ -568,6 +577,7 @@ export class AuthService {
   }
 
   public async forgotPassword(email: string) {
+    await this.assertLoginMethod("password");
     try {
       await this.userPasswordEmailService.sendForgotPasswordEmail(email);
     } catch {
@@ -576,6 +586,7 @@ export class AuthService {
   }
 
   public async createPassword(data: CreatePasswordBody) {
+    await this.assertLoginMethod("password");
     const { createToken: token, password, language } = data;
     const createToken = await this.createPasswordService.getOneByToken(token);
 
@@ -615,6 +626,7 @@ export class AuthService {
   }
 
   public async resetPassword(token: string, newPassword: string) {
+    await this.assertLoginMethod("password");
     const resetToken = await this.resetPasswordService.getOneByToken(token);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
@@ -865,6 +877,7 @@ export class AuthService {
   }
 
   async createMagicLink(email: string) {
+    await this.assertLoginMethod("magicLink");
     try {
       const user = await this.userService.getUserByEmail(email);
 
@@ -912,6 +925,7 @@ export class AuthService {
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
+    await this.assertLoginMethod("magicLink");
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
     const dateNow = new Date();

@@ -1,4 +1,21 @@
 {
+  "loginMethods": {
+    "title": "Login methods",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Magic link",
+    "password": "Password",
+    "configure": "Configure {{provider}}",
+    "errors": {
+      "disabled": "This login method is disabled.",
+      "invalidConfiguration": "Invalid provider configuration.",
+      "missingConfiguration": "Complete all required provider fields.",
+      "lastMethod": "Keep at least one usable login method enabled.",
+      "save": "Unable to save login methods.",
+      "load": "Unable to load login methods."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platform logo",
     "title": "Connect {{clientName}} to Mentingo?",
@@ -3874,8 +3891,6 @@
   },
   "loginView": {
     "header": "Login",
-    "subHeader": "Enter your email below to login to your account",
-    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"

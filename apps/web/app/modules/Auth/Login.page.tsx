@@ -9,12 +9,12 @@ import { version } from "~/../version.json";
 import { useHandleMagicLink } from "~/api/mutations/useHandleMagicLink";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useLoginMethods } from "~/api/queries/useLoginMethods";
 import useLoginPageFiles from "~/api/queries/useLoginPageFiles";
-import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
   const { t } = useTranslation();
 
-  const { data: ssoEnabled } = useSSOEnabled();
+  const { data: loginMethods } = useLoginMethods();
 
   const handlePreviewClick = (resource: LoginPageResource) => {
     setPreviewResource(resource);
@@ -87,14 +87,9 @@ export default function LoginPage() {
     setPreviewResource(null);
   };
 
-  const isGoogleOAuthEnabled =
-    (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
-
-  const isMicrosoftOAuthEnabled =
-    (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
-
-  const isSlackOAuthEnabled =
-    (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
+  const isGoogleOAuthEnabled = loginMethods?.google ?? false;
+  const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
+  const isSlackOAuthEnabled = loginMethods?.slack ?? false;
 
   const { mutateAsync: loginUser } = useLoginUser();
 
@@ -172,12 +167,9 @@ export default function LoginPage() {
             </div>
             {t("loginView.header")}
           </CardTitle>
-          <CardDescription>
-            {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isSSOEnforced && (
+          {!isSSOEnforced && loginMethods?.password && (
             <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("loginView.field.email")}</Label>
@@ -225,13 +217,14 @@ export default function LoginPage() {
           )}
 
           <SocialLogin
-            isSSOEnforced={isSSOEnforced}
+            isSSOEnforced={isSSOEnforced || !loginMethods?.password}
+            isMagicLinkEnabled={loginMethods?.magicLink ?? false}
             isGoogleOAuthEnabled={isGoogleOAuthEnabled}
             isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
             isSlackOAuthEnabled={isSlackOAuthEnabled}
           />
 
-          {!inviteOnlyRegistration && (
+          {!inviteOnlyRegistration && loginMethods?.password && !isSSOEnforced && (
             <div className="mt-4 text-center text-sm">
               {t("loginView.other.dontHaveAccount")}{" "}
               <Link

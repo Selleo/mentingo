@@ -9,6 +9,7 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { ConfigurationStatus } from "./ConfigurationStatus";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
+import LoginMethods from "./LoginMethods";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
 import type { GlobalSettings } from "../../types";
@@ -18,14 +19,19 @@ const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED ===
 
 interface OrganizationTabContentProps {
   globalSettings: GlobalSettings;
+  canManageEnvs?: boolean;
 }
 
-export default function OrganizationTabContent({ globalSettings }: OrganizationTabContentProps) {
+export default function OrganizationTabContent({
+  globalSettings,
+  canManageEnvs = false,
+}: OrganizationTabContentProps) {
   const { data: stripeConfigured } = useStripeConfigured();
   const canEditSSOEnforcement = isGoogleOAuthEnabled || isMicrosoftOAuthEnabled;
 
   return (
     <>
+      {canManageEnvs && <LoginMethods />}
       <ConfigurationStatus />
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
       <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />
