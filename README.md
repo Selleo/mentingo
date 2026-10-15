@@ -126,6 +126,28 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 - **Grade open-ended answers without an L&D queue.** Behavioural and problem-solving tasks are analysed automatically and returned with actionable feedback.
 - **Keep the AI accountable.** Every model call is traced with Langfuse, so you can inspect cost, latency and what the mentor actually said.
 
+### Use Mentingo tools from your AI assistant
+
+Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. Standard connections use `account:access` with explicit consent and your account's current permissions. Clients can omit scopes; Mentingo presents account access for approval. Use granular scopes below only when you want to cap a connection deliberately.
+
+```sh
+claude mcp add --transport http mentingo https://<tenant-host>/api/mcp
+codex mcp add mentingo --url https://<tenant-host>/api/mcp
+```
+
+In Claude Code, run `/mcp` and select Mentingo. For Codex, run `codex mcp login mentingo`. Sign in and approve access; no manual scope selection is needed for a standard connection. `account:access` and `student:read` are exclusive and cannot be mixed with granular caps.
+
+| Workflow                                             | Example scopes                                           |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| Course authoring with existing categories and search | `courses:read courses:write categories:read search:read` |
+| Knowledge article authoring                          | `articles:read articles:write`                           |
+| News authoring                                       | `news:read news:write`                                   |
+| Learner assistant                                    | `student:read`                                           |
+
+Add `files:write` when authoring needs uploads, and request other domain scopes only when needed. Write scopes do not automatically grant read access. Management read scopes can expose drafts and authoring details; `student:read` instead exposes limited learner search and list/get tools and cannot be combined with other scopes.
+
+Existing `authoring` and `search` grants retain their current access until reconnect, subject to normal expiry, revocation and account permissions. Changing scopes requires fresh consent. Follow the [MCP guide](docs/mcp.md#connection-access-and-optional-scope-caps) for the full scope list, client setup and learner restrictions.
+
 ### Enterprise and white-label readiness
 
 - **Ship it as your own product.** Custom domains, logos, colours and styles - no Mentingo branding required anywhere in the learner experience.

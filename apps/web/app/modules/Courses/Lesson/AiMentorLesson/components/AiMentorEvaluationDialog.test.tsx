@@ -41,7 +41,10 @@ describe("AiMentorEvaluationDialog", () => {
 
     expect(screen.getByText("Discovers needs")).toBeVisible();
     expect(screen.getByText("4/5 pts")).toBeVisible();
-    expect(screen.getByText("You asked two useful discovery questions.")).toBeVisible();
+    expect(screen.getAllByText("You asked two useful discovery questions.")).toHaveLength(2);
+    expect(
+      screen.getByRole("complementary", { name: "Suggestion from the AI Mentor" }),
+    ).toHaveTextContent("You asked two useful discovery questions.");
     expect(screen.getByText("Makes unsupported guarantees")).toBeVisible();
     expect(
       screen.getByText("You guaranteed delivery by Friday without confirming it."),

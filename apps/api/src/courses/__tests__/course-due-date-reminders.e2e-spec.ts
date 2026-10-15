@@ -9,11 +9,11 @@ import { eq } from "drizzle-orm";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { CourseDueDateReminderEmailHandler } from "src/courses/handlers/course-due-date-reminder-email.handler";
 import { CourseDueDateReminderEmailEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import {
   announcements,
   courses,
@@ -28,6 +28,7 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { deliverPendingAutomationEmails } from "../../../test/helpers/automation-emails";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { CourseService } from "../course.service";
 
@@ -55,12 +56,15 @@ describe("Course due date reminders (e2e)", () => {
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
     };
 
-    const { app: testApp } = await createE2ETest([
-      {
-        provide: FileService,
-        useValue: mockFileService,
-      },
-    ]);
+    const { app: testApp } = await createE2ETest({
+      manualAutomationEmails: true,
+      customProviders: [
+        {
+          provide: FileService,
+          useValue: mockFileService,
+        },
+      ],
+    });
 
     app = testApp;
     db = app.get(DB);
@@ -86,6 +90,7 @@ describe("Course due date reminders (e2e)", () => {
     jest.restoreAllMocks();
 
     await truncateTables(baseDb, [
+      "automation_runs",
       "user_announcements",
       "announcements",
       "courses",
@@ -153,7 +158,8 @@ describe("Course due date reminders (e2e)", () => {
 
     if (!reminderEvent) throw new Error("Expected course due date reminder email event");
 
-    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
+    publishSpy.mockRestore();
+    await publishAndDeliverReminder(reminderEvent);
 
     const sentEmails = emailAdapter.getAllEmails();
     expect(sentEmails).toHaveLength(2);
@@ -292,12 +298,13 @@ describe("Course due date reminders (e2e)", () => {
       expect.objectContaining({
         studentId: student.id,
         courseName: polishTitle,
-        daysBeforeDueDate: "1",
+        daysBeforeDueDate: 1,
         defaultEmailSettings: expect.objectContaining({ language: SUPPORTED_LANGUAGES.PL }),
       }),
     ]);
 
-    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
+    publishSpy.mockRestore();
+    await publishAndDeliverReminder(reminderEvent);
 
     const [sentEmail] = emailAdapter.getAllEmails();
     expect(sentEmail.to).toBe(student.email);
@@ -366,7 +373,8 @@ describe("Course due date reminders (e2e)", () => {
       }),
     );
 
-    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
+    publishSpy.mockRestore();
+    await publishAndDeliverReminder(reminderEvent);
 
     expect(emailAdapter.getAllEmails()).toHaveLength(1);
     expect(await getReminderAnnouncementRows()).toHaveLength(1);
@@ -404,23 +412,34 @@ describe("Course due date reminders (e2e)", () => {
       await originalSendMail(email);
     });
 
-    await expect(app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent)).resolves.toBe(
-      undefined,
-    );
+    publishSpy.mockRestore();
+    const results = await publishAndDeliverReminder(reminderEvent, true);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
 
     const sentEmails = emailAdapter.getAllEmails();
     expect(sentEmails).toHaveLength(1);
     expect(sentEmails[0]).toEqual(expect.objectContaining({ to: successfulRecipient.email }));
 
     const announcementRows = await getReminderAnnouncementRows();
-    expect(announcementRows).toHaveLength(1);
-    expect(announcementRows[0]).toEqual(
-      expect.objectContaining({
-        userId: successfulRecipient.id,
-        sourceId: successfulCourse.id,
-      }),
+    expect(announcementRows).toHaveLength(2);
+    expect(announcementRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userId: successfulRecipient.id, sourceId: successfulCourse.id }),
+        expect.objectContaining({ userId: failedRecipient.id }),
+      ]),
     );
   });
+
+  const publishAndDeliverReminder = async (
+    event: CourseDueDateReminderEmailEvent,
+    allowFailures = false,
+  ) => {
+    const tenantId = event.courseDueDateReminderEmailData.recipients[0].tenantId;
+    await app
+      .get(TenantDbRunnerService)
+      .runWithTenant(tenantId, () => app.get(OutboxPublisher).publish(event));
+    return deliverPendingAutomationEmails(app, tenantId, allowFailures);
+  };
 
   const normalizeEmailText = (text?: string) => text?.replace(/\s+/g, " ").trim() ?? "";
 

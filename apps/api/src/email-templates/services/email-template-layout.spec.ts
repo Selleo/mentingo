@@ -1,4 +1,5 @@
 import { EMAIL_TEMPLATE_DEFINITIONS, renderEmailTemplate } from "@repo/email-templates";
+import { getEmailCardBackground } from "@repo/shared";
 
 describe("Email template branded layout", () => {
   it.each([undefined, 8])("renders divider height %s", (height) => {
@@ -53,11 +54,11 @@ describe("Email template branded layout", () => {
       },
     });
     expect(rendered.html).toContain("background-color:#5345ad");
-    expect(rendered.html).not.toContain("linear-gradient");
+    expect(rendered.html).toContain(`background-image:${getEmailCardBackground("#5345ad")}`);
     expect(rendered.html).toContain('rowspan="2"');
     expect(rendered.html).toContain("background-color:#ffffff");
-    expect(rendered.html).toContain("border-radius:1.5rem 1.5rem 0 0");
-    expect(rendered.html).toContain("border-radius:0 0 1.5rem 1.5rem");
+    expect(rendered.html).toContain("border-radius:1.5rem");
+    expect(rendered.html).toContain("border-bottom-left-radius:1.5rem");
     expect(rendered.html).toContain("Open Sans");
     expect(rendered.html).toContain('src="cid:logo"');
     expect(rendered.html).toContain('src="cid:border-circle"');

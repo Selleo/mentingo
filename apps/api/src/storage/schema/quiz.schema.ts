@@ -318,6 +318,9 @@ export const assessmentAttempts = pgTable(
     learnerAssessmentStartedIdx: index(
       "assessment_attempts_tenant_learner_assessment_started_idx",
     ).on(table.tenantId, table.learnerId, table.assessmentId, table.startedAt),
+    reportLatestGradedIdx: index("assessment_attempts_report_latest_graded_idx")
+      .on(table.tenantId, table.learnerId, table.assessmentId, table.attemptNumber)
+      .where(sql`${table.scorePercentage} IS NOT NULL AND ${table.gradedAt} IS NOT NULL`),
     assessmentLanguageIdx: index("assessment_attempts_tenant_assessment_language_idx").on(
       table.tenantId,
       table.assessmentId,

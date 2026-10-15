@@ -1,5 +1,5 @@
 import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { omit } from "lodash";
 import request from "supertest";
 
@@ -8,6 +8,7 @@ import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  settings,
   createTokens,
   credentials,
   courses,
@@ -19,6 +20,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { deliverPendingAutomationEmails } from "../../../test/helpers/automation-emails";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
@@ -27,6 +29,7 @@ import type { DatabasePg } from "src/common";
 
 describe("UsersController (e2e)", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
   let authService: AuthService;
   let groupService: GroupService;
   let testUser: UserWithCredentials;
@@ -40,7 +43,12 @@ describe("UsersController (e2e)", () => {
   let emailAdapter: EmailTestingAdapter;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const {
+      app: testApp,
+      runAsTenant,
+      defaultTenantId,
+    } = await createE2ETest({ manualAutomationEmails: true });
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     authService = app.get(AuthService);
     groupService = app.get(GroupService);
@@ -57,6 +65,7 @@ describe("UsersController (e2e)", () => {
   });
 
   beforeEach(async () => {
+    await db.delete(settings).where(isNull(settings.userId));
     await settingsFactory.create({ userId: null });
     emailAdapter.clearEmails();
 
@@ -80,6 +89,7 @@ describe("UsersController (e2e)", () => {
   };
 
   const waitForEmails = async (expectedCount: number) => {
+    await deliverPendingAutomationEmails(app, testUser.tenantId);
     const attempts = 20;
 
     for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -113,7 +123,7 @@ describe("UsersController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(baseDb, ["users", "groups", "settings"]);
+    await truncateTables(baseDb, ["automation_runs", "users", "groups", "settings"]);
   });
 
   describe("GET /user?id=:id", () => {
@@ -227,13 +237,15 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return 403 when updating another user", async () => {
-      const anotherUser = await authService.register({
-        email: "another@example.com",
-        password: "password123",
-        firstName: "Another",
-        lastName: "User",
-        language: "en",
-      });
+      const anotherUser = await inTenant(() =>
+        authService.register({
+          email: "another@example.com",
+          password: "password123",
+          firstName: "Another",
+          lastName: "User",
+          language: "en",
+        }),
+      );
       await request(app.getHttpServer())
         .patch(`/api/user?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
@@ -401,13 +413,15 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return 403 when changing another user's password", async () => {
-      const anotherUser = await authService.register({
-        email: "another2@example.com",
-        password: "Password123@",
-        firstName: "Another",
-        lastName: "User",
-        language: "en",
-      });
+      const anotherUser = await inTenant(() =>
+        authService.register({
+          email: "another2@example.com",
+          password: "Password123@",
+          firstName: "Another",
+          lastName: "User",
+          language: "en",
+        }),
+      );
 
       const password = "Password2137@";
 
@@ -429,13 +443,15 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should delete user", async () => {
-      const anotherUser = await authService.register({
-        email: "another3@example.com",
-        password: "password123",
-        firstName: "Another",
-        lastName: "User",
-        language: "en",
-      });
+      const anotherUser = await inTenant(() =>
+        authService.register({
+          email: "another3@example.com",
+          password: "password123",
+          firstName: "Another",
+          lastName: "User",
+          language: "en",
+        }),
+      );
 
       await request(app.getHttpServer())
         .delete(`/api/user`)
@@ -453,15 +469,18 @@ describe("UsersController (e2e)", () => {
     let cookies: string;
 
     beforeAll(async () => {
+      await db.delete(settings).where(isNull(settings.userId));
       await settingsFactory.create({ userId: null });
 
-      const anotherUser = await authService.register({
-        email: "another4@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-        language: "en",
-      });
+      const anotherUser = await inTenant(() =>
+        authService.register({
+          email: "another4@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+          language: "en",
+        }),
+      );
       const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({
@@ -513,13 +532,15 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return forbidden", async () => {
-      const anotherUser2 = await authService.register({
-        email: "another5@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-        language: "en",
-      });
+      const anotherUser2 = await inTenant(() =>
+        authService.register({
+          email: "another5@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+          language: "en",
+        }),
+      );
       await request(app.getHttpServer())
         .get(`/api/user/details?userId=${anotherUser2.id}`)
         .set("Cookie", cookies)
@@ -533,24 +554,28 @@ describe("UsersController (e2e)", () => {
 
     it("should update groups for multiple users", async () => {
       firstUser = {
-        ...(await authService.register({
-          email: "another6@example.com",
-          password: testPassword,
-          firstName: "Another",
-          lastName: "User",
-          language: "en",
-        })),
+        ...(await inTenant(() =>
+          authService.register({
+            email: "another6@example.com",
+            password: testPassword,
+            firstName: "Another",
+            lastName: "User",
+            language: "en",
+          }),
+        )),
         avatarReference: null,
       };
 
       secondUser = {
-        ...(await authService.register({
-          email: "another7@example.com",
-          password: testPassword,
-          firstName: "Another",
-          lastName: "User",
-          language: "en",
-        })),
+        ...(await inTenant(() =>
+          authService.register({
+            email: "another7@example.com",
+            password: testPassword,
+            firstName: "Another",
+            lastName: "User",
+            language: "en",
+          }),
+        )),
         avatarReference: null,
       };
 
@@ -571,24 +596,28 @@ describe("UsersController (e2e)", () => {
 
     it("should return forbidden 403", async () => {
       firstUser = {
-        ...(await authService.register({
-          email: "another6@example.com",
-          password: testPassword,
-          firstName: "Another",
-          lastName: "User",
-          language: "en",
-        })),
+        ...(await inTenant(() =>
+          authService.register({
+            email: "another6@example.com",
+            password: testPassword,
+            firstName: "Another",
+            lastName: "User",
+            language: "en",
+          }),
+        )),
         avatarReference: null,
       };
 
       secondUser = {
-        ...(await authService.register({
-          email: "another7@example.com",
-          password: testPassword,
-          firstName: "Another",
-          lastName: "User",
-          language: "en",
-        })),
+        ...(await inTenant(() =>
+          authService.register({
+            email: "another7@example.com",
+            password: testPassword,
+            firstName: "Another",
+            lastName: "User",
+            language: "en",
+          }),
+        )),
         avatarReference: null,
       };
 
@@ -620,21 +649,25 @@ describe("UsersController (e2e)", () => {
 
   describe("PATCH /user/bulk/roles", () => {
     it("should update roles for multiple users", async () => {
-      const firstUser = await authService.register({
-        email: "bulk-roles-1@example.com",
-        password: testPassword,
-        firstName: "Bulk",
-        lastName: "UserOne",
-        language: "en",
-      });
+      const firstUser = await inTenant(() =>
+        authService.register({
+          email: "bulk-roles-1@example.com",
+          password: testPassword,
+          firstName: "Bulk",
+          lastName: "UserOne",
+          language: "en",
+        }),
+      );
 
-      const secondUser = await authService.register({
-        email: "bulk-roles-2@example.com",
-        password: testPassword,
-        firstName: "Bulk",
-        lastName: "UserTwo",
-        language: "en",
-      });
+      const secondUser = await inTenant(() =>
+        authService.register({
+          email: "bulk-roles-2@example.com",
+          password: testPassword,
+          firstName: "Bulk",
+          lastName: "UserTwo",
+          language: "en",
+        }),
+      );
 
       await request(app.getHttpServer())
         .patch("/api/user/bulk/roles")
@@ -680,13 +713,15 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return forbidden 403 for non-admins", async () => {
-      const regularUser = await authService.register({
-        email: "bulk-roles-regular@example.com",
-        password: testPassword,
-        firstName: "Regular",
-        lastName: "User",
-        language: "en",
-      });
+      const regularUser = await inTenant(() =>
+        authService.register({
+          email: "bulk-roles-regular@example.com",
+          password: testPassword,
+          firstName: "Regular",
+          lastName: "User",
+          language: "en",
+        }),
+      );
 
       const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")

@@ -3,7 +3,9 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
+  AUTOMATION_EMAIL: "automation-email",
   EMAIL_TEMPLATE_TEST: "email-template-test",
+  SEMANTIC_SEARCH_INDEX: "semantic-search-index",
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",
@@ -21,6 +23,7 @@ export const QUEUE_NAMES = {
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
   VIDEO_METADATA: "video-metadata",
+  REPORT_EXPORT: "report-export",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -92,4 +95,11 @@ export interface VideoMetadataJobData {
   provider: VideoMetadataProvider;
   fileKey?: string;
   bunnyVideoId?: string;
+}
+
+export interface ReportExportJobData {
+  tenantId: UUIDType;
+  exportId: UUIDType;
+  actorId: UUIDType;
+  action?: "generate" | "expire";
 }

@@ -1,3 +1,5 @@
+import { VOICE_JUDGE_TEST_IDS } from "@mentingo/voice";
+
 export const AI_MENTOR_PRACTICE_HANDLES = {
   FORM: "ai-mentor-practice-form",
   SCENARIO_INPUT: "ai-mentor-practice-scenario-input",
@@ -9,6 +11,6 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   CHECK_BUTTON: "ai-mentor-practice-check-button",
   VIEW_FEEDBACK_BUTTON: "ai-mentor-practice-view-feedback-button",
   PRACTICE_AGAIN_BUTTON: "ai-mentor-practice-again-button",
-  FEEDBACK_DIALOG: "ai-mentor-practice-feedback-dialog",
+  FEEDBACK_DIALOG: VOICE_JUDGE_TEST_IDS.DIALOG,
   WIDGET: "ai-mentor-practice-dashboard-widget",
 } as const;

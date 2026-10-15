@@ -152,7 +152,9 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     const adminUser = await createAdminUser();
     const adminCookies = await cookieFor(adminUser, app);
     const learningPath = await learningPathFactory.create({ authorId: adminUser.id });
-    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const student = await userFactory
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
     const group = await groupFactory.withMembers([student.id]).create();
     const course = await courseFactory.create({
       authorId: adminUser.id,

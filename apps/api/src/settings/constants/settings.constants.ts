@@ -9,15 +9,6 @@ const DEFAULT_COMPANY_INFORMATION = {
   courtRegisterNumber: "",
 };
 
-export const DEFAULT_EMAIL_TRIGGERS = {
-  userFirstLogin: false,
-  userCourseAssignment: false,
-  userShortInactivity: false,
-  userLongInactivity: false,
-  userChapterFinished: false,
-  userCourseFinished: false,
-};
-
 export const DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS = 5;
 
 export const DEFAULT_GLOBAL_SETTINGS = {
@@ -44,7 +35,6 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: true,
-  userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
   contrastColor: null,
   loginPageFiles: [],

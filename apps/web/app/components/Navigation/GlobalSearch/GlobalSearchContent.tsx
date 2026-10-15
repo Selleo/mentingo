@@ -180,7 +180,7 @@ export const GlobalSearchContent = ({
           })()}
         </div>
       ) : (
-        <div className="mx-auto px-6 pt-4">
+        <div role="status" aria-label={t("globalSearch.loading")} className="mx-auto px-6 pt-4">
           <Loader />
         </div>
       )}

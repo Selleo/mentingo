@@ -1,9 +1,9 @@
 import { Link } from "@tiptap/extension-link";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { BubbleMenu, EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Bold, Check, Italic, Link2, Unlink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -20,6 +20,7 @@ import type {
   EmailTemplateParagraph,
   EmailTemplateVariables,
 } from "../emailTemplates.types";
+import type { ReactNode } from "react";
 
 export type EmailTemplateRichTextProps = {
   content: EmailTemplateParagraph[];
@@ -27,6 +28,7 @@ export type EmailTemplateRichTextProps = {
   onChange: (content: EmailTemplateParagraph[]) => void;
   disabled: boolean;
   inline?: boolean;
+  toolbarActions?: ReactNode;
   onRegisterVariableInserter?: (insert: EmailTemplateVariableInserter) => void;
 };
 
@@ -36,11 +38,13 @@ export function EmailTemplateRichText({
   onChange,
   disabled,
   inline = false,
+  toolbarActions,
   onRegisterVariableInserter,
 }: EmailTemplateRichTextProps) {
   const { t } = useTranslation();
   const [isLinkEditorOpen, setIsLinkEditorOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const editor = useEditor({
     immediatelyRender: false,
     editable: !disabled,
@@ -122,13 +126,12 @@ export function EmailTemplateRichText({
     )
       editor.commands.setContent({ type: "doc", content }, false);
   }, [content, editor]);
-  return (
-    <div className={cn("bg-white", { "rounded-lg border border-neutral-300": !inline })}>
+  const toolbar = (
+    <div ref={toolbarRef}>
       <div
         className={cn("flex items-center text-sm text-neutral-900", {
           "flex-wrap gap-1 border-b p-2": !inline,
-          "absolute top-0 left-1 z-20 -translate-y-1/2 rounded-md border bg-white p-0.5 shadow-sm [&>button]:size-7 [&_svg]:size-3.5":
-            inline,
+          "p-0.5 [&>button]:size-7 [&_svg]:size-3.5": inline,
         })}
       >
         <Button
@@ -139,6 +142,7 @@ export function EmailTemplateRichText({
           aria-label={t("emailTemplates.ui.bold")}
           aria-pressed={editor?.isActive("bold") ?? false}
           className={cn({ "bg-neutral-100": editor?.isActive("bold") })}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor?.chain().focus().toggleBold().run()}
         >
           <Bold className="size-4" />
@@ -150,6 +154,7 @@ export function EmailTemplateRichText({
           disabled={disabled}
           aria-label={t("emailTemplates.ui.italic")}
           aria-pressed={editor?.isActive("italic") ?? false}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor?.chain().focus().toggleItalic().run()}
         >
           <Italic className="size-4" />
@@ -176,13 +181,15 @@ export function EmailTemplateRichText({
         >
           {editor?.isActive("link") ? <Unlink className="size-4" /> : <Link2 className="size-4" />}
         </Button>
+        {toolbarActions && (
+          <div className="ml-1 border-l border-neutral-200 pl-1">{toolbarActions}</div>
+        )}
       </div>
       {isLinkEditorOpen && (
         <div
           className={cn("flex items-center gap-2 p-2", {
             "border-b": !inline,
-            "absolute left-1 top-6 z-30 w-64 max-w-[calc(100%-0.5rem)] rounded-md border bg-white shadow-sm":
-              inline,
+            "w-64 max-w-[calc(100vw-2rem)] border-t": inline,
           })}
         >
           <EmailTemplateTextField
@@ -209,6 +216,34 @@ export function EmailTemplateRichText({
             <Check className="size-4" />
           </Button>
         </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className={cn("bg-white", { "rounded-lg border border-neutral-300": !inline })}>
+      {!inline && toolbar}
+      {inline && editor && (
+        <BubbleMenu
+          editor={editor}
+          updateDelay={0}
+          className="rounded-lg border border-neutral-200 bg-white shadow-lg"
+          shouldShow={({ editor: currentEditor }) =>
+            currentEditor.isEditable &&
+            (currentEditor.isFocused ||
+              Boolean(toolbarRef.current?.contains(document.activeElement)))
+          }
+          tippyOptions={{
+            placement: "top",
+            offset: [0, 8],
+            duration: 100,
+            zIndex: 50,
+            appendTo: () => document.body,
+            maxWidth: "calc(100vw - 2rem)",
+          }}
+        >
+          {toolbar}
+        </BubbleMenu>
       )}
       <EditorContent editor={editor} />
     </div>

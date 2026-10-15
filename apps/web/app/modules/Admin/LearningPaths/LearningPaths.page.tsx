@@ -1,32 +1,29 @@
-import { learningPathsQueryOptions } from "~/api/queries/useLearningPaths";
-import { queryClient } from "~/api/queryClient";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { AdminLearningPathsPageContent } from "./components/AdminLearningPathsPageContent";
 import { AdminLearningPathsPageProvider } from "./context/AdminLearningPathsPageContext";
 import { useAdminLearningPathsPage } from "./hooks/useAdminLearningPathsPage";
 
-import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) =>
   setPageTitle(matches, "pages.adminLearningPaths");
 
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const searchQuery = url.searchParams.get("searchQuery") ?? "";
-
-  const { language } = useLanguageStore.getState();
-
-  return queryClient.fetchQuery(learningPathsQueryOptions({ language, searchQuery }));
-};
-
-export default function AdminLearningPathsPage() {
+function AuthenticatedAdminLearningPathsPage() {
   const page = useAdminLearningPathsPage();
 
   return (
     <AdminLearningPathsPageProvider value={page}>
       <AdminLearningPathsPageContent />
     </AdminLearningPathsPageProvider>
+  );
+}
+
+export default function AdminLearningPathsPage() {
+  return (
+    <RequireAuthenticatedUser>
+      <AuthenticatedAdminLearningPathsPage />
+    </RequireAuthenticatedUser>
   );
 }

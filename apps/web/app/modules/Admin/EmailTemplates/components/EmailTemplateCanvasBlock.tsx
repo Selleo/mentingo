@@ -134,6 +134,76 @@ export function EmailTemplateCanvasBlock({
     disabled,
     data: { kind: EMAIL_TEMPLATE_DRAG_TYPES.BLOCK, index },
   });
+  const isEditingText =
+    selected &&
+    !disabled &&
+    (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADING ||
+      block.type === EMAIL_TEMPLATE_BLOCK_TYPES.TEXT ||
+      block.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER);
+
+  const blockActions = (
+    <div className="flex items-center [&>button]:size-7">
+      <Button
+        ref={setActivatorNodeRef}
+        type="button"
+        variant="ghost"
+        size="icon"
+        onMouseDown={(event) => event.preventDefault()}
+        {...attributes}
+        {...listeners}
+        data-testid={EMAIL_TEMPLATES_HANDLES.DRAG_BLOCK}
+        aria-label={t("emailTemplates.ui.dragBlock")}
+        className="touch-none cursor-grab"
+      >
+        <GripVertical className="size-3.5" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onMouseDown={(event) => event.preventDefault()}
+        disabled={index === 0}
+        aria-label={t("emailTemplates.ui.moveUp")}
+        onClick={() => onMove(-1)}
+      >
+        <ArrowUp className="size-3.5" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onMouseDown={(event) => event.preventDefault()}
+        disabled={index === count - 1}
+        aria-label={t("emailTemplates.ui.moveDown")}
+        onClick={() => onMove(1)}
+      >
+        <ArrowDown className="size-3.5" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onMouseDown={(event) => event.preventDefault()}
+        data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE_BLOCK}
+        aria-label={t("emailTemplates.ui.duplicateBlock")}
+        onClick={onDuplicate}
+      >
+        <Copy className="size-3.5" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onMouseDown={(event) => event.preventDefault()}
+        data-testid={EMAIL_TEMPLATES_HANDLES.REMOVE_BLOCK}
+        aria-label={t("emailTemplates.ui.removeBlock")}
+        onClick={onRemove}
+      >
+        <Trash2 className="size-3.5" />
+      </Button>
+    </div>
+  );
+
   const paragraphs = "content" in block ? block.content : undefined;
   let content = <></>;
   if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADER)
@@ -181,6 +251,7 @@ export function EmailTemplateCanvasBlock({
         {selected && !disabled ? (
           <EmailTemplateRichText
             inline
+            toolbarActions={blockActions}
             content={paragraphContent}
             variables={variables}
             disabled={disabled}
@@ -235,73 +306,17 @@ export function EmailTemplateCanvasBlock({
             },
           )}
         >
-          {!disabled && (
+          {!disabled && !isEditingText && (
             <div
               className={cn(
-                "absolute top-0 right-1 z-20 flex -translate-y-1/2 rounded-md border bg-white p-0.5 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 [&>button]:size-7",
+                "absolute top-0 right-1 z-20 -mt-2 flex -translate-y-full rounded-md border bg-white p-0.5 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 [&>button]:size-7",
                 { "opacity-100": selected },
               )}
             >
-              <Button
-                ref={setActivatorNodeRef}
-                type="button"
-                variant="ghost"
-                size="icon"
-                {...attributes}
-                {...listeners}
-                data-testid={EMAIL_TEMPLATES_HANDLES.DRAG_BLOCK}
-                aria-label={t("emailTemplates.ui.dragBlock")}
-                className="touch-none cursor-grab"
-              >
-                <GripVertical className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                disabled={index === 0}
-                aria-label={t("emailTemplates.ui.moveUp")}
-                onClick={() => onMove(-1)}
-              >
-                <ArrowUp className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                disabled={index === count - 1}
-                aria-label={t("emailTemplates.ui.moveDown")}
-                onClick={() => onMove(1)}
-              >
-                <ArrowDown className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE_BLOCK}
-                aria-label={t("emailTemplates.ui.duplicateBlock")}
-                onClick={onDuplicate}
-              >
-                <Copy className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                data-testid={EMAIL_TEMPLATES_HANDLES.REMOVE_BLOCK}
-                aria-label={t("emailTemplates.ui.removeBlock")}
-                onClick={onRemove}
-              >
-                <Trash2 className="size-3.5" />
-              </Button>
+              {blockActions}
             </div>
           )}
-          {selected &&
-          !disabled &&
-          (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADING ||
-            block.type === EMAIL_TEMPLATE_BLOCK_TYPES.TEXT ||
-            block.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER) ? (
+          {isEditingText ? (
             <div className="px-[10%]">{content}</div>
           ) : (
             <button

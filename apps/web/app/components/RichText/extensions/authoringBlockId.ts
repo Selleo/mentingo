@@ -23,8 +23,7 @@ const AUTHORING_BLOCK_NODE_TYPES = [
   "video",
 ];
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const createAuthoringBlockId = () => globalThis.crypto.randomUUID();
 
@@ -38,11 +37,7 @@ const stripAuthoringBlockIds = (fragment: Fragment): Fragment =>
       const content = node.content.size ? stripAuthoringBlockIds(node.content) : node.content;
       if (!("authoringBlockId" in node.attrs) && content === node.content) return node;
 
-      return node.type.create(
-        { ...node.attrs, authoringBlockId: null },
-        content,
-        node.marks,
-      );
+      return node.type.create({ ...node.attrs, authoringBlockId: null }, content, node.marks);
     }),
   );
 
@@ -119,11 +114,7 @@ export const AuthoringBlockId = Extension.create<AuthoringBlockIdOptions>({
         props: {
           transformPasted: (slice: Slice) =>
             slice.content.size
-              ? new Slice(
-                  stripAuthoringBlockIds(slice.content),
-                  slice.openStart,
-                  slice.openEnd,
-                )
+              ? new Slice(stripAuthoringBlockIds(slice.content), slice.openStart, slice.openEnd)
               : slice,
         },
         appendTransaction: (transactions, _oldState, newState) => {

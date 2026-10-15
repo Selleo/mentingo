@@ -271,3 +271,77 @@ export function assertScormUploadGrant(
   if (grant.targetType !== ENTITY_TYPES.LESSON || grant.targetId !== targetId)
     throw new ForbiddenException("SCORM lesson does not match its grant");
 }
+
+export function assertPlatformAssetUploadGrant(
+  grant: McpUploadGrant,
+  asset: import("./mcp.types").McpPlatformAssetUploadGrant["asset"],
+  file: Express.Multer.File | null | undefined,
+  body: Record<string, unknown>,
+): void {
+  const fieldNames = {
+    platformLogo: "logo",
+    platformSimpleLogo: "logo",
+    loginBackground: "login-background",
+    certificateBackground: "certificate-background",
+    loginDocument: "file",
+  };
+  if (
+    !("kind" in grant) ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET ||
+    grant.targetType !== ENTITY_TYPES.GLOBAL_SETTINGS ||
+    grant.targetId !== grant.tenantId ||
+    grant.asset !== asset ||
+    !file ||
+    file.fieldname !== fieldNames[asset] ||
+    file.originalname !== grant.filename ||
+    file.mimetype !== grant.mimeType ||
+    file.size !== grant.size ||
+    (asset === "loginDocument"
+      ? Object.keys(body).length !== 1 || body.name !== grant.name
+      : Object.keys(body).length !== 0)
+  )
+    throw new ForbiddenException("Platform asset upload does not match its grant");
+}
+
+export function assertUserAvatarUploadGrant(
+  grant: McpUploadGrant,
+  currentUserId: string,
+  file: Express.Multer.File | null | undefined,
+  data: unknown,
+  body?: Record<string, unknown>,
+): void {
+  let rawEmpty = true;
+  if (body) {
+    rawEmpty = Object.keys(body).length === 1 && typeof body.data === "string";
+    if (rawEmpty) {
+      try {
+        const parsed = JSON.parse(body.data as string);
+        rawEmpty =
+          !!parsed &&
+          typeof parsed === "object" &&
+          !Array.isArray(parsed) &&
+          Object.keys(parsed).length === 0;
+      } catch {
+        rawEmpty = false;
+      }
+    }
+  }
+  if (
+    !("kind" in grant) ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.USER_AVATAR ||
+    grant.targetType !== ENTITY_TYPES.USER ||
+    grant.userId !== currentUserId ||
+    grant.targetId !== currentUserId ||
+    !file ||
+    file.fieldname !== "userAvatar" ||
+    file.originalname !== grant.filename ||
+    file.mimetype !== grant.mimeType ||
+    file.size !== grant.size ||
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    Object.keys(data).length !== 0 ||
+    !rawEmpty
+  )
+    throw new ForbiddenException("User avatar upload does not match its grant");
+}

@@ -55,6 +55,8 @@ interface MultipleSelectorProps {
    **/
   onSearchSync?: (value: string) => Option[];
   onChange?: (options: Option[]) => void;
+  /** Accessible, localized label for removing a selected option. */
+  getRemoveLabel?: (option: Option) => string;
   /** Limit the maximum number of selected options. */
   maxSelected?: number;
   /** When the number of selected options exceeds the limit, the onMaxSelected will be called. */
@@ -167,6 +169,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
     {
       value,
       onChange,
+      getRemoveLabel,
       placeholder,
       defaultOptions: arrayDefaultOptions = [],
       options: arrayOptions,
@@ -294,6 +297,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             }
           }
           if (e.key === "Escape") {
+            setOpen(false);
             input.blur();
           }
         }
@@ -521,7 +525,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                       e.stopPropagation();
                     }}
                     onClick={() => handleUnselect(option)}
-                    aria-label="Remove"
+                    type="button"
+                    aria-label={getRemoveLabel?.(option) ?? "Remove"}
                   >
                     <XIcon size={14} aria-hidden="true" />
                   </button>
@@ -572,7 +577,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                               e.stopPropagation();
                             }}
                             onClick={() => handleUnselect(option)}
-                            aria-label="Remove"
+                            type="button"
+                            aria-label={getRemoveLabel?.(option) ?? "Remove"}
                           >
                             <XIcon size={14} aria-hidden="true" />
                           </button>

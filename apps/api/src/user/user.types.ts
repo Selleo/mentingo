@@ -2,7 +2,6 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { EmailTemplateDeliveryContext } from "src/email-templates/email-template.types";
 import type { DefaultEmailSettings } from "src/events/types";
 import type { users } from "src/storage/schema";
 import type {
@@ -38,7 +37,6 @@ export type CreateUserContext =
 
 export type CreateUserCoreResult = {
   createdUser: CreatedUser;
-  token?: string;
   newUsersLanguage: SupportedLanguages;
 };
 
@@ -87,7 +85,6 @@ export type CreateUsersCoreBulkCreatedRow = {
 
 export type CreateUsersCoreBulkResult = {
   createdUser: CreatedUser;
-  token: string;
   newUsersLanguage: SupportedLanguages;
   groupIds: UUIDType[];
 };
@@ -147,6 +144,7 @@ export type UserPasswordEmailRecipient = {
   id: UUIDType;
   email: string;
   firstName: string;
+  lastName?: string;
   tenantId: UUIDType;
   hasCredentials: boolean;
   defaultEmailSettings: DefaultEmailSettings;
@@ -164,14 +162,4 @@ export type UserPasswordEmailTokenInsert = {
 
 export type UserCreatePasswordTokenInsert = UserPasswordEmailTokenInsert & {
   reminderCount: number;
-};
-
-export type PreparedUserPasswordEmail = {
-  template?: EmailTemplateDeliveryContext;
-  userId: UUIDType;
-  to: string;
-  tenantId: UUIDType;
-  subject: string;
-  text: string;
-  html: string;
 };

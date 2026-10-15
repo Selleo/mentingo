@@ -22,10 +22,7 @@ export const authoringSessionQueryOptions = (courseId: string, sessionId: string
   });
 
 /** Refreshes a snapshot without replacing a newer websocket projection. */
-export const refreshAuthoringSession = async (
-  courseId: string,
-  sessionId: string,
-) => {
+export const refreshAuthoringSession = async (courseId: string, sessionId: string) => {
   const snapshot = await getAuthoringSession(courseId, sessionId);
   queryClient.setQueryData<AuthoringSession>(authoringSessionKey(courseId, sessionId), (current) =>
     !current || snapshot.snapshotSequence >= current.snapshotSequence ? snapshot : current,

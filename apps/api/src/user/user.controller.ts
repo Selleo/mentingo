@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
@@ -42,11 +43,14 @@ import { hasPermission } from "src/common/permissions/permission.utils";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
+import { FileGuard } from "src/file/guards/file.guard";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ImageConstraintsValidator } from "src/file/validators/image-constraints.validator";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
+import { assertUserAvatarUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -301,8 +305,22 @@ export class UserController {
         )
         .build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST, fileIsRequired: false }),
     )
-    userAvatar?: Express.Multer.File,
+    userAvatar: Express.Multer.File | undefined,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ message: string }>> {
+    if (request.mcpUploadGrant) {
+      assertUserAvatarUploadGrant(
+        request.mcpUploadGrant,
+        currentUserId,
+        userAvatar,
+        userInfo.data,
+        request.body,
+      );
+      await FileGuard.validateFile(userAvatar!, {
+        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
+        maxSize: AVATAR_MAX_SIZE,
+      });
+    }
     await this.usersService.updateUserProfile(currentUserId, userInfo.data, userAvatar);
 
     return new BaseResponse({

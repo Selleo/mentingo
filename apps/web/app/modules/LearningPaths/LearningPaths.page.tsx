@@ -1,18 +1,13 @@
-import { redirect, useNavigate } from "@remix-run/react";
+import { Navigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { currentUserQueryOptions } from "~/api/queries";
-import { globalSettingsQueryOptions, useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { learningPathsQueryOptions } from "~/api/queries/useLearningPaths";
-import { queryClient } from "~/api/queryClient";
+import { usePublicGlobalSettingsSuspense } from "~/api/queries/usePublicGlobalSettingsSuspense";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { usePermissions } from "~/hooks/usePermissions";
 import AdminLearningPathsPage from "~/modules/Admin/LearningPaths/LearningPaths.page";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../e2e/data/learning-paths/handles";
@@ -24,36 +19,9 @@ import { StudentLearningPathCard } from "./components/StudentLearningPathCard";
 import { useStudentLearningPathsPage } from "./hooks/useStudentLearningPathsPage";
 import { getLearningPathViewerAccess } from "./utils/learningPathViewerAccess";
 
-import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.learningPaths");
-
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const searchQuery = url.searchParams.get("searchQuery") ?? "";
-
-  try {
-    const user = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-    if (!user) {
-      saveEntryToNavigationHistory(request);
-
-      throw redirect("/auth/login");
-    }
-  } catch {
-    throw redirect("/auth/login");
-  }
-
-  const globalSettings = await queryClient.ensureQueryData(globalSettingsQueryOptions);
-
-  if (globalSettings?.data.learningPathsEnabled === false) {
-    throw redirect(LOGIN_REDIRECT_URL);
-  }
-
-  const { language } = useLanguageStore.getState();
-
-  return queryClient.fetchQuery(learningPathsQueryOptions({ language, searchQuery }));
-};
 
 function StudentLearningPathsPage({
   canSelfEnroll,
@@ -101,11 +69,9 @@ function StudentLearningPathsPage({
   );
 }
 
-export default function LearningPathsPage() {
-  const navigate = useNavigate();
-
+function LearningPathsPageContent() {
   const { permissions } = usePermissions();
-  const { data: globalSettings } = useGlobalSettings();
+  const { data: globalSettings } = usePublicGlobalSettingsSuspense();
 
   const canAccessLearningPathAdmin = hasAnyPermission(permissions, [
     PERMISSIONS.LEARNING_PATH_CREATE,
@@ -118,17 +84,21 @@ export default function LearningPathsPage() {
     PERMISSIONS.LEARNING_PATH_EXPORT,
   ]);
 
-  useLayoutEffect(() => {
-    if (globalSettings?.learningPathsEnabled === false) {
-      navigate("/courses");
-    }
-  }, [globalSettings?.learningPathsEnabled, navigate]);
-
-  if (globalSettings?.learningPathsEnabled === false) return null;
+  if (globalSettings?.learningPathsEnabled === false) {
+    return <Navigate to={LOGIN_REDIRECT_URL} replace />;
+  }
 
   return canAccessLearningPathAdmin ? (
     <AdminLearningPathsPage />
   ) : (
     <StudentLearningPathsPage {...getLearningPathViewerAccess(permissions)} />
+  );
+}
+
+export default function LearningPathsPage() {
+  return (
+    <RequireAuthenticatedUser>
+      <LearningPathsPageContent />
+    </RequireAuthenticatedUser>
   );
 }

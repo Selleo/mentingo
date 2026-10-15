@@ -1,13 +1,11 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { EMAIL_TEMPLATE_STATUSES, type EmailTemplateEvent } from "@repo/email-templates";
-import { and, count, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { EMAIL_TEMPLATE_STATUSES, type PublishedEmailTemplate } from "@repo/email-templates";
+import { and, count, desc, eq, isNull, or, sql, type SQL } from "drizzle-orm";
 
+import { acquireAutomationLifecycleLock } from "src/automation-execution/utils/acquire-automation-lifecycle-lock";
 import { DatabasePg, type UUIDType } from "src/common";
-import {
-  buildJsonbFieldWithMultipleEntries,
-  mergeJsonbField,
-  setJsonbField,
-} from "src/common/helpers/sqlHelpers";
+import { buildJsonbFieldWithMultipleEntries, mergeJsonbField } from "src/common/helpers/sqlHelpers";
+import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import { emailTemplates } from "src/storage/schema";
 
@@ -16,28 +14,55 @@ import type { SupportedLanguages } from "@repo/shared";
 
 @Injectable()
 export class EmailTemplateRepository {
-  constructor(@Inject(DB) private readonly db: DatabasePg) {}
+  constructor(
+    @Inject(DB) private readonly database: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async withLockedEmailTemplate<T>(
     id: UUIDType,
-    callback: (template: EmailTemplateRecord) => Promise<T>,
+    callback: (template: EmailTemplateRecord, transaction: DatabasePg) => Promise<T>,
   ): Promise<T> {
-    return this.db.transaction(async (transaction) => {
-      const event = await this.getEmailTemplateEventOrThrow(transaction, id);
-      await this.lockEmailTemplatePublication(transaction, event);
+    return this.database.transaction(async (transaction) => {
+      await acquireAutomationLifecycleLock(transaction);
 
       const template = await this.getEmailTemplateForUpdateOrThrow(transaction, id);
-      return callback(template);
+
+      return callback(template, transaction);
     });
   }
 
-  findEmailTemplateOverridePageWithTotal(offset: number, pageSize: number) {
-    return this.db.transaction(
+  findCustomEmailTemplatePageWithCount(
+    offset: number,
+    pageSize: number,
+    search = "",
+    language?: SupportedLanguages,
+  ) {
+    const matches = search
+      ? or(
+          ...[emailTemplates.name, emailTemplates.subject].map((field) => {
+            const localized = this.localizationService.getLocalizedSqlField(
+              field,
+              language,
+              emailTemplates,
+            );
+
+            return sql`position(lower(${search}) in lower(${localized})) > 0`;
+          }),
+        )
+      : undefined;
+
+    const filter = and(isNull(emailTemplates.deletedAt), matches);
+
+    return this.database.transaction(
       async (transaction) => {
-        const totalItems = await this.countEmailTemplateOverrides(transaction);
+        const totalItems = await this.countCustomEmailTemplates(transaction, filter);
         const limit = Math.max(0, Math.min(pageSize, totalItems - offset));
+
         const templates =
-          limit > 0 ? await this.findEmailTemplateOverridePage(transaction, offset, limit) : [];
+          limit > 0
+            ? await this.findCustomEmailTemplatePage(transaction, offset, limit, filter)
+            : [];
 
         return { templates, totalItems };
       },
@@ -46,7 +71,7 @@ export class EmailTemplateRepository {
   }
 
   async findEmailTemplateById(id: UUIDType) {
-    const [template] = await this.db
+    const [template] = await this.database
       .select()
       .from(emailTemplates)
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)));
@@ -54,23 +79,8 @@ export class EmailTemplateRepository {
     return template;
   }
 
-  async findPublishedEmailTemplate(event: EmailTemplateEvent) {
-    const [template] = await this.db
-      .select()
-      .from(emailTemplates)
-      .where(
-        and(
-          isNull(emailTemplates.deletedAt),
-          eq(emailTemplates.event, event),
-          eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
-        ),
-      )
-      .limit(1);
-    return template;
-  }
-
-  async createEmailTemplate(values: typeof emailTemplates.$inferInsert) {
-    const [template] = await this.db
+  async insertEmailTemplate(values: typeof emailTemplates.$inferInsert) {
+    const [template] = await this.database
       .insert(emailTemplates)
       .values({
         ...values,
@@ -79,11 +89,12 @@ export class EmailTemplateRepository {
         content: buildJsonbFieldWithMultipleEntries(values.content),
       })
       .returning();
+
     return template;
   }
 
-  async createExampleEmailTemplateIfMissing(values: typeof emailTemplates.$inferInsert) {
-    await this.db
+  async insertSampleEmailTemplateIfAbsent(values: typeof emailTemplates.$inferInsert) {
+    await this.database
       .insert(emailTemplates)
       .values({
         ...values,
@@ -94,10 +105,10 @@ export class EmailTemplateRepository {
       .onConflictDoNothing({ target: emailTemplates.id });
   }
 
-  async deleteEmailTemplate(id: UUIDType) {
+  async softDeleteEmailTemplate(id: UUIDType) {
     const now = new Date().toISOString();
 
-    await this.db
+    await this.database
       .update(emailTemplates)
       .set({
         deletedAt: now,
@@ -108,11 +119,12 @@ export class EmailTemplateRepository {
   }
 
   async updateEmailTemplate(id: UUIDType, values: Partial<typeof emailTemplates.$inferInsert>) {
-    const [template] = await this.db
+    const [template] = await this.database
       .update(emailTemplates)
       .set(values)
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .returning();
+
     return template;
   }
 
@@ -121,7 +133,7 @@ export class EmailTemplateRepository {
     language: SupportedLanguages,
     availableLocales: SupportedLanguages[],
   ) {
-    const [template] = await this.db
+    const [template] = await this.database
       .update(emailTemplates)
       .set({
         name: sql`${emailTemplates.name} - ${language}`,
@@ -132,90 +144,86 @@ export class EmailTemplateRepository {
       })
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .returning();
+
     return template;
   }
 
   async updateEmailTemplateTranslations(id: UUIDType, values: EmailTemplateTranslationUpdate) {
     const { name, subject, content, ...metadata } = values;
 
-    const [template] = await this.db
+    const [template] = await this.database
       .update(emailTemplates)
       .set({
         ...metadata,
-        name: this.patchLocalizedText(emailTemplates.name, name),
-        subject: this.patchLocalizedText(emailTemplates.subject, subject),
+        name: this.mergeEmailTemplateTextTranslations(emailTemplates.name, name),
+        subject: this.mergeEmailTemplateTextTranslations(emailTemplates.subject, subject),
         content: content
           ? mergeJsonbField(emailTemplates.content, buildJsonbFieldWithMultipleEntries(content))
           : undefined,
       })
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .returning();
+
     return template;
   }
 
-  private patchLocalizedText(
+  private mergeEmailTemplateTextTranslations(
     column: typeof emailTemplates.name | typeof emailTemplates.subject,
     translations: EmailTemplateTranslationUpdate["name"],
   ) {
-    if (!translations) return undefined;
+    if (!translations) {
+      return undefined;
+    }
 
     return Object.entries(translations).reduce(
-      (field, [language, value]) => setJsonbField(field, language, value, true, true) ?? field,
+      (field, [language, value]) => {
+        const updatedFields = this.localizationService.updateLocalizableFields(
+          ["text"],
+          { text: field },
+          { text: value },
+          language,
+          true,
+        );
+
+        return (updatedFields.text as SQL | undefined) ?? field;
+      },
       sql`${column}`,
     );
   }
 
-  publishEmailTemplate(id: UUIDType, event: EmailTemplateEvent) {
-    return this.db.transaction(async (transaction) => {
-      await this.lockEmailTemplatePublication(transaction, event);
-
-      const now = new Date().toISOString();
-      const archivedTemplates = await transaction
-        .update(emailTemplates)
-        .set({
-          status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
-          archivedAt: now,
-          updatedAt: now,
-        })
-        .where(
-          and(
-            isNull(emailTemplates.deletedAt),
-            eq(emailTemplates.event, event),
-            eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
-            ne(emailTemplates.id, id),
-          ),
-        )
-        .returning();
-
-      const [template] = await transaction
-        .update(emailTemplates)
-        .set({
-          status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
-          publishedAt: now,
-          archivedAt: null,
-          updatedAt: now,
-        })
-        .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
-        .returning();
-
-      return { template, archivedTemplates };
-    });
-  }
-
-  private async lockEmailTemplatePublication(transaction: DatabasePg, event: EmailTemplateEvent) {
-    await transaction.execute(
-      sql`SELECT pg_advisory_xact_lock(hashtext(current_setting('app.tenant_id', true) || ':' || ${event}))`,
-    );
-  }
-
-  private async getEmailTemplateEventOrThrow(transaction: DatabasePg, id: UUIDType) {
-    const [template] = await transaction
-      .select({ event: emailTemplates.event })
+  async findPublishedEmailTemplates() {
+    return this.database
+      .select()
       .from(emailTemplates)
-      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)));
+      .where(
+        and(
+          isNull(emailTemplates.deletedAt),
+          eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
+        ),
+      );
+  }
 
-    if (!template) throw new NotFoundException("emailTemplates.errors.notFound");
-    return template.event;
+  async publishEmailTemplate(
+    id: UUIDType,
+    publication: PublishedEmailTemplate,
+    transaction: DatabasePg = this.database,
+  ) {
+    const now = new Date().toISOString();
+
+    const [template] = await transaction
+      .update(emailTemplates)
+      .set({
+        status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
+        publishedAt: now,
+        archivedAt: null,
+        updatedAt: now,
+        publication,
+        publicationVersion: sql`${emailTemplates.publicationVersion} + 1`,
+      })
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
+      .returning();
+
+    return { template, archivedTemplates: [] as EmailTemplateRecord[] };
   }
 
   private async getEmailTemplateForUpdateOrThrow(transaction: DatabasePg, id: UUIDType) {
@@ -225,23 +233,32 @@ export class EmailTemplateRepository {
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .for("update");
 
-    if (!template) throw new NotFoundException("emailTemplates.errors.notFound");
+    if (!template) {
+      throw new NotFoundException("emailTemplates.errors.notFound");
+    }
+
     return template;
   }
 
-  private async countEmailTemplateOverrides(transaction: DatabasePg) {
+  private async countCustomEmailTemplates(transaction: DatabasePg, filter?: SQL) {
     const [{ totalItems }] = await transaction
       .select({ totalItems: count() })
       .from(emailTemplates)
-      .where(isNull(emailTemplates.deletedAt));
+      .where(filter);
+
     return totalItems;
   }
 
-  private findEmailTemplateOverridePage(transaction: DatabasePg, offset: number, limit: number) {
+  private findCustomEmailTemplatePage(
+    transaction: DatabasePg,
+    offset: number,
+    limit: number,
+    filter?: SQL,
+  ) {
     return transaction
       .select()
       .from(emailTemplates)
-      .where(isNull(emailTemplates.deletedAt))
+      .where(filter)
       .orderBy(desc(emailTemplates.updatedAt), desc(emailTemplates.id))
       .offset(offset)
       .limit(limit);

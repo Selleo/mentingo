@@ -1,20 +1,16 @@
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 
 import { useEnrollCurrentUserToLearningPath } from "~/api/mutations/useLearningPathMutations";
-import { useLearningPaths } from "~/api/queries/useLearningPaths";
+import { useLearningPathsSuspense } from "~/api/queries/useLearningPaths";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import type { GetLearningPathsResponse } from "~/api/generated-api";
-
 export function useStudentLearningPathsPage() {
-  const loaderLearningPaths = useLoaderData<GetLearningPathsResponse>();
-
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("searchQuery") ?? "";
 
   const language = useLanguageStore((state) => state.language);
 
-  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
+  const { data: learningPaths } = useLearningPathsSuspense({
     language,
     searchQuery,
   });

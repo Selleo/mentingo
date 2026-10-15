@@ -10,6 +10,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
+  automations,
   announcements,
   articleSections,
   articles,
@@ -95,6 +96,18 @@ export class ActivityLogResourceNameService {
     ids: UUIDType[],
   ): Promise<NamedActivityLogResource[]> {
     switch (resourceType) {
+      case ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION:
+        return this.db
+          .select({
+            id: automations.id,
+            name: this.localizationService.getLocalizedSqlField(
+              automations.name,
+              undefined,
+              automations,
+            ),
+          })
+          .from(automations)
+          .where(inArray(automations.id, ids));
       case ACTIVITY_LOG_RESOURCE_TYPES.USER:
         return this.db
           .select({

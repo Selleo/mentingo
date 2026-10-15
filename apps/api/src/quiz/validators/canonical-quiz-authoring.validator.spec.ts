@@ -11,8 +11,18 @@ import { validateCanonicalQuizQuestions } from "./canonical-quiz-authoring.valid
 
 describe("canonical generated assessment validation", () => {
   FormatRegistry.Set("uuid", validate);
-  const fixture: unknown = JSON.parse(readFileSync(resolve(__dirname, "../../../../../docs/contracts/course-authoring/quiz-operation.json"), "utf8"));
-  if (!Value.Check(authoringOperationSchema, fixture) || fixture.type !== "lesson.update" || fixture.payload.lessonType !== "quiz") throw new Error("Invalid fixture");
+  const fixture: unknown = JSON.parse(
+    readFileSync(
+      resolve(__dirname, "../../../../../docs/contracts/course-authoring/quiz-operation.json"),
+      "utf8",
+    ),
+  );
+  if (
+    !Value.Check(authoringOperationSchema, fixture) ||
+    fixture.type !== "lesson.update" ||
+    fixture.payload.lessonType !== "quiz"
+  )
+    throw new Error("Invalid fixture");
   const questions = fixture.payload.questions;
 
   it("accepts all ten supported question families from the producer", () => {
@@ -22,18 +32,31 @@ describe("canonical generated assessment validation", () => {
 
   it("rejects an automatic single choice with no correct answer", () => {
     const question = questions.find((item) => item.questionType === "single_choice")!;
-    expect(validateCanonicalQuizQuestions([{ ...question, options: question.options.map((option) => ({ ...option, isCorrect: false })) }])).toContain("invalid_choice_answers");
+    expect(
+      validateCanonicalQuizQuestions([
+        {
+          ...question,
+          options: question.options.map((option) => ({ ...option, isCorrect: false })),
+        },
+      ]),
+    ).toContain("invalid_choice_answers");
   });
 
   it("rejects blank markers pointing at different answer identities", () => {
     const question = questions.find((item) => item.questionType === "fill_in_the_blanks_text")!;
-    expect(validateCanonicalQuizQuestions([{ ...question, prompt: "Missing marker" }])).toContain("invalid_blank_markers");
+    expect(validateCanonicalQuizQuestions([{ ...question, prompt: "Missing marker" }])).toContain(
+      "invalid_blank_markers",
+    );
   });
 
   it("rejects orphan drag targets and incomplete scales", () => {
     const question = questions.find((item) => item.questionType === "fill_in_the_blanks_dnd")!;
-    expect(validateCanonicalQuizQuestions([{ ...question, dragAndDropOptions: [] }])).toContain("invalid_drag_targets");
+    expect(validateCanonicalQuizQuestions([{ ...question, dragAndDropOptions: [] }])).toContain(
+      "invalid_drag_targets",
+    );
     const scale = questions.find((item) => item.questionType === "scale_1_5")!;
-    expect(validateCanonicalQuizQuestions([{ ...scale, scaleOptions: scale.scaleOptions.slice(1) }])).toContain("invalid_scale");
+    expect(
+      validateCanonicalQuizQuestions([{ ...scale, scaleOptions: scale.scaleOptions.slice(1) }]),
+    ).toContain("invalid_scale");
   });
 });

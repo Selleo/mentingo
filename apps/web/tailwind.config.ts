@@ -8,6 +8,7 @@ const config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "../../packages/shared/src/**/*.{ts,tsx}",
+    "./node_modules/@mentingo/voice/dist/**/*.js",
   ],
   prefix: "",
   theme: {

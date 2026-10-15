@@ -1,16 +1,24 @@
+import { randomUUID } from "node:crypto";
+
 import {
   BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { nanoid } from "nanoid";
+import {
+  AUTOMATION_EVENT_KINDS,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
+import { eq } from "drizzle-orm";
 import { match } from "ts-pattern";
 
-import { hashToken } from "src/auth/utils/hash-auth-token";
+import { CORS_ORIGIN } from "src/auth/consts";
+import { NotificationEvent } from "src/automation-execution/events/notification-event";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { DatabasePg } from "src/common";
-import { UsersImportInviteEmailsEvent } from "src/events/user/users-import-invite-emails.event";
 import { UsersImportEvent } from "src/events/user/users-import.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
@@ -18,12 +26,12 @@ import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membe
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
+import { tenants, users } from "src/storage/schema";
 import { UserImportRepository } from "src/user/repositories/user-import.repository";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
 import {
   USER_CREATION_FLOW_TYPE,
   type CreateUserContext,
-  type CreateUsersCoreBulkCreateTokenRow,
   type CreateUsersCoreBulkCreatedRow,
   type CreateUsersCoreBulkItem,
   type CreateUsersCoreBulkRoleAssignment,
@@ -39,7 +47,7 @@ import {
   type UserImportValidationResult,
 } from "src/user/user.types";
 
-import type { UUIDType } from "src/common";
+import type { NotificationRecipient } from "src/automation-execution/automation-execution.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ImportUserResponse, SkippedUserImport } from "src/user/schemas/createUser.schema";
 import type { CreateUserSettingsResolution } from "src/user/types/create-user-settings-resolution.type";
@@ -53,6 +61,7 @@ export class UserImportService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
     private readonly userImportRepository: UserImportRepository,
+    private readonly notificationAccountActionService: NotificationAccountActionService,
   ) {}
 
   async importUsers(
@@ -321,16 +330,46 @@ export class UserImportService {
     creator: CurrentUserType,
     trx: DatabasePg,
   ) {
+    const [tenant] = await trx
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, creator.tenantId));
+    const [inviter] = await trx
+      .select({ firstName: users.firstName, lastName: users.lastName })
+      .from(users)
+      .where(eq(users.id, creator.userId));
+    const invitingName = inviter ? `${inviter.firstName} ${inviter.lastName}`.trim() : "Admin";
+    const recipients: NotificationRecipient[] = [];
+    for (const { createdUser, newUsersLanguage } of createdUsers) {
+      const accountActionIntentId =
+        await this.notificationAccountActionService.createNotificationAccountActionIntent(
+          {
+            userId: createdUser.id,
+            kind: "create_password",
+            applicationOrigin: (tenant?.host || CORS_ORIGIN).replace(/\/$/, ""),
+            tokenTtlMs: 365 * 86400000,
+            usesCalendarYearExpiry: true,
+            reminderCount: 0,
+          },
+          trx,
+        );
+      recipients.push({
+        itemId: createdUser.id,
+        email: createdUser.email,
+        name: createdUser.firstName,
+        language: newUsersLanguage,
+        eventFields: {
+          userFirstName: createdUser.firstName,
+          userLastName: createdUser.lastName,
+          userEmail: createdUser.email,
+          invitedByUserName: invitingName,
+          invited_by_user_name: invitingName,
+        },
+        accountActionIntentId,
+      });
+    }
     await this.outboxPublisher.publish(
-      new UsersImportInviteEmailsEvent({
-        tenantId: creator.tenantId,
-        creatorId: creator.userId,
-        recipients: createdUsers.map(({ createdUser, token }) => ({
-          email: createdUser.email,
-          userId: createdUser.id,
-          token,
-        })),
-      }),
+      new NotificationEvent(randomUUID(), AUTOMATION_EVENT_KINDS.USER_INVITE, recipients),
       trx,
     );
 
@@ -375,16 +414,6 @@ export class UserImportService {
     );
     await this.settingsService.createSettingsForUsers(createUserSettings.userSettings, trx);
 
-    const createTokenExpiryDate = new Date();
-    createTokenExpiryDate.setFullYear(createTokenExpiryDate.getFullYear() + 1);
-
-    const createTokenRows = this.prepareCreateTokenRows(
-      createdUserImportRows.map(({ createdUser }) => createdUser.id),
-      createTokenExpiryDate,
-    );
-
-    await this.userImportRepository.insertCreateTokens(createTokenRows, trx);
-
     const userDetailsToInsert = await this.prepareUserDetailsToInsert(createdUserImportRows, trx);
     await this.userImportRepository.insertUserDetails(userDetailsToInsert, trx);
 
@@ -398,11 +427,8 @@ export class UserImportService {
       });
     }
 
-    const tokenByUserId = new Map(createTokenRows.map(({ userId, token }) => [userId, token]));
-
     return createdUserImportRows.map(({ importRow, createdUser }) => ({
       createdUser,
-      token: tokenByUserId.get(createdUser.id) as string,
       newUsersLanguage:
         createUserSettings.settingsByEmail.get(importRow.email)?.newUsersLanguage ??
         SUPPORTED_LANGUAGES.EN,
@@ -443,23 +469,6 @@ export class UserImportService {
       ({ groupIds: _groupIds, roleIds: _roleIds, roleSlugs: _roleSlugs, ...userInsertRow }) =>
         userInsertRow,
     );
-  }
-
-  private prepareCreateTokenRows(
-    userIds: UUIDType[],
-    expiryDate: Date,
-  ): CreateUsersCoreBulkCreateTokenRow[] {
-    return userIds.map((userId) => {
-      const token = nanoid(64);
-
-      return {
-        userId,
-        token,
-        tokenHash: hashToken(token),
-        expiryDate,
-        reminderCount: 0,
-      };
-    });
   }
 
   private prepareUserRoleAssignments(

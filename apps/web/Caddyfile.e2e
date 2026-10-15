@@ -1,8 +1,12 @@
 {
     admin :2020
+    auto_https disable_redirects
+    skip_install_trust
 }
 
-:5173 {
+# Invitation and password-reset emails require HTTPS action links.
+https://localhost:5173, https://*.lms.localhost:5173 {
+    tls internal
     handle /api/* {
         reverse_proxy http://localhost:3000
     }

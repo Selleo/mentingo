@@ -1,3 +1,5 @@
+import { buildMcpUploadFollowUp } from "./mcp-upload-guidance";
+
 type UploadResult = Record<string, unknown>;
 
 /** Add a concrete destination to grants using the tenant URL bound to the MCP access token. */
@@ -10,6 +12,7 @@ export function withMcpUploadInstructions<T extends UploadResult>(
 
   if (typeof result.uploadPath === "string" && typeof result.token === "string") {
     const uploadUrl = new URL(result.uploadPath, origin).toString();
+    const followUp = buildMcpUploadFollowUp(input);
     const scheme =
       typeof result.authorizationScheme === "string" ? result.authorizationScheme : "Bearer";
     return {
@@ -24,6 +27,7 @@ export function withMcpUploadInstructions<T extends UploadResult>(
         fields: result.fields,
         ...(result.additionalFileField ? { additionalFileField: result.additionalFileField } : {}),
       },
+      ...(followUp ? { contentInsertion: followUp } : {}),
       acceptedFile: { filename: input.filename, mimeType: input.mimeType, sizeBytes: input.size },
       instructions: [
         "Send the local file bytes to uploadRequest.url exactly; do not replace its host with another API domain.",
@@ -37,9 +41,11 @@ export function withMcpUploadInstructions<T extends UploadResult>(
   if (typeof result.tusEndpoint === "string") {
     const uploadUrl = new URL(result.tusEndpoint, origin).toString();
     const tenantHosted = new URL(uploadUrl).origin === origin;
+    const followUp = buildMcpUploadFollowUp({ ...input, transport: "tus" });
     return {
       ...result,
       uploadUrl,
+      ...(followUp ? { contentInsertion: followUp } : {}),
       ...(typeof result.completePath === "string"
         ? { completeUrl: new URL(result.completePath, origin).toString() }
         : {}),

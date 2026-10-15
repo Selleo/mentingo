@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
@@ -15,7 +16,11 @@ describe("Phishing capability gate", () => {
       isError: false,
     } as ReturnType<typeof usePhishingConfiguration>);
     const content = vi.fn(() => <div>Campaign controls</div>);
-    renderWith().render(<PhishingGate>{<Child onMount={content} />}</PhishingGate>);
+    renderWith().render(
+      <MemoryRouter>
+        <PhishingGate>{<Child onMount={content} />}</PhishingGate>
+      </MemoryRouter>,
+    );
     expect(content).not.toHaveBeenCalled();
     expect(screen.queryByText("Campaign controls")).not.toBeInTheDocument();
   });
@@ -26,9 +31,11 @@ describe("Phishing capability gate", () => {
       isError: false,
     } as ReturnType<typeof usePhishingConfiguration>);
     renderWith().render(
-      <PhishingGate>
-        <div>Campaign controls</div>
-      </PhishingGate>,
+      <MemoryRouter>
+        <PhishingGate>
+          <div>Campaign controls</div>
+        </PhishingGate>
+      </MemoryRouter>,
     );
     expect(screen.getByText("Campaign controls")).toBeInTheDocument();
   });
@@ -39,11 +46,13 @@ describe("Phishing capability gate", () => {
       refetch: vi.fn(),
     } as unknown as ReturnType<typeof usePhishingConfiguration>);
     renderWith().render(
-      <PhishingGate>
-        <div>Campaign controls</div>
-      </PhishingGate>,
+      <MemoryRouter>
+        <PhishingGate>
+          <div>Campaign controls</div>
+        </PhishingGate>
+      </MemoryRouter>,
     );
-    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
     expect(screen.queryByText("Campaign controls")).not.toBeInTheDocument();
   });
 });

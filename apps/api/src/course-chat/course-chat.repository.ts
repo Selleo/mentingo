@@ -178,6 +178,7 @@ export class CourseChatRepository {
         id: users.id,
         email: users.email,
         firstName: users.firstName,
+        lastName: users.lastName,
         tenantId: users.tenantId,
       })
       .from(studentCourses)

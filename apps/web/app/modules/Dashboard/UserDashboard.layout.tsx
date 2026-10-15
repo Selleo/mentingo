@@ -1,57 +1,66 @@
-import { redirect, useLocation, useNavigate } from "@remix-run/react";
-import { useEffect } from "react";
+import { useLocation, useNavigate } from "@remix-run/react";
+import { useEffect, useRef } from "react";
 
-import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
-import { queryClient } from "~/api/queryClient";
+import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { MFAGuard } from "~/Guards/MFAGuard";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
-import { LOGIN_REDIRECT_URL } from "../Auth/constants";
+import { resolvePostAuthRedirectPath } from "../Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
-import { useSyncUserAfterLogin } from "./hooks/useSyncUserAfterLogin";
-
-export const clientLoader = async ({ request }: { request: Request }) => {
-  try {
-    const user = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-    if (!user) {
-      saveEntryToNavigationHistory(request);
-
-      throw redirect("/auth/login");
-    }
-  } catch (error) {
-    throw redirect("/auth/login");
-  }
-
-  return null;
-};
-
 export default function UserDashboardLayout() {
+  return (
+    <RequireAuthenticatedUser>
+      <UserDashboardContent />
+    </RequireAuthenticatedUser>
+  );
+}
+
+function UserDashboardContent() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { data: user } = useCurrentUser();
+  const { data: user } = useCurrentUserSuspense();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
+  const consumeLastUnauthorizedEntry = useNavigationHistoryStore(
+    (state) => state.consumeLastUnauthorizedEntry,
+  );
 
-  useSyncUserAfterLogin(user);
-
-  const shouldRedirect = Boolean(lastEntry && lastEntry.pathname !== location.pathname);
+  const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
+  const canReturnToDestination = isAuthenticated && !user?.requiresPasswordChange;
+  const currentPath = `${location.pathname}${location.search}`;
+  const returnFromPath = useRef<string | null>(null);
+  const shouldRedirect = Boolean(
+    canReturnToDestination &&
+      (returnFromPath.current === currentPath ||
+        (lastEntry &&
+          resolvePostAuthRedirectPath({ pathname: lastEntry.pathname }) !== currentPath)),
+  );
 
   useEffect(() => {
-    if (!shouldRedirect || !lastEntry) return;
+    if (returnFromPath.current !== currentPath) returnFromPath.current = null;
+    if (!canReturnToDestination || !lastEntry) return;
 
-    navigate(lastEntry.pathname || LOGIN_REDIRECT_URL, { replace: true });
-  }, [lastEntry, navigate, shouldRedirect]);
+    // Consume before navigating so a rejected destination cannot be retried
+    // when its route guard sends the user back to this layout.
+    const entry = consumeLastUnauthorizedEntry();
+    if (!entry) return;
+
+    const destination = resolvePostAuthRedirectPath({ pathname: entry.pathname });
+    if (destination !== currentPath) {
+      // Keep the default outlet hidden until the return navigation commits.
+      // Otherwise clearing history can mount the index redirect in between.
+      returnFromPath.current = currentPath;
+      navigate(destination, { replace: true });
+    }
+  }, [canReturnToDestination, consumeLastUnauthorizedEntry, currentPath, lastEntry, navigate]);
 
   if (shouldRedirect) {
     return null;
   }
-
-  const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
 
   return (
     <MFAGuard mode="app">

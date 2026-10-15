@@ -14,6 +14,27 @@ import { EmailTemplateValidationService } from "./email-template-validation.serv
 describe("EmailTemplateValidationService", () => {
   const service = new EmailTemplateValidationService();
 
+  it.each([undefined, Number.NaN, new Date(), { nested: undefined }])(
+    "replaces supplied collection samples with generated preview values: %j",
+    (value) => {
+      const placeholders = [
+        {
+          name: "items",
+          label: "Items",
+          type: "collection" as const,
+          required: false,
+          sampleValue: [value] as never,
+        },
+      ];
+      expect(() => service.assertValidEmailTemplateDraft(placeholders, {}, {})).not.toThrow();
+      const preview = service.buildEmailPreviewVariables(placeholders);
+      expect(Array.isArray(preview.items)).toBe(true);
+      expect(preview.items).toEqual(
+        service.buildEmailPreviewVariables([{ ...placeholders[0]!, sampleValue: [] }]).items,
+      );
+    },
+  );
+
   it.each([
     { type: "text", content: [] },
     { type: "heading", content: [{ type: "paragraph", content: [{ type: "text", text: "   " }] }] },
@@ -22,7 +43,7 @@ describe("EmailTemplateValidationService", () => {
     { type: "image", attrs: { src: "", alt: "" } },
   ])("rejects empty blocks even alongside valid content: %j", (block) => {
     expect(() =>
-      service.validateDraft(
+      service.assertValidEmailTemplateDraft(
         EMAIL_TEMPLATE_EVENTS.WELCOME,
         { en: "Hello" },
         {
@@ -70,7 +91,7 @@ describe("EmailTemplateValidationService", () => {
     },
   ])("rejects malformed document structure before traversing it: %j", (document) => {
     expect(() =>
-      service.validateDraft(
+      service.assertValidEmailTemplateDraft(
         EMAIL_TEMPLATE_EVENTS.WELCOME,
         { en: "Hello" },
         { en: document as unknown as EmailTemplateDocument },
@@ -80,10 +101,10 @@ describe("EmailTemplateValidationService", () => {
 
   it("also validates structure for runtime delivery", () => {
     expect(() =>
-      service.validateRuntimeVariables(
+      service.assertEmailTemplateVariableValues(
         EMAIL_TEMPLATE_EVENTS.WELCOME,
         null as unknown as EmailTemplateDocument,
-        service.getSampleVariables(EMAIL_TEMPLATE_EVENTS.WELCOME),
+        service.buildEmailPreviewVariables(EMAIL_TEMPLATE_EVENTS.WELCOME),
       ),
     ).toThrow("emailTemplates.errors.invalidContent");
   });
@@ -111,7 +132,11 @@ describe("EmailTemplateValidationService", () => {
       ],
     };
     expect(() =>
-      service.validateDraft(EMAIL_TEMPLATE_EVENTS.WELCOME, { en: "Hello" }, { en: document }),
+      service.assertValidEmailTemplateDraft(
+        EMAIL_TEMPLATE_EVENTS.WELCOME,
+        { en: "Hello" },
+        { en: document },
+      ),
     ).toThrow("emailTemplates.errors.httpsRequired");
   });
 
@@ -124,7 +149,11 @@ describe("EmailTemplateValidationService", () => {
         content: [{ type: EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE, attrs: { src, alt: "image" } }],
       };
       expect(() =>
-        service.validateDraft(EMAIL_TEMPLATE_EVENTS.WELCOME, { en: "Hi" }, { en: document }),
+        service.assertValidEmailTemplateDraft(
+          EMAIL_TEMPLATE_EVENTS.WELCOME,
+          { en: "Hi" },
+          { en: document },
+        ),
       ).toThrow("emailTemplates.errors.privateImageHost");
     },
   );
@@ -173,7 +202,7 @@ describe("EmailTemplateValidationService", () => {
       },
     };
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         definition.event,
         definition.name,
         definition.subjects,
@@ -199,7 +228,7 @@ describe("EmailTemplateValidationService", () => {
       ],
     };
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         definition.event,
         definition.name,
         { en: "Reset" },
@@ -211,7 +240,7 @@ describe("EmailTemplateValidationService", () => {
 
   it("warns about missing header and footer", () => {
     expect(
-      service.getTranslationWarnings(
+      service.collectEmailTemplateTranslationWarnings(
         { en: "Hello" },
         {
           en: {
@@ -237,7 +266,7 @@ describe("EmailTemplateValidationService", () => {
       subject: definition.subjects.en,
       document: definition.defaultDocuments.en,
       variables: {
-        ...service.getSampleVariables(definition.event),
+        ...service.buildEmailPreviewVariables(definition.event),
         courses: [
           {
             courseTitle: "First course",
@@ -290,7 +319,7 @@ describe("EmailTemplateValidationService", () => {
     const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.user_assigned_to_course;
 
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         definition.event,
         definition.name,
         definition.subjects,
@@ -307,7 +336,7 @@ describe("EmailTemplateValidationService", () => {
 
     for (const definition of EMAIL_TEMPLATE_DEFINITIONS) {
       expect(() =>
-        service.validatePublished(
+        service.assertEmailTemplatePublishable(
           definition.event,
           definition.name,
           definition.subjects,
@@ -323,7 +352,7 @@ describe("EmailTemplateValidationService", () => {
           event: definition.event,
           document: definition.defaultDocuments[language],
           subject: definition.subjects[language],
-          variables: service.getSampleVariables(definition.event),
+          variables: service.buildEmailPreviewVariables(definition.event),
           branding: { companyName: "Acme", primaryColor: "#4796FD" },
         });
 
@@ -340,10 +369,18 @@ describe("EmailTemplateValidationService", () => {
     const malformedSubject = { ...definition.subjects, en: "Hello {{ invalid-value }}" };
 
     expect(() =>
-      service.validateDraft(definition.event, unknownSubject, definition.defaultDocuments),
+      service.assertValidEmailTemplateDraft(
+        definition.event,
+        unknownSubject,
+        definition.defaultDocuments,
+      ),
     ).toThrow("emailTemplates.errors.unsupportedVariables");
     expect(() =>
-      service.validateDraft(definition.event, malformedSubject, definition.defaultDocuments),
+      service.assertValidEmailTemplateDraft(
+        definition.event,
+        malformedSubject,
+        definition.defaultDocuments,
+      ),
     ).toThrow("emailTemplates.errors.malformedVariables");
   });
 
@@ -360,7 +397,11 @@ describe("EmailTemplateValidationService", () => {
     };
 
     expect(() =>
-      service.validateDraft(EMAIL_TEMPLATE_EVENTS.WELCOME, { en: "Welcome" }, { en: document }),
+      service.assertValidEmailTemplateDraft(
+        EMAIL_TEMPLATE_EVENTS.WELCOME,
+        { en: "Welcome" },
+        { en: document },
+      ),
     ).toThrow("emailTemplates.errors.privateImageHost");
   });
 
@@ -376,7 +417,7 @@ describe("EmailTemplateValidationService", () => {
     };
 
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         definition.event,
         definition.name,
         definition.subjects,
@@ -394,7 +435,7 @@ describe("EmailTemplateValidationService", () => {
     };
 
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         EMAIL_TEMPLATE_EVENTS.WELCOME,
         { en: "Welcome" },
         { en: "Welcome" },
@@ -410,7 +451,7 @@ describe("EmailTemplateValidationService", () => {
       event: definition.event,
       document: definition.defaultDocuments.en,
       subject: definition.subjects.en,
-      variables: service.getSampleVariables(definition.event),
+      variables: service.buildEmailPreviewVariables(definition.event),
       branding: { companyName: "Acme", primaryColor: "#4796FD" },
     });
 

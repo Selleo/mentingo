@@ -18,11 +18,7 @@ type Options = {
 };
 
 /** React Query mutation for source upload, evidence selection, and session refresh. */
-export const useUploadCourseAuthoringSource = ({
-  courseId,
-  sessionId,
-  onUploaded,
-}: Options) => {
+export const useUploadCourseAuthoringSource = ({ courseId, sessionId, onUploaded }: Options) => {
   const { t } = useTranslation();
   const { toast } = useToast();
 
