@@ -4029,7 +4029,14 @@
           "noFeedbackDescription": "Cette évaluation n'a aucun critère de notation et aucune erreur de blocage n'a été détectée lors de votre tentative.",
           "loadingTitle": "Vérification de votre tentative",
           "loadingDescription": "Réviser la conversation par rapport aux critères de la leçon. Cela peut prendre un moment.",
-          "openDetails": "Ouvrir les détails de l'évaluation"
+          "openDetails": "Ouvrir les détails de l'évaluation",
+          "kicker": "Évaluation par l'AI Mentor",
+          "title": "Résumé de la conversation",
+          "scoreTotal": "/ {{maxScore}} pts",
+          "summary": "{{percentage}} % · seuil de réussite {{requiredScore}}/{{maxScore}} pts",
+          "percentage": "{{percentage}} %",
+          "tipTitle": "Suggestion de l'AI Mentor",
+          "tipNote": "D'après ce que vous avez dit dans cette conversation"
         },
         "voiceOverlay": {
           "headerEyebrow": "Interface utilisateur vocale",

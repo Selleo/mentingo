@@ -4291,7 +4291,14 @@
           "noFeedbackDescription": "Diese Bewertung enthält keine bewerteten Kriterien und in Ihrem Versuch wurden keine kritischen Fehler erkannt.",
           "loadingTitle": "Ihr Versuch wird geprüft",
           "loadingDescription": "Das Gespräch wird mit den Kriterien der Lektion verglichen. Dies kann einen Moment dauern.",
-          "openDetails": "Bewertungsdetails öffnen"
+          "openDetails": "Bewertungsdetails öffnen",
+          "kicker": "Bewertung durch den AI Mentor",
+          "title": "Gesprächszusammenfassung",
+          "scoreTotal": "/ {{maxScore}} Pkt.",
+          "summary": "{{percentage}} % · Bestehensgrenze {{requiredScore}}/{{maxScore}} Pkt.",
+          "percentage": "{{percentage}} %",
+          "tipTitle": "Vorschlag vom AI Mentor",
+          "tipNote": "Basierend auf deinen Aussagen in diesem Gespräch"
         },
         "voiceOverlay": {
           "headerEyebrow": "Sprach-Benutzeroberfläche",

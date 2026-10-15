@@ -4298,7 +4298,14 @@
           "noFeedbackDescription": "Toto hodnocení neobsahuje bodovaná kritéria a ve vašem pokusu nebyly zjištěny žádné kritické chyby.",
           "loadingTitle": "Kontrolujeme váš pokus",
           "loadingDescription": "Porovnáváme konverzaci s kritérii lekce. Může to chvíli trvat.",
-          "openDetails": "Otevřít podrobnosti hodnocení"
+          "openDetails": "Otevřít podrobnosti hodnocení",
+          "kicker": "Hodnocení od AI Mentora",
+          "title": "Shrnutí rozhovoru",
+          "scoreTotal": "/ {{maxScore}} b.",
+          "summary": "{{percentage}} % · hranice úspěchu {{requiredScore}}/{{maxScore}} b.",
+          "percentage": "{{percentage}} %",
+          "tipTitle": "Doporučení od AI Mentora",
+          "tipNote": "Na základě toho, co jste v tomto rozhovoru řekli"
         },
         "voiceOverlay": {
           "headerEyebrow": "Hlasové uživatelské rozhraní",

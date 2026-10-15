@@ -4537,7 +4537,14 @@
           "noFeedbackDescription": "Ta ocena nie zawiera kryteriów punktowych, a w Twojej próbie nie wykryto błędów krytycznych.",
           "loadingTitle": "Sprawdzamy Twoją próbę",
           "loadingDescription": "Porównujemy rozmowę z kryteriami lekcji. Może to potrwać chwilę.",
-          "openDetails": "Otwórz szczegóły oceny"
+          "openDetails": "Otwórz szczegóły oceny",
+          "kicker": "Ocena od AI Mentora",
+          "title": "Podsumowanie rozmowy",
+          "scoreTotal": "/ {{maxScore}} pkt",
+          "summary": "{{percentage}}% · próg zaliczenia {{requiredScore}}/{{maxScore}} pkt",
+          "percentage": "{{percentage}}%",
+          "tipTitle": "Sugestia od AI Mentora",
+          "tipNote": "Na podstawie Twoich wypowiedzi w tej rozmowie"
         },
         "voiceOverlay": {
           "headerEyebrow": "Interfejs głosowy",
