@@ -5228,6 +5228,7 @@
     }
   },
   "learningPathsView": {
+    "pathDetails": "Podrobnosti vzdělávací cesty",
     "title": "Rozvojové cesty",
     "description": "Procházejte přiřazené rozvojové cesty a pokračujte v uspořádaných sekvencích kurzů.",
     "searchPlaceholder": "Hledat rozvojové cesty",

@@ -14,6 +14,7 @@ import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/Lear
 import { LearningPathCardActions } from "./LearningPathCardActions";
 import { LearningPathCertificate } from "./LearningPathCertificate";
 import { LearningPathCoursesSection } from "./LearningPathCoursesSection";
+import { LearningPathDetails } from "./LearningPathDetails";
 import { LearningPathEditableText } from "./LearningPathEditableText";
 import { LearningPathStatusBadge } from "./LearningPathStatusBadge";
 
@@ -123,14 +124,10 @@ export function InlineLearningPathCard({
   useEffect(() => {
     setOptimisticText({
       language: selectedLanguage,
-      title: optimisticDisplayLearningPath.title,
-      description: optimisticDisplayLearningPath.description,
+      title: displayLearningPath.title,
+      description: displayLearningPath.description,
     });
-  }, [
-    optimisticDisplayLearningPath.description,
-    optimisticDisplayLearningPath.title,
-    selectedLanguage,
-  ]);
+  }, [displayLearningPath.description, displayLearningPath.title, selectedLanguage]);
 
   useEffect(() => {
     if (pendingThumbnailUrlRef.current) {
@@ -225,12 +222,11 @@ export function InlineLearningPathCard({
                 onSave={(title) => handleTextUpdate({ title })}
               />
             </div>
-            <LearningPathEditableText
-              value={optimisticDisplayLearningPath.description}
-              fallback={t("adminLearningPathsView.table.emptyDescription")}
+            <LearningPathDetails
+              key={selectedLanguage}
+              title={optimisticDisplayLearningPath.title}
+              description={optimisticDisplayLearningPath.description}
               canEdit={canEdit}
-              className="mt-1 line-clamp-2 text-sm leading-6 text-neutral-600"
-              inputClassName="!mt-1 text-sm leading-6"
               onSave={(description) => handleTextUpdate({ description })}
             />
             <div className="mt-3 flex flex-wrap items-center gap-2">
