@@ -3609,6 +3609,7 @@
           "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
           "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
           "voiceConfigCartesiaTooltip": "Balso garsas naudoja Cartesia. Pasirinkite Male arba Female, kad būtų naudojamas sukonfigūruotas balsų susiejimas, arba pasirinkite Custom ir įveskite Cartesia balso ID.",
+          "voiceConfigElevenLabsTooltip": "Balso garsas naudoja ElevenLabs. Pasirinkite Male arba Female, kad būtų naudojamas sukonfigūruotas balsų susiejimas, arba pasirinkite Custom ir įveskite ElevenLabs balso ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Balso garsas naudoja su OpenAI suderinamą teksto į kalbą endpointą. Male ir Female naudoja OpenAI balso presetus. Pasirinkite Custom, jei norite įvesti kitą šio endpointo palaikomą balso reikšmę.",
           "aiMentorPersonaTooltip": "Tai apibrėžia pamokos asmenybę. Galite pasirinkti AI mentoriaus vardą ir pseudoportretą. Asmuo atpažins save šiuo vardu, o pasirinktas avataras bus rodomas pamokų metu.",
           "suggestedExamples": "Siūlomi pavyzdžiai",

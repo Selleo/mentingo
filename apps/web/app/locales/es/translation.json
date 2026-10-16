@@ -3552,6 +3552,7 @@
           "aiRoleplayTypeTooltip": "Simula un personaje y una situación realistas, sin romper el personaje.\nEjemplo: \"Esta es la segunda vez que tu servicio falla. ¿Qué vas a hacer al respecto?\"",
           "passThresholdTooltip": "Establezca el porcentaje mínimo (1-100%) requerido para aprobar. Déjelo vacío si no hay umbral.",
           "voiceConfigCartesiaTooltip": "El audio de voz usa Cartesia. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de Cartesia.",
+          "voiceConfigElevenLabsTooltip": "El audio de voz usa ElevenLabs. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de ElevenLabs.",
           "voiceConfigOpenAiCompatibleTooltip": "El audio de voz usa un endpoint de texto a voz compatible con OpenAI. Male y Female usan presets de voces de OpenAI. Elija Custom para introducir otro valor de voz compatible con ese endpoint.",
           "aiMentorPersonaTooltip": "Esto define la personalidad de la lección. Puede seleccionar un nombre y un avatar para el mentor de IA. La persona se identificará con este nombre y el avatar seleccionado se mostrará durante las lecciones.",
           "suggestedExamples": "Ejemplos sugeridos",

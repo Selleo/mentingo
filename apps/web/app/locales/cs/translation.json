@@ -3614,6 +3614,7 @@
           "aiRoleplayTypeTooltip": "Simuluje realistickou postavu a situaci – bez porušení charakteru.\nPříklad: \"Toto je podruhé, co vaše služba selhala. Co s tím hodláte dělat?\"",
           "passThresholdTooltip": "Nastavte minimální procento (1–100 %), které je potřeba k úspěšnému zvládnutí. Nechte prázdné, pokud není nastaven žádný práh.",
           "voiceConfigCartesiaTooltip": "Hlasový výstup používá Cartesia. Vyberte Male nebo Female pro použití nakonfigurovaného mapování hlasů, nebo vyberte Custom a zadejte Cartesia voice ID.",
+          "voiceConfigElevenLabsTooltip": "Hlasový výstup používá ElevenLabs. Vyberte Male nebo Female pro použití nakonfigurovaného mapování hlasů, nebo vyberte Custom a zadejte ElevenLabs voice ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Hlasový výstup používá OpenAI kompatibilní endpoint pro převod textu na řeč. Male a Female používají presety hlasů OpenAI. Vyberte Custom, pokud chcete zadat jinou hodnotu hlasu podporovanou tímto endpointem.",
           "aiMentorPersonaTooltip": "To definuje osobnost lekce. Můžete si vybrat jméno a avatar pro AI Mentora. Osoba se identifikuje tímto jménem a vybraný avatar se bude zobrazovat během lekcí.",
           "suggestedExamples": "Doporučené příklady",

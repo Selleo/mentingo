@@ -64796,6 +64796,10 @@
                     "type": "string"
                   },
                   {
+                    "const": "elevenlabs",
+                    "type": "string"
+                  },
+                  {
                     "const": "openaiCompatible",
                     "type": "string"
                   }
