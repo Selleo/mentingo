@@ -1,0 +1,31 @@
+name: Record published release film
+
+# Release events run on a tag. Dispatch the existing recorder on the default branch instead: the release-film
+# and github-pages environments allow main/staging branches, not tags. The film still records the exact tag
+# from this event, using the same queue, review and publication as a recording started by hand.
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  record:
+    name: Queue the release film
+    if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: write # workflow_dispatch is allowed to start another run with GITHUB_TOKEN
+    steps:
+      - name: Start recording the published tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          gh workflow run release-film.yml --repo "${GITHUB_REPOSITORY}" --ref "${DEFAULT_BRANCH}" \
+            -f "tag=${RELEASE_TAG}" -f learn=sync -F publish=true -F replace=false
+          printf 'Queued the film for **%s**. Follow recording and publication in [Release film](%s/%s/actions/workflows/release-film.yml).\n' \
+            "${RELEASE_TAG}" "${GITHUB_SERVER_URL}" "${GITHUB_REPOSITORY}" >> "${GITHUB_STEP_SUMMARY}"

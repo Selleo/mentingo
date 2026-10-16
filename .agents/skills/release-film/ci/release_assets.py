@@ -20,7 +20,7 @@ site alone (--film: its staged files, no release touched; a tag the site already
 film the live site already shows (--base-url: read back from its films.json), with an index of them, newest first.
 Without --base-url, earlier and publish look the site's address up (GitHub Pages: a 404 means no site, any other
 failure stops). recording checks that a run whose film is to be published is a recording of release-film.yml in
-this repository, started by hand: an artifact of that name from any other run is never published.
+this repository, started through workflow_dispatch: an artifact of that name from any other run is never published.
 """
 import argparse
 import datetime as dt
@@ -136,16 +136,18 @@ def notes_section(tag, code, links):
               ('captions_vtt', 'narration subtitles (VTT)'))
     names = asset_names(tag, code)
     parts = [f'[{label}]({links[names[key]]})' for key, label in labels if names[key] in links]
-    return f'{MARK_START}\n## 🎬 Release film\n\nA narrated demo of this release: {" · ".join(parts)}\n{MARK_END}'
+    preview = ''
+    if names['poster'] in links and names['film'] in links:
+        preview = f'[![Watch the release film]({links[names["poster"]]})]({links[names["film"]]})\n\n'
+    return f'{MARK_START}\n## 🎬 Release film\n\n{preview}A narrated demo of this release: {" · ".join(parts)}\n{MARK_END}'
 
 
 def with_section(body, section):
-    """The notes with the film's section replaced, or added once at the end."""
+    """Put one film section above the notes, moving any earlier section to the top."""
     body = body or ''
     pattern = re.compile(re.escape(MARK_START) + r'.*?' + re.escape(MARK_END), re.S)
-    if pattern.search(body):
-        return pattern.sub(lambda _: section, body, count=1)
-    return body.rstrip() + '\n\n' + section + '\n'
+    notes = pattern.sub('', body).strip()
+    return section + ('\n\n' + notes if notes else '') + '\n'
 
 
 def gh(*args, input_text=None):
@@ -190,14 +192,14 @@ def site_address(repo):
 
 
 def recording(run_id, repo=None):
-    """Stops unless ``run_id`` is a recording of this repository's release-film.yml started by hand: any other run
+    """Stops unless ``run_id`` is a workflow_dispatch recording of this repository's release-film.yml: any other run
     (another workflow, a pull request from a fork) may upload an artifact of the same name."""
     repo = repo or os.environ['GITHUB_REPOSITORY']
     check(re.fullmatch(r'[0-9]+', str(run_id or '')), f'unexpected run ID {run_id!r}')
     run = json.loads(gh('api', f'repos/{repo}/actions/runs/{run_id}'))
     check(run.get('path') == RECORDING and run.get('event') == 'workflow_dispatch'
           and (run.get('head_repository') or {}).get('id') == (run.get('repository') or {}).get('id'),
-          f'run {run_id} is not a recording of {RECORDING} started by hand in {repo}: nothing was published')
+          f'run {run_id} is not a recording of {RECORDING} started through workflow_dispatch in {repo}: nothing was published')
     return {'run': int(run_id), 'recording': RECORDING}
 
 

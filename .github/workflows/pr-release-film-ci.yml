@@ -11,6 +11,7 @@ on:
     paths:
       - .agents/skills/release-film/**
       - .github/workflows/release-film.yml
+      - .github/workflows/release-film-on-release.yml
       - .github/workflows/release-film-publish.yml
       - .github/workflows/pr-release-film-ci.yml
 
