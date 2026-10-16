@@ -5414,6 +5414,7 @@
     }
   },
   "learningPathsView": {
+    "pathDetails": "Mokymosi kelio informacija",
     "title": "Tobulėjimo keliai",
     "description": "Naršykite priskirtus tobulėjimo kelius ir tęskite sutvarkytas kursų sekas.",
     "searchPlaceholder": "Ieškoti tobulėjimo kelių",

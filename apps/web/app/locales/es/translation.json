@@ -5161,6 +5161,7 @@
     "adminLearningPathEditor": "Editor de ruta de desarrollo"
   },
   "learningPathsView": {
+    "pathDetails": "Detalles de la ruta de aprendizaje",
     "title": "Rutas de desarrollo",
     "description": "Explore las rutas de desarrollo asignadas y continúe con sus secuencias de cursos ordenadas.",
     "searchPlaceholder": "Buscar rutas de desarrollo",

@@ -15,7 +15,6 @@ import {
   and,
   count,
   countDistinct,
-  desc,
   eq,
   exists,
   getTableColumns,
@@ -276,7 +275,7 @@ export class LearningPathRepository {
         ),
       )
       .where(whereCondition)
-      .orderBy(desc(learningPaths.createdAt))
+      .orderBy(asc(learningPaths.createdAt), asc(learningPaths.id))
       .limit(perPage)
       .offset((page - 1) * perPage);
 

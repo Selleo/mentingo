@@ -1436,6 +1436,7 @@
     }
   },
   "learningPathsView": {
+    "pathDetails": "Szczegóły ścieżki",
     "title": "Ścieżki Rozwoju",
     "description": "Przeglądaj przypisane ścieżki rozwoju i kontynuuj uporządkowane sekwencje kursów.",
     "searchPlaceholder": "Szukaj ścieżek rozwoju",

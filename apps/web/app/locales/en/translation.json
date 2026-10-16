@@ -5224,6 +5224,7 @@
     "adminLearningPathEditor": "Development Path Editor"
   },
   "learningPathsView": {
+    "pathDetails": "Learning path details",
     "title": "Development Paths",
     "description": "Browse assigned development paths and continue through their ordered course sequences.",
     "searchPlaceholder": "Search development paths",

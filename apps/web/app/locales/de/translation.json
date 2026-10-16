@@ -5409,6 +5409,7 @@
     }
   },
   "learningPathsView": {
+    "pathDetails": "Details zum Lernpfad",
     "title": "Entwicklungspfade",
     "description": "Durchsuchen Sie zugewiesene Entwicklungspfade und setzen Sie geordnete Kurssequenzen fort.",
     "searchPlaceholder": "Entwicklungspfade suchen",

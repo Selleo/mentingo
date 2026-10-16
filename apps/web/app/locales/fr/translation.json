@@ -4946,6 +4946,7 @@
     "adminLearningPathEditor": "Éditeur de parcours de développement"
   },
   "learningPathsView": {
+    "pathDetails": "Détails du parcours de formation",
     "title": "Parcours de développement",
     "description": "Consultez les parcours de développement qui vous sont attribués et reprenez votre progression.",
     "searchPlaceholder": "Rechercher des parcours de développement",
