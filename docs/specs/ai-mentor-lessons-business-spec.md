@@ -71,7 +71,8 @@ Mathematical speech preserves exact values while avoiding awkward fractional nam
 Voice delivery follows the speech provider configured on the connected Luma API key.
 Cartesia keeps its existing emotion and pause guidance. ElevenLabs receives a separate
 voice prompt that invites short, natural delivery cues for emotion, tone, pauses and
-human reactions. The speech service translates these into ElevenLabs bracketed audio
+human reactions. Its instructions require one appropriate delivery cue at the start
+of each reply, with additional cues only where delivery changes. The speech service translates these into ElevenLabs bracketed audio
 tags while learners see only the dialogue. Pronunciation overrides and spelling keep
 the same readable display contract. Pauses express relative pacing rather than exact
 durations. Provider selection and prompt rendering have deterministic unit coverage;
