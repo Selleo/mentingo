@@ -7,7 +7,7 @@ import {
 } from "./voiceMentorTurnState";
 
 import type { VoiceMentorTurnState } from "./voiceMentorTurnState";
-import type { RealtimePCMPlayer } from "../audio-player";
+import type { RealtimePCMPlayer } from "@mentingo/voice/core";
 import type {
   AudioOutputLifecycleEventPayload,
   AudioOutputAlignmentEventPayload,
@@ -108,6 +108,10 @@ export function createVoiceMentorSocketHandlers({
         return;
       }
 
+      if (data.sampleRate != null && (!Number.isFinite(data.sampleRate) || data.sampleRate <= 0)) {
+        return;
+      }
+
       const nextState = onVoiceMentorAudioChunk(turnStateRef.current, {
         turnId: data.turnId,
         seq: data.seq,
@@ -127,7 +131,7 @@ export function createVoiceMentorSocketHandlers({
         return;
       }
 
-      await audioPlayerRef.current?.enqueue(bytes, data.turnId);
+      await audioPlayerRef.current?.enqueue(bytes, data.turnId, data.sampleRate ?? undefined);
       restartInactivityTimer();
     },
     [VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT]: (payload) => {
