@@ -282,7 +282,11 @@ function tokenRequest(body: Record<string, unknown>): Request {
   } as unknown as Request;
 }
 
-async function approvedCode(service: McpOAuthService, scope = "search:read"): Promise<string> {
+async function approvedCode(
+  service: McpOAuthService,
+  scope = "search:read",
+  expectedScope = scope,
+): Promise<string> {
   const pageRes = buildRes();
   await service.authorizationPage(authorizationRequest(scope), pageRes);
   const nonce = new URL(responseRedirect(pageRes), "https://tenant.example.com").searchParams.get(
@@ -290,7 +294,7 @@ async function approvedCode(service: McpOAuthService, scope = "search:read"): Pr
   );
   expect(nonce).toBeTruthy();
   const consent = await service.consentDetails(authorizationRequest(scope), nonce!);
-  expect(consent.scopes).toEqual(scope.split(" "));
+  expect(consent.scopes).toEqual(expectedScope.split(" "));
   const approvalRes = buildRes();
   await service.authorize(
     {
@@ -355,14 +359,16 @@ describe("McpOAuthService explicit scopes", () => {
   });
 
   it.each([
-    "account:access",
-    "student:read",
-    "search:read",
-    "courses:read articles:read",
-    "courses:read courses:write",
+    ["account:access", "account:access"],
+    ["student:read", "student:read"],
+    ["search:read", "search:read"],
+    ["courses:read articles:read", "courses:read articles:read"],
+    ["courses:read courses:write", "courses:read courses:write"],
+    [MCP_REQUESTABLE_SCOPES.join(" "), "account:access"],
+    [[...MCP_REQUESTABLE_SCOPES].reverse().join(" "), "account:access"],
   ])(
-    "preserves %s through consent, PKCE exchange, and refresh without scope escalation",
-    async (requestedScope) => {
+    "resolves %s to %s through consent, PKCE exchange, and refresh without scope escalation",
+    async (requestedScope, expectedScope) => {
       const redis = buildRedis();
       await storeClient(redis, "scoped-client");
       const tokenStore = jest.fn();
@@ -373,8 +379,7 @@ describe("McpOAuthService explicit scopes", () => {
         "actor@example.com",
         tokenStore,
       );
-      const expectedScope = requestedScope;
-      const code = await approvedCode(service, requestedScope);
+      const code = await approvedCode(service, requestedScope, expectedScope);
       const exchangeRes = buildRes();
       await service.token(
         tokenRequest({
@@ -439,6 +444,9 @@ describe("McpOAuthService explicit scopes", () => {
   it.each([
     "account:access courses:read",
     "account:access student:read",
+    MCP_REQUESTABLE_SCOPES.filter((scope) => scope !== "files:write").join(" "),
+    [...MCP_REQUESTABLE_SCOPES, "unknown"].join(" "),
+    [...MCP_REQUESTABLE_SCOPES.slice(0, -1), "account:access"].join(" "),
     "authoring",
     "search",
     "unknown",
