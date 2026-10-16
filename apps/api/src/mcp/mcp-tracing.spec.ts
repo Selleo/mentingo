@@ -40,9 +40,9 @@ describe("MCP tool tracing", () => {
     ).resolves.toBe(result);
     expect(propagateAttributes).toHaveBeenCalledWith(
       {
-        userId: "tenant:user",
+        userId: "user",
         sessionId: "mcp:tenant:user:oauth-client:2026-10-16",
-        metadata: { clientId: "oauth-client", requestId: "rpc" },
+        metadata: { tenantId: "tenant", clientId: "oauth-client", requestId: "rpc" },
       },
       expect.any(Function),
     );
@@ -85,6 +85,34 @@ describe("MCP tool tracing", () => {
       expect.objectContaining({ sessionId }),
       expect.any(Function),
     );
+  });
+
+  it("tracks the same user across tenants while retaining tenant metadata and separate sessions", async () => {
+    const operation = async () => ({ content: [] });
+    await traceMcpTool("list_courses", actor, undefined, {}, operation);
+    await traceMcpTool(
+      "list_courses",
+      {
+        ...actor,
+        grant: { ...actor.grant, tenantId: "other-tenant" },
+      },
+      undefined,
+      {},
+      operation,
+    );
+
+    expect(jest.mocked(propagateAttributes).mock.calls.map(([attributes]) => attributes)).toEqual([
+      {
+        userId: "user",
+        sessionId: "mcp:tenant:user:oauth-client:2026-10-16",
+        metadata: { tenantId: "tenant", clientId: "oauth-client", requestId: "" },
+      },
+      {
+        userId: "user",
+        sessionId: "mcp:other-tenant:user:oauth-client:2026-10-16",
+        metadata: { tenantId: "other-tenant", clientId: "oauth-client", requestId: "" },
+      },
+    ]);
   });
 
   it("marks returned MCP errors and ends the observation", async () => {
