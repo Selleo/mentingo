@@ -2170,6 +2170,10 @@ export class CourseService {
       throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
+    }
+
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,
@@ -3026,6 +3030,8 @@ export class CourseService {
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
+
+    await this.masterCourseService.assertCourseContentEditable(courseId);
 
     const existingTrailerResources = await this.db
       .select({ id: resources.id })

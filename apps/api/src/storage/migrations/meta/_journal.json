@@ -1541,6 +1541,13 @@
       "when": 1791901898718,
       "tag": "0219_add_search_chunks_hnsw_cosine_index",
       "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1792055706227,
+      "tag": "0220_course_transfer_reliability",
+      "breakpoints": true
     }
   ]
 }

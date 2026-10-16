@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "../../lib/utils";
@@ -6,8 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 import { PaginationButton } from "./PaginationButton";
 
+export const PAGINATION_VARIANTS = {
+  DEFAULT: "default",
+  COMPACT: "compact",
+} as const;
+
+export type PaginationVariant = (typeof PAGINATION_VARIANTS)[keyof typeof PAGINATION_VARIANTS];
+
 interface PaginationProps {
   className?: string;
+  variant?: PaginationVariant;
   emptyDataClassName?: string;
   totalItems?: number;
   itemsPerPage?: ItemsPerPageOption;
@@ -36,6 +45,7 @@ export type ItemsPerPageOption =
 
 export const Pagination = ({
   className,
+  variant = PAGINATION_VARIANTS.DEFAULT,
   emptyDataClassName,
   totalItems = 0,
   itemsPerPage = 10,
@@ -144,6 +154,40 @@ export const Pagination = ({
     return (
       <div className={cn("w-full text-center py-8 body-base-md", emptyDataClassName)}>
         {t("pagination.noData")}
+      </div>
+    );
+  }
+
+  if (variant === PAGINATION_VARIANTS.COMPACT) {
+    return (
+      <div className={cn("flex items-center justify-between gap-2", className)}>
+        <div className="body-sm text-neutral-800">
+          {t("pagination.showing", { startItem, endItem, totalItems })}
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            data-testid={testIds?.previous}
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={handlePrevious}
+            disabled={currentPage <= 1}
+            aria-label={t("pagination.previous")}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button
+            data-testid={testIds?.next}
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={handleNext}
+            disabled={currentPage >= totalPages}
+            aria-label={t("pagination.next")}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
       </div>
     );
   }

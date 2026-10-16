@@ -177,31 +177,25 @@ export class BunnyStreamService {
     }
   }
 
-  async uploadStream(params: {
-    title: string;
+  /** Uploads video bytes into a Bunny video that was already created with `createVideo`. */
+  async uploadVideoContent(params: {
+    videoId: string;
     stream: Readable;
     contentType?: string;
-  }): Promise<{ fileKey: string; bunnyGuid: string }> {
+  }): Promise<void> {
     const cfg = await this.getConfig();
     const httpClient = this.createHttpClient(cfg);
-    const { data: video } = await httpClient.post("/videos", {
-      title: params.title,
-    });
 
     try {
-      await httpClient.put(`/videos/${video.guid}`, params.stream, {
+      await httpClient.put(`/videos/${params.videoId}`, params.stream, {
         headers: { "Content-Type": params.contentType ?? "application/octet-stream" },
         timeout: 0,
       });
-
-      return {
-        fileKey: `bunny-${video.guid}`,
-        bunnyGuid: video.guid,
-      };
     } catch (error) {
-      await this.delete(video.guid).catch(() => undefined);
       throw new Error(
-        `Bunny stream upload failed for video ${video.guid}: ${this.getAxiosErrorMessage(error)}`,
+        `Bunny stream upload failed for video ${params.videoId}: ${this.getAxiosErrorMessage(
+          error,
+        )}`,
       );
     }
   }
@@ -251,6 +245,17 @@ export class BunnyStreamService {
     } catch (error) {
       throw new Error(`Failed to delete video: ${error.message}`);
     }
+  }
+
+  async findVideosByTitle(title: string): Promise<BunnyVideoDetails[]> {
+    const cfg = await this.getConfig();
+    const httpClient = this.createHttpClient(cfg);
+
+    const { data } = await httpClient.get<{ items?: BunnyVideoDetails[] }>("/videos", {
+      params: { search: title, itemsPerPage: 10 },
+    });
+
+    return data.items ?? [];
   }
 
   async getVideo(videoId: string): Promise<BunnyVideoDetails> {

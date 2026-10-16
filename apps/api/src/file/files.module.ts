@@ -5,6 +5,10 @@ import { S3Module } from "src/s3/s3.module";
 
 import { FileController } from "./file.controller";
 import { FileService } from "./file.service";
+import { HostedVideoCopyService } from "./hosted-video-copy.service";
+import { HostedVideoStatusCron } from "./hosted-video-status.cron";
+import { HostedVideoStatusService } from "./hosted-video-status.service";
+import { HostedVideoRepository } from "./hosted-video.repository";
 import { ImageVariantService } from "./image-variants/image-variant.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
@@ -15,13 +19,21 @@ import { VideoMetadataRepository } from "./video-metadata.repository";
 import { VideoMetadataService } from "./video-metadata.service";
 import { VideoMetadataWorker } from "./video-metadata.worker";
 import { VideoProcessingStateService } from "./video-processing-state.service";
+import { VideoUploadAuthorizationRepository } from "./video-upload-authorization.repository";
+import { VideoUploadAuthorizationService } from "./video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 @Module({
   imports: [S3Module, BunnyStreamModule],
   controllers: [FileController],
   providers: [
+    HostedVideoRepository,
+    HostedVideoCopyService,
+    HostedVideoStatusService,
+    HostedVideoStatusCron,
     FileService,
+    VideoUploadAuthorizationService,
+    VideoUploadAuthorizationRepository,
     ImageVariantService,
     ThumbnailService,
     BunnyVideoProvider,
@@ -34,6 +46,12 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
     VideoMetadataService,
     VideoMetadataWorker,
   ],
-  exports: [FileService, ImageVariantService, VideoMetadataQueueService],
+  exports: [
+    FileService,
+    ImageVariantService,
+    VideoMetadataQueueService,
+    HostedVideoCopyService,
+    HostedVideoStatusService,
+  ],
 })
 export class FileModule {}

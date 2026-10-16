@@ -15,6 +15,8 @@ import {
   updateLearningPathSettingsSchema,
 } from "./types/learning-path-settings.types";
 
+import type { Pagination } from "src/common";
+
 export const learningPathStatusOptions = Type.Enum(LEARNING_PATH_STATUSES);
 export const supportedLanguagesOptions = Type.Enum(SUPPORTED_LANGUAGES);
 export const learningPathProgressStatusOptions = Type.Union([
@@ -212,6 +214,11 @@ export const learningPathExportCandidatesResponseSchema = Type.Object({
   }),
 });
 
+export type LearningPathExportCandidatesPage = {
+  data: LearningPathExportCandidatesResponse;
+  pagination: Pagination;
+};
+
 export const learningPathJobStatusSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
@@ -285,3 +292,10 @@ export type LearningPathCertificateDownloadBody = Static<
 export type LearningPathCertificateCreateShareLinkBody = Static<
   typeof learningPathCertificateCreateShareLinkSchema
 >;
+
+export const learningPathExportAppliedEventSchema = Type.Object({
+  learningPathCourseSyncData: Type.Object({
+    tenantId: UUIDSchema,
+    learningPathId: UUIDSchema,
+  }),
+});

@@ -8,7 +8,10 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { FileService } from "src/file/file.service";
+import * as outboxConstants from "src/outbox/outbox.constants";
+import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courses,
@@ -25,6 +28,8 @@ import { createLearningPathFactory } from "../../../test/factory/learningPath.fa
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
+import { LEARNING_PATH_ERRORS } from "../constants/learning-path.errors";
 import { LearningPathExportService } from "../services/learning-path-export.service";
 
 import {
@@ -34,7 +39,6 @@ import {
   SOURCE_HOST,
   TABLES_TO_TRUNCATE,
   TARGET_HOST,
-  waitFor,
   withTenantHost,
 } from "./learning-path-export.e2e-utils";
 
@@ -63,6 +67,8 @@ describe("LearningPathExportController (e2e)", () => {
   >["getLearningPathCourseLinks"];
 
   beforeAll(async () => {
+    jest.spyOn(outboxConstants, "isOutboxProcessingEnabled").mockReturnValue(true);
+
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       uploadFile: jest.fn(),
@@ -74,16 +80,27 @@ describe("LearningPathExportController (e2e)", () => {
       set: jest.fn().mockResolvedValue(""),
     };
 
-    const e2e = await createE2ETest([
-      {
-        provide: FileService,
-        useValue: mockFileService,
-      },
-      {
-        provide: "CACHE_MANAGER",
-        useValue: mockCacheManager,
-      },
-    ]);
+    const e2e = await createE2ETest({
+      useDbProxy: true,
+      customProviders: [
+        {
+          provide: FileService,
+          useValue: mockFileService,
+        },
+        {
+          provide: S3Service,
+          useValue: { getFileExists: jest.fn().mockResolvedValue(false) },
+        },
+        {
+          provide: BunnyStreamService,
+          useValue: { isConfigured: jest.fn().mockResolvedValue(false) },
+        },
+        {
+          provide: "CACHE_MANAGER",
+          useValue: mockCacheManager,
+        },
+      ],
+    });
 
     app = e2e.app;
     db = app.get(DB);
@@ -480,7 +497,8 @@ describe("LearningPathExportController (e2e)", () => {
       SOURCE_HOST,
     ).expect(200);
 
-    const targetLearningPath = await waitFor(
+    const targetLearningPath = await waitForOutbox(
+      app,
       async () => {
         const [path] = await baseDb
           .select({
@@ -526,7 +544,8 @@ describe("LearningPathExportController (e2e)", () => {
       SOURCE_HOST,
     ).expect(200);
 
-    const reorderedTargetCourseLinks = await waitFor(
+    const reorderedTargetCourseLinks = await waitForOutbox(
+      app,
       () => getLearningPathCourseLinks(targetLearningPathId),
       (courseLinks) =>
         courseLinks.length === 2 &&
@@ -551,7 +570,8 @@ describe("LearningPathExportController (e2e)", () => {
 
     const courseExportJobId = courseExportResponse.body.data.jobs[0].reason as string;
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -648,11 +668,19 @@ describe("LearningPathExportController (e2e)", () => {
     );
   });
 
-  it("recovers a learning path export job when the queued export id no longer exists", async () => {
+  it("recovers a stale queued export id using the existing learning path export link", async () => {
     const { learningPathId, sourceAdmin, sourceCookie } = await setupSourcePath();
     const staleExportId = faker.string.uuid();
+    const exportResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .post(`/api/learning-path/master/${learningPathId}/export`)
+        .set("Cookie", sourceCookie)
+        .send({ targetTenantIds: [targetTenantId] }),
+      SOURCE_HOST,
+    ).expect(201);
+    const existingExportId = exportResponse.body.data.jobs[0].exportId;
 
-    await learningPathExportService.processExportJob({
+    await learningPathExportService.transferFromLegacyExportJob({
       exportId: staleExportId,
       sourceLearningPathId: learningPathId,
       sourceTenantId,
@@ -679,8 +707,36 @@ describe("LearningPathExportController (e2e)", () => {
       );
 
     expect(exportRows).toHaveLength(1);
+    expect(exportRows[0].id).toBe(existingExportId);
     expect(exportRows[0].id).not.toBe(staleExportId);
     expect(exportRows[0].targetLearningPathId).toBe(exportedLearningPath.targetLearningPathId);
+  });
+
+  it("rejects a legacy export job when no learning path export link exists", async () => {
+    const { learningPathId, sourceAdmin } = await setupSourcePath();
+
+    await expect(
+      learningPathExportService.transferFromLegacyExportJob({
+        exportId: faker.string.uuid(),
+        sourceLearningPathId: learningPathId,
+        sourceTenantId,
+        targetTenantId,
+        actorId: sourceAdmin.id,
+      }),
+    ).rejects.toMatchObject({ message: LEARNING_PATH_ERRORS.EXPORT_LINK_MISSING });
+
+    const exportRows = await baseDb
+      .select({ id: learningPathExports.id })
+      .from(learningPathExports)
+      .where(eq(learningPathExports.sourceLearningPathId, learningPathId));
+
+    const targetPaths = await baseDb
+      .select({ id: learningPaths.id })
+      .from(learningPaths)
+      .where(eq(learningPaths.tenantId, targetTenantId));
+
+    expect(exportRows).toHaveLength(0);
+    expect(targetPaths).toHaveLength(0);
   });
 
   it("reuses the same export link when exporting the same learning path twice", async () => {
@@ -702,7 +758,8 @@ describe("LearningPathExportController (e2e)", () => {
     expect(secondExportResponse.body.data.jobs[0].reason).toBe("already-linked");
     expect(secondExportResponse.body.data.jobs[0].exportId).toBe(firstExportId);
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())

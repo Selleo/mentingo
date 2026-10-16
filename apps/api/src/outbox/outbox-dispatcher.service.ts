@@ -28,7 +28,7 @@ export class OutboxDispatcherService {
 
     try {
       await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
-        await this.outboxRepository.recoverNotificationIntake();
+        await this.outboxRepository.recoverStalledIntake();
         let event = await this.outboxRepository.claimNext();
 
         while (event) {
@@ -50,6 +50,11 @@ export class OutboxDispatcherService {
     }
 
     try {
+      await this.outboxDirectHandlerService.dispatchReactions(
+        event.eventType,
+        event.payload,
+        event.id,
+      );
       const handled = await this.outboxDirectHandlerService.dispatch(
         event.eventType,
         event.payload,

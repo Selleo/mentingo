@@ -12,13 +12,11 @@ import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useCurrentUserSuspense } from "~/api/queries";
 import { COURSE_QUERY_KEY, useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { useCourseDuplicationJobStatus } from "~/api/queries/admin/useCourseDuplicationJobStatus";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
-import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -96,10 +94,8 @@ const EditCourse = () => {
   const [courseLanguage, setCourseLanguage] = useState<SupportedLanguages>(language);
 
   const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
-  const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
-  const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -141,16 +137,11 @@ const EditCourse = () => {
     courseLanguage,
     Boolean(course),
   );
-  const { data: exportCandidates } = useMasterCourseExportCandidates(id, canShowTenantSharing);
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 
   const hasMissingCourseTranslations =
     hasMissingTranslations?.data?.hasMissingTranslations ?? false;
 
-  const { tenants: shareableTenants = [], summary } = exportCandidates ?? {};
-  const { remainingCount } = summary ?? { remainingCount: 0 };
-
-  const canExportMore = remainingCount > 0;
   const unsupportedScormExportLessonCount = useMemo(() => {
     const supportedLessonTypes = new Set<LessonType>([
       LessonType.CONTENT,
@@ -168,15 +159,6 @@ const EditCourse = () => {
       ) ?? 0
     );
   }, [course?.chapters]);
-
-  const validSelectedTenantIds = useMemo(
-    () =>
-      selectedTenantIds.filter((tenantId) => {
-        const selectedTenant = shareableTenants.find((tenant) => tenant.id === tenantId);
-        return Boolean(selectedTenant) && !selectedTenant?.isExported;
-      }),
-    [selectedTenantIds, shareableTenants],
-  );
 
   const sharedCourseNotice = useMemo(
     () => ({
@@ -196,20 +178,6 @@ const EditCourse = () => {
     await generateTranslations({ courseId: id, language: courseLanguage });
     setOpenGenerateTranslationModal(false);
   }, [courseLanguage, generateTranslations, id]);
-
-  const handleExport = useCallback(async () => {
-    if (!validSelectedTenantIds.length) return;
-    await exportMasterCourse({ courseId: id, targetTenantIds: validSelectedTenantIds });
-    setSelectedTenantIds([]);
-  }, [exportMasterCourse, id, validSelectedTenantIds]);
-
-  const toggleTenantSelection = useCallback((tenantId: string, checked: boolean) => {
-    setSelectedTenantIds((prev) => {
-      if (!checked) return prev.filter((idToKeep) => idToKeep !== tenantId);
-      if (prev.includes(tenantId)) return prev;
-      return [...prev, tenantId];
-    });
-  }, []);
 
   const canRefetchChapterList =
     previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
@@ -532,12 +500,6 @@ const EditCourse = () => {
             language={courseLanguage}
             unsupportedLessonCount={unsupportedScormExportLessonCount}
             showTenantSharing={canShowTenantSharing}
-            tenants={shareableTenants}
-            selectedTenantIds={validSelectedTenantIds}
-            canExportMore={canExportMore}
-            isExportPending={isExportPending}
-            onToggleTenantSelection={toggleTenantSelection}
-            onExport={handleExport}
           />
         </TabsContent>
       </Tabs>

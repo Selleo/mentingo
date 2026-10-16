@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
@@ -9,20 +10,32 @@ import {
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
+  MASTER_COURSE_EXPORT_SYNC_STATUSES,
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
 } from "@repo/shared";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { COURSE_TRANSFER_MAX_ATTEMPTS } from "src/course-transfer/course-transfer.constants";
+import { CourseTransferCoordinator } from "src/course-transfer/course-transfer.coordinator";
+import { CourseTransferDispatcher } from "src/course-transfer/course-transfer.dispatcher";
+import {
+  CourseTransferFailedError,
+  CourseTransferLeaseLostError,
+} from "src/course-transfer/course-transfer.errors";
+import { CourseTransferRequestedEvent } from "src/course-transfer/events/course-transfer-requested.event";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import * as outboxConstants from "src/outbox/outbox.constants";
+import { OUTBOX_STATUSES } from "src/outbox/outbox.types";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import {
   aiJudgeBlockingErrors,
   aiJudgeConfigurations,
@@ -34,9 +47,12 @@ import {
   aiMentorThreads,
   categories,
   chapters,
+  courseTransferOperations,
+  courseTransferStreams,
   courses,
   lessons,
   masterCourseExports,
+  outboxEvents,
   assessments,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
@@ -53,6 +69,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -80,29 +97,6 @@ const ensureCookieArray = (cookies: string | string[]) => {
   return accessTokenCookie ? [accessTokenCookie] : normalizedCookies;
 };
 
-const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function waitFor<T>(
-  fetcher: () => Promise<T>,
-  predicate: (value: T) => boolean,
-  timeoutMs = 15000,
-  intervalMs = 250,
-): Promise<T> {
-  const start = Date.now();
-  let lastValue = await fetcher();
-
-  while (!predicate(lastValue)) {
-    if (Date.now() - start >= timeoutMs) {
-      throw new Error("Timed out waiting for condition");
-    }
-
-    await sleep(intervalMs);
-    lastValue = await fetcher();
-  }
-
-  return lastValue;
-}
-
 describe("Master course export and sync (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
@@ -124,7 +118,6 @@ describe("Master course export and sync (e2e)", () => {
     downloadMp4Fallback: jest.Mock;
     getMediaConfigurationSignature: jest.Mock;
     isConfigured: jest.Mock;
-    uploadStream: jest.Mock;
   };
 
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -134,6 +127,8 @@ describe("Master course export and sync (e2e)", () => {
   let chapterFactory: ReturnType<typeof createChapterFactory>;
 
   beforeAll(async () => {
+    jest.spyOn(outboxConstants, "isOutboxProcessingEnabled").mockReturnValue(true);
+
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
@@ -163,10 +158,6 @@ describe("Master course export and sync (e2e)", () => {
       }),
       getMediaConfigurationSignature: jest.fn().mockResolvedValue("source-target-same"),
       isConfigured: jest.fn().mockResolvedValue(false),
-      uploadStream: jest.fn().mockResolvedValue({
-        fileKey: "bunny-target-upload",
-        bunnyGuid: "target-upload",
-      }),
     };
 
     const mockCacheManager = {
@@ -174,24 +165,27 @@ describe("Master course export and sync (e2e)", () => {
       set: jest.fn().mockResolvedValue(""),
     };
 
-    const e2e = await createE2ETest([
-      {
-        provide: FileService,
-        useValue: mockFileService,
-      },
-      {
-        provide: S3Service,
-        useValue: mockS3Service,
-      },
-      {
-        provide: BunnyStreamService,
-        useValue: mockBunnyStreamService,
-      },
-      {
-        provide: "CACHE_MANAGER",
-        useValue: mockCacheManager,
-      },
-    ]);
+    const e2e = await createE2ETest({
+      useDbProxy: true,
+      customProviders: [
+        {
+          provide: FileService,
+          useValue: mockFileService,
+        },
+        {
+          provide: S3Service,
+          useValue: mockS3Service,
+        },
+        {
+          provide: BunnyStreamService,
+          useValue: mockBunnyStreamService,
+        },
+        {
+          provide: "CACHE_MANAGER",
+          useValue: mockCacheManager,
+        },
+      ],
+    });
 
     app = e2e.app;
     db = app.get(DB);
@@ -252,6 +246,9 @@ describe("Master course export and sync (e2e)", () => {
 
   const truncateMasterCourseTables = async () => {
     await truncateTables(baseDb, [
+      "outbox_events",
+      "course_transfer_operations",
+      "course_transfer_streams",
       "master_course_entity_map",
       "master_course_exports",
       "resource_entity",
@@ -305,6 +302,7 @@ describe("Master course export and sync (e2e)", () => {
   const setupAndExport = async (options?: {
     createMatchingTargetCategory?: boolean;
     beforeExport?: (setup: ExportSetup) => Promise<void>;
+    afterExportAccepted?: (setup: ExportSetup & { operationId: string }) => Promise<void>;
   }): Promise<
     ExportSetup & {
       sourceCookie: string[];
@@ -461,7 +459,15 @@ describe("Master course export and sync (e2e)", () => {
     const exportJobId = exportResponse.body.data.jobs[0].reason;
     expect(typeof exportJobId).toBe("string");
 
-    await waitFor(
+    await options?.afterExportAccepted?.({
+      ...sourceData,
+      sourceAdmin,
+      targetAdmin,
+      operationId: exportJobId,
+    });
+
+    await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -484,7 +490,8 @@ describe("Master course export and sync (e2e)", () => {
       },
     );
 
-    const exportsData = await waitFor(
+    const exportsData = await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -831,7 +838,7 @@ describe("Master course export and sync (e2e)", () => {
       .limit(1);
 
     expect(exportLink).toBeDefined();
-    await masterCourseService.processSyncJob({
+    await masterCourseService.transferFromSyncJob({
       exportId: exportLink.id,
       sourceCourseId,
       sourceTenantId,
@@ -906,7 +913,8 @@ describe("Master course export and sync (e2e)", () => {
       SOURCE_HOST,
     ).expect(200);
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () =>
         runAsTenant(targetTenantId, async () => {
           const [targetCourse] = await db
@@ -1358,7 +1366,7 @@ describe("Master course export and sync (e2e)", () => {
       )
       .limit(1);
 
-    await masterCourseService.processSyncJob({
+    await masterCourseService.transferFromSyncJob({
       exportId: exportLink.id,
       sourceCourseId,
       sourceTenantId,
@@ -1535,7 +1543,8 @@ describe("Master course export and sync (e2e)", () => {
     };
     expect(targetCourseId).not.toBe(sourceCourseId);
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -1740,7 +1749,7 @@ describe("Master course export and sync (e2e)", () => {
       )
       .limit(1);
 
-    await masterCourseService.processSyncJob({
+    await masterCourseService.transferFromSyncJob({
       exportId: exportLink.id,
       sourceCourseId,
       sourceTenantId,
@@ -1748,7 +1757,8 @@ describe("Master course export and sync (e2e)", () => {
       triggerEventType: "test",
     });
 
-    await waitFor(
+    await waitForOutbox(
+      app,
       async () =>
         runAsTenant(targetTenantId, async () => {
           const [targetLesson] = await db
@@ -1840,7 +1850,7 @@ describe("Master course export and sync (e2e)", () => {
       .from(masterCourseExports)
       .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
     const sync = () =>
-      masterCourseService.processSyncJob({
+      masterCourseService.transferFromSyncJob({
         exportId: exportLink.id,
         sourceCourseId,
         sourceTenantId,
@@ -2014,7 +2024,6 @@ describe("Master course export and sync (e2e)", () => {
 
     expect(targetLesson.fileS3Key).toBe(sourceBunnyReference);
     expect(mockBunnyStreamService.downloadMp4Fallback).not.toHaveBeenCalled();
-    expect(mockBunnyStreamService.uploadStream).not.toHaveBeenCalled();
   });
 
   it("streams Bunny source videos into target S3 when target tenant does not use Bunny", async () => {
@@ -2066,7 +2075,8 @@ describe("Master course export and sync (e2e)", () => {
       SOURCE_HOST,
     ).expect(200);
 
-    const syncedTargetCourse = await waitFor(
+    const syncedTargetCourse = await waitForOutbox(
+      app,
       async () => {
         const response = await withTenantHost(
           request(app.getHttpServer())
@@ -2093,5 +2103,206 @@ describe("Master course export and sync (e2e)", () => {
         chapter.lessons.some((lesson) => lesson.title === "Master Source Lesson"),
       ),
     ).toBe(false);
+  });
+  describe("transfer reliability", () => {
+    const getCoordinator = () => app.get(CourseTransferCoordinator, { strict: false });
+    const getTenantDbRunner = () => app.get(TenantDbRunnerService, { strict: false });
+
+    const findExportLink = async (sourceCourseId: string) => {
+      const [exportLink] = await baseDb
+        .select()
+        .from(masterCourseExports)
+        .where(
+          and(
+            eq(masterCourseExports.sourceCourseId, sourceCourseId),
+            eq(masterCourseExports.targetTenantId, targetTenantId),
+          ),
+        );
+      return exportLink;
+    };
+
+    const countTargetCopies = async (sourceCourseId: string) => {
+      const copies = await baseDb
+        .select({ id: courses.id })
+        .from(courses)
+        .where(
+          and(eq(courses.sourceCourseId, sourceCourseId), eq(courses.tenantId, targetTenantId)),
+        );
+      return copies.length;
+    };
+
+    const requestNewRevision = async (sourceCourseId: string) => {
+      await runAsTenant(sourceTenantId, () =>
+        app
+          .get(MasterCourseService, { strict: false })
+          .queueSyncForSourceCourse(sourceCourseId, "test"),
+      );
+      const [latestOperation] = await baseDb
+        .select()
+        .from(courseTransferOperations)
+        .orderBy(desc(courseTransferOperations.revision))
+        .limit(1);
+      return latestOperation;
+    };
+
+    it("recovers an accepted export whose dispatch was lost after commit", async () => {
+      const { sourceCourseId } = await setupAndExport({
+        afterExportAccepted: async () => {
+          await baseDb
+            .update(outboxEvents)
+            .set({ status: OUTBOX_STATUSES.PUBLISHED })
+            .where(eq(outboxEvents.eventType, CourseTransferRequestedEvent.name));
+          await baseDb
+            .update(courseTransferStreams)
+            .set({ nextRecoveryAt: new Date(Date.now() - 60_000).toISOString() });
+
+          await expect(getCoordinator().redispatchStalledTransfers()).resolves.toBe(1);
+        },
+      });
+
+      expect(await countTargetCopies(sourceCourseId)).toBe(1);
+      const requestedEvents = await baseDb
+        .select({ id: outboxEvents.id })
+        .from(outboxEvents)
+        .where(eq(outboxEvents.eventType, CourseTransferRequestedEvent.name));
+      expect(requestedEvents).toHaveLength(2);
+    });
+
+    it("treats a repeated delivery of an applied operation as already done", async () => {
+      const { sourceCourseId, targetCourseId } = await setupAndExport();
+      const exportLink = await findExportLink(sourceCourseId);
+      const [operation] = await baseDb.select().from(courseTransferOperations);
+
+      await expect(
+        app
+          .get(CourseTransferDispatcher, { strict: false })
+          .enqueueRequestedTransfer({ operationId: operation.id, sourceTenantId }, randomUUID()),
+      ).resolves.toBeUndefined();
+
+      await expect(
+        app.get(MasterCourseService, { strict: false }).transferFromSyncJob({
+          operationId: operation.id,
+          exportId: exportLink.id,
+          sourceCourseId,
+          sourceTenantId,
+          targetTenantId,
+          triggerEventType: "test",
+        }),
+      ).resolves.toBe(targetCourseId);
+      expect(await countTargetCopies(sourceCourseId)).toBe(1);
+    });
+
+    it("rejects a destination write after its lease was taken over", async () => {
+      const { sourceCourseId } = await setupAndExport();
+      const operation = await requestNewRevision(sourceCourseId);
+      const writeDestination = jest.fn();
+
+      await expect(
+        getCoordinator().transferUnderLease(operation.id, async (leasedTransfer) => {
+          await baseDb
+            .update(courseTransferStreams)
+            .set({ claimToken: randomUUID() })
+            .where(eq(courseTransferStreams.id, operation.streamId));
+
+          return getTenantDbRunner().runWithTenant(targetTenantId, () =>
+            getTenantDbRunner().transactionWithHandle((transaction) =>
+              leasedTransfer.commitDestinationWrite(transaction, writeDestination),
+            ),
+          );
+        }),
+      ).rejects.toBeInstanceOf(CourseTransferLeaseLostError);
+      expect(writeDestination).not.toHaveBeenCalled();
+
+      const [stream] = await baseDb
+        .select()
+        .from(courseTransferStreams)
+        .where(eq(courseTransferStreams.id, operation.streamId));
+      expect(stream.appliedRevision).toBe(operation.revision - 1);
+    });
+
+    it("fails a transfer after its attempts run out and lets a new export retry it", async () => {
+      const { sourceCourseId, sourceCookie } = await setupAndExport();
+      const operation = await requestNewRevision(sourceCourseId);
+      await baseDb
+        .update(courseTransferOperations)
+        .set({ attemptCount: COURSE_TRANSFER_MAX_ATTEMPTS })
+        .where(eq(courseTransferOperations.id, operation.id));
+      const exportLink = await findExportLink(sourceCourseId);
+
+      await expect(
+        app.get(MasterCourseService, { strict: false }).transferFromSyncJob({
+          operationId: operation.id,
+          exportId: exportLink.id,
+          sourceCourseId,
+          sourceTenantId,
+          targetTenantId,
+          triggerEventType: "test",
+        }),
+      ).rejects.toBeInstanceOf(CourseTransferFailedError);
+      expect((await findExportLink(sourceCourseId)).syncStatus).toBe(
+        MASTER_COURSE_EXPORT_SYNC_STATUSES.FAILED,
+      );
+
+      const retryResponse = await withTenantHost(
+        request(app.getHttpServer())
+          .post(`/api/course/master/${sourceCourseId}/export`)
+          .set("Cookie", sourceCookie)
+          .send({ targetTenantIds: [targetTenantId] }),
+        SOURCE_HOST,
+      ).expect(201);
+      expect(retryResponse.body.data.jobs[0].queued).toBe(true);
+
+      await waitForOutbox(
+        app,
+        () => findExportLink(sourceCourseId),
+        (link) => link.syncStatus === MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
+      );
+      expect(await countTargetCopies(sourceCourseId)).toBe(1);
+    });
+
+    it("searches and paginates sharing candidates", async () => {
+      const { sourceCourseId, sourceCookie } = await setupAndExport();
+      const searchToken = faker.string.alphanumeric(10).toLowerCase();
+      const extraTenants = await baseDb
+        .insert(tenants)
+        .values(
+          ["alpha", "beta"].map((suffix) => ({
+            name: `Search ${searchToken} ${suffix}`,
+            host: `http://${searchToken}-${suffix}.lms.localhost`,
+            isManaging: false,
+          })),
+        )
+        .returning({ id: tenants.id });
+
+      try {
+        const fetchCandidates = (query: Record<string, string | number>) =>
+          withTenantHost(
+            request(app.getHttpServer())
+              .get(`/api/course/master/${sourceCourseId}/export-candidates`)
+              .query(query)
+              .set("Cookie", sourceCookie),
+            SOURCE_HOST,
+          ).expect(200);
+
+        const searched = await fetchCandidates({ search: `${searchToken} alpha` });
+        expect(searched.body.data.tenants.map(({ name }: { name: string }) => name)).toEqual([
+          `Search ${searchToken} alpha`,
+        ]);
+        expect(searched.body.pagination.totalItems).toBe(1);
+
+        const secondPage = await fetchCandidates({ search: searchToken, page: 2, perPage: 1 });
+        expect(secondPage.body.data.tenants).toHaveLength(1);
+        expect(secondPage.body.data.tenants[0].name).toBe(`Search ${searchToken} beta`);
+        expect(secondPage.body.pagination).toEqual({ totalItems: 2, page: 2, perPage: 1 });
+        expect(secondPage.body.data.summary.exportedCount).toBe(1);
+      } finally {
+        await baseDb.delete(tenants).where(
+          inArray(
+            tenants.id,
+            extraTenants.map(({ id }) => id),
+          ),
+        );
+      }
+    });
   });
 });

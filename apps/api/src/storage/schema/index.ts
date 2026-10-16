@@ -98,6 +98,7 @@ import {
   type AiMentorTeachingStyle,
   type AiMentorType,
   type ResourceVisibility,
+  type VideoProviderType,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -152,9 +153,14 @@ import type {
 } from "src/automation-execution/automation-execution.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type {
+  CourseTransferKind,
+  CourseTransferStatus,
+} from "src/course-transfer/course-transfer.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
+import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
   ReportConfigurationVisibility,
@@ -2594,6 +2600,131 @@ export const tenants = pgTable(
   },
   (table) => ({
     uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),
+  }),
+);
+
+export const courseTransferStreams = pgTable(
+  "course_transfer_streams",
+  {
+    ...id,
+    ...timestamps,
+    kind: text("kind").$type<CourseTransferKind>().notNull(),
+    exportId: uuid("export_id").notNull(),
+    sourceTenantId: uuid("source_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    targetTenantId: uuid("target_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    requestedRevision: integer("requested_revision").notNull().default(0),
+    appliedRevision: integer("applied_revision").notNull().default(0),
+    latestOperationId: uuid("latest_operation_id"),
+    claimToken: uuid("claim_token"),
+    leaseExpiresAt: timestampWithTimezone({ name: "lease_expires_at" }),
+    nextRecoveryAt: timestampWithTimezone({ name: "next_recovery_at" }).notNull().defaultNow(),
+    targetId: uuid("target_id"),
+  },
+  (table) => ({
+    relationshipIdx: uniqueIndex("course_transfer_streams_relationship_idx").on(
+      table.kind,
+      table.exportId,
+    ),
+    recoveryIdx: index("course_transfer_streams_recovery_idx").on(table.nextRecoveryAt),
+    revisionCheck: check(
+      "course_transfer_streams_revision_check",
+      sql`${table.appliedRevision} >= 0 AND ${table.requestedRevision} >= ${table.appliedRevision}`,
+    ),
+  }),
+);
+
+export const hostedVideos = pgTable(
+  "hosted_videos",
+  {
+    ...id,
+    ...timestamps,
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    provider: text("provider").$type<VideoProviderType>().notNull(),
+    providerVideoId: text("provider_video_id"),
+    reference: text("reference"),
+    providerConfigurationSignature: text("provider_configuration_signature").notNull(),
+    status: text("status").$type<HostedVideoStatus>().notNull(),
+    statusChangedAt: timestampWithTimezone({ name: "status_changed_at" }).notNull().defaultNow(),
+    copiedFromTenantId: uuid("copied_from_tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    copiedFromReference: text("copied_from_reference"),
+    lastCheckedAt: timestampWithTimezone({ name: "last_checked_at" }),
+  },
+  (table) => ({
+    providerVideoIdx: uniqueIndex("hosted_videos_provider_video_idx").on(
+      table.provider,
+      table.providerVideoId,
+    ),
+    tenantReferenceIdx: index("hosted_videos_tenant_reference_idx").on(
+      table.tenantId,
+      table.reference,
+    ),
+    statusIdx: index("hosted_videos_status_idx").on(table.status),
+    copyIdx: uniqueIndex("hosted_videos_copy_idx")
+      .on(
+        table.tenantId,
+        table.provider,
+        table.providerConfigurationSignature,
+        table.copiedFromTenantId,
+        table.copiedFromReference,
+      )
+      .where(sql`${table.copiedFromReference} IS NOT NULL`),
+  }),
+);
+
+export const courseTransferOperations = pgTable(
+  "course_transfer_operations",
+  {
+    ...id,
+    ...timestamps,
+    streamId: uuid("stream_id")
+      .references(() => courseTransferStreams.id, { onDelete: "cascade" })
+      .notNull(),
+    revision: integer("revision").notNull(),
+    status: text("status").$type<CourseTransferStatus>().notNull().default("pending"),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    errorCode: text("error_code"),
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+    targetId: uuid("target_id"),
+  },
+  (table) => ({
+    revisionIdx: uniqueIndex("course_transfer_operations_revision_idx").on(
+      table.streamId,
+      table.revision,
+    ),
+  }),
+);
+
+export const courseTransferDependencies = pgTable(
+  "course_transfer_dependencies",
+  {
+    ...id,
+    ...timestamps,
+    operationId: uuid("operation_id")
+      .references(() => courseTransferOperations.id, { onDelete: "cascade" })
+      .notNull(),
+    dependencyStreamId: uuid("dependency_stream_id")
+      .references(() => courseTransferStreams.id, { onDelete: "cascade" })
+      .notNull(),
+    requiredRevision: integer("required_revision").notNull(),
+    sourceId: uuid("source_id").notNull(),
+  },
+  (table) => ({
+    operationDependencyIdx: uniqueIndex("course_transfer_dependencies_operation_stream_idx").on(
+      table.operationId,
+      table.dependencyStreamId,
+    ),
+    dependencyStreamIdx: index("course_transfer_dependencies_stream_idx").on(
+      table.dependencyStreamId,
+    ),
   }),
 );
 

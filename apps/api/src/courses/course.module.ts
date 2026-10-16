@@ -8,6 +8,8 @@ import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { EmailModule } from "src/common/emails/emails.module";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
+import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
+import { CourseDurationModule } from "src/courses/course-duration.module";
 import { CourseHandler } from "src/courses/handlers/course.handler";
 import { MasterCourseSyncHandler } from "src/courses/handlers/master-course-sync.handler";
 import { FileModule } from "src/file/files.module";
@@ -27,8 +29,6 @@ import { CourseDuplicationQueueService } from "./course-duplication.queue.servic
 import { CourseDuplicationRepository } from "./course-duplication.repository";
 import { CourseDuplicationService } from "./course-duplication.service";
 import { CourseDuplicationWorker } from "./course-duplication.worker";
-import { CourseDurationRepository } from "./course-duration.repository";
-import { CourseDurationService } from "./course-duration.service";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
 import { CourseScormExportService } from "./course-scorm-export.service";
@@ -40,8 +40,6 @@ import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
 import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
 import { CourseDueDateReminderEmailHandler } from "./handlers/course-due-date-reminder-email.handler";
-import { CourseDurationHandler } from "./handlers/course-duration.handler";
-import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
 import { MasterCourseService } from "./master-course.service";
@@ -51,6 +49,8 @@ import { CourseTranslationService } from "./services/course-translation.service"
 
 @Module({
   imports: [
+    CourseTransferModule,
+    CourseDurationModule,
     BunnyStreamModule,
     FileModule,
     StatisticsModule,
@@ -73,8 +73,6 @@ import { CourseTranslationService } from "./services/course-translation.service"
   controllers: [CourseController],
   providers: [
     CourseService,
-    CourseDurationService,
-    CourseDurationRepository,
     CourseScormAssetsService,
     CourseScormExportService,
     CourseScormSnapshotRepository,
@@ -88,11 +86,9 @@ import { CourseTranslationService } from "./services/course-translation.service"
     GroupCourseDueDateCalendarService,
     CourseHandler,
     CourseDueDateReminderEmailHandler,
-    CourseDurationHandler,
     LocalizationService,
     CourseCron,
     MasterCourseService,
-    MasterCourseSnapshotService,
     MasterCourseRepository,
     CourseTranslationRepository,
     CourseTranslationService,
@@ -108,7 +104,6 @@ import { CourseTranslationService } from "./services/course-translation.service"
     CourseTranslationService,
     MasterCourseService,
     MasterCourseRepository,
-    MasterCourseSnapshotService,
   ],
 })
 export class CourseModule {}

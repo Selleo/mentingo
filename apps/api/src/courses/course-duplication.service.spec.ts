@@ -4,10 +4,10 @@ import { COURSE_TYPE, PERMISSIONS } from "@repo/shared";
 import { CourseDuplicationService } from "src/courses/course-duplication.service";
 
 import type { UUIDType } from "src/common";
+import type { CourseTransferService } from "src/course-transfer/services/course-transfer.service";
 import type { CourseDuplicationQueueService } from "src/courses/course-duplication.queue.service";
 import type { CourseDuplicationRepository } from "src/courses/course-duplication.repository";
 import type { CourseDuplicationSourceCourse } from "src/courses/course-duplication.types";
-import type { MasterCourseService } from "src/courses/master-course.service";
 import type { SearchIndexService } from "src/global-search/search-index.service";
 import type { WsGateway } from "src/websocket";
 
@@ -47,7 +47,7 @@ describe("CourseDuplicationService", () => {
     const service = new CourseDuplicationService(
       repository,
       queueService,
-      {} as MasterCourseService,
+      {} as CourseTransferService,
       {} as SearchIndexService,
       {} as WsGateway,
     );

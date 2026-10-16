@@ -31,6 +31,7 @@ import {
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { HostedVideoStatusService } from "src/file/hosted-video-status.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
@@ -92,6 +93,7 @@ export class LessonService {
     private readonly lessonVideoProgressService: LessonVideoProgressService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly quizRuntimeService: QuizRuntimeService,
+    private readonly hostedVideoStatusService: HostedVideoStatusService,
   ) {}
 
   async getLessonById(
@@ -732,6 +734,13 @@ export class LessonService {
       videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
     );
 
+    const videoProcessingStatusByReference =
+      await this.hostedVideoStatusService.findProcessingStatusesInCurrentTenant(
+        lessonResources
+          .filter((resource) => resource.contentType?.startsWith("video/"))
+          .map((resource) => resource.reference),
+      );
+
     const mappedResources = lessonResources.map((resource) => ({
       id: resource.id,
       resourceEntityId: resource.resourceEntityId,
@@ -743,6 +752,7 @@ export class LessonService {
       provider: resource.contentType?.startsWith("video/")
         ? getVideoProviderFromReference(resource.reference)
         : undefined,
+      videoProcessingStatus: videoProcessingStatusByReference.get(resource.reference),
       videoProgress: resource.resourceEntityId
         ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
         : undefined,

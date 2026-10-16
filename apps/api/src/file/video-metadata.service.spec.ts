@@ -1,4 +1,8 @@
-import { isBunnyVideoReadyStatus, isValidVideoDuration } from "./video-metadata.utils";
+import {
+  isBunnyApiVideoReadyStatus,
+  isBunnyWebhookReadyStatus,
+  isValidVideoDuration,
+} from "./video-metadata.utils";
 
 describe("video metadata duration validation", () => {
   it.each([1, 1.25, Number.MAX_SAFE_INTEGER])("accepts positive finite duration %s", (value) => {
@@ -13,12 +17,22 @@ describe("video metadata duration validation", () => {
   );
 });
 
-describe("Bunny video readiness", () => {
+describe("Bunny webhook video readiness", () => {
   it.each([3, 4, "3", "4"])("accepts ready status %s", (value) => {
-    expect(isBunnyVideoReadyStatus(value)).toBe(true);
+    expect(isBunnyWebhookReadyStatus(value)).toBe(true);
   });
 
-  it.each([0, 1, 2, 5, null, undefined, "invalid"])("rejects status %s", (value) => {
-    expect(isBunnyVideoReadyStatus(value)).toBe(false);
+  it.each([0, 1, 2, 5, 8, 9, null, undefined, "invalid"])("rejects status %s", (value) => {
+    expect(isBunnyWebhookReadyStatus(value)).toBe(false);
+  });
+});
+
+describe("Bunny API video readiness", () => {
+  it.each([4, "4"])("accepts ready status %s", (value) => {
+    expect(isBunnyApiVideoReadyStatus(value)).toBe(true);
+  });
+
+  it.each([0, 1, 2, 3, 5, 6, 8, null, undefined, "invalid"])("rejects status %s", (value) => {
+    expect(isBunnyApiVideoReadyStatus(value)).toBe(false);
   });
 });

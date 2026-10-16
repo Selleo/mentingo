@@ -65,6 +65,7 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
+import { HostedVideoStatusService } from "./hosted-video-status.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
 import { ThumbnailService } from "./thumbnail.service";
@@ -72,8 +73,9 @@ import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
-import { isBunnyVideoReadyStatus } from "./video-metadata.utils";
+import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
+import { VideoUploadAuthorizationService } from "./video-upload-authorization.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 import type { ResourceRelationshipType } from "./file.constants";
@@ -92,6 +94,7 @@ import type {
   ImageQuality,
   ImageVariantCreationOptions,
 } from "src/file/image-variants/image-variant.types";
+import type { BunnyWebhookSignature } from "src/file/types/bunny-webhook.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
@@ -119,6 +122,8 @@ export class FileService {
     private readonly notificationGateway: VideoUploadNotificationGateway,
     private readonly videoMetadataQueueService: VideoMetadataQueueService,
     private readonly tenantRunner: TenantDbRunnerService,
+    private readonly videoUploadAuthorizationService: VideoUploadAuthorizationService,
+    private readonly hostedVideoStatusService: HostedVideoStatusService,
   ) {}
 
   async getFileUrl(fileKey: string, options: { quality?: ImageQuality } = {}): Promise<string> {
@@ -426,6 +431,8 @@ export class FileService {
     if (sizeBytes > maxUploadSize) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
+
+    await this.videoUploadAuthorizationService.assertCanUpload(data, currentUser);
 
     const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
 
@@ -1032,28 +1039,15 @@ export class FileService {
       ? ((await this.cache.get(uploadKey(uploadId))) as VideoUploadState | undefined)
       : undefined;
 
+    const webhookSignature = { rawBody, signature, signatureVersion, signatureAlgorithm };
+
     if (!uploadId || !data?.tenantId || !data.resourceId) {
-      this.logger.warn(`Ignoring Bunny webhook without cached upload mapping for video ${videoId}`);
-      return { ignored: true };
+      return this.updateHostedVideoFromBunnyWebhook(videoId, Number(status), webhookSignature);
     }
 
-    if (
-      !signature ||
-      !signatureVersion ||
-      !signatureAlgorithm ||
-      !(await this.tenantRunner.runWithTenant(data.tenantId, () =>
-        this.bunnyStreamService.validateWebhookSignature(
-          rawBody,
-          signature,
-          signatureVersion,
-          signatureAlgorithm,
-        ),
-      ))
-    ) {
-      throw new BadRequestException("Invalid Bunny webhook signature");
-    }
+    await this.assertValidBunnyWebhookSignature(data.tenantId, webhookSignature);
 
-    if (!isBunnyVideoReadyStatus(status)) {
+    if (!isBunnyWebhookReadyStatus(status)) {
       return { ignored: true };
     }
 
@@ -1084,6 +1078,47 @@ export class FileService {
     });
 
     return { success: true };
+  }
+  /** Routes a webhook for a video created outside an upload session, such as a transferred copy. */
+  private async updateHostedVideoFromBunnyWebhook(
+    videoId: string,
+    bunnyStatus: number,
+    webhookSignature: BunnyWebhookSignature,
+  ) {
+    const hostedVideo = await this.hostedVideoStatusService.findHostedVideo(
+      VIDEO_PROVIDERS.BUNNY,
+      videoId,
+    );
+
+    if (!hostedVideo) {
+      this.logger.warn(`Ignoring Bunny webhook for unknown video ${videoId}`);
+      return { ignored: true };
+    }
+
+    await this.assertValidBunnyWebhookSignature(hostedVideo.tenantId, webhookSignature);
+    await this.hostedVideoStatusService.recordBunnyWebhookStatus(hostedVideo, bunnyStatus);
+
+    return { success: true };
+  }
+
+  private async assertValidBunnyWebhookSignature(
+    tenantId: string,
+    { rawBody, signature, signatureVersion, signatureAlgorithm }: BunnyWebhookSignature,
+  ): Promise<void> {
+    if (!signature || !signatureVersion || !signatureAlgorithm) {
+      throw new BadRequestException("Invalid Bunny webhook signature");
+    }
+
+    const isValidSignature = await this.tenantRunner.runWithTenant(tenantId, () =>
+      this.bunnyStreamService.validateWebhookSignature(
+        rawBody,
+        signature,
+        signatureVersion,
+        signatureAlgorithm,
+      ),
+    );
+
+    if (!isValidSignature) throw new BadRequestException("Invalid Bunny webhook signature");
   }
 
   async getThumbnail(

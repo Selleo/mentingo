@@ -15,7 +15,7 @@ import {
 import { and, eq, isNull } from "drizzle-orm";
 import { v5 as uuidv5 } from "uuid";
 
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseTransferService } from "src/course-transfer/services/course-transfer.service";
 import { DB } from "src/storage/db/db.providers";
 import {
   calendarEvents,
@@ -97,7 +97,7 @@ describe("Native archive import (e2e)", () => {
         deleteStaged: async () => undefined,
       }));
     jest
-      .spyOn(app.get(MasterCourseService), "duplicateCourseIntoExistingCourse")
+      .spyOn(app.get(CourseTransferService), "copyCourseIntoExistingCourse")
       .mockResolvedValue({ chapterMap: new Map(), lessonMap: new Map() });
   });
 
@@ -179,7 +179,7 @@ describe("Native archive import (e2e)", () => {
   });
 
   it("reuses a staged image resource and rewrites the lesson description", async () => {
-    jest.spyOn(app.get(MasterCourseService), "duplicateCourseIntoExistingCourse").mockRestore();
+    jest.spyOn(app.get(CourseTransferService), "copyCourseIntoExistingCourse").mockRestore();
 
     const sourceCourseId = randomUUID();
     const sourceResourceId = randomUUID();

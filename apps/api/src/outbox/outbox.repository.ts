@@ -42,7 +42,21 @@ export class OutboxRepository {
         FROM outbox_events
         WHERE status IN (${OUTBOX_STATUSES.PENDING}, ${OUTBOX_STATUSES.FAILED})
           AND (status <> ${OUTBOX_STATUSES.FAILED}
-            OR event_type NOT IN ('NotificationEvent', 'AutomationEmailDeliveryRequestedEvent')
+            OR event_type NOT IN (
+              'NotificationEvent',
+              'AutomationEmailDeliveryRequestedEvent',
+              'LearningPathExportAppliedEvent',
+              'CourseTransferRequestedEvent',
+              'CourseTransferVideoMetadataRequestedEvent',
+              'BulkUpdateCourseCategoryEvent',
+              'UpdateCourseEvent',
+              'CreateChapterEvent',
+              'UpdateChapterEvent',
+              'DeleteChapterEvent',
+              'CreateLessonEvent',
+              'UpdateLessonEvent',
+              'DeleteLessonEvent'
+            )
             OR updated_at < NOW() - INTERVAL '5 seconds')
         ORDER BY created_at ASC
         LIMIT 1
@@ -71,11 +85,25 @@ export class OutboxRepository {
     return this.normalizeRow(claimResult);
   }
 
-  async recoverNotificationIntake(): Promise<void> {
+  async recoverStalledIntake(): Promise<void> {
     await this.db.execute(sql`
       UPDATE outbox_events SET status = 'pending', updated_at = NOW()
       WHERE status = 'processing'
-        AND event_type IN ('NotificationEvent', 'AutomationEmailDeliveryRequestedEvent')
+        AND event_type IN (
+          'NotificationEvent',
+          'AutomationEmailDeliveryRequestedEvent',
+          'LearningPathExportAppliedEvent',
+              'CourseTransferRequestedEvent',
+              'CourseTransferVideoMetadataRequestedEvent',
+              'BulkUpdateCourseCategoryEvent',
+              'UpdateCourseEvent',
+              'CreateChapterEvent',
+              'UpdateChapterEvent',
+              'DeleteChapterEvent',
+              'CreateLessonEvent',
+              'UpdateLessonEvent',
+              'DeleteLessonEvent'
+        )
         AND updated_at < NOW() - INTERVAL '5 minutes'
     `);
   }

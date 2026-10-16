@@ -3,6 +3,7 @@ import { BulkUpdateCourseCategoryEvent } from "src/events";
 
 import type { DatabasePg } from "src/common";
 import type { MasterCourseService } from "src/courses/master-course.service";
+import type { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
 
 describe("MasterCourseSyncHandler", () => {
   it("queues master-course sync once per changed course for bulk category updates", async () => {
@@ -10,6 +11,7 @@ describe("MasterCourseSyncHandler", () => {
     const handler = new MasterCourseSyncHandler(
       { queueSyncForSourceCourse } as unknown as MasterCourseService,
       {} as DatabasePg,
+      {} as OutboxDirectHandlerService,
     );
 
     await handler.handle(

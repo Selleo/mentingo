@@ -22,7 +22,7 @@ import type {
 } from "../native-archive.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 @Injectable()
 export class NativeArchiveLiveTrainingService {

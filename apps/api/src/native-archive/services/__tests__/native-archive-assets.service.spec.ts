@@ -10,7 +10,7 @@ import { NativeArchiveAssetsService } from "../native-archive-assets.service";
 
 import type { ParsedNativeArchive } from "../../native-archive.types";
 import type { UUIDType } from "src/common";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 const TENANT_ID = "1c720b6d-390d-4613-aa75-a5cc0b642147" as UUIDType;
 const IMAGE_FILE_KEY = `${TENANT_ID}/course/native-archive/variants/imported.webp`;

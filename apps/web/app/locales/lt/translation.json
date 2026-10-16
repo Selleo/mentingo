@@ -2443,6 +2443,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Prisijungimas per Google",
+        "description": "Leiskite naudotojams prisijungti su Google paskyra."
+      },
+      "microsoftSignIn": {
+        "title": "Prisijungimas per Microsoft",
+        "description": "Leiskite naudotojams prisijungti su Microsoft paskyra."
+      },
+      "slackSignIn": {
+        "title": "Prisijungimas per Slack",
+        "description": "Leiskite naudotojams prisijungti su Slack paskyra."
+      },
+      "microsoftCalendar": {
+        "title": "Microsoft kalendorius",
+        "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
+      },
+      "payments": {
+        "title": "Mokėjimai",
+        "description": "Stripe raktai kursams parduoti ir mokėjimų webhookams tikrinti."
+      },
+      "videoStreaming": {
+        "title": "Vaizdo transliacija",
+        "description": "Bunny Stream biblioteka vaizdo įrašams įkelti, koduoti ir leisti."
+      },
+      "artificialIntelligence": {
+        "title": "Dirbtinis intelektas",
+        "description": "Raktai AI mentoriams, generavimui ir Luma kursų asistentui."
+      },
+      "liveTraining": {
+        "title": "Tiesioginiai mokymai",
+        "description": "LiveKit serveris tiesioginiams mokymams."
+      },
+      "phishingSimulations": {
+        "title": "Phishing simuliacijos",
+        "description": "Ryšys su phishing simuliacijų paslauga."
+      }
+    },
     "name": "Aplinkos kintamieji",
     "keysTitle": "Raktai",
     "updateSuccessful": "Sėkmingai atnaujintos paslaptys",
@@ -4811,6 +4849,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Neturite teisės čia įkelti vaizdo įrašo",
+      "uploadTargetNotFound": "Elementas, į kurį įkeliate vaizdo įrašą, nerastas",
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
@@ -5016,6 +5056,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Šis vaizdo įrašas apdorojamas",
+        "body": "Netrukus jį bus galima peržiūrėti. Grįžkite po kelių minučių."
+      },
+      "processingFailed": {
+        "title": "Šio vaizdo įrašo nepavyko apdoroti",
+        "body": "Susisiekite su administratoriumi."
+      },
       "tooltip": {
         "bunnyMissing": "Vaizdo įrašas nepasiekiamas. Patikrinkite Bunny CDN konfigūraciją."
       },
@@ -5159,8 +5207,42 @@
     "adminLearningPaths": "Tobulėjimo keliai",
     "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Norėdami dubliuoti šį kursą, turite turėti teisę jį valdyti",
+      "sourceCourseNotFound": "Dubliuojamas kursas nerastas",
+      "sourceCategoryMissing": "Dubliuojamas kursas neturi kategorijos",
+      "targetCourseNotFound": "Dubliuotas kursas nerastas",
+      "tenantMissing": "Šio kurso tenantas nerastas",
+      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima dubliuoti"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Pasirinkti visas šio puslapio organizacijas",
+    "selectOrganization": "Pasirinkti {{name}}",
+    "columns": {
+      "organization": "Organizacija",
+      "status": "Būsena"
+    },
+    "searchPlaceholder": "Ieškoti organizacijų",
+    "selectedCount": "Pasirinkta: {{count}}",
+    "clearSelection": "Išvalyti",
+    "shareButton": "Dalintis",
+    "shareWithCountButton": "Dalintis su {{count}}",
+    "sharingButton": "Bendrinama...",
+    "emptySearch": "Paieškos neatitinka jokia organizacija",
+    "emptyList": "Nėra kitų organizacijų, su kuriomis būtų galima dalintis",
+    "status": {
+      "shared": "Dalinamas",
+      "inProgress": "Vykdoma",
+      "paused": "Pristabdyta",
+      "failed": "Nepavyko"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Bendrinimas su šiuo tenantu pristabdytas",
+      "transferFailed": "Perkėlimas nepavyko. Pakartokite bendrinimą, kad tęstumėte.",
       "sourceCourseNotFound": "Saltinio kursas nerastas",
       "sourceAuthorNotFound": "Saltinio kurso autorius nerastas",
       "sourceCategoryNotFound": "Saltinio kurso kategorija nerasta",
@@ -5178,11 +5260,13 @@
       "targetCourseMissing": "Tikslinis kursas nerastas",
       "videoStorageNotConfigured": "Vaizdo irasu saugykla siam tenantui nesukonfiguruota",
       "sourceVideoMissing": "Saltinio vaizdo irasas nerastas",
-      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
+      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas",
+      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima bendrinti"
     }
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Eksportuojamas tobulėjimo kelias nerastas",
       "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
       "exportLinkMissing": "Tobulėjimo kelio eksporto rysys nerastas",
       "noCourses": "Pries eksportuojant tobulėjimo kelyje turi buti bent vienas kursas",

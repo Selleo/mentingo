@@ -8,7 +8,7 @@ import type {
   NativeArchiveLearningPathInsert,
 } from "../repositories/native-archive-import.repository.types";
 import type { UUIDType } from "src/common";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 export function buildNativeArchiveCourseInsert(
   source: SourceSnapshot["course"],

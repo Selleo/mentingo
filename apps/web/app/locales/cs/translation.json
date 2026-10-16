@@ -2449,6 +2449,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Přihlášení přes Google",
+        "description": "Umožněte uživatelům přihlásit se účtem Google."
+      },
+      "microsoftSignIn": {
+        "title": "Přihlášení přes Microsoft",
+        "description": "Umožněte uživatelům přihlásit se účtem Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Přihlášení přes Slack",
+        "description": "Umožněte uživatelům přihlásit se účtem Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Kalendář Microsoft",
+        "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Platby",
+        "description": "Klíče Stripe pro prodej kurzů a ověřování platebních webhooků."
+      },
+      "videoStreaming": {
+        "title": "Streamování videa",
+        "description": "Knihovna Bunny Stream pro nahrávání, kódování a přehrávání videí."
+      },
+      "artificialIntelligence": {
+        "title": "Umělá inteligence",
+        "description": "Klíče pro AI mentory, generování obsahu a asistenta kurzů Luma."
+      },
+      "liveTraining": {
+        "title": "Živá školení",
+        "description": "Server LiveKit pro živá školení."
+      },
+      "phishingSimulations": {
+        "title": "Simulace phishingu",
+        "description": "Připojení ke službě simulace phishingu."
+      }
+    },
     "name": "Proměnné prostředí",
     "keysTitle": "Klíče",
     "updateSuccessful": "Tajemství byla úspěšně aktualizována",
@@ -4816,6 +4854,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Nemáte oprávnění nahrát sem video",
+      "uploadTargetNotFound": "Položka, ke které nahráváte video, nebyla nalezena",
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
@@ -5021,6 +5061,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Toto video se zpracovává",
+        "body": "Brzy bude připravené ke zhlédnutí. Vraťte se za pár minut."
+      },
+      "processingFailed": {
+        "title": "Toto video se nepodařilo zpracovat",
+        "body": "Obraťte se na svého administrátora."
+      },
       "tooltip": {
         "bunnyMissing": "Video není k dispozici. Zkontrolujte konfiguraci Bunny CDN."
       },
@@ -5163,8 +5211,42 @@
     "adminLearningPaths": "Rozvojové cesty",
     "adminLearningPathEditor": "Editor rozvojové cesty"
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "K duplikování tohoto kurzu potřebujete oprávnění ke správě kurzu",
+      "sourceCourseNotFound": "Kurz k duplikování nebyl nalezen",
+      "sourceCategoryMissing": "Kurz k duplikování nemá kategorii",
+      "targetCourseNotFound": "Duplikovaný kurz nebyl nalezen",
+      "tenantMissing": "Tenant tohoto kurzu nebyl nalezen",
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Vybrat všechny organizace na této stránce",
+    "selectOrganization": "Vybrat {{name}}",
+    "columns": {
+      "organization": "Organizace",
+      "status": "Stav"
+    },
+    "searchPlaceholder": "Hledat organizace",
+    "selectedCount": "Vybráno: {{count}}",
+    "clearSelection": "Zrušit výběr",
+    "shareButton": "Sdílet",
+    "shareWithCountButton": "Sdílet s {{count}}",
+    "sharingButton": "Sdílení...",
+    "emptySearch": "Hledání neodpovídá žádná organizace",
+    "emptyList": "Nejsou k dispozici žádné další organizace ke sdílení",
+    "status": {
+      "shared": "Sdíleno",
+      "inProgress": "Probíhá",
+      "paused": "Pozastaveno",
+      "failed": "Selhalo"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Sdílení s tímto tenantem je pozastaveno",
+      "transferFailed": "Přenos se nezdařil. Pro pokračování zopakujte sdílení.",
       "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
       "sourceAuthorNotFound": "Autor zdrojoveho kurzu nebyl nalezen",
       "sourceCategoryNotFound": "Kategorie zdrojoveho kurzu nebyla nalezena",
@@ -5182,11 +5264,13 @@
       "targetCourseMissing": "Cilovy kurz nebyl nalezen",
       "videoStorageNotConfigured": "Ukladani videa neni pro tohoto tenanta nakonfigurovano",
       "sourceVideoMissing": "Zdrojove video nebylo nalezeno",
-      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
+      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni",
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze sdílet"
     }
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Rozvojová cesta k exportu nebyla nalezena",
       "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
       "exportLinkMissing": "Vazba exportu rozvojove cesty nebyla nalezena",
       "noCourses": "Rozvojova cesta musi pred exportem obsahovat alespon jeden kurz",

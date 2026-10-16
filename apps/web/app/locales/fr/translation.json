@@ -2438,6 +2438,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Connexion avec Google",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Google."
+      },
+      "microsoftSignIn": {
+        "title": "Connexion avec Microsoft",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Connexion avec Slack",
+        "description": "Permettre aux utilisateurs de se connecter avec leur compte Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Calendrier Microsoft",
+        "description": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Paiements",
+        "description": "Clés Stripe pour vendre des cours et vérifier les webhooks de paiement."
+      },
+      "videoStreaming": {
+        "title": "Streaming vidéo",
+        "description": "Bibliothèque Bunny Stream pour téléverser, encoder et lire les vidéos."
+      },
+      "artificialIntelligence": {
+        "title": "Intelligence artificielle",
+        "description": "Clés pour les mentors IA, la génération et l'assistant de cours Luma."
+      },
+      "liveTraining": {
+        "title": "Formations en direct",
+        "description": "Serveur LiveKit utilisé pour les formations en direct."
+      },
+      "phishingSimulations": {
+        "title": "Simulations de phishing",
+        "description": "Connexion au service de simulation de phishing."
+      }
+    },
     "name": "Variables d'environnement",
     "keysTitle": "Clés",
     "updateSuccessful": "Secrets mis à jour avec succès",
@@ -2678,6 +2716,7 @@
         "lesson": "Leçon introuvable."
       },
       "forbidden": {
+        "updateCourse": "Vous n'êtes pas autorisé à modifier ce cours.",
         "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
       },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
@@ -4548,6 +4587,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Vous n'êtes pas autorisé à téléverser une vidéo ici",
+      "uploadTargetNotFound": "L'élément auquel vous téléversez la vidéo est introuvable",
       "invalidData": "Échec du téléchargement du fichier : données de fichier non valides",
       "fileEmpty": "Échec du téléchargement du fichier : le fichier est vide",
       "contentTypeMismatch": "Le type de contenu du fichier ne correspond pas au type de contenu fourni",
@@ -4753,6 +4794,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "Cette vidéo est en cours de traitement",
+        "body": "Elle sera bientôt disponible. Revenez dans quelques minutes."
+      },
+      "processingFailed": {
+        "title": "Cette vidéo n'a pas pu être traitée",
+        "body": "Veuillez contacter votre administrateur."
+      },
       "tooltip": {
         "bunnyMissing": "La vidéo n'est pas disponible. Veuillez vérifier la configuration de Bunny CDN."
       },
@@ -5539,8 +5588,42 @@
       "missingTenantIdHeader": "En-tête X-Tenant-Id manquant"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Vous devez pouvoir gérer ce cours pour le dupliquer",
+      "sourceCourseNotFound": "Le cours à dupliquer est introuvable",
+      "sourceCategoryMissing": "Le cours à dupliquer n'a pas de catégorie",
+      "targetCourseNotFound": "Le cours dupliqué est introuvable",
+      "tenantMissing": "Le locataire de ce cours est introuvable",
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Sélectionner toutes les organisations de cette page",
+    "selectOrganization": "Sélectionner {{name}}",
+    "columns": {
+      "organization": "Organisation",
+      "status": "Statut"
+    },
+    "searchPlaceholder": "Rechercher des organisations",
+    "selectedCount": "Sélectionné : {{count}}",
+    "clearSelection": "Effacer",
+    "shareButton": "Partager",
+    "shareWithCountButton": "Partager avec {{count}}",
+    "sharingButton": "Partage...",
+    "emptySearch": "Aucune organisation ne correspond à votre recherche",
+    "emptyList": "Aucune autre organisation avec laquelle partager",
+    "status": {
+      "shared": "Partagé",
+      "inProgress": "En cours",
+      "paused": "En pause",
+      "failed": "Échec"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Le partage avec ce locataire est suspendu",
+      "transferFailed": "Le transfert a échoué. Relancez le partage pour reprendre.",
       "sourceCourseNotFound": "Cours source introuvable",
       "sourceAuthorNotFound": "Auteur du cours source introuvable",
       "sourceCategoryNotFound": "Catégorie de cours source introuvable",
@@ -5558,11 +5641,13 @@
       "targetCourseMissing": "Cours cible introuvable",
       "videoStorageNotConfigured": "Le stockage vidéo n'est pas configuré pour ce locataire",
       "sourceVideoMissing": "Vidéo source introuvable",
-      "exportedCourseReadonly": "Le cours exporté est en lecture seule"
+      "exportedCourseReadonly": "Le cours exporté est en lecture seule",
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être partagé"
     }
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Parcours de développement à exporter introuvable",
       "noTargetTenants": "Sélectionnez au moins un locataire cible",
       "exportLinkMissing": "Lien d'exportation du parcours de développement introuvable",
       "noCourses": "Le parcours de développement doit inclure au moins un cours avant l'export",

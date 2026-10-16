@@ -68,6 +68,7 @@ test("admin cannot bulk delete non-student users", async ({
 
     await openUsersPageFlow(page);
     await filterUsersFlow(page, { keyword: prefix });
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.TABLE_BODY).getByRole("row")).toHaveCount(2);
     await selectUsersFlow(page, [studentUser.id, contentCreatorUser.id]);
     await openBulkEditActionFlow(page, "delete");
     await confirmBulkEditFlow(page);

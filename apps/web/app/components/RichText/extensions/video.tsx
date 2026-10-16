@@ -11,6 +11,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
+import { VideoProcessingPlaceholder } from "~/components/VideoPlayer/VideoProcessingPlaceholder";
 import { cn } from "~/lib/utils";
 
 import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
@@ -231,6 +232,14 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
 
   if (!attrs.src) return null;
 
+  if (attrs.processingStatus) {
+    return (
+      <NodeViewWrapper className="video-node not-prose">
+        <VideoProcessingPlaceholder status={attrs.processingStatus} />
+      </NodeViewWrapper>
+    );
+  }
+
   if (attrs.hasError) return null;
 
   const trackingEnabled = Boolean(
@@ -319,6 +328,10 @@ const baseVideoNodeConfig: NodeConfig = {
       },
       videoBucketSizeSeconds: {
         default: null,
+      },
+      processingStatus: {
+        default: null,
+        rendered: false,
       },
     };
   },

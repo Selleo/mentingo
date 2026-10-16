@@ -4,6 +4,7 @@ export type BunnyMp4FallbackResolution = 720 | 480 | 360 | 240;
 
 export type BunnyVideoDetails = {
   guid: string;
+  title: string;
   length: number;
   status: number;
   [key: string]: unknown;

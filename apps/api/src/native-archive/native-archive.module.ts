@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { AiModule } from "src/ai/ai.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
+import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { QueueModule } from "src/queue/queue.module";
@@ -24,6 +25,7 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
   imports: [
     AiModule,
     CourseModule,
+    CourseTransferModule,
     FileModule,
     BunnyStreamModule,
     S3Module,

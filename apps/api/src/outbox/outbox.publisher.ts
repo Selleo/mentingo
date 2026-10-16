@@ -45,6 +45,12 @@ export class OutboxPublisher {
     publication: OutboxPublication,
     transaction?: DatabasePg,
   ): Promise<void> {
+    await this.outboxDirectHandlerService.dispatchReactions(
+      publication.eventType,
+      publication.payload,
+      randomUUID(),
+      transaction,
+    );
     if (!this.outboxDirectHandlerService.has(publication.eventType)) {
       await this.eventBus.publish(event);
       return;

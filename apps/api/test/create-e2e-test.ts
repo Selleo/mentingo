@@ -30,6 +30,8 @@ type E2ETestOptions = {
 };
 
 const TEST_APP_ROLE = "lms_test_app_user";
+/** Webhooks verify signatures over the exact request bytes. */
+const RAW_BODY_PATHS = ["/api/phishing/webhook", "/api/file/bunny/webhook"];
 const TEST_APP_ROLE_PASSWORD = "replace_with_strong_password";
 
 const getAppDatabaseUrl = (databaseUrl: string) => {
@@ -183,7 +185,7 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
       express.json({
         limit: "5mb",
         verify: (incoming, _response, buffer) => {
-          if (req.path.startsWith("/api/phishing/webhook"))
+          if (RAW_BODY_PATHS.some((rawBodyPath) => req.path.startsWith(rawBodyPath)))
             (incoming as express.Request & { rawBody: Buffer }).rawBody = buffer;
         },
       })(req, res, (err) => {

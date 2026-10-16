@@ -9,10 +9,11 @@ import {
 import { match } from "ts-pattern";
 
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import { COURSE_TRANSFER_MODES } from "src/course-transfer/course-transfer.constants";
+import { CourseTransferService } from "src/course-transfer/services/course-transfer.service";
 import { COURSE_DUPLICATION_COPY_SUFFIX } from "src/courses/course-duplication.constants";
 import { CourseDuplicationQueueService } from "src/courses/course-duplication.queue.service";
 import { CourseDuplicationRepository } from "src/courses/course-duplication.repository";
-import { MasterCourseService } from "src/courses/master-course.service";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { WsGateway } from "src/websocket";
 
@@ -27,7 +28,7 @@ export class CourseDuplicationService {
   constructor(
     private readonly courseDuplicationRepository: CourseDuplicationRepository,
     private readonly courseDuplicationQueueService: CourseDuplicationQueueService,
-    private readonly masterCourseService: MasterCourseService,
+    private readonly courseTransferService: CourseTransferService,
     private readonly searchIndexService: SearchIndexService,
     private readonly wsGateway: WsGateway,
   ) {}
@@ -64,15 +65,14 @@ export class CourseDuplicationService {
     return this.courseDuplicationQueueService.getJobStatus(jobId);
   }
 
-  async processDuplicationJob(jobId: string, data: CourseDuplicationJobData): Promise<void> {
+  async duplicateCourseFromJob(jobId: string, data: CourseDuplicationJobData): Promise<void> {
     this.publishStatus(jobId, data, COURSE_DUPLICATION_STATUS.PROCESSING);
 
     try {
-      await this.masterCourseService.duplicateCourseIntoExistingCourse({
-        sourceCourseId: data.sourceCourseId,
-        targetCourseId: data.targetCourseId,
-        actorId: data.actor.userId,
-        tenantId: data.tenantId,
+      await this.courseTransferService.copyCourseIntoExistingCourse({
+        source: { tenantId: data.tenantId, courseId: data.sourceCourseId },
+        destination: { tenantId: data.tenantId, courseId: data.targetCourseId },
+        policy: { mode: COURSE_TRANSFER_MODES.DUPLICATE, actorId: data.actor.userId },
       });
 
       await this.searchIndexService.refreshCourse(data.targetCourseId);

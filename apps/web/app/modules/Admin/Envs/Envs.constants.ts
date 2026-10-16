@@ -121,3 +121,88 @@ export const SECRET_METADATA = {
     placeholderKey: "adminEnvsView.form.placeholder",
   },
 };
+
+type SecretName = keyof typeof SECRET_METADATA;
+
+export const ENV_GROUPS = [
+  {
+    id: "googleSignIn",
+    titleKey: "adminEnvsView.groups.googleSignIn.title",
+    descriptionKey: "adminEnvsView.groups.googleSignIn.description",
+    secretNames: [
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "GOOGLE_OAUTH_ENABLED",
+      "VITE_GOOGLE_OAUTH_ENABLED",
+    ],
+  },
+  {
+    id: "microsoftSignIn",
+    titleKey: "adminEnvsView.groups.microsoftSignIn.title",
+    descriptionKey: "adminEnvsView.groups.microsoftSignIn.description",
+    secretNames: [
+      "MICROSOFT_CLIENT_ID",
+      "MICROSOFT_CLIENT_SECRET",
+      "MICROSOFT_OAUTH_ENABLED",
+      "VITE_MICROSOFT_OAUTH_ENABLED",
+    ],
+  },
+  {
+    id: "slackSignIn",
+    titleKey: "adminEnvsView.groups.slackSignIn.title",
+    descriptionKey: "adminEnvsView.groups.slackSignIn.description",
+    secretNames: [
+      "SLACK_CLIENT_ID",
+      "SLACK_CLIENT_SECRET",
+      "SLACK_OAUTH_ENABLED",
+      "VITE_SLACK_OAUTH_ENABLED",
+    ],
+  },
+  {
+    id: "microsoftCalendar",
+    titleKey: "adminEnvsView.groups.microsoftCalendar.title",
+    descriptionKey: "adminEnvsView.groups.microsoftCalendar.description",
+    secretNames: ["MICROSOFT_CALENDAR_CLIENT_ID", "MICROSOFT_CALENDAR_CLIENT_SECRET"],
+  },
+  {
+    id: "payments",
+    titleKey: "adminEnvsView.groups.payments.title",
+    descriptionKey: "adminEnvsView.groups.payments.description",
+    secretNames: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "VITE_STRIPE_PUBLISHABLE_KEY"],
+  },
+  {
+    id: "videoStreaming",
+    titleKey: "adminEnvsView.groups.videoStreaming.title",
+    descriptionKey: "adminEnvsView.groups.videoStreaming.description",
+    secretNames: [
+      "BUNNY_STREAM_API_KEY",
+      "BUNNY_STREAM_READ_ONLY_API_KEY",
+      "BUNNY_STREAM_LIBRARY_ID",
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY",
+      "BUNNY_STREAM_CDN_URL",
+    ],
+  },
+  {
+    id: "artificialIntelligence",
+    titleKey: "adminEnvsView.groups.artificialIntelligence.title",
+    descriptionKey: "adminEnvsView.groups.artificialIntelligence.description",
+    secretNames: ["OPENAI_API_KEY", "LUMA_API_KEY"],
+  },
+  {
+    id: "liveTraining",
+    titleKey: "adminEnvsView.groups.liveTraining.title",
+    descriptionKey: "adminEnvsView.groups.liveTraining.description",
+    secretNames: ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"],
+  },
+  {
+    id: "phishingSimulations",
+    titleKey: "adminEnvsView.groups.phishingSimulations.title",
+    descriptionKey: "adminEnvsView.groups.phishingSimulations.description",
+    secretNames: ["PHISHING_API_KEY", "PHISHING_BASE_URL", "PHISHING_WEBHOOK_SECRET"],
+  },
+] as const satisfies ReadonlyArray<{
+  id: string;
+  titleKey: string;
+  descriptionKey: string;
+  secretNames: ReadonlyArray<SecretName>;
+}>;

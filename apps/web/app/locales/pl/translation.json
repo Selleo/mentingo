@@ -2672,6 +2672,44 @@
     }
   },
   "adminEnvsView": {
+    "groups": {
+      "googleSignIn": {
+        "title": "Logowanie przez Google",
+        "description": "Pozwól użytkownikom logować się kontem Google."
+      },
+      "microsoftSignIn": {
+        "title": "Logowanie przez Microsoft",
+        "description": "Pozwól użytkownikom logować się kontem Microsoft."
+      },
+      "slackSignIn": {
+        "title": "Logowanie przez Slack",
+        "description": "Pozwól użytkownikom logować się kontem Slack."
+      },
+      "microsoftCalendar": {
+        "title": "Kalendarz Microsoft",
+        "description": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook."
+      },
+      "payments": {
+        "title": "Płatności",
+        "description": "Klucze Stripe do sprzedaży kursów i weryfikacji webhooków płatności."
+      },
+      "videoStreaming": {
+        "title": "Strumieniowanie wideo",
+        "description": "Biblioteka Bunny Stream do przesyłania, kodowania i odtwarzania wideo."
+      },
+      "artificialIntelligence": {
+        "title": "Sztuczna inteligencja",
+        "description": "Klucze dla mentorów AI, generowania treści i asystenta kursów Luma."
+      },
+      "liveTraining": {
+        "title": "Szkolenia na żywo",
+        "description": "Serwer LiveKit używany do sesji szkoleń na żywo."
+      },
+      "phishingSimulations": {
+        "title": "Symulacje phishingu",
+        "description": "Połączenie z usługą symulacji phishingu."
+      }
+    },
     "name": "Zmienne środowiskowe",
     "keysTitle": "Klucze",
     "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
@@ -5101,6 +5139,8 @@
   },
   "files": {
     "toast": {
+      "uploadForbidden": "Nie masz uprawnień do przesłania wideo w tym miejscu",
+      "uploadTargetNotFound": "Nie znaleziono elementu, do którego przesyłasz wideo",
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
@@ -5306,6 +5346,14 @@
       }
     },
     "video": {
+      "processing": {
+        "title": "To wideo jest przetwarzane",
+        "body": "Wkrótce będzie gotowe do obejrzenia. Wróć za kilka minut."
+      },
+      "processingFailed": {
+        "title": "Nie udało się przetworzyć tego wideo",
+        "body": "Skontaktuj się z administratorem."
+      },
       "tooltip": {
         "bunnyMissing": "Wideo jest niedostępne. Sprawdź konfigurację Bunny CDN."
       },
@@ -5863,8 +5911,42 @@
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
     }
   },
+  "courseDuplication": {
+    "error": {
+      "manageAccessRequired": "Aby zduplikować ten kurs, potrzebujesz uprawnień do zarządzania nim",
+      "sourceCourseNotFound": "Nie znaleziono kursu do zduplikowania",
+      "sourceCategoryMissing": "Kurs do zduplikowania nie ma kategorii",
+      "targetCourseNotFound": "Nie znaleziono zduplikowanego kursu",
+      "tenantMissing": "Nie znaleziono tenanta tego kursu",
+      "foreignSourceAsset": "Ten kurs używa pliku należącego do innej organizacji, więc nie można go zduplikować"
+    }
+  },
+  "tenantSharing": {
+    "selectAllOnPage": "Zaznacz wszystkie organizacje na tej stronie",
+    "selectOrganization": "Zaznacz {{name}}",
+    "columns": {
+      "organization": "Organizacja",
+      "status": "Status"
+    },
+    "searchPlaceholder": "Szukaj organizacji",
+    "selectedCount": "Wybrano: {{count}}",
+    "clearSelection": "Wyczyść",
+    "shareButton": "Udostępnij",
+    "shareWithCountButton": "Udostępnij ({{count}})",
+    "sharingButton": "Udostępnianie...",
+    "emptySearch": "Żadna organizacja nie pasuje do wyszukiwania",
+    "emptyList": "Brak innych organizacji, którym można udostępnić",
+    "status": {
+      "shared": "Udostępniony",
+      "inProgress": "W toku",
+      "paused": "Wstrzymany",
+      "failed": "Błąd"
+    }
+  },
   "masterCourse": {
     "error": {
+      "exportPaused": "Udostępnianie temu tenantowi jest wstrzymane",
+      "transferFailed": "Przesyłanie nie powiodło się. Ponów udostępnianie, aby wznowić.",
       "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
       "sourceAuthorNotFound": "Nie znaleziono autora kursu źródłowego",
       "sourceCategoryNotFound": "Nie znaleziono kategorii kursu źródłowego",
@@ -5882,11 +5964,13 @@
       "targetCourseMissing": "Nie znaleziono kursu docelowego",
       "videoStorageNotConfigured": "Magazyn wideo nie jest skonfigurowany dla tego tenanta",
       "sourceVideoMissing": "Nie znaleziono wideo źródłowego",
-      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu"
+      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu",
+      "foreignSourceAsset": "Ten kurs używa pliku należącego do innej organizacji, więc nie można go udostępnić"
     }
   },
   "learningPathExport": {
     "error": {
+      "sourceNotFound": "Nie znaleziono Ścieżki Rozwoju do eksportu",
       "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
       "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki rozwoju",
       "noCourses": "Ścieżka Rozwoju musi zawierać co najmniej jeden kurs przed eksportem",

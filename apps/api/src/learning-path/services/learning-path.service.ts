@@ -638,6 +638,11 @@ export class LearningPathService {
         trx,
       );
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "update-learning-path",
+      );
+
       if (learningPath && (sequenceEnabledChanged || includesCertificateChanged)) {
         await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
       }
@@ -661,11 +666,6 @@ export class LearningPathService {
       this.db,
     );
 
-    await this.learningPathExportService.queueSyncForSourceLearningPath(
-      learningPathId,
-      "update-learning-path",
-    );
-
     await this.searchIndexService.refreshLearningPath(learningPathId);
 
     return this.ensureLocalizedLearningPathExists(
@@ -686,12 +686,18 @@ export class LearningPathService {
       throw new BadRequestException(LEARNING_PATH_ERRORS.LANGUAGE_ALREADY_EXISTS);
     }
 
-    const updatedLearningPath = await this.learningPathRepository.updateLearningPath(
-      learningPathId,
-      {
-        availableLocales: [...learningPath.availableLocales, language],
-      },
-    );
+    const updatedLearningPath = await this.db.transaction(async (transaction) => {
+      const updatedPath = await this.learningPathRepository.updateLearningPath(
+        learningPathId,
+        { availableLocales: [...learningPath.availableLocales, language] },
+        transaction,
+      );
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "add-learning-path-language",
+      );
+      return updatedPath;
+    });
 
     if (!updatedLearningPath) {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
@@ -794,6 +800,11 @@ export class LearningPathService {
         trx,
       );
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "add-learning-path-course",
+      );
+
       await Promise.all(
         addedCourses.map((course) =>
           this.publishLearningPathCourseAddedEvent(
@@ -807,11 +818,6 @@ export class LearningPathService {
 
       return addedCourses;
     });
-
-    await this.learningPathExportService.queueSyncForSourceLearningPath(
-      learningPathId,
-      "add-learning-path-course",
-    );
 
     return addedCourses;
   }
@@ -1187,6 +1193,11 @@ export class LearningPathService {
         trx,
       );
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "remove-learning-path-course",
+      );
+
       await this.publishLearningPathCourseRemovedEvent(
         learningPathId,
         courseId,
@@ -1196,11 +1207,6 @@ export class LearningPathService {
 
       return removedCourse;
     });
-
-    await this.learningPathExportService.queueSyncForSourceLearningPath(
-      learningPathId,
-      "remove-learning-path-course",
-    );
 
     return removedCourse;
   }
@@ -1248,6 +1254,11 @@ export class LearningPathService {
         await this.learningPathRepository.setDisplayOrder(learningPathId, courseId, index + 1, trx);
       }
 
+      await this.learningPathExportService.queueSyncForSourceLearningPath(
+        learningPathId,
+        "reorder-learning-path-courses",
+      );
+
       if (learningPath.sequenceEnabled) {
         await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
       }
@@ -1257,11 +1268,6 @@ export class LearningPathService {
         courseIds: body.courseIds,
       };
     });
-
-    await this.learningPathExportService.queueSyncForSourceLearningPath(
-      learningPathId,
-      "reorder-learning-path-courses",
-    );
 
     return result;
   }

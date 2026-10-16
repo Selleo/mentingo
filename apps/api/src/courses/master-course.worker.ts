@@ -22,7 +22,7 @@ export class MasterCourseWorker implements OnModuleDestroy {
     this.exportWorker = new Worker(
       QUEUE_NAMES.MASTER_COURSE_EXPORT,
       async (job: Job<MasterCourseExportJobData>) => {
-        await this.masterCourseService.processExportJob(job.data);
+        await this.masterCourseService.transferFromLegacyExportJob(job.data);
       },
       {
         connection,
@@ -33,7 +33,7 @@ export class MasterCourseWorker implements OnModuleDestroy {
     this.syncWorker = new Worker(
       QUEUE_NAMES.MASTER_COURSE_SYNC,
       async (job: Job<MasterCourseSyncJobData>) => {
-        await this.masterCourseService.processSyncJob(job.data);
+        await this.masterCourseService.transferFromSyncJob(job.data);
       },
       {
         connection,

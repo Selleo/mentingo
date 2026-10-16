@@ -1,9 +1,25 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { BaseResponse, baseResponse, UUIDSchema, type UUIDType } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDSchema,
+  type UUIDType,
+} from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
@@ -14,6 +30,7 @@ import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guar
 import {
   learningPathExportBodySchema,
   learningPathExportCandidatesResponseSchema,
+  type LearningPathExportCandidatesResponse,
   learningPathExportLinkSchema,
   learningPathExportResponseSchema,
   learningPathJobStatusSchema,
@@ -67,15 +84,27 @@ export class LearningPathExportController {
   @Get(":learningPathId/export-candidates")
   @RequirePermission(PERMISSIONS.LEARNING_PATH_EXPORT)
   @Validate({
-    request: [{ type: "param", name: "learningPathId", schema: UUIDSchema, required: true }],
-    response: baseResponse(learningPathExportCandidatesResponseSchema),
+    request: [
+      { type: "param", name: "learningPathId", schema: UUIDSchema, required: true },
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number()) },
+    ],
+    response: paginatedResponse(learningPathExportCandidatesResponseSchema),
   })
   async getLearningPathExportCandidates(
     @Param("learningPathId") learningPathId: UUIDType,
+    @Query("search") search: string | undefined,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
     @CurrentUser() actor: CurrentUserType,
-  ) {
-    return new BaseResponse(
-      await this.learningPathExportService.getLearningPathExportCandidates(learningPathId, actor),
+  ): Promise<PaginatedResponse<LearningPathExportCandidatesResponse>> {
+    return new PaginatedResponse(
+      await this.learningPathExportService.getLearningPathExportCandidates(learningPathId, actor, {
+        search,
+        page,
+        perPage,
+      }),
     );
   }
 

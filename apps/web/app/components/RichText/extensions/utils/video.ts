@@ -1,4 +1,6 @@
 import {
+  VIDEO_PROCESSING_STATUSES,
+  type VideoProcessingStatus,
   VIDEO_EMBED_PROVIDERS,
   detectVideoProviderFromUrl,
   extractVimeoId,
@@ -37,6 +39,7 @@ export type VideoEmbedAttrs = {
   videoWatchedRanges: VideoCoverageRange[];
   videoDurationSeconds: number | null;
   videoBucketSizeSeconds: number | null;
+  processingStatus: VideoProcessingStatus | null;
 };
 
 const isVideoSourceType = (value: string | null | undefined): value is VideoSourceType =>
@@ -98,7 +101,13 @@ type VideoEmbedAttrsInput = {
   videoWatchedRanges?: VideoCoverageRange[] | string | null;
   videoDurationSeconds?: number | string | null;
   videoBucketSizeSeconds?: number | string | null;
+  processingStatus?: string | null;
 };
+
+const isVideoProcessingStatus = (
+  value: string | null | undefined,
+): value is VideoProcessingStatus =>
+  Object.values(VIDEO_PROCESSING_STATUSES).some((status) => status === value);
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
   const src = safeEmbedUrl(attrs.src) ?? "";
@@ -138,6 +147,9 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     videoWatchedRanges: parseVideoCoverageRanges(attrs.videoWatchedRanges),
     videoDurationSeconds: parseFiniteNumberOrNull(attrs.videoDurationSeconds),
     videoBucketSizeSeconds: parseFiniteNumberOrNull(attrs.videoBucketSizeSeconds),
+    processingStatus: match(attrs.processingStatus)
+      .when(isVideoProcessingStatus, (status) => status)
+      .otherwise(() => null),
   };
 };
 
@@ -165,6 +177,7 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const videoWatchedRanges = element.getAttribute("data-video-watched-ranges") ?? null;
   const videoDurationSeconds = element.getAttribute("data-video-duration-seconds") ?? null;
   const videoBucketSizeSeconds = element.getAttribute("data-video-bucket-size-seconds") ?? null;
+  const processingStatus = element.getAttribute("data-processing-status") ?? null;
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
     .when(isVideoSourceType, (value) => value)
@@ -190,5 +203,6 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
     videoWatchedRanges,
     videoDurationSeconds,
     videoBucketSizeSeconds,
+    processingStatus,
   });
 };

@@ -79,12 +79,12 @@ describe("NativeArchiveImportService", () => {
       createLearningPath: jest.fn(),
       createLearningPathCourses: jest.fn(),
     };
-    const courseRepository = {
+    const courseTransferGraphRepository = {
       findCategoryByBaseTitle: jest.fn().mockResolvedValue({ id: "category-id" }),
       ensureCourseSummaryStats: jest.fn(),
     };
-    const masterCourseService = {
-      duplicateCourseIntoExistingCourse: jest.fn().mockResolvedValue({ chapterMap: new Map() }),
+    const courseTransferService = {
+      copyCourseIntoExistingCourse: jest.fn().mockResolvedValue({ chapterMap: new Map() }),
     };
     const assetsService = {
       stageArchiveAssets: jest.fn().mockResolvedValue({
@@ -92,6 +92,7 @@ describe("NativeArchiveImportService", () => {
         uploadedResourceIdsByFileKey: new Map(),
         rewriteReference: (reference: string | null) => reference,
         rewriteValue: (value: unknown) => value,
+        deleteStaged: jest.fn(),
       }),
     };
     const validationService = {
@@ -104,8 +105,8 @@ describe("NativeArchiveImportService", () => {
     const service = new NativeArchiveImportService(
       archiveRepository as never,
       tenantRunner as never,
-      courseRepository as never,
-      masterCourseService as never,
+      courseTransferGraphRepository as never,
+      courseTransferService as never,
       assetsService as never,
       validationService as never,
       liveTrainingService as never,
@@ -128,8 +129,11 @@ describe("NativeArchiveImportService", () => {
     expect(archiveRepository.createCourse).toHaveBeenCalledWith(
       expect.objectContaining({ id: targetCourseId, originalId: COURSE_ID }),
     );
-    expect(masterCourseService.duplicateCourseIntoExistingCourse).toHaveBeenCalledWith(
-      expect.objectContaining({ sourceCourseId: COURSE_ID, targetCourseId }),
+    expect(courseTransferService.copyCourseIntoExistingCourse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: { tenantId: ACTOR.tenantId, snapshot },
+        destination: { tenantId: ACTOR.tenantId, courseId: targetCourseId },
+      }),
     );
     expect(archiveRepository.createLearningPath).toHaveBeenCalledWith(
       expect.objectContaining({ id: targetPathId, originalId: PATH_ID }),

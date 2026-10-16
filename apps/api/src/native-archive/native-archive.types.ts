@@ -10,7 +10,7 @@ import type { PERMISSIONS } from "@repo/shared";
 import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/courses/types/master-course.types";
+import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 import type {
   calendarEvents,
   liveLessons,
