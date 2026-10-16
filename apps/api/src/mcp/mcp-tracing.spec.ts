@@ -17,8 +17,13 @@ describe("MCP tool tracing", () => {
   const span = { update: jest.fn(), end: jest.fn() };
 
   beforeEach(() => {
+    jest.useFakeTimers({ now: new Date("2026-10-16T12:00:00Z") });
     jest.clearAllMocks();
     jest.mocked(startObservation).mockReturnValue(span as never);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("records scoped identity, arguments and response without changing the result", async () => {
@@ -34,7 +39,11 @@ describe("MCP tool tracing", () => {
       ),
     ).resolves.toBe(result);
     expect(propagateAttributes).toHaveBeenCalledWith(
-      { userId: "tenant:user", metadata: { clientId: "oauth-client", requestId: "rpc" } },
+      {
+        userId: "tenant:user",
+        sessionId: "mcp:tenant:user:oauth-client:2026-10-16",
+        metadata: { clientId: "oauth-client", requestId: "rpc" },
+      },
       expect.any(Function),
     );
     expect(startObservation).toHaveBeenCalledWith(
@@ -45,6 +54,37 @@ describe("MCP tool tracing", () => {
     expect(operation).toHaveBeenCalledTimes(1);
     expect(span.update).toHaveBeenCalledWith({ output: result, level: "DEFAULT" });
     expect(span.end).toHaveBeenCalledTimes(1);
+  });
+
+  it("groups different tool calls within a UTC day and rolls over at UTC midnight", async () => {
+    const operation = async () => ({ content: [] });
+    jest.setSystemTime(new Date("2026-10-16T00:00:00Z"));
+    await traceMcpTool("list_courses", actor, undefined, {}, operation);
+    jest.setSystemTime(new Date("2026-10-16T23:59:59.999Z"));
+    await traceMcpTool("get_course", actor, undefined, {}, operation);
+    jest.setSystemTime(new Date("2026-10-17T00:00:00Z"));
+    await traceMcpTool("get_course", actor, undefined, {}, operation);
+
+    expect(
+      jest.mocked(propagateAttributes).mock.calls.map(([attributes]) => attributes.sessionId),
+    ).toEqual([
+      "mcp:tenant:user:oauth-client:2026-10-16",
+      "mcp:tenant:user:oauth-client:2026-10-16",
+      "mcp:tenant:user:oauth-client:2026-10-17",
+    ]);
+  });
+
+  it.each([
+    ["tenantId", "other-tenant", "mcp:other-tenant:user:oauth-client:2026-10-16"],
+    ["userId", "other-user", "mcp:tenant:other-user:oauth-client:2026-10-16"],
+    ["clientId", "other-client", "mcp:tenant:user:other-client:2026-10-16"],
+  ])("separates daily sessions by %s", async (field, value, sessionId) => {
+    const otherActor = { ...actor, grant: { ...actor.grant, [field]: value } };
+    await traceMcpTool("get_course", otherActor, undefined, {}, async () => ({ content: [] }));
+    expect(propagateAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId }),
+      expect.any(Function),
+    );
   });
 
   it("marks returned MCP errors and ends the observation", async () => {

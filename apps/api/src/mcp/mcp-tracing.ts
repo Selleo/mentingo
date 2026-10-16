@@ -30,6 +30,9 @@ export function traceMcpTool(
   return propagateAttributes(
     {
       userId: `${actor.grant.tenantId}:${actor.grant.userId}`,
+      sessionId: `mcp:${actor.grant.tenantId}:${actor.grant.userId}:${
+        actor.grant.clientId
+      }:${new Date().toISOString().slice(0, 10)}`,
       metadata: { clientId: actor.grant.clientId, requestId: call?.requestId ?? "" },
     },
     async () => {
