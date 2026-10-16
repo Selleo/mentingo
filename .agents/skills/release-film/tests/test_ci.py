@@ -141,6 +141,35 @@ class Redact(unittest.TestCase):
         self.assertEqual(redact.values({'GH_TOKEN': 'short'}), [])
 
 
+class ReleaseNotes(unittest.TestCase):
+    def test_the_film_precedes_the_notes_and_republishing_does_not_duplicate_it(self):
+        section = f'{release_assets.MARK_START}\nNew film\n{release_assets.MARK_END}'
+        notes = '# Highlights\n\nExisting text.\n\n## Details\n\n- One\n- Two'
+        result = release_assets.with_section(notes, section)
+        self.assertEqual(result, f'{section}\n\n{notes}\n')
+        self.assertEqual(release_assets.with_section(result, section), result)
+        self.assertEqual(release_assets.with_section(None, section), section + '\n')
+
+    def test_an_earlier_film_section_moves_to_the_top_and_keeps_the_surrounding_notes(self):
+        old = f'{release_assets.MARK_START}\nOld film\n{release_assets.MARK_END}'
+        section = f'{release_assets.MARK_START}\nNew film\n{release_assets.MARK_END}'
+        for body in (f'# Summary\n\n{old}', f'{old}\n\n# Summary', f'# Summary\n\n{old}\n\n## Details'):
+            with self.subTest(body=body):
+                result = release_assets.with_section(body, section)
+                self.assertTrue(result.startswith(section + '\n\n# Summary'))
+                self.assertEqual(result.count(release_assets.MARK_START), 1)
+                self.assertNotIn('Old film', result)
+                self.assertEqual(result[len(section):].strip(), body.replace(old, '').strip())
+
+    def test_the_preview_links_the_poster_to_the_film_and_is_optional(self):
+        names = release_assets.asset_names('v1.2.0', 'en')
+        links = {names['film']: 'https://example.test/film.mp4', names['poster']: 'https://example.test/poster.jpg'}
+        section = release_assets.notes_section('v1.2.0', 'en', links)
+        self.assertIn('[![Watch the release film](https://example.test/poster.jpg)](https://example.test/film.mp4)', section)
+        self.assertIn('[film (MP4)](https://example.test/film.mp4)', section)
+        self.assertNotIn('![', release_assets.notes_section('v1.2.0', 'en', {names['film']: links[names['film']]}))
+
+
 class Publish(unittest.TestCase):
     TAG = 'v1.2.0'
 
@@ -195,7 +224,10 @@ class Publish(unittest.TestCase):
                 result = release_assets.publish(folder, 'release', repo='o/r')
                 self.assertNotIn(film, result['uploaded'])  # an interrupted publish resumes
                 self.assertEqual(len(result['uploaded']), 4)
-                self.assertTrue(release['body'].startswith('# Release Summary\n\nNotes.'))
+                self.assertTrue(release['body'].startswith(release_assets.MARK_START))
+                self.assertTrue(release['body'].endswith('# Release Summary\n\nNotes.\n'))
+                poster = release_assets.asset_names(self.TAG, 'en')['poster']
+                self.assertIn(f'[![Watch the release film](https://example.test/{poster})](https://x/f)', release['body'])
                 self.assertIn('film (MP4)', release['body'])
                 self.assertIn('page with the film and every pull request (ZIP)', release['body'])
                 again = release_assets.publish(folder, 'release', repo='o/r')  # a second publish changes nothing
@@ -235,7 +267,8 @@ class Publish(unittest.TestCase):
             self.assertEqual(left, sorted(others + list(staged)))  # no other asset was touched
             self.assertEqual(release['body'].count(release_assets.MARK_START), 1)
             self.assertNotIn('old links', release['body'])
-            self.assertTrue(release['body'].startswith('Notes.'))
+            self.assertTrue(release['body'].startswith(release_assets.MARK_START))
+            self.assertTrue(release['body'].endswith('Notes.\n'))
 
     def test_a_film_the_site_shows_for_the_tag_stops_the_release_publish_unless_replaced(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -327,7 +360,7 @@ class Provenance(unittest.TestCase):
     RUN = {'path': '.github/workflows/release-film.yml', 'event': 'workflow_dispatch',
            'head_repository': {'id': 7}, 'repository': {'id': 7}}
 
-    def test_only_a_recording_of_this_repository_started_by_hand_is_published(self):
+    def test_only_a_dispatched_recording_of_this_repository_is_published(self):
         with mock.patch.object(release_assets, 'gh', return_value=json.dumps(self.RUN)) as gh:
             self.assertEqual(release_assets.recording('123', repo='o/r')['run'], 123)
         gh.assert_called_once_with('api', 'repos/o/r/actions/runs/123')
@@ -335,7 +368,7 @@ class Provenance(unittest.TestCase):
         for change in ({'path': '.github/workflows/pr-check.yml'}, {'event': 'pull_request'},
                        {'head_repository': {'id': 8}}):
             with self.subTest(change), mock.patch.object(release_assets, 'gh', return_value=json.dumps(dict(self.RUN, **change))), \
-                    self.assertRaisesRegex(SystemExit, 'is not a recording of .* started by hand'):
+                    self.assertRaisesRegex(SystemExit, 'is not a recording of .* started through workflow_dispatch'):
                 release_assets.recording('123', repo='o/r')
         with mock.patch.object(release_assets, 'gh') as gh, self.assertRaisesRegex(SystemExit, 'unexpected run ID'):
             release_assets.recording('123 --paginate', repo='o/r')

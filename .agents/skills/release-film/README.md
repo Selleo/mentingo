@@ -255,10 +255,17 @@ describes the keys and the other commands.
 
 </details>
 
-In GitHub Actions a person starts every recording, and a recording with `publish` on starts the publication itself.
+In GitHub Actions each stable published release queues a recording, and a recording with `publish` on starts the
+publication itself. Recordings can also be started by hand for an existing tag or to retry a failed film.
 Publishing to the site needs GitHub Pages built from GitHub Actions, with the branch allowed in the `github-pages`
 environment.
 
+- `release-film-on-release.yml` reacts to `release: published`, skipping drafts and prereleases. It dispatches
+  `release-film.yml` on the repository's default branch with the event's exact tag, `publish=true`, `learn=sync`
+  and `replace=false`. Dispatching on the default branch respects the `release-film` and `github-pages`
+  environments' branch rules; a release event itself runs on a tag. This uses `GITHUB_TOKEN` with `actions: write`,
+  with no additional secret. Editing release notes does not trigger another recording. The dispatch job's summary
+  links to the recording workflow; its success means queued, while the separate recording run reports the film's result.
 - `release-film.yml` records the film of a tag on a Claude for Teams token (`CLAUDE_CODE_OAUTH_TOKEN` from
   `claude setup-token`, kept in the `release-film` environment, whose branch rule names the branches that may use
   it). One recording runs at a time. Its `publish` input is on by default: after a successful recording the film
@@ -267,6 +274,13 @@ environment.
 - `release-film-publish.yml` publishes a recording (its run ID) to a test draft release, to the tag's release or to
   the Pages site alone. A tag that already has a film stops it unless `replace` is on, which first deletes that
   film's release assets (never another asset). The site keeps every other film it already shows.
+
+The release notes start with a single film section: a clickable poster opens the MP4, followed by links to the
+film, page ZIP and subtitles. Publishing again updates this section and moves an older section to the top without
+duplicating it or replacing the remaining notes. The film covers selected user-facing changes since the previous
+published ancestor release; the page accounts for the release's pull requests. There is no monthly timer: each
+stable release gets its own film. Deploy these workflows to the default branch and future release tags before
+publishing a release. An already published release does not replay its event; record it by hand if needed.
 
 <details>
 <summary>The recording job's steps</summary>
