@@ -2,7 +2,12 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 
 import { toNodeHandler } from "@modelcontextprotocol/node";
-import { createMcpHandler, McpServer, type RegisteredTool } from "@modelcontextprotocol/server";
+import {
+  createMcpHandler,
+  McpServer,
+  type RegisteredTool,
+  type CallToolResult,
+} from "@modelcontextprotocol/server";
 import {
   BadRequestException,
   ConflictException,
@@ -90,6 +95,7 @@ import { canListMcpTool } from "./mcp-tool-access";
 import { canUseMcpToolWithScopes, MCP_SCOPES } from "./mcp-tool-scope";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 import * as McpToolSchemas from "./mcp-tool.schemas";
+import { traceMcpTool } from "./mcp-tracing";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { MCP_UPLOAD_INSTRUCTIONS_SERVER } from "./mcp-upload-guidance";
 import { withMcpUploadInstructions } from "./mcp-upload-response";
@@ -239,7 +245,14 @@ export class McpHttpService {
       const tool = Reflect.apply(registerTool, server, [
         name,
         selected?.config ?? config,
-        selected?.callback ?? callback,
+        (input: unknown, extra: unknown) =>
+          traceMcpTool(name, actor, this.callContext.getStore(), input, () =>
+            Reflect.apply(
+              (selected?.callback ?? callback) as (...args: unknown[]) => Promise<CallToolResult>,
+              undefined,
+              [input, extra],
+            ),
+          ),
       ]) as RegisteredTool;
       const studentPermissions = Object.entries(MCP_STUDENT_TOOL_PERMISSIONS).find(
         ([tool]) => tool === name,
