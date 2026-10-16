@@ -3403,6 +3403,7 @@
           "aiRoleplayTypeTooltip": "Simule un personnage et une situation réalistes – sans briser le personnage.\nExemple : « C'est la deuxième fois que votre service échoue. Qu'allez-vous faire à ce sujet ? »",
           "passThresholdTooltip": "Définissez le pourcentage minimum (1-100 %) requis pour réussir. Laissez vide pour aucun seuil.",
           "voiceConfigCartesiaTooltip": "L'audio vocal utilise Cartesia. Choisissez Homme ou Femme pour utiliser le mappage vocal configuré, ou choisissez Personnalisé et saisissez un identifiant vocal Cartesia.",
+          "voiceConfigElevenLabsTooltip": "L'audio vocal utilise ElevenLabs. Choisissez Homme ou Femme pour utiliser le mappage vocal configuré, ou choisissez Personnalisé et saisissez un identifiant vocal ElevenLabs.",
           "voiceConfigOpenAiCompatibleTooltip": "L'audio vocal utilise un point de terminaison de synthèse vocale compatible OpenAI. Les hommes et les femmes utilisent les préréglages vocaux OpenAI. Choisissez Personnalisé pour saisir une autre valeur vocale prise en charge par ce point de terminaison.",
           "aiMentorPersonaTooltip": "Définissez le personnage de la leçon en choisissant un nom et un avatar pour l'AI Mentor. Il utilisera ce nom et cet avatar pendant le cours.",
           "suggestedExamples": "Exemples suggérés",

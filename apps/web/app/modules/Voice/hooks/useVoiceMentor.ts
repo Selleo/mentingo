@@ -1,3 +1,4 @@
+import { RealtimePCMPlayer } from "@mentingo/voice/core";
 import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -5,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 import { useToast } from "~/components/ui/use-toast";
 
-import { RealtimePCMPlayer } from "../audio-player";
 import { RealtimePCMStreamerWorklet } from "../audio-stream";
 import { VOICE_CONNECTION_STATE, type VoiceConnectionState } from "../audio-stream.types";
 import { acceptMentorSpeechAlignment, resolveActiveWordIndex } from "../voice-mentor-presentation";

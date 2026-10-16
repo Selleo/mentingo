@@ -3646,6 +3646,7 @@
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
           "voiceConfigCartesiaTooltip": "Voice audio uses Cartesia. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a Cartesia voice ID.",
+          "voiceConfigElevenLabsTooltip": "Voice audio uses ElevenLabs. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a ElevenLabs voice ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Voice audio uses an OpenAI-compatible text-to-speech endpoint. Male and Female use OpenAI voice presets. Choose Custom to enter another voice value supported by that endpoint.",
           "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",

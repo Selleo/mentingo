@@ -12,6 +12,7 @@ import type { AiRepository } from "src/ai/repositories/ai.repository";
 import type { MessageService } from "src/ai/services/message.service";
 import type { RagService } from "src/ai/services/rag.service";
 import type { TokenService } from "src/ai/services/token.service";
+import type { EnvService } from "src/env/services/env.service";
 
 describe("PromptService learner-name personalization", () => {
   const threadId = "11111111-1111-4111-8111-111111111111";
@@ -56,14 +57,18 @@ describe("PromptService learner-name personalization", () => {
       getContext: jest.fn().mockResolvedValue({ chunks: [] }),
     };
     const tokenService = { countTokens: jest.fn().mockReturnValue(42) };
+    const envService = {
+      getLumaConfigured: jest.fn().mockResolvedValue({ voiceTtsProvider: "cartesia" }),
+    };
     const service = new PromptService(
       aiRepository as unknown as AiRepository,
       messageService as unknown as MessageService,
       tokenService as unknown as TokenService,
       ragService as unknown as RagService,
+      envService as unknown as EnvService,
     );
 
-    return { aiRepository, messageService, ragService, service, tokenService };
+    return { aiRepository, messageService, ragService, service, tokenService, envService };
   };
 
   it("appends the learner-name rules to the stored Roleplay prompt returned for the welcome", async () => {
@@ -125,6 +130,28 @@ describe("PromptService learner-name personalization", () => {
     expect(prompt).toContain("Never infer or invent gender, titles, honorifics");
     expect(prompt).toContain("In Roleplay, remain fully in character");
   });
+
+  it.each(["cartesia", "elevenlabs", "openaiCompatible"])(
+    "selects voice guidelines for the configured %s provider",
+    async (voiceTtsProvider) => {
+      const { service, envService } = createService();
+      service.onModuleInit();
+      envService.getLumaConfigured.mockResolvedValue({ voiceTtsProvider });
+      const prompt = await service.buildPrompt(threadId, "Hello", true);
+      const content = prompt.map((message) => message.content).join("\n");
+      if (voiceTtsProvider === "elevenlabs") {
+        expect(content).toContain("The active speech provider is ElevenLabs");
+        expect(content).toContain("⟦cue:short pause⟧");
+        expect(content).not.toContain("Allowed values: happy");
+      } else {
+        expect(content).toContain("⟦emotion:neutral⟧");
+        expect(content).not.toContain("The active speech provider is ElevenLabs");
+      }
+      envService.getLumaConfigured.mockClear();
+      await service.buildPrompt(threadId, "Hello", false);
+      expect(envService.getLumaConfigured).not.toHaveBeenCalled();
+    },
+  );
 
   it("adds a system interruption marker to the next voice mentor prompt", async () => {
     const { service } = createService();

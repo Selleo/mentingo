@@ -136,6 +136,7 @@ export const PROMPT_MAP = {
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,
+  voiceMentorElevenLabsAddon: voiceMentorAddonSchema,
   voiceMentorTimingAddon: voiceMentorTimingAddonSchema,
   voiceMentorInterruptionPolicy: voiceMentorInterruptionPolicySchema,
   voiceMentorInterruptionEvent: voiceMentorInterruptionEventSchema,

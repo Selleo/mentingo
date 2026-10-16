@@ -44,11 +44,19 @@ export const isConfiguredResponseSchema = Type.Object({
   enabled: Type.Boolean(),
 });
 
+export const voiceTtsProviderSchema = Type.Union([
+  Type.Literal("cartesia"),
+  Type.Literal("elevenlabs"),
+  Type.Literal("openaiCompatible"),
+]);
+
+export type VoiceTtsProvider = Static<typeof voiceTtsProviderSchema>;
+
 export const lumaConfiguredResponseSchema = Type.Object({
   enabled: Type.Boolean(),
   courseGenerationEnabled: Type.Boolean(),
   voiceMentorEnabled: Type.Boolean(),
-  voiceTtsProvider: Type.Union([Type.Literal("cartesia"), Type.Literal("openaiCompatible")]),
+  voiceTtsProvider: voiceTtsProviderSchema,
 });
 
 export const aiCapabilityMatrixItemSchema = Type.Object({
