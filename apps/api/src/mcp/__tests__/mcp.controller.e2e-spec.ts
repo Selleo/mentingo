@@ -15,6 +15,12 @@ import request from "supertest";
 
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { SearchIndexService } from "src/global-search/search-index.service";
+import {
+  normalizeSearchText,
+  chunkSearchText,
+} from "src/global-search/semantic-search-index.chunking";
+import { SemanticSearchEmbeddingService } from "src/global-search/semantic-search-index.embedding.service";
+import { SemanticSearchIndexRepository } from "src/global-search/semantic-search-index.repository";
 import { DB } from "src/storage/db/db.providers";
 import {
   users,
@@ -25,6 +31,7 @@ import {
   courses,
   permissionUserRoles,
   resourceEntity,
+  searchDocuments,
   studentCourses,
   studentLessonProgress,
   assessments,
@@ -499,7 +506,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       expect(detail[key]).not.toHaveProperty("resources");
     }
     const result = await call("global_search", { searchQuery: "MCP", language: "en" }, reader);
-    for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
+    expect(result.lessons).toEqual([]);
+    for (const excluded of ["users", "groups", "categories", "learningPaths"])
       expect(result).not.toHaveProperty(excluded);
     expect(JSON.stringify(result)).not.toContain(draftCourseId);
     expect(JSON.stringify(result)).not.toContain(draftArticleId);
@@ -549,6 +557,136 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         };
       });
     }
+
+    async function indexLesson(fixture: Awaited<ReturnType<typeof curriculum>>, owner = admin) {
+      await runAsTenant(owner.tenantId, async () => {
+        await app.get(SearchIndexService).refreshLesson(fixture.lesson.id);
+        const index = app.get(SemanticSearchIndexRepository);
+        const docs = await db
+          .select()
+          .from(searchDocuments)
+          .where(eq(searchDocuments.entityId, fixture.lesson.id));
+        for (const doc of docs) {
+          const source = await index.findSource({
+            entityType: doc.entityType,
+            entityId: doc.entityId,
+            documentType: doc.documentType,
+            language: doc.language,
+          });
+          if (!source) continue;
+          const chunks = chunkSearchText(normalizeSearchText(source.content));
+          if (chunks.length)
+            await index.replace(
+              source,
+              chunks,
+              chunks.map(() => [1, ...Array<number>(1535).fill(0)]),
+            );
+        }
+      });
+    }
+
+    it("globally finds authorized lessons in keyword and hybrid modes then reads them by result identity", async () => {
+      const visible = await curriculum();
+      const enrolledOnly = await curriculum(admin, COURSE_STATUSES.PRIVATE);
+      const hidden = await curriculum();
+      const foreignLesson = await curriculum(foreign);
+      await baseDb
+        .update(courses)
+        .set({ status: COURSE_STATUSES.DRAFT })
+        .where(eq(courses.id, hidden.course.id));
+      for (const fixture of [visible, enrolledOnly, hidden]) await indexLesson(fixture);
+      await indexLesson(foreignLesson, foreign);
+      const embed = jest
+        .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
+        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+      try {
+        for (const reader of await readers()) {
+          for (const mode of ["keyword", "hybrid"]) {
+            const found = await call(
+              "global_search",
+              { searchQuery: "Visible authored body", language: "en", mode },
+              reader,
+            );
+            expect(found.lessons).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ id: visible.lesson.id, courseId: visible.course.id }),
+              ]),
+            );
+            for (const fixture of [enrolledOnly, hidden, foreignLesson])
+              expect(found.lessons.map((row: ToolResult) => row.id)).not.toContain(
+                fixture.lesson.id,
+              );
+            const hit = found.lessons.find((row: ToolResult) => row.id === visible.lesson.id);
+            expect(Object.keys(hit).sort()).toEqual(
+              ["id", "title", "courseId", "matchedPassage", "url"].sort(),
+            );
+            const detail = await call(
+              "get_lesson",
+              { courseId: hit.courseId, lessonId: hit.id, language: "en" },
+              reader,
+            );
+            expect(detail.lesson.content).toContain(visible.marker);
+            expect(found).not.toHaveProperty("users");
+            expect(found).not.toHaveProperty("learningPaths");
+          }
+          await runAsTenant(reader.tenantId, async () =>
+            db.insert(studentCourses).values({
+              studentId: reader.user.id,
+              courseId: enrolledOnly.course.id,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            }),
+          );
+          const enrolled = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+            reader,
+          );
+          expect(enrolled.lessons.map((row: ToolResult) => row.id)).toContain(
+            enrolledOnly.lesson.id,
+          );
+          await runAsTenant(reader.tenantId, async () =>
+            db
+              .update(studentCourses)
+              .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+              .where(
+                and(
+                  eq(studentCourses.studentId, reader.user.id),
+                  eq(studentCourses.courseId, enrolledOnly.course.id),
+                ),
+              ),
+          );
+          const revoked = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+            reader,
+          );
+          expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(
+            enrolledOnly.lesson.id,
+          );
+          for (const query of [
+            `scriptsecret-${visible.marker}`,
+            `hiddenattribute-${visible.marker}`,
+            `unclosedscript-${visible.marker}`,
+          ]) {
+            const noHiddenMatches = await call(
+              "global_search",
+              { searchQuery: query, language: "en", mode: "keyword" },
+              reader,
+            );
+            expect(noHiddenMatches.lessons).toEqual([]);
+          }
+        }
+        const legacy = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
+        const legacyResults = await call(
+          "global_search",
+          { searchQuery: "Visible authored body", language: "en" },
+          legacy,
+        );
+        expect(legacyResults).not.toHaveProperty("lessons");
+      } finally {
+        embed.mockRestore();
+      }
+    });
 
     async function readers() {
       return [

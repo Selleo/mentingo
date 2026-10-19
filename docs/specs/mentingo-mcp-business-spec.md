@@ -81,7 +81,7 @@ truncation marker. List titles cap at 500 characters and summaries/course descri
 at 2,000. Course, article and Q&A lists accept bounded pages of at most 25; news keeps
 its learner API's fixed page size.
 
-Student global search skips lesson, development path and directory retrieval; the separate `search_lessons` tool finds accessible lessons by title and authored text. Course
+Student global search supports keyword and hybrid semantic lesson discovery with the same public/enrolled-private course rules as lesson reads, including for administrators and authors. It filters tenant, visibility, enrollment and safe source types before ranking and limiting. Results return lesson/course IDs, bounded sanitized passages and source links so the assistant can fetch `get_lesson` before drawing conclusions. Only normalized current indexed title and content-lesson description chunks are eligible; assessment questions/answers, AI prompts and lesson files are excluded. Background indexing is required for global lesson results; `search_lessons` remains a literal-text fallback. Legacy search grants and other access scopes retain their existing contracts. Development-path and directory retrieval remain excluded. Course
 matches use only title/description documents, in keyword and hybrid modes, so hidden
 lesson/file text cannot cause a course match. Course search passages and attachment
 filenames are omitted. Eligible editorial file text shares the same permission-filtered
@@ -155,3 +155,5 @@ Prior local validation included the MCP unit suite and real HTTP tests against d
 Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. Browser-based MCP, third-party clients, and deployed behavior remain unverified. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.
 
 MCP learner curriculum regression coverage verifies public and own-enrolled private access, administrator scope limits, draft/archive and tenant exclusion, content sanitization, scope discovery and permission revocation. The focused HTTP suite runs against disposable Postgres, Redis and S3 storage; it also verifies that lesson reads preserve learning progress.
+
+Global lesson search tests cover keyword/vector retrieval and search-to-read through MCP, with deterministic embeddings, public/private enrollment, revocation, drafts, archives, tenant isolation and exclusion of raw hidden HTML, assessment and file sources.

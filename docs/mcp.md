@@ -156,7 +156,9 @@ These MCP reads do not start lessons, change progress, enforce the interactive
 lesson sequence, or create AI sessions. They do not enroll the account or change
 normal web lesson access, including freemium rules.
 
-`get_lesson` requires matching `courseId`, `chapterId`, `lessonId` and `language`.
+`get_lesson` requires `courseId`, `lessonId` and `language`; optional `chapterId`
+is also checked when supplied. Use lesson and course IDs from global search to
+fetch the actual lesson content.
 Content lessons return sanitized authored text; quiz, AI mentor, video/embed and
 other lesson types return metadata only with `contentReadSupported: false`.
 No assessment answers, hidden grading, AI configuration, file credentials, playback
@@ -178,10 +180,21 @@ available, and direct calls to tools outside the scope are rejected.
 
 The same reader tool names are used for account, granular and student connections. Tool discovery selects each resource view from the approved scope and current permissions: `student:read` always uses learner projections; account and granular read connections use the management view only with that resource's management permissions, otherwise the learner view. Role names do not choose the view. `get_course` uses `courseId`, `get_qa_entry` uses `qaId`, and article/news lookup uses `id`.
 
-Student search is restricted before retrieval to accessible course metadata, news,
-articles and Q&A. It excludes lesson, directory and development-path searches.
-Use the separate `search_lessons` tool to search accessible lesson titles and text;
-its results include course/chapter identity and canonical lesson links.
+For `student:read`, `global_search` includes accessible lesson results in keyword
+and hybrid modes. Start with `global_search(mode: "hybrid")`, then read the result
+with `get_lesson` or `get_article` before answering. Lesson visibility and safe
+source checks run before ranking and limits: published unarchived public courses,
+or private courses with the connected account's own active enrollment. There is
+no administrator or author bypass. Results contain lesson/course IDs, a bounded
+sanitized passage and a canonical link, without attachment filenames or file URLs.
+Only indexed lesson titles and authored content-lesson descriptions are eligible;
+assessment questions/answers, AI configuration and lesson files are excluded.
+Both keyword and hybrid learner lesson results require current normalized text
+chunks from background indexing; unindexed or stale lessons produce no result.
+The existing `semanticStatus` indicates hybrid readiness/fallback. Use
+`search_lessons` as a literal-text fallback without an index dependency. Directory
+and development-path searches remain excluded. Legacy `search` and other scope
+contracts retain their existing projections.
 Course matching uses title/description documents only, including in hybrid mode;
 lesson or private file matches cannot cause a course hit. Course matched passages
 and attachment filenames are omitted from returned results. Editorial retrieval

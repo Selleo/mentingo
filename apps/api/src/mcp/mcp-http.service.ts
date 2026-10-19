@@ -215,7 +215,7 @@ export class McpHttpService {
     let instructions = MCP_UPLOAD_INSTRUCTIONS_SERVER;
     if (studentOnly)
       instructions =
-        "Search learner-visible courses, chapters, lessons, articles, news and Q&A. Use search_lessons for lesson titles and text, list_chapters/list_lessons to browse, and get_lesson to read authored text. Public courses and enrolled private courses only, including for administrators. This connection cannot modify content, update progress, access quiz answers, AI prompts, or file URLs.";
+        "Search learner-visible courses, chapters, lessons, articles, news and Q&A. Use global_search with mode=hybrid to find relevant lessons and articles, then get_lesson/get_article to read their content. Use list_chapters/list_lessons to browse, or search_lessons for an unindexed literal text search. Public courses and enrolled private courses only, including for administrators. This connection cannot modify content, update progress, access quiz answers, AI prompts, or file URLs.";
     else if (actor.grant.scopes.includes(MCP_SCOPES.SEARCH))
       instructions =
         "Search learner-visible course metadata, articles, news and Q&A. No lesson content, modifications, administrative data or file URLs.";
@@ -3306,6 +3306,7 @@ export class McpHttpService {
         resource: actor.grant.resource,
         searchOnly: learnerSearch || actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
         studentOnly: learnerSearch,
+        includeLearnerLessons: studentOnly,
       },
     );
 

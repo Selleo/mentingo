@@ -58,7 +58,7 @@ export const listStudentLessonsInputSchema = Type.Object(
   { additionalProperties: false },
 );
 export const getStudentLessonInputSchema = Type.Object(
-  { courseId: UUIDSchema, chapterId: UUIDSchema, lessonId: UUIDSchema, language },
+  { courseId: UUIDSchema, chapterId: Type.Optional(UUIDSchema), lessonId: UUIDSchema, language },
   { additionalProperties: false },
 );
 export const searchStudentLessonsInputSchema = Type.Object(

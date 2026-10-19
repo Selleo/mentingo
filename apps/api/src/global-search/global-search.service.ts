@@ -58,13 +58,31 @@ export class GlobalSearchService {
     ) => {
       if (
         options.contentOnly &&
-        (entityType === SEARCH_ENTITY_TYPES.LESSON ||
+        ((entityType === SEARCH_ENTITY_TYPES.LESSON && !options.includeLearnerLessons) ||
           entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
       )
         return [];
       const metadataOnly = Boolean(
         options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
       );
+      if (options.includeLearnerLessons && entityType === SEARCH_ENTITY_TYPES.LESSON) {
+        const keyword = await this.hybridSearchRepository.findKeywordMatches(
+          entityType,
+          trimmedQuery,
+          currentUser,
+          false,
+          true,
+        );
+        if (!embedding) return keyword;
+        const semantic = await this.hybridSearchRepository.findSemanticMatches(
+          entityType,
+          embedding,
+          currentUser,
+          false,
+          true,
+        );
+        return fuseSearchMatches(keyword, semantic);
+      }
       const keyword = await this.hybridSearchRepository.findKeywordMatches(
         entityType,
         trimmedQuery,
@@ -114,9 +132,7 @@ export class GlobalSearchService {
       this.getMyCourses(courseMatches, language, currentUser, options.learnerOnly),
       this.getAvailableCourses(courseMatches, language, currentUser),
       options.contentOnly ? [] : this.getLearningPaths(learningPathMatches, language, currentUser),
-      options.contentOnly
-        ? []
-        : this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
+      this.getLessons(lessonMatches, language, trimmedQuery, currentUser, options),
       this.getNews(newsMatches, language, currentUser),
       this.getArticles(articleMatches, language, currentUser),
       this.getQA(qaMatches, language, currentUser),
@@ -265,7 +281,11 @@ export class GlobalSearchService {
     language: SupportedLanguages,
     searchQuery: string,
     currentUser: CurrentUserType,
+    options: GlobalSearchReadOptions = {},
   ) {
+    if (options.includeLearnerLessons)
+      return this.globalSearchRepository.getLearnerLessons(matches, language, currentUser);
+    if (options.contentOnly) return [];
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ)) return [];
 
     if (hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)) {

@@ -91,4 +91,9 @@ export type GlobalSearchLessonAccess =
   (typeof GLOBAL_SEARCH_LESSON_ACCESS)[keyof typeof GLOBAL_SEARCH_LESSON_ACCESS];
 
 /** Trusted integration projection and learner visibility controls. */
-export type GlobalSearchReadOptions = { contentOnly?: boolean; learnerOnly?: boolean };
+export type GlobalSearchReadOptions = {
+  contentOnly?: boolean;
+  learnerOnly?: boolean;
+  /** Trusted MCP student:read opt-in; does not broaden regular learner or legacy search. */
+  includeLearnerLessons?: boolean;
+};
