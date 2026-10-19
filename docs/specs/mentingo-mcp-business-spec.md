@@ -32,7 +32,7 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Read and update existing users, group memberships, and roles; create, read, and update groups and translations. User creation/import, archiving/deletion, group deletion, and credential operations are excluded.
 - Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, branding images, and public login documents. SSO and MFA settings are excluded.
 - Open search results directly in the connected tenant using links returned by Mentingo.
-- Connect a learner assistant with the exclusive `student:read` scope for search and eight reader list/get tools, keeping authoring, administration, lesson bodies and file URLs unavailable.
+- Connect a learner assistant with `student:read` to find accessible lessons by title or text, browse course chapters and read content lessons while keeping authoring, administration, assessment answers and file URLs unavailable.
 - Connect standard assistants with account access and explicit consent; optionally cap a connection with per-domain read/write scopes instead. Both follow existing account permissions.
 - Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
@@ -63,7 +63,17 @@ intersection of the account's current permissions and default student permission
 Elevated role shortcuts are excluded; no permissions or enrollments are added.
 Course reads return metadata only and reject drafts, archived courses and unenrolled
 private courses, even if the connected account is the author. They exclude chapter
-and lesson bodies, assessments, authoring configuration and file URLs. Article/news
+and lesson bodies in the course metadata response. Separate MCP-only `list_chapters`,
+`get_chapter`, `list_lessons`, `get_lesson` and `search_lessons` tools expose the
+accessible curriculum and bounded content lesson text. Published unarchived courses
+are readable without enrollment; private courses require this account's own active
+enrollment, even for an administrator or author. Drafts and archived courses remain
+unavailable. Lesson search filters those rules before retrieval and counting and
+matches localized titles and authored content text. These read-only MCP tools do
+not start lessons, change progress, enforce interactive lesson sequence, create AI
+sessions or change the web app's enrollment/freemium behavior. Other lesson types
+return metadata only: no quiz answers, hidden grading, AI prompts, playback URLs,
+private files or authoring configuration. Article/news
 reads require published, learner-visible content in an available language; Q&A reads
 require the requested language. Their returned original text is sanitized, excludes
 embedded resource objects and signed URLs, and is capped at 16,000 characters with a
@@ -71,7 +81,7 @@ truncation marker. List titles cap at 500 characters and summaries/course descri
 at 2,000. Course, article and Q&A lists accept bounded pages of at most 25; news keeps
 its learner API's fixed page size.
 
-Student global search skips lesson, development path and directory retrieval. Course
+Student global search skips lesson, development path and directory retrieval; the separate `search_lessons` tool finds accessible lessons by title and authored text. Course
 matches use only title/description documents, in keyword and hybrid modes, so hidden
 lesson/file text cannot cause a course match. Course search passages and attachment
 filenames are omitted. Eligible editorial file text shares the same permission-filtered
@@ -143,3 +153,5 @@ listed below.
 Prior local validation included the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
 
 Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. Browser-based MCP, third-party clients, and deployed behavior remain unverified. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.
+
+MCP learner curriculum regression coverage verifies public and own-enrolled private access, administrator scope limits, draft/archive and tenant exclusion, content sanitization, scope discovery and permission revocation. The focused HTTP suite runs against disposable Postgres, Redis and S3 storage; it also verifies that lesson reads preserve learning progress.

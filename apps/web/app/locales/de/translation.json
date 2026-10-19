@@ -12,7 +12,7 @@
     "title": "{{clientName}} mit Mentingo verbinden?",
     "description": "Dieser Assistent kann Mentingo mit Ihren aktuellen Berechtigungen nutzen.",
     "searchDescription": "Erlaube diesem Assistenten, zugängliche Kursinformationen, Wissensartikel, Neuigkeiten und Fragen und Antworten zu suchen und Links zu Mentingo zurückzugeben. Er kann keine Inhalte ändern, Unterrichtsinhalte abrufen oder Verwaltungswerkzeuge verwenden.",
-    "studentDescription": "Nur Lernendenzugriff: veröffentlichte Artikel, Nachrichten, Fragen und Antworten sowie zugängliche Kursmetadaten suchen und lesen. Keine Lektionen, privaten Dateien, Entwürfe, Verwaltung oder Änderungen. Alle Slack-Nutzer teilen den Lernendenzugriff des verbundenen Kontos.",
+    "studentDescription": "Lernendenzugriff nur zum Lesen: Kurse und Lektionen suchen, Kapitel durchsuchen und Lektionstexte in öffentlichen Kursen oder privaten Kursen lesen, in die dieses Konto eingeschrieben ist, sowie veröffentlichte Artikel, Nachrichten und Fragen und Antworten. Keine Änderungen, Quizlösungen, KI-Prompts oder privaten Datei-URLs. Alle Slack-Nutzer teilen den Lernendenzugriff des verbundenen Kontos.",
     "accountDescription": "Erlaube diesem Assistenten, die für dein Konto verfügbaren Mentingo-Werkzeuge zu nutzen, einschließlich Lesen und Änderungen. Deine aktuellen Berechtigungen und Organisationseinstellungen gelten weiterhin. Prüfe das Konto und die Weiterleitungsadresse, bevor du Zugriff erlaubst.",
     "explicitDescription": "Prüfen Sie die angeforderten Berechtigungen unten. Sie begrenzen den Assistenten innerhalb Ihrer Kontoberechtigungen; Lesezugriff auf Verwaltungswerkzeuge kann Entwürfe und Verwaltungsdaten enthalten.",
     "requestedScopes": "Angeforderte Berechtigungen",

@@ -9,6 +9,7 @@ import { GlobalSearchModule } from "src/global-search/global-search.module";
 import { GroupModule } from "src/group/group.module";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LessonModule } from "src/lesson/lesson.module";
+import { LocalizationModule } from "src/localization/localization.module";
 import { NewsModule } from "src/news/news.module";
 import { PermissionsModule } from "src/permissions/permissions.module";
 import { QAModule } from "src/qa/qa.module";
@@ -25,6 +26,7 @@ import { McpHttpService } from "./mcp-http.service";
 import { McpOAuthController } from "./mcp-oauth.controller";
 import { McpOAuthService } from "./mcp-oauth.service";
 import { McpResourceService } from "./mcp-resource.service";
+import { McpStudentLessonRepository } from "./mcp-student-lesson.repository";
 import { McpTokenService } from "./mcp-token.service";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { McpController } from "./mcp.controller";
@@ -32,6 +34,7 @@ import { McpController } from "./mcp.controller";
 @Module({
   imports: [
     CourseModule,
+    LocalizationModule,
     FileModule,
     ChapterModule,
     CategoryModule,
@@ -52,6 +55,7 @@ import { McpController } from "./mcp.controller";
   ],
   providers: [
     McpHttpService,
+    McpStudentLessonRepository,
     McpAuthGuard,
     McpTokenService,
     McpUploadGrantService,
