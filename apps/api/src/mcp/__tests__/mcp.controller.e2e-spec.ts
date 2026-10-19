@@ -827,6 +827,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
 
     it("requires own active enrollment for paid public lessons, including admin student scope", async () => {
       const fixture = await curriculum();
+      // Exercise enrollment authorization with authored words, not UUID tokenization.
+      const searchQuery = "Visible authored body";
       await baseDb
         .update(courses)
         .set({ priceInCents: 1500 })
@@ -841,7 +843,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
           for (const mode of ["keyword", "hybrid"]) {
             const result = await call(
               "global_search",
-              { searchQuery: fixture.marker, language: "en", mode },
+              { searchQuery, language: "en", mode },
               reader,
             );
             expect(result.lessons.map((row: ToolResult) => row.id)).not.toContain(
@@ -861,7 +863,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
           for (const mode of ["keyword", "hybrid"]) {
             const result = await call(
               "global_search",
-              { searchQuery: fixture.marker, language: "en", mode },
+              { searchQuery, language: "en", mode },
               reader,
             );
             expect(result.lessons.map((row: ToolResult) => row.id)).toContain(fixture.lesson.id);
@@ -880,7 +882,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
           await assertUnavailable(fixture, reader);
           const revoked = await call(
             "global_search",
-            { searchQuery: fixture.marker, language: "en", mode: "hybrid" },
+            { searchQuery, language: "en", mode: "hybrid" },
             reader,
           );
           expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(fixture.lesson.id);
