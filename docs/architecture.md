@@ -88,7 +88,7 @@ Tenancy is enforced in the database, not only in application code.
 2. A conversation or generation request is assembled from versioned prompts in `@repo/prompts` plus retrieved context.
 3. The request is sent to the AI provider **you** configured, using **your** API key, through the Vercel AI SDK.
 4. Voice sessions run over LiveKit; text sessions over the API and WebSockets.
-5. Every call is traced in Langfuse with prompt, latency and token cost, so AI behaviour is auditable after the fact.
+5. Model generations and Mentor/RAG embeddings are traced in Langfuse so AI behaviour is auditable after the fact. Global-search query and indexing embeddings opt out of telemetry at their shared call site; see [embedding tracing](langfuse/tracing-budget.md).
 
 ## Background work
 
