@@ -16,7 +16,10 @@ import { groupBy } from "lodash";
 import { v5 as uuidv5 } from "uuid";
 
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
-import { COURSE_TRANSFER_RESOURCE_GROUPS } from "src/course-transfer/course-transfer.constants";
+import {
+  COURSE_TRANSFER_ENTITY_MAP_SCOPES,
+  COURSE_TRANSFER_RESOURCE_GROUPS,
+} from "src/course-transfer/course-transfer.constants";
 import { CourseTransferVideoMetadataRequestedEvent } from "src/course-transfer/events/course-transfer-video-metadata-requested.event";
 import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
 import {
@@ -55,15 +58,20 @@ import { normalizeJsonb, toJsonbBuildObject, toNullableJsonbBuildObject } from "
 
 import type { DatabasePg, UUIDType } from "src/common";
 import type {
+  CourseTransferArchiveSyncPolicy,
   CourseTransferCopyCourseResult,
   CourseTransferDuplicatePolicy,
+  CourseTransferEntityMapScope,
   CourseTransferRelationship,
   CourseTransferSyncPolicy,
 } from "src/course-transfer/course-transfer.types";
 import type {
   QuestionJsonbInsert,
+  ResourceJsonbInsert,
   CourseSelect,
   CourseTransferMaterializeLearningPathInput,
+  CourseTransferMirrorCourseOptions,
+  CourseTransferMirroredCourse,
   CourseTransferPreparedCourse,
   CreateTargetCourseFromSourceParams,
   DuplicateResourcesParams,
@@ -109,18 +117,66 @@ export class CourseTransferMaterializerService {
     policy: CourseTransferSyncPolicy,
     transaction: DatabasePg,
   ): Promise<UUIDType> {
+    const targetAuthor = await this.courseTransferGraphRepository.findTargetAuthor();
+
+    if (!targetAuthor) throw new BadRequestException("masterCourse.error.targetAuthorMissing");
+
+    const { courseId } = await this.mirrorCourse(
+      prepared,
+      {
+        entityMapScope: {
+          kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT,
+          exportId: policy.exportId,
+        },
+        targetAuthorId: targetAuthor.id,
+        linksToSource: true,
+      },
+      transaction,
+    );
+
+    return courseId;
+  }
+
+  /**
+   * Mirrors a course read from an archive into an existing course. Entities earlier imports of
+   * the same archive created are updated in place, so the IDs learner progress points at survive.
+   */
+  async syncArchiveCourse(
+    prepared: CourseTransferPreparedCourse,
+    policy: CourseTransferArchiveSyncPolicy,
+    transaction: DatabasePg,
+  ): Promise<CourseTransferCopyCourseResult> {
+    const targetCourse = await this.findDuplicateDestination(prepared.destination.courseId);
+    const { chapterMap, lessonMap } = await this.mirrorCourse(
+      prepared,
+      {
+        entityMapScope: {
+          kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE,
+          courseId: targetCourse.id,
+        },
+        targetAuthorId: policy.actorId,
+        linksToSource: false,
+        uploadedResourceIdsByFileKey: policy.uploadedResourceIdsByFileKey,
+      },
+      transaction,
+    );
+
+    return { chapterMap, lessonMap };
+  }
+
+  private async mirrorCourse(
+    prepared: CourseTransferPreparedCourse,
+    options: CourseTransferMirrorCourseOptions,
+    transaction: DatabasePg,
+  ): Promise<CourseTransferMirroredCourse> {
     const { snapshot: sourceSnapshot, resourceCollection, scormPackages } = prepared;
-    const { exportId } = policy;
+    const { entityMapScope, targetAuthorId } = options;
     const targetCourseId = prepared.destination.courseId;
     const targetTenantHost = prepared.destination.host;
     const sourceTenantId = prepared.source.tenantId;
     const targetTenantId = prepared.destination.tenantId;
     const sourceLanguage = sourceSnapshot.course.baseLanguage;
     const courseSettings = normalizeCourseSettings(sourceSnapshot.course.settings);
-
-    const targetAuthor = await this.courseTransferGraphRepository.findTargetAuthor();
-
-    if (!targetAuthor) throw new BadRequestException("masterCourse.error.targetAuthorMissing");
 
     const categoryId = await this.syncCategoryFromSource(sourceSnapshot);
 
@@ -133,13 +189,13 @@ export class CourseTransferMaterializerService {
       syncedTargetCourseId = await this.createTargetCourseFromSource(
         {
           targetCourseId,
-          exportId,
+          entityMapScope,
           sourceTenantId,
           sourceSnapshot,
           sourceLanguage,
           courseSettings,
           categoryId,
-          targetAuthorId: targetAuthor.id,
+          targetAuthorId,
           resourceCollection,
         },
         transaction,
@@ -151,9 +207,10 @@ export class CourseTransferMaterializerService {
         sourceLanguage,
         courseSettings,
         categoryId,
-        sourceTenantId: sourceTenantId,
+        sourceCourseId: options.linksToSource ? sourceSnapshot.course.id : null,
+        sourceTenantId: options.linksToSource ? sourceTenantId : null,
         resourceCollection,
-        targetAuthorId: targetAuthor.id,
+        targetAuthorId,
       });
     }
 
@@ -165,18 +222,18 @@ export class CourseTransferMaterializerService {
 
     const chapterMap = await this.syncChapters(
       {
-        exportId: exportId,
+        entityMapScope,
         sourceLanguage,
         sourceSnapshot,
         targetCourseId: resolvedTargetCourseId,
-        targetAuthorId: targetAuthor.id,
+        targetAuthorId,
       },
       transaction,
     );
 
     const lessonMap = await this.syncLessons(
       {
-        exportId: exportId,
+        entityMapScope,
         sourceLanguage,
         sourceSnapshot,
         chapterMap,
@@ -187,11 +244,11 @@ export class CourseTransferMaterializerService {
 
     const questionMap = await this.syncQuestions(
       {
-        exportId: exportId,
+        entityMapScope,
         sourceLanguage,
         sourceSnapshot,
         lessonMap,
-        targetAuthorId: targetAuthor.id,
+        targetAuthorId,
         resourceCollection,
       },
       transaction,
@@ -199,7 +256,7 @@ export class CourseTransferMaterializerService {
 
     const optionMap = await this.syncOptions(
       {
-        exportId: exportId,
+        entityMapScope,
         sourceLanguage,
         sourceSnapshot,
         questionMap,
@@ -229,13 +286,14 @@ export class CourseTransferMaterializerService {
 
     await this.syncResources(
       {
-        exportId: exportId,
+        entityMapScope,
         lessonMap,
         questionMap,
         targetCourseId: resolvedTargetCourseId,
         targetTenantId: targetTenantId,
-        targetAuthorId: targetAuthor.id,
+        targetAuthorId,
         resourceCollection,
+        uploadedResourceIdsByFileKey: options.uploadedResourceIdsByFileKey,
       },
       transaction,
     );
@@ -254,7 +312,7 @@ export class CourseTransferMaterializerService {
       blankMap,
     });
 
-    await this.cleanupMissingMirroredEntities(exportId, sourceSnapshot, transaction);
+    await this.cleanupMissingMirroredEntities(entityMapScope, sourceSnapshot, transaction);
 
     await this.courseTransferGraphRepository.updateTargetCourseChapterCount(
       resolvedTargetCourseId,
@@ -265,7 +323,7 @@ export class CourseTransferMaterializerService {
       resolvedTargetCourseId,
       transaction,
     );
-    return resolvedTargetCourseId;
+    return { courseId: resolvedTargetCourseId, chapterMap, lessonMap };
   }
 
   async findDuplicateDestination(courseId: UUIDType) {
@@ -497,7 +555,7 @@ export class CourseTransferMaterializerService {
     if (relationship.targetId) return relationship.targetId;
 
     const mappedTargetCourseId = await this.courseTransferGraphRepository.getMappedTargetEntityId(
-      relationship.id,
+      { kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT, exportId: relationship.id },
       MASTER_COURSE_ENTITY_TYPES.COURSE,
       sourceCourseId,
     );
@@ -604,7 +662,7 @@ export class CourseTransferMaterializerService {
     );
 
     await this.courseTransferGraphRepository.upsertMap(
-      params.exportId,
+      params.entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.COURSE,
       params.sourceSnapshot.course.id,
       targetCourseId,
@@ -661,6 +719,7 @@ export class CourseTransferMaterializerService {
     params: UpdateTargetCourseFromSourceParams,
   ): Promise<void> {
     const {
+      sourceCourseId,
       sourceTenantId,
       sourceSnapshot: { course },
       courseSettings,
@@ -700,7 +759,7 @@ export class CourseTransferMaterializerService {
       baseLanguage: course.baseLanguage,
       availableLocales: course.availableLocales,
       originType: COURSE_ORIGIN_TYPES.EXPORTED,
-      sourceCourseId: course.id,
+      sourceCourseId,
       sourceTenantId,
     });
   }
@@ -714,7 +773,7 @@ export class CourseTransferMaterializerService {
         sourceChapter.id,
       );
       const mappedId = await this.resolveOrCreateMappedTargetId(
-        params.exportId,
+        params.entityMapScope,
         MASTER_COURSE_ENTITY_TYPES.CHAPTER,
         sourceChapter.id,
         () =>
@@ -786,7 +845,7 @@ export class CourseTransferMaterializerService {
       if (!mappedChapterId) continue;
 
       const mappedId = await this.resolveOrCreateMappedTargetId(
-        params.exportId,
+        params.entityMapScope,
         MASTER_COURSE_ENTITY_TYPES.LESSON,
         sourceLesson.id,
         () =>
@@ -902,7 +961,7 @@ export class CourseTransferMaterializerService {
       if (!sourceAssessment) continue;
 
       const mappedId = await this.resolveOrCreateMappedTargetId(
-        params.exportId,
+        params.entityMapScope,
         MASTER_COURSE_ENTITY_TYPES.QUESTION,
         sourceQuestion.id,
         () =>
@@ -1044,11 +1103,11 @@ export class CourseTransferMaterializerService {
   }
 
   private async syncOptions(
-    { exportId, sourceSnapshot, questionMap }: SyncOptionsParams,
+    { entityMapScope, sourceSnapshot, questionMap }: SyncOptionsParams,
     transaction: DatabasePg,
   ) {
     await this.cleanupMissingMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.OPTION,
       sourceSnapshot.options.map(({ id }) => id),
       assessmentQuestionChoiceOptions,
@@ -1056,7 +1115,7 @@ export class CourseTransferMaterializerService {
     );
 
     const mappings = await this.courseTransferGraphRepository.getMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.OPTION,
       transaction,
     );
@@ -1085,7 +1144,7 @@ export class CourseTransferMaterializerService {
 
     for (const [sourceId, targetId] of optionMap) {
       await this.courseTransferGraphRepository.upsertMap(
-        exportId,
+        entityMapScope,
         MASTER_COURSE_ENTITY_TYPES.OPTION,
         sourceId,
         targetId,
@@ -1891,7 +1950,7 @@ export class CourseTransferMaterializerService {
     }
 
     await this.cleanupMissingResourceMappings(
-      params.exportId,
+      params.entityMapScope,
       Array.from(resourceBySourceId.keys()),
       transaction,
     );
@@ -1902,7 +1961,7 @@ export class CourseTransferMaterializerService {
       const sourceResource = resourceReference.source.resource;
       const existingTargetResourceId =
         await this.courseTransferGraphRepository.getMappedTargetEntityId(
-          params.exportId,
+          params.entityMapScope,
           MASTER_COURSE_ENTITY_TYPES.RESOURCE,
           sourceResourceId,
           transaction,
@@ -1926,15 +1985,21 @@ export class CourseTransferMaterializerService {
         archived: false,
       };
 
-      const targetResourceId =
-        existingTargetResourceId ??
-        (await this.courseTransferGraphRepository.createResource(resourceValues));
+      const uploadedResourceId = params.uploadedResourceIdsByFileKey?.get(resourceValues.reference);
+      const targetResourceId = uploadedResourceId
+        ? await this.adoptUploadedResource(
+            uploadedResourceId,
+            existingTargetResourceId,
+            resourceValues,
+          )
+        : (existingTargetResourceId ??
+          (await this.courseTransferGraphRepository.createResource(resourceValues)));
 
-      if (existingTargetResourceId) {
+      if (existingTargetResourceId && !uploadedResourceId) {
         await this.courseTransferGraphRepository.updateResource(targetResourceId, resourceValues);
-      } else {
+      } else if (!existingTargetResourceId) {
         await this.courseTransferGraphRepository.upsertMap(
-          params.exportId,
+          params.entityMapScope,
           MASTER_COURSE_ENTITY_TYPES.RESOURCE,
           sourceResourceId,
           targetResourceId,
@@ -1974,6 +2039,35 @@ export class CourseTransferMaterializerService {
           resourceReference.source.relationshipType || RESOURCE_RELATIONSHIP_TYPES.TRAILER,
       });
     }
+  }
+
+  /**
+   * An archive import stores each file as its own resource before mirroring. A resource mirrored
+   * by an earlier import takes over the new file, keeping its ID, and the staged one is removed.
+   */
+  private async adoptUploadedResource(
+    uploadedResourceId: UUIDType,
+    existingTargetResourceId: UUIDType | undefined,
+    resourceValues: ResourceJsonbInsert,
+  ): Promise<UUIDType> {
+    const uploadedResource =
+      await this.courseTransferGraphRepository.getResourceById(uploadedResourceId);
+    const values = {
+      ...resourceValues,
+      contentType: uploadedResource?.contentType ?? resourceValues.contentType,
+      metadata: uploadedResource
+        ? toJsonbBuildObject(uploadedResource.metadata)
+        : resourceValues.metadata,
+    };
+
+    if (!existingTargetResourceId || existingTargetResourceId === uploadedResourceId) {
+      await this.courseTransferGraphRepository.updateResource(uploadedResourceId, values);
+      return uploadedResourceId;
+    }
+
+    await this.courseTransferGraphRepository.updateResource(existingTargetResourceId, values);
+    await this.courseTransferGraphRepository.deleteResourcesByIds([uploadedResourceId]);
+    return existingTargetResourceId;
   }
 
   private async duplicateResources(params: DuplicateResourcesParams) {
@@ -2064,12 +2158,12 @@ export class CourseTransferMaterializerService {
   }
 
   private async cleanupMissingResourceMappings(
-    exportId: UUIDType,
+    entityMapScope: CourseTransferEntityMapScope,
     sourceResourceIds: UUIDType[],
     transaction: DatabasePg,
   ) {
     const mappings = await this.courseTransferGraphRepository.getMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.RESOURCE,
       transaction,
     );
@@ -2083,39 +2177,40 @@ export class CourseTransferMaterializerService {
       toDelete.map((mapping) => mapping.targetEntityId),
     );
     await this.courseTransferGraphRepository.deleteMappingsByIds(
+      entityMapScope,
       toDelete.map((mapping) => mapping.id),
       transaction,
     );
   }
 
   private async cleanupMissingMirroredEntities(
-    exportId: UUIDType,
+    entityMapScope: CourseTransferEntityMapScope,
     sourceSnapshot: SourceSnapshot,
     transaction: DatabasePg,
   ) {
     await this.cleanupMissingMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.CHAPTER,
       sourceSnapshot.chapters.map((item) => item.id),
       chapters,
       transaction,
     );
     await this.cleanupMissingMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.LESSON,
       sourceSnapshot.lessons.filter((item) => shouldSyncLesson(item)).map((item) => item.id),
       lessons,
       transaction,
     );
     await this.cleanupMissingMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.QUESTION,
       sourceSnapshot.questions.map((item) => item.id),
       assessmentQuestions,
       transaction,
     );
     await this.cleanupMissingMappings(
-      exportId,
+      entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.OPTION,
       sourceSnapshot.options.map((item) => item.id),
       assessmentQuestionChoiceOptions,
@@ -2124,7 +2219,7 @@ export class CourseTransferMaterializerService {
   }
 
   private async cleanupMissingMappings(
-    exportId: UUIDType,
+    entityMapScope: CourseTransferEntityMapScope,
     entityType: MasterCourseEntityType,
     sourceIds: UUIDType[],
     targetTable:
@@ -2135,7 +2230,7 @@ export class CourseTransferMaterializerService {
     transaction: DatabasePg,
   ) {
     const mappings = await this.courseTransferGraphRepository.getMappings(
-      exportId,
+      entityMapScope,
       entityType,
       transaction,
     );
@@ -2149,20 +2244,21 @@ export class CourseTransferMaterializerService {
     }
     await this.courseTransferGraphRepository.deleteMappedEntities(targetTable, targetIds);
     await this.courseTransferGraphRepository.deleteMappingsByIds(
+      entityMapScope,
       toDelete.map((item) => item.id),
       transaction,
     );
   }
 
   private async resolveOrCreateMappedTargetId(
-    exportId: UUIDType,
+    entityMapScope: CourseTransferEntityMapScope,
     entityType: MasterCourseEntityType,
     sourceEntityId: UUIDType,
     create: () => Promise<UUIDType>,
     transaction: DatabasePg,
   ): Promise<UUIDType> {
     const existingTargetEntityId = await this.courseTransferGraphRepository.getMappedTargetEntityId(
-      exportId,
+      entityMapScope,
       entityType,
       sourceEntityId,
       transaction,
@@ -2172,7 +2268,7 @@ export class CourseTransferMaterializerService {
 
     const targetEntityId = await create();
     await this.courseTransferGraphRepository.upsertMap(
-      exportId,
+      entityMapScope,
       entityType,
       sourceEntityId,
       targetEntityId,

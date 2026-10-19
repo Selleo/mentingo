@@ -5,6 +5,7 @@ const PUBLIC_ARCHIVE_ERROR_CODES = new Set([
   "nativeArchive.error.categoryCreationFailed",
   "nativeArchive.error.categoryNotFound",
   "nativeArchive.error.courseNotFound",
+  "nativeArchive.error.courseNotSyncable",
   "nativeArchive.error.createAccessRequired",
   "nativeArchive.error.embeddingUnavailable",
   "nativeArchive.error.fileRequired",

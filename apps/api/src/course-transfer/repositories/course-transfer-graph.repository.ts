@@ -9,6 +9,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, isNull, notInArray, or, sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
@@ -17,6 +18,7 @@ import {
   getFirstJsonbObjectValue,
 } from "src/common/helpers/sqlHelpers";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
+import { COURSE_TRANSFER_ENTITY_MAP_SCOPES } from "src/course-transfer/course-transfer.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -41,6 +43,7 @@ import {
   learningPaths,
   lessons,
   masterCourseEntityMap,
+  nativeArchiveEntityMap,
   assessmentQuestionChoiceOptions,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
@@ -59,6 +62,7 @@ import {
 } from "src/storage/schema";
 
 import type { AnyPgColumn, AnyPgTable } from "drizzle-orm/pg-core";
+import type { CourseTransferEntityMapScope } from "src/course-transfer/course-transfer.types";
 import type {
   AiMentorConfigurationJsonbInsert,
   AiMentorConfigurationJsonbUpdate,
@@ -92,6 +96,7 @@ import type {
   ResourceJsonbInsert,
   ScormPackageInsert,
   ScormScoInsert,
+  CourseTransferEntityMapping,
   DeleteStaleTargetQuestionDetailsValues,
   RemoveScormPackagesForMappedTargetsParams,
   UpsertTargetBlankAnswerSetValues,
@@ -120,73 +125,136 @@ export class CourseTransferGraphRepository {
   }
 
   async getMappedTargetEntityId(
-    exportId: UUIDType,
+    scope: CourseTransferEntityMapScope,
     entityType: MasterCourseEntityType,
     sourceEntityId: UUIDType,
     transaction: DatabasePg = this.db,
   ) {
-    const [existing] = await transaction
-      .select({ targetEntityId: masterCourseEntityMap.targetEntityId })
-      .from(masterCourseEntityMap)
-      .where(
-        and(
-          eq(masterCourseEntityMap.exportId, exportId),
-          eq(masterCourseEntityMap.entityType, entityType),
-          eq(masterCourseEntityMap.sourceEntityId, sourceEntityId),
-        ),
+    const [existing] = await match(scope)
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT }, ({ exportId }) =>
+        transaction
+          .select({ targetEntityId: masterCourseEntityMap.targetEntityId })
+          .from(masterCourseEntityMap)
+          .where(
+            and(
+              eq(masterCourseEntityMap.exportId, exportId),
+              eq(masterCourseEntityMap.entityType, entityType),
+              eq(masterCourseEntityMap.sourceEntityId, sourceEntityId),
+            ),
+          )
+          .limit(1),
       )
-      .limit(1);
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE }, ({ courseId }) =>
+        transaction
+          .select({ targetEntityId: nativeArchiveEntityMap.targetEntityId })
+          .from(nativeArchiveEntityMap)
+          .where(
+            and(
+              eq(nativeArchiveEntityMap.courseId, courseId),
+              eq(nativeArchiveEntityMap.entityType, entityType),
+              eq(nativeArchiveEntityMap.sourceEntityId, sourceEntityId),
+            ),
+          )
+          .limit(1),
+      )
+      .exhaustive();
 
     return existing?.targetEntityId;
   }
 
   async upsertMap(
-    exportId: UUIDType,
+    scope: CourseTransferEntityMapScope,
     entityType: MasterCourseEntityType,
     sourceEntityId: UUIDType,
     targetEntityId: UUIDType,
     transaction: DatabasePg,
   ) {
-    await transaction
-      .insert(masterCourseEntityMap)
-      .values({
-        exportId,
-        entityType,
-        sourceEntityId,
-        targetEntityId,
-      })
-      .onConflictDoUpdate({
-        target: [
-          masterCourseEntityMap.exportId,
-          masterCourseEntityMap.entityType,
-          masterCourseEntityMap.sourceEntityId,
-        ],
-        set: { targetEntityId },
-      });
+    await match(scope)
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT }, ({ exportId }) =>
+        transaction
+          .insert(masterCourseEntityMap)
+          .values({ exportId, entityType, sourceEntityId, targetEntityId })
+          .onConflictDoUpdate({
+            target: [
+              masterCourseEntityMap.exportId,
+              masterCourseEntityMap.entityType,
+              masterCourseEntityMap.sourceEntityId,
+            ],
+            set: { targetEntityId },
+          }),
+      )
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE }, ({ courseId }) =>
+        transaction
+          .insert(nativeArchiveEntityMap)
+          .values({ courseId, entityType, sourceEntityId, targetEntityId })
+          .onConflictDoUpdate({
+            target: [
+              nativeArchiveEntityMap.courseId,
+              nativeArchiveEntityMap.entityType,
+              nativeArchiveEntityMap.sourceEntityId,
+            ],
+            set: { targetEntityId },
+          }),
+      )
+      .exhaustive();
   }
 
   async getMappings(
-    exportId: UUIDType,
+    scope: CourseTransferEntityMapScope,
     entityType: MasterCourseEntityType,
     transaction: DatabasePg,
-  ) {
-    return transaction
-      .select()
-      .from(masterCourseEntityMap)
-      .where(
-        and(
-          eq(masterCourseEntityMap.exportId, exportId),
-          eq(masterCourseEntityMap.entityType, entityType),
-        ),
-      );
+  ): Promise<CourseTransferEntityMapping[]> {
+    return match(scope)
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT }, ({ exportId }) =>
+        transaction
+          .select({
+            id: masterCourseEntityMap.id,
+            sourceEntityId: masterCourseEntityMap.sourceEntityId,
+            targetEntityId: masterCourseEntityMap.targetEntityId,
+          })
+          .from(masterCourseEntityMap)
+          .where(
+            and(
+              eq(masterCourseEntityMap.exportId, exportId),
+              eq(masterCourseEntityMap.entityType, entityType),
+            ),
+          ),
+      )
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE }, ({ courseId }) =>
+        transaction
+          .select({
+            id: nativeArchiveEntityMap.id,
+            sourceEntityId: nativeArchiveEntityMap.sourceEntityId,
+            targetEntityId: nativeArchiveEntityMap.targetEntityId,
+          })
+          .from(nativeArchiveEntityMap)
+          .where(
+            and(
+              eq(nativeArchiveEntityMap.courseId, courseId),
+              eq(nativeArchiveEntityMap.entityType, entityType),
+            ),
+          ),
+      )
+      .exhaustive();
   }
 
-  async deleteMappingsByIds(mapIds: UUIDType[], transaction: DatabasePg) {
+  async deleteMappingsByIds(
+    scope: CourseTransferEntityMapScope,
+    mapIds: UUIDType[],
+    transaction: DatabasePg,
+  ) {
     if (!mapIds.length) return;
 
-    await transaction
-      .delete(masterCourseEntityMap)
-      .where(inArray(masterCourseEntityMap.id, mapIds));
+    await match(scope)
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT }, () =>
+        transaction.delete(masterCourseEntityMap).where(inArray(masterCourseEntityMap.id, mapIds)),
+      )
+      .with({ kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE }, () =>
+        transaction
+          .delete(nativeArchiveEntityMap)
+          .where(inArray(nativeArchiveEntityMap.id, mapIds)),
+      )
+      .exhaustive();
   }
 
   async deleteLessonScormPackages(lessonIds: UUIDType[]) {

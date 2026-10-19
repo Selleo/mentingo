@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { LESSON_TYPES, PERMISSIONS } from "@repo/shared";
+import { match } from "ts-pattern";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { processInBatches } from "src/common/utils/processInBatches";
@@ -14,6 +15,7 @@ import { S3Service } from "src/s3/s3.service";
 import { resolveScormContentTypeFromFilename } from "src/scorm/scorm-content-type";
 
 import {
+  NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_LIMITS,
   NATIVE_ARCHIVE_OMITTED_ROW_FIELDS,
 } from "../native-archive.constants";
@@ -21,6 +23,7 @@ import { NativeArchiveSnapshotRepository } from "../repositories/native-archive-
 
 import type { NativeArchiveLearningPathSnapshot } from "../native-archive-learning-path.types";
 import type {
+  NativeArchiveExportAccess,
   NativeArchiveFile,
   NativeArchiveLiveTrainingExportRows,
   NativeArchiveLiveTrainingLessonSnapshot,
@@ -68,8 +71,13 @@ export class NativeArchiveSnapshotService {
   async buildCourseExportSnapshot(
     courseId: UUIDType,
     actor: CurrentUserType,
+    exportAccess: NativeArchiveExportAccess = NATIVE_ARCHIVE_EXPORT_ACCESS.ACTOR_PERMISSIONS,
   ): Promise<NativeArchiveSnapshotResult> {
-    const snapshot = await this.loadCourseSnapshotForExport(courseId, actor, true);
+    const assertManage = match(exportAccess)
+      .with(NATIVE_ARCHIVE_EXPORT_ACCESS.ACTOR_PERMISSIONS, () => true)
+      .with(NATIVE_ARCHIVE_EXPORT_ACCESS.PRE_AUTHORIZED, () => false)
+      .exhaustive();
+    const snapshot = await this.loadCourseSnapshotForExport(courseId, actor, assertManage);
     const document = await this.serializeCourseSnapshotWithLiveTraining(snapshot);
 
     return {

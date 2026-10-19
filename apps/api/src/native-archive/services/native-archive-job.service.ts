@@ -13,12 +13,15 @@ import {
 } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { Worker, type Job, type Queue } from "bullmq";
+import { match } from "ts-pattern";
 
 import { isRecord } from "src/common/utils/object.utils";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { S3Service } from "src/s3/s3.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { NativeArchiveImportFinishedEvent } from "../events/native-archive-import-finished.event";
 import {
   getNativeArchiveExportKey,
   getNativeArchiveExportPrefix,
@@ -26,7 +29,9 @@ import {
   getNativeArchiveUploadPrefix,
 } from "../native-archive-storage-paths";
 import {
+  NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_EXPORT_TTL_MS,
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_PAGE_SIZE,
   NATIVE_ARCHIVE_JOB_STATE,
@@ -39,6 +44,10 @@ import { NativeArchiveSnapshotService } from "./native-archive-snapshot.service"
 import { buildNativeArchive } from "./native-archive-zip.service";
 
 import type {
+  NativeArchiveExportAccess,
+  NativeArchiveImportMode,
+  NativeArchiveImportOptions,
+  NativeArchiveImportSource,
   NativeArchiveJob,
   NativeArchiveJobReceipt,
   NativeArchiveJobResult,
@@ -59,6 +68,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly nativeArchiveSnapshotService: NativeArchiveSnapshotService,
     private readonly nativeArchiveImportService: NativeArchiveImportService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {
     this.archiveWorker = new Worker<NativeArchiveJob>(
       QUEUE_NAMES.NATIVE_ARCHIVE,
@@ -74,6 +84,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     kind: "course" | "learning-path",
     id: UUIDType,
     actor: CurrentUserType,
+    exportAccess: NativeArchiveExportAccess = NATIVE_ARCHIVE_EXPORT_ACCESS.ACTOR_PERMISSIONS,
   ): Promise<NativeArchiveJobReceipt> {
     if (!this.s3Service.isConfigured()) {
       throw new BadRequestException("nativeArchive.error.storageUnavailable");
@@ -90,6 +101,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       {
         action,
         rootId: id,
+        exportAccess,
         actor,
       } satisfies NativeArchiveJob,
       { attempts: 1, removeOnComplete: false, removeOnFail: false },
@@ -126,6 +138,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   async enqueueArchiveImportFromStorageKey(
     key: string,
     actor: CurrentUserType,
+    { importSource, importMode }: NativeArchiveImportOptions = {},
   ): Promise<NativeArchiveJobReceipt> {
     if (!key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
       throw new ForbiddenException("nativeArchive.error.invalidUpload");
@@ -137,6 +150,8 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       {
         action: NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
         key,
+        importSource,
+        importMode,
         actor,
       } satisfies NativeArchiveJob,
       { attempts: 1, removeOnComplete: false, removeOnFail: false },
@@ -199,18 +214,77 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   }
 
   private async processArchiveJob(job: Job<NativeArchiveJob>): Promise<NativeArchiveJobResult> {
-    const { action, actor, rootId, key } = job.data;
+    const { action, actor, rootId, key, exportAccess, importSource, importMode } = job.data;
 
     if (action === NATIVE_ARCHIVE_JOB_ACTION.IMPORT) {
-      return this.processImportJob(key, actor);
+      return this.importArchiveAndReportOutcome(String(job.id), key, actor, {
+        importSource,
+        importMode,
+      });
     }
 
-    return this.processExportJob(action, rootId, actor);
+    return this.processExportJob(action, rootId, actor, exportAccess);
+  }
+
+  /** Runs the import; when the job came with an import source, its outcome is published for that source. */
+  private async importArchiveAndReportOutcome(
+    jobId: string,
+    key: string | undefined,
+    actor: CurrentUserType,
+    { importSource, importMode }: NativeArchiveImportOptions,
+  ): Promise<NativeArchiveJobResult> {
+    try {
+      const result = await this.processImportJob(key, actor, importMode);
+
+      if (importSource)
+        await this.publishImportFinished(jobId, actor, importSource, {
+          outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.IMPORTED,
+          courseId: match(result.kind)
+            .with(NATIVE_ARCHIVE_KIND.COURSE, () => result.rootId)
+            .with(NATIVE_ARCHIVE_KIND.LEARNING_PATH, () => null)
+            .exhaustive(),
+          failureCode: null,
+        });
+
+      return result;
+    } catch (error) {
+      if (importSource)
+        await this.publishImportFinished(jobId, actor, importSource, {
+          outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.FAILED,
+          courseId: null,
+          failureCode: toPublicArchiveFailureCode(error instanceof Error ? error.message : null),
+        });
+
+      throw error;
+    }
+  }
+
+  private async publishImportFinished(
+    jobId: string,
+    actor: CurrentUserType,
+    importSource: NativeArchiveImportSource,
+    finish: Pick<NativeArchiveImportFinishedEvent, "outcome" | "courseId" | "failureCode">,
+  ) {
+    await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
+      this.outboxPublisher.publish(
+        new NativeArchiveImportFinishedEvent(
+          actor.tenantId,
+          jobId,
+          actor.userId,
+          finish.outcome,
+          finish.courseId,
+          finish.failureCode,
+          importSource,
+          new Date().toISOString(),
+        ),
+      ),
+    );
   }
 
   private async processImportJob(
     key: string | undefined,
     actor: CurrentUserType,
+    importMode: NativeArchiveImportMode | undefined,
   ): Promise<NativeArchiveJobResult> {
     if (!key || !key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
       throw new ForbiddenException("nativeArchive.error.invalidUpload");
@@ -223,7 +297,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       await pipeline((await this.s3Service.getFileStream(key)).stream, createWriteStream(filename));
 
       return await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-        this.nativeArchiveImportService.importArchive(filename, actor),
+        this.nativeArchiveImportService.importArchive(filename, actor, importMode),
       );
     } finally {
       await rm(directory, { recursive: true, force: true });
@@ -236,6 +310,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     action: NativeArchiveJob["action"],
     rootId: UUIDType | undefined,
     actor: CurrentUserType,
+    exportAccess: NativeArchiveExportAccess = NATIVE_ARCHIVE_EXPORT_ACCESS.ACTOR_PERMISSIONS,
   ): Promise<NativeArchiveJobResult> {
     if (
       !rootId ||
@@ -253,7 +328,11 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     const archive = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
       const snapshot =
         kind === NATIVE_ARCHIVE_KIND.COURSE
-          ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(rootId, actor)
+          ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(
+              rootId,
+              actor,
+              exportAccess,
+            )
           : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(rootId, actor);
 
       return buildNativeArchive({ kind, rootId, ...snapshot });

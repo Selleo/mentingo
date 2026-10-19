@@ -13,6 +13,27 @@ export const NATIVE_ARCHIVE_JOB_ACTION = {
   IMPORT: "import",
 } as const;
 
+/**
+ * How an export job decides the actor may read the exported content. `PRE_AUTHORIZED` is for callers
+ * that checked access before enqueueing, such as integration keys whose owner lives in another tenant.
+ */
+export const NATIVE_ARCHIVE_EXPORT_ACCESS = {
+  ACTOR_PERMISSIONS: "actor-permissions",
+  PRE_AUTHORIZED: "pre-authorized",
+} as const;
+
+export const NATIVE_ARCHIVE_IMPORT_MODES = {
+  /** Creates an editable copy; importing the same archive again keeps the existing course. */
+  COPY: "copy",
+  /** Creates a read-only shared course that importing a newer archive updates in place. */
+  SYNC: "sync",
+} as const;
+
+export const NATIVE_ARCHIVE_IMPORT_OUTCOMES = {
+  IMPORTED: "imported",
+  FAILED: "failed",
+} as const;
+
 export const NATIVE_ARCHIVE_LIMITS = {
   MAX_ARCHIVE_BYTES: 500 * 1024 * 1024,
   MAX_UPLOAD_FILES: 1,

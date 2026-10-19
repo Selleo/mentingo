@@ -4,6 +4,9 @@ import type {
   NATIVE_ARCHIVE_VERSION,
   NATIVE_ARCHIVE_KIND,
   NATIVE_ARCHIVE_JOB_ACTION,
+  NATIVE_ARCHIVE_EXPORT_ACCESS,
+  NATIVE_ARCHIVE_IMPORT_MODES,
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
 } from "./native-archive.constants";
 import type { NativeArchiveLiveTrainingLesson } from "./schemas/native-archive-live-training.schema";
 import type { PERMISSIONS } from "@repo/shared";
@@ -90,10 +93,30 @@ export type NativeArchiveStagedAssets = {
   deleteStaged: () => Promise<void>;
 };
 
+export type NativeArchiveExportAccess =
+  (typeof NATIVE_ARCHIVE_EXPORT_ACCESS)[keyof typeof NATIVE_ARCHIVE_EXPORT_ACCESS];
+
+export type NativeArchiveImportOutcome =
+  (typeof NATIVE_ARCHIVE_IMPORT_OUTCOMES)[keyof typeof NATIVE_ARCHIVE_IMPORT_OUTCOMES];
+
+export type NativeArchiveImportMode =
+  (typeof NATIVE_ARCHIVE_IMPORT_MODES)[keyof typeof NATIVE_ARCHIVE_IMPORT_MODES];
+
+/** Opaque context of whoever queued an import; it comes back in NativeArchiveImportFinishedEvent. */
+export type NativeArchiveImportSource = Record<string, string>;
+
+export type NativeArchiveImportOptions = {
+  importSource?: NativeArchiveImportSource;
+  importMode?: NativeArchiveImportMode;
+};
+
 export type NativeArchiveJob = {
   action: (typeof NATIVE_ARCHIVE_JOB_ACTION)[keyof typeof NATIVE_ARCHIVE_JOB_ACTION];
   rootId?: UUIDType;
   key?: string;
+  exportAccess?: NativeArchiveExportAccess;
+  importSource?: NativeArchiveImportSource;
+  importMode?: NativeArchiveImportMode;
   actor: CurrentUserType;
 };
 

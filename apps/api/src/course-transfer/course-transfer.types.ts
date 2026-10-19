@@ -1,6 +1,7 @@
 import type {
   COURSE_TRANSFER_CLAIM_OUTCOMES,
   COURSE_TRANSFER_DEPENDENCY_STATES,
+  COURSE_TRANSFER_ENTITY_MAP_SCOPES,
   COURSE_TRANSFER_ERROR_CODES,
   COURSE_TRANSFER_JOB_STATES,
   COURSE_TRANSFER_KINDS,
@@ -144,6 +145,12 @@ export interface CourseTransferSyncPolicy {
   exportId: UUIDType;
 }
 
+export interface CourseTransferArchiveSyncPolicy {
+  mode: typeof COURSE_TRANSFER_MODES.ARCHIVE_SYNC;
+  actorId: UUIDType;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
+}
+
 export interface CourseTransferDuplicatePolicy {
   mode: typeof COURSE_TRANSFER_MODES.DUPLICATE;
   actorId: UUIDType;
@@ -152,12 +159,25 @@ export interface CourseTransferDuplicatePolicy {
   uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 }
 
-export type CourseTransferPolicy = CourseTransferSyncPolicy | CourseTransferDuplicatePolicy;
+export type CourseTransferPolicy =
+  | CourseTransferSyncPolicy
+  | CourseTransferArchiveSyncPolicy
+  | CourseTransferDuplicatePolicy;
+
+export type CourseTransferEntityMapScope =
+  | { kind: typeof COURSE_TRANSFER_ENTITY_MAP_SCOPES.EXPORT; exportId: UUIDType }
+  | { kind: typeof COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE; courseId: UUIDType };
 
 export interface CourseTransferCopyCourseInput {
   source: CourseTransferCourseSource;
   destination: CourseTransferCourseDestination;
   policy: CourseTransferDuplicatePolicy;
+}
+
+export interface CourseTransferSyncArchiveCourseInput {
+  source: { tenantId: UUIDType; snapshot: SourceSnapshot };
+  destination: CourseTransferCourseDestination;
+  policy: CourseTransferArchiveSyncPolicy;
 }
 
 export interface CourseTransferCopyCourseResult {

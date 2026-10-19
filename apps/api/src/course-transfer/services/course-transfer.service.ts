@@ -33,6 +33,7 @@ import type {
   CourseTransferExportCandidatesQuery,
   CourseTransferCopyCourseInput,
   CourseTransferCopyCourseResult,
+  CourseTransferSyncArchiveCourseInput,
   CourseTransferDependency,
   CourseTransferExportRequest,
   CourseTransferExportResult,
@@ -206,6 +207,33 @@ export class CourseTransferService {
       preparedCourse,
       policy,
       targetCourse,
+    );
+  }
+
+  /**
+   * Mirrors a course read from an archive into an existing course of the same tenant, updating
+   * what earlier imports of that archive created instead of adding copies.
+   */
+  async syncArchiveCourseIntoExistingCourse(
+    input: CourseTransferSyncArchiveCourseInput,
+    transaction: DatabasePg,
+  ): Promise<CourseTransferCopyCourseResult> {
+    const { source, destination, policy } = input;
+    if (source.tenantId !== destination.tenantId) {
+      throw new Error("An archive sync must stay within one tenant");
+    }
+
+    const preparedCourse = await this.courseTransferAssetService.prepareCourse({
+      snapshot: source.snapshot,
+      sourceTenantId: source.tenantId,
+      destination,
+      policy,
+    });
+
+    return this.courseTransferMaterializerService.syncArchiveCourse(
+      preparedCourse,
+      policy,
+      transaction,
     );
   }
 

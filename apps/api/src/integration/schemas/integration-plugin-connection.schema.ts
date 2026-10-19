@@ -16,6 +16,13 @@ export const integrationPhishingConnectionSchema = Type.Object(
   },
   { additionalProperties: false },
 );
+export const integrationContentMarketplaceConnectionSchema = Type.Object(
+  {
+    baseUrl: Type.String({ minLength: 1, maxLength: 2000 }),
+    apiKey: Type.String({ minLength: 32, maxLength: 256, writeOnly: true }),
+  },
+  { additionalProperties: false },
+);
 export const integrationPluginConfiguredSchema = Type.Object({ tenantId: UUIDSchema });
 export const integrationPluginStatusSchema = Type.Object({
   tenantId: UUIDSchema,
@@ -24,5 +31,8 @@ export const integrationPluginStatusSchema = Type.Object({
 });
 export type IntegrationPluginDiscovery = Static<typeof integrationPluginDiscoverySchema>;
 export type IntegrationPhishingConnection = Static<typeof integrationPhishingConnectionSchema>;
+export type IntegrationContentMarketplaceConnection = Static<
+  typeof integrationContentMarketplaceConnectionSchema
+>;
 export type IntegrationPluginConfigured = Static<typeof integrationPluginConfiguredSchema>;
 export type IntegrationPluginStatus = Static<typeof integrationPluginStatusSchema>;

@@ -57,7 +57,8 @@
       "embeddingUnavailable": "Przetwarzanie dokumentów AI jest niedostępne.",
       "unsupportedVersion": "Ta wersja pakietu Mentingo nie jest obsługiwana.",
       "missingAsset": "W pakiecie Mentingo brakuje wymaganego pliku.",
-      "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo."
+      "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo.",
+      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z marketplace."
     }
   },
   "aiConversations": {
@@ -2450,6 +2451,7 @@
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
         "phishing_report_read": "Może przeglądać raporty z symulacji phishingu.",
+        "content_marketplace_browse": "Przeglądanie marketplace treści i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
         "account_read_self": "Może przeglądać własne dane konta.",
         "account_update_self": "Może edytować własne dane konta.",
         "user_read_self": "Może przeglądać własny profil użytkownika.",
@@ -5908,7 +5910,8 @@
       "ownerInactive": "Właściciel klucza API nie jest już aktywny",
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
-      "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+      "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id",
+      "invalidPluginOrigin": "Użyj adresu wtyczki HTTPS bez ścieżki (HTTP localhost jest dozwolony w środowisku deweloperskim)"
     }
   },
   "courseDuplication": {
@@ -8130,6 +8133,56 @@
     "picker": {
       "search": "Szukaj",
       "empty": "Brak wyników"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Kategoria / temat",
+    "allCategories": "Wszystkie kategorie",
+    "duration": "Czas trwania",
+    "anyDuration": "Dowolny czas",
+    "clearFilters": "Wyczyść filtry",
+    "durations": {
+      "short": "Poniżej 1 godziny",
+      "medium": "1–3 godziny",
+      "long": "Powyżej 3 godzin"
+    },
+    "discover": "Odkrywaj kursy, które rozwijają umiejętności w Twojej organizacji.",
+    "search": "Szukaj kursów, tematów lub umiejętności…",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "recentTitle": "Ostatnio zaktualizowane",
+    "recentDescription": "Poznaj najnowsze aktualizacje kursów w katalogu.",
+    "recentBadge": "Ostatnio zaktualizowany",
+    "allCourses": "Wszystkie kursy",
+    "results": "Znalezione kursy: {{count}}",
+    "sortBy": "Sortuj według",
+    "sortRecent": "Ostatnia aktualizacja",
+    "sortTitle": "Tytuł (A–Z)",
+    "noResults": "Brak kursów pasujących do wyszukiwania. Spróbuj innego słowa.",
+    "addToCourses": "Dodaj do kursów",
+    "title": "Marketplace treści",
+    "description": "Przeglądaj wybrane kursy i kopiuj je do swojej organizacji.",
+    "loading": "Ładowanie…",
+    "retry": "Spróbuj ponownie",
+    "unavailable": "Marketplace treści nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
+    "serviceError": "Marketplace treści jest niedostępny. Spróbuj ponownie.",
+    "empty": "W marketplace nie ma jeszcze żadnych kursów.",
+    "updated": "Zaktualizowano {{date}}",
+    "copying": "Kopiowanie kursu…",
+    "copyNotice": "Kurs zostanie dodany jako kurs udostępniony, którego nie można edytować. Synchronizacja aktualizuje go do najnowszej wersji i zachowuje postępy uczestników.",
+    "copyComplete": "Kurs został skopiowany do Twojej organizacji.",
+    "copyUpdated": "Twoja kopia tego kursu została zaktualizowana.",
+    "copyFailed": "Nie udało się skopiować kursu. Spróbuj ponownie.",
+    "openCourse": "Otwórz kurs",
+    "sync": "Synchronizuj",
+    "syncing": "Synchronizowanie…",
+    "syncNotice": "Zaktualizuj swoją kopię do najnowszej wersji tego kursu.",
+    "firstPage": "Wróć do pierwszej strony",
+    "error": {
+      "invalidQuery": "Nieprawidłowe parametry wyszukiwania lub stronicowania katalogu.",
+      "unavailable": "Marketplace treści nie jest dostępny dla tej organizacji.",
+      "listingNotFound": "Nie znaleziono tego kursu w marketplace.",
+      "thumbnailNotFound": "Ten kurs z marketplace nie ma miniatury.",
+      "serviceError": "Marketplace treści nie mógł zrealizować żądania. Spróbuj ponownie później."
     }
   }
 }

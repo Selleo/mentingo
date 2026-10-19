@@ -57,7 +57,8 @@
       "embeddingUnavailable": "El procesamiento de documentos de IA no está disponible.",
       "unsupportedVersion": "Esta versión del paquete de Mentingo no es compatible.",
       "missingAsset": "Falta un archivo obligatorio en el paquete de Mentingo.",
-      "invalidArchive": "Este ZIP no es un paquete de Mentingo válido."
+      "invalidArchive": "Este ZIP no es un paquete de Mentingo válido.",
+      "courseNotSyncable": "Este curso se añadió como una copia editable y no se puede sincronizar. Elimínalo y vuelve a añadirlo desde el marketplace."
     }
   },
   "aiConversations": {
@@ -2218,6 +2219,7 @@
       "descriptions": {
         "phishing_manage": "Crear y gestionar simulaciones de phishing.",
         "phishing_report_read": "Ver informes de simulaciones de phishing.",
+        "content_marketplace_browse": "Explorar el marketplace de contenidos y copiar sus cursos (copiar también requiere crear cursos).",
         "account_read_self": "Ver los detalles de su propia cuenta.",
         "account_update_self": "Editar los detalles de su propia cuenta.",
         "user_read_self": "Ver su propio perfil de usuario.",
@@ -5800,7 +5802,8 @@
       "ownerInactive": "El propietario de la clave API ya no está activo",
       "ownerNotAdmin": "El propietario de la clave API ya no tiene permisos de administrador",
       "missingApiKeyHeader": "Falta el encabezado X-API-Key",
-      "missingTenantIdHeader": "Falta el encabezado X-Tenant-Id"
+      "missingTenantIdHeader": "Falta el encabezado X-Tenant-Id",
+      "invalidPluginOrigin": "Usa un origen de plugin HTTPS sin ruta (HTTP localhost está permitido en desarrollo)"
     }
   },
   "courseDuplication": {
@@ -7985,6 +7988,56 @@
       "automation_disable": "El envío se detuvo porque cambió la automatización.",
       "automation_archive": "El envío se detuvo porque cambió la automatización.",
       "automation_deleted": "El envío se detuvo porque cambió la automatización."
+    }
+  },
+  "contentMarketplace": {
+    "category": "Categoría / tema",
+    "allCategories": "Todas las categorías",
+    "duration": "Duración",
+    "anyDuration": "Cualquier duración",
+    "clearFilters": "Borrar filtros",
+    "durations": {
+      "short": "Menos de 1 hora",
+      "medium": "1–3 horas",
+      "long": "Más de 3 horas"
+    },
+    "discover": "Descubre cursos para desarrollar habilidades en tu organización.",
+    "search": "Buscar cursos, temas o habilidades…",
+    "clearSearch": "Borrar búsqueda",
+    "recentTitle": "Actualizados recientemente",
+    "recentDescription": "Explora las últimas actualizaciones de cursos del catálogo.",
+    "recentBadge": "Actualizado recientemente",
+    "allCourses": "Todos los cursos",
+    "results": "Cursos encontrados: {{count}}",
+    "sortBy": "Ordenar por",
+    "sortRecent": "Actualizados recientemente",
+    "sortTitle": "Título (A–Z)",
+    "noResults": "No hay cursos que coincidan con tu búsqueda. Prueba otra palabra clave.",
+    "addToCourses": "Añadir a cursos",
+    "title": "Marketplace de contenidos",
+    "description": "Explora cursos seleccionados y cópialos en tu organización.",
+    "loading": "Cargando…",
+    "retry": "Intentar de nuevo",
+    "unavailable": "El marketplace de contenidos no está habilitado para esta organización. Contacta con tu administrador.",
+    "serviceError": "El marketplace de contenidos no está disponible. Inténtalo de nuevo.",
+    "empty": "Todavía no hay cursos disponibles en el marketplace.",
+    "updated": "Actualizado el {{date}}",
+    "copying": "Copiando el curso…",
+    "copyNotice": "El curso se añade como un curso compartido que no se puede editar. Sincronizar lo actualiza a la última versión y conserva el progreso de los alumnos.",
+    "copyComplete": "El curso se copió en tu organización.",
+    "copyUpdated": "Tu copia de este curso se actualizó.",
+    "copyFailed": "No se pudo copiar el curso. Inténtalo de nuevo.",
+    "openCourse": "Abrir curso",
+    "sync": "Sincronizar",
+    "syncing": "Sincronizando…",
+    "syncNotice": "Actualiza tu copia a la última versión de este curso.",
+    "firstPage": "Volver a la primera página",
+    "error": {
+      "invalidQuery": "Parámetros de búsqueda o paginación del catálogo no válidos.",
+      "unavailable": "El marketplace de contenidos no está disponible para esta organización.",
+      "listingNotFound": "No se encontró este curso del marketplace.",
+      "thumbnailNotFound": "Este curso del marketplace no tiene miniatura.",
+      "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde."
     }
   }
 }

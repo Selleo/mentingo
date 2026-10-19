@@ -57,7 +57,8 @@
       "embeddingUnavailable": "Le traitement des documents IA est indisponible.",
       "unsupportedVersion": "Cette version du package Mentingo n’est pas prise en charge.",
       "missingAsset": "Un fichier requis manque dans le package Mentingo.",
-      "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide."
+      "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide.",
+      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace."
     }
   },
   "aiConversations": {
@@ -2220,6 +2221,7 @@
       "descriptions": {
         "phishing_manage": "Créer et gérer des simulations de phishing.",
         "phishing_report_read": "Consulter les rapports des simulations de phishing.",
+        "content_marketplace_browse": "Parcourir la place de marché de contenus et copier ses cours (la copie nécessite aussi la création de cours).",
         "account_read_self": "Afficher les détails de leur propre compte.",
         "account_update_self": "Modifiez les détails de leur propre compte.",
         "user_read_self": "Afficher leur propre profil utilisateur.",
@@ -5585,7 +5587,8 @@
       "ownerInactive": "Le propriétaire de la clé API n'est plus actif",
       "ownerNotAdmin": "Le propriétaire de la clé API ne dispose plus des autorisations d'administrateur",
       "missingApiKeyHeader": "En-tête X-API-Key manquant",
-      "missingTenantIdHeader": "En-tête X-Tenant-Id manquant"
+      "missingTenantIdHeader": "En-tête X-Tenant-Id manquant",
+      "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)"
     }
   },
   "courseDuplication": {
@@ -7559,6 +7562,56 @@
       "automation_disable": "L’envoi a été arrêté car l’automatisation a changé.",
       "automation_archive": "L’envoi a été arrêté car l’automatisation a changé.",
       "automation_deleted": "L’envoi a été arrêté car l’automatisation a changé."
+    }
+  },
+  "contentMarketplace": {
+    "category": "Catégorie / sujet",
+    "allCategories": "Toutes les catégories",
+    "duration": "Durée",
+    "anyDuration": "Toutes les durées",
+    "clearFilters": "Effacer les filtres",
+    "durations": {
+      "short": "Moins de 1 heure",
+      "medium": "1–3 heures",
+      "long": "Plus de 3 heures"
+    },
+    "discover": "Découvrez des cours pour développer les compétences de votre organisation.",
+    "search": "Rechercher des cours, des sujets ou des compétences…",
+    "clearSearch": "Effacer la recherche",
+    "recentTitle": "Mis à jour récemment",
+    "recentDescription": "Découvrez les dernières mises à jour des cours du catalogue.",
+    "recentBadge": "Mis à jour récemment",
+    "allCourses": "Tous les cours",
+    "results": "Cours trouvés : {{count}}",
+    "sortBy": "Trier par",
+    "sortRecent": "Mis à jour récemment",
+    "sortTitle": "Titre (A–Z)",
+    "noResults": "Aucun cours ne correspond à votre recherche. Essayez un autre mot-clé.",
+    "addToCourses": "Ajouter aux cours",
+    "title": "Place de marché de contenus",
+    "description": "Parcourez des cours sélectionnés et copiez-les dans votre organisation.",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "unavailable": "La place de marché de contenus n'est pas activée pour cette organisation. Contactez votre administrateur.",
+    "serviceError": "La place de marché de contenus est indisponible. Veuillez réessayer.",
+    "empty": "Aucun cours n'est encore disponible sur la place de marché.",
+    "updated": "Mis à jour le {{date}}",
+    "copying": "Copie du cours…",
+    "copyNotice": "Le cours est ajouté comme cours partagé non modifiable. La synchronisation le met à jour vers la dernière version et conserve la progression des apprenants.",
+    "copyComplete": "Le cours a été copié dans votre organisation.",
+    "copyUpdated": "Votre copie de ce cours a été mise à jour.",
+    "copyFailed": "Le cours n'a pas pu être copié. Veuillez réessayer.",
+    "openCourse": "Ouvrir le cours",
+    "sync": "Synchroniser",
+    "syncing": "Synchronisation…",
+    "syncNotice": "Mettez à jour votre copie avec la dernière version de ce cours.",
+    "firstPage": "Revenir à la première page",
+    "error": {
+      "invalidQuery": "Paramètres de recherche ou de pagination du catalogue invalides.",
+      "unavailable": "La place de marché de contenus n'est pas disponible pour cette organisation.",
+      "listingNotFound": "Ce cours de la place de marché est introuvable.",
+      "thumbnailNotFound": "Ce cours de la place de marché n'a pas de miniature.",
+      "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard."
     }
   }
 }

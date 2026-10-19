@@ -57,7 +57,8 @@
       "embeddingUnavailable": "AI document processing is unavailable. Try again when it is configured.",
       "unsupportedVersion": "This Mentingo package version is not supported.",
       "missingAsset": "The Mentingo package is missing a required file.",
-      "invalidArchive": "This ZIP is not a valid Mentingo package."
+      "invalidArchive": "This ZIP is not a valid Mentingo package.",
+      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace."
     }
   },
   "aiConversations": {
@@ -2226,6 +2227,7 @@
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
         "phishing_report_read": "View phishing simulation reports.",
+        "content_marketplace_browse": "Browse the content marketplace and copy its courses (copying also needs course creation).",
         "account_read_self": "View their own account details.",
         "account_update_self": "Edit their own account details.",
         "user_read_self": "View their own user profile.",
@@ -5863,7 +5865,8 @@
       "ownerInactive": "API key owner is no longer active",
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
-      "missingTenantIdHeader": "Missing X-Tenant-Id header"
+      "missingTenantIdHeader": "Missing X-Tenant-Id header",
+      "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)"
     }
   },
   "courseDuplication": {
@@ -8075,6 +8078,56 @@
       "wrongNumberOfRoots": "Automation can have only 1 root",
       "treeNotConnected": "Not all provided steps are connected with each other",
       "bulkInsertFailed": "Could not update automation steps"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Category / topic",
+    "allCategories": "All categories",
+    "duration": "Duration",
+    "anyDuration": "Any duration",
+    "clearFilters": "Clear filters",
+    "durations": {
+      "short": "Under 1 hour",
+      "medium": "1–3 hours",
+      "long": "Over 3 hours"
+    },
+    "discover": "Discover courses to build skills across your organization.",
+    "search": "Search courses, topics or skills…",
+    "clearSearch": "Clear search",
+    "recentTitle": "Recently updated",
+    "recentDescription": "Explore the latest course updates in the marketplace.",
+    "recentBadge": "Recently updated",
+    "allCourses": "All courses",
+    "results": "Courses found: {{count}}",
+    "sortBy": "Sort by",
+    "sortRecent": "Recently updated",
+    "sortTitle": "Title (A–Z)",
+    "noResults": "No courses match your search. Try a different keyword.",
+    "addToCourses": "Add to courses",
+    "title": "Content marketplace",
+    "description": "Browse curated courses and copy them into your organization.",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "unavailable": "The content marketplace is not enabled for this organization. Contact your administrator.",
+    "serviceError": "The content marketplace is unavailable. Please try again.",
+    "empty": "No courses are available in the marketplace yet.",
+    "updated": "Updated {{date}}",
+    "copying": "Copying the course…",
+    "copyNotice": "The course is added as a shared course that can't be edited. Sync updates it to the latest version and keeps learners' progress.",
+    "copyComplete": "The course was copied into your organization.",
+    "copyUpdated": "Your copy of this course was updated.",
+    "copyFailed": "The course could not be copied. Please try again.",
+    "openCourse": "Open course",
+    "sync": "Sync",
+    "syncing": "Syncing…",
+    "syncNotice": "Update your copy to the latest version of this course.",
+    "firstPage": "Back to first page",
+    "error": {
+      "invalidQuery": "Invalid marketplace search or pagination parameters.",
+      "unavailable": "The content marketplace is not available for this organization.",
+      "listingNotFound": "This marketplace course was not found.",
+      "thumbnailNotFound": "This marketplace course has no thumbnail.",
+      "serviceError": "The content marketplace could not complete the request. Try again later."
     }
   }
 }

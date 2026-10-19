@@ -3,6 +3,7 @@ import { FileSlidersIcon, PlusIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { ContentMarketplaceLink } from "~/modules/ContentMarketplace/components/ContentMarketplaceLink";
 
 import { FeaturedCourseSelect } from "./FeaturedCourseSelect";
 
@@ -16,9 +17,13 @@ const CoursesHeader = () => {
           <FeaturedCourseSelect className="min-w-0 flex-1 sm:flex-none" />
         </div>
         <div className="ml-auto flex w-full gap-2 sm:w-auto sm:gap-3">
+          <ContentMarketplaceLink
+            className="min-w-0 flex-1 sm:flex-none"
+            buttonClassName="bg-white"
+          />
           <Link to="/admin/courses" className="min-w-0 flex-1 sm:flex-none">
             <Button variant="outline" className="w-full whitespace-nowrap bg-white">
-              <FileSlidersIcon className="mr-1 size-5" />
+              <FileSlidersIcon className="mr-2 size-5" />
               {t("adminCoursesView.courses.header")}
             </Button>
           </Link>

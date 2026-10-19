@@ -1411,6 +1411,381 @@
         ]
       }
     },
+    "/api/integration/courses": {
+      "get": {
+        "operationId": "IntegrationCoursesController_getTenantCourses",
+        "summary": "List courses for an external catalog",
+        "description": "Returns the non-archived courses of the tenant selected by X-Tenant-Id, with localized title and description, languages, a signed thumbnail URL and chapter and lesson counts.\n\nRequires a managing tenant key whose owner has the course export permission. Titles and descriptions use the given language and fall back to each course's base language.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantCoursesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/courses/{courseId}/native-archive": {
+      "post": {
+        "operationId": "IntegrationNativeArchiveController_startCourseArchiveExport",
+        "summary": "Start a native archive export of a course",
+        "description": "Queues a native archive (mentingo-package zip) export of a course in the tenant selected by X-Tenant-Id and returns the job id. Poll GET /integration/native-archive/jobs/:jobId until the job completes, then download the archive.\n\nRequires a managing tenant key whose owner has the course export permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartCourseArchiveExportResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/native-archive/jobs/{jobId}": {
+      "get": {
+        "operationId": "IntegrationNativeArchiveController_getCourseArchiveExportStatus",
+        "summary": "Get a native archive export job",
+        "description": "Returns the state of a native archive export started with this integration key in the tenant selected by X-Tenant-Id. Finished archives can be downloaded for 24 hours.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseArchiveExportStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/native-archive/jobs/{jobId}/download": {
+      "get": {
+        "operationId": "IntegrationNativeArchiveController_downloadCourseArchive",
+        "summary": "Download a native archive",
+        "description": "Streams the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. The body is the archive itself, not a JSON envelope.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/plugins/content-marketplace": {
+      "put": {
+        "operationId": "IntegrationContentMarketplaceController_saveContentMarketplaceConnection",
+        "summary": "Connect a tenant to the content marketplace",
+        "description": "Atomically saves the content marketplace plugin origin and API key, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveContentMarketplaceConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveContentMarketplaceConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "get": {
+        "operationId": "IntegrationContentMarketplaceController_checkContentMarketplaceConnection",
+        "summary": "Verify tenant content marketplace connectivity",
+        "description": "Checks that Mentingo can authenticate to the configured content marketplace plugin and reports whether the marketplace is enabled for the tenant. Requires a managing tenant key with tenant management permission. No credentials are returned.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckContentMarketplaceConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/key": {
       "get": {
         "operationId": "IntegrationAdminController_getCurrentKey",
@@ -1852,6 +2227,14 @@
                 "type": "string"
               },
               {
+                "const": "CONTENT_MARKETPLACE_BASE_URL",
+                "type": "string"
+              },
+              {
+                "const": "CONTENT_MARKETPLACE_API_KEY",
+                "type": "string"
+              },
+              {
                 "const": "MICROSOFT_CLIENT_ID",
                 "type": "string"
               },
@@ -1997,6 +2380,14 @@
                     },
                     {
                       "const": "PHISHING_WEBHOOK_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "CONTENT_MARKETPLACE_BASE_URL",
+                      "type": "string"
+                    },
+                    {
+                      "const": "CONTENT_MARKETPLACE_API_KEY",
                       "type": "string"
                     },
                     {
@@ -3292,6 +3683,393 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTenantCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "baseLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "availableLocales": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "thumbnailUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "chapterCount": {
+                  "type": "number"
+                },
+                "lessonCount": {
+                  "type": "number"
+                },
+                "metadata": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "anyOf": [
+                        {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "durationMinutes": {
+                      "anyOf": [
+                        {
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "category",
+                    "durationMinutes"
+                  ]
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "description",
+                "baseLanguage",
+                "availableLocales",
+                "thumbnailUrl",
+                "status",
+                "originType",
+                "chapterCount",
+                "lessonCount",
+                "metadata",
+                "updatedAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "StartCourseArchiveExportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseArchiveExportStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "result": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "const": "course",
+                            "type": "string"
+                          },
+                          {
+                            "const": "learning-path",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rootId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "alreadyExists": {
+                        "type": "boolean"
+                      },
+                      "createdCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "reusedCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "rootId"
+                    ]
+                  }
+                ]
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "jobId",
+              "state",
+              "result",
+              "failedReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SaveContentMarketplaceConnectionBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "apiKey": {
+            "minLength": 32,
+            "maxLength": 256,
+            "writeOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseUrl",
+          "apiKey"
+        ]
+      },
+      "SaveContentMarketplaceConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CheckContentMarketplaceConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reachable": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenantId",
+              "reachable",
+              "enabled"
             ]
           }
         },

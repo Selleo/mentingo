@@ -19,6 +19,7 @@ export * from "./constants/automationTriggers";
 export * from "./constants/automations";
 export * from "./constants/calendar";
 export * from "./constants/certificate";
+export * from "./constants/contentMarketplace";
 export * from "./constants/course";
 export * from "./constants/courseChat";
 export * from "./constants/courseDuplication";

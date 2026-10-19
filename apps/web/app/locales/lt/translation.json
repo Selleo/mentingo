@@ -57,7 +57,8 @@
       "embeddingUnavailable": "AI dokumentų apdorojimas nepasiekiamas.",
       "unsupportedVersion": "Ši Mentingo paketo versija nepalaikoma.",
       "missingAsset": "Mentingo pakete trūksta būtino failo.",
-      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas."
+      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas.",
+      "courseNotSyncable": "Šis kursas buvo pridėtas kaip redaguojama kopija, todėl jo negalima sinchronizuoti. Ištrinkite jį ir pridėkite iš naujo iš prekyvietės."
     }
   },
   "aiConversations": {
@@ -2225,6 +2226,7 @@
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
         "phishing_report_read": "Gali peržiūrėti sukčiavimo el. paštu simuliacijų ataskaitas.",
+        "content_marketplace_browse": "Naršyti turinio prekyvietę ir kopijuoti jos kursus (kopijuojant taip pat reikia teisės kurti kursus).",
         "account_read_self": "Gali peržiūrėti savo paskyros duomenis.",
         "account_update_self": "Gali redaguoti savo paskyros duomenis.",
         "user_read_self": "Gali peržiūrėti savo naudotojo profilį.",
@@ -6051,7 +6053,8 @@
       "ownerInactive": "API rakto savininkas nebėra aktyvus",
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
-      "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+      "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės",
+      "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)"
     }
   },
   "luma": {
@@ -8044,6 +8047,56 @@
     "picker": {
       "search": "Ieškoti",
       "empty": "Atitikmenų nerasta"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Kategorija / tema",
+    "allCategories": "Visos kategorijos",
+    "duration": "Trukmė",
+    "anyDuration": "Bet kokia trukmė",
+    "clearFilters": "Išvalyti filtrus",
+    "durations": {
+      "short": "Iki 1 valandos",
+      "medium": "1–3 valandos",
+      "long": "Daugiau nei 3 valandos"
+    },
+    "discover": "Atraskite kursus, kurie padeda ugdyti įgūdžius jūsų organizacijoje.",
+    "search": "Ieškoti kursų, temų ar įgūdžių…",
+    "clearSearch": "Išvalyti paiešką",
+    "recentTitle": "Neseniai atnaujinti",
+    "recentDescription": "Atraskite naujausius kursų atnaujinimus kataloge.",
+    "recentBadge": "Neseniai atnaujintas",
+    "allCourses": "Visi kursai",
+    "results": "Rasta kursų: {{count}}",
+    "sortBy": "Rikiuoti pagal",
+    "sortRecent": "Neseniai atnaujinti",
+    "sortTitle": "Pavadinimą (A–Z)",
+    "noResults": "Paiešką atitinkančių kursų nerasta. Pabandykite kitą raktažodį.",
+    "addToCourses": "Pridėti prie kursų",
+    "title": "Turinio prekyvietė",
+    "description": "Naršykite atrinktus kursus ir kopijuokite juos į savo organizaciją.",
+    "loading": "Įkeliama…",
+    "retry": "Bandyti dar kartą",
+    "unavailable": "Turinio prekyvietė šiai organizacijai neįjungta. Kreipkitės į administratorių.",
+    "serviceError": "Turinio prekyvietė nepasiekiama. Bandykite dar kartą.",
+    "empty": "Prekyvietėje dar nėra kursų.",
+    "updated": "Atnaujinta {{date}}",
+    "copying": "Kursas kopijuojamas…",
+    "copyNotice": "Kursas pridedamas kaip bendrinamas kursas, kurio negalima redaguoti. Sinchronizavimas jį atnaujina iki naujausios versijos ir išsaugo besimokančiųjų pažangą.",
+    "copyComplete": "Kursas nukopijuotas į jūsų organizaciją.",
+    "copyUpdated": "Jūsų šio kurso kopija atnaujinta.",
+    "copyFailed": "Kurso nukopijuoti nepavyko. Bandykite dar kartą.",
+    "openCourse": "Atidaryti kursą",
+    "sync": "Sinchronizuoti",
+    "syncing": "Sinchronizuojama…",
+    "syncNotice": "Atnaujinkite savo kopiją į naujausią šio kurso versiją.",
+    "firstPage": "Grįžti į pirmą puslapį",
+    "error": {
+      "invalidQuery": "Netinkami katalogo paieškos arba puslapiavimo parametrai.",
+      "unavailable": "Turinio prekyvietė šiai organizacijai nepasiekiama.",
+      "listingNotFound": "Šis prekyvietės kursas nerastas.",
+      "thumbnailNotFound": "Šis prekyvietės kursas neturi miniatiūros.",
+      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau."
     }
   }
 }

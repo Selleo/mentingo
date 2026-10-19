@@ -11,6 +11,7 @@ export type SystemRoleSlug = (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE
 export const PERMISSIONS = {
   PHISHING_MANAGE: "phishing.manage",
   PHISHING_REPORT_READ: "phishing.report_read",
+  CONTENT_MARKETPLACE_BROWSE: "content_marketplace.browse",
   ACCOUNT_READ_SELF: "account.read_self",
   ACCOUNT_UPDATE_SELF: "account.update_self",
   USER_READ_SELF: "user.read_self",
@@ -230,6 +231,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: [
     PERMISSIONS.PHISHING_MANAGE,
     PERMISSIONS.PHISHING_REPORT_READ,
+    PERMISSIONS.CONTENT_MARKETPLACE_BROWSE,
     PERMISSIONS.AI_THREAD_READ,
     PERMISSIONS.ACCOUNT_READ_SELF,
     PERMISSIONS.ACCOUNT_UPDATE_SELF,

@@ -14,6 +14,7 @@ import type {
 } from "src/course-transfer/course-transfer.constants";
 import type {
   CourseTransferCourseDestination,
+  CourseTransferEntityMapScope,
   CourseTransferPolicy,
 } from "src/course-transfer/course-transfer.types";
 import type { CourseTransferSnapshotService } from "src/course-transfer/services/course-transfer-snapshot.service";
@@ -565,9 +566,29 @@ export type SourceSnapshot = {
   courseResources: Array<ResourceWithRelation>;
 };
 
+export type CourseTransferEntityMapping = {
+  id: UUIDType;
+  sourceEntityId: UUIDType;
+  targetEntityId: UUIDType;
+};
+
+export type CourseTransferMirrorCourseOptions = {
+  entityMapScope: CourseTransferEntityMapScope;
+  targetAuthorId: UUIDType;
+  /** Whether the course records the source course and tenant it mirrors. */
+  linksToSource: boolean;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
+};
+
+export type CourseTransferMirroredCourse = {
+  courseId: UUIDType;
+  chapterMap: Map<UUIDType, UUIDType>;
+  lessonMap: Map<UUIDType, UUIDType>;
+};
+
 export type CreateTargetCourseFromSourceParams = {
   targetCourseId: UUIDType;
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   sourceTenantId: UUIDType;
   sourceSnapshot: SourceSnapshot;
   sourceLanguage: string;
@@ -583,13 +604,14 @@ export type UpdateTargetCourseFromSourceParams = {
   sourceLanguage: string;
   courseSettings: CoursesSettings;
   categoryId: UUIDType;
-  sourceTenantId: UUIDType;
+  sourceCourseId: UUIDType | null;
+  sourceTenantId: UUIDType | null;
   resourceCollection: CourseTransferResourceCollection;
   targetAuthorId: UUIDType;
 };
 
 export type SyncChaptersParams = {
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   sourceLanguage: string;
   sourceSnapshot: SourceSnapshot;
   targetCourseId: UUIDType;
@@ -597,7 +619,7 @@ export type SyncChaptersParams = {
 };
 
 export type SyncLessonsParams = {
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   sourceLanguage: string;
   sourceSnapshot: SourceSnapshot;
   chapterMap: Map<UUIDType, UUIDType>;
@@ -605,7 +627,7 @@ export type SyncLessonsParams = {
 };
 
 export type SyncQuestionsParams = {
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   sourceLanguage: string;
   sourceSnapshot: SourceSnapshot;
   lessonMap: Map<UUIDType, UUIDType>;
@@ -614,7 +636,7 @@ export type SyncQuestionsParams = {
 };
 
 export type SyncOptionsParams = {
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   sourceLanguage: string;
   sourceSnapshot: SourceSnapshot;
   questionMap: Map<UUIDType, UUIDType>;
@@ -711,13 +733,14 @@ export type GetTargetResourceEntityIdParams = {
 };
 
 export type SyncResourcesParams = {
-  exportId: UUIDType;
+  entityMapScope: CourseTransferEntityMapScope;
   lessonMap: Map<UUIDType, UUIDType>;
   questionMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
   targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
   resourceCollection: CourseTransferResourceCollection;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type DuplicateResourcesParams = {
