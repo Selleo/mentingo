@@ -19,6 +19,7 @@ import {
   getCourseAuthoringBlocks,
   normalizeCourseAuthoringBlocks,
 } from "src/common/utils/courseAuthoringBlocks";
+import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 import { AiJudgeConfigurationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration.service";
 import { AiMentorConfigurationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration.service";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -230,7 +231,13 @@ export class CourseAuthoringContextService {
       .from(assessments)
       .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(assessmentAttempts, eq(assessmentAttempts.assessmentId, assessments.id))
+      .leftJoin(
+        assessmentAttempts,
+        and(
+          eq(assessmentAttempts.assessmentId, assessments.id),
+          currentLearningState(assessmentAttempts.learningStateId),
+        ),
+      )
       .where(eq(chapters.courseId, courseId))
       .groupBy(assessments.id, assessments.lessonId, assessments.attemptCooldown);
     const selected = new Set(query.lessonIds ?? []);
@@ -397,7 +404,13 @@ export class CourseAuthoringContextService {
       .from(assessments)
       .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(assessmentAttempts, eq(assessmentAttempts.assessmentId, assessments.id))
+      .leftJoin(
+        assessmentAttempts,
+        and(
+          eq(assessmentAttempts.assessmentId, assessments.id),
+          currentLearningState(assessmentAttempts.learningStateId),
+        ),
+      )
       .where(and(eq(chapters.courseId, courseId), inArray(assessments.lessonId, selectedIds)))
       .groupBy(assessments.id, assessments.lessonId, assessments.attemptCooldown);
     const mentorVersions = await this.db

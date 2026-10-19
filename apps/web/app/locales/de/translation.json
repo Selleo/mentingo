@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Wiederholung: {{completed}} von {{total}} Lektionen",
+    "repeat": "Kurs wiederholen",
+    "setting": "Kurswiederholung erlauben",
+    "settingDescription": "Lernende können einen abgeschlossenen Kurs mit neuem Fortschritt wiederholen.",
+    "completedOn": "Abgeschlossen am {{date}}",
+    "progress": "Wiederholung: {{completed}} von {{total}} Kapiteln",
+    "errors": {
+      "staleState": "Aktualisieren Sie den Kurs, bevor Sie fortfahren.",
+      "unavailable": "Dieser Kurs kann derzeit nicht wiederholt werden.",
+      "accessDenied": "Sie haben keinen Zugriff auf die Kurswiederholung."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatisierungen & E-Mails",
     "templates": "Automatisierungsvorlagen",
@@ -6166,6 +6179,8 @@
       "certificate": "Zertifikat",
       "uponCompletion": "Nach Abschluss",
       "notIssuedYet": "Noch nicht ausgestellt",
+      "certificateDate": "Ausgestellt",
+      "certificateExpiry": "Läuft ab",
       "aboutAuthor": "Über den Autor"
     },
     "certificate": {

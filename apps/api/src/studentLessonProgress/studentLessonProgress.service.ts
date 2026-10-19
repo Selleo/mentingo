@@ -13,6 +13,12 @@ import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { canTrackLessonProgress } from "src/common/utils/lessonLearningAccess";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
+import {
+  activeLearningStateId,
+  activeCourseLearningStateId,
+  CourseRepetitionService,
+} from "src/course-repetition/course-repetition.service";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -22,6 +28,7 @@ import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
+  courseLearningStates,
   aiMentorStudentLessonProgress,
   chapters,
   courseStudentMode,
@@ -63,6 +70,7 @@ export class StudentLessonProgressService {
     private readonly certificatesService: CertificatesService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly courseRepetitionService: CourseRepetitionService,
   ) {}
 
   async getLessonProgressAccess(
@@ -205,7 +213,13 @@ export class StudentLessonProgressService {
       .select()
       .from(studentLessonProgress)
       .where(
-        and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
+        and(
+          eq(studentLessonProgress.lessonId, id),
+          and(
+            eq(studentLessonProgress.studentId, studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
+        ),
       );
 
     const currentLessonProgress = !lessonProgress
@@ -214,6 +228,7 @@ export class StudentLessonProgressService {
             .insert(studentLessonProgress)
             .values({
               studentId,
+              learningStateId: await activeLearningStateId(dbInstance, studentId, id),
               lessonId: lesson.id,
               chapterId: lesson.chapterId,
               completedQuestionCount,
@@ -224,6 +239,7 @@ export class StudentLessonProgressService {
                 studentLessonProgress.studentId,
                 studentLessonProgress.lessonId,
                 studentLessonProgress.chapterId,
+                studentLessonProgress.learningStateId,
               ],
               set: {
                 completedQuestionCount,
@@ -254,7 +270,10 @@ export class StudentLessonProgressService {
         .where(
           and(
             eq(studentLessonProgress.lessonId, lesson.id),
-            eq(studentLessonProgress.studentId, studentId),
+            and(
+              eq(studentLessonProgress.studentId, studentId),
+              activeLearningState(studentLessonProgress.learningStateId),
+            ),
             isNull(studentLessonProgress.completedAt),
           ),
         )
@@ -401,7 +420,10 @@ export class StudentLessonProgressService {
       .where(
         and(
           eq(studentLessonProgress.lessonId, lesson.id),
-          eq(studentLessonProgress.studentId, studentId),
+          and(
+            eq(studentLessonProgress.studentId, studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
           resetStarted
             ? or(
                 isNotNull(studentLessonProgress.completedAt),
@@ -488,7 +510,13 @@ export class StudentLessonProgressService {
       .select()
       .from(studentLessonProgress)
       .where(
-        and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
+        and(
+          eq(studentLessonProgress.lessonId, id),
+          and(
+            eq(studentLessonProgress.studentId, studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
+        ),
       );
 
     if (lessonProgress?.isStarted) return;
@@ -498,6 +526,7 @@ export class StudentLessonProgressService {
 
       await dbInstance.insert(studentLessonProgress).values({
         studentId,
+        learningStateId: await activeLearningStateId(dbInstance, studentId, id),
         lessonId: id,
         chapterId: lesson.chapterId,
       });
@@ -514,7 +543,10 @@ export class StudentLessonProgressService {
         .where(
           and(
             eq(studentLessonProgress.lessonId, id),
-            eq(studentLessonProgress.studentId, studentId),
+            and(
+              eq(studentLessonProgress.studentId, studentId),
+              activeLearningState(studentLessonProgress.learningStateId),
+            ),
           ),
         );
     }
@@ -540,7 +572,10 @@ export class StudentLessonProgressService {
       .leftJoin(
         studentChapterProgress,
         and(
-          eq(studentChapterProgress.studentId, studentCourses.studentId),
+          and(
+            eq(studentChapterProgress.studentId, studentCourses.studentId),
+            activeLearningState(studentChapterProgress.learningStateId),
+          ),
           eq(studentChapterProgress.courseId, studentCourses.courseId),
           eq(studentChapterProgress.chapterId, chapterId),
         ),
@@ -548,7 +583,10 @@ export class StudentLessonProgressService {
       .leftJoin(
         studentLessonProgress,
         and(
-          eq(studentLessonProgress.studentId, studentCourses.studentId),
+          and(
+            eq(studentLessonProgress.studentId, studentCourses.studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
           eq(studentLessonProgress.chapterId, chapterId),
         ),
       )
@@ -670,6 +708,7 @@ export class StudentLessonProgressService {
         lessonId,
         chapterId,
         studentId: userId,
+        learningStateId: await activeLearningStateId(trx, userId, lessonId),
         attempts: 1,
         isQuizPassed,
         completedAt: isCompleted ? sql`now()` : null,
@@ -682,6 +721,7 @@ export class StudentLessonProgressService {
           studentLessonProgress.studentId,
           studentLessonProgress.lessonId,
           studentLessonProgress.chapterId,
+          studentLessonProgress.learningStateId,
         ],
         set: {
           attempts,
@@ -710,7 +750,10 @@ export class StudentLessonProgressService {
       .where(
         and(
           eq(studentLessonProgress.chapterId, chapterId),
-          eq(studentLessonProgress.studentId, studentId),
+          and(
+            eq(studentLessonProgress.studentId, studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
           isNotNull(studentLessonProgress.completedAt),
         ),
       );
@@ -724,6 +767,7 @@ export class StudentLessonProgressService {
       return dbInstance
         .insert(studentChapterProgress)
         .values({
+          learningStateId: await activeCourseLearningStateId(dbInstance, studentId, courseId),
           completedLessonCount: completedLessonCount.count,
           completedAt: sql`now()`,
           completedAsFreemium,
@@ -736,6 +780,7 @@ export class StudentLessonProgressService {
             studentChapterProgress.studentId,
             studentChapterProgress.chapterId,
             studentChapterProgress.courseId,
+            studentChapterProgress.learningStateId,
           ],
           set: {
             completedLessonCount: completedLessonCount.count,
@@ -749,6 +794,7 @@ export class StudentLessonProgressService {
     return dbInstance
       .insert(studentChapterProgress)
       .values({
+        learningStateId: await activeCourseLearningStateId(dbInstance, studentId, courseId),
         completedLessonCount: completedLessonCount.count,
         courseId,
         chapterId,
@@ -759,6 +805,7 @@ export class StudentLessonProgressService {
           studentChapterProgress.studentId,
           studentChapterProgress.chapterId,
           studentChapterProgress.courseId,
+          studentChapterProgress.learningStateId,
         ],
         set: {
           completedLessonCount: completedLessonCount.count,
@@ -773,7 +820,13 @@ export class StudentLessonProgressService {
     actor: ActorUserType,
     trx?: DatabasePg,
     language?: SupportedLanguages,
-  ) {
+  ): Promise<unknown> {
+    if (!trx || trx === this.db) {
+      return this.db.transaction((db) =>
+        this.checkCourseIsCompletedForUser(courseId, studentId, actor, db, language),
+      );
+    }
+    const repetitionInfo = await this.courseRepetitionService.getInfo(courseId, studentId, trx);
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
       courseId,
       studentId,
@@ -807,11 +860,14 @@ export class StudentLessonProgressService {
 
       if (course?.hasCertificate)
         return (
-          await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
+          !repetitionInfo.repetition &&
+            (await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId, trx)),
           await this.certificatesService.createCertificate(studentId, courseId, trx)
         );
 
-      return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
+      if (!repetitionInfo.repetition)
+        return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId, trx);
+      return;
     }
 
     return await this.updateStudentCourseStats(
@@ -837,7 +893,10 @@ export class StudentLessonProgressService {
       .from(studentChapterProgress)
       .where(
         and(
-          eq(studentChapterProgress.studentId, studentId),
+          and(
+            eq(studentChapterProgress.studentId, studentId),
+            activeLearningState(studentChapterProgress.learningStateId),
+          ),
           eq(studentChapterProgress.courseId, courseId),
           isNotNull(studentChapterProgress.completedAt),
         ),
@@ -876,7 +935,22 @@ export class StudentLessonProgressService {
     dbInstance: DatabasePg = this.db,
     language?: SupportedLanguages,
   ): Promise<boolean> {
+    const info = await this.courseRepetitionService.getInfo(courseId, studentId, dbInstance);
+    if (info.repetition && progress !== PROGRESS_STATUSES.COMPLETED) {
+      await dbInstance
+        .update(courseLearningStates)
+        .set({ finishedChapterCount })
+        .where(eq(courseLearningStates.id, info.repetition.id));
+      return false;
+    }
+    const replacing = progress === PROGRESS_STATUSES.COMPLETED && Boolean(info.repetition);
     if (progress === PROGRESS_STATUSES.COMPLETED) {
+      await this.courseRepetitionService.complete(
+        courseId,
+        studentId,
+        finishedChapterCount,
+        dbInstance,
+      );
       const [studentCourse] = await dbInstance
         .update(studentCourses)
         .set({
@@ -894,7 +968,7 @@ export class StudentLessonProgressService {
             eq(studentCourses.studentId, studentId),
             eq(studentCourses.courseId, courseId),
             eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-            isNull(studentCourses.completedAt),
+            replacing ? undefined : isNull(studentCourses.completedAt),
           ),
         )
         .returning();
@@ -923,6 +997,17 @@ export class StudentLessonProgressService {
       .set({ progress, finishedChapterCount, completedAt: null })
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
 
+    await dbInstance
+      .update(courseLearningStates)
+      .set({ completedAt: null, finishedChapterCount })
+      .where(
+        and(
+          eq(courseLearningStates.courseId, courseId),
+          eq(courseLearningStates.studentId, studentId),
+          eq(courseLearningStates.kind, "current"),
+        ),
+      );
+
     return false;
   }
 
@@ -949,7 +1034,10 @@ export class StudentLessonProgressService {
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, userId),
+          and(
+            eq(studentLessonProgress.studentId, userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
         ),
       )
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))

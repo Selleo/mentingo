@@ -2,6 +2,8 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { DB } from "src/storage/db/db.providers";
 import {
   assessmentAttempts,
@@ -34,7 +36,10 @@ export class QuizRuntimeRepository {
   async insertAttempt(values: QuizAttemptInsert, db: DatabasePg) {
     const [attempt] = await db
       .insert(assessmentAttempts)
-      .values(values)
+      .values({
+        ...values,
+        learningStateId: courseLearningContext.getStore()?.learningStateId ?? null,
+      })
       .returning({ id: assessmentAttempts.id });
     return attempt;
   }
@@ -80,7 +85,10 @@ export class QuizRuntimeRepository {
       .where(
         and(
           eq(assessmentAttempts.assessmentId, assessmentId),
-          eq(assessmentAttempts.learnerId, learnerId),
+          and(
+            eq(assessmentAttempts.learnerId, learnerId),
+            activeLearningState(assessmentAttempts.learningStateId),
+          ),
         ),
       )
       .orderBy(desc(assessmentAttempts.attemptNumber))

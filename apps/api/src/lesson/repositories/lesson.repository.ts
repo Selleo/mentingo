@@ -9,6 +9,7 @@ import {
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg, type UUIDType } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -104,7 +105,7 @@ export class LessonRepository {
             SELECT bool_and(COALESCE(scp.completed_lesson_count, 0) = c.lesson_count)
             FROM ${chapters} c
             LEFT JOIN ${studentChapterProgress} scp
-              ON scp.chapter_id = c.id AND scp.student_id = ${userId}
+              ON scp.chapter_id = c.id AND ${activeLearningState(sql.raw("scp.learning_state_id"))} AND scp.student_id = ${userId}
             WHERE c.course_id = ${courseId} AND c.display_order < ${chapters.displayOrder}
           )
         `,
@@ -115,7 +116,10 @@ export class LessonRepository {
           studentChapterProgress,
           and(
             eq(studentChapterProgress.chapterId, chapters.id),
-            eq(studentChapterProgress.studentId, userId),
+            and(
+              eq(studentChapterProgress.studentId, userId),
+              activeLearningState(studentChapterProgress.learningStateId),
+            ),
           ),
         )
         .where(eq(lessons.id, id));
@@ -233,7 +237,7 @@ export class LessonRepository {
               SELECT l2.id
               FROM ${lessons} l2
               JOIN ${chapters} c ON c.id = l2.chapter_id
-              LEFT JOIN ${studentLessonProgress} slp ON slp.lesson_id = l2.id AND slp.student_id = ${userId}
+              LEFT JOIN ${studentLessonProgress} slp ON slp.lesson_id = l2.id AND ${activeLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${userId}
               WHERE c.course_id = ${chapters.courseId}
                 AND l2.id != ${lessons.id}
                 AND slp.completed_at IS NULL
@@ -251,6 +255,7 @@ export class LessonRepository {
         and(
           eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id),
           eq(aiMentorThreads.userId, userId),
+          activeLearningState(aiMentorThreads.learningStateId),
           ne(aiMentorThreads.status, THREAD_STATUS.ARCHIVED),
         ),
       )
@@ -268,7 +273,10 @@ export class LessonRepository {
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, userId),
+          and(
+            eq(studentLessonProgress.studentId, userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
@@ -428,7 +436,15 @@ export class LessonRepository {
       .from(studentLessonProgress)
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .where(and(eq(chapters.courseId, courseId), eq(studentLessonProgress.studentId, userId)));
+      .where(
+        and(
+          eq(chapters.courseId, courseId),
+          and(
+            eq(studentLessonProgress.studentId, userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
+        ),
+      );
   }
 
   async checkLessonAssignment(id: UUIDType, userId: UUIDType) {
@@ -447,7 +463,10 @@ export class LessonRepository {
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, userId),
+          and(
+            eq(studentLessonProgress.studentId, userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
         ),
       )
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
@@ -554,7 +573,10 @@ export class LessonRepository {
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, currentUser.userId),
+          and(
+            eq(studentLessonProgress.studentId, currentUser.userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
         ),
       )
       .where(and(...conditions))
@@ -583,7 +605,10 @@ export class LessonRepository {
       .where(
         and(
           eq(studentLessonProgress.lessonId, lessonId),
-          eq(studentLessonProgress.studentId, userId),
+          and(
+            eq(studentLessonProgress.studentId, userId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
           ...(conditions ?? []),
         ),
       );

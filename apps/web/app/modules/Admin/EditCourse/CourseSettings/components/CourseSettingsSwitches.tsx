@@ -16,7 +16,7 @@ type Props = {
 
 type CourseSettingsSwitch = {
   key: string;
-  feature: CourseFeature;
+  feature?: CourseFeature;
   label: string;
   description: string;
   isEnabled?: boolean;
@@ -47,6 +47,7 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
 
   const isDisabled = isLoading || isUpdatingCourseSettings;
   const testIdBySettingKey: Record<string, string> = {
+    repetitionEnabled: COURSE_SETTINGS_HANDLES.REPETITION_SWITCH,
     lessonSequenceEnabled: COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH,
     quizFeedbackEnabled: COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH,
     videoCompletionTrackingEnabled: COURSE_SETTINGS_HANDLES.VIDEO_COMPLETION_TRACKING_SWITCH,
@@ -80,7 +81,20 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
       onToggle: handleVideoCompletionTrackingToggle,
       ariaLabel: t("adminCourseView.settings.other.enableVideoCompletionTracking"),
     },
-  ].filter((setting) => isCourseFeatureEnabledForCourseType(courseType, setting.feature));
+    {
+      key: "repetitionEnabled",
+      feature: undefined,
+      label: t("courseRepetition.setting"),
+      description: t("courseRepetition.settingDescription"),
+      isEnabled: data?.repetitionEnabled ?? false,
+      onToggle: (nextValue: boolean) =>
+        updateCourseSettings({ courseId, data: { repetitionEnabled: nextValue } }),
+      ariaLabel: t("courseRepetition.setting"),
+    },
+  ].filter(
+    (setting) =>
+      !setting.feature || isCourseFeatureEnabledForCourseType(courseType, setting.feature),
+  );
 
   if (!settings.length) return null;
 

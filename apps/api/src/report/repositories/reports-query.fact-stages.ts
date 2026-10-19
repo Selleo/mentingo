@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, exists, inArray, or, sql } from "drizzle-orm";
 
+import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 import {
   chapters,
   certificates,
@@ -141,7 +142,12 @@ function buildLearnerCourseProgress({ db, access }: ReportQueryContext) {
         eq(chapters.id, lessons.chapterId),
       ),
     )
-    .where(eq(studentLessonProgress.tenantId, access.tenantId))
+    .where(
+      and(
+        eq(studentLessonProgress.tenantId, access.tenantId),
+        currentLearningState(studentLessonProgress.learningStateId),
+      ),
+    )
     .groupBy(studentLessonProgress.tenantId, studentLessonProgress.studentId, chapters.courseId);
 }
 

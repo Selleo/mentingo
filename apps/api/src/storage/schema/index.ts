@@ -1,3 +1,4 @@
+export { courseLearningStates } from "./course-learning-state.schema";
 import {
   EMAIL_TEMPLATE_STATUSES,
   type EmailTemplateEvent,
@@ -130,6 +131,7 @@ import {
 } from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
+import { courseLearningStates } from "./course-learning-state.schema";
 import { int4multirange, nativeJsonb, tsvector } from "./custom-types";
 export * from "./quiz.schema";
 import {
@@ -1069,6 +1071,9 @@ export const aiMentorThreads = pgTable(
   "ai_mentor_threads",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     ...timestamps,
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
@@ -1486,6 +1491,9 @@ export const studentLessonProgress = pgTable(
   "student_lesson_progress",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     ...timestamps,
     studentId: uuid("student_id")
       .references(() => users.id, { onDelete: "set null" })
@@ -1510,7 +1518,9 @@ export const studentLessonProgress = pgTable(
     tenantId,
   },
   withTenantIdIndex("student_lesson_progress", (table) => ({
-    unq: unique().on(table.studentId, table.lessonId, table.chapterId),
+    unq: unique()
+      .on(table.studentId, table.lessonId, table.chapterId, table.learningStateId)
+      .nullsNotDistinct(),
     reportLearnerChapterIdx: index("student_lesson_progress_report_learner_chapter_idx").on(
       table.tenantId,
       table.studentId,
@@ -1544,6 +1554,9 @@ export const studentChapterProgress = pgTable(
   "student_chapter_progress",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     ...timestamps,
     studentId: uuid("student_id")
       .references(() => users.id)
@@ -1564,7 +1577,9 @@ export const studentChapterProgress = pgTable(
     tenantId,
   },
   withTenantIdIndex("student_chapter_progress", (table) => ({
-    unq: unique().on(table.studentId, table.courseId, table.chapterId),
+    unq: unique()
+      .on(table.studentId, table.courseId, table.chapterId, table.learningStateId)
+      .nullsNotDistinct(),
   })),
 );
 
@@ -1714,6 +1729,9 @@ export const scormAttempts = pgTable(
   "scorm_attempts",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     ...timestamps,
     studentId: uuid("student_id")
       .references(() => users.id, { onDelete: "cascade" })
@@ -1755,9 +1773,11 @@ export const scormAttempts = pgTable(
       table.packageId,
     ),
     scoIdx: index("scorm_attempts_sco_id_idx").on(table.scoId),
-    studentPackageScoAttemptUniqueIdx: uniqueIndex(
+    studentPackageScoAttemptUniqueIdx: unique(
       "scorm_attempts_student_package_sco_attempt_unique_idx",
-    ).on(table.studentId, table.packageId, table.scoId, table.attemptNumber),
+    )
+      .on(table.studentId, table.packageId, table.scoId, table.attemptNumber, table.learningStateId)
+      .nullsNotDistinct(),
   })),
 );
 
@@ -2472,6 +2492,9 @@ export const lessonVideoProgress = pgTable(
   "lesson_video_progress",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     ...timestamps,
     studentId: uuid("student_id")
       .references(() => users.id, { onDelete: "cascade" })
@@ -2509,7 +2532,9 @@ export const lessonVideoProgress = pgTable(
     resourceEntityIdx: index("lesson_video_progress_resource_entity_idx").on(
       table.resourceEntityId,
     ),
-    unq: unique().on(table.studentId, table.lessonId, table.resourceEntityId),
+    unq: unique()
+      .on(table.studentId, table.lessonId, table.resourceEntityId, table.learningStateId)
+      .nullsNotDistinct(),
   })),
 );
 

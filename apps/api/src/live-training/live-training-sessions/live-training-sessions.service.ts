@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
@@ -10,8 +17,12 @@ import {
   type LiveTrainingParticipantRole,
   type SupportedLanguages,
 } from "@repo/shared";
+import { eq } from "drizzle-orm";
 
+import { DatabasePg } from "src/common";
 import { shouldApplyGroupManagerScope } from "src/common/permissions/group-manager-scope.utils";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import {
   EndLiveTrainingSessionEvent,
   FailLiveTrainingSessionEvent,
@@ -22,6 +33,7 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { courseLearningStates } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
 import { getLiveTrainingRoomName } from "src/websocket/websocket.gateway";
@@ -74,6 +86,8 @@ export class LiveTrainingSessionsService {
   private readonly logger = new Logger(LiveTrainingSessionsService.name);
 
   constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly courseRepetitionService: CourseRepetitionService,
     private readonly liveTrainingSessionsRepository: LiveTrainingSessionsRepository,
     private readonly liveKitService: LiveKitService,
     private readonly liveTrainingService: LiveTrainingService,
@@ -559,6 +573,7 @@ export class LiveTrainingSessionsService {
     await this.markLinkedLiveLessonsCompleted({
       liveTrainingId,
       deliveryType: liveTraining.deliveryType,
+      completedAt: endedAt,
       currentUser,
     });
     await this.publishSessionEvent(LIVE_TRAINING_SESSION_STATUSES.ENDED, {
@@ -1027,6 +1042,7 @@ export class LiveTrainingSessionsService {
     liveTrainingId: UUIDType;
     deliveryType: LiveTrainingDeliveryType;
     currentUser: CurrentUserType;
+    completedAt: string;
   }) {
     let completionRows: LiveTrainingLessonCompletionRow[];
 
@@ -1041,12 +1057,36 @@ export class LiveTrainingSessionsService {
     }
 
     for (const row of completionRows) {
-      await this.studentLessonProgressService.markLessonAsCompleted({
-        id: row.lessonId,
-        studentId: row.studentId,
-        userPermissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE],
-        actor: input.currentUser,
-        language: row.language,
+      await this.tenantDbRunner.transaction(async () => {
+        await this.courseRepetitionService.lock(row.courseId, row.studentId, this.db);
+        let learningStateId: string | null;
+        try {
+          learningStateId = await this.courseRepetitionService.resolveWritableState(
+            row.courseId,
+            row.studentId,
+            row.learningStateId,
+          );
+        } catch (error) {
+          if (error instanceof ConflictException) return;
+          throw error;
+        }
+        if (learningStateId) {
+          const [state] = await this.db
+            .select()
+            .from(courseLearningStates)
+            .where(eq(courseLearningStates.id, learningStateId));
+          if (state?.previousStateId && new Date(state.createdAt) > new Date(input.completedAt))
+            return;
+        }
+        await courseLearningContext.run({ learningStateId }, () =>
+          this.studentLessonProgressService.markLessonAsCompleted({
+            id: row.lessonId,
+            studentId: row.studentId,
+            userPermissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE],
+            actor: input.currentUser,
+            language: row.language,
+          }),
+        );
       });
     }
   }

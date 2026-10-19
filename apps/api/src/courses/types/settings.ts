@@ -31,6 +31,7 @@ export const certificateValiditySchema = Type.Union([
 
 export const coursesSettingsSchema = Type.Object(
   {
+    repetitionEnabled: Type.Optional(Type.Boolean({ default: false })),
     lessonSequenceEnabled: Type.Boolean({
       default: LESSON_SEQUENCE_ENABLED,
     }),

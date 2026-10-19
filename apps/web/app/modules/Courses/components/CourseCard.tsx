@@ -28,6 +28,7 @@ const CourseCard = ({
   authorAvatarUrl,
   category,
   completedChapterCount,
+  repetitionCompletedChapterCount,
   courseChapterCount,
   currency,
   description,
@@ -95,6 +96,14 @@ const CourseCard = ({
               courseLessonCount={courseChapterCount}
               completedLessonCount={completedChapterCount}
             />
+          )}
+          {enrolled && repetitionCompletedChapterCount != null && (
+            <p className="mt-1 text-sm text-neutral-700">
+              {t("courseRepetition.progress", {
+                completed: repetitionCompletedChapterCount,
+                total: courseChapterCount,
+              })}
+            </p>
           )}
           <div className={cn({ "mt-3": enrolled })}>
             <CourseCardTitle title={title} />

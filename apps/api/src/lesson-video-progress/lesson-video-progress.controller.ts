@@ -6,6 +6,7 @@ import { baseResponse, BaseResponse } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 
 import { LessonVideoProgressService } from "./lesson-video-progress.service";
 import {
@@ -18,6 +19,7 @@ import {
 export class LessonVideoProgressController {
   constructor(private readonly lessonVideoProgressService: LessonVideoProgressService) {}
 
+  @CourseLearningWrite({ source: "body", field: "lessonId" })
   @Post()
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({

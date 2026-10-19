@@ -13,6 +13,7 @@ import { and, count, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm"
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   liveTrainingAttendance,
@@ -29,6 +30,7 @@ import {
   permissionRuleSetPermissions,
   permissionUserRoles,
   studentCourses,
+  courseLearningStates,
   users,
 } from "src/storage/schema";
 
@@ -648,6 +650,8 @@ export class LiveTrainingSessionsRepository {
         lessonId: liveLessons.lessonId,
         studentId: liveTrainingSessionParticipants.userId,
         language: liveLessons.language,
+        courseId: studentCourses.courseId,
+        learningStateId: courseLearningStates.id,
       })
       .from(liveLessons)
       .innerJoin(
@@ -670,10 +674,19 @@ export class LiveTrainingSessionsRepository {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          activeLearningState(courseLearningStates.id),
+        ),
+      )
       .where(
         and(
           eq(liveLessons.liveTrainingId, liveTrainingId),
           sql`${liveTrainingSessionParticipants.joinCount} > 0`,
+          sql`NOT EXISTS (SELECT 1 FROM course_learning_states rep WHERE rep.course_id = ${studentCourses.courseId} AND rep.student_id = ${studentCourses.studentId} AND rep.kind = 'repetition' AND ${liveTrainingSessionParticipants.lastLeftAt} < rep.created_at)`,
         ),
       );
   }
@@ -686,6 +699,8 @@ export class LiveTrainingSessionsRepository {
         lessonId: liveLessons.lessonId,
         studentId: studentCourses.studentId,
         language: liveLessons.language,
+        courseId: studentCourses.courseId,
+        learningStateId: courseLearningStates.id,
       })
       .from(liveLessons)
       .innerJoin(
@@ -701,6 +716,14 @@ export class LiveTrainingSessionsRepository {
         and(
           eq(studentCourses.courseId, liveTrainingLinks.entityId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          activeLearningState(courseLearningStates.id),
         ),
       )
       .where(eq(liveLessons.liveTrainingId, liveTrainingId));

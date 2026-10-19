@@ -226,6 +226,7 @@ export const questionDetails = Type.Object({
 });
 
 export const lessonShowSchema = Type.Object({
+  learningStateId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   id: UUIDSchema,
   title: Type.String(),
   type: Type.Enum(LESSON_TYPES),

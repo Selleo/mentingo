@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, gte, inArray, lt, max, sql } from "drizzle-o
 
 import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -101,7 +102,8 @@ export class AdminAiThreadsRepository {
       .leftJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
       .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(courses, eq(courses.id, chapters.courseId));
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
+      .where(activeLearningState(aiMentorThreads.learningStateId));
   }
 
   async getThreadSummaries(adminAiThreadQuery: AdminAiThreadQuery) {
@@ -143,8 +145,11 @@ export class AdminAiThreadsRepository {
   }
 
   async findThreadSummaryById(threadId: UUIDType, adminAiThreadQuery: AdminAiThreadQuery = {}) {
-    const [threadSummary] = await this.buildThreadSummariesQuery(adminAiThreadQuery)
-      .where(eq(aiMentorThreads.id, threadId))
+    const summaries = this.buildThreadSummariesQuery(adminAiThreadQuery).as("thread_summary");
+    const [threadSummary] = await this.db
+      .select()
+      .from(summaries)
+      .where(eq(summaries.id, threadId))
       .limit(1);
     return threadSummary;
   }

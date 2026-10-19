@@ -7,6 +7,7 @@ import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
@@ -15,6 +16,7 @@ import { StudentLessonProgressService } from "./studentLessonProgress.service";
 export class StudentLessonProgressController {
   constructor(private readonly studentLessonProgressService: StudentLessonProgressService) {}
 
+  @CourseLearningWrite({ source: "query", field: "id" })
   @Post()
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({

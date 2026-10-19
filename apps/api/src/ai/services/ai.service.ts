@@ -1,6 +1,7 @@
 import { observe, propagateAttributes, updateActiveObservation } from "@langfuse/tracing";
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -45,6 +46,8 @@ import {
 } from "src/ai/utils/translation-output";
 import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { DB } from "src/storage/db/db.providers";
@@ -96,9 +99,10 @@ export class AiService {
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB)
     private readonly db: DatabasePg,
+    private readonly courseRepetitionService: CourseRepetitionService,
   ) {}
 
-  async getThreadWithSetup(data: CreateThreadBody) {
+  async getOrCreateLessonThread(data: CreateThreadBody) {
     return observe(
       async () =>
         propagateAttributes(
@@ -113,35 +117,8 @@ export class AiService {
           }),
           async () => {
             try {
-              const threadData = await this.threadService.createThreadIfNoneExist(data);
-
-              if (!threadData.newThread) {
-                return { data: threadData.thread };
-              }
-
-              return propagateAttributes(
-                buildAiMentorTraceAttributes({
-                  sessionId: threadData.thread.id,
-                  userId: data.userId,
-                  tenantId: dbAls.getStore()?.tenantId,
-                  flow: AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
-                  operation: "thread-setup",
-                  channel: "text",
-                  threadId: threadData.thread.id,
-                  lessonId: data.lessonId,
-                  aiMentorLessonId: threadData.thread.aiMentorLessonId ?? undefined,
-                }),
-                async () => {
-                  const systemPrompt = await this.promptService.setSystemPrompt({
-                    threadId: threadData.thread.id,
-                    userId: threadData.thread.userId,
-                  });
-
-                  await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
-
-                  return { data: threadData.thread };
-                },
-              );
+              const { thread } = await this.threadService.createThreadIfNoneExist(data);
+              return { data: thread };
             } catch (error) {
               updateActiveObservation({
                 level: "ERROR",
@@ -157,6 +134,60 @@ export class AiService {
 
   async getExistingThreadForLesson(lessonId: UUIDType, userId: UUIDType) {
     return this.threadService.findExistingThreadForLesson(lessonId, userId);
+  }
+
+  async initializeLessonWelcome(threadId: UUIDType, userId: UUIDType) {
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)], true);
+    if (!thread || thread.userId !== userId || thread.status !== THREAD_STATUS.ACTIVE) return;
+    if (await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.MENTOR))
+      return;
+    const systemMessage = await this.aiRepository.findFirstMessageByRoleAndThread(
+      threadId,
+      MESSAGE_ROLE.SYSTEM,
+    );
+    const { courseId } = await this.aiRepository.findLessonIdByThreadId(threadId);
+    if (!courseId) return;
+
+    const systemPrompt =
+      systemMessage?.content ?? (await this.promptService.buildSystemPrompt({ threadId, userId }));
+    const content = await this.generateWelcomeMessage(systemPrompt);
+    await this.db.transaction(async (trx) => {
+      await this.courseRepetitionService.lock(courseId, userId, trx);
+      await this.courseRepetitionService.resolveWritableState(
+        courseId,
+        userId,
+        thread.learningStateId,
+        trx,
+      );
+      const activeThread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
+      if (!activeThread || activeThread.status !== THREAD_STATUS.ACTIVE)
+        throw new ConflictException("courseRepetition.errors.staleState");
+      if (await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.MENTOR))
+        return;
+      if (
+        !systemMessage &&
+        !(await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.SYSTEM))
+      ) {
+        await this.aiRepository.insertMessage(
+          {
+            tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt),
+            threadId,
+            role: MESSAGE_ROLE.SYSTEM,
+            content: systemPrompt,
+          },
+          trx,
+        );
+      }
+      await this.aiRepository.insertMessage(
+        {
+          tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, content),
+          threadId,
+          role: MESSAGE_ROLE.MENTOR,
+          content,
+        },
+        trx,
+      );
+    });
   }
 
   async getPracticeThreadWithSetup(data: {
@@ -439,6 +470,7 @@ export class AiService {
     if (!thread) throw new BadRequestException("Thread not found");
 
     const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
+    const { lessonId, courseId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
     const judged = await observe(
       async () =>
@@ -456,35 +488,47 @@ export class AiService {
             aiMentorLessonId: thread.aiMentorLessonId ?? undefined,
             practiceSessionId: thread.practiceSessionId ?? undefined,
           }),
-          () => this.judgeService.runJudge(data, viewer),
+          () => this.judgeService.evaluate(data, viewer),
         ),
       { name: "Thread Evaluator", asType: "evaluator" },
     )();
 
-    const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
     const { permissions: learnerPermissions } = await this.permissionsService.getUserAccess(
       thread.userId,
     );
 
-    if (lessonId) {
-      await this.markAsCompletedIfJudge(
-        lessonId,
-        thread.userId,
-        learnerPermissions,
-        currentUser,
-        judged.data,
-        thread.userLanguage,
-        true,
-      );
-    }
-
-    const { status: _status, ...judgeData } = judged.data;
-
-    return {
-      data: {
-        ...judgeData,
-      },
-    };
+    return this.db.transaction(async (tx) => {
+      let learningStateId = thread.learningStateId;
+      if (courseId) {
+        await this.courseRepetitionService.lock(courseId, thread.userId, tx);
+        learningStateId = await this.courseRepetitionService.resolveWritableState(
+          courseId,
+          thread.userId,
+          thread.learningStateId,
+          tx,
+        );
+      }
+      return courseLearningContext.run({ learningStateId }, async () => {
+        await this.judgeService.persistJudgement(
+          data.threadId,
+          thread.userLanguage,
+          judged.rubric,
+          judged.data,
+        );
+        if (lessonId) {
+          await this.markAsCompletedIfJudge(
+            lessonId,
+            thread.userId,
+            learnerPermissions,
+            currentUser,
+            judged.data,
+            thread.userLanguage,
+            true,
+          );
+        }
+        return { data: judged.data };
+      });
+    });
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {

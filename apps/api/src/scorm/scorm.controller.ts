@@ -32,6 +32,7 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
@@ -436,6 +437,7 @@ export class ScormController {
     });
   }
 
+  @CourseLearningWrite({ source: "query", field: "lessonId" })
   @Get("runtime/launch")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
@@ -457,6 +459,7 @@ export class ScormController {
     );
   }
 
+  @CourseLearningWrite({ source: "body", field: "attemptId", entity: "scorm" })
   @Post("runtime/commit")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
@@ -475,6 +478,7 @@ export class ScormController {
     });
   }
 
+  @CourseLearningWrite({ source: "body", field: "attemptId", entity: "scorm" })
   @Post("runtime/finish")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({

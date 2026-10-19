@@ -1548,6 +1548,20 @@
       "when": 1792055706227,
       "tag": "0220_course_transfer_reliability",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1792406054481,
+      "tag": "0221_course_repetition_states",
+      "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1792406121599,
+      "tag": "0222_course_repetition_backfill",
+      "breakpoints": true
     }
   ]
 }

@@ -19,6 +19,7 @@ import request from "supertest";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   announcements,
@@ -592,6 +593,15 @@ describe("LiveTrainingController (e2e)", () => {
 
     const lessonId = lessonResponse.body.data.id;
     const { liveTrainingId } = lessonResponse.body.data;
+    const current = await db.transaction((tx) =>
+      app.get(CourseRepetitionService).ensureCurrent(course.id, student.id, tx),
+    );
+    await db.insert(studentLessonProgress).values({
+      studentId: student.id,
+      lessonId,
+      chapterId: chapter.id,
+      learningStateId: current.id,
+    });
 
     const startResponse = await request(app.getHttpServer())
       .post(`/api/live-training/${liveTrainingId}/sessions/start`)
@@ -631,7 +641,7 @@ describe("LiveTrainingController (e2e)", () => {
           eq(liveTrainingLinks.entityId, course.id),
         ),
       );
-    const [lessonProgress] = await db
+    const progressRows = await db
       .select()
       .from(studentLessonProgress)
       .where(
@@ -646,8 +656,10 @@ describe("LiveTrainingController (e2e)", () => {
     expect(liveLesson).toBeDefined();
     expect(courseLink).toBeDefined();
     expect(liveLesson.liveTrainingLinkId).toBe(courseLink.id);
-    expect(lessonProgress.completedAt).not.toBeNull();
-    expect(lessonProgress.languageAnswered).toBe(language);
+    expect(progressRows).toHaveLength(1);
+    expect(progressRows[0].learningStateId).toBe(current.id);
+    expect(progressRows[0].completedAt).not.toBeNull();
+    expect(progressRows[0].languageAnswered).toBe(language);
   });
 
   it("does not create in-app notifications when a live training has no linked course", async () => {

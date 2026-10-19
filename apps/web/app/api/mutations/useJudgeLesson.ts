@@ -3,16 +3,25 @@ import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
 import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
 import { toast } from "~/components/ui/use-toast";
 
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "../queries/admin/useCourseStudentsAiMentorResults";
 import { getCurrentThreadMessagesQueryKey } from "../queries/useCurrentThreadMessages";
 
+import type { CourseLearningIdentity } from "~/api/utils/course-learning-state.types";
+
 export const useJudgeLesson = (lessonId: string) => {
   return useMutation({
-    mutationFn: async ({ threadId }: { threadId: string }) => {
-      const response = await ApiClient.api.aiControllerJudgeThread(threadId);
+    mutationFn: async ({
+      threadId,
+      learningStateId,
+    }: { threadId: string } & CourseLearningIdentity) => {
+      const response = await ApiClient.api.aiControllerJudgeThread(
+        threadId,
+        courseLearningHeaders(learningStateId),
+      );
       return response.data;
     },
     onError: (error) => {

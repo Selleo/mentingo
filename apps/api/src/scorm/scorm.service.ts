@@ -882,6 +882,7 @@ export class ScormService {
     );
 
     return {
+      learningStateId: attempt.learningStateId,
       attemptId: attempt.id,
       packageId: launchableSco.packageId,
       scoId: launchableSco.scoId,
