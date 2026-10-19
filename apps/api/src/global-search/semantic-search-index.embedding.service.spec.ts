@@ -25,9 +25,20 @@ describe("pinned semantic search embeddings", () => {
     expect(embedMany).toHaveBeenCalledWith(
       expect.objectContaining({
         values: ["expenses policy"],
+        telemetry: { isEnabled: false },
         maxRetries: 0,
         abortSignal: expect.any(AbortSignal),
       }),
+    );
+  });
+
+  it("disables telemetry for background indexing batches", async () => {
+    const texts = ["first chunk", "second chunk"];
+    embedMany.mockResolvedValue({ embeddings: texts.map(() => Array(1536).fill(0.1)) });
+
+    expect(await service.embedTexts(texts)).toHaveLength(2);
+    expect(embedMany).toHaveBeenCalledWith(
+      expect.objectContaining({ values: texts, telemetry: { isEnabled: false } }),
     );
   });
 

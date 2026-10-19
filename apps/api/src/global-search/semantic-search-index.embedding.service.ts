@@ -24,6 +24,8 @@ export class SemanticSearchEmbeddingService {
     const { embeddings } = await embedMany({
       model: provider.embedding(SEMANTIC_SEARCH_MODEL),
       values: texts,
+      // Query and indexing embeddings must not consume Langfuse observation units.
+      telemetry: { isEnabled: false },
       maxRetries: 0,
       abortSignal: AbortSignal.timeout(timeoutMs),
     });
