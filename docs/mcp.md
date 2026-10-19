@@ -61,9 +61,12 @@ can deliberately request a narrower grant. Every new authorization requires cons
 repeat connections; the consent screen explains that account access includes reads
 and changes.
 
+Clients that request exactly the complete advertised scope catalog also receive
+`account:access`; the consent page and issued token show that resolved scope.
+
 For a deliberate access cap, request granular scopes or `student:read` instead.
-`account:access` and `student:read` must each be requested alone. Granular scopes can
-be combined with each other. Empty, unknown, duplicate and mixed exclusive scopes
+Otherwise, `account:access` and `student:read` must each be requested alone.
+Granular scopes can be combined with each other. Empty, unknown, duplicate and mixed exclusive scopes
 are rejected. Read and write scopes are separate: a write scope does not implicitly
 include its read counterpart.
 

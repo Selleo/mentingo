@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
-import { MCP_SCOPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -156,6 +156,12 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
 
   it("defaults a new connection without a scope parameter to account access", async () => {
     const auth = await authorizationCode(null);
+    const issued = await exchange(auth.code, auth.verifier).expect(200);
+    expect(issued.body.scope).toBe(MCP_SCOPES.ACCOUNT_ACCESS);
+  });
+
+  it("accepts clients requesting every advertised scope as account access", async () => {
+    const auth = await authorizationCode(MCP_REQUESTABLE_SCOPES.join(" "));
     const issued = await exchange(auth.code, auth.verifier).expect(200);
     expect(issued.body.scope).toBe(MCP_SCOPES.ACCOUNT_ACCESS);
   });

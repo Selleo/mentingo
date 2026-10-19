@@ -160,6 +160,18 @@ const toolScopes: Record<string, McpScope> = {
   global_search: MCP_SCOPES.SEARCH_READ,
 };
 
+/** Clients without a scope preference may request the entire discovery catalog. */
+export function normalizeMcpAuthorizationScopes(scopes: string[]): string[] {
+  if (
+    scopes.length === MCP_REQUESTABLE_SCOPES.length &&
+    new Set(scopes).size === scopes.length &&
+    MCP_REQUESTABLE_SCOPES.every((scope) => scopes.includes(scope))
+  ) {
+    return [MCP_SCOPES.ACCOUNT_ACCESS];
+  }
+  return scopes;
+}
+
 export function isRequestableMcpScopeSet(scopes: unknown): scopes is McpScope[] {
   if (!Array.isArray(scopes) || scopes.length === 0 || new Set(scopes).size !== scopes.length)
     return false;
