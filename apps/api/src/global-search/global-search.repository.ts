@@ -1,8 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, COURSE_STATUSES, LEARNING_PATH_STATUSES } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  COURSE_STATUSES,
+  LEARNING_PATH_STATUSES,
+  PERMISSIONS,
+} from "@repo/shared";
 import { and, desc, eq, inArray, isNotNull, ne, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
@@ -40,6 +46,7 @@ import type {
 } from "./global-search.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class GlobalSearchRepository {
@@ -191,6 +198,49 @@ export class GlobalSearchRepository {
       )
       .groupBy(learningPaths.id);
 
+    return this.sortByMatches(rows, matches);
+  }
+
+  /** Hydrate learner lesson matches without management shortcuts or attachment lookups. */
+  async getLearnerLessons(
+    matches: MatchRow[],
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const ids = this.matchIds(matches);
+    if (!ids.length) return [];
+    const publicAccess = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ)
+      ? and(eq(courses.status, COURSE_STATUSES.PUBLISHED), eq(courses.priceInCents, 0))
+      : sql`false`;
+    const enrolledAccess = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ_ASSIGNED)
+      ? and(
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+          sql`EXISTS (SELECT 1 FROM ${studentCourses}
+            WHERE ${studentCourses.courseId} = ${courses.id}
+              AND ${studentCourses.studentId} = ${currentUser.userId}
+              AND ${studentCourses.tenantId} = ${currentUser.tenantId}
+              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED})`,
+        )
+      : sql`false`;
+    const rows = await this.db
+      .select({
+        id: lessons.id,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language, courses),
+        courseId: courses.id,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(
+        and(
+          inArray(lessons.id, ids),
+          eq(lessons.tenantId, currentUser.tenantId),
+          eq(chapters.tenantId, currentUser.tenantId),
+          eq(courses.tenantId, currentUser.tenantId),
+          eq(courses.isArchived, false),
+          or(publicAccess, enrolledAccess),
+        ),
+      );
     return this.sortByMatches(rows, matches);
   }
 

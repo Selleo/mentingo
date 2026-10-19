@@ -73,7 +73,7 @@ include its read counterpart.
 | Scope                                         | Intended access                                                                                                                    |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `account:access`                              | Standard permission-aware account access; default when scopes are omitted; exclusive                                               |
-| `student:read`                                | Exclusive learner search and the eight learner list/get tools below                                                                |
+| `student:read`                                | Exclusive learner content search, course curriculum and lesson reads below                                                         |
 | `search:read`                                 | Global search with current account permissions; learner projection without management permissions, broader results where permitted |
 | `courses:read`, `courses:write`               | Course, chapter and lesson management reads or mutations                                                                           |
 | `categories:read`, `categories:write`         | Category management reads or mutations                                                                                             |
@@ -137,6 +137,9 @@ subject to current account permissions and enabled tenant features:
 | Tools                             | Returned data                                                                                                               |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `list_courses`, `get_course`      | Available/enrolled course metadata: title, description, category, enrollment, chapter count, price/currency and source link |
+| `list_chapters`, `get_chapter`    | Ordered chapters in free public courses or actively enrolled paid public and private courses                                |
+| `list_lessons`, `get_lesson`      | Lesson metadata and bounded authored text for content lessons; other lesson types return metadata only                      |
+| `search_lessons`                  | Search localized lesson titles and content text across accessible courses, optionally within a course                       |
 | `list_articles`, `get_article`    | Published, unarchived articles in an available language; list metadata and bounded article text                             |
 | `list_news`, `get_news`           | Published learner-visible news in an available language; list metadata and bounded news text                                |
 | `list_qa_entries`, `get_qa_entry` | Learner-visible Q&A available in the requested language; list titles and bounded answers                                    |
@@ -145,10 +148,33 @@ Mentingo intersects the connected account's **current** permissions with the def
 student permission set; it never grants a missing permission or impersonates another
 student. Elevated role shortcuts are excluded. Course detail explicitly rejects
 drafts, archived courses and unenrolled private courses, including courses authored
-by the connected account. Course results never contain chapter/lesson bodies,
-assessments, internal authoring settings, private files or signed download URLs.
+by the connected account. Course results remain metadata only. The curriculum and
+lesson tools are available exclusively through `student:read`; account/granular
+management tools keep their existing contracts. Course catalog metadata, including
+paid public course listings, remains searchable; finding a course does not grant access to
+its curriculum or lesson content. Curriculum and lesson access requires a published,
+unarchived public course with exactly zero price (`priceInCents = 0`), or this
+account's own active enrollment in a published paid course or a private course.
+A private course requires enrollment even when its price is zero. Drafts and archived
+courses are unavailable even to an enrolled administrator or the course author.
+These rules are the same for every account connected through `student:read`.
+These MCP reads do not start lessons, change progress, enforce the interactive
+lesson sequence, or create AI sessions. They do not enroll the account or change
+normal web lesson access, including freemium rules.
 
-Article, news and Q&A details contain sanitized original text only, capped at 16,000
+`get_lesson` requires `courseId`, `lessonId` and `language`; optional `chapterId`
+is also checked when supplied. Use lesson and course IDs from global search to
+fetch the actual lesson content.
+Content lessons return sanitized authored text; quiz, AI mentor, video/embed and
+other lesson types return metadata only with `contentReadSupported: false`.
+No assessment answers, hidden grading, AI configuration, file credentials, playback
+or signed download URLs are exposed. `search_lessons` supports `query`, optional
+`courseId`, `language`, `page` and `pageSize` (maximum 25), filtering authorization
+before retrieving and counting results. Keyword search matches the same sanitized
+text returned to learners, scanning authorized lessons in batches of 100 without
+requiring the optional search index. Its cost grows with the accessible lesson catalog.
+
+Content lesson, article, news and Q&A details contain sanitized original text only, capped at 16,000
 characters with `contentTruncated`. Resource objects, injected signed URLs, HTML
 attributes and active HTML are excluded. Titles are capped at 500 characters and
 summaries/course descriptions at 2,000. Lists return bounded pages: courses, articles
@@ -160,8 +186,25 @@ available, and direct calls to tools outside the scope are rejected.
 
 The same reader tool names are used for account, granular and student connections. Tool discovery selects each resource view from the approved scope and current permissions: `student:read` always uses learner projections; account and granular read connections use the management view only with that resource's management permissions, otherwise the learner view. Role names do not choose the view. `get_course` uses `courseId`, `get_qa_entry` uses `qaId`, and article/news lookup uses `id`.
 
-Student search is restricted before retrieval to accessible course metadata, news,
-articles and Q&A. It excludes lesson, directory and development-path searches.
+For `student:read`, `global_search` includes accessible lesson results in keyword
+and hybrid modes. Start with `global_search(mode: "hybrid")`, then read the result
+with `get_lesson` or `get_article` before answering. Lesson visibility and safe
+source checks run before ranking and limits. Unenrolled access requires a published,
+unarchived public course with exactly zero price (`priceInCents = 0`). Published
+paid courses and private courses require the connected account's own active
+enrollment; private courses require enrollment regardless of price. Drafts and
+archives are excluded. Paid public course metadata can still appear in course
+search results without making its lessons readable. There is
+no administrator or author bypass. Results contain lesson/course IDs, a bounded
+sanitized passage and a canonical link, without attachment filenames or file URLs.
+Only indexed lesson titles and authored content-lesson descriptions are eligible;
+assessment questions/answers, AI configuration and lesson files are excluded.
+Both keyword and hybrid learner lesson results require current normalized text
+chunks from background indexing; unindexed or stale lessons produce no result.
+The existing `semanticStatus` indicates hybrid readiness/fallback. Use
+`search_lessons` as a literal-text fallback without an index dependency. Directory
+and development-path searches remain excluded. Legacy `search` and other scope
+contracts retain their existing projections.
 Course matching uses title/description documents only, including in hybrid mode;
 lesson or private file matches cannot cause a course hit. Course matched passages
 and attachment filenames are omitted from returned results. Editorial retrieval

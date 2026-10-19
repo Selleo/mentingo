@@ -118,6 +118,11 @@ describe("MCP search scope runtime enforcement", () => {
         "global_search",
         "list_courses",
         "get_course",
+        "list_chapters",
+        "get_chapter",
+        "list_lessons",
+        "get_lesson",
+        "search_lessons",
         "list_articles",
         "get_article",
         "list_news",
@@ -126,10 +131,32 @@ describe("MCP search scope runtime enforcement", () => {
         "get_qa_entry",
       ].sort(),
     );
-    expect(names).not.toEqual(
-      expect.arrayContaining(["get_lesson", "list_users", "create_course"]),
-    );
+    expect(names).not.toEqual(expect.arrayContaining(["list_users", "create_course"]));
   });
+  it("student lesson calls retain learner identity for admins and recheck permission revocation", async () => {
+    const { rpc, service, getUserAccess } = await catalog([MCP_SCOPES.STUDENT_READ]);
+    const listLessons = jest
+      .fn()
+      .mockResolvedValue({ data: [], pagination: { page: 1, perPage: 10, totalItems: 0 } });
+    Object.assign(service, { studentLessonRepository: { listLessons } });
+    const args = { courseId: actor.grant.userId, chapterId: actor.grant.userId, language: "en" };
+    const result = await rpc("tools/call", { name: "list_lessons", arguments: args });
+    expect(result.result.isError).not.toBe(true);
+    expect(listLessons).toHaveBeenCalledWith(
+      args,
+      expect.objectContaining({
+        userId: actor.grant.userId,
+        tenantId: actor.grant.tenantId,
+        roleSlugs: [],
+      }),
+    );
+    expect(listLessons.mock.calls[0][1].permissions).not.toContain(PERMISSIONS.COURSE_UPDATE);
+    getUserAccess.mockResolvedValueOnce({ permissions: [], roleSlugs: [] });
+    const denied = await rpc("tools/call", { name: "list_lessons", arguments: args });
+    expect(denied.result.isError).toBe(true);
+    expect(listLessons).toHaveBeenCalledTimes(1);
+  });
+
   it("general access gives a learner canonical reads and no authoring or lesson tools", async () => {
     const { rpc } = await catalog(
       [MCP_SCOPES.ACCOUNT_ACCESS],

@@ -5,6 +5,7 @@ export type McpSearchContext = {
   resource: string;
   searchOnly: boolean;
   studentOnly?: boolean;
+  includeLearnerLessons?: boolean;
 };
 
 export type McpLinkedSearchResponse = {
@@ -24,3 +25,12 @@ export type McpContentSearchResponse = Pick<
   | "articles"
   | "qa"
 >;
+
+export type McpLearnerContentSearchResponse = McpContentSearchResponse & {
+  lessons: Array<
+    Pick<GlobalSearchResponse["lessons"][number], "id" | "title" | "courseId"> & {
+      matchedPassage?: string;
+      url: string;
+    }
+  >;
+};
