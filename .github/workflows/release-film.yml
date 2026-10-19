@@ -5,8 +5,9 @@ name: Release film
 # key: `claude -p` would bill it instead of the seat. The film and its page become the run's release-film artifact;
 # after a successful recording a second job (release-film-publish.yml, without the Claude token) attaches them to the
 # release and rebuilds the public Pages site, unless `publish` is off. A tag that already has a film stops such a
-# recording before it starts, unless `replace` is on (the earlier film is removed for the new one). It starts only by
-# hand, one film at a time: a film uses about a third of the seat's 5-hour limit.
+# recording before it starts, unless `replace` is on (the earlier film is removed for the new one). Dispatched by
+# release-film-on-release.yml for stable published releases or by hand, one film at a time: a film uses about a
+# third of the seat's 5-hour limit.
 # Mentingo is public: anyone signed in to GitHub can download these artifacts (the film, the run's report and the
 # project's knowledge). The token stays in the steps that need it and the report leaves out the run's secrets.
 on:

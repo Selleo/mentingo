@@ -267,7 +267,13 @@ runs start, scene workers, capture, write and finish. It requires a
 passing machine check, CLI worker/review capabilities and a valid nonempty
 scene plan. It exits nonzero without a complete reviewed film with narrated
 scenes. Learning defaults to `sync`; `--learn off` disables it.
-In GitHub Actions, `.github/workflows/release-film.yml` records a film when
+In GitHub Actions, `.github/workflows/release-film-on-release.yml` dispatches
+`.github/workflows/release-film.yml` for each stable published release, on the
+default branch with the published tag and publication on (replacement off).
+Drafts and prereleases are skipped; editing release notes does not trigger it.
+The default branch respects the `release-film` and `github-pages` environments'
+branch rules, unlike the release event's tag ref. The dispatch job queues the
+work; the separate recording run reports its outcome. Recording can also be
 started by hand (tag, base, learning), one at a time, on the company seat's
 token; the film and its page become the run's `release-film` artifact, and
 the project's knowledge travels between recordings as the
@@ -280,7 +286,7 @@ worker writes.
 After a successful recording (unless its `publish` input is off) the same
 run's second job, without the Claude token, calls
 `.github/workflows/release-film-publish.yml`: it attaches the film to the tag's
-release with a section of links in its notes (`ci/release_assets.py`) and
+release with a clickable poster and links at the top of its notes (`ci/release_assets.py`) and
 rebuilds the public GitHub Pages site of the films from every release's page ZIP
 (`site`: an index and each film at `/<tag>/`). Started by hand, the same
 workflow publishes an earlier recording to a test draft release or to the
@@ -292,7 +298,10 @@ release, or its page on the site) stops a publication, and a recording that
 would publish over it before it spends the seat, unless `replace` is on: then
 that film's release assets are deleted first (never another asset or a
 release), its notes section is rewritten and the site shows the new film.
-Neither workflow starts on its own.
+Republication keeps one film section and preserves the remaining release notes.
+There is no monthly schedule; each stable release starts its own film once the
+workflows are deployed to the default branch and the release tag. Existing
+releases can be recorded by hand.
 `RELEASE_FILM_CI=1` sizes a run for a 2-core, 8 GB runner: the film renders
 on 2 jobs, at most 3 scenes are checked at once, and the page is only written
 to `public/` (no server outlives the job). `RELEASE_FILM_CI_DEVICE_SCALE`,
