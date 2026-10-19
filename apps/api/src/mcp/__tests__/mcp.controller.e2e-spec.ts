@@ -825,6 +825,94 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       }
     });
 
+    it("gives normal student account access the same free and enrolled lesson reads and search", async () => {
+      const reader = await issueClient(student.user, student.host, [MCP_SCOPES.ACCOUNT_ACCESS]);
+      const free = await curriculum();
+      const paid = await curriculum();
+      const privateCourse = await curriculum(admin, COURSE_STATUSES.PRIVATE);
+      await baseDb
+        .update(courses)
+        .set({ priceInCents: 1500 })
+        .where(eq(courses.id, paid.course.id));
+      for (const fixture of [free, paid, privateCourse]) await indexLesson(fixture);
+      const embed = jest
+        .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
+        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+      try {
+        const tools = (await rpc(reader, "tools/list")).result.tools.map(
+          (tool: ToolResult) => tool.name,
+        );
+        expect(tools).toEqual(
+          expect.arrayContaining([
+            "list_chapters",
+            "get_chapter",
+            "list_lessons",
+            "get_lesson",
+            "search_lessons",
+          ]),
+        );
+        expect(tools).not.toContain("create_course");
+        expect((await call("get_lesson", free.args, reader)).lesson.content).toContain(free.marker);
+        for (const fixture of [paid, privateCourse]) await assertUnavailable(fixture, reader);
+        for (const mode of ["keyword", "hybrid"]) {
+          const result = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode },
+            reader,
+          );
+          const ids = result.lessons.map((row: ToolResult) => row.id);
+          expect(ids).toContain(free.lesson.id);
+          for (const fixture of [paid, privateCourse]) expect(ids).not.toContain(fixture.lesson.id);
+        }
+        await runAsTenant(reader.tenantId, async () =>
+          db
+            .insert(studentCourses)
+            .values(
+              [paid, privateCourse].map((fixture) => ({
+                courseId: fixture.course.id,
+                studentId: reader.user.id,
+                status: COURSE_ENROLLMENT.ENROLLED,
+              })),
+            ),
+        );
+        for (const fixture of [paid, privateCourse])
+          expect((await call("get_lesson", fixture.args, reader)).lesson.content).toContain(
+            fixture.marker,
+          );
+        for (const mode of ["keyword", "hybrid"]) {
+          const result = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode },
+            reader,
+          );
+          const ids = result.lessons.map((row: ToolResult) => row.id);
+          for (const fixture of [free, paid, privateCourse])
+            expect(ids).toContain(fixture.lesson.id);
+        }
+        await runAsTenant(reader.tenantId, async () =>
+          db
+            .update(studentCourses)
+            .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+            .where(
+              and(
+                eq(studentCourses.studentId, reader.user.id),
+                inArray(studentCourses.courseId, [paid.course.id, privateCourse.course.id]),
+              ),
+            ),
+        );
+        for (const fixture of [paid, privateCourse]) await assertUnavailable(fixture, reader);
+        const revoked = await call(
+          "global_search",
+          { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+          reader,
+        );
+        for (const fixture of [paid, privateCourse])
+          expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(fixture.lesson.id);
+      } finally {
+        embed.mockRestore();
+      }
+    });
+
     it("requires own active enrollment for paid public lessons, including admin student scope", async () => {
       const fixture = await curriculum();
       // Exercise enrollment authorization with authored words, not UUID tokenization.

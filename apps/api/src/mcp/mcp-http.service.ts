@@ -155,7 +155,7 @@ export class McpHttpService {
     private readonly globalSearchService: GlobalSearchService,
     private readonly userService: UserService,
     private readonly groupService: GroupService,
-    private readonly studentLessonRepository: McpStudentLessonRepository,
+    private readonly mcpStudentLessonRepository: McpStudentLessonRepository,
   ) {}
 
   async handle(req: Request, res: Response, actor: McpToolActor): Promise<void> {
@@ -202,6 +202,8 @@ export class McpHttpService {
       (!actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
         !actor.grant.scopes.includes(MCP_SCOPES.SEARCH) &&
         !hasMcpManagementSearchAccess(permissions));
+    const learnerLessons =
+      learnerSearch && canUseMcpToolWithScopes("get_lesson", actor.grant.scopes);
     const discoveryUser = asMcpStudentUser(
       {
         userId: actor.grant.userId,
@@ -213,7 +215,7 @@ export class McpHttpService {
       settings,
     );
     let instructions = MCP_UPLOAD_INSTRUCTIONS_SERVER;
-    if (studentOnly)
+    if (learnerLessons)
       instructions =
         "Search learner-visible courses, chapters, lessons, articles, news and Q&A. Use global_search with mode=hybrid to find relevant lessons and articles, then get_lesson/get_article to read their content. Use list_chapters/list_lessons to browse, or search_lessons for an unindexed literal text search. Free public courses and actively enrolled paid public or private courses only, including for administrators. This connection cannot modify content, update progress, access quiz answers, AI prompts, or file URLs.";
     else if (actor.grant.scopes.includes(MCP_SCOPES.SEARCH))
@@ -232,16 +234,15 @@ export class McpHttpService {
         learnerTools.set(name, { config, callback });
       },
     } as unknown as McpServer;
-    if (studentOnly)
-      registerMcpStudentLessonTools(
-        readerCollector,
-        (permissions, operation) => this.run(actor, permissions, operation, "learner"),
-        this.studentLessonRepository,
-        actor.grant.resource,
-      );
+    registerMcpStudentLessonTools(
+      readerCollector,
+      (permissions, operation) => this.run(actor, permissions, operation, "learner"),
+      this.mcpStudentLessonRepository,
+      actor.grant.resource,
+    );
     const readerPermissions = {
       ...MCP_STUDENT_TOOL_PERMISSIONS,
-      ...(studentOnly ? MCP_STUDENT_LESSON_TOOL_PERMISSIONS : {}),
+      ...MCP_STUDENT_LESSON_TOOL_PERMISSIONS,
     };
     registerMcpStudentTools(
       readerCollector,
@@ -300,7 +301,11 @@ export class McpHttpService {
       return tool;
     }) as typeof server.registerTool;
 
-    if (studentOnly) {
+    if (
+      !actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
+      !actor.grant.scopes.includes(MCP_SCOPES.SEARCH) &&
+      (studentOnly || !canListMcpTool("get_lesson", permissions, settings))
+    ) {
       const search = learnerTools.get("search_lessons")!;
       Reflect.apply(server.registerTool, server, [
         "search_lessons",
@@ -3306,7 +3311,7 @@ export class McpHttpService {
         resource: actor.grant.resource,
         searchOnly: learnerSearch || actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
         studentOnly: learnerSearch,
-        includeLearnerLessons: studentOnly,
+        includeLearnerLessons: learnerLessons,
       },
     );
 

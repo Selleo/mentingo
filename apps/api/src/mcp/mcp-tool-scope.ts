@@ -214,6 +214,9 @@ export function canUseMcpToolWithScopes(name: string, scopes: unknown): boolean 
   if (!isMcpScopeSet(scopes)) return false;
   if (scopes.includes(MCP_SCOPES.STUDENT_READ)) return studentTools.has(name);
   if (scopes[0] === MCP_SCOPES.SEARCH) return name === "global_search";
+  // New learner tools are available to normal account/domain reads, not frozen legacy authoring.
+  if (name === "search_lessons")
+    return scopes.includes(MCP_SCOPES.ACCOUNT_ACCESS) || scopes.includes(MCP_SCOPES.COURSES_READ);
   if (name === "get_my_capabilities")
     return scopes.some((scope) => scope !== MCP_SCOPES.SEARCH_READ);
   if (!Object.prototype.hasOwnProperty.call(toolScopes, name)) return false;

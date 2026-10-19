@@ -44,13 +44,13 @@ describe("MCP integration scope policy", () => {
       expect(canUseMcpToolWithScopes(tool, [MCP_SCOPES.STUDENT_READ])).toBe(false);
   });
 
-  it.each([
-    MCP_SCOPES.ACCOUNT_ACCESS,
-    MCP_SCOPES.COURSES_READ,
-    MCP_SCOPES.SEARCH_READ,
-    MCP_SCOPES.AUTHORING,
-  ])("keeps the learner-only lesson search out of %s grants", (scope) =>
-    expect(canUseMcpToolWithScopes("search_lessons", [scope])).toBe(false),
+  it.each([MCP_SCOPES.ACCOUNT_ACCESS, MCP_SCOPES.COURSES_READ])(
+    "includes learner lesson search in %s",
+    (scope) => expect(canUseMcpToolWithScopes("search_lessons", [scope])).toBe(true),
+  );
+  it.each([MCP_SCOPES.SEARCH_READ, MCP_SCOPES.AUTHORING])(
+    "preserves narrow and legacy %s catalogs",
+    (scope) => expect(canUseMcpToolWithScopes("search_lessons", [scope])).toBe(false),
   );
 
   it("preserves a frozen legacy authoring catalog without implicitly adding new tools", () => {

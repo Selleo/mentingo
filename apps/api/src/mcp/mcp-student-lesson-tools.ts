@@ -19,7 +19,7 @@ export const MCP_STUDENT_LESSON_TOOL_PERMISSIONS = {
   search_lessons: courseRead,
 };
 
-/** Register only for student:read: management tools keep their existing contracts. */
+/** Learner read adapters for normal account access and read-only scope caps. */
 export function registerMcpStudentLessonTools(
   server: McpServer,
   run: McpToolRunner,
