@@ -357,6 +357,11 @@ change source permissions; the separate web-search option explains its access to
 
 ### Recovering partial research
 
+Research activity retains the exact search queries and readable source links. Failed attempts
+show their recorded retrieval limitations beside the queries, including unavailable pages;
+these attempted URLs are not presented as verified source citations. Collecting saved evidence
+does not by itself count as a completed web search.
+
 A temporary analysis-provider outage leaves successful topic findings and fetched source pages
 available while identifying topics whose assessment is incomplete. Other topic assessments can
 finish independently. Temporary embedding outages can use the existing bounded text retrieval over

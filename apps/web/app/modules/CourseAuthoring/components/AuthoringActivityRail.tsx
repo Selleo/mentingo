@@ -364,6 +364,31 @@ const AuthoringResearchSources = ({ tools }: { tools: ToolActivity[] }) => {
   );
 };
 
+/** Keeps failed search attempts visible without presenting them as verified citations. */
+const AuthoringResearchDiagnostics = ({ tools }: { tools: ToolActivity[] }) => {
+  const messages = Array.from(
+    new Set(
+      tools.flatMap(({ tool }) =>
+        ["failed", "stopped"].includes(tool.status) &&
+        tool.display.trim() &&
+        tool.display !== tool.result?.query
+          ? [tool.display]
+          : [],
+      ),
+    ),
+  );
+  if (messages.length === 0) return null;
+  return (
+    <div className="ml-7 space-y-1 text-xs text-neutral-600">
+      {messages.map((message) => (
+        <p key={message} className="whitespace-pre-line break-words">
+          {message}
+        </p>
+      ))}
+    </div>
+  );
+};
+
 const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
   const orderedTools = [...tools].sort((left, right) => left.sequence - right.sequence);
   const representative =
@@ -382,8 +407,10 @@ const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
         showCounts={false}
         showQueries={false}
         showSources={false}
+        showDiagnostics={false}
       />
       <AuthoringSearchQueries queries={queries} />
+      <AuthoringResearchDiagnostics tools={orderedTools} />
       <AuthoringResearchSources tools={orderedTools} />
     </div>
   );
@@ -395,10 +422,12 @@ export const AuthoringToolActivity = ({
   showCounts = true,
   showQueries = true,
   showSources = true,
+  showDiagnostics = true,
 }: Pick<ToolActivity, "tool" | "taskLabel"> & {
   showCounts?: boolean;
   showQueries?: boolean;
   showSources?: boolean;
+  showDiagnostics?: boolean;
 }) => {
   const { t } = useTranslation();
   const isWebToolActivity = isWebTool(tool);
@@ -480,6 +509,9 @@ export const AuthoringToolActivity = ({
       )}
       {isWebToolActivity && showQueries && (
         <AuthoringSearchQueries queries={searchQueriesForTools([{ tool, sequence: 0 }])} />
+      )}
+      {(isWebToolActivity || isExtraction) && showDiagnostics && (
+        <AuthoringResearchDiagnostics tools={[{ tool, sequence: 0 }]} />
       )}
     </div>
   );

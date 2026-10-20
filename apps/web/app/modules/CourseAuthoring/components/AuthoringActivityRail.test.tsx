@@ -684,6 +684,78 @@ describe("AuthoringActivityRail live work", () => {
     ]);
   });
 
+  it("keeps each failed search diagnostic visible beside queries and verified source links", () => {
+    const unreadable = "Could not read https://example.com/blocked: HTTP 403.";
+    const unavailable = "Search provider unavailable; no pages were searched.";
+    renderWith().render(
+      <AuthoringActivityRail
+        compact
+        tasks={[]}
+        tools={[
+          {
+            taskId: "research-task",
+            sequence: 1,
+            tool: {
+              toolCallId: "search-one",
+              toolName: "web_search",
+              display: unreadable,
+              status: "failed",
+              result: { query: "First exact query", sourceCount: 0 },
+            },
+          },
+          {
+            taskId: "research-task",
+            sequence: 2,
+            tool: {
+              toolCallId: "search-two",
+              toolName: "web_search",
+              display: unavailable,
+              status: "failed",
+              result: {
+                query: "Second exact query",
+                sourceCount: 1,
+                sources: [{ url: "https://example.org/readable", title: "Readable page" }],
+              },
+            },
+          },
+        ]}
+        questions={[]}
+        assetTasks={[]}
+        applications={[]}
+        connection="live"
+        onRetry={vi.fn()}
+        onStopRequest={vi.fn()}
+        onAnswer={vi.fn()}
+        onAssetAction={vi.fn()}
+        onSkipAsset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Web search failed")).toBeVisible();
+    expect(screen.getByText(unreadable)).toBeVisible();
+    expect(screen.getByText(unavailable)).toBeVisible();
+    expect(screen.getByText("First exact query")).toBeVisible();
+    expect(screen.getByText("Second exact query")).toBeVisible();
+    expect(screen.getAllByTestId("authoring-source-chip")).toHaveLength(1);
+    expect(screen.getByTestId("authoring-source-chip")).toHaveTextContent("example.org");
+  });
+
+  it("shows a failed search diagnostic in the assistant transcript tool row", () => {
+    renderWith().render(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "search-empty",
+          toolName: "web_search",
+          display: "No search was executed because evidence collection did not reach the web step.",
+          status: "failed",
+          result: { sourceCount: 0 },
+        }}
+      />,
+    );
+    expect(screen.getByText(/No search was executed/)).toBeVisible();
+    expect(screen.queryByTestId("authoring-source-chip")).not.toBeInTheDocument();
+  });
+
   it("keeps queries after the first twelve inspectable from the grouped activity", async () => {
     const user = userEvent.setup();
     const queries = Array.from({ length: 13 }, (_, index) => `search query ${index + 1}`);
