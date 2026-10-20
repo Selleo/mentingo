@@ -6667,6 +6667,7 @@
       "readOnly": "Draft preview is read-only until you apply it."
     },
     "openWorkspace": "Edit with AI",
+    "createWorkspace": "Create with AI",
     "openLegacyDraft": "Continue legacy generation draft",
     "activityRail": {
       "inProgress": "Working… Progress will update when the next step finishes.",

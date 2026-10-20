@@ -6718,6 +6718,7 @@
       "readOnly": "Podgląd wersji roboczej jest tylko do odczytu do czasu zastosowania."
     },
     "openWorkspace": "Edytuj z AI",
+    "createWorkspace": "Twórz z AI",
     "openLegacyDraft": "Kontynuuj starszą wersję roboczą",
     "activityRail": {
       "inProgress": "Praca trwa… Postęp pojawi się po zakończeniu kolejnego etapu.",

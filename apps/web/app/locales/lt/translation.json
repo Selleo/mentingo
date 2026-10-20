@@ -6655,6 +6655,7 @@
       "readOnly": "Rengiamo turinio peržiūra yra tik skaitoma, kol ją pritaikysite."
     },
     "openWorkspace": "Redaguoti su DI",
+    "createWorkspace": "Kurti su DI",
     "openLegacyDraft": "Tęsti seną juodraštį",
     "activityRail": {
       "inProgress": "Vykdoma… Eiga bus atnaujinta užbaigus kitą veiksmą.",

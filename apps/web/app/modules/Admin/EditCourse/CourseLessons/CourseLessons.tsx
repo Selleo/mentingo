@@ -158,6 +158,7 @@ const CourseLessons = ({
   const isCurriculumLocked = authoringCurriculumPreview !== null;
   const shouldShowAuthoringButton =
     isBaseLanguage && showCourseGenerationButton && canUseCourseAuthoring;
+  const hasLessons = chapters?.some((chapter) => chapter.lessons.length > 0) ?? false;
 
   const baseLanguageLesson = useMemo(() => {
     if (!selectedChapter || !selectedLesson) return null;
@@ -431,7 +432,11 @@ const CourseLessons = ({
                     data-testid={CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON}
                   >
                     <Icon name="WandSparkles" className="size-4" />
-                    {t("courseAuthoring.openWorkspace")}
+                    {t(
+                      hasLessons
+                        ? "courseAuthoring.openWorkspace"
+                        : "courseAuthoring.createWorkspace",
+                    )}
                   </Button>
                 </div>
               )}

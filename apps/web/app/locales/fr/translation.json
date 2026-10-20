@@ -6390,6 +6390,7 @@
       "readOnly": "L’aperçu du brouillon est en lecture seule jusqu’à son application."
     },
     "openWorkspace": "Modifier avec l’IA",
+    "createWorkspace": "Créer avec l’IA",
     "openLegacyDraft": "Continuer l’ancien brouillon",
     "activityRail": {
       "inProgress": "Traitement en cours… La progression sera actualisée après la prochaine étape.",

@@ -6604,6 +6604,7 @@
       "readOnly": "La vista previa del borrador es de solo lectura hasta que la apliques."
     },
     "openWorkspace": "Editar con IA",
+    "createWorkspace": "Crear con IA",
     "openLegacyDraft": "Continuar borrador anterior",
     "activityRail": {
       "inProgress": "Trabajando… El progreso se actualizará al terminar el siguiente paso.",
