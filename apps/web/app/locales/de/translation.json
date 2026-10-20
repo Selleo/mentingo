@@ -6009,6 +6009,32 @@
     "permissionsUpdated": "Ihre Berechtigungen wurden aktualisiert. Ihre Sitzung wird aktualisiert, um den neuen Zugriff anzuwenden.",
     "refreshFailed": "Ihre Berechtigungen wurden geändert, aber die Sitzungsaktualisierung ist fehlgeschlagen. Bitte melden Sie sich erneut an."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Deine Sitzung ist abgelaufen",
+      "description": "Melde dich erneut an, um fortzufahren."
+    },
+    "forbidden": {
+      "title": "Kein Zugriff",
+      "description": "Du hast keine Berechtigung, diese Seite anzuzeigen. Wende dich an deinen Administrator, wenn du das für einen Fehler hältst."
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "description": "Die gesuchte Seite existiert nicht oder wurde verschoben."
+    },
+    "connection": {
+      "title": "Verbindungsproblem",
+      "description": "Der Server ist nicht erreichbar. Überprüfe deine Internetverbindung und versuche es erneut."
+    },
+    "unknown": {
+      "title": "Etwas ist schiefgelaufen",
+      "description": "Ein unerwarteter Fehler ist aufgetreten. Versuche es gleich noch einmal."
+    },
+    "action": {
+      "logIn": "Anmelden",
+      "tryAgain": "Erneut versuchen"
+    }
+  },
   "tenantInactive": {
     "title": "Organisation deaktiviert",
     "description": "Dieser Arbeitsbereich ist derzeit inaktiv. Wenn Sie glauben, dass es sich hierbei um einen Fehler handelt, wenden Sie sich an Ihren Administrator, um den Zugriff wiederherzustellen."

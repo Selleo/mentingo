@@ -5871,6 +5871,32 @@
     "permissionsUpdated": "Twoje uprawnienia zostały zaktualizowane. Odświeżamy sesję, aby zastosować nowe dostępy.",
     "refreshFailed": "Uprawnienia zostały zmienione, ale odświeżenie sesji nie powiodło się. Zaloguj się ponownie."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Twoja sesja wygasła",
+      "description": "Zaloguj się ponownie, aby kontynuować."
+    },
+    "forbidden": {
+      "title": "Brak dostępu",
+      "description": "Nie masz uprawnień do wyświetlenia tej strony. Jeśli uważasz, że to błąd, skontaktuj się z administratorem."
+    },
+    "notFound": {
+      "title": "Nie znaleziono strony",
+      "description": "Strona, której szukasz, nie istnieje lub została przeniesiona."
+    },
+    "connection": {
+      "title": "Problem z połączeniem",
+      "description": "Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie."
+    },
+    "unknown": {
+      "title": "Coś poszło nie tak",
+      "description": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę."
+    },
+    "action": {
+      "logIn": "Zaloguj się",
+      "tryAgain": "Spróbuj ponownie"
+    }
+  },
   "tenantInactive": {
     "title": "Organizacja wyłączona",
     "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."

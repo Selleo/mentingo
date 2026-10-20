@@ -5548,6 +5548,32 @@
     "permissionsUpdated": "Vos autorisations ont été mises à jour. Actualisation de votre session pour appliquer un nouvel accès.",
     "refreshFailed": "Vos autorisations ont changé, mais l'actualisation de la session a échoué. Veuillez vous reconnecter."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Votre session a expiré",
+      "description": "Reconnectez-vous pour continuer."
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "description": "Vous n'avez pas l'autorisation d'afficher cette page. Contactez votre administrateur si vous pensez qu'il s'agit d'une erreur."
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée."
+    },
+    "connection": {
+      "title": "Problème de connexion",
+      "description": "Impossible de joindre le serveur. Vérifiez votre connexion internet et réessayez."
+    },
+    "unknown": {
+      "title": "Une erreur s'est produite",
+      "description": "Une erreur inattendue s'est produite. Réessayez dans un instant."
+    },
+    "action": {
+      "logIn": "Se connecter",
+      "tryAgain": "Réessayer"
+    }
+  },
   "tenantInactive": {
     "title": "Organisation désactivée",
     "description": "Cet espace de travail est actuellement inactif. Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur pour restaurer l'accès."

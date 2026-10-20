@@ -5763,6 +5763,32 @@
     "permissionsUpdated": "Tus permisos fueron actualizados. Actualizando su sesión para aplicar un nuevo acceso.",
     "refreshFailed": "Sus permisos cambiaron, pero falló la actualización de la sesión. Por favor inicia sesión nuevamente."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Tu sesión ha caducado",
+      "description": "Inicia sesión de nuevo para continuar."
+    },
+    "forbidden": {
+      "title": "No tienes acceso",
+      "description": "No tienes permiso para ver esta página. Si crees que es un error, ponte en contacto con tu administrador."
+    },
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o se ha movido."
+    },
+    "connection": {
+      "title": "Problema de conexión",
+      "description": "No pudimos conectar con el servidor. Comprueba tu conexión a internet e inténtalo de nuevo."
+    },
+    "unknown": {
+      "title": "Algo salió mal",
+      "description": "Se produjo un error inesperado. Inténtalo de nuevo en un momento."
+    },
+    "action": {
+      "logIn": "Iniciar sesión",
+      "tryAgain": "Intentar de nuevo"
+    }
+  },
   "tenantInactive": {
     "title": "Organización deshabilitada",
     "description": "Este espacio de trabajo está actualmente inactivo. Si cree que se trata de un error, comuníquese con su administrador para restaurar el acceso."

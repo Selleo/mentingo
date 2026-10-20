@@ -5826,6 +5826,32 @@
     "permissionsUpdated": "Your permissions were updated. Refreshing your session to apply new access.",
     "refreshFailed": "Your permissions changed, but the session refresh failed. Please sign in again."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Your session has expired",
+      "description": "Log in again to continue where you left off."
+    },
+    "forbidden": {
+      "title": "You don't have access",
+      "description": "You don't have permission to view this page. Contact your administrator if you think this is a mistake."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for doesn't exist or has been moved."
+    },
+    "connection": {
+      "title": "Connection problem",
+      "description": "We couldn't reach the server. Check your internet connection and try again."
+    },
+    "unknown": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Try again in a moment."
+    },
+    "action": {
+      "logIn": "Log in",
+      "tryAgain": "Try again"
+    }
+  },
   "tenantInactive": {
     "title": "Organization Disabled",
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."

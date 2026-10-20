@@ -6018,6 +6018,32 @@
     "permissionsUpdated": "Vaše oprávnění byla aktualizována. Obnovujeme relaci, aby se použil nový přístup.",
     "refreshFailed": "Vaše oprávnění byla změněna, ale obnovení relace se nezdařilo. Přihlaste se prosím znovu."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Vaše relace vypršela",
+      "description": "Pro pokračování se znovu přihlaste."
+    },
+    "forbidden": {
+      "title": "Nemáte přístup",
+      "description": "Nemáte oprávnění zobrazit tuto stránku. Pokud si myslíte, že jde o chybu, kontaktujte svého administrátora."
+    },
+    "notFound": {
+      "title": "Stránka nenalezena",
+      "description": "Hledaná stránka neexistuje nebo byla přesunuta."
+    },
+    "connection": {
+      "title": "Problém s připojením",
+      "description": "Nepodařilo se spojit se serverem. Zkontrolujte připojení k internetu a zkuste to znovu."
+    },
+    "unknown": {
+      "title": "Něco se pokazilo",
+      "description": "Došlo k neočekávané chybě. Zkuste to za chvíli znovu."
+    },
+    "action": {
+      "logIn": "Přihlásit se",
+      "tryAgain": "Zkusit znovu"
+    }
+  },
   "tenantInactive": {
     "title": "Organizace je deaktivována",
     "description": "Tento pracovní prostor je momentálně neaktivní. Pokud se domníváte, že se jedná o chybu, obraťte se na správce, aby obnovil přístup."
