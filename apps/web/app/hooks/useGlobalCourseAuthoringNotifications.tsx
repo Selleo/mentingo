@@ -3,7 +3,6 @@ import { isAxiosError } from "axios";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { authoringContextKey } from "~/api/queries/useCourseAuthoringContextQuery";
 import { refreshAuthoringSession } from "~/api/queries/useCourseAuthoringSessionQuery";
 import { queryClient } from "~/api/queryClient";
 import { ToastAction } from "~/components/ui/toast";
@@ -12,8 +11,10 @@ import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { observeAuthoringWork } from "~/modules/CourseAuthoring/authoringNotifications";
 import { isUnavailableAuthoringSession } from "~/modules/CourseAuthoring/authoringSessionRecovery";
-
-import type { CourseContext } from "~/modules/CourseAuthoring/courseAuthoring.types";
+import {
+  authoringSessionVisibility,
+  authoringSessionVisibilityKey,
+} from "~/modules/CourseAuthoring/authoringSessionVisibility";
 
 /** Keeps observed requests visible after closing the drawer or selecting another session. */
 export const useGlobalCourseAuthoringNotifications = () => {
@@ -36,6 +37,13 @@ export const useGlobalCourseAuthoringNotifications = () => {
       active &&
       useAuthStore.getState().isLoggedIn &&
       useCurrentUserStore.getState().currentUser?.id === actorId;
+    const unsubscribeVisibility = authoringSessionVisibility.subscribe((visibleSessions) => {
+      notices.forEach((notice, key) => {
+        if (!visibleSessions[key]) return;
+        notice.dismiss();
+        notices.delete(key);
+      });
+    });
     const dispose = observeAuthoringWork({
       client: queryClient,
       seedCachedSessions,
@@ -46,14 +54,12 @@ export const useGlobalCourseAuthoringNotifications = () => {
         (isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
       notify: (outcome, session) => {
         if (!isCurrentActor()) return;
-        const noticeKey = `${session.courseId}:${session.sessionId}`;
+        const noticeKey = authoringSessionVisibilityKey(session.courseId, session.sessionId);
         notices.get(noticeKey)?.dismiss();
-        const context = queryClient.getQueryData<CourseContext>(
-          authoringContextKey(session.courseId, session.language),
-        );
+        notices.delete(noticeKey);
+        if (authoringSessionVisibility.getState()[noticeKey]) return;
         const open = presentation.current.t("courseAuthoring.notifications.open");
         const notice = presentation.current.toast({
-          title: context?.title,
           action: (
             <ToastAction
               altText={open}
@@ -77,6 +83,7 @@ export const useGlobalCourseAuthoringNotifications = () => {
     return () => {
       active = false;
       dispose();
+      unsubscribeVisibility();
       notices.forEach((notice) => notice.dismiss());
       notices.clear();
     };

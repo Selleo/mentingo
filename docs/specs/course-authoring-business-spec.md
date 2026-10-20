@@ -332,14 +332,17 @@ remains variable; no duration estimate is shown for the thinking presets.
 
 ### Following background work
 
-Course editors enter the workflow through **Edit with AI** (**Edytuj z AI** in Polish).
+Course editors enter the workflow through **Create with AI** (**Twórz z AI** in Polish) while
+the course has no lessons, or **Edit with AI** (**Edytuj z AI**) once it contains lessons.
 Live work has a progress bar that remains visible when its activity details are collapsed. Known
 chapter or lesson totals supply a completion count; work without a known total shows an indeterminate bar.
 Counts describe the current stage, rather than an estimate of the entire request's remaining time.
 
 While the author remains signed in with Mentingo open, requests observed running can notify them
 when work finishes, fails or needs an answer, including after the drawer closes or another session
-is selected. The notification opens the owning conversation. Opening old completed conversations
+is selected. The session currently visible in the drawer or standalone conversation does not
+show background toasts; opening that session dismisses any existing notice. Notifications use
+the shared Mentingo toast and open the owning conversation. Opening old completed conversations
 does not replay completion notifications. These are in-app notices, not email or closed-browser
 push notifications.
 

@@ -31,6 +31,7 @@ import {
   selectAuthoringSession,
   writeAuthoringSessionSelection,
 } from "./authoringSessionSelection";
+import { useVisibleAuthoringSession } from "./authoringSessionVisibility";
 import { AuthoringSessionMenu } from "./components/AuthoringSessionMenu";
 import { CourseGenerationSession } from "./CourseGenerationSession";
 
@@ -100,6 +101,7 @@ export const CourseGenerationDrawer = ({
   const createSessionScopeRef = useRef<string | null>(null);
   const sessionSelectionKey = authoringSessionSelectionKey(courseId, language, tenantScope);
   const sessionCreateCommandKey = authoringSessionCreateCommandKey(sessionSelectionKey);
+  useVisibleAuthoringSession(courseId, selectedSessionId, open);
 
   useEffect(
     () => () => {

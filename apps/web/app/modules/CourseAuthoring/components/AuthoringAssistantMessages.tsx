@@ -1,6 +1,6 @@
 /** Renders the assistant transcript from durable parts in event order. */
 import { getUiMessageText } from "@repo/shared";
-import { Check, CircleAlert, FileText, RotateCcw } from "lucide-react";
+import { ArrowRight, Check, CircleAlert, FileText, Pencil, RotateCcw } from "lucide-react";
 import { Fragment, type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Markdown, { type Components } from "react-markdown";
@@ -164,40 +164,53 @@ const AuthoringQuestionCard = ({
     );
   } else if (question.choices.length > 0) {
     responseNode = (
-      <div className="mt-3 space-y-1.5">
+      <div className="mt-4 space-y-2">
         {question.choices.slice(0, 3).map((choice, index) => (
-          <button
+          <Button
             key={choice}
             type="button"
-            className="flex w-full items-start gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 text-left text-sm text-neutral-800 hover:border-primary-400 hover:bg-primary-50"
+            variant="outline"
+            className="group h-auto min-h-14 w-full justify-start gap-3 whitespace-normal rounded-xl border-neutral-200 bg-white p-3 text-left font-normal text-neutral-800 hover:border-primary-400 hover:bg-primary-50 hover:text-neutral-950 hover:opacity-100"
             disabled={submitting || !onAnswer}
             onClick={() => void submit(choice)}
           >
-            <span className="shrink-0 font-semibold text-primary-700">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-xs font-semibold text-neutral-600 transition-colors group-hover:bg-primary-100 group-hover:text-primary-700">
               {String.fromCharCode(65 + index)}.
             </span>
-            <span className="min-w-0 flex-1 whitespace-normal break-words">{choice}</span>
-          </button>
+            <span className="min-w-0 flex-1 break-words leading-5">{choice}</span>
+            <ArrowRight
+              className="size-4 shrink-0 text-neutral-300 transition-colors group-hover:text-primary-600"
+              aria-hidden="true"
+            />
+          </Button>
         ))}
-        <button
+        <Button
           type="button"
-          className="flex w-full items-start gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 text-left text-sm text-neutral-800 hover:border-primary-400 hover:bg-primary-50"
+          variant="ghost"
+          className={cn(
+            "h-auto min-h-11 w-full justify-start gap-3 rounded-xl px-3 py-2 text-left font-normal text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+            otherSelected && "bg-primary-50 text-primary-700",
+          )}
           disabled={submitting || !onAnswer}
+          aria-expanded={otherSelected}
           onClick={() => setOtherSelected(true)}
         >
-          <span className="font-semibold text-primary-700">D.</span>
-          <span>{t("courseAuthoring.conversation.questionOther")}</span>
-        </button>
+          <span className="flex size-7 shrink-0 items-center justify-center text-xs font-semibold">
+            D.
+          </span>
+          <span className="flex-1">{t("courseAuthoring.conversation.questionOther")}</span>
+          <Pencil className="size-3.5 shrink-0" aria-hidden="true" />
+        </Button>
         {otherSelected && (
           <form
-            className="flex items-center gap-2 pt-1"
+            className="flex flex-col gap-2 rounded-xl border border-primary-200 bg-white p-3 sm:flex-row sm:items-center"
             onSubmit={(event) => {
               event.preventDefault();
               void submit(answerText.trim());
             }}
           >
             <Input
-              className="h-8 bg-white text-sm"
+              className="h-10 min-w-0 bg-white text-sm"
               value={answerText}
               aria-label={t("courseAuthoring.activityRail.yourAnswer")}
               placeholder={t("courseAuthoring.activityRail.yourAnswer")}
@@ -206,7 +219,7 @@ const AuthoringQuestionCard = ({
             />
             <Button
               type="submit"
-              size="sm"
+              className="shrink-0"
               disabled={submitting || !answerText.trim() || !onAnswer}
             >
               {t("courseAuthoring.conversation.answer")}
@@ -218,21 +231,25 @@ const AuthoringQuestionCard = ({
   } else {
     responseNode = (
       <form
-        className="mt-2 flex items-center gap-2"
+        className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center"
         onSubmit={(event) => {
           event.preventDefault();
           void submit(answerText.trim());
         }}
       >
         <Input
-          className="h-8 bg-white text-sm"
+          className="h-10 min-w-0 bg-white text-sm"
           value={answerText}
           aria-label={t("courseAuthoring.activityRail.yourAnswer")}
           placeholder={t("courseAuthoring.activityRail.yourAnswer")}
           disabled={submitting || !onAnswer}
           onChange={(event) => setAnswerText(event.target.value)}
         />
-        <Button type="submit" size="sm" disabled={submitting || !answerText.trim() || !onAnswer}>
+        <Button
+          type="submit"
+          className="shrink-0"
+          disabled={submitting || !answerText.trim() || !onAnswer}
+        >
           {t("courseAuthoring.conversation.answer")}
         </Button>
         {otherSelected && (
@@ -265,10 +282,12 @@ const AuthoringQuestionCard = ({
 
   return (
     <div
-      className="max-w-xl rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-2 text-sm"
+      className="w-full max-w-xl py-1 text-sm"
       data-testid={`course-authoring-question-${question.id}`}
     >
-      {!hidePrompt && <p className="font-medium text-neutral-800">{prompt}</p>}
+      {!hidePrompt && (
+        <p className="text-base font-semibold leading-6 text-neutral-950">{prompt}</p>
+      )}
       {responseNode}
     </div>
   );
@@ -819,14 +838,14 @@ export const AuthoringAssistantMessages = ({
           aiName={aiName}
           contentNode={
             <div className="max-w-xl space-y-3">
-              <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span>
-                  {t("courseAuthoring.conversation.questionProgress", {
-                    current: activePendingIndex + 1,
-                    total: pendingQuestions.length,
-                  })}
-                </span>
-                {pendingQuestions.length > 1 && (
+              {pendingQuestions.length > 1 && (
+                <div className="flex items-center justify-between text-xs font-medium text-neutral-500">
+                  <span>
+                    {t("courseAuthoring.conversation.questionProgress", {
+                      current: activePendingIndex + 1,
+                      total: pendingQuestions.length,
+                    })}
+                  </span>
                   <div className="flex gap-1">
                     <Button
                       type="button"
@@ -847,8 +866,8 @@ export const AuthoringAssistantMessages = ({
                       {t("courseAuthoring.conversation.questionNext")}
                     </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <AuthoringQuestionCard
                 key={`${activePendingQuestion.taskId}-${activePendingQuestion.revision}`}
                 question={activePendingQuestion}

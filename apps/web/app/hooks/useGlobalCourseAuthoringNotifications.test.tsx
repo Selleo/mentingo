@@ -10,6 +10,10 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+import {
+  authoringSessionVisibility,
+  useVisibleAuthoringSession,
+} from "~/modules/CourseAuthoring/authoringSessionVisibility";
 
 import { useGlobalCourseAuthoringNotifications } from "./useGlobalCourseAuthoringNotifications";
 
@@ -66,6 +70,7 @@ describe("global authoring notification ownership", () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
     queryClient.clear();
+    authoringSessionVisibility.setState({}, true);
     setActor("actor-a");
   });
   afterEach(() => {
@@ -93,6 +98,73 @@ describe("global authoring notification ownership", () => {
     await refreshAuthoringSession("course-a", "session-a");
     await refreshAuthoringSession("course-a", "session-a");
     expect(queryClient.getQueryData<AuthoringSession>(key)?.snapshotSequence).toBe(2);
+  });
+
+  it.each(["waiting_author", "failed", "completed"] as const)(
+    "suppresses %s notices while the same session is visible",
+    (outcome) => {
+      queryClient.setQueryData(key, session("running"));
+      const { unmount } = renderHook(() => {
+        useVisibleAuthoringSession("course-a", "session-a");
+        useGlobalCourseAuthoringNotifications();
+      });
+      vi.setSystemTime(Date.now() + 10_000);
+      act(() => {
+        queryClient.setQueryData(key, session(outcome, 2));
+      });
+      expect(mocks.toast).not.toHaveBeenCalled();
+      unmount();
+    },
+  );
+
+  it("dismisses an existing attention toast on reopening and resumes background notices on close", () => {
+    queryClient.setQueryData(key, session("running"));
+    const { rerender, unmount } = renderHook(
+      ({ open }) => {
+        useVisibleAuthoringSession("course-a", "session-a", open);
+        useGlobalCourseAuthoringNotifications();
+      },
+      { initialProps: { open: false } },
+    );
+    vi.setSystemTime(Date.now() + 10_000);
+    act(() => {
+      queryClient.setQueryData(key, session("waiting_author", 2));
+    });
+    expect(mocks.toast).toHaveBeenCalledTimes(1);
+    const attention = mocks.toast.mock.results[0].value;
+
+    rerender({ open: true });
+    expect(attention.dismiss).toHaveBeenCalledTimes(1);
+    rerender({ open: false });
+    expect(mocks.toast).toHaveBeenCalledTimes(1);
+    act(() => {
+      queryClient.setQueryData(key, session("completed", 3));
+    });
+    expect(mocks.toast).toHaveBeenCalledTimes(2);
+    expect(mocks.toast).toHaveBeenLastCalledWith({
+      description: expect.any(String),
+      action: expect.anything(),
+      variant: "default",
+      duration: 15_000,
+    });
+    unmount();
+    expect(attention.dismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["course-a", "session-b"],
+    ["course-b", "session-a"],
+  ])("still notifies while a different session %s/%s is visible", (courseId, sessionId) => {
+    queryClient.setQueryData(key, session("running"));
+    const { unmount } = renderHook(() => {
+      useVisibleAuthoringSession(courseId, sessionId);
+      useGlobalCourseAuthoringNotifications();
+    });
+    act(() => {
+      queryClient.setQueryData(key, session("waiting_author", 2));
+    });
+    expect(mocks.toast).toHaveBeenCalledTimes(1);
+    unmount();
   });
 
   it("rejects actor A's delayed poll before it can enter actor B's query cache", async () => {

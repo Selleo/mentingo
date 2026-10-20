@@ -5,6 +5,7 @@ import { useCourseAuthoringSessionsQuery } from "~/api/queries/useCourseAuthorin
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { useVisibleAuthoringSession } from "./authoringSessionVisibility";
 import { CourseGenerationSession } from "./CourseGenerationSession";
 
 /** Uses the product's localized generation title for direct route navigation. */
@@ -21,6 +22,7 @@ const CourseAuthoringPage = () => {
     sessionsQuery.data?.find(
       (session) => session.status === "active" || session.status === "paused",
     )?.sessionId;
+  useVisibleAuthoringSession(id, sessionId);
   return (
     sessionId && (
       <CourseGenerationSession
