@@ -24,6 +24,7 @@ export class SemanticSearchEmbeddingService {
     const { embeddings } = await embedMany({
       model: provider.embedding(SEMANTIC_SEARCH_MODEL),
       values: texts,
+      telemetry: { isEnabled: false },
       maxRetries: 0,
       abortSignal: AbortSignal.timeout(timeoutMs),
     });
