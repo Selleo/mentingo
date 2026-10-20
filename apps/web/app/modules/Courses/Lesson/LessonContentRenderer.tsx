@@ -51,7 +51,13 @@ export const LessonContentRenderer = memo(
           videoCoverageTracking={videoCoverageTracking}
         />
       ))
-      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
+      .with("quiz", () => (
+        <Quiz
+          key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
+          lesson={lesson}
+          userId={user?.id || ""}
+        />
+      ))
       .with("ai_mentor", () => (
         <AiMentorLesson
           lesson={lesson}
@@ -63,7 +69,9 @@ export const LessonContentRenderer = memo(
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))
-      .with("scorm", () => <ScormLesson lessonId={lesson.id} />)
+      .with("scorm", () => (
+        <ScormLesson lessonId={lesson.id} learningStateId={lesson.learningStateId} />
+      ))
       .with("live_training", () => <LiveTrainingLesson lesson={lesson} />)
       .otherwise(() => null);
   },

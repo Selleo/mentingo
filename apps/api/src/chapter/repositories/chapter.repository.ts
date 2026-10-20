@@ -3,6 +3,7 @@ import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
@@ -61,7 +62,10 @@ export class ChapterRepository {
         and(
           eq(studentChapterProgress.courseId, chapters.courseId),
           eq(studentChapterProgress.chapterId, chapters.id),
-          eq(studentChapterProgress.studentId, userId),
+          and(
+            eq(studentChapterProgress.studentId, userId),
+            activeLearningState(studentChapterProgress.learningStateId),
+          ),
         ),
       )
       .leftJoin(

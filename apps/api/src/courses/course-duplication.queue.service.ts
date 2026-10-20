@@ -31,13 +31,16 @@ export class CourseDuplicationQueueService {
     attemptsMade: number;
     failedReason: string | null;
   } | null> {
-    const job = await this.queueService.getQueue(QUEUE_NAMES.COURSE_DUPLICATION).getJob(jobId);
+    const queue = this.queueService.getQueue(QUEUE_NAMES.COURSE_DUPLICATION);
+    // Read state first so terminal states include the metadata persisted by the worker.
+    const state = await queue.getJobState(jobId);
+    const job = await queue.getJob(jobId);
     if (!job) return null;
 
     return {
       id: String(job.id),
       name: job.name,
-      state: await job.getState(),
+      state,
       attemptsMade: job.attemptsMade,
       failedReason: job.failedReason ?? null,
     };

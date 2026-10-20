@@ -19,6 +19,7 @@ export type VideoCoverageTrackingOptions = {
   enabled: boolean;
   showCoverageMarkers?: boolean;
   lessonId?: string;
+  learningStateId?: string | null;
   resourceEntityId?: string | null;
   language?: SupportedLanguages;
   initialCoveragePercent?: number;

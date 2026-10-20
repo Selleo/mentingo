@@ -16,6 +16,7 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { groups, groupUsers, lessonLearningTime, studentCourses, users } from "src/storage/schema";
 import { WsGateway } from "src/websocket";
 
@@ -54,6 +55,7 @@ export class LearningTimeService implements OnModuleInit {
   private readonly logger = new Logger(LearningTimeService.name);
 
   constructor(
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly queueService: QueueService,
     private readonly learningTimeRepository: LearningTimeRepository,
     private readonly wsGateway: WsGateway,
@@ -71,8 +73,15 @@ export class LearningTimeService implements OnModuleInit {
     this.logger.log("Learning time tracking handlers registered");
   }
 
-  private getSessionKey(userId: string, lessonId: string, socketId: string): string {
-    return `learning-session:${userId}:${lessonId}:${socketId}`;
+  private getSessionKey(
+    userId: string,
+    lessonId: string,
+    socketId: string,
+    learningStateId?: string | null,
+  ): string {
+    return `learning-session:${userId}:${lessonId}:${socketId}${
+      learningStateId ? `:${learningStateId}` : ""
+    }`;
   }
 
   private async getSession(key: string): Promise<LessonSession | null> {
@@ -111,6 +120,17 @@ export class LearningTimeService implements OnModuleInit {
     }
   }
 
+  private async hasLesson(
+    socket: AuthenticatedSocket,
+    payload: JoinLessonPayload,
+  ): Promise<boolean> {
+    const { tenantId } = socket.data.user;
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
+      const courseId = await this.learningTimeRepository.getCourseIdByLessonId(payload.lessonId);
+      return Boolean(courseId);
+    });
+  }
+
   private async handleJoinLesson(
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
@@ -119,9 +139,11 @@ export class LearningTimeService implements OnModuleInit {
       return;
     }
 
+    if (!(await this.hasLesson(socket, payload))) return;
+
     const userId = socket.data.user.userId;
     const { lessonId, courseId } = payload;
-    const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
+    const sessionKey = this.getSessionKey(userId, lessonId, socket.id, payload.learningStateId);
 
     const session: LessonSession = {
       lessonId,
@@ -150,7 +172,7 @@ export class LearningTimeService implements OnModuleInit {
     const tenantId = socket.data.user.tenantId;
 
     const { lessonId } = payload;
-    const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
+    const sessionKey = this.getSessionKey(userId, lessonId, socket.id, payload.learningStateId);
     const session = await this.getSession(sessionKey);
 
     if (session && session.accumulatedSeconds > 0) {
@@ -179,10 +201,12 @@ export class LearningTimeService implements OnModuleInit {
       return;
     }
 
+    if (!(await this.hasLesson(socket, payload))) return;
+
     const userId = socket.data.user.userId;
     const tenantId = socket.data.user.tenantId;
     const { lessonId, courseId, isActive } = payload;
-    const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
+    const sessionKey = this.getSessionKey(userId, lessonId, socket.id, payload.learningStateId);
     const session = await this.getSession(sessionKey);
 
     if (!session) {

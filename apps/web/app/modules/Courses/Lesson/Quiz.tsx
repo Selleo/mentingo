@@ -112,12 +112,13 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     submitQuiz.mutate({
       lessonId: lesson.id,
       questionsAnswers: parsedQuestionsAnswers,
+      learningStateId: lesson.learningStateId,
       language,
     });
   };
 
   const handleRetake = () => {
-    retakeQuiz.mutate();
+    retakeQuiz.mutate(lesson.learningStateId);
   };
 
   const requiredCorrect = Math.ceil(((lesson.thresholdScore ?? 0) * questions?.length) / 100);

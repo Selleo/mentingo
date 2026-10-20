@@ -24,7 +24,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -846,11 +846,17 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .from(aiMentorLessons)
         .where(eq(aiMentorLessons.lessonId, lessonId));
 
-      await aiRepository.createThread({
+      const thread = await aiRepository.createThread({
         userId: admin.id,
         aiMentorLessonId: aiMentorLesson.id,
         status: THREAD_STATUS.ACTIVE,
         userLanguage: SUPPORTED_LANGUAGES.DE,
+      });
+      await aiRepository.insertMessage({
+        threadId: thread.id,
+        role: MESSAGE_ROLE.MENTOR,
+        content: "Welcome to the lesson",
+        tokenCount: 4,
       });
 
       const response = await request(app.getHttpServer())
@@ -860,6 +866,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .expect(200);
 
       expect(response.body.data).toMatchObject({
+        threadId: thread.id,
         aiMentor: { name: "AI Mentor" },
       });
     });

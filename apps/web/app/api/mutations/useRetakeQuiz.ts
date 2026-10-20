@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -16,8 +17,11 @@ export function useRetakeQuiz({ lessonId, handleOnSuccess }: RetakeQuizProps) {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async () => {
-      const response = await ApiClient.api.lessonControllerDeleteStudentQuizAnswers({ lessonId });
+    mutationFn: async (learningStateId?: string | null) => {
+      const response = await ApiClient.api.lessonControllerDeleteStudentQuizAnswers(
+        { lessonId },
+        courseLearningHeaders(learningStateId),
+      );
       return response.data;
     },
     onSuccess: async () => {

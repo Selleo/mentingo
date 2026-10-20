@@ -68,6 +68,7 @@ export const LessonContent = ({
       enabled: videoProgressPersistenceEnabled,
       showCoverageMarkers: videoProgressPersistenceEnabled && videoCompletionTrackingEnabled,
       lessonId: lesson.id,
+      learningStateId: lesson.learningStateId,
       language,
       onVideoActivated: videoProgressStore.getState().markVideoActivated,
       onSnapshotChange: videoProgressStore.getState().publishSnapshot,
@@ -75,6 +76,7 @@ export const LessonContent = ({
     [
       language,
       lesson.id,
+      lesson.learningStateId,
       videoCompletionTrackingEnabled,
       videoProgressPersistenceEnabled,
       videoProgressStore,
@@ -166,7 +168,11 @@ export const LessonContent = ({
       !lesson.hasVideo &&
       !lesson.lessonCompleted
     ) {
-      markLessonAsCompleted({ lessonId: lesson.id, language });
+      markLessonAsCompleted({
+        lessonId: lesson.id,
+        language,
+        learningStateId: lesson.learningStateId,
+      });
     }
 
     if (currentLessonIndex === totalLessons - 1) {
@@ -189,6 +195,7 @@ export const LessonContent = ({
     isLastLesson,
     isPreviewMode,
     lesson.id,
+    lesson.learningStateId,
     lesson.type,
     markLessonAsCompleted,
     language,
@@ -215,13 +222,18 @@ export const LessonContent = ({
       const endedIndex = index ?? (videosCount === 1 ? 0 : null);
       if (endedIndex !== videosCount - 1) return;
 
-      markLessonAsCompleted({ lessonId: lesson.id, language });
+      markLessonAsCompleted({
+        lessonId: lesson.id,
+        language,
+        learningStateId: lesson.learningStateId,
+      });
     },
     [
       isEffectiveStudentExperience,
       isPreviewMode,
       language,
       lesson.id,
+      lesson.learningStateId,
       lesson.lessonCompleted,
       lesson.type,
       lesson.videos,

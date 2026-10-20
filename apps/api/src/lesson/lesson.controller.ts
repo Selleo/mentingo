@@ -1,4 +1,8 @@
 import {
+  forwardRef,
+  ForbiddenException,
+  NotFoundException,
+  Inject,
   Body,
   Controller,
   Delete,
@@ -17,6 +21,8 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import {
+  COURSE_LEARNING_STATE_KINDS,
+  AI_THREAD_STATUSES,
   ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
@@ -32,16 +38,32 @@ import {
   type EditableResourceVisibility,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
+import { and, eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
+import { AiService } from "src/ai/services/ai.service";
+import { DatabasePg } from "src/common";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
+import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import {
+  COURSE_LEARNING_TARGET_FIELDS,
+  COURSE_LEARNING_TARGET_SOURCES,
+} from "src/course-repetition/course-learning-write.constants";
+import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
+import {
+  CourseRepetitionService,
+  activeLearningStateId,
+} from "src/course-repetition/course-repetition.service";
+import { CourseService } from "src/courses/course.service";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
@@ -52,6 +74,8 @@ import {
   assertLessonUploadGrant,
 } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
+import { DB } from "src/storage/db/db.providers";
+import { chapters, courseLearningStates, lessons, studentCourses } from "src/storage/schema";
 
 import {
   AnswerQuestionBody,
@@ -95,6 +119,10 @@ export class LessonController {
   constructor(
     private readonly adminLessonsService: AdminLessonService,
     private readonly lessonService: LessonService,
+    private readonly aiService: AiService,
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly courseRepetitionService: CourseRepetitionService,
+    @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
   ) {}
 
   @Get("all")
@@ -140,14 +168,69 @@ export class LessonController {
     @Query("studentId") studentId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType | null,
   ): Promise<BaseResponse<LessonShow>> {
-    return new BaseResponse(
-      await this.lessonService.getLessonById(
-        id,
-        studentId || currentUser?.userId,
-        currentUser,
-        language,
-      ),
-    );
+    if (!currentUser)
+      return new BaseResponse(
+        await this.lessonService.getLessonById(id, undefined, null, language),
+      );
+    const learnerId = studentId || currentUser.userId;
+    const result = await this.db.transaction(async (db) => {
+      const [course] = await db
+        .select({ courseId: chapters.courseId })
+        .from(chapters)
+        .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+        .where(eq(lessons.id, id));
+      if (course) await this.courseRepetitionService.lock(course.courseId, learnerId, db);
+      let learningStateId = await activeLearningStateId(db, learnerId, id);
+      const readOnly = learnerId !== currentUser.userId;
+      if (readOnly) {
+        if (
+          !course ||
+          !hasAnyPermission(currentUser.permissions, [
+            PERMISSIONS.COURSE_STATISTICS,
+            PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+          ])
+        )
+          throw new ForbiddenException("common.toast.noAccess");
+        await this.courseService.assertCanViewCourseStatistics(course.courseId, currentUser);
+        const [enrollment] = await db
+          .select({ id: studentCourses.id })
+          .from(studentCourses)
+          .where(
+            and(
+              eq(studentCourses.courseId, course.courseId),
+              eq(studentCourses.studentId, learnerId),
+              getGroupManagerLearnerScopeCondition(currentUser, studentCourses.studentId, [
+                PERMISSIONS.COURSE_STATISTICS,
+              ]),
+            ),
+          );
+        if (!enrollment) throw new NotFoundException("common.toast.notFound");
+        const [current] = await db
+          .select({ id: courseLearningStates.id })
+          .from(courseLearningStates)
+          .where(
+            and(
+              eq(courseLearningStates.courseId, course.courseId),
+              eq(courseLearningStates.studentId, learnerId),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
+            ),
+          );
+        learningStateId = current?.id ?? null;
+      }
+      const learningContext = { learningStateId, readOnly };
+      return courseLearningContext.run(learningContext, async () => {
+        const lesson = await this.lessonService.getLessonById(id, learnerId, currentUser, language);
+        return {
+          response: new BaseResponse({ ...lesson, learningStateId }),
+          readOnly: learningContext.readOnly,
+        };
+      });
+    });
+    const { response, readOnly } = result;
+    if (!readOnly && response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
+      await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
+    }
+    return response;
   }
 
   @Post("beta-create-lesson")
@@ -384,6 +467,10 @@ export class LessonController {
     });
   }
 
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Post("evaluation-quiz")
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({
@@ -525,6 +612,10 @@ export class LessonController {
     return new BaseResponse(fileData);
   }
 
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.QUERY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Delete("delete-student-quiz-answers")
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({

@@ -39,8 +39,11 @@ const CourseCertificate = ({ courseId }: CourseCertificateProps) => {
   });
 
   const hasFinishedCourse = useMemo(() => {
-    return course?.completedChapterCount === course?.courseChapterCount;
-  }, [course?.completedChapterCount, course?.courseChapterCount]);
+    return (
+      Boolean(course?.learningState?.current?.completedAt) ||
+      course?.completedChapterCount === course?.courseChapterCount
+    );
+  }, [course?.learningState, course?.completedChapterCount, course?.courseChapterCount]);
   const isCertificateAvailable = Boolean(
     certificate && hasFinishedCourse && isEffectiveStudentExperience,
   );
@@ -68,7 +71,8 @@ const CourseCertificate = ({ courseId }: CourseCertificateProps) => {
   return (
     <>
       <CertificateStatCard
-        availableLabel={isCertificateAvailable ? formattedDate : undefined}
+        completionDate={formattedDate}
+        expiryDate={formattedExpiryDate || undefined}
         hasCertificate
         isAdminExperience={false}
         isCertificateAvailable={isCertificateAvailable}

@@ -91,6 +91,7 @@ export default function LessonPage() {
 
   useLearningTimeTracker({
     lessonId,
+    learningStateId: lesson?.learningStateId,
     courseId,
     enabled: !!user && !!lesson && !!course && !course.isManagerPreview,
   });
@@ -235,7 +236,7 @@ export default function LessonPage() {
                 </p>
               </div>
               <LessonContent
-                key={lesson.id}
+                key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}
                 handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
