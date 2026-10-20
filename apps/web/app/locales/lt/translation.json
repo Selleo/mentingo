@@ -6014,6 +6014,32 @@
     "permissionsUpdated": "Jūsų leidimai buvo atnaujinti. Atnaujiname sesiją, kad pritaikytume naują prieigą.",
     "refreshFailed": "Leidimai pasikeitė, tačiau sesijos atnaujinimas nepavyko. Prisijunkite dar kartą."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Jūsų sesija baigėsi",
+      "description": "Prisijunkite iš naujo, kad galėtumėte tęsti."
+    },
+    "forbidden": {
+      "title": "Neturite prieigos",
+      "description": "Neturite teisės peržiūrėti šio puslapio. Jei manote, kad tai klaida, susisiekite su administratoriumi."
+    },
+    "notFound": {
+      "title": "Puslapis nerastas",
+      "description": "Ieškomas puslapis neegzistuoja arba buvo perkeltas."
+    },
+    "connection": {
+      "title": "Ryšio problema",
+      "description": "Nepavyko prisijungti prie serverio. Patikrinkite interneto ryšį ir bandykite dar kartą."
+    },
+    "unknown": {
+      "title": "Kažkas nepavyko",
+      "description": "Įvyko netikėta klaida. Bandykite dar kartą po akimirkos."
+    },
+    "action": {
+      "logIn": "Prisijungti",
+      "tryAgain": "Bandyti dar kartą"
+    }
+  },
   "tenantInactive": {
     "title": "Organizacija išjungta",
     "description": "Ši darbo sritis šiuo metu neaktyvi. Jei manote, kad tai klaida, susisiekite su administratoriumi, kad atkurtumėte prieigą."

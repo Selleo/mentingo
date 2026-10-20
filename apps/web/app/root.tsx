@@ -1,12 +1,4 @@
-import {
-  isRouteErrorResponse,
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useRouteError,
-} from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
 import { Suspense } from "react";
 
 import { version } from "~/../version.json";
@@ -73,11 +65,5 @@ export function HydrateFallback() {
 export function ErrorBoundary() {
   const error = useRouteError();
 
-  if (isRouteErrorResponse(error)) {
-    return <CustomErrorBoundary stack={error.data} message={error.statusText} />;
-  } else if (error instanceof Error) {
-    return <CustomErrorBoundary stack={error.stack} message={error.message} />;
-  } else {
-    return <CustomErrorBoundary />;
-  }
+  return <CustomErrorBoundary error={error} />;
 }
