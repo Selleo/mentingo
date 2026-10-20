@@ -3,8 +3,6 @@ export const ALLOWED_SECRETS = [
   "PHISHING_API_KEY",
   "PHISHING_BASE_URL",
   "PHISHING_WEBHOOK_SECRET",
-  "CONTENT_MARKETPLACE_BASE_URL",
-  "CONTENT_MARKETPLACE_API_KEY",
   "MICROSOFT_CLIENT_ID",
   "MICROSOFT_CLIENT_SECRET",
   "MICROSOFT_CALENDAR_CLIENT_ID",
@@ -33,6 +31,12 @@ export const ALLOWED_SECRETS = [
   "LIVEKIT_API_KEY",
   "LIVEKIT_API_SECRET",
 ];
+
+/**
+ * Secrets that only internal flows write after validating their values, such as plugin
+ * connections whose base URL must stay a public origin. The env API never accepts them.
+ */
+export const INTERNAL_SECRETS = ["CONTENT_MARKETPLACE_BASE_URL", "CONTENT_MARKETPLACE_API_KEY"];
 
 export const SERVICE_GROUPS = {
   phishing: ["PHISHING_API_KEY", "PHISHING_BASE_URL", "PHISHING_WEBHOOK_SECRET"],

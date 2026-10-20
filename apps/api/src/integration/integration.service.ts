@@ -251,7 +251,7 @@ export class IntegrationService {
     assertCanManageTenants(actor, keyTenant);
     const tenant = await this.integrationRepository.getTenantById(tenantId);
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
-    const origin = toPluginOrigin(input.baseUrl);
+    const origin = await toPluginOrigin(input.baseUrl);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
       this.envService.bulkUpsertEnv(
         [

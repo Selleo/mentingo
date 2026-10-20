@@ -22,6 +22,7 @@ export function ContentMarketplaceSpotlight({ listing }: ContentMarketplaceSpotl
     <Card className="group relative isolate h-full min-h-64 overflow-hidden rounded-2xl border-neutral-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
       <ContentMarketplaceThumbnail
         listingId={listing.id}
+        versionId={listing.versionId}
         hasThumbnail={listing.hasThumbnail}
         title=""
         className="absolute inset-y-0 right-0 -z-10 h-full w-3/5 rounded-none bg-primary-50 [mask-image:linear-gradient(to_right,transparent,black_40%)] transition-transform duration-500 ease-out group-hover:scale-105 [&>svg]:text-primary-200"

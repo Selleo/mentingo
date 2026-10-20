@@ -8,6 +8,7 @@ import { DB } from "src/storage/db/db.providers";
 import { courses } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -17,6 +18,7 @@ import { truncateAllTables } from "../../../test/helpers/test-helpers";
 
 import {
   CATALOG_ACCESS_CASES,
+  CATALOG_CATEGORY_TITLE,
   CATALOG_COURSES,
   KEY_KINDS,
   KEYWORD_SEARCH_CASES,
@@ -66,7 +68,12 @@ describe("Integration course catalog (e2e)", () => {
 
   /** Creates a course with chapters in the content tenant; lesson counts are per chapter. */
   const arrangeContentCourse = (
-    course: { title: string; thumbnailS3Key: string | null; isArchived?: boolean },
+    course: {
+      title: string;
+      thumbnailS3Key: string | null;
+      isArchived?: boolean;
+      categoryId?: UUIDType;
+    },
     chapterLessonCounts: number[] = [1],
   ) =>
     runAsTenant(contentTenant.id, async () => {
@@ -109,7 +116,13 @@ describe("Integration course catalog (e2e)", () => {
 
   it("lists the selected tenant's courses with languages, counts and thumbnails", async () => {
     const { apiKey } = await issueKey(KEY_KINDS.MANAGING);
-    const algebra = await arrangeContentCourse(CATALOG_COURSES.ALGEBRA, [3, 2]);
+    const category = await runAsTenant(contentTenant.id, () =>
+      createCategoryFactory(tenantDb).create({ title: CATALOG_CATEGORY_TITLE }),
+    );
+    const algebra = await arrangeContentCourse(
+      { ...CATALOG_COURSES.ALGEBRA, categoryId: category.id },
+      [3, 2],
+    );
     await arrangeContentCourse(CATALOG_COURSES.BIOLOGY, []);
 
     const response = await listCourses(apiKey, contentTenant.id).expect(200);
@@ -128,6 +141,7 @@ describe("Integration course catalog (e2e)", () => {
           chapterCount: 2,
           lessonCount: 5,
           updatedAt: expect.any(String),
+          metadata: { category: CATALOG_CATEGORY_TITLE, durationMinutes: null },
         },
         expect.objectContaining({
           title: CATALOG_COURSES.BIOLOGY.title,

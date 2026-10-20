@@ -6,6 +6,7 @@ import { cn } from "~/lib/utils";
 
 type ContentMarketplaceThumbnailProps = {
   listingId: string;
+  versionId: string;
   hasThumbnail: boolean;
   title: string;
   className?: string;
@@ -13,11 +14,12 @@ type ContentMarketplaceThumbnailProps = {
 
 export function ContentMarketplaceThumbnail({
   listingId,
+  versionId,
   hasThumbnail,
   title,
   className,
 }: ContentMarketplaceThumbnailProps) {
-  const { data: thumbnail } = useContentMarketplaceThumbnail(listingId, hasThumbnail);
+  const { data: thumbnail } = useContentMarketplaceThumbnail(listingId, versionId, hasThumbnail);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   useEffect(() => {

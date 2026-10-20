@@ -10,6 +10,7 @@ import type { CourseDuplicationRepository } from "src/courses/course-duplication
 import type { CourseDuplicationSourceCourse } from "src/courses/course-duplication.types";
 import type { SearchIndexService } from "src/global-search/search-index.service";
 import type { OutboxPublisher } from "src/outbox/outbox.publisher";
+import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import type { WsGateway } from "src/websocket";
 
 describe("CourseDuplicationService", () => {
@@ -52,6 +53,7 @@ describe("CourseDuplicationService", () => {
       {} as SearchIndexService,
       {} as WsGateway,
       {} as OutboxPublisher,
+      {} as TenantDbRunnerService,
     );
 
     return { service, repository, queueService };

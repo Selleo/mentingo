@@ -10,7 +10,10 @@ import type {
 } from "./course-transfer.constants";
 import type { MasterCourseExportSyncStatus } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
-import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
+import type {
+  CourseTransferPreparedCourse,
+  SourceSnapshot,
+} from "src/course-transfer/types/course-transfer-graph.types";
 import type { courseTransferOperations, courseTransferStreams } from "src/storage/schema";
 
 export type CourseTransferKind = (typeof COURSE_TRANSFER_KINDS)[keyof typeof COURSE_TRANSFER_KINDS];
@@ -177,6 +180,11 @@ export interface CourseTransferCopyCourseInput {
 export interface CourseTransferSyncArchiveCourseInput {
   source: { tenantId: UUIDType; snapshot: SourceSnapshot };
   destination: CourseTransferCourseDestination;
+  policy: CourseTransferArchiveSyncPolicy;
+}
+
+export interface CourseTransferPreparedArchiveCourseSync {
+  preparedCourse: CourseTransferPreparedCourse;
   policy: CourseTransferArchiveSyncPolicy;
 }
 

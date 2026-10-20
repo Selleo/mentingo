@@ -37,10 +37,10 @@ export class IntegrationContentMarketplaceConnectionService {
     assertCanManageTenants(actor, keyTenant);
     await this.assertTenantExists(tenantId);
 
-    const origin = toPluginOrigin(input.baseUrl);
+    const origin = await toPluginOrigin(input.baseUrl);
 
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
-      this.envService.bulkUpsertEnv(
+      this.envService.bulkUpsertInternalEnv(
         [
           { name: CONTENT_MARKETPLACE_ENV.BASE_URL, value: origin },
           { name: CONTENT_MARKETPLACE_ENV.API_KEY, value: input.apiKey },

@@ -1659,17 +1659,11 @@ export class CourseTransferMaterializerService {
       .digest("hex");
   }
 
+  /**
+   * Upserts mirrored SCORM packages and SCOs under stable ids so learner attempts survive a sync,
+   * removing only packages and SCOs that no longer exist in the source.
+   */
   private async syncScormPackages(params: SyncScormPackagesParams) {
-    const targetLessonIds = Array.from(params.lessonMap.values());
-
-    if (!params.scormPackages.length) {
-      await this.courseTransferGraphRepository.removeScormPackagesForMappedTargets({
-        targetCourseId: params.targetCourseId,
-        targetLessonIds,
-      });
-      return;
-    }
-
     const sourceScosByPackageId = groupBy(params.sourceSnapshot.scormScos, (sco) => sco.packageId);
     const targetPackages = params.scormPackages.flatMap((preparedPackage) => {
       const targetEntityId = this.getTargetScormPackageEntityId(preparedPackage.sourcePackage, {
@@ -1682,8 +1676,8 @@ export class CourseTransferMaterializerService {
 
     await this.courseTransferGraphRepository.removeScormPackagesForMappedTargets({
       targetCourseId: params.targetCourseId,
-      targetLessonIds,
-      targetPackageIds: targetPackages.map(({ targetPackageId }) => targetPackageId),
+      targetLessonIds: Array.from(params.lessonMap.values()),
+      retainedPackageIds: targetPackages.map(({ targetPackageId }) => targetPackageId),
     });
 
     for (const targetPackage of targetPackages) {
@@ -1695,7 +1689,7 @@ export class CourseTransferMaterializerService {
         targetExtractedFilesReference,
       } = targetPackage;
 
-      await this.courseTransferGraphRepository.createScormPackage({
+      await this.courseTransferGraphRepository.upsertScormPackage({
         id: targetPackageId,
         entityType: sourcePackage.entityType,
         entityId: targetEntityId,
@@ -1716,11 +1710,19 @@ export class CourseTransferMaterializerService {
         status: sourcePackage.status,
       });
 
-      for (const sourceSco of sourceScosByPackageId[sourcePackage.id] ?? []) {
+      const syncedScos = (sourceScosByPackageId[sourcePackage.id] ?? []).flatMap((sourceSco) => {
         const targetLessonId = params.lessonMap.get(sourceSco.lessonId);
-        if (!targetLessonId) continue;
 
-        await this.courseTransferGraphRepository.createScormSco({
+        return targetLessonId ? [{ sourceSco, targetLessonId }] : [];
+      });
+
+      await this.courseTransferGraphRepository.removeScormScosMissingFromPackage(
+        targetPackageId,
+        syncedScos.map(({ sourceSco }) => sourceSco.identifier),
+      );
+
+      for (const { sourceSco, targetLessonId } of syncedScos) {
+        await this.courseTransferGraphRepository.upsertScormSco({
           packageId: targetPackageId,
           lessonId: targetLessonId,
           organizationIdentifier: sourceSco.organizationIdentifier,
@@ -2198,7 +2200,7 @@ export class CourseTransferMaterializerService {
     await this.cleanupMissingMappings(
       entityMapScope,
       MASTER_COURSE_ENTITY_TYPES.LESSON,
-      sourceSnapshot.lessons.filter((item) => shouldSyncLesson(item)).map((item) => item.id),
+      sourceSnapshot.lessons.map((item) => item.id),
       lessons,
       transaction,
     );

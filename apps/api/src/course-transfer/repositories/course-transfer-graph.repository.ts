@@ -8,7 +8,18 @@ import {
   type MasterCourseEntityType,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, isNull, notInArray, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  eq,
+  getTableColumns,
+  inArray,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -441,6 +452,18 @@ export class CourseTransferGraphRepository {
 
   async updateTargetLesson(lessonId: UUIDType, values: LessonJsonbUpdate) {
     await this.db.update(lessons).set(values).where(eq(lessons.id, lessonId));
+  }
+
+  async refreshChapterLessonCounts(courseId: UUIDType) {
+    const chapterLessonCount = this.db
+      .select({ lessonCount: count() })
+      .from(lessons)
+      .where(eq(lessons.chapterId, chapters.id));
+
+    await this.db
+      .update(chapters)
+      .set({ lessonCount: sql<number>`(${chapterLessonCount})` })
+      .where(eq(chapters.courseId, courseId));
   }
 
   async insertTargetAssessmentIfMissing(values: AssessmentUpsertValues) {
@@ -939,7 +962,7 @@ export class CourseTransferGraphRepository {
   }
 
   async removeScormPackagesForMappedTargets(params: RemoveScormPackagesForMappedTargetsParams) {
-    const conditions = [
+    const mappedTargetConditions = [
       and(
         eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
         eq(scormPackages.entityId, params.targetCourseId),
@@ -947,7 +970,7 @@ export class CourseTransferGraphRepository {
     ];
 
     if (params.targetLessonIds.length) {
-      conditions.push(
+      mappedTargetConditions.push(
         and(
           eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
           inArray(scormPackages.entityId, params.targetLessonIds),
@@ -955,19 +978,51 @@ export class CourseTransferGraphRepository {
       );
     }
 
-    if (params.targetPackageIds?.length) {
-      conditions.push(inArray(scormPackages.id, params.targetPackageIds));
-    }
+    const retainedPackageCondition = params.retainedPackageIds.length
+      ? notInArray(scormPackages.id, params.retainedPackageIds)
+      : undefined;
 
-    await this.db.delete(scormPackages).where(or(...conditions));
+    await this.db
+      .delete(scormPackages)
+      .where(and(or(...mappedTargetConditions), retainedPackageCondition));
   }
 
-  async createScormPackage(values: ScormPackageInsert) {
-    await this.db.insert(scormPackages).values(values);
+  async upsertScormPackage(values: ScormPackageInsert & { id: UUIDType }) {
+    const { id: _id, tenantId: _tenantId, createdAt: _createdAt, ...updatableValues } = values;
+
+    await this.db
+      .insert(scormPackages)
+      .values(values)
+      .onConflictDoUpdate({ target: scormPackages.id, set: updatableValues });
   }
 
-  async createScormSco(values: ScormScoInsert) {
-    await this.db.insert(scormScos).values(values);
+  async upsertScormSco(values: ScormScoInsert) {
+    const {
+      id: _id,
+      tenantId: _tenantId,
+      createdAt: _createdAt,
+      packageId: _packageId,
+      identifier: _identifier,
+      ...updatableValues
+    } = values;
+
+    await this.db
+      .insert(scormScos)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [scormScos.packageId, scormScos.identifier],
+        set: updatableValues,
+      });
+  }
+
+  async removeScormScosMissingFromPackage(packageId: UUIDType, retainedIdentifiers: string[]) {
+    const retainedIdentifierCondition = retainedIdentifiers.length
+      ? notInArray(scormScos.identifier, retainedIdentifiers)
+      : undefined;
+
+    await this.db
+      .delete(scormScos)
+      .where(and(eq(scormScos.packageId, packageId), retainedIdentifierCondition));
   }
 
   async findLearningPathTargetAuthor(transaction: DatabasePg) {

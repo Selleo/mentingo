@@ -3,24 +3,20 @@ import { Readable } from "node:stream";
 import { ContentMarketplaceApiError } from "@mentingo/content-marketplace-sdk";
 import {
   BadGatewayException,
-  BadRequestException,
   ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
+  type OnModuleInit,
 } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
+import { Value } from "@sinclair/typebox/value";
 import { match, P } from "ts-pattern";
 
 import { hasPermission } from "src/common/permissions/permission.utils";
-import { getNativeArchiveUploadKey } from "src/native-archive/native-archive-storage-paths";
-import {
-  NATIVE_ARCHIVE_IMPORT_MODES,
-  NATIVE_ARCHIVE_LIMITS,
-} from "src/native-archive/native-archive.constants";
+import { NATIVE_ARCHIVE_IMPORT_MODES } from "src/native-archive/native-archive.constants";
 import { NativeArchiveJobService } from "src/native-archive/services/native-archive-job.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { S3Service } from "src/s3/s3.service";
 
 import {
   CONTENT_MARKETPLACE_COPY_STATUSES,
@@ -29,6 +25,7 @@ import {
 } from "../content-marketplace.constants";
 import { ContentMarketplaceCourseCopiedEvent } from "../events/content-marketplace-course-copied.event";
 import { ContentMarketplaceLineageRepository } from "../repositories/content-marketplace-lineage.repository";
+import { contentMarketplaceImportSourceSchema } from "../schemas/content-marketplace.schema";
 
 import { ContentMarketplaceClientService } from "./content-marketplace-client.service";
 
@@ -43,25 +40,34 @@ import type {
 } from "../schemas/content-marketplace.schema";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-
-const ARCHIVE_CONTENT_TYPE = "application/zip";
+import type {
+  NativeArchiveImportSource,
+  NativeArchiveSourceDownload,
+} from "src/native-archive/native-archive.types";
 
 /**
  * The tenant side of the content marketplace: browsing listings and copying one into the tenant.
- * A copy downloads the listing's archive into upload storage and queues the regular native-archive
- * import, so the copy becomes an ordinary editable course.
+ * A copy queues a native-archive import that downloads the listing's archive when it runs and
+ * imports it as a read-only shared course; copying the same listing again syncs that course in
+ * place.
  */
 @Injectable()
-export class ContentMarketplaceService {
+export class ContentMarketplaceService implements OnModuleInit {
   private readonly logger = new Logger(ContentMarketplaceService.name);
 
   constructor(
     private readonly contentMarketplaceClientService: ContentMarketplaceClientService,
     private readonly nativeArchiveJobService: NativeArchiveJobService,
-    private readonly s3Service: S3Service,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly contentMarketplaceLineageRepository: ContentMarketplaceLineageRepository,
   ) {}
+
+  onModuleInit(): void {
+    this.nativeArchiveJobService.registerSourceArchiveDownloader(
+      CONTENT_MARKETPLACE_IMPORT_SOURCE_KIND,
+      (importSource) => this.downloadAcquisitionArchive(importSource),
+    );
+  }
 
   /** Never throws: a tenant without a working connection simply has the marketplace off. */
   async getAvailability(): Promise<ContentMarketplaceAvailability> {
@@ -69,14 +75,7 @@ export class ContentMarketplaceService {
 
     if (!connection) return { enabled: false };
 
-    try {
-      const configuration =
-        await this.contentMarketplaceClientService.fetchConfiguration(connection);
-
-      return { enabled: configuration.capabilities.contentMarketplace.enabled };
-    } catch {
-      return { enabled: false };
-    }
+    return { enabled: await this.isMarketplaceEnabled(connection) };
   }
 
   async listListings(query: ContentMarketplaceCatalogQuery) {
@@ -119,36 +118,28 @@ export class ContentMarketplaceService {
     if (!hasPermission(actor.permissions, PERMISSIONS.COURSE_CREATE))
       throw new ForbiddenException("auth.error.missingPermission");
 
-    return this.callEnabledMarketplace(async (connection) => {
-      const acquisition = await this.contentMarketplaceClientService.createAcquisition(
-        connection,
-        listingId,
+    const acquisition = await this.callEnabledMarketplace((connection) =>
+      this.contentMarketplaceClientService.createAcquisition(connection, listingId),
+    );
+    const importSource: ContentMarketplaceImportSource = {
+      kind: CONTENT_MARKETPLACE_IMPORT_SOURCE_KIND,
+      listingId,
+      versionId: acquisition.versionId,
+      acquisitionId: acquisition.acquisitionId,
+    };
+
+    try {
+      const { jobId } = await this.nativeArchiveJobService.enqueueArchiveImportFromSource(
+        importSource,
+        actor,
+        NATIVE_ARCHIVE_IMPORT_MODES.SYNC,
       );
 
-      try {
-        const uploadKey = await this.storeAcquisitionArchive(
-          connection,
-          acquisition.acquisitionId,
-          actor,
-        );
-        const importSource: ContentMarketplaceImportSource = {
-          kind: CONTENT_MARKETPLACE_IMPORT_SOURCE_KIND,
-          listingId,
-          versionId: acquisition.versionId,
-          acquisitionId: acquisition.acquisitionId,
-        };
-        const { jobId } = await this.nativeArchiveJobService.enqueueArchiveImportFromStorageKey(
-          uploadKey,
-          actor,
-          { importSource, importMode: NATIVE_ARCHIVE_IMPORT_MODES.SYNC },
-        );
-
-        return { jobId, acquisitionId: acquisition.acquisitionId };
-      } catch (error) {
-        await this.reportFailedCopy(actor, acquisition.acquisitionId);
-        throw error;
-      }
-    });
+      return { jobId, acquisitionId: acquisition.acquisitionId };
+    } catch (error) {
+      await this.reportFailedCopy(actor, acquisition.acquisitionId);
+      throw error;
+    }
   }
 
   /** A copy is outdated once the listing publishes a version newer than the one it was copied from. */
@@ -177,33 +168,27 @@ export class ContentMarketplaceService {
     });
   }
 
-  private async storeAcquisitionArchive(
-    connection: ContentMarketplaceConnection,
-    acquisitionId: string,
-    actor: CurrentUserType,
-  ) {
-    const archive = await this.contentMarketplaceClientService.openAcquisitionArchive(
-      connection,
-      acquisitionId,
+  /**
+   * Supplies a copy's archive to its native-archive import job, which runs this in the copying
+   * tenant's context. A failure fails the job, and the job's failed import reports the failed copy.
+   */
+  private async downloadAcquisitionArchive(
+    importSource: NativeArchiveImportSource,
+  ): Promise<NativeArchiveSourceDownload> {
+    if (!Value.Check(contentMarketplaceImportSourceSchema, importSource))
+      throw new Error("Invalid content marketplace import source");
+
+    const archive = await this.callEnabledMarketplace((connection) =>
+      this.contentMarketplaceClientService.openAcquisitionArchive(
+        connection,
+        importSource.acquisitionId,
+      ),
     );
 
-    if (
-      archive.contentLength !== null &&
-      archive.contentLength > NATIVE_ARCHIVE_LIMITS.MAX_ARCHIVE_BYTES
-    ) {
-      await archive.body.cancel();
-      throw new BadRequestException("nativeArchive.error.archiveTooLarge");
-    }
-
-    const uploadKey = getNativeArchiveUploadKey(actor.tenantId, acquisitionId);
-
-    await this.s3Service.uploadStreamMultipart(
-      Readable.fromWeb(archive.body as NodeReadableStream<Uint8Array>),
-      uploadKey,
-      ARCHIVE_CONTENT_TYPE,
-    );
-
-    return uploadKey;
+    return {
+      stream: Readable.fromWeb(archive.body as NodeReadableStream<Uint8Array>),
+      contentLength: archive.contentLength,
+    };
   }
 
   /** Analytics never fail the user's copy: a report that cannot be queued is only logged. */
@@ -230,7 +215,8 @@ export class ContentMarketplaceService {
   ): Promise<T> {
     const connection = await this.contentMarketplaceClientService.findTenantConnection();
 
-    if (!connection) throw new ForbiddenException(CONTENT_MARKETPLACE_ERRORS.UNAVAILABLE);
+    if (!connection || !(await this.isMarketplaceEnabled(connection)))
+      throw new ForbiddenException(CONTENT_MARKETPLACE_ERRORS.UNAVAILABLE);
 
     try {
       return await callMarketplace(connection);
@@ -244,6 +230,17 @@ export class ContentMarketplaceService {
           () => new ForbiddenException(CONTENT_MARKETPLACE_ERRORS.UNAVAILABLE),
         )
         .otherwise(() => new BadGatewayException(CONTENT_MARKETPLACE_ERRORS.SERVICE_ERROR));
+    }
+  }
+
+  private async isMarketplaceEnabled(connection: ContentMarketplaceConnection): Promise<boolean> {
+    try {
+      const configuration =
+        await this.contentMarketplaceClientService.fetchConfiguration(connection);
+
+      return configuration.capabilities.contentMarketplace.enabled;
+    } catch {
+      return false;
     }
   }
 }

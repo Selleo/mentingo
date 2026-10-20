@@ -31,20 +31,24 @@ import {
 import {
   NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_EXPORT_TTL_MS,
+  NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_PAGE_SIZE,
   NATIVE_ARCHIVE_JOB_STATE,
   NATIVE_ARCHIVE_KIND,
+  NATIVE_ARCHIVE_LIMITS,
 } from "../native-archive.constants";
 
 import { NativeArchiveImportService } from "./native-archive-import.service";
 import { toPublicArchiveFailureCode } from "./native-archive-job-error.utils";
 import { NativeArchiveSnapshotService } from "./native-archive-snapshot.service";
 import { buildNativeArchive } from "./native-archive-zip.service";
+import { createSizeLimitedArchiveStream } from "./native-archive-zip.utils";
 
 import type {
   NativeArchiveExportAccess,
+  NativeArchiveImportArchive,
   NativeArchiveImportMode,
   NativeArchiveImportOptions,
   NativeArchiveImportSource,
@@ -52,6 +56,7 @@ import type {
   NativeArchiveJobReceipt,
   NativeArchiveJobResult,
   NativeArchiveJobStatus,
+  NativeArchiveSourceArchiveDownloader,
 } from "../native-archive.types";
 import type { OnModuleDestroy } from "@nestjs/common";
 import type { UUIDType } from "src/common";
@@ -61,6 +66,10 @@ import type { FileStreamPayload } from "src/file/types/file-stream.type";
 @Injectable()
 export class NativeArchiveJobService implements OnModuleDestroy {
   private readonly archiveWorker: Worker<NativeArchiveJob>;
+  private readonly sourceArchiveDownloadersBySourceKind = new Map<
+    string,
+    NativeArchiveSourceArchiveDownloader
+  >();
 
   constructor(
     private readonly queueService: QueueService,
@@ -150,6 +159,43 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       {
         action: NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
         key,
+        archiveOrigin: NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.UPLOAD,
+        importSource,
+        importMode,
+        actor,
+      } satisfies NativeArchiveJob,
+      { attempts: 1, removeOnComplete: false, removeOnFail: false },
+    );
+
+    return { jobId: String(job.id) };
+  }
+
+  /**
+   * Lets a feature that queues imports from its own source, such as the content marketplace,
+   * supply the archive inside the import job instead of the HTTP request that queued it.
+   */
+  registerSourceArchiveDownloader(
+    sourceKind: string,
+    downloader: NativeArchiveSourceArchiveDownloader,
+  ) {
+    this.sourceArchiveDownloadersBySourceKind.set(sourceKind, downloader);
+  }
+
+  /**
+   * Queues an import whose archive the downloader registered for the import source's kind
+   * supplies when the job runs, so the HTTP request never downloads it.
+   */
+  async enqueueArchiveImportFromSource(
+    importSource: NativeArchiveImportSource,
+    actor: CurrentUserType,
+    importMode?: NativeArchiveImportMode,
+  ): Promise<NativeArchiveJobReceipt> {
+    const job = await this.queueService.enqueue(
+      QUEUE_NAMES.NATIVE_ARCHIVE,
+      NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
+      {
+        action: NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
+        archiveOrigin: NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.IMPORT_SOURCE,
         importSource,
         importMode,
         actor,
@@ -214,10 +260,11 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   }
 
   private async processArchiveJob(job: Job<NativeArchiveJob>): Promise<NativeArchiveJobResult> {
-    const { action, actor, rootId, key, exportAccess, importSource, importMode } = job.data;
+    const { action, actor, rootId, key, archiveOrigin, exportAccess, importSource, importMode } =
+      job.data;
 
     if (action === NATIVE_ARCHIVE_JOB_ACTION.IMPORT) {
-      return this.importArchiveAndReportOutcome(String(job.id), key, actor, {
+      return this.importArchiveAndReportOutcome(String(job.id), { key, archiveOrigin }, actor, {
         importSource,
         importMode,
       });
@@ -226,27 +273,19 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     return this.processExportJob(action, rootId, actor, exportAccess);
   }
 
-  /** Runs the import; when the job came with an import source, its outcome is published for that source. */
+  /**
+   * Runs the import; when the job came with an import source, its outcome is published for that
+   * source. IMPORTED is published by the import inside its content transaction; only FAILED is
+   * published here, because a failed import committed nothing.
+   */
   private async importArchiveAndReportOutcome(
     jobId: string,
-    key: string | undefined,
+    archive: NativeArchiveImportArchive,
     actor: CurrentUserType,
     { importSource, importMode }: NativeArchiveImportOptions,
   ): Promise<NativeArchiveJobResult> {
     try {
-      const result = await this.processImportJob(key, actor, importMode);
-
-      if (importSource)
-        await this.publishImportFinished(jobId, actor, importSource, {
-          outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.IMPORTED,
-          courseId: match(result.kind)
-            .with(NATIVE_ARCHIVE_KIND.COURSE, () => result.rootId)
-            .with(NATIVE_ARCHIVE_KIND.LEARNING_PATH, () => null)
-            .exhaustive(),
-          failureCode: null,
-        });
-
-      return result;
+      return await this.processImportJob(jobId, archive, actor, importMode, importSource);
     } catch (error) {
       if (importSource)
         await this.publishImportFinished(jobId, actor, importSource, {
@@ -282,28 +321,81 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   }
 
   private async processImportJob(
-    key: string | undefined,
+    jobId: string,
+    {
+      key,
+      archiveOrigin = NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.UPLOAD,
+    }: NativeArchiveImportArchive,
     actor: CurrentUserType,
     importMode: NativeArchiveImportMode | undefined,
+    importSource: NativeArchiveImportSource | undefined,
   ): Promise<NativeArchiveJobResult> {
-    if (!key || !key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
-      throw new ForbiddenException("nativeArchive.error.invalidUpload");
-    }
+    const uploadKey = match(archiveOrigin)
+      .with(NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.UPLOAD, () => this.getTenantUploadKey(key, actor))
+      .with(NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.IMPORT_SOURCE, () => null)
+      .exhaustive();
 
     const directory = await mkdtemp(path.join(tmpdir(), "mentingo-native-upload-"));
     const filename = path.join(directory, "archive.zip");
 
     try {
-      await pipeline((await this.s3Service.getFileStream(key)).stream, createWriteStream(filename));
+      if (uploadKey) {
+        await pipeline(
+          (await this.s3Service.getFileStream(uploadKey)).stream,
+          createWriteStream(filename),
+        );
+      } else {
+        await this.downloadImportSourceArchive(importSource, actor, filename);
+      }
 
       return await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-        this.nativeArchiveImportService.importArchive(filename, actor, importMode),
+        this.nativeArchiveImportService.importArchive(
+          filename,
+          actor,
+          importMode,
+          importSource && { jobId, importSource },
+        ),
       );
     } finally {
       await rm(directory, { recursive: true, force: true });
 
-      await this.s3Service.deleteFile(key);
+      if (uploadKey) await this.s3Service.deleteFile(uploadKey);
     }
+  }
+
+  private getTenantUploadKey(key: string | undefined, actor: CurrentUserType): string {
+    if (!key || !key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
+      throw new ForbiddenException("nativeArchive.error.invalidUpload");
+    }
+
+    return key;
+  }
+
+  /** Downloads the import source's archive in the tenant's context, rejecting archives over the size limit. */
+  private async downloadImportSourceArchive(
+    importSource: NativeArchiveImportSource | undefined,
+    actor: CurrentUserType,
+    filename: string,
+  ) {
+    const downloadSourceArchive =
+      importSource && this.sourceArchiveDownloadersBySourceKind.get(importSource.kind);
+
+    if (!importSource || !downloadSourceArchive)
+      throw new ForbiddenException("nativeArchive.error.invalidJob");
+
+    const download = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
+      downloadSourceArchive(importSource),
+    );
+
+    if (
+      download.contentLength !== null &&
+      download.contentLength > NATIVE_ARCHIVE_LIMITS.MAX_ARCHIVE_BYTES
+    ) {
+      download.stream.destroy();
+      throw new BadRequestException("nativeArchive.error.archiveTooLarge");
+    }
+
+    await pipeline(download.stream, createSizeLimitedArchiveStream(), createWriteStream(filename));
   }
 
   private async processExportJob(

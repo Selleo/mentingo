@@ -151,7 +151,7 @@ export class ContentMarketplaceController {
   @ApiEndpointDocs({
     summary: "Copy a content marketplace course into the tenant",
     description:
-      "Downloads the listing's current version and queues a native archive import into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.",
+      "Queues a native archive import that downloads the listing's current version into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.",
   })
   @Validate({
     request: [{ type: "param", name: "listingId", schema: UUIDSchema, required: true }],

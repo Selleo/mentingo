@@ -16,6 +16,8 @@ export const CATALOG_COURSES = {
   CHEMISTRY: { title: "Chemistry Lab", thumbnailS3Key: null },
 } as const;
 
+export const CATALOG_CATEGORY_TITLE = "Mathematics";
+
 export const KEYWORD_SEARCH_CASES = [
   { keyword: "algebra", titles: [CATALOG_COURSES.ALGEBRA.title] },
   { keyword: "  BIO ", titles: [CATALOG_COURSES.BIOLOGY.title] },

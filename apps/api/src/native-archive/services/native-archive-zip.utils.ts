@@ -123,8 +123,8 @@ export function buildArchiveManifest(
   };
 }
 
-/** Bounds the compressed archive bytes emitted by the ZIP writer. */
-function createSizeLimitedArchiveOutput(): Transform {
+/** Passes archive bytes through and fails the stream once they exceed the archive size limit. */
+export function createSizeLimitedArchiveStream(): Transform {
   let archiveBytes = 0;
 
   return new Transform({
@@ -150,7 +150,7 @@ export function createNativeArchiveZipStream(
   stagedAssets: NativeArchivePreparedAsset[],
   manifest: NativeArchiveManifest,
 ): Transform {
-  const archiveOutput = createSizeLimitedArchiveOutput();
+  const archiveOutput = createSizeLimitedArchiveStream();
   const zipWriter = archiver("zip", { zlib: { level: 6 } });
 
   zipWriter.on("error", (error) => archiveOutput.destroy(error));

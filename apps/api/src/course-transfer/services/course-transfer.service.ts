@@ -34,6 +34,7 @@ import type {
   CourseTransferCopyCourseInput,
   CourseTransferCopyCourseResult,
   CourseTransferSyncArchiveCourseInput,
+  CourseTransferPreparedArchiveCourseSync,
   CourseTransferDependency,
   CourseTransferExportRequest,
   CourseTransferExportResult,
@@ -211,13 +212,12 @@ export class CourseTransferService {
   }
 
   /**
-   * Mirrors a course read from an archive into an existing course of the same tenant, updating
-   * what earlier imports of that archive created instead of adding copies.
+   * Copies the assets of a course read from an archive into its destination. Call it before
+   * opening the transaction that syncs the course, so storage and video copies never hold it open.
    */
-  async syncArchiveCourseIntoExistingCourse(
+  async prepareArchiveCourseSync(
     input: CourseTransferSyncArchiveCourseInput,
-    transaction: DatabasePg,
-  ): Promise<CourseTransferCopyCourseResult> {
+  ): Promise<CourseTransferPreparedArchiveCourseSync> {
     const { source, destination, policy } = input;
     if (source.tenantId !== destination.tenantId) {
       throw new Error("An archive sync must stay within one tenant");
@@ -230,9 +230,20 @@ export class CourseTransferService {
       policy,
     });
 
+    return { preparedCourse, policy };
+  }
+
+  /**
+   * Mirrors a prepared archive course into an existing course of the same tenant, updating what
+   * earlier imports of that archive created instead of adding copies.
+   */
+  async syncPreparedArchiveCourse(
+    preparedSync: CourseTransferPreparedArchiveCourseSync,
+    transaction: DatabasePg,
+  ): Promise<CourseTransferCopyCourseResult> {
     return this.courseTransferMaterializerService.syncArchiveCourse(
-      preparedCourse,
-      policy,
+      preparedSync.preparedCourse,
+      preparedSync.policy,
       transaction,
     );
   }

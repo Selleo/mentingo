@@ -19404,7 +19404,7 @@
       "post": {
         "operationId": "ContentMarketplaceController_copyContentMarketplaceListing",
         "summary": "Copy a content marketplace course into the tenant",
-        "description": "Downloads the listing's current version and queues a native archive import into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.",
+        "description": "Queues a native archive import that downloads the listing's current version into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.",
         "parameters": [
           {
             "name": "listingId",
@@ -161753,14 +161753,6 @@
                 "type": "string"
               },
               {
-                "const": "CONTENT_MARKETPLACE_BASE_URL",
-                "type": "string"
-              },
-              {
-                "const": "CONTENT_MARKETPLACE_API_KEY",
-                "type": "string"
-              },
-              {
                 "const": "MICROSOFT_CLIENT_ID",
                 "type": "string"
               },
@@ -161906,14 +161898,6 @@
                     },
                     {
                       "const": "PHISHING_WEBHOOK_SECRET",
-                      "type": "string"
-                    },
-                    {
-                      "const": "CONTENT_MARKETPLACE_BASE_URL",
-                      "type": "string"
-                    },
-                    {
-                      "const": "CONTENT_MARKETPLACE_API_KEY",
                       "type": "string"
                     },
                     {

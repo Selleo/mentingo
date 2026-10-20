@@ -2227,14 +2227,6 @@
                 "type": "string"
               },
               {
-                "const": "CONTENT_MARKETPLACE_BASE_URL",
-                "type": "string"
-              },
-              {
-                "const": "CONTENT_MARKETPLACE_API_KEY",
-                "type": "string"
-              },
-              {
                 "const": "MICROSOFT_CLIENT_ID",
                 "type": "string"
               },
@@ -2380,14 +2372,6 @@
                     },
                     {
                       "const": "PHISHING_WEBHOOK_SECRET",
-                      "type": "string"
-                    },
-                    {
-                      "const": "CONTENT_MARKETPLACE_BASE_URL",
-                      "type": "string"
-                    },
-                    {
-                      "const": "CONTENT_MARKETPLACE_API_KEY",
                       "type": "string"
                     },
                     {

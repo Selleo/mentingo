@@ -2,11 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import { CONTENT_MARKETPLACE_LISTINGS_QUERY_KEY } from "./useContentMarketplaceListings";
+export const CONTENT_MARKETPLACE_THUMBNAIL_QUERY_KEY = ["content-marketplace", "thumbnail"];
 
-export function useContentMarketplaceThumbnail(listingId: string, enabled: boolean) {
+export function useContentMarketplaceThumbnail(
+  listingId: string,
+  versionId: string,
+  enabled: boolean,
+) {
   return useQuery({
-    queryKey: [...CONTENT_MARKETPLACE_LISTINGS_QUERY_KEY, listingId, "thumbnail"],
+    queryKey: [...CONTENT_MARKETPLACE_THUMBNAIL_QUERY_KEY, listingId, versionId],
     queryFn: async () =>
       (
         await ApiClient.api.contentMarketplaceControllerStreamContentMarketplaceThumbnail(

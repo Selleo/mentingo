@@ -6,8 +6,13 @@ import {
   LESSON_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_STATUSES,
+  MASTER_COURSE_ENTITY_TYPES,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
+
+import { COURSE_TRANSFER_ENTITY_MAP_SCOPES } from "src/course-transfer/course-transfer.constants";
+import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
+import { toJsonbBuildObject, toNullableJsonbBuildObject } from "src/utils/jsonb";
 
 import { NativeArchiveImportRepository } from "../repositories/native-archive-import.repository";
 import {
@@ -20,13 +25,17 @@ import type {
   NativeArchiveLiveTrainingRestoreState,
   NativeArchiveRestoredTraining,
 } from "../native-archive.types";
-import type { UUIDType } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { CourseTransferEntityMapScope } from "src/course-transfer/course-transfer.types";
 import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
 @Injectable()
 export class NativeArchiveLiveTrainingService {
-  constructor(private readonly nativeArchiveImportRepository: NativeArchiveImportRepository) {}
+  constructor(
+    private readonly nativeArchiveImportRepository: NativeArchiveImportRepository,
+    private readonly courseTransferGraphRepository: CourseTransferGraphRepository,
+  ) {}
 
   async restoreLiveTrainingLessons(
     snapshot: SourceSnapshot,
@@ -49,6 +58,115 @@ export class NativeArchiveLiveTrainingService {
     }
 
     await this.updateChapterLessonCounts(snapshot, chapterMap);
+  }
+
+  /**
+   * Brings the live-training lessons of an archive-synced course in line with the archive. Lessons
+   * an earlier sync restored are moved and renamed; missing ones are restored and recorded in the
+   * course's archive entity map, so later syncs keep them and remove them with their source.
+   * Must run inside the sync transaction, after the course content was mirrored.
+   */
+  async syncLiveTrainingLessons(
+    snapshot: SourceSnapshot,
+    chapterMap: Map<UUIDType, UUIDType>,
+    actor: CurrentUserType,
+    targetCourseId: UUIDType,
+    transaction: DatabasePg,
+  ): Promise<void> {
+    const records = this.readLiveTrainingRecords(snapshot);
+
+    if (records) {
+      const restoreItems = this.prepareRestoreItems(snapshot, records, chapterMap);
+      const syncedLessonIds = await this.findSyncedLiveTrainingLessonIds(
+        targetCourseId,
+        transaction,
+      );
+
+      const state: NativeArchiveLiveTrainingRestoreState = {
+        trainings: new Map(),
+        lessons: new Map(),
+      };
+
+      for (const item of restoreItems) {
+        if (syncedLessonIds.has(item.sourceLesson.id)) continue;
+
+        await this.restoreLiveTrainingLesson(targetCourseId, item, actor, state);
+      }
+
+      await this.updateSyncedLiveTrainingLessons(restoreItems, syncedLessonIds);
+      await this.recordRestoredLiveTrainingLessons(targetCourseId, state.lessons, transaction);
+    }
+
+    await this.courseTransferGraphRepository.refreshChapterLessonCounts(targetCourseId);
+  }
+
+  /** Tells whether syncing the archive would restore live-training lessons the course lacks. */
+  async hasLiveTrainingLessonsToRestore(
+    snapshot: SourceSnapshot,
+    targetCourseId: UUIDType,
+    transaction: DatabasePg,
+  ): Promise<boolean> {
+    const liveTrainingLessons = snapshot.lessons.filter(
+      (lesson) => lesson.type === LESSON_TYPES.LIVE_TRAINING,
+    );
+    if (!liveTrainingLessons.length) return false;
+
+    const syncedLessonIds = await this.findSyncedLiveTrainingLessonIds(targetCourseId, transaction);
+
+    return liveTrainingLessons.some((lesson) => !syncedLessonIds.has(lesson.id));
+  }
+
+  private async findSyncedLiveTrainingLessonIds(
+    targetCourseId: UUIDType,
+    transaction: DatabasePg,
+  ): Promise<Map<UUIDType, UUIDType>> {
+    const mappings = await this.courseTransferGraphRepository.getMappings(
+      this.getArchiveEntityMapScope(targetCourseId),
+      MASTER_COURSE_ENTITY_TYPES.LESSON,
+      transaction,
+    );
+
+    return new Map(mappings.map((mapping) => [mapping.sourceEntityId, mapping.targetEntityId]));
+  }
+
+  private async updateSyncedLiveTrainingLessons(
+    restoreItems: NativeArchiveLiveTrainingRestoreItem[],
+    syncedLessonIds: Map<UUIDType, UUIDType>,
+  ): Promise<void> {
+    const updatedLessonIds = new Set<UUIDType>();
+
+    for (const { sourceLesson, mappedChapterId } of restoreItems) {
+      const syncedLessonId = syncedLessonIds.get(sourceLesson.id);
+      if (!syncedLessonId || updatedLessonIds.has(syncedLessonId)) continue;
+
+      await this.courseTransferGraphRepository.updateTargetLesson(syncedLessonId, {
+        chapterId: mappedChapterId,
+        title: toJsonbBuildObject(sourceLesson.title),
+        description: toNullableJsonbBuildObject(sourceLesson.description),
+        displayOrder: sourceLesson.displayOrder,
+      });
+      updatedLessonIds.add(syncedLessonId);
+    }
+  }
+
+  private async recordRestoredLiveTrainingLessons(
+    targetCourseId: UUIDType,
+    restoredLessonIds: Map<UUIDType, UUIDType>,
+    transaction: DatabasePg,
+  ): Promise<void> {
+    for (const [sourceLessonId, lessonId] of restoredLessonIds) {
+      await this.courseTransferGraphRepository.upsertMap(
+        this.getArchiveEntityMapScope(targetCourseId),
+        MASTER_COURSE_ENTITY_TYPES.LESSON,
+        sourceLessonId,
+        lessonId,
+        transaction,
+      );
+    }
+  }
+
+  private getArchiveEntityMapScope(targetCourseId: UUIDType): CourseTransferEntityMapScope {
+    return { kind: COURSE_TRANSFER_ENTITY_MAP_SCOPES.ARCHIVE_COURSE, courseId: targetCourseId };
   }
 
   private readLiveTrainingRecords(

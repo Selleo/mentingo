@@ -7,6 +7,7 @@ import type {
   NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_IMPORT_MODES,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
+  NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
 } from "./native-archive.constants";
 import type { NativeArchiveLiveTrainingLesson } from "./schemas/native-archive-live-training.schema";
 import type { PERMISSIONS } from "@repo/shared";
@@ -105,15 +106,34 @@ export type NativeArchiveImportMode =
 /** Opaque context of whoever queued an import; it comes back in NativeArchiveImportFinishedEvent. */
 export type NativeArchiveImportSource = Record<string, string>;
 
+/** Identifies the queued import whose outcome is reported for its import source. */
+export type NativeArchiveImportFinishedReport = {
+  jobId: string;
+  importSource: NativeArchiveImportSource;
+};
+
 export type NativeArchiveImportOptions = {
   importSource?: NativeArchiveImportSource;
   importMode?: NativeArchiveImportMode;
 };
 
+export type NativeArchiveImportArchiveOrigin =
+  (typeof NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS)[keyof typeof NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS];
+
+export type NativeArchiveSourceDownload = {
+  stream: Readable;
+  contentLength: number | null;
+};
+
+export type NativeArchiveSourceArchiveDownloader = (
+  importSource: NativeArchiveImportSource,
+) => Promise<NativeArchiveSourceDownload>;
+
 export type NativeArchiveJob = {
   action: (typeof NATIVE_ARCHIVE_JOB_ACTION)[keyof typeof NATIVE_ARCHIVE_JOB_ACTION];
   rootId?: UUIDType;
   key?: string;
+  archiveOrigin?: NativeArchiveImportArchiveOrigin;
   exportAccess?: NativeArchiveExportAccess;
   importSource?: NativeArchiveImportSource;
   importMode?: NativeArchiveImportMode;
@@ -170,6 +190,8 @@ export type ParsedNativeArchive = NativeArchiveDocument & {
 };
 
 export type NativeArchivePermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+export type NativeArchiveImportArchive = Pick<NativeArchiveJob, "key" | "archiveOrigin">;
 
 export type NativeArchiveJobReceipt = { jobId: string };
 export type NativeArchiveJobStatus = {

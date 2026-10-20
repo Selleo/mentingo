@@ -2,13 +2,17 @@ import {
   createContentMarketplaceClient,
   type FileDownload,
 } from "@mentingo/content-marketplace-sdk";
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
 import { EnvService } from "src/env/services/env.service";
+import { isAllowedPluginOrigin } from "src/integration/utils/integration-plugin-origin.utils";
 import { dbAls } from "src/storage/db/db-als.store";
 
-import { CONTENT_MARKETPLACE_ENV } from "../content-marketplace.constants";
+import {
+  CONTENT_MARKETPLACE_ENV,
+  CONTENT_MARKETPLACE_ERRORS,
+} from "../content-marketplace.constants";
 import {
   contentMarketplaceConfigurationSchema,
   type ContentMarketplaceConfiguration,
@@ -52,65 +56,90 @@ export class ContentMarketplaceClientService {
     }
   }
 
-  fetchConfiguration(
+  async fetchConfiguration(
     connection: ContentMarketplaceConnection,
   ): Promise<ContentMarketplaceConfiguration> {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).configuration.get(),
+      client.configuration.get(),
       contentMarketplaceConfigurationSchema,
     );
   }
 
-  listCatalogPage(connection: ContentMarketplaceConnection, query: ContentMarketplaceCatalogQuery) {
+  async listCatalogPage(
+    connection: ContentMarketplaceConnection,
+    query: ContentMarketplaceCatalogQuery,
+  ) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).catalog.list(query),
+      client.catalog.list(query),
       contentMarketplaceCatalogPageSchema,
     );
   }
 
-  listCatalogFilters(connection: ContentMarketplaceConnection) {
+  async listCatalogFilters(connection: ContentMarketplaceConnection) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).catalog.filters(),
+      client.catalog.filters(),
       contentMarketplaceCatalogFiltersSchema,
     );
   }
 
-  getListing(connection: ContentMarketplaceConnection, listingId: string) {
+  async getListing(connection: ContentMarketplaceConnection, listingId: string) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).listings.get(listingId),
+      client.listings.get(listingId),
       contentMarketplaceListingSchema,
     );
   }
 
-  openListingThumbnail(
+  async openListingThumbnail(
     connection: ContentMarketplaceConnection,
     listingId: string,
   ): Promise<FileDownload> {
-    return this.createTenantMarketplaceClient(connection).listings.thumbnail(listingId);
+    const client = await this.createTenantMarketplaceClient(connection);
+
+    return client.listings.thumbnail(listingId);
   }
 
-  createAcquisition(connection: ContentMarketplaceConnection, listingId: string) {
+  async createAcquisition(connection: ContentMarketplaceConnection, listingId: string) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).acquisitions.create(listingId),
+      client.acquisitions.create(listingId),
       contentMarketplaceAcquisitionSchema,
     );
   }
 
-  openAcquisitionArchive(
+  async openAcquisitionArchive(
     connection: ContentMarketplaceConnection,
     acquisitionId: string,
   ): Promise<FileDownload> {
-    return this.createTenantMarketplaceClient(connection).acquisitions.archive(acquisitionId);
+    const client = await this.createTenantMarketplaceClient(connection);
+
+    return client.acquisitions.archive(acquisitionId);
   }
 
-  sendEvent(connection: ContentMarketplaceConnection, event: ContentMarketplaceAnalyticsEvent) {
+  async sendEvent(
+    connection: ContentMarketplaceConnection,
+    event: ContentMarketplaceAnalyticsEvent,
+  ) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
     return this.readValidatedMarketplaceResponse(
-      this.createTenantMarketplaceClient(connection).events.send(event),
+      client.events.send(event),
       contentMarketplaceEventReceiptSchema,
     );
   }
 
-  private createTenantMarketplaceClient(connection: ContentMarketplaceConnection) {
+  private async createTenantMarketplaceClient(connection: ContentMarketplaceConnection) {
+    if (!(await isAllowedPluginOrigin(connection.baseUrl)))
+      throw new ForbiddenException(CONTENT_MARKETPLACE_ERRORS.UNAVAILABLE);
+
     return createContentMarketplaceClient({
       apiKey: connection.apiKey,
       baseURL: connection.baseUrl,

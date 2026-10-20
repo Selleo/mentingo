@@ -24,6 +24,7 @@ export function ContentMarketplaceListingCard({ listing }: ContentMarketplaceLis
       <div className="relative overflow-hidden">
         <ContentMarketplaceThumbnail
           listingId={listing.id}
+          versionId={listing.versionId}
           hasThumbnail={listing.hasThumbnail}
           title=""
           className="rounded-none bg-primary-50 transition-transform duration-500 ease-out group-hover:scale-105 [&>svg]:text-primary-200"

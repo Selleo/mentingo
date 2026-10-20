@@ -29,6 +29,11 @@ export const NATIVE_ARCHIVE_IMPORT_MODES = {
   SYNC: "sync",
 } as const;
 
+export const NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS = {
+  UPLOAD: "upload",
+  IMPORT_SOURCE: "import-source",
+} as const;
+
 export const NATIVE_ARCHIVE_IMPORT_OUTCOMES = {
   IMPORTED: "imported",
   FAILED: "failed",
