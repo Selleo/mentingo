@@ -6,7 +6,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, COURSE_STATUSES, PERMISSIONS, hasPermission } from "@repo/shared";
+import {
+  COURSE_LEARNING_STATE_KINDS,
+  COURSE_ENROLLMENT,
+  COURSE_STATUSES,
+  PERMISSIONS,
+  hasPermission,
+} from "@repo/shared";
 import { and, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
@@ -1004,7 +1010,7 @@ export class StudentLessonProgressService {
         and(
           eq(courseLearningStates.courseId, courseId),
           eq(courseLearningStates.studentId, studentId),
-          eq(courseLearningStates.kind, "current"),
+          eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
         ),
       );
 

@@ -32,6 +32,7 @@ import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { courseLearningStates } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
@@ -86,7 +87,7 @@ export class LiveTrainingSessionsService {
   private readonly logger = new Logger(LiveTrainingSessionsService.name);
 
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly courseRepetitionService: CourseRepetitionService,
     private readonly liveTrainingSessionsRepository: LiveTrainingSessionsRepository,
     private readonly liveKitService: LiveKitService,

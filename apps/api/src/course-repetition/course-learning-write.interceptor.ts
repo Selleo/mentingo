@@ -9,14 +9,23 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { ApiHeader } from "@nestjs/swagger";
-import { sql } from "drizzle-orm";
+import { COURSE_LEARNING_STATE_HEADER } from "@repo/shared";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { defer, lastValueFrom } from "rxjs";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import {
+  aiMentorLessons,
+  aiMentorThreads,
+  chapters,
+  lessons,
+  scormAttempts,
+} from "src/storage/schema";
 
 import { courseLearningContext } from "./course-learning-context";
+import { COURSE_LEARNING_TARGET_ENTITIES } from "./course-learning-write.constants";
 import { CourseRepetitionService } from "./course-repetition.service";
 
 import type { CourseLearningTarget } from "./course-learning-write.types";
@@ -28,7 +37,7 @@ export const CourseLearningWrite = (target: CourseLearningTarget) =>
   applyDecorators(
     SetMetadata(LEARNING_TARGET, target),
     ApiHeader({
-      name: "x-course-learning-state-id",
+      name: COURSE_LEARNING_STATE_HEADER,
       required: false,
       schema: { type: "string", format: "uuid" },
     }),
@@ -56,34 +65,63 @@ export class CourseLearningWriteInterceptor implements NestInterceptor {
     )
       throw new BadRequestException("common.toast.invalidRequest");
     const execute = async () => {
-      let lessonId = sql`${entityId}::uuid`;
-      if (target.entity === "thread")
-        lessonId = sql`(SELECT a.lesson_id FROM ai_mentor_threads t JOIN ai_mentor_lessons a ON a.id = t.ai_mentor_lesson_id WHERE t.id = ${entityId} AND t.user_id = ${userId})`;
-      if (target.entity === "scorm")
-        lessonId = sql`(SELECT lesson_id FROM scorm_attempts WHERE id = ${entityId} AND student_id = ${userId})`;
-      const [course] = await this.db.execute<{ course_id: string }>(
-        sql`SELECT ch.course_id FROM chapters ch JOIN lessons l ON l.chapter_id = ch.id WHERE l.id = ${lessonId}`,
-      );
-      if (!course && target.entity === "thread") {
-        const [practice] = await this.db.execute(
-          sql`SELECT id FROM ai_mentor_threads WHERE id = ${entityId} AND user_id = ${userId} AND practice_session_id IS NOT NULL`,
+      let lessonCondition = eq(lessons.id, entityId);
+      if (target.entity === COURSE_LEARNING_TARGET_ENTITIES.THREAD)
+        lessonCondition = inArray(
+          lessons.id,
+          this.db
+            .select({ lessonId: aiMentorLessons.lessonId })
+            .from(aiMentorThreads)
+            .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
+            .where(and(eq(aiMentorThreads.id, entityId), eq(aiMentorThreads.userId, userId))),
         );
+      if (target.entity === COURSE_LEARNING_TARGET_ENTITIES.SCORM)
+        lessonCondition = inArray(
+          lessons.id,
+          this.db
+            .select({ lessonId: scormAttempts.lessonId })
+            .from(scormAttempts)
+            .where(and(eq(scormAttempts.id, entityId), eq(scormAttempts.studentId, userId))),
+        );
+      const [course] = await this.db
+        .select({ courseId: chapters.courseId })
+        .from(chapters)
+        .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+        .where(lessonCondition);
+      if (!course && target.entity === COURSE_LEARNING_TARGET_ENTITIES.THREAD) {
+        const [practice] = await this.db
+          .select({ id: aiMentorThreads.id })
+          .from(aiMentorThreads)
+          .where(
+            and(
+              eq(aiMentorThreads.id, entityId),
+              eq(aiMentorThreads.userId, userId),
+              isNotNull(aiMentorThreads.practiceSessionId),
+            ),
+          );
         if (practice) return lastValueFrom(next.handle());
       }
       if (!course) throw new ConflictException("courseRepetition.errors.staleState");
-      await this.courseRepetitionService.lock(course.course_id, userId, this.db);
-      const supplied = request.headers["x-course-learning-state-id"];
+      await this.courseRepetitionService.lock(course.courseId, userId, this.db);
+      const supplied = request.headers[COURSE_LEARNING_STATE_HEADER];
       const learningStateId = await this.courseRepetitionService.resolveWritableState(
-        course.course_id,
+        course.courseId,
         userId,
         supplied,
       );
-      if (target.entity === "thread" || target.entity === "scorm") {
-        const table = target.entity === "thread" ? sql`ai_mentor_threads` : sql`scorm_attempts`;
-        const [entity] = await this.db.execute<{ learning_state_id: string | null }>(
-          sql`SELECT learning_state_id FROM ${table} WHERE id = ${entityId}`,
-        );
-        if (!entity || entity.learning_state_id !== learningStateId)
+      if (
+        target.entity === COURSE_LEARNING_TARGET_ENTITIES.THREAD ||
+        target.entity === COURSE_LEARNING_TARGET_ENTITIES.SCORM
+      ) {
+        const table =
+          target.entity === COURSE_LEARNING_TARGET_ENTITIES.THREAD
+            ? aiMentorThreads
+            : scormAttempts;
+        const [entity] = await this.db
+          .select({ learningStateId: table.learningStateId })
+          .from(table)
+          .where(eq(table.id, entityId));
+        if (!entity || entity.learningStateId !== learningStateId)
           throw new ConflictException("courseRepetition.errors.staleState");
       }
       return courseLearningContext.run({ learningStateId }, () => lastValueFrom(next.handle()));

@@ -1043,7 +1043,30 @@ describe("Course repetition (e2e)", () => {
       };
       const oldThread = await ai.createThread(threadValues);
 
+      const legacyProgressTables = [
+        studentChapterProgress,
+        studentLessonProgress,
+        assessmentAttempts,
+        lessonVideoProgress,
+        scormAttempts,
+        aiMentorThreads,
+      ];
+      for (const table of legacyProgressTables) {
+        await db
+          .update(table)
+          .set({ learningStateId: null })
+          .where(eq(table.learningStateId, f.current.id));
+      }
+
       const info = await repetitionService.repeat(f.course.id, f.user.id, f.current.id);
+      for (const table of legacyProgressTables) {
+        expect(
+          await db
+            .select({ id: table.id })
+            .from(table)
+            .where(eq(table.learningStateId, f.current.id)),
+        ).toHaveLength(1);
+      }
       await request(app.getHttpServer())
         .post(`/api/ai/judge/${oldThread.id}`)
         .set("Cookie", cookie)

@@ -5,12 +5,26 @@ import {
   Inject,
   Injectable,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, COURSE_STATUSES } from "@repo/shared";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { COURSE_LEARNING_STATE_KINDS, COURSE_ENROLLMENT, COURSE_STATUSES } from "@repo/shared";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB } from "src/storage/db/db.providers";
-import { courseLearningStates, courses, studentCourses } from "src/storage/schema";
+import {
+  aiMentorLessons,
+  aiMentorThreads,
+  assessmentAttempts,
+  assessments,
+  chapters,
+  courseLearningStates,
+  courses,
+  lessons,
+  lessonVideoProgress,
+  scormAttempts,
+  studentChapterProgress,
+  studentCourses,
+  studentLessonProgress,
+} from "src/storage/schema";
 
 import { courseLearningContext } from "./course-learning-context";
 
@@ -19,14 +33,15 @@ import type { CourseRepetitionResponse } from "./course-repetition.schema";
 export async function activeLearningStateId(db: DatabasePg, studentId: string, lessonId: string) {
   const context = courseLearningContext.getStore();
   if (context) return context.learningStateId;
-  const rows = await db.execute<{ id: string }>(sql`
-    SELECT cls.id FROM course_learning_states cls
-    JOIN chapters ch ON ch.course_id = cls.course_id
-    JOIN lessons l ON l.chapter_id = ch.id
-    WHERE cls.student_id = ${studentId} AND l.id = ${lessonId}
-    ORDER BY cls.kind DESC LIMIT 1
-  `);
-  return rows[0]?.id ?? null;
+  const [state] = await db
+    .select({ id: courseLearningStates.id })
+    .from(courseLearningStates)
+    .innerJoin(chapters, eq(chapters.courseId, courseLearningStates.courseId))
+    .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+    .where(and(eq(courseLearningStates.studentId, studentId), eq(lessons.id, lessonId)))
+    .orderBy(desc(courseLearningStates.kind))
+    .limit(1);
+  return state?.id ?? null;
 }
 
 export async function activeCourseLearningStateId(
@@ -68,7 +83,7 @@ export class CourseRepetitionService {
         and(
           eq(courseLearningStates.courseId, courseId),
           eq(courseLearningStates.studentId, studentId),
-          eq(courseLearningStates.kind, "current"),
+          eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
         ),
       );
     if (existing) return existing;
@@ -82,7 +97,7 @@ export class CourseRepetitionService {
       .values({
         courseId,
         studentId,
-        kind: "current",
+        kind: COURSE_LEARNING_STATE_KINDS.CURRENT,
         completedAt: enrollment?.completedAt ?? null,
         finishedChapterCount: enrollment?.finishedChapterCount ?? 0,
       })
@@ -94,7 +109,7 @@ export class CourseRepetitionService {
         and(
           eq(courseLearningStates.courseId, courseId),
           eq(courseLearningStates.studentId, studentId),
-          eq(courseLearningStates.kind, "current"),
+          eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
         ),
       );
     await this.bindLegacyProgress(courseId, studentId, current.id, db);
@@ -107,24 +122,87 @@ export class CourseRepetitionService {
     stateId: string,
     db: DatabasePg,
   ) {
-    await db.execute(
-      sql`UPDATE student_chapter_progress SET learning_state_id = ${stateId} WHERE course_id = ${courseId} AND student_id = ${studentId} AND learning_state_id IS NULL`,
-    );
-    await db.execute(
-      sql`UPDATE student_lesson_progress p SET learning_state_id = ${stateId} FROM chapters ch WHERE ch.id = p.chapter_id AND ch.course_id = ${courseId} AND p.student_id = ${studentId} AND p.learning_state_id IS NULL`,
-    );
-    await db.execute(
-      sql`UPDATE lesson_video_progress p SET learning_state_id = ${stateId} FROM lessons l JOIN chapters ch ON ch.id = l.chapter_id WHERE l.id = p.lesson_id AND ch.course_id = ${courseId} AND p.student_id = ${studentId} AND p.learning_state_id IS NULL`,
-    );
-    await db.execute(
-      sql`UPDATE assessment_attempts a SET learning_state_id = ${stateId} FROM assessments q JOIN lessons l ON l.id = q.lesson_id JOIN chapters ch ON ch.id = l.chapter_id WHERE a.assessment_id = q.id AND ch.course_id = ${courseId} AND a.learner_id = ${studentId} AND a.learning_state_id IS NULL`,
-    );
-    await db.execute(
-      sql`UPDATE scorm_attempts SET learning_state_id = ${stateId} WHERE course_id = ${courseId} AND student_id = ${studentId} AND learning_state_id IS NULL`,
-    );
-    await db.execute(
-      sql`UPDATE ai_mentor_threads t SET learning_state_id = ${stateId} FROM ai_mentor_lessons a JOIN lessons l ON l.id = a.lesson_id JOIN chapters ch ON ch.id = l.chapter_id WHERE t.ai_mentor_lesson_id = a.id AND ch.course_id = ${courseId} AND t.user_id = ${studentId} AND t.learning_state_id IS NULL`,
-    );
+    const courseChapterIds = db
+      .select({ id: chapters.id })
+      .from(chapters)
+      .where(eq(chapters.courseId, courseId));
+    const courseLessonIds = db
+      .select({ id: lessons.id })
+      .from(lessons)
+      .where(inArray(lessons.chapterId, courseChapterIds));
+
+    await db
+      .update(studentChapterProgress)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          eq(studentChapterProgress.courseId, courseId),
+          eq(studentChapterProgress.studentId, studentId),
+          isNull(studentChapterProgress.learningStateId),
+        ),
+      );
+    await db
+      .update(studentLessonProgress)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          inArray(studentLessonProgress.chapterId, courseChapterIds),
+          eq(studentLessonProgress.studentId, studentId),
+          isNull(studentLessonProgress.learningStateId),
+        ),
+      );
+    await db
+      .update(lessonVideoProgress)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          inArray(lessonVideoProgress.lessonId, courseLessonIds),
+          eq(lessonVideoProgress.studentId, studentId),
+          isNull(lessonVideoProgress.learningStateId),
+        ),
+      );
+    await db
+      .update(assessmentAttempts)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          inArray(
+            assessmentAttempts.assessmentId,
+            db
+              .select({ id: assessments.id })
+              .from(assessments)
+              .where(inArray(assessments.lessonId, courseLessonIds)),
+          ),
+          eq(assessmentAttempts.learnerId, studentId),
+          isNull(assessmentAttempts.learningStateId),
+        ),
+      );
+    await db
+      .update(scormAttempts)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          eq(scormAttempts.courseId, courseId),
+          eq(scormAttempts.studentId, studentId),
+          isNull(scormAttempts.learningStateId),
+        ),
+      );
+    await db
+      .update(aiMentorThreads)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          inArray(
+            aiMentorThreads.aiMentorLessonId,
+            db
+              .select({ id: aiMentorLessons.id })
+              .from(aiMentorLessons)
+              .where(inArray(aiMentorLessons.lessonId, courseLessonIds)),
+          ),
+          eq(aiMentorThreads.userId, studentId),
+          isNull(aiMentorThreads.learningStateId),
+        ),
+      );
   }
 
   async getInfo(
@@ -155,8 +233,10 @@ export class CourseRepetitionService {
         : null;
     return {
       enabled: course?.settings.repetitionEnabled ?? false,
-      current: summary(states.find((state) => state.kind === "current")),
-      repetition: summary(states.find((state) => state.kind === "repetition")),
+      current: summary(states.find((state) => state.kind === COURSE_LEARNING_STATE_KINDS.CURRENT)),
+      repetition: summary(
+        states.find((state) => state.kind === COURSE_LEARNING_STATE_KINDS.REPETITION),
+      ),
     };
   }
 
@@ -178,7 +258,7 @@ export class CourseRepetitionService {
       .orderBy(desc(courseLearningStates.kind))
       .limit(1);
     const requiresIdentity = Boolean(
-      state && (state.kind === "repetition" || state.previousStateId),
+      state && (state.kind === COURSE_LEARNING_STATE_KINDS.REPETITION || state.previousStateId),
     );
     if ((supplied && supplied !== state?.id) || (requiresIdentity && !supplied))
       throw new ConflictException("courseRepetition.errors.staleState");
@@ -216,8 +296,10 @@ export class CourseRepetitionService {
           ),
         )
         .orderBy(desc(courseLearningStates.kind));
-      const current = states.find((state) => state.kind === "current");
-      const repetition = states.find((state) => state.kind === "repetition");
+      const current = states.find((state) => state.kind === COURSE_LEARNING_STATE_KINDS.CURRENT);
+      const repetition = states.find(
+        (state) => state.kind === COURSE_LEARNING_STATE_KINDS.REPETITION,
+      );
       if (
         repetition?.previousStateId === currentStateId ||
         current?.previousStateId === currentStateId
@@ -228,9 +310,12 @@ export class CourseRepetitionService {
       if (!course.settings.repetitionEnabled || !enrollment.completedAt || repetition)
         throw new BadRequestException("courseRepetition.errors.unavailable");
       await this.bindLegacyProgress(courseId, studentId, current.id, db);
-      await db
-        .insert(courseLearningStates)
-        .values({ courseId, studentId, kind: "repetition", previousStateId: current.id });
+      await db.insert(courseLearningStates).values({
+        courseId,
+        studentId,
+        kind: COURSE_LEARNING_STATE_KINDS.REPETITION,
+        previousStateId: current.id,
+      });
       return this.getInfo(courseId, studentId, db);
     });
   }
@@ -251,7 +336,9 @@ export class CourseRepetitionService {
           eq(courseLearningStates.studentId, studentId),
         ),
       );
-    const repetition = states.find((state) => state.kind === "repetition");
+    const repetition = states.find(
+      (state) => state.kind === COURSE_LEARNING_STATE_KINDS.REPETITION,
+    );
     if (repetition) {
       await db
         .delete(courseLearningStates)
@@ -259,12 +346,16 @@ export class CourseRepetitionService {
           and(
             eq(courseLearningStates.courseId, courseId),
             eq(courseLearningStates.studentId, studentId),
-            eq(courseLearningStates.kind, "current"),
+            eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
           ),
         );
       await db
         .update(courseLearningStates)
-        .set({ kind: "current", completedAt: sql`now()`, finishedChapterCount })
+        .set({
+          kind: COURSE_LEARNING_STATE_KINDS.CURRENT,
+          completedAt: sql`now()`,
+          finishedChapterCount,
+        })
         .where(eq(courseLearningStates.id, repetition.id));
     } else {
       await db
@@ -274,7 +365,7 @@ export class CourseRepetitionService {
           and(
             eq(courseLearningStates.courseId, courseId),
             eq(courseLearningStates.studentId, studentId),
-            eq(courseLearningStates.kind, "current"),
+            eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
             isNull(courseLearningStates.completedAt),
           ),
         );

@@ -21,6 +21,8 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import {
+  COURSE_LEARNING_STATE_KINDS,
+  AI_THREAD_STATUSES,
   ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
@@ -36,7 +38,7 @@ import {
   type EditableResourceVisibility,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { sql, and, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
@@ -52,6 +54,10 @@ import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/gro
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import {
+  COURSE_LEARNING_TARGET_FIELDS,
+  COURSE_LEARNING_TARGET_SOURCES,
+} from "src/course-repetition/course-learning-write.constants";
 import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 import {
   CourseRepetitionService,
@@ -68,7 +74,8 @@ import {
   assertLessonUploadGrant,
 } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
-import { courseLearningStates, studentCourses } from "src/storage/schema";
+import { DB } from "src/storage/db/db.providers";
+import { chapters, courseLearningStates, lessons, studentCourses } from "src/storage/schema";
 
 import {
   AnswerQuestionBody,
@@ -113,7 +120,7 @@ export class LessonController {
     private readonly adminLessonsService: AdminLessonService,
     private readonly lessonService: LessonService,
     private readonly aiService: AiService,
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly courseRepetitionService: CourseRepetitionService,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
   ) {}
@@ -167,10 +174,12 @@ export class LessonController {
       );
     const learnerId = studentId || currentUser.userId;
     const result = await this.db.transaction(async (db) => {
-      const [course] = await db.execute<{ course_id: string }>(
-        sql`SELECT ch.course_id FROM chapters ch JOIN lessons l ON l.chapter_id = ch.id WHERE l.id = ${id}`,
-      );
-      if (course) await this.courseRepetitionService.lock(course.course_id, learnerId, db);
+      const [course] = await db
+        .select({ courseId: chapters.courseId })
+        .from(chapters)
+        .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+        .where(eq(lessons.id, id));
+      if (course) await this.courseRepetitionService.lock(course.courseId, learnerId, db);
       let learningStateId = await activeLearningStateId(db, learnerId, id);
       const readOnly = learnerId !== currentUser.userId;
       if (readOnly) {
@@ -182,13 +191,13 @@ export class LessonController {
           ])
         )
           throw new ForbiddenException("common.toast.noAccess");
-        await this.courseService.assertCanViewCourseStatistics(course.course_id, currentUser);
+        await this.courseService.assertCanViewCourseStatistics(course.courseId, currentUser);
         const [enrollment] = await db
           .select({ id: studentCourses.id })
           .from(studentCourses)
           .where(
             and(
-              eq(studentCourses.courseId, course.course_id),
+              eq(studentCourses.courseId, course.courseId),
               eq(studentCourses.studentId, learnerId),
               getGroupManagerLearnerScopeCondition(currentUser, studentCourses.studentId, [
                 PERMISSIONS.COURSE_STATISTICS,
@@ -201,9 +210,9 @@ export class LessonController {
           .from(courseLearningStates)
           .where(
             and(
-              eq(courseLearningStates.courseId, course.course_id),
+              eq(courseLearningStates.courseId, course.courseId),
               eq(courseLearningStates.studentId, learnerId),
-              eq(courseLearningStates.kind, "current"),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
             ),
           );
         learningStateId = current?.id ?? null;
@@ -218,7 +227,7 @@ export class LessonController {
       });
     });
     const { response, readOnly } = result;
-    if (!readOnly && response.data.threadId && response.data.status === "active") {
+    if (!readOnly && response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
       await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
     }
     return response;
@@ -458,7 +467,10 @@ export class LessonController {
     });
   }
 
-  @CourseLearningWrite({ source: "body", field: "lessonId" })
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Post("evaluation-quiz")
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({
@@ -600,7 +612,10 @@ export class LessonController {
     return new BaseResponse(fileData);
   }
 
-  @CourseLearningWrite({ source: "query", field: "lessonId" })
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.QUERY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Delete("delete-student-quiz-answers")
   @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({

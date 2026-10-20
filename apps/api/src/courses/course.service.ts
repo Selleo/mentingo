@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { buildOverdueCoursesEventFields } from "@repo/email-templates";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   AUTOMATION_EVENT_KINDS,
   SUPPORTED_LANGUAGES,
   COURSE_FEATURE,
@@ -133,6 +134,7 @@ import {
   certificates,
   chapters,
   courseStudentMode,
+  courseLearningStates,
   courses,
   coursesSummaryStats,
   groups,
@@ -621,11 +623,19 @@ export class CourseService {
         courseId: courses.id,
         title: continueCourseTitle,
         thumbnailS3Key: courses.thumbnailS3Key,
-        completedChapterCount: sql<number>`COALESCE((SELECT cls.finished_chapter_count FROM course_learning_states cls WHERE cls.course_id = ${courses.id} AND cls.student_id = ${studentCourses.studentId} AND cls.kind = 'repetition'), ${studentCourses.finishedChapterCount})`,
+        completedChapterCount: sql<number>`COALESCE(${courseLearningStates.finishedChapterCount}, ${studentCourses.finishedChapterCount})`,
         courseChapterCount: courses.chapterCount,
       })
       .from(studentCourses)
       .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+        ),
+      )
       .where(
         and(
           eq(studentCourses.studentId, userId),
@@ -635,7 +645,7 @@ export class CourseService {
               eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
               isNull(studentCourses.completedAt),
             ),
-            sql`(SELECT cls.finished_chapter_count FROM course_learning_states cls WHERE cls.course_id = ${courses.id} AND cls.student_id = ${studentCourses.studentId} AND cls.kind = 'repetition') IS NOT NULL`,
+            isNotNull(courseLearningStates.finishedChapterCount),
           ),
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
@@ -4286,9 +4296,16 @@ export class CourseService {
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
       courseChapterCount: courses.chapterCount,
       completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-      repetitionCompletedChapterCount: sql<
-        number | null
-      >`(SELECT cls.finished_chapter_count FROM course_learning_states cls WHERE cls.course_id = ${courses.id} AND cls.student_id = ${studentCourses.studentId} AND cls.kind = 'repetition')`,
+      repetitionCompletedChapterCount: sql<number | null>`${this.db
+        .select({ finishedChapterCount: courseLearningStates.finishedChapterCount })
+        .from(courseLearningStates)
+        .where(
+          and(
+            eq(courseLearningStates.courseId, courses.id),
+            eq(courseLearningStates.studentId, studentCourses.studentId),
+            eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+          ),
+        )}`,
       priceInCents: courses.priceInCents,
       currency: courses.currency,
       hasFreeChapter: sql<boolean>`
@@ -4770,16 +4787,25 @@ export class CourseService {
         groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         completedAt: sql<string | null>`MAX(${studentCourses.completedAt})`,
-        repetitionCompletedLessonsCount: sql<number | null>`(
-          SELECT COUNT(slp.id)::int
-          FROM course_learning_states rep
-          LEFT JOIN student_lesson_progress slp ON slp.learning_state_id = rep.id
-            AND slp.student_id = rep.student_id
-            AND slp.completed_at IS NOT NULL
-          WHERE rep.course_id = ${courseId} AND rep.student_id = ${users.id}
-            AND rep.kind = 'repetition'
-          GROUP BY rep.id
-        )`,
+        repetitionCompletedLessonsCount: sql<number | null>`${this.db
+          .select({ count: sql<number>`${count(studentLessonProgress.id)}::int` })
+          .from(courseLearningStates)
+          .leftJoin(
+            studentLessonProgress,
+            and(
+              eq(studentLessonProgress.learningStateId, courseLearningStates.id),
+              eq(studentLessonProgress.studentId, courseLearningStates.studentId),
+              isNotNull(studentLessonProgress.completedAt),
+            ),
+          )
+          .where(
+            and(
+              eq(courseLearningStates.courseId, courseId),
+              eq(courseLearningStates.studentId, users.id),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+            ),
+          )
+          .groupBy(courseLearningStates.id)}`,
         lastActivity: lastActivityExpression,
         lastCompletedLessonName: lastCompletedLessonName,
       })

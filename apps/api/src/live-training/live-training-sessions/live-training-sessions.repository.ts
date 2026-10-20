@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
@@ -9,7 +10,7 @@ import {
   type LiveTrainingParticipantRole,
   type PermissionKey,
 } from "@repo/shared";
-import { and, count, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, exists, inArray, isNull, lt, notExists, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
@@ -645,6 +646,7 @@ export class LiveTrainingSessionsRepository {
   async getOnlineLiveLessonCompletionRows(
     liveTrainingId: UUIDType,
   ): Promise<LiveTrainingLessonCompletionRow[]> {
+    const repetitionState = alias(courseLearningStates, "repetition_state");
     return this.db
       .selectDistinct({
         lessonId: liveLessons.lessonId,
@@ -686,7 +688,19 @@ export class LiveTrainingSessionsRepository {
         and(
           eq(liveLessons.liveTrainingId, liveTrainingId),
           sql`${liveTrainingSessionParticipants.joinCount} > 0`,
-          sql`NOT EXISTS (SELECT 1 FROM course_learning_states rep WHERE rep.course_id = ${studentCourses.courseId} AND rep.student_id = ${studentCourses.studentId} AND rep.kind = 'repetition' AND ${liveTrainingSessionParticipants.lastLeftAt} < rep.created_at)`,
+          notExists(
+            this.db
+              .select({ id: repetitionState.id })
+              .from(repetitionState)
+              .where(
+                and(
+                  eq(repetitionState.courseId, studentCourses.courseId),
+                  eq(repetitionState.studentId, studentCourses.studentId),
+                  eq(repetitionState.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+                  lt(liveTrainingSessionParticipants.lastLeftAt, repetitionState.createdAt),
+                ),
+              ),
+          ),
         ),
       );
   }

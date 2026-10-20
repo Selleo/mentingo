@@ -9,6 +9,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
   CERTIFICATE_ARCHIVE_REASONS,
@@ -24,7 +25,7 @@ import {
   isSupportedLanguage,
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 import { match } from "ts-pattern";
@@ -51,7 +52,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { certificates, courses, studentCourses } from "src/storage/schema";
+import { certificates, courseLearningStates, courses, studentCourses } from "src/storage/schema";
 
 import { CertificateRepository } from "./certificate.repository";
 import {
@@ -258,9 +259,17 @@ export class CertificatesService implements OnModuleDestroy {
           transactionInstance,
         );
 
-        const [renewal] = await transactionInstance.execute(
-          sql`SELECT id FROM course_learning_states WHERE course_id = ${courseId} AND student_id = ${userId} AND kind = 'current' AND previous_state_id IS NOT NULL`,
-        );
+        const [renewal] = await transactionInstance
+          .select({ id: courseLearningStates.id })
+          .from(courseLearningStates)
+          .where(
+            and(
+              eq(courseLearningStates.courseId, courseId),
+              eq(courseLearningStates.studentId, userId),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
+              isNotNull(courseLearningStates.previousStateId),
+            ),
+          );
         if (
           existingCertificate &&
           (!renewal || new Date(existingCertificate.issuedAt).getTime() === issuedAt.getTime())

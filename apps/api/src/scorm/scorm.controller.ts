@@ -32,6 +32,11 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import {
+  COURSE_LEARNING_TARGET_ENTITIES,
+  COURSE_LEARNING_TARGET_FIELDS,
+  COURSE_LEARNING_TARGET_SOURCES,
+} from "src/course-repetition/course-learning-write.constants";
 import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
@@ -437,7 +442,10 @@ export class ScormController {
     });
   }
 
-  @CourseLearningWrite({ source: "query", field: "lessonId" })
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.QUERY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Get("runtime/launch")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
@@ -459,7 +467,11 @@ export class ScormController {
     );
   }
 
-  @CourseLearningWrite({ source: "body", field: "attemptId", entity: "scorm" })
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.ATTEMPT_ID,
+    entity: COURSE_LEARNING_TARGET_ENTITIES.SCORM,
+  })
   @Post("runtime/commit")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
@@ -478,7 +490,11 @@ export class ScormController {
     });
   }
 
-  @CourseLearningWrite({ source: "body", field: "attemptId", entity: "scorm" })
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.ATTEMPT_ID,
+    entity: COURSE_LEARNING_TARGET_ENTITIES.SCORM,
+  })
   @Post("runtime/finish")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
