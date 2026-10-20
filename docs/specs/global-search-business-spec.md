@@ -50,6 +50,8 @@ When learners find an assigned course, the result includes the same completed-ch
 
 ## Key Technical Context
 
+- Demo and local environments can pause automatic semantic index refresh with `SEMANTIC_SEARCH_BACKGROUND_INDEXING_ENABLED=false` and an API restart. This stops scheduled reconciliation and the indexing worker, retaining queued jobs for a later restart with indexing enabled. Existing indexed content remains searchable, but new or changed content and attachments will not receive refreshed semantic indexing while paused. Keyword search remains available; explicit meaning-search queries can still call the embedding provider. The switch defaults to enabled and applies to each API process, so all processes consuming the same demo queue must use the same setting.
+
 - The frontend search dialog lives under `apps/web/app/components/Navigation/GlobalSearch` and sends the current UI language through `useGlobalSearch`.
 - The backend endpoint is `GET /api/global-search`, implemented by `GlobalSearchController`, `GlobalSearchService`, and `GlobalSearchRepository`.
 - Indexed search documents live in the `search_documents` table and are refreshed by `SearchIndexService`. Semantic chunks use a cosine HNSW index, with access and current-source checks inside retrieval. Semantic retrieval uses bounded ANN candidates without an exact semantic fallback. Restrictive filters can reduce semantic recall; keyword results remain available.
