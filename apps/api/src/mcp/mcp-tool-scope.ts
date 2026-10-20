@@ -8,6 +8,11 @@ const studentTools = new Set([
   "global_search",
   "list_courses",
   "get_course",
+  "list_chapters",
+  "get_chapter",
+  "list_lessons",
+  "get_lesson",
+  "search_lessons",
   "list_articles",
   "get_article",
   "list_news",
@@ -160,6 +165,18 @@ const toolScopes: Record<string, McpScope> = {
   global_search: MCP_SCOPES.SEARCH_READ,
 };
 
+/** Clients without a scope preference may request the entire discovery catalog. */
+export function normalizeMcpAuthorizationScopes(scopes: string[]): string[] {
+  if (
+    scopes.length === MCP_REQUESTABLE_SCOPES.length &&
+    new Set(scopes).size === scopes.length &&
+    MCP_REQUESTABLE_SCOPES.every((scope) => scopes.includes(scope))
+  ) {
+    return [MCP_SCOPES.ACCOUNT_ACCESS];
+  }
+  return scopes;
+}
+
 export function isRequestableMcpScopeSet(scopes: unknown): scopes is McpScope[] {
   if (!Array.isArray(scopes) || scopes.length === 0 || new Set(scopes).size !== scopes.length)
     return false;
@@ -197,6 +214,9 @@ export function canUseMcpToolWithScopes(name: string, scopes: unknown): boolean 
   if (!isMcpScopeSet(scopes)) return false;
   if (scopes.includes(MCP_SCOPES.STUDENT_READ)) return studentTools.has(name);
   if (scopes[0] === MCP_SCOPES.SEARCH) return name === "global_search";
+  // New learner tools are available to normal account/domain reads, not frozen legacy authoring.
+  if (name === "search_lessons")
+    return scopes.includes(MCP_SCOPES.ACCOUNT_ACCESS) || scopes.includes(MCP_SCOPES.COURSES_READ);
   if (name === "get_my_capabilities")
     return scopes.some((scope) => scope !== MCP_SCOPES.SEARCH_READ);
   if (!Object.prototype.hasOwnProperty.call(toolScopes, name)) return false;

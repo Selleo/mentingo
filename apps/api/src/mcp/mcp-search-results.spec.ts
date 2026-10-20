@@ -2,7 +2,10 @@ import { GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shar
 
 import { shapeMcpSearchResults } from "./mcp-search-results";
 
-import type { McpLinkedSearchResponse } from "./mcp-search-results.types";
+import type {
+  McpLinkedSearchResponse,
+  McpLearnerContentSearchResponse,
+} from "./mcp-search-results.types";
 import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
 
 function response(): GlobalSearchResponse {
@@ -119,4 +122,38 @@ describe("MCP search result presentation", () => {
     (resource) =>
       expect(() => shapeMcpSearchResults(response(), { ...context, resource })).toThrow(),
   );
+  it("adds only safe lesson fields for the explicit student lesson-search projection", () => {
+    const source = response();
+    Object.assign(source.lessons[0], {
+      matchedPassage:
+        '<p>Useful lesson</p><script>hidden prompt</script><img src="https://secret.invalid">',
+      matchedAttachmentFileName: "secret.pdf",
+      grading: "secret rubric",
+      url: "https://attacker.invalid",
+    });
+    const result = shapeMcpSearchResults(source, {
+      ...context,
+      searchOnly: true,
+      studentOnly: true,
+      includeLearnerLessons: true,
+    }) as McpLearnerContentSearchResponse;
+    expect(result.lessons).toEqual([
+      {
+        id: "lesson/id",
+        courseId: "my/id",
+        title: "Lesson",
+        matchedPassage: "Useful lesson",
+        url: "https://tenant.example/course/my%2Fid/lesson/lesson%2Fid",
+      },
+    ]);
+    for (const field of [
+      "secret.pdf",
+      "secret rubric",
+      "hidden prompt",
+      "attacker",
+      "users",
+      "learningPaths",
+    ])
+      expect(JSON.stringify(result)).not.toContain(field);
+  });
 });

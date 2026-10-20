@@ -78,7 +78,7 @@ jobs:
           exit 1
 
       # Any run may upload an artifact named release-film (another workflow, a pull request from a fork): only a
-      # recording of release-film.yml in this repository, started by hand, is published.
+      # workflow_dispatch recording of release-film.yml in this repository is published (automatic or by hand).
       - name: Check the run is a recording
         if: env.PUBLISH == 'true' && inputs.run_id != '' && inputs.run_id != github.run_id
         env:
@@ -153,7 +153,7 @@ jobs:
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       # Any run may upload an artifact named release-film (another workflow, a pull request from a fork): only a
-      # recording of release-film.yml in this repository, started by hand, is published.
+      # workflow_dispatch recording of release-film.yml in this repository is published (automatic or by hand).
       - name: Check the run is a recording
         if: inputs.target == 'pages' && inputs.run_id != '' && inputs.run_id != github.run_id
         env:

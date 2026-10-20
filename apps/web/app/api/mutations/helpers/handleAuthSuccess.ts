@@ -25,28 +25,44 @@ type HandleAuthSuccessOptions = {
   setHasVerifiedMFA: (value: boolean) => void;
 };
 
+const normalizeAuthSuccessUser = (user: AuthSuccessUser): CurrentUserResponse["data"] => ({
+  ...user,
+  isSupportMode: user.isSupportMode ?? false,
+  studentModeCourseIds: user.studentModeCourseIds ?? [],
+  permissions: user.permissions ?? [],
+  roleSlugs: user.roleSlugs ?? [],
+});
+
+/**
+ * Auth responses carry no permissions, so route guards would treat the user as having none
+ * and redirect them to the fallback page. Fetch the full current user before marking the
+ * session as logged in, and fall back to the auth payload only when that request fails.
+ */
+const fetchCurrentUserAfterAuth = async (fallbackUser: CurrentUserResponse["data"]) => {
+  try {
+    const response = await queryClient.fetchQuery({ ...currentUserQueryOptions, staleTime: 0 });
+
+    return response?.data ?? fallbackUser;
+  } catch {
+    return fallbackUser;
+  }
+};
+
 export async function handleAuthSuccess({
   user,
   setLoggedIn,
   setCurrentUser,
   setHasVerifiedMFA,
 }: HandleAuthSuccessOptions) {
-  const normalizedUser: CurrentUserResponse["data"] = {
-    ...user,
-    isSupportMode: user.isSupportMode ?? false,
-    studentModeCourseIds: user.studentModeCourseIds ?? [],
-    permissions: user.permissions ?? [],
-    roleSlugs: user.roleSlugs ?? [],
-  };
+  const currentUser = await fetchCurrentUserAfterAuth(normalizeAuthSuccessUser(user));
 
-  queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
+  queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: currentUser });
   setLoggedIn(true);
-  setCurrentUser(normalizedUser);
-  setHasVerifiedMFA(!normalizedUser.shouldVerifyMFA);
+  setCurrentUser(currentUser);
+  setHasVerifiedMFA(!currentUser.shouldVerifyMFA);
 
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: currentUserQueryOptions.queryKey }),
-    queryClient.invalidateQueries({ queryKey: getDashboardSettingsQueryKey(normalizedUser.id) }),
+    queryClient.invalidateQueries({ queryKey: getDashboardSettingsQueryKey(currentUser.id) }),
     queryClient.invalidateQueries({ queryKey: userSettingsQueryOptions.queryKey }),
     queryClient.invalidateQueries({ queryKey: mfaSetupQueryOptions.queryKey }),
   ]);

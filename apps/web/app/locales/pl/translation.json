@@ -12,7 +12,7 @@
     "title": "Połączyć {{clientName}} z Mentingo?",
     "description": "Ten asystent może korzystać z Mentingo zgodnie z Twoimi uprawnieniami.",
     "searchDescription": "Zezwól temu asystentowi na wyszukiwanie dostępnych informacji o kursach, artykułów wiedzy, aktualności oraz pytań i odpowiedzi i zwracanie linków do Mentingo. Nie może zmieniać treści, pobierać treści lekcji ani używać narzędzi administracyjnych.",
-    "studentDescription": "Tylko dostęp ucznia: wyszukiwanie i odczyt opublikowanych artykułów, aktualności, pytań i odpowiedzi oraz dostępnych metadanych kursów. Bez lekcji, prywatnych plików, wersji roboczych, administracji i zmian. Wszyscy użytkownicy Slacka korzystają z dostępu ucznia połączonego konta.",
+    "studentDescription": "Dostęp ucznia tylko do odczytu: wyszukiwanie kursów i lekcji, przeglądanie rozdziałów oraz czytanie treści lekcji w bezpłatnych kursach publicznych lub w kursach publicznych i prywatnych, na które to konto ma aktywny zapis. Informacje o płatnych kursach publicznych pozostają widoczne. Administratorów obowiązują te same zasady. Bez wersji roboczych, kursów archiwalnych, zmian, odpowiedzi do quizów, instrukcji AI ani adresów plików. Dostępne są też opublikowane artykuły, aktualności i pytania i odpowiedzi. Wszyscy użytkownicy Slacka korzystają z dostępu ucznia połączonego konta.",
     "accountDescription": "Zezwól temu asystentowi na używanie narzędzi Mentingo dostępnych dla Twojego konta, w tym odczytywanie danych i wprowadzanie zmian. Zawsze obowiązują Twoje aktualne uprawnienia i ustawienia organizacji. Przed udzieleniem dostępu sprawdź konto i adres przekierowania.",
     "explicitDescription": "Sprawdź uprawnienia poniżej. Ograniczają one dostęp asystenta w ramach uprawnień Twojego konta; odczyt w narzędziach zarządzania może obejmować wersje robocze i dane administracyjne.",
     "requestedScopes": "Żądane uprawnienia",
@@ -3883,6 +3883,7 @@
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
           "voiceConfigCartesiaTooltip": "Audio głosu korzysta z Cartesia. Wybierz Male albo Female, aby użyć skonfigurowanego mapowania głosów, albo wybierz Custom i wpisz identyfikator głosu Cartesia.",
+          "voiceConfigElevenLabsTooltip": "Audio głosu korzysta z ElevenLabs. Wybierz Male albo Female, aby użyć skonfigurowanego mapowania głosów, albo wybierz Custom i wpisz identyfikator głosu ElevenLabs.",
           "voiceConfigOpenAiCompatibleTooltip": "Audio głosu korzysta z endpointu TTS zgodnego z OpenAI. Male i Female używają presetów głosów OpenAI. Wybierz Custom, aby wpisać inną wartość głosu obsługiwaną przez ten endpoint.",
           "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
@@ -5871,6 +5872,32 @@
   "sessionRevocation": {
     "permissionsUpdated": "Twoje uprawnienia zostały zaktualizowane. Odświeżamy sesję, aby zastosować nowe dostępy.",
     "refreshFailed": "Uprawnienia zostały zmienione, ale odświeżenie sesji nie powiodło się. Zaloguj się ponownie."
+  },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Twoja sesja wygasła",
+      "description": "Zaloguj się ponownie, aby kontynuować."
+    },
+    "forbidden": {
+      "title": "Brak dostępu",
+      "description": "Nie masz uprawnień do wyświetlenia tej strony. Jeśli uważasz, że to błąd, skontaktuj się z administratorem."
+    },
+    "notFound": {
+      "title": "Nie znaleziono strony",
+      "description": "Strona, której szukasz, nie istnieje lub została przeniesiona."
+    },
+    "connection": {
+      "title": "Problem z połączeniem",
+      "description": "Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie."
+    },
+    "unknown": {
+      "title": "Coś poszło nie tak",
+      "description": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę."
+    },
+    "action": {
+      "logIn": "Zaloguj się",
+      "tryAgain": "Spróbuj ponownie"
+    }
   },
   "tenantInactive": {
     "title": "Organizacja wyłączona",

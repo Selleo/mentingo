@@ -12,7 +12,7 @@
     "title": "Connecter {{clientName}} à Mentingo ?",
     "description": "Cet assistant peut utiliser Mentingo selon vos autorisations actuelles.",
     "searchDescription": "Autorisez cet assistant à rechercher les informations accessibles sur les cours, les articles de connaissances, les actualités et les questions-réponses, et à fournir des liens vers Mentingo. Il ne peut pas modifier le contenu, récupérer le contenu des leçons ni utiliser les outils d’administration.",
-    "studentDescription": "Accès apprenant uniquement : rechercher et lire les articles publiés, actualités, questions-réponses et métadonnées de cours accessibles. Sans leçons, fichiers privés, brouillons, administration ni modifications. Tous les utilisateurs Slack partagent l’accès apprenant du compte connecté.",
+    "studentDescription": "Accès apprenant en lecture seule : rechercher des cours et des leçons, parcourir les chapitres et lire les textes des leçons des cours publics gratuits, ou des cours publics et privés auxquels ce compte est activement inscrit. Les informations sur les cours publics payants restent visibles. Les administrateurs suivent les mêmes règles. Aucun brouillon, cours archivé, modification, réponse aux quiz, instruction IA ni URL de fichier. Les articles, actualités et questions-réponses publiés sont également disponibles. Tous les utilisateurs Slack partagent l’accès apprenant du compte connecté.",
     "accountDescription": "Autorisez cet assistant à utiliser les outils Mentingo disponibles pour votre compte, y compris la lecture et les modifications. Vos autorisations actuelles et les paramètres de votre organisation restent applicables. Vérifiez le compte et l’adresse de redirection avant d’autoriser l’accès.",
     "explicitDescription": "Vérifiez les autorisations demandées ci-dessous. Elles limitent l’assistant dans les droits de votre compte ; la lecture via les outils de gestion peut inclure des brouillons et des données administratives.",
     "requestedScopes": "Autorisations demandées",
@@ -3405,6 +3405,7 @@
           "aiRoleplayTypeTooltip": "Simule un personnage et une situation réalistes – sans briser le personnage.\nExemple : « C'est la deuxième fois que votre service échoue. Qu'allez-vous faire à ce sujet ? »",
           "passThresholdTooltip": "Définissez le pourcentage minimum (1-100 %) requis pour réussir. Laissez vide pour aucun seuil.",
           "voiceConfigCartesiaTooltip": "L'audio vocal utilise Cartesia. Choisissez Homme ou Femme pour utiliser le mappage vocal configuré, ou choisissez Personnalisé et saisissez un identifiant vocal Cartesia.",
+          "voiceConfigElevenLabsTooltip": "L'audio vocal utilise ElevenLabs. Choisissez Homme ou Femme pour utiliser le mappage vocal configuré, ou choisissez Personnalisé et saisissez un identifiant vocal ElevenLabs.",
           "voiceConfigOpenAiCompatibleTooltip": "L'audio vocal utilise un point de terminaison de synthèse vocale compatible OpenAI. Les hommes et les femmes utilisent les préréglages vocaux OpenAI. Choisissez Personnalisé pour saisir une autre valeur vocale prise en charge par ce point de terminaison.",
           "aiMentorPersonaTooltip": "Définissez le personnage de la leçon en choisissant un nom et un avatar pour l'AI Mentor. Il utilisera ce nom et cet avatar pendant le cours.",
           "suggestedExamples": "Exemples suggérés",
@@ -5548,6 +5549,32 @@
   "sessionRevocation": {
     "permissionsUpdated": "Vos autorisations ont été mises à jour. Actualisation de votre session pour appliquer un nouvel accès.",
     "refreshFailed": "Vos autorisations ont changé, mais l'actualisation de la session a échoué. Veuillez vous reconnecter."
+  },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Votre session a expiré",
+      "description": "Reconnectez-vous pour continuer."
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "description": "Vous n'avez pas l'autorisation d'afficher cette page. Contactez votre administrateur si vous pensez qu'il s'agit d'une erreur."
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée."
+    },
+    "connection": {
+      "title": "Problème de connexion",
+      "description": "Impossible de joindre le serveur. Vérifiez votre connexion internet et réessayez."
+    },
+    "unknown": {
+      "title": "Une erreur s'est produite",
+      "description": "Une erreur inattendue s'est produite. Réessayez dans un instant."
+    },
+    "action": {
+      "logIn": "Se connecter",
+      "tryAgain": "Réessayer"
+    }
   },
   "tenantInactive": {
     "title": "Organisation désactivée",

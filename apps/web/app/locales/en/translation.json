@@ -12,7 +12,7 @@
     "title": "Connect {{clientName}} to Mentingo?",
     "description": "This assistant can use Mentingo with your current permissions.",
     "searchDescription": "Allow this assistant to search accessible course metadata, knowledge articles, news and Q&A, and return links to Mentingo. It cannot modify content, retrieve lesson content or use administration tools.",
-    "studentDescription": "Student access only: search and read published articles, news, Q&A and accessible course metadata. No lessons, private files, drafts, administration or changes. All Slack users share the connected account’s learner access.",
+    "studentDescription": "Read-only learner access: search courses and lessons, browse chapters, and read authored lesson text in free public courses, or public and private courses this account is actively enrolled in. Paid public course listings remain visible. Administrators follow the same rules. No drafts, archived courses, changes, quiz answers, AI prompts or file URLs. Published articles, news and Q&A are also available. All Slack users share the connected account’s learner access.",
     "accountDescription": "Allow this assistant to use the Mentingo tools available to your account, including reading and making changes. Your current permissions and organisation settings always apply. Review the account and redirect address before allowing access.",
     "explicitDescription": "Review the requested permissions below. These scopes limit the assistant’s access within your current account permissions; read scopes for management tools can include drafts and administration data.",
     "requestedScopes": "Requested permissions",
@@ -3648,6 +3648,7 @@
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
           "voiceConfigCartesiaTooltip": "Voice audio uses Cartesia. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a Cartesia voice ID.",
+          "voiceConfigElevenLabsTooltip": "Voice audio uses ElevenLabs. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a ElevenLabs voice ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Voice audio uses an OpenAI-compatible text-to-speech endpoint. Male and Female use OpenAI voice presets. Choose Custom to enter another voice value supported by that endpoint.",
           "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
@@ -5826,6 +5827,32 @@
   "sessionRevocation": {
     "permissionsUpdated": "Your permissions were updated. Refreshing your session to apply new access.",
     "refreshFailed": "Your permissions changed, but the session refresh failed. Please sign in again."
+  },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Your session has expired",
+      "description": "Log in again to continue where you left off."
+    },
+    "forbidden": {
+      "title": "You don't have access",
+      "description": "You don't have permission to view this page. Contact your administrator if you think this is a mistake."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for doesn't exist or has been moved."
+    },
+    "connection": {
+      "title": "Connection problem",
+      "description": "We couldn't reach the server. Check your internet connection and try again."
+    },
+    "unknown": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Try again in a moment."
+    },
+    "action": {
+      "logIn": "Log in",
+      "tryAgain": "Try again"
+    }
   },
   "tenantInactive": {
     "title": "Organization Disabled",

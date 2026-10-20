@@ -8,6 +8,7 @@ import {
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { useReplaceAiJudgeConfiguration } from "~/api/mutations/admin/useReplaceAiJudgeConfiguration";
 import { useReplaceAiMentorConfiguration } from "~/api/mutations/admin/useReplaceAiMentorConfiguration";
@@ -268,10 +269,16 @@ const AiMentorLessonForm = ({
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const { data: lumaConfigured } = useLumaConfigured();
   const canConfigureVoiceMentor = Boolean(lumaConfigured?.voiceMentorEnabled);
-  const voiceConfigTooltipKey =
-    lumaConfigured?.voiceTtsProvider === "openaiCompatible"
-      ? "adminCourseView.curriculum.lesson.other.voiceConfigOpenAiCompatibleTooltip"
-      : "adminCourseView.curriculum.lesson.other.voiceConfigCartesiaTooltip";
+  const voiceConfigTooltipKey = match(lumaConfigured?.voiceTtsProvider)
+    .with(
+      "elevenlabs",
+      () => "adminCourseView.curriculum.lesson.other.voiceConfigElevenLabsTooltip",
+    )
+    .with(
+      "openaiCompatible",
+      () => "adminCourseView.curriculum.lesson.other.voiceConfigOpenAiCompatibleTooltip",
+    )
+    .otherwise(() => "adminCourseView.curriculum.lesson.other.voiceConfigCartesiaTooltip");
 
   const objectUrlRef = useRef<string | null>(null);
   const hasStagedAiMentorConfigurationRef = useRef(false);

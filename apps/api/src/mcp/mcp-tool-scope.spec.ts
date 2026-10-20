@@ -17,11 +17,16 @@ describe("MCP integration scope policy", () => {
     },
   );
 
-  it("exposes learner equivalents without management or lesson access", () => {
+  it("exposes learner content and curriculum without management access", () => {
     for (const tool of [
       "global_search",
       "list_courses",
       "get_course",
+      "list_chapters",
+      "get_chapter",
+      "list_lessons",
+      "get_lesson",
+      "search_lessons",
       "list_articles",
       "get_article",
       "list_news",
@@ -31,7 +36,6 @@ describe("MCP integration scope policy", () => {
     ])
       expect(canUseMcpToolWithScopes(tool, [MCP_SCOPES.STUDENT_READ])).toBe(true);
     for (const tool of [
-      "get_lesson",
       "list_users",
       "get_my_capabilities",
       "request_generic_file_upload",
@@ -39,6 +43,15 @@ describe("MCP integration scope policy", () => {
     ])
       expect(canUseMcpToolWithScopes(tool, [MCP_SCOPES.STUDENT_READ])).toBe(false);
   });
+
+  it.each([MCP_SCOPES.ACCOUNT_ACCESS, MCP_SCOPES.COURSES_READ])(
+    "includes learner lesson search in %s",
+    (scope) => expect(canUseMcpToolWithScopes("search_lessons", [scope])).toBe(true),
+  );
+  it.each([MCP_SCOPES.SEARCH_READ, MCP_SCOPES.AUTHORING])(
+    "preserves narrow and legacy %s catalogs",
+    (scope) => expect(canUseMcpToolWithScopes("search_lessons", [scope])).toBe(false),
+  );
 
   it("preserves a frozen legacy authoring catalog without implicitly adding new tools", () => {
     expect(canUseMcpToolWithScopes("create_course", [MCP_SCOPES.AUTHORING])).toBe(true);

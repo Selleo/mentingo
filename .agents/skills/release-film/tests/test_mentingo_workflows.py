@@ -1,17 +1,21 @@
 """Mentingo's release film workflows (.github/workflows/release-film*.yml): the seat's token only in the steps that call
-Claude, never an API key, nothing started on its own, publishing a separate job without the token, the Node of the
+Claude, never an API key, stable releases dispatch the recorder, publishing a separate job without the token, the Node of the
 project's recipe, and only this workflow's own knowledge read back. Mentingo is public: anyone signed in can download
 its artifacts, so what they hold and what the token reaches is checked here."""
 import json
+import os
 from pathlib import Path
 import re
 import sys
+import subprocess
+import tempfile
 import unittest
 
 sys.dont_write_bytecode = True
 SKILL = Path(__file__).resolve().parents[1]
 WORKFLOWS = SKILL.parents[2] / '.github' / 'workflows'
 RECORD, PUBLISH = WORKFLOWS / 'release-film.yml', WORKFLOWS / 'release-film-publish.yml'
+AUTOMATE = WORKFLOWS / 'release-film-on-release.yml'
 try:
     import yaml
 except ImportError:  # the runner's python3 has it (python3-yaml); a bare interpreter skips these checks
@@ -61,10 +65,10 @@ class Workflows(unittest.TestCase):
                     if uses(step, 'actions/checkout'):
                         self.assertIs(step['with']['persist-credentials'], False, 'a checkout keeps no GitHub token')
 
-    def test_films_start_only_by_hand_one_at_a_time(self):
+    def test_recordings_are_dispatched_one_at_a_time(self):
         for workflow, expected in ((self.record, ['workflow_dispatch']),
                                    (self.publish, ['workflow_call', 'workflow_dispatch'])):
-            self.assertEqual(sorted(workflow['on']), expected)  # no push, tag, release, schedule or pull request trigger
+            self.assertEqual(sorted(workflow['on']), expected)  # release events dispatch this existing entry point
         self.assertEqual(self.film['env']['FILM'], "${{ github.event_name == 'workflow_dispatch' }}")
         # a recording or a publication waiting for its turn is queued, never cancelled by the next one
         self.assertEqual(self.record['concurrency'],
@@ -93,7 +97,7 @@ class Workflows(unittest.TestCase):
                                          r'release_assets\.py earlier --tag')
 
     def test_every_action_is_pinned_to_a_commit(self):  # these jobs hold the seat's token and write releases and Pages
-        for path in (RECORD, PUBLISH, WORKFLOWS / 'pr-release-film-ci.yml'):
+        for path in (RECORD, PUBLISH, AUTOMATE, WORKFLOWS / 'pr-release-film-ci.yml'):
             for line in path.read_text(encoding='utf-8').splitlines():
                 if 'uses:' in line and 'uses: ./' not in line:
                     with self.subTest(workflow=path.name, line=line.strip()):
@@ -186,7 +190,7 @@ class Workflows(unittest.TestCase):
         self.assertIn('--base-url', site)
         # a cancelled run deploys nothing (always() would carry the job past a cancel)
         self.assertTrue(pages['if'].startswith('${{ !cancelled() && '))
-        # only a recording of release-film.yml in this repository, started by hand, is ever published: any run (a
+        # only a workflow_dispatch recording of release-film.yml in this repository is ever published: any run (a
         # fork's pull request among them) may upload an artifact named release-film
         for job in (publish, pages):
             names = [s.get('name') for s in job['steps']]
@@ -206,6 +210,64 @@ class Workflows(unittest.TestCase):
         helper = (SKILL / 'ci' / 'release_assets.py').read_text(encoding='utf-8')
         self.assertIsNone(re.search(r"\"DELETE\"|'release', 'delete'|--clobber", helper))
         self.assertEqual(re.findall(r"'DELETE'.*", helper), ["'DELETE', f'repos/{repo}/releases/assets/{assets[name][\"id\"]}')"])
+
+
+@unittest.skipUnless(yaml and AUTOMATE.is_file(), "PyYAML and Mentingo's release film automation")
+class PublishedRelease(unittest.TestCase):
+    def setUp(self):
+        self.workflow = load(AUTOMATE)
+        self.job = self.workflow['jobs']['record']
+        self.step, = self.job['steps']
+
+    def test_only_stable_publications_dispatch_a_recording_on_the_default_branch(self):
+        self.assertEqual(self.workflow['on'], {'release': {'types': ['published']}})
+        self.assertEqual(self.job['if'], '${{ !github.event.release.draft && !github.event.release.prerelease }}')
+        self.assertEqual(self.workflow['permissions'], {})
+        self.assertEqual(self.job['permissions'], {'actions': 'write'})
+        self.assertNotIn('environment', self.job)  # the tag needs no environment access or Claude token
+        self.assertNotIn('secrets.', AUTOMATE.read_text(encoding='utf-8'))
+        self.assertEqual(self.step['env'], {
+            'GH_TOKEN': '${{ github.token }}', 'RELEASE_TAG': '${{ github.event.release.tag_name }}',
+            'DEFAULT_BRANCH': '${{ github.event.repository.default_branch }}'})
+        self.assertNotIn('${{', self.step['run'])  # event data reaches the shell through quoted variables
+        self.assertIn('.github/workflows/release-film-on-release.yml',
+                      load(WORKFLOWS / 'pr-release-film-ci.yml')['on']['pull_request']['paths'])
+
+    def dispatch(self, tag='v4.20.1', exit_code=0):
+        """Execute the real dispatch step with a fake gh; never contact GitHub or record a film."""
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            gh = folder / 'gh'
+            gh.write_text('#!/usr/bin/env python3\nimport json, os, sys\nfrom pathlib import Path\n'
+                          'Path(os.environ["GH_ARGS"]).write_text(json.dumps(sys.argv[1:]))\n'
+                          'sys.exit(int(os.environ["GH_EXIT"]))\n')
+            gh.chmod(0o755)
+            summary = folder / 'summary'
+            env = dict(os.environ, PATH=f'{folder}{os.pathsep}{os.environ["PATH"]}', RELEASE_TAG=tag,
+                       DEFAULT_BRANCH='main', GITHUB_REPOSITORY='Selleo/mentingo', GITHUB_SERVER_URL='https://github.com',
+                       GITHUB_STEP_SUMMARY=str(summary), GH_TOKEN='fake-token', GH_ARGS=str(folder / 'args'),
+                       GH_EXIT=str(exit_code))
+            done = subprocess.run(['bash', '-c', self.step['run']], env=env, capture_output=True, text=True, timeout=10)
+            return done, json.loads((folder / 'args').read_text()), summary.read_text() if summary.exists() else ''
+
+    def test_the_published_tag_is_filmed_and_published_with_no_automatic_replacement(self):
+        done, args, summary = self.dispatch()
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual(args, ['workflow', 'run', 'release-film.yml', '--repo', 'Selleo/mentingo', '--ref', 'main',
+                                '-f', 'tag=v4.20.1', '-f', 'learn=sync', '-F', 'publish=true', '-F', 'replace=false'])
+        self.assertIn('v4.20.1', summary)
+        self.assertIn('https://github.com/Selleo/mentingo/actions/workflows/release-film.yml', summary)
+
+    def test_a_failed_dispatch_fails_the_job_without_claiming_a_recording_was_queued(self):
+        done, _, summary = self.dispatch(exit_code=1)
+        self.assertNotEqual(done.returncode, 0)
+        self.assertEqual(summary, '')
+
+    def test_a_tag_is_passed_as_data_never_as_shell_code(self):
+        tag = 'v4.20.1; $(exit 19) `exit 20`'
+        done, args, _ = self.dispatch(tag)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertIn(f'tag={tag}', args)  # the recorder subsequently validates the tag before recording
 
 
 if __name__ == '__main__':

@@ -129,6 +129,48 @@ describe("global search modes", () => {
     });
   });
 
+  it.each([GLOBAL_SEARCH_MODES.KEYWORD, GLOBAL_SEARCH_MODES.HYBRID])(
+    "opts into learner-safe lesson retrieval in %s while retaining other content restrictions",
+    async (mode) => {
+      const getLearnerLessons = jest
+        .fn()
+        .mockResolvedValue([{ id: actor.userId, title: "Lesson", courseId: actor.tenantId }]);
+      const getCourseRows = jest.fn().mockResolvedValue([]);
+      Object.assign(keyword, { getLearnerLessons, getCourseRows });
+      const learner = { ...actor, permissions: [PERMISSIONS.COURSE_READ_ASSIGNED] };
+      const result = await service.search(
+        "customer objections",
+        SUPPORTED_LANGUAGES.EN,
+        learner,
+        mode,
+        {
+          contentOnly: true,
+          learnerOnly: true,
+          includeLearnerLessons: true,
+        },
+      );
+      expect(hybrid.findKeywordMatches).toHaveBeenCalledTimes(5);
+      expect(hybrid.findKeywordMatches).toHaveBeenCalledWith(
+        "lesson",
+        "customer objections",
+        learner,
+        false,
+        true,
+      );
+      if (mode === GLOBAL_SEARCH_MODES.HYBRID)
+        expect(hybrid.findSemanticMatches).toHaveBeenCalledWith(
+          "lesson",
+          [1],
+          learner,
+          false,
+          true,
+        );
+      expect(getLearnerLessons).toHaveBeenCalledWith([], SUPPORTED_LANGUAGES.EN, learner);
+      expect(result.lessons[0].id).toBe(actor.userId);
+      expect(result.users).toEqual([]);
+      expect(result.learningPaths).toEqual([]);
+    },
+  );
   it("does not call providers for a short query", async () => {
     await service.search("ab", SUPPORTED_LANGUAGES.EN, actor, GLOBAL_SEARCH_MODES.HYBRID);
     expect(embeddings.embedQuery).not.toHaveBeenCalled();

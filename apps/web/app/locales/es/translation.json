@@ -12,7 +12,7 @@
     "title": "¿Conectar {{clientName}} con Mentingo?",
     "description": "Este asistente puede usar Mentingo según tus permisos actuales.",
     "searchDescription": "Permite que este asistente busque información accesible de cursos, artículos de conocimiento, noticias y preguntas y respuestas, y devuelva enlaces a Mentingo. No puede modificar contenido, obtener contenido de lecciones ni utilizar herramientas de administración.",
-    "studentDescription": "Solo acceso de estudiante: buscar y leer artículos publicados, noticias, preguntas y respuestas y metadatos de cursos accesibles. Sin lecciones, archivos privados, borradores, administración ni cambios. Todos los usuarios de Slack comparten el acceso de estudiante de la cuenta conectada.",
+    "studentDescription": "Acceso de estudiante de solo lectura: buscar cursos y lecciones, explorar capítulos y leer el texto de las lecciones de cursos públicos gratuitos, o de cursos públicos y privados en los que esta cuenta tiene una inscripción activa. La información de los cursos públicos de pago sigue visible. Los administradores siguen las mismas reglas. Sin borradores, cursos archivados, cambios, respuestas de cuestionarios, instrucciones de IA ni URL de archivos. También están disponibles artículos, noticias y preguntas y respuestas publicados. Todos los usuarios de Slack comparten el acceso de estudiante de la cuenta conectada.",
     "accountDescription": "Permite que este asistente use las herramientas de Mentingo disponibles para tu cuenta, incluida la lectura y la realización de cambios. Siempre se aplican tus permisos actuales y los ajustes de la organización. Revisa la cuenta y la dirección de redirección antes de permitir el acceso.",
     "explicitDescription": "Revise los permisos solicitados abajo. Limitan al asistente dentro de los permisos de su cuenta; la lectura en herramientas de gestión puede incluir borradores y datos administrativos.",
     "requestedScopes": "Permisos solicitados",
@@ -3592,6 +3592,7 @@
           "aiRoleplayTypeTooltip": "Simula un personaje y una situación realistas, sin romper el personaje.\nEjemplo: \"Esta es la segunda vez que tu servicio falla. ¿Qué vas a hacer al respecto?\"",
           "passThresholdTooltip": "Establezca el porcentaje mínimo (1-100%) requerido para aprobar. Déjelo vacío si no hay umbral.",
           "voiceConfigCartesiaTooltip": "El audio de voz usa Cartesia. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de Cartesia.",
+          "voiceConfigElevenLabsTooltip": "El audio de voz usa ElevenLabs. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de ElevenLabs.",
           "voiceConfigOpenAiCompatibleTooltip": "El audio de voz usa un endpoint de texto a voz compatible con OpenAI. Male y Female usan presets de voces de OpenAI. Elija Custom para introducir otro valor de voz compatible con ese endpoint.",
           "aiMentorPersonaTooltip": "Esto define la personalidad de la lección. Puede seleccionar un nombre y un avatar para el mentor de IA. La persona se identificará con este nombre y el avatar seleccionado se mostrará durante las lecciones.",
           "suggestedExamples": "Ejemplos sugeridos",
@@ -5763,6 +5764,32 @@
   "sessionRevocation": {
     "permissionsUpdated": "Tus permisos fueron actualizados. Actualizando su sesión para aplicar un nuevo acceso.",
     "refreshFailed": "Sus permisos cambiaron, pero falló la actualización de la sesión. Por favor inicia sesión nuevamente."
+  },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Tu sesión ha caducado",
+      "description": "Inicia sesión de nuevo para continuar."
+    },
+    "forbidden": {
+      "title": "No tienes acceso",
+      "description": "No tienes permiso para ver esta página. Si crees que es un error, ponte en contacto con tu administrador."
+    },
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o se ha movido."
+    },
+    "connection": {
+      "title": "Problema de conexión",
+      "description": "No pudimos conectar con el servidor. Comprueba tu conexión a internet e inténtalo de nuevo."
+    },
+    "unknown": {
+      "title": "Algo salió mal",
+      "description": "Se produjo un error inesperado. Inténtalo de nuevo en un momento."
+    },
+    "action": {
+      "logIn": "Iniciar sesión",
+      "tryAgain": "Intentar de nuevo"
+    }
   },
   "tenantInactive": {
     "title": "Organización deshabilitada",

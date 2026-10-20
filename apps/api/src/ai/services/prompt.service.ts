@@ -14,6 +14,7 @@ import { MessageService } from "src/ai/services/message.service";
 import { RagService } from "src/ai/services/rag.service";
 import { TokenService } from "src/ai/services/token.service";
 import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { EnvService } from "src/env/services/env.service";
 import { aiMentorThreads } from "src/storage/schema";
 
 import type { OnModuleInit } from "@nestjs/common";
@@ -34,6 +35,7 @@ export class PromptService implements OnModuleInit {
     private readonly messageService: MessageService,
     private readonly tokenService: TokenService,
     private readonly ragService: RagService,
+    private readonly envService: EnvService,
   ) {}
 
   onModuleInit() {
@@ -97,7 +99,10 @@ export class PromptService implements OnModuleInit {
 
     if (isVoiceMentor) {
       const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
-      const voiceMentorAddon = await this.loadPrompt("voiceMentorAddon", {
+      const { voiceTtsProvider } = await this.envService.getLumaConfigured();
+      const voicePromptId =
+        voiceTtsProvider === "elevenlabs" ? "voiceMentorElevenLabsAddon" : "voiceMentorAddon";
+      const voiceMentorAddon = await this.loadPrompt(voicePromptId, {
         language: thread.userLanguage,
       });
       metaMessages.push({

@@ -68,6 +68,23 @@ In voice conversations, the mentor is instructed to produce the words a person s
 
 Mathematical speech preserves exact values while avoiding awkward fractional names. In Polish, a decimal such as “0,47” becomes “zero przecinek cztery siedem”, including each zero and any stated trailing zeros. A fraction such as “40/70” becomes “czterdzieści podzielone przez siedemdziesiąt”, without simplification or rounding solely for pronunciation. Signs, percentage meaning, operators, and grouping remain explicit; money may use ordinary currency units and grosze. The displayed response retains readable notation such as “0,47” or “40 / 70”; reserved pronunciation spans supply the matching plain spoken math to the speech service.
 
+Voice delivery follows the speech provider configured on the connected Luma API key.
+Cartesia keeps its existing emotion and pause guidance. ElevenLabs receives a separate
+voice prompt that invites short, natural delivery cues for emotion, tone, pauses and
+human reactions. Its instructions require one appropriate delivery cue at the start
+of each reply, with additional cues only where delivery changes. The speech service translates these into ElevenLabs bracketed audio
+tags while learners see only the dialogue. Pronunciation overrides and spelling keep
+the same readable display contract. Pauses express relative pacing rather than exact
+durations. Provider selection and prompt rendering have deterministic unit coverage;
+live emotional delivery remains unverified.
+
+Voice playback uses the shared voice player and the source sample rate supplied
+with each audio chunk. This lets 24 kHz and 44.1 kHz speech play at the intended
+speed and pitch. Chunks without rate metadata keep the 44.1 kHz fallback; invalid
+rates are rejected before advancing the turn sequence. Core regression tests cover
+rate forwarding and sequence preservation, while shared-package tests cover audio
+duration and scheduling. The release requires `@mentingo/voice` 0.3.0 or later.
+
 Conventional written abbreviations expand into full spoken words through say spans. Amounts include their currency or unit in the same span, with inflection governed by the complete sentence. Spelling uses one reserved spell span around the entire word or token, preserving its displayed spelling without per-letter markers or inserted spaces. Voice pronunciation must preserve exact meaning, especially numbers and quantities. Removing markers must leave grammatical, correctly spaced display text; emotion and pause controls do not replace visible spaces, punctuation, or line breaks. The voice prompt uses one general rule: every expression whose written form differs from its spoken form requires a complete pronunciation span, with a small set of varied multilingual examples. Every equation line, including systems, intermediate calculations, problem statements, and final variable assignments, requires a complete spoken reading; annotating only the final numeric answers is insufficient. Equations and mathematical expressions must use pronunciation spans that verbalize numbers, variables, operators, relations, powers, roots, and grouping in the conversation language while preserving the displayed notation. Other pronunciation-sensitive notation, including dates, times, ranges, compound units, versions, and technical literals, uses context-appropriate spoken wording with the same meaning. Long expressions split at natural boundaries to respect streaming marker limits. These are model instructions, not deterministic pronunciation guarantees.
 
 Polish quantities agree with their sentence context. Voice pronunciation spans cover the complete quantity phrase: displayed “w 3 miesiące” is spoken as “w trzy miesiące”, “w ciągu 3 miesięcy” as “w ciągu trzech miesięcy”, and “po 3 miesiącach” as “po trzech miesiącach”. Digits remain readable in the transcript without changing the quantity or grammatical meaning. Both mentor modes also favor complete natural questions such as “Za ile dni możecie realnie zacząć pracę nad projektem?”. These prompt rules guide generation; they do not mechanically repair arbitrary grammar errors.

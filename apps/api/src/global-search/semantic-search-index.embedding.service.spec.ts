@@ -25,6 +25,7 @@ describe("pinned semantic search embeddings", () => {
     expect(embedMany).toHaveBeenCalledWith(
       expect.objectContaining({
         values: ["expenses policy"],
+        telemetry: { isEnabled: false },
         maxRetries: 0,
         abortSignal: expect.any(AbortSignal),
       }),

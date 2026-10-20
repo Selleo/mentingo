@@ -2,7 +2,6 @@ import crypto from "crypto";
 
 import {
   AiCapability,
-  AiCapabilityProvider,
   createLumaClient,
   type PublicConfigurationResponse,
 } from "@mentingo/luma-sdk";
@@ -17,6 +16,7 @@ import {
   SERVICE_GROUPS,
 } from "src/env/env.config";
 import { EnvRepository } from "src/env/repositories/env.repository";
+import { resolveVoiceTtsProvider } from "src/env/voice-tts-provider";
 import { UpdateEnvEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { dbAls } from "src/storage/db/db-als.store";
@@ -365,12 +365,6 @@ export class EnvService {
   }
 
   private getVoiceTtsProvider(configuration: PublicConfigurationResponse | null) {
-    const voiceTextToSpeech = configuration?.capabilities?.[AiCapability.VoiceTextToSpeech];
-
-    if (voiceTextToSpeech?.enabled && voiceTextToSpeech.provider === AiCapabilityProvider.Luma) {
-      return "openaiCompatible";
-    }
-
-    return "cartesia";
+    return resolveVoiceTtsProvider(configuration?.capabilities?.[AiCapability.VoiceTextToSpeech]);
   }
 }

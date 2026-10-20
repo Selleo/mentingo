@@ -3,6 +3,7 @@ import {
   COURSE_ENROLLMENT,
   COURSE_STATUSES,
   LEARNING_PATH_STATUSES,
+  LESSON_TYPES,
   PERMISSIONS,
   RESOURCE_VISIBILITY,
 } from "@repo/shared";
@@ -38,8 +39,9 @@ export class HybridSearchRepository {
     query: string,
     actor: CurrentUserType,
     metadataOnly = false,
+    learnerLessons = false,
   ): Promise<MatchRow[]> {
-    const sourceEligibility = sql`(${this.eligibility(entityType, actor)}) AND ${this.sourceAccess(
+    const sourceEligibility = sql`(${this.eligibility(entityType, actor, learnerLessons)}) AND ${this.sourceAccess(
       actor,
     )}`;
     const eligibility = sql`${sourceEligibility} AND ${
@@ -53,6 +55,7 @@ export class HybridSearchRepository {
           NULL::text AS passage, NULL::text AS filename
         FROM search_documents s CROSS JOIN q
         WHERE s.tenant_id = ${actor.tenantId} AND s.entity_type = ${entityType}
+          AND ${!(learnerLessons && entityType === SEARCH_ENTITY_TYPES.LESSON)}
           AND ${eligibility} AND s.search_vector @@ q.value
         UNION ALL
         SELECT s.entity_id, s.language, ts_rank(c.search_vector, q.value) AS rank,
@@ -78,6 +81,7 @@ export class HybridSearchRepository {
     embedding: number[],
     actor: CurrentUserType,
     metadataOnly = false,
+    learnerLessons = false,
   ): Promise<MatchRow[]> {
     return this.db.transaction(async (trx) => {
       // Transaction-local settings use the same connection as every candidate query.
@@ -87,16 +91,18 @@ export class HybridSearchRepository {
       const matches = new Map<string, MatchRow>();
       let limit = SEMANTIC_SEARCH_INITIAL_CANDIDATES;
       for (let batch = 0; batch < SEMANTIC_SEARCH_MAX_CANDIDATE_BATCHES; batch++) {
-        const result = await trx.execute(
-          this.buildSemanticCandidateQuery(
-            entityType,
-            embedding,
-            actor,
-            limit,
-            [...matches.keys()],
-            metadataOnly,
-          ),
-        );
+        const parameters = [
+          entityType,
+          embedding,
+          actor,
+          limit,
+          [...matches.keys()],
+          metadataOnly,
+        ] as const;
+        const query = learnerLessons
+          ? this.buildSemanticCandidateQuery(...parameters, true)
+          : this.buildSemanticCandidateQuery(...parameters);
+        const result = await trx.execute(query);
         const rows = result as unknown as SemanticCandidateMatchRow[];
         const candidateCount = Number(rows[0]?.candidateCount ?? 0);
         let recovered = 0;
@@ -133,8 +139,9 @@ export class HybridSearchRepository {
     embedding: number[],
     actor: CurrentUserType,
     limit: number,
-    excludedEntityIds: string[] = [],
+    excludedEntityIds: readonly string[] = [],
     metadataOnly = false,
+    learnerLessons = false,
   ): SQL {
     const vector = `[${embedding.join(",")}]`;
     const unseen = excludedEntityIds.length
@@ -155,7 +162,7 @@ export class HybridSearchRepository {
           AND ${metadataOnly ? sql`c.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})` : sql`true`}
           -- OFFSET 0 keeps the source/access check correlated, preserving the HNSW scan.
           AND EXISTS (SELECT 1 FROM search_documents s
-            WHERE ${this.currentSource(actor)} AND ${this.eligibility(entityType, actor)}
+            WHERE ${this.currentSource(actor)} AND ${this.eligibility(entityType, actor, learnerLessons)}
             OFFSET 0)
         ORDER BY c.embedding <=> ${vector}::vector
         LIMIT ${limit}
@@ -270,7 +277,7 @@ export class HybridSearchRepository {
   }
 
   /** Apply current entity access before ranking/limits, including source-language availability. */
-  private eligibility(type: SearchEntityType, actor: CurrentUserType): SQL {
+  private eligibility(type: SearchEntityType, actor: CurrentUserType, learnerLessons = false): SQL {
     const can = (permission: Parameters<typeof hasPermission>[1]) =>
       hasPermission(actor.permissions, permission);
     const any = (permissions: Parameters<typeof hasAnyPermission>[1]) =>
@@ -289,6 +296,30 @@ export class HybridSearchRepository {
         AND (${sql.join(scope, sql` OR `)}))`;
     }
     if (type === SEARCH_ENTITY_TYPES.LESSON) {
+      if (learnerLessons) {
+        const publicAccess = can(PERMISSIONS.COURSE_READ)
+          ? sql`e.status = ${COURSE_STATUSES.PUBLISHED} AND e.price_in_cents = 0`
+          : sql`false`;
+        const enrolledAccess = can(PERMISSIONS.COURSE_READ_ASSIGNED)
+          ? sql`e.status IN (${COURSE_STATUSES.PUBLISHED}, ${COURSE_STATUSES.PRIVATE})
+              AND EXISTS (SELECT 1 FROM student_courses sc
+                WHERE sc.course_id = e.id AND sc.student_id = ${actor.userId}
+                  AND sc.tenant_id = ${actor.tenantId}
+                  AND sc.status = ${COURSE_ENROLLMENT.ENROLLED})`
+          : sql`false`;
+        return sql`s.metadata->>'resourceId' IS NULL
+          AND s.metadata->>'semanticResource' IS DISTINCT FROM 'true'
+          AND EXISTS (SELECT 1 FROM lessons l JOIN chapters ch ON ch.id = l.chapter_id
+            JOIN courses e ON e.id = ch.course_id
+            WHERE l.id = s.entity_id
+              AND l.tenant_id = ${actor.tenantId} AND ch.tenant_id = ${actor.tenantId}
+              AND e.tenant_id = ${actor.tenantId} AND e.is_archived = false
+              AND ((${publicAccess}) OR (${enrolledAccess}))
+              AND s.language = ANY(e.available_locales)
+              AND (s.document_type = ${SEARCH_DOCUMENT_TYPES.TITLE}
+                OR (s.document_type = ${SEARCH_DOCUMENT_TYPES.DESCRIPTION}
+                  AND l.type = ${LESSON_TYPES.CONTENT})))`;
+      }
       if (!can(PERMISSIONS.COURSE_READ)) return sql`false`;
       let scope: SQL = sql`EXISTS (SELECT 1 FROM student_courses sc WHERE sc.course_id = e.id
         AND sc.student_id = ${actor.userId} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED})`;

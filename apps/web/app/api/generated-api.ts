@@ -8622,7 +8622,7 @@ export interface GetLumaConfiguredResponse {
     enabled: boolean;
     courseGenerationEnabled: boolean;
     voiceMentorEnabled: boolean;
-    voiceTtsProvider: "cartesia" | "openaiCompatible";
+    voiceTtsProvider: "cartesia" | "elevenlabs" | "openaiCompatible";
   };
 }
 
