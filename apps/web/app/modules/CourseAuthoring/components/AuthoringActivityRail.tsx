@@ -7,6 +7,7 @@ import {
   Globe,
   LoaderCircle,
   RotateCcw,
+  Search,
   Square,
   Wrench,
 } from "lucide-react";
@@ -28,7 +29,9 @@ import {
 
 import { AuthoringAssetDecision } from "./AuthoringAssetDecision";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
-import { AuthoringSourceChipRow } from "./AuthoringSourceCitation";
+import { AuthoringElapsedTime } from "./AuthoringElapsedTime";
+import { AuthoringPlanStepList } from "./AuthoringPlanStepList";
+import { AuthoringSourceChip } from "./AuthoringSourceCitation";
 import { AuthoringWorkProgressBar } from "./AuthoringWorkProgressBar";
 
 import type {
@@ -269,13 +272,25 @@ const taskFailureLabel = (task: AuthoringTask, t: (key: string) => string) =>
 /** Maps task state to the activity icon used by the rail. */
 const taskStatusIcon = (status: AuthoringTask["status"]) =>
   match(status)
-    .with("succeeded", () => <CheckCircle2 className="size-4 text-success-700" />)
-    .with("failed", () => <AlertCircle className="size-4 text-destructive" />)
-    .with("running", () => <LoaderCircle className="size-4 animate-spin text-primary-700" />)
-    .otherwise(() => <Clock3 className="size-4 text-neutral-500" />);
+    .with("succeeded", () => <CheckCircle2 className="size-3.5 text-success-700" />)
+    .with("failed", () => <AlertCircle className="size-3.5 text-destructive" />)
+    .with("running", () => (
+      <LoaderCircle className="size-3.5 text-primary-700 motion-safe:animate-spin" />
+    ))
+    .otherwise(() => <Clock3 className="size-3.5 text-neutral-400" />);
+
+/** Running, queued and finished states are already conveyed by the row icon. */
+const SELF_EVIDENT_TASK_STATUSES = new Set<AuthoringTask["status"]>([
+  "running",
+  "queued",
+  "succeeded",
+]);
 
 const WEB_TOOL_NAMES = new Set(["web_search", "research"]);
+/** Matches "6/11" with an optional " · current topic" suffix. */
+const SYNTHESIS_PROGRESS_PATTERN = /^\s*(\d+)\s*\/\s*(\d+)(?:\s*·\s*(.+))?$/;
 const MAX_VISIBLE_SEARCH_QUERIES = 12;
+const MAX_VISIBLE_SOURCES = 4;
 
 const isWebTool = (tool: ToolActivity["tool"]) => WEB_TOOL_NAMES.has(tool.toolName);
 
@@ -316,6 +331,16 @@ const groupResearchActivity = (items: CompactWorkItem[]): CompactWorkItem[] => {
   });
 };
 
+const ROW_CLASS = "flex min-h-7 items-center gap-2 px-1 text-[13px] leading-5";
+const ROW_DETAIL_CLASS = "ml-[26px]";
+
+const AuthoringSearchQuery = ({ query }: { query: string }) => (
+  <li className="flex min-w-0 items-start gap-1.5 text-xs leading-5 text-neutral-500">
+    <Search className="mt-1 size-3 shrink-0 text-neutral-400" aria-hidden="true" />
+    <span className="min-w-0 break-words">{query}</span>
+  </li>
+);
+
 const AuthoringSearchQueries = ({ queries }: { queries: string[] }) => {
   const { t } = useTranslation();
   const visibleQueries = queries.slice(0, MAX_VISIBLE_SEARCH_QUERIES);
@@ -325,25 +350,21 @@ const AuthoringSearchQueries = ({ queries }: { queries: string[] }) => {
       {visibleQueries.length > 0 && (
         <ul
           aria-label={t("courseAuthoring.activityRail.searchQueries")}
-          className="ml-7 list-disc space-y-0.5 break-words pl-3 text-xs text-neutral-600"
+          className={cn(ROW_DETAIL_CLASS, "space-y-0.5")}
         >
           {visibleQueries.map((query) => (
-            <li key={query} className="break-words">
-              {query}
-            </li>
+            <AuthoringSearchQuery key={query} query={query} />
           ))}
         </ul>
       )}
       {omittedQueries.length > 0 && (
-        <details className="ml-7 text-xs text-neutral-500">
-          <summary className="cursor-pointer">
+        <details className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>
+          <summary className="cursor-pointer py-0.5 hover:text-neutral-800">
             {t("courseAuthoring.activityRail.moreSearchQueries", { count: omittedQueries.length })}
           </summary>
-          <ul className="ml-3 list-disc space-y-0.5 break-words pl-3 pt-1">
+          <ul className="space-y-0.5 pt-0.5">
             {omittedQueries.map((query) => (
-              <li key={query} className="break-words">
-                {query}
-              </li>
+              <AuthoringSearchQuery key={query} query={query} />
             ))}
           </ul>
         </details>
@@ -353,14 +374,37 @@ const AuthoringSearchQueries = ({ queries }: { queries: string[] }) => {
 };
 
 const AuthoringResearchSources = ({ tools }: { tools: ToolActivity[] }) => {
+  const { t } = useTranslation();
   const sources = parseFetchedResearchSources(
     tools.flatMap(({ tool }) => tool.result?.sources ?? []),
   ).map(({ url, title }) => ({ url, label: title }));
+  const [expanded, setExpanded] = useState(false);
   if (sources.length === 0) return null;
+  const visibleSources = expanded ? sources : sources.slice(0, MAX_VISIBLE_SOURCES);
+  const hiddenCount = sources.length - visibleSources.length;
   return (
-    <div className="ml-7">
-      <AuthoringSourceChipRow sources={sources} />
-    </div>
+    <ul
+      className={cn(ROW_DETAIL_CLASS, "flex flex-wrap items-center gap-1 pt-1")}
+      aria-label={t("courseAuthoring.sources.label")}
+      data-testid="authoring-source-row"
+    >
+      {visibleSources.map((source) => (
+        <li key={source.url}>
+          <AuthoringSourceChip source={source} className="mx-0" />
+        </li>
+      ))}
+      {hiddenCount > 0 && (
+        <li>
+          <button
+            type="button"
+            className="rounded-full px-1.5 text-[11px] font-medium text-neutral-500 hover:text-neutral-900"
+            onClick={() => setExpanded(true)}
+          >
+            {t("courseAuthoring.changeSet.more", { count: hiddenCount })}
+          </button>
+        </li>
+      )}
+    </ul>
   );
 };
 
@@ -379,7 +423,7 @@ const AuthoringResearchDiagnostics = ({ tools }: { tools: ToolActivity[] }) => {
   );
   if (messages.length === 0) return null;
   return (
-    <div className="ml-7 space-y-1 text-xs text-neutral-600">
+    <div className={cn(ROW_DETAIL_CLASS, "space-y-1 text-xs text-neutral-600")}>
       {messages.map((message) => (
         <p key={message} className="whitespace-pre-line break-words">
           {message}
@@ -400,7 +444,7 @@ const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
   const queries = searchQueriesForTools(orderedTools);
   const taskLabel = orderedTools.find((item) => item.taskLabel)?.taskLabel;
   return (
-    <div className="space-y-0.5">
+    <div className="pb-1">
       <AuthoringToolActivity
         {...representative}
         taskLabel={taskLabel}
@@ -415,6 +459,22 @@ const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
     </div>
   );
 };
+
+const toolActivityLabel = (
+  tool: ToolActivity["tool"],
+  status: ToolActivity["tool"]["status"],
+  t: (key: string) => string,
+) =>
+  match(tool.toolName)
+    .with("research_synthesis", () =>
+      t(`courseAuthoring.conversation.researchSynthesisTool.${status}`),
+    )
+    .with("web_extract", () => t(`courseAuthoring.conversation.webExtractTool.${status}`))
+    .when(
+      (name) => WEB_TOOL_NAMES.has(name),
+      () => t(`courseAuthoring.conversation.webSearchTool.${status}`),
+    )
+    .otherwise(() => tool.display);
 
 export const AuthoringToolActivity = ({
   tool,
@@ -433,25 +493,21 @@ export const AuthoringToolActivity = ({
   const isWebToolActivity = isWebTool(tool);
   const isExtraction = tool.toolName === "web_extract";
   const isSynthesis = tool.toolName === "research_synthesis";
-  const progressParts = tool.display.split("/");
-  const assessedCount = Number(progressParts[0]);
-  const topicCount = Number(progressParts[1]);
+  const synthesisMatch = isSynthesis ? SYNTHESIS_PROGRESS_PATTERN.exec(tool.display) : null;
+  const assessedCount = Number(synthesisMatch?.[1]);
+  const topicCount = Number(synthesisMatch?.[2]);
+  const currentTopic = synthesisMatch?.[3]?.trim();
+  const synthesisCount = synthesisMatch ? `${assessedCount}/${topicCount}` : tool.display;
   const incompletePersistedSynthesis =
-    isSynthesis &&
-    tool.status === "completed" &&
-    progressParts.length === 2 &&
-    Number.isInteger(assessedCount) &&
-    Number.isInteger(topicCount) &&
-    assessedCount >= 0 &&
-    assessedCount < topicCount;
+    tool.status === "completed" && synthesisMatch !== null && assessedCount < topicCount;
   const displayStatus = incompletePersistedSynthesis ? "stopped" : tool.status;
+  const synthesisProgress =
+    synthesisMatch && topicCount > 0
+      ? Math.min(100, Math.round((assessedCount / topicCount) * 100))
+      : null;
   const isRunning = displayStatus === "started";
   const isProblem = displayStatus === "failed" || displayStatus === "stopped";
-  let label = tool.display;
-  if (isSynthesis) label = t(`courseAuthoring.conversation.researchSynthesisTool.${displayStatus}`);
-  else if (isExtraction) label = t(`courseAuthoring.conversation.webExtractTool.${tool.status}`);
-  else if (isWebToolActivity)
-    label = t(`courseAuthoring.conversation.webSearchTool.${tool.status}`);
+  const label = toolActivityLabel(tool, displayStatus, t);
   const counts = [
     typeof tool.result?.sourceCount === "number"
       ? t("courseAuthoring.conversation.toolSourceCount", { count: tool.result.sourceCount })
@@ -472,6 +528,8 @@ export const AuthoringToolActivity = ({
     );
   } else if (isProblem) {
     icon = <CircleAlert className="size-3.5 text-warning-600" aria-hidden="true" />;
+  } else if (displayStatus === "completed") {
+    icon = <CheckCircle2 className="size-3.5 text-success-700" aria-hidden="true" />;
   }
 
   return (
@@ -480,35 +538,82 @@ export const AuthoringToolActivity = ({
         data-testid={`course-authoring-tool-${tool.toolCallId}`}
         role="status"
         title={isWebToolActivity && tool.display !== label ? tool.display : undefined}
-        className="flex items-center gap-1.5 px-1 py-1 text-xs text-neutral-500"
+        className={cn(ROW_CLASS, "text-neutral-600")}
       >
         {icon}
-        <span className={cn(isRunning && "loading-text-shimmer", isProblem && "text-neutral-700")}>
-          {label}
+        <span
+          className={cn(
+            "min-w-0 shrink-0 truncate",
+            isRunning && "loading-text-shimmer",
+            isProblem && "text-neutral-800",
+          )}
+        >
+          {isRunning ? label : label.replace(/(…|\.\.\.)$/, "")}
         </span>
-        {taskLabel && <span className="text-neutral-400">· {taskLabel}</span>}
+        {taskLabel && <span className="min-w-0 truncate text-neutral-400">{taskLabel}</span>}
         {!isWebToolActivity && !isExtraction && !isSynthesis && isProblem && (
-          <span className="text-neutral-500">
-            · {t(`courseAuthoring.activityRail.taskStatus.${tool.status}`)}
+          <span className="ml-auto shrink-0 text-xs text-neutral-500">
+            {t(`courseAuthoring.activityRail.taskStatus.${tool.status}`)}
           </span>
         )}
         {showCounts && counts.length > 0 && (
-          <span className="text-neutral-400">· {counts.join(" · ")}</span>
+          <span className="ml-auto shrink-0 text-xs text-neutral-400">{counts.join(" · ")}</span>
         )}
       </div>
       {isSynthesis && tool.display && (
-        <p className="ml-7 text-xs text-neutral-600">
-          {t("courseAuthoring.conversation.researchSynthesisProgress", { progress: tool.display })}
+        <div className={cn(ROW_DETAIL_CLASS, "flex items-center gap-2")}>
+          {synthesisProgress !== null && (
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={synthesisProgress}
+              aria-label={t("courseAuthoring.conversation.researchSynthesisProgress", {
+                progress: synthesisCount,
+              })}
+              className="h-1 w-40 shrink-0 overflow-hidden rounded-full bg-neutral-200"
+            >
+              <div
+                className={cn(
+                  "h-full rounded-full bg-primary-600 transition-[width,background-color] duration-500 motion-reduce:transition-none",
+                  isRunning && "motion-safe:animate-pulse",
+                  displayStatus === "completed" && "bg-success-600",
+                  isProblem && "bg-warning-500",
+                )}
+                style={{ width: `${synthesisProgress}%` }}
+              />
+            </div>
+          )}
+          <p
+            className={cn(
+              "shrink-0 text-xs tabular-nums text-neutral-500",
+              displayStatus === "completed" && "text-success-700",
+            )}
+          >
+            {t("courseAuthoring.conversation.researchSynthesisProgress", {
+              progress: synthesisCount,
+            })}
+          </p>
+        </div>
+      )}
+      {isRunning && currentTopic && (
+        <p
+          className={cn(ROW_DETAIL_CLASS, "truncate text-xs text-neutral-500")}
+          title={currentTopic}
+        >
+          {currentTopic}
         </p>
       )}
       {isExtraction && typeof tool.result?.query === "string" && (
-        <p className="ml-7 break-all text-xs text-neutral-600">{tool.result.query}</p>
-      )}
-      {(isWebToolActivity || isExtraction) && showSources && (
-        <AuthoringResearchSources tools={[{ tool, sequence: 0 }]} />
+        <p className={cn(ROW_DETAIL_CLASS, "break-all text-xs text-neutral-500")}>
+          {tool.result.query}
+        </p>
       )}
       {isWebToolActivity && showQueries && (
         <AuthoringSearchQueries queries={searchQueriesForTools([{ tool, sequence: 0 }])} />
+      )}
+      {(isWebToolActivity || isExtraction) && showSources && (
+        <AuthoringResearchSources tools={[{ tool, sequence: 0 }]} />
       )}
       {(isWebToolActivity || isExtraction) && showDiagnostics && (
         <AuthoringResearchDiagnostics tools={[{ tool, sequence: 0 }]} />
@@ -569,7 +674,6 @@ export const AuthoringActivityRail = ({
     ),
   );
   const hasLessonWork = compact && lessonTasks.length > 0;
-  const manyLessons = compact && lessonTasks.length > 0 && totalLessons >= 8;
   const detailedPlanTask = tasks.find(
     (task) => task.kind === "detailed_plan" && task.workProgress?.chapters?.length,
   );
@@ -596,8 +700,20 @@ export const AuthoringActivityRail = ({
     })),
   ].sort((left, right) => left.sequence - right.sequence || left.index - right.index);
   const compactWorkItems = groupResearchActivity(groupLessonWorkByChapter(workItems));
-  const hasSearchQueryHistory =
-    searchQueriesForTools(tools.filter(({ tool }) => isWebTool(tool))).length > 0;
+  const hasFailedWork =
+    tasks.some((task) => task.status === "failed") ||
+    tools.some(({ tool }) => tool.status === "failed");
+  const hasRunningWork =
+    tasks.some((task) => ["queued", "running"].includes(task.status)) ||
+    tools.some(({ tool }) => tool.status === "started");
+  let liveWorkTone: "neutral" | "success" | "danger" = "neutral";
+  if (hasFailedWork) liveWorkTone = "danger";
+  else if (!hasOpenWork && tasks.length + tools.length > 0) liveWorkTone = "success";
+  let liveWorkIcon = <CheckCircle2 className="size-3.5 text-success-700" />;
+  if (hasFailedWork) liveWorkIcon = <AlertCircle className="size-3.5 text-destructive" />;
+  else if (hasRunningWork) {
+    liveWorkIcon = <LoaderCircle className="size-3.5 text-primary-700 motion-safe:animate-spin" />;
+  } else if (hasOpenWork) liveWorkIcon = <Clock3 className="size-3.5 text-neutral-500" />;
   const connectionLabel = match(connection)
     .with("live", () => t("courseAuthoring.activityRail.connection.live"))
     .with("offline", () => t("courseAuthoring.activityRail.connection.offline"))
@@ -629,15 +745,39 @@ export const AuthoringActivityRail = ({
     });
   }
 
-  const renderTask = (
-    task: AuthoringTask,
-    options: { showStop?: boolean; showChapterContext?: boolean } = {},
-  ) => {
+  const taskLabelFor = (task: AuthoringTask) => {
     let label = taskLabels[task.taskId] ?? task.workProgress?.lessonTitle ?? taskKindLabel(task, t);
     if (task.kind === "detailed_plan" && task.workProgress) label = taskKindLabel(task, t);
     if (task.workProgress?.stage === "recovering") {
       label = t("courseAuthoring.activityRail.recoveringFailedParts");
     }
+    return label;
+  };
+  const currentActivity = [
+    ...tasks
+      .filter((task) => task.status === "running")
+      .map((task) => ({
+        sequence: taskSequences[task.taskId] ?? 0,
+        label: taskLabelFor(task),
+      })),
+    ...tools
+      .filter(({ tool }) => tool.status === "started")
+      .map(({ tool, sequence }) => ({
+        sequence,
+        label: toolActivityLabel(tool, tool.status, t),
+      })),
+  ]
+    .sort((left, right) => left.sequence - right.sequence)
+    .at(-1)?.label;
+  const needsAttention = hasFailedWork || tasks.some((task) => task.status === "waiting_author");
+
+  const renderTask = (
+    task: AuthoringTask,
+    options: { showStop?: boolean; showChapterContext?: boolean } = {},
+  ) => {
+    let label = taskLabelFor(task);
+    if (["succeeded", "failed", "stopped", "superseded"].includes(task.status))
+      label = label.replace(/(…|\.\.\.)$/, "");
     const canStop = options.showStop !== false && canStopTask(task);
     const canDiscard = ["waiting_author", "waiting_dependencies"].includes(task.status);
     const requestAction = canDiscard && onDiscardRequest ? onDiscardRequest : onStopRequest;
@@ -661,21 +801,29 @@ export const AuthoringActivityRail = ({
 
     if (compact) {
       return (
-        <div key={task.taskId} className="space-y-0.5 px-1 py-1 text-sm">
-          <div className="flex min-h-8 items-center gap-2">
-            <span className="shrink-0">{taskStatusIcon(task.status)}</span>
-            <span className="min-w-0 flex-1 truncate font-medium text-neutral-800" title={label}>
+        <div key={task.taskId} className="space-y-0.5">
+          <div className={ROW_CLASS}>
+            <span className="flex shrink-0">{taskStatusIcon(task.status)}</span>
+            <span
+              className={cn(
+                "min-w-0 flex-1 truncate text-neutral-700",
+                task.status === "running" && "text-neutral-900",
+              )}
+              title={label}
+            >
               {label}
             </span>
-            <span className="shrink-0 text-xs text-neutral-500">
-              {t(`courseAuthoring.activityRail.taskStatus.${taskStatusKey(task.status)}`)}
-            </span>
+            {!SELF_EVIDENT_TASK_STATUSES.has(task.status) && (
+              <span className="shrink-0 text-xs text-neutral-500">
+                {t(`courseAuthoring.activityRail.taskStatus.${taskStatusKey(task.status)}`)}
+              </span>
+            )}
             {canStop && (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-7 shrink-0 rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-950"
+                className="size-7 shrink-0 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
                 disabled={busy}
                 onClick={() => requestAction(task.requestId)}
                 aria-label={requestActionLabel}
@@ -689,7 +837,7 @@ export const AuthoringActivityRail = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-7 shrink-0 rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-950"
+                className="size-7 shrink-0 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
                 disabled={busy}
                 onClick={() => onRetry(task.taskId)}
                 aria-label={t(`courseAuthoring.activityRail.${authoringTaskRetryLabel(task)}`)}
@@ -701,7 +849,7 @@ export const AuthoringActivityRail = ({
           </div>
           {task.workProgress?.repairAttempt !== undefined &&
             task.workProgress.repairLimit !== undefined && (
-              <p className="pl-6 text-xs text-neutral-500">
+              <p className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>
                 {t("courseAuthoring.activityRail.repairProgress", {
                   attempt: task.workProgress.repairAttempt,
                   limit: task.workProgress.repairLimit,
@@ -709,10 +857,10 @@ export const AuthoringActivityRail = ({
               </p>
             )}
           {options.showChapterContext !== false && chapterContext && (
-            <p className="pl-6 text-xs text-neutral-500">{chapterContext}</p>
+            <p className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>{chapterContext}</p>
           )}
           {task.kind === "detailed_plan" && task.workProgress?.chapters?.length && (
-            <ol className="ml-6 space-y-0.5 border-l border-neutral-200 pl-2">
+            <ol className={cn(ROW_DETAIL_CLASS, "space-y-0.5")}>
               {task.workProgress.chapters.map((chapter) => {
                 const chapterStatus = task.status === "succeeded" ? "complete" : chapter.status;
                 let iconStatus: AuthoringTask["status"] = "queued";
@@ -723,7 +871,7 @@ export const AuthoringActivityRail = ({
                 return (
                   <li
                     key={chapter.chapterId}
-                    className="flex min-h-7 items-center gap-2 px-1 text-xs text-neutral-700"
+                    className="flex min-h-6 items-center gap-2 text-xs text-neutral-600"
                   >
                     <span className="shrink-0">{taskStatusIcon(iconStatus)}</span>
                     <span className="min-w-0 flex-1 truncate" title={chapter.title}>
@@ -743,7 +891,9 @@ export const AuthoringActivityRail = ({
             </ol>
           )}
           {(task.status === "failed" || task.failure) && (
-            <p className="pl-6 text-xs text-destructive">{taskFailureLabel(task, t)}</p>
+            <p className={cn(ROW_DETAIL_CLASS, "text-xs text-destructive")}>
+              {taskFailureLabel(task, t)}
+            </p>
           )}
         </div>
       );
@@ -843,9 +993,6 @@ export const AuthoringActivityRail = ({
     const researchItems = groupResearchActivity(chapterResearchTools).filter(
       (item): item is ResearchWorkItem => item.kind === "research",
     );
-    const completedResearchSteps = group.tools.filter(
-      (item) => item.tool.tool.status === "completed",
-    ).length;
     const startedTools = group.tools.filter(
       (item) =>
         !isWebTool(item.tool.tool) &&
@@ -866,24 +1013,21 @@ export const AuthoringActivityRail = ({
     ].sort((left, right) => left.sequence - right.sequence || left.index - right.index);
 
     return (
-      <div className="space-y-1 px-1 py-1">
-        <div className="flex min-h-8 items-center gap-2 text-sm">
-          <span className="shrink-0">{taskStatusIcon(status)}</span>
+      <div className="space-y-0.5">
+        <div className={ROW_CLASS}>
+          <span className="flex shrink-0">{taskStatusIcon(status)}</span>
           <span
             className="min-w-0 flex-1 truncate font-medium text-neutral-800"
             title={group.chapterTitle}
           >
             {group.chapterTitle}
           </span>
-          <span className="shrink-0 text-xs text-neutral-500">
-            {t("courseAuthoring.activityRail.chapterLessonsProgress", { completed, total })}
-          </span>
           {stopTask && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="size-7 shrink-0 rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-950"
+              className="size-7 shrink-0 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               disabled={busy}
               onClick={() => requestAction(stopTask.requestId)}
               aria-label={requestActionLabel}
@@ -893,15 +1037,11 @@ export const AuthoringActivityRail = ({
             </Button>
           )}
         </div>
-        {completedResearchSteps > 0 && (
-          <p className="pl-6 text-xs text-neutral-500">
-            {t("courseAuthoring.activityRail.completedResearchSteps", {
-              count: completedResearchSteps,
-            })}
-          </p>
-        )}
+        <p className={cn(ROW_DETAIL_CLASS, "-mt-1 text-xs tabular-nums text-neutral-500")}>
+          {t("courseAuthoring.activityRail.chapterLessonsProgress", { completed, total })}
+        </p>
         {nestedWorkItems.length > 0 && (
-          <ol className="ml-3 space-y-0.5 border-l border-neutral-200 pl-2">
+          <ol className="ml-[11px] space-y-0.5 border-l border-neutral-200 pl-2">
             {nestedWorkItems.map((item) => {
               if (item.kind === "task") {
                 return (
@@ -928,14 +1068,14 @@ export const AuthoringActivityRail = ({
           </ol>
         )}
         {omittedRunningCount > 0 && (
-          <p className="pl-6 text-xs text-neutral-500">
+          <p className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>
             {t("courseAuthoring.activityRail.moreLessonsRunning", {
               count: omittedRunningCount,
             })}
           </p>
         )}
         {omittedToolCount > 0 && (
-          <p className="pl-6 text-xs text-neutral-500">
+          <p className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>
             {t("courseAuthoring.activityRail.moreToolUpdates", { count: omittedToolCount })}
           </p>
         )}
@@ -945,12 +1085,28 @@ export const AuthoringActivityRail = ({
 
   return (
     <aside className="space-y-4">
-      <AuthoringWorkProgressBar tasks={tasks} busy={busy} />
+      {!compact && <AuthoringWorkProgressBar tasks={tasks} busy={busy} />}
       {compact ? (
         <AuthoringCollapsibleSection
           title={t("courseAuthoring.activityRail.liveWork")}
-          summary={workSummary}
-          defaultOpen={(hasOpenWork && !manyLessons) || hasSearchQueryHistory}
+          icon={liveWorkIcon}
+          detail={
+            hasRunningWork && currentActivity ? (
+              <span className="loading-text-shimmer">{currentActivity}</span>
+            ) : undefined
+          }
+          summary={hasRunningWork ? <AuthoringElapsedTime className="text-xs" /> : workSummary}
+          tone={liveWorkTone}
+          progress={
+            liveWorkTone === "success" ? undefined : (
+              <AuthoringWorkProgressBar
+                tasks={tasks}
+                busy={busy || hasRunningWork}
+                showLabel={false}
+              />
+            )
+          }
+          defaultOpen={needsAttention}
         >
           <ol className="space-y-1">
             {compactWorkItems.map((item) => {
@@ -976,22 +1132,10 @@ export const AuthoringActivityRail = ({
           </ol>
           {planSteps.length > 0 && (
             <div className="px-1 pt-2">
-              <p className="text-xs font-medium text-neutral-600">
+              <p className="mb-1 text-xs font-medium text-neutral-600">
                 {t("courseAuthoring.activityRail.plan")}
               </p>
-              <ol className="mt-1 space-y-1 py-1">
-                {planSteps.map((step, index) => (
-                  <li
-                    key={`${index}-${step}`}
-                    className="flex items-start gap-3 text-sm leading-5 text-neutral-800"
-                  >
-                    <span className="w-4 shrink-0 text-right tabular-nums text-neutral-500">
-                      {index + 1}.
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
+              <AuthoringPlanStepList steps={planSteps} />
             </div>
           )}
         </AuthoringCollapsibleSection>

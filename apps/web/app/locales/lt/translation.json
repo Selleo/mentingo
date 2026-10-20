@@ -6332,6 +6332,7 @@
         "description": "Kursas nepakeistas."
       },
       "more": "+{{count}} daugiau",
+      "readySoFar": "jau paruošta: {{count}}",
       "discard": "Atmesti",
       "retry": "Bandyti dar kartą",
       "heading": "Siūlomi pakeitimai",
@@ -6545,6 +6546,10 @@
       "questionProgress": "Klausimas {{current}} iš {{total}}",
       "questionPrevious": "Ankstesnis",
       "questionNext": "Kitas",
+      "questionNeedsInput": "Reikia jūsų atsakymo",
+      "questionSubmitHint": "Enter – siųsti · Shift+Enter – nauja eilutė",
+      "questionShortcutHint": "Spauskite A–D, kad pasirinktumėte",
+      "pendingSlowHint": "Skaitomas kursas, šaltiniai ir jūsų užklausa, kad būtų nuspręstas kitas žingsnis. Tai gali užtrukti iki minutės.",
       "newChat": "New chat",
       "searchSessions": "Ieškoti pokalbių...",
       "noSessionsFound": "Pokalbių nerasta.",
@@ -6685,7 +6690,6 @@
       "moreToolUpdates": "+{{count}} kitų įrankių pranešimų",
       "searchQueries": "Paieškos užklausos",
       "moreSearchQueries": "+{{count}} daugiau užklausų",
-      "completedResearchSteps": "Užbaigti tyrimo veiksmai: {{count}}",
       "chapterStatus": {
         "failed": "Nepavyko",
         "pending": "laukiama",

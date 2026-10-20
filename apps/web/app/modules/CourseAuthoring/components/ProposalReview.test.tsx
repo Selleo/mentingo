@@ -471,6 +471,26 @@ describe("ProposalReview", () => {
     expect(screen.queryByRole("button", { name: /Lesson 1.1: Old quiz/ })).not.toBeInTheDocument();
   });
 
+  it("keeps an approved outline approved while its lessons are planned under the same request", () => {
+    const outline = {
+      ...attemptedQuizProposal,
+      id: "approved-outline",
+      decision: "accepted" as const,
+      operations: [],
+      outline: [{ id: "chapter-1", title: "Getting started", lessons: [] }],
+    };
+    renderWith().render(
+      <ProposalGroup requestId="planning-outline" proposals={[outline]} generationPending />,
+    );
+
+    expect(screen.getByTestId("course-authoring-proposal-group-planning-outline")).toHaveAttribute(
+      "data-state",
+      "outlineApproved",
+    );
+    expect(screen.getByText("Approved")).toBeVisible();
+    expect(screen.queryByText("Finishing draft")).not.toBeInTheDocument();
+  });
+
   it("replaces outline approval with discarded while retaining its chapters", () => {
     const outline = {
       ...attemptedQuizProposal,

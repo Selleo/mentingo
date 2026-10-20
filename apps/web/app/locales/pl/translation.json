@@ -6395,6 +6395,7 @@
         "description": "Kurs nie został zmieniony."
       },
       "more": "+{{count}} więcej",
+      "readySoFar": "gotowe: {{count}}",
       "discard": "Odrzuć",
       "retry": "Spróbuj ponownie",
       "heading": "Proponowane zmiany",
@@ -6608,6 +6609,10 @@
       "questionProgress": "Pytanie {{current}} z {{total}}",
       "questionPrevious": "Poprzednie",
       "questionNext": "Następne",
+      "questionNeedsInput": "Potrzebna Twoja odpowiedź",
+      "questionSubmitHint": "Enter, aby wysłać · Shift+Enter, aby dodać nową linię",
+      "questionShortcutHint": "Naciśnij A–D, aby wybrać",
+      "pendingSlowHint": "Analizuję kurs, źródła i Twoją prośbę, aby wybrać kolejny krok. Może to potrwać do minuty.",
       "newChat": "New chat",
       "searchSessions": "Szukaj czatów...",
       "noSessionsFound": "Nie znaleziono czatów.",
@@ -6750,7 +6755,6 @@
       "moreToolUpdates": "+{{count}} kolejnych aktualizacji narzędzi",
       "searchQueries": "Wyszukiwane hasła",
       "moreSearchQueries": "+{{count}} kolejnych zapytań",
-      "completedResearchSteps": "Ukończone kroki wyszukiwania: {{count}}",
       "chapterStatus": {
         "failed": "Niepowodzenie",
         "pending": "oczekuje",

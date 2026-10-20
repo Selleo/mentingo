@@ -175,7 +175,8 @@ describe("AuthoringActivityRail asset decisions", () => {
     },
   );
 
-  it("shows web research as the only live-work step while it is running", () => {
+  it("folds web research behind one live status line while it is running", async () => {
+    const user = userEvent.setup();
     renderWith().render(
       <AuthoringActivityRail
         compact
@@ -204,12 +205,14 @@ describe("AuthoringActivityRail asset decisions", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Live work/ })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    const liveWork = screen.getByRole("button", { name: /Live work/ });
+    expect(liveWork).toHaveAttribute("aria-expanded", "false");
+    expect(liveWork).toHaveTextContent("Searching the web");
+    expect(liveWork).toHaveTextContent("0:00");
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.queryByTestId("course-authoring-tool-web-only")).toBeNull();
+    await user.click(screen.getByRole("button", { name: /Live work/ }));
     expect(screen.getByTestId("course-authoring-tool-web-only")).toBeInTheDocument();
-    expect(screen.getByText("0 of 1 complete")).toBeInTheDocument();
   });
 
   it.each([
@@ -250,7 +253,8 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(screen.getByText(label)).toBeVisible();
   });
 
-  it("shows short actions separately from execution tasks", () => {
+  it("shows short actions separately from execution tasks", async () => {
+    const user = userEvent.setup();
     renderWith().render(
       <AuthoringActivityRail
         compact
@@ -277,12 +281,12 @@ describe("AuthoringActivityRail asset decisions", () => {
       />,
     );
 
+    expect(screen.getByText("Live work")).toBeVisible();
+    expect(screen.getByText("Planning the course outline…")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /Live work/ }));
     expect(screen.getByText("Research Mentingo")).toBeVisible();
     expect(screen.getByText("Plan the outline")).toBeVisible();
     expect(screen.getByText("Draft the lessons")).toBeVisible();
-    expect(screen.getByText("Live work")).toBeVisible();
-    expect(screen.getByText("0 of 1 complete")).toBeVisible();
-    expect(screen.getByText("Planning the course outline…")).toBeVisible();
   });
   it("sends the asset action with its task revision and exposes omission", async () => {
     const user = userEvent.setup();
@@ -441,8 +445,12 @@ describe("AuthoringActivityRail asset decisions", () => {
       />,
     );
 
-    expect(screen.getByText("Searching sources…")).toBeVisible();
-    expect(screen.getByText("Updating your course…")).toBeVisible();
+    expect(screen.getByRole("button", { name: /Live work/ })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getAllByText("Searching sources…").length).toBeGreaterThan(0);
+    expect(screen.getByText("Updating your course")).toBeVisible();
     expect(
       screen.getByText(
         "The course-generation step could not finish. Retry it or change your instructions.",
@@ -453,7 +461,6 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(screen.queryByText("live")).toBeNull();
     expect(screen.getByRole("progressbar")).not.toHaveAttribute("aria-valuenow");
     expect(screen.queryByText("succeeded")).toBeNull();
-    expect(screen.getByText("1 of 1 lessons complete")).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Stop request" }));
     await user.click(screen.getByRole("button", { name: "Retry" }));
@@ -597,6 +604,40 @@ describe("AuthoringActivityRail live work", () => {
     },
   );
 
+  it("shows synthesis progress with the current topic and turns complete when done", () => {
+    const { rerender } = renderWith().render(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "synthesis",
+          toolName: "research_synthesis",
+          display: "6/11 · KSeF offline mode",
+          status: "started",
+          result: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "55");
+    expect(screen.getByText("Topics assessed: 6/11")).toBeVisible();
+    expect(screen.getByText("KSeF offline mode")).toBeVisible();
+
+    rerender(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "synthesis",
+          toolName: "research_synthesis",
+          display: "11/11",
+          status: "completed",
+          result: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
+    expect(screen.getByText("Source synthesis complete")).toBeVisible();
+    expect(screen.queryByText("KSeF offline mode")).toBeNull();
+  });
+
   it("shows exact search queries beneath the individual tool row", () => {
     renderWith().render(
       <AuthoringToolActivity
@@ -614,7 +655,8 @@ describe("AuthoringActivityRail live work", () => {
     expect(screen.getByRole("listitem")).toHaveTextContent("A detailed search query");
   });
 
-  it("groups completed web searches and keeps exact query history visible", () => {
+  it("groups completed web searches and keeps exact query history visible", async () => {
+    const user = userEvent.setup();
     renderWith().render(
       <AuthoringActivityRail
         compact
@@ -669,8 +711,9 @@ describe("AuthoringActivityRail live work", () => {
 
     expect(screen.getByRole("button", { name: /Live work/ })).toHaveAttribute(
       "aria-expanded",
-      "true",
+      "false",
     );
+    await user.click(screen.getByRole("button", { name: /Live work/ }));
     expect(screen.getAllByText("Searched the web")).toHaveLength(1);
     expect(screen.getAllByTestId("authoring-source-chip")).toHaveLength(2);
     expect(
@@ -788,20 +831,19 @@ describe("AuthoringActivityRail live work", () => {
       />,
     );
 
+    await user.click(screen.getByRole("button", { name: /Live work/ }));
     expect(screen.getByText("search query 12")).toBeVisible();
     expect(screen.getByText("search query 13")).not.toBeVisible();
     await user.click(screen.getByText("+1 more queries"));
     expect(screen.getByText("search query 13")).toBeVisible();
   });
 
-  it("stays open while work runs and collapses once it is done", async () => {
+  it("shows the current step while work runs and a summary once it is done", async () => {
     const user = userEvent.setup();
     const { rerender } = renderWith().render(compactRail("running"));
-    expect(screen.getByRole("button", { name: /Live work/ })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
-    expect(screen.getByText("Planning the course outline…")).toBeVisible();
+    const running = screen.getByRole("button", { name: /Live work/ });
+    expect(running).toHaveAttribute("aria-expanded", "false");
+    expect(running).toHaveTextContent("Planning the course outline…");
 
     rerender(compactRail("succeeded"));
     const toggle = screen.getByRole("button", { name: /Live work/ });
@@ -810,7 +852,7 @@ describe("AuthoringActivityRail live work", () => {
     expect(screen.queryByText("Planning the course outline…")).toBeNull();
 
     await user.click(toggle);
-    expect(screen.getByText("Planning the course outline…")).toBeVisible();
+    expect(screen.getByText("Planning the course outline")).toBeVisible();
   });
 
   it("shows chapter planning rows and treats a succeeded planner as complete", async () => {
@@ -937,12 +979,12 @@ describe("AuthoringActivityRail live work", () => {
       />,
     );
 
+    await user.click(screen.getByRole("button", { name: /Live work/ }));
     expect(screen.getByText("Foundations")).toBeVisible();
     expect(screen.getByText("1 of 2 lessons complete in this chapter")).toBeVisible();
-    expect(screen.getByText("Practice the basics")).toBeVisible();
+    expect(screen.getAllByText("Practice the basics").length).toBeGreaterThan(0);
     expect(screen.getByTestId("course-authoring-tool-lesson-search")).toBeVisible();
     expect(screen.getByText("Foundations lesson research")).toBeVisible();
-    expect(screen.getByText("Research steps complete: 1")).toBeVisible();
     expect(screen.queryByText("Generating your lesson…")).toBeNull();
     expect(screen.getAllByRole("button", { name: /Live work/ })).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Stop request" })).toHaveLength(1);

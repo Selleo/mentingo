@@ -6336,6 +6336,7 @@
         "description": "Kurz nebyl změněn."
       },
       "more": "+{{count}} další",
+      "readySoFar": "zatím hotovo: {{count}}",
       "discard": "Zahodit",
       "retry": "Zkusit znovu",
       "heading": "Navrhované změny",
@@ -6549,6 +6550,10 @@
       "questionProgress": "Otázka {{current}} z {{total}}",
       "questionPrevious": "Předchozí",
       "questionNext": "Další",
+      "questionNeedsInput": "Potřebujeme vaši odpověď",
+      "questionSubmitHint": "Enter pro odeslání · Shift+Enter pro nový řádek",
+      "questionShortcutHint": "Stiskněte A–D pro výběr",
+      "pendingSlowHint": "Čtu kurz, zdroje a váš požadavek, abych určil další krok. Může to trvat až minutu.",
       "newChat": "New chat",
       "searchSessions": "Hledat konverzace...",
       "noSessionsFound": "Nebyly nalezeny žádné konverzace.",
@@ -6690,7 +6695,6 @@
       "moreToolUpdates": "+{{count}} dalších hlášení nástrojů",
       "searchQueries": "Vyhledávací dotazy",
       "moreSearchQueries": "+{{count}} dalších dotazů",
-      "completedResearchSteps": "Dokončené kroky rešerše: {{count}}",
       "chapterStatus": {
         "failed": "Neúspěšné",
         "pending": "čeká",

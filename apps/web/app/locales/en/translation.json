@@ -6345,6 +6345,7 @@
         "description": "Nothing in your course was changed."
       },
       "more": "+{{count}} more",
+      "readySoFar": "{{count}} ready so far",
       "discard": "Discard",
       "retry": "Try again",
       "heading": "Proposed changes",
@@ -6557,6 +6558,10 @@
       "questionProgress": "Question {{current}} of {{total}}",
       "questionPrevious": "Previous",
       "questionNext": "Next",
+      "questionNeedsInput": "Needs your input",
+      "questionSubmitHint": "Enter to send · Shift+Enter for a new line",
+      "questionShortcutHint": "Press A–D to choose",
+      "pendingSlowHint": "Reading your course, sources and request to decide the next step. This can take up to a minute.",
       "newChat": "New chat",
       "searchSessions": "Search chats...",
       "noSessionsFound": "No chats found.",
@@ -6697,7 +6702,6 @@
       "moreToolUpdates": "+{{count}} more tool updates",
       "searchQueries": "Search queries",
       "moreSearchQueries": "+{{count}} more queries",
-      "completedResearchSteps": "Research steps complete: {{count}}",
       "chapterStatus": {
         "failed": "Failed",
         "pending": "waiting",

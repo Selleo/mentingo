@@ -1198,7 +1198,7 @@ describe("AuthoringAssistantMessages", () => {
     );
 
     expect(screen.getByTestId("course-authoring-question-question-audience")).toHaveTextContent(
-      "Your answer: First-time managers",
+      "First-time managers",
     );
     expect(firstRequestIndex()).toBeLessThan(promptIndex());
     expect(promptIndex()).toBeLessThan(laterRequestIndex());
@@ -1208,7 +1208,6 @@ describe("AuthoringAssistantMessages", () => {
   });
 
   it("keeps the plan at its route message and places later progress after the reply", async () => {
-    const user = userEvent.setup();
     const question: QuestionView = {
       id: "course-title-question",
       taskId: "title-task",
@@ -1298,16 +1297,15 @@ describe("AuthoringAssistantMessages", () => {
     );
 
     const planToggle = screen.getByRole("button", { name: /^Plan/ });
-    expect(planToggle).toHaveAttribute("aria-expanded", "false");
+    expect(planToggle).toHaveAttribute("aria-expanded", "true");
     expect(planToggle).toHaveTextContent("2 steps");
-    expect(screen.queryByText("Confirm the title")).toBeNull();
-    await user.click(planToggle);
+    expect(screen.getByText("Confirm the title")).toBeVisible();
 
     const text = screen.getByTestId("course-authoring-assistant-messages").textContent ?? "";
     expect(text.indexOf("I can update the title.")).toBeLessThan(text.indexOf("Confirm the title"));
     expect(text.indexOf("Confirm the title")).toBeLessThan(text.indexOf(question.prompt));
-    expect(text.indexOf(question.prompt)).toBeLessThan(text.indexOf("Your answer"));
-    expect(text.indexOf("Your answer")).toBeLessThan(
+    expect(text.indexOf(question.prompt)).toBeLessThan(text.indexOf("Mentingo: Onboarding"));
+    expect(text.indexOf("Mentingo: Onboarding")).toBeLessThan(
       text.indexOf("I prepared a scoped edit for review."),
     );
     expect(text.indexOf("I prepared a scoped edit for review.")).toBeLessThan(
@@ -1426,7 +1424,8 @@ describe("AuthoringAssistantMessages", () => {
 
     const card = screen.getByTestId("course-authoring-question-question-clarification");
     expect(card).toHaveTextContent("Who is the course for?");
-    expect(card).toHaveTextContent(`Your answer: ${answer}`);
+    expect(card).toHaveTextContent(answer);
+    expect(card).not.toHaveTextContent("Your answer");
     expect(card.querySelector("form")).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "Your answer" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Answer" })).not.toBeInTheDocument();
@@ -1487,7 +1486,6 @@ describe("AuthoringAssistantMessages", () => {
 
     expect(screen.getByText("What is the audience?")).toBeVisible();
     expect(screen.getByText("Which teaching experience should the course assume?")).toBeVisible();
-    expect(screen.getByText("Your answer:")).toBeVisible();
     expect(screen.getByText("New teachers", { exact: true })).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Your answer" })).toHaveValue("");
     expect(onAnswerQuestion).toHaveBeenCalledWith(initialQuestion, "New teachers");
@@ -1573,6 +1571,68 @@ describe("AuthoringAssistantMessages", () => {
     expect(onAnswerQuestion).toHaveBeenCalledWith(first, "Support team");
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText(second.prompt)).toBeVisible();
+  });
+
+  it("answers the active pending question with letter shortcuts and Enter", async () => {
+    const user = userEvent.setup();
+    const onAnswerQuestion = vi.fn(async () => undefined);
+    const question: QuestionView = {
+      id: "shortcut-question",
+      taskId: "shortcut-task",
+      requestId: "request-shortcut",
+      revision: 1,
+      prompt: "Who is the course for?",
+      choices: ["New hires", "Managers", "Administrators"],
+      capability: null,
+      reason: null,
+      answer: null,
+      answered: false,
+    };
+
+    renderWith().render(
+      <AuthoringAssistantMessages
+        chatMessages={[]}
+        questionsByRequest={{ "request-shortcut": [question] }}
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    await user.keyboard("d");
+    const answer = screen.getByRole("textbox", { name: "Your answer" });
+    expect(answer).toHaveFocus();
+    await user.type(answer, "Team leads{Enter}");
+    expect(onAnswerQuestion).toHaveBeenCalledWith(question, "Team leads");
+    expect(await screen.findByText("Team leads", { exact: true })).toBeVisible();
+    await user.keyboard("b");
+    expect(onAnswerQuestion).toHaveBeenCalledTimes(1);
+  });
+
+  it("selects a suggestion with its letter shortcut", async () => {
+    const user = userEvent.setup();
+    const onAnswerQuestion = vi.fn(async () => undefined);
+    const question: QuestionView = {
+      id: "shortcut-choice",
+      taskId: "shortcut-choice-task",
+      requestId: "request-shortcut-choice",
+      revision: 1,
+      prompt: "How long should it be?",
+      choices: ["Short", "Medium", "Long"],
+      capability: null,
+      reason: null,
+      answer: null,
+      answered: false,
+    };
+
+    renderWith().render(
+      <AuthoringAssistantMessages
+        chatMessages={[]}
+        questionsByRequest={{ "request-shortcut-choice": [question] }}
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    await user.keyboard("b");
+    expect(onAnswerQuestion).toHaveBeenCalledWith(question, "Medium");
   });
 
   it("places a proposal at its server part position without adding another assistant header", () => {
@@ -1712,7 +1772,6 @@ describe("AuthoringAssistantMessages", () => {
   });
 
   it("orders the final response, current task activity and review chronologically", async () => {
-    const user = userEvent.setup();
     renderWith().render(
       <AuthoringAssistantMessages
         chatMessages={[
@@ -1793,8 +1852,6 @@ describe("AuthoringAssistantMessages", () => {
         ]}
       />,
     );
-
-    await user.click(screen.getByRole("button", { name: /^Plan/ }));
 
     const transcript = screen.getByTestId("course-authoring-assistant-messages").textContent ?? "";
     expect(transcript.indexOf("I will prepare it.")).toBeLessThan(transcript.indexOf("Plan steps"));
@@ -1933,7 +1990,7 @@ describe("AuthoringAssistantMessages", () => {
     expect(screen.getByRole("listitem")).toHaveTextContent("OWASP agent security guidance");
     expect(done).not.toHaveTextContent("succeeded");
     expect(screen.getByTestId("course-authoring-tool-tool-failed")).toHaveTextContent(
-      /Generating lesson\s*·\s*failed/,
+      /Generating lesson\s*failed/,
     );
   });
 

@@ -6281,6 +6281,7 @@
         "description": "Tu curso no se ha modificado."
       },
       "more": "+{{count}} más",
+      "readySoFar": "{{count}} listos por ahora",
       "discard": "Descartar",
       "retry": "Reintentar",
       "heading": "Cambios propuestos",
@@ -6494,6 +6495,10 @@
       "questionProgress": "Pregunta {{current}} de {{total}}",
       "questionPrevious": "Anterior",
       "questionNext": "Siguiente",
+      "questionNeedsInput": "Necesitamos tu respuesta",
+      "questionSubmitHint": "Enter para enviar · Mayús+Enter para una nueva línea",
+      "questionShortcutHint": "Pulsa A–D para elegir",
+      "pendingSlowHint": "Leyendo tu curso, las fuentes y tu solicitud para decidir el siguiente paso. Puede tardar hasta un minuto.",
       "newChat": "New chat",
       "searchSessions": "Buscar chats...",
       "noSessionsFound": "No se encontraron chats.",
@@ -6634,7 +6639,6 @@
       "moreToolUpdates": "+{{count}} actualizaciones más de herramientas",
       "searchQueries": "Búsquedas",
       "moreSearchQueries": "+{{count}} consultas más",
-      "completedResearchSteps": "Pasos de investigación completados: {{count}}",
       "chapterStatus": {
         "failed": "Fallido",
         "pending": "en espera",
