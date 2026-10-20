@@ -321,10 +321,61 @@ research within the existing budget before unresolved gaps are handed back.
 ### Iterative review policy
 
 Scoped edits return after structural checks without an extra educational review model pass or
-implicit web search. Larger drafts and assembled courses expose quality findings as advice, without
-automatically replacing proposals or generating lessons again. Authors request revisions explicitly.
-Task completion reports execution success; educational quality findings remain a separate review
-signal. Provider response time remains variable.
+implicit web search. Larger drafts keep their initial educational review and can receive one
+targeted correction using the already permitted evidence. Fast and Balanced then return the repaired
+draft for author review without another advisory model call; Thorough retains that second check.
+Recovery of a material factual-verification gap still receives fresh review. Structural, source,
+language and target-scope checks run on every draft before it becomes reviewable. Remaining concerns
+stay visible, and applying course changes remains a separate author decision. Task completion reports
+execution success; educational quality findings remain a separate signal. Provider response time
+remains variable; no duration estimate is shown for the thinking presets.
+
+### Following background work
+
+Course editors enter the workflow through **Edit with AI** (**Edytuj z AI** in Polish).
+Live work has a progress bar that remains visible when its activity details are collapsed. Known
+chapter or lesson totals supply a completion count; work without a known total shows an indeterminate bar.
+Counts describe the current stage, rather than an estimate of the entire request's remaining time.
+
+While the author remains signed in with Mentingo open, requests observed running can notify them
+when work finishes, fails or needs an answer, including after the drawer closes or another session
+is selected. The notification opens the owning conversation. Opening old completed conversations
+does not replay completion notifications. These are in-app notices, not email or closed-browser
+push notifications.
+
+Background refresh results are checked against the active signed-in author before they
+enter the shared session cache. Signing out, changing accounts or leaving the app's
+notification provider stops tracking and dismisses its notices. Opening another saved
+conversation resets session-specific review and application state.
+
+The **Deep research** option (**Pogłębione wyszukiwanie źródeł** in Polish) explains that it
+investigates permitted sources more thoroughly. Enabling it does not itself enable web access or
+change source permissions; the separate web-search option explains its access to public websites.
+
+### Recovering partial research
+
+A temporary analysis-provider outage leaves successful topic findings and fetched source pages
+available while identifying topics whose assessment is incomplete. Other topic assessments can
+finish independently. Temporary embedding outages can use the existing bounded text retrieval over
+the same permitted pages. Neither recovery treats an unassessed topic as supported or changes the
+author's source permissions.
+
+Unrecoverable research failures retain their actual failure category and recovery action instead
+of becoming a successful assistant reply that claims search or page retrieval failed. Provider
+connection problems can offer retry; configuration and service defects retain service guidance.
+
+Focused deterministic tests cover progress states, notification transitions and deduplication,
+partial research recovery and review-call budgets. Live provider latency, authenticated browser
+behavior and delivery after the browser closes have not been verified by these checks.
+
+Pre-PR validation on 2026-10-20: `pnpm --filter web test` passes 1,349 tests with 12
+existing skips under Node 22.15.0. Full web `lint-tsc` and touched-file Prettier checks
+pass; lint retains one existing warning in an unchanged test. The AI API unit suite
+passes all 2,337 tests; Python lint, formatting and compilation pass. Independent review
+verified the auth cleanup and route-remount fixes with 61 focused tests. Changed Python files retain their existing
+BasedPyright baseline without introducing diagnostics. No authenticated E2E, live-provider
+benchmark or deployment was run. API contracts and schemas are unchanged, so client generation
+and migrations are not required.
 
 ### Actionable generation recovery
 

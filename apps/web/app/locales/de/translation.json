@@ -6268,6 +6268,12 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "Die KI hat diese Anfrage abgeschlossen. Öffnen Sie die Sitzung, um das Ergebnis zu sehen.",
+      "failed": "Die KI konnte diese Anfrage nicht abschließen. Öffnen Sie die Sitzung für Wiederherstellungsoptionen.",
+      "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren.",
+      "open": "Sitzung öffnen"
+    },
     "changeSet": {
       "ready": {
         "status": "Bereit zur Prüfung",
@@ -6560,7 +6566,9 @@
       "scopeWholeCourse": "Gesamter Kurs",
       "scopeSelected": "Ausgewählter Lehrplan",
       "webSearch": "Websuche",
-      "deepThinking": "Vertiefte Recherche",
+      "deepThinking": "Vertiefte Quellenrecherche",
+      "deepResearchHelp": "Untersucht erlaubte Quellen genauer. Aktiviert keinen Internetzugriff.",
+      "webSearchHelp": "Erlaubt die Suche auf öffentlichen Webseiten.",
       "strictSourceMode": "Nur meine Quellen",
       "strictSourceModeHelp": "Nur Prompt und angehängte Dateien",
       "back": "Zurück"
@@ -6637,9 +6645,10 @@
       "contentPending": "Der Inhalt dieser Lektion wurde noch nicht generiert.",
       "readOnly": "Die Entwurfsvorschau ist bis zur Anwendung schreibgeschützt."
     },
-    "openWorkspace": "Mit KI generieren",
+    "openWorkspace": "Mit KI bearbeiten",
     "openLegacyDraft": "Alten Entwurf fortsetzen",
     "activityRail": {
+      "inProgress": "In Bearbeitung… Der Fortschritt wird nach dem nächsten Schritt aktualisiert.",
       "retryFailedParts": "Fehlgeschlagene Teile erneut versuchen",
       "retryProvider": "Verbindung erneut versuchen",
       "recoveringFailedParts": "Fehlgeschlagene Teile werden fortgesetzt…",

@@ -1,5 +1,5 @@
 /** Standalone compatibility route for saved authoring links; Curriculum opens the drawer. */
-import { type MetaFunction, useParams } from "@remix-run/react";
+import { type MetaFunction, useParams, useSearchParams } from "@remix-run/react";
 
 import { useCourseAuthoringSessionsQuery } from "~/api/queries/useCourseAuthoringSessionsQuery";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -13,13 +13,23 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "course
 /** Supplies route identity to the shared session interaction without owning generation state. */
 const CourseAuthoringPage = () => {
   const { id = "" } = useParams();
+  const [searchParams] = useSearchParams();
   const language = useLanguageStore((state) => state.language);
   const sessionsQuery = useCourseAuthoringSessionsQuery(id);
-  const sessionId = sessionsQuery.data?.find(
-    (session) => session.status === "active" || session.status === "paused",
-  )?.sessionId;
+  const sessionId =
+    searchParams.get("sessionId") ||
+    sessionsQuery.data?.find(
+      (session) => session.status === "active" || session.status === "paused",
+    )?.sessionId;
   return (
-    sessionId && <CourseGenerationSession courseId={id} language={language} sessionId={sessionId} />
+    sessionId && (
+      <CourseGenerationSession
+        key={`${id}:${sessionId}`}
+        courseId={id}
+        language={language}
+        sessionId={sessionId}
+      />
+    )
   );
 };
 

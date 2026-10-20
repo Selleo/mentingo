@@ -6012,6 +6012,12 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "L’IA a terminé cette demande. Ouvrez la session pour voir le résultat.",
+      "failed": "L’IA n’a pas pu terminer cette demande. Ouvrez la session pour voir les options de reprise.",
+      "waiting_author": "L’IA a besoin de votre réponse pour continuer.",
+      "open": "Ouvrir la session"
+    },
     "changeSet": {
       "ready": {
         "status": "Prêt à examiner",
@@ -6304,7 +6310,9 @@
       "scopeWholeCourse": "Cours entier",
       "scopeSelected": "Programme sélectionné",
       "webSearch": "Recherche web",
-      "deepThinking": "Recherche approfondie",
+      "deepThinking": "Recherche approfondie de sources",
+      "deepResearchHelp": "Examine plus en détail les sources autorisées. N’active pas l’accès à internet.",
+      "webSearchHelp": "Autorise la recherche sur les sites web publics.",
       "strictSourceMode": "Uniquement mes sources",
       "strictSourceModeHelp": "Uniquement la consigne et les fichiers joints",
       "back": "Retour"
@@ -6381,9 +6389,10 @@
       "contentPending": "Le contenu de cette leçon n’a pas encore été généré.",
       "readOnly": "L’aperçu du brouillon est en lecture seule jusqu’à son application."
     },
-    "openWorkspace": "Générer avec l’IA",
+    "openWorkspace": "Modifier avec l’IA",
     "openLegacyDraft": "Continuer l’ancien brouillon",
     "activityRail": {
+      "inProgress": "Traitement en cours… La progression sera actualisée après la prochaine étape.",
       "retryFailedParts": "Réessayer les parties en échec",
       "retryProvider": "Réessayer la connexion",
       "recoveringFailedParts": "Reprise des parties en échec…",

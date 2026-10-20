@@ -6290,6 +6290,12 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "AI finished this request. Open the session to see the result.",
+      "failed": "AI could not finish this request. Open the session to review recovery options.",
+      "waiting_author": "AI needs your input to continue.",
+      "open": "Open session"
+    },
     "changeSet": {
       "ready": {
         "status": "Ready to review",
@@ -6582,6 +6588,8 @@
       "scopeSelected": "Selected curriculum",
       "webSearch": "Web search",
       "deepThinking": "Deep research",
+      "deepResearchHelp": "Searches permitted sources in more detail. Does not enable web access.",
+      "webSearchHelp": "Allows searching public websites.",
       "strictSourceMode": "Only my sources",
       "strictSourceModeHelp": "Prompt and attached files only",
       "back": "Back"
@@ -6658,9 +6666,10 @@
       "contentPending": "The content for this lesson hasn’t been generated yet.",
       "readOnly": "Draft preview is read-only until you apply it."
     },
-    "openWorkspace": "Generate with AI",
+    "openWorkspace": "Edit with AI",
     "openLegacyDraft": "Continue legacy generation draft",
     "activityRail": {
+      "inProgress": "Working… Progress will update when the next step finishes.",
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
