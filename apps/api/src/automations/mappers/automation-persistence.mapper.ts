@@ -65,9 +65,9 @@ function buildWorkflowFromStepRows(
   steps: AutomationStepRow[],
   definitionKind: AutomationDefinitionKind,
 ): AutomationWorkflow {
-  const definitionSteps = steps.filter(
-    (step) => step.automationId === automation.id && step.definitionKind === definitionKind,
-  );
+  const definitionSteps = steps
+    .filter((step) => step.automationId === automation.id && step.definitionKind === definitionKind)
+    .sort((left, right) => left.id.localeCompare(right.id));
 
   return {
     rootStepId:
