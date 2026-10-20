@@ -4115,16 +4115,24 @@
       },
       "featuredCourse": {
         "label": "Doporučený kurz",
-        "none": "Vyberte doporučený kurz",
         "search": "Hledat publikované kurzy...",
         "empty": "Nebyly nalezeny žádné publikované kurzy",
-        "clear": "Zrušit doporučený kurz",
         "loadMore": "Načíst další kurzy",
         "updated": "Doporučený kurz byl aktualizován",
-        "updateFailed": "Doporučený kurz se nepodařilo aktualizovat"
+        "updateFailed": "Doporučený kurz se nepodařilo aktualizovat",
+        "change": "Změnit doporučený",
+        "automatic": "Automaticky (nejoblíbenější kurz)",
+        "dialogDescription": "Vyberte publikovaný kurz, který studenti uvidí na stránce kurzů jako první.",
+        "clickToChange": "Klikněte pro změnu"
       },
       "lessonsCount_one": "{{count}} lekce",
-      "lessonsCount_other": "{{count}} lekcí"
+      "lessonsCount_other": "{{count}} lekcí",
+      "inlineEdit": {
+        "addCourse": "Přidat kurz",
+        "addCourseTo": "Přidat kurz do {{category}}",
+        "addCategory": "Přidat kategorii",
+        "categoryPlaceholder": "Název kategorie"
+      }
     }
   },
   "studentQuizSummaryView": {

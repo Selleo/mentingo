@@ -4053,16 +4053,24 @@
       },
       "featuredCourse": {
         "label": "Curso destacado",
-        "none": "Elegir curso destacado",
         "search": "Buscar cursos publicados...",
         "empty": "No se encontraron cursos publicados",
-        "clear": "Quitar curso destacado",
         "loadMore": "Cargar más cursos",
         "updated": "Curso destacado actualizado",
-        "updateFailed": "No se pudo actualizar el curso destacado"
+        "updateFailed": "No se pudo actualizar el curso destacado",
+        "change": "Cambiar destacado",
+        "automatic": "Automático (curso más popular)",
+        "dialogDescription": "Elige el curso publicado que los alumnos verán primero en la página de cursos.",
+        "clickToChange": "Haz clic para cambiar"
       },
       "lessonsCount_one": "Lección {{count}}",
-      "lessonsCount_other": "Lecciones {{count}}"
+      "lessonsCount_other": "Lecciones {{count}}",
+      "inlineEdit": {
+        "addCourse": "Añadir curso",
+        "addCourseTo": "Añadir curso a {{category}}",
+        "addCategory": "Añadir categoría",
+        "categoryPlaceholder": "Nombre de la categoría"
+      }
     }
   },
   "studentQuizSummaryView": {

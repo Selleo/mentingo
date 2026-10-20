@@ -4109,16 +4109,24 @@
       },
       "featuredCourse": {
         "label": "Featured course",
-        "none": "Choose featured course",
         "search": "Search published courses...",
         "empty": "No published courses found",
-        "clear": "Clear featured course",
         "loadMore": "Load more courses",
         "updated": "Featured course updated",
-        "updateFailed": "Could not update featured course"
+        "updateFailed": "Could not update featured course",
+        "change": "Change featured",
+        "automatic": "Automatic (most popular course)",
+        "dialogDescription": "Pick the published course learners see first on the courses page.",
+        "clickToChange": "Click to change"
       },
       "lessonsCount_one": "{{count}} lesson",
-      "lessonsCount_other": "{{count}} lessons"
+      "lessonsCount_other": "{{count}} lessons",
+      "inlineEdit": {
+        "addCourse": "Add course",
+        "addCourseTo": "Add course to {{category}}",
+        "addCategory": "Add category",
+        "categoryPlaceholder": "Category name"
+      }
     }
   },
   "studentQuizSummaryView": {

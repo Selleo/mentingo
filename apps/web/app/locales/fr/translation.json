@@ -3857,16 +3857,24 @@
       },
       "featuredCourse": {
         "label": "Cours à la une",
-        "none": "Choisir un cours à la une",
         "search": "Rechercher des cours publiés...",
         "empty": "Aucun cours publié trouvé",
-        "clear": "Supprimer le cours à la une",
         "loadMore": "Charger plus de cours",
         "updated": "Cours à la une mis à jour",
-        "updateFailed": "Impossible de mettre à jour le cours à la une"
+        "updateFailed": "Impossible de mettre à jour le cours à la une",
+        "change": "Changer la mise en avant",
+        "automatic": "Automatique (cours le plus populaire)",
+        "dialogDescription": "Choisissez le cours publié que les apprenants verront en premier sur la page des cours.",
+        "clickToChange": "Cliquez pour modifier"
       },
       "lessonsCount_one": "{{count}} leçon",
-      "lessonsCount_other": "{{count}} leçons"
+      "lessonsCount_other": "{{count}} leçons",
+      "inlineEdit": {
+        "addCourse": "Ajouter un cours",
+        "addCourseTo": "Ajouter un cours à {{category}}",
+        "addCategory": "Ajouter une catégorie",
+        "categoryPlaceholder": "Nom de la catégorie"
+      }
     }
   },
   "studentQuizSummaryView": {

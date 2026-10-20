@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link, useSearchParams } from "@remix-run/react";
 import { ArrowLeft, FileText, FolderUp, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -69,6 +69,12 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 const CourseTypeSelectorPage = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get("categoryId");
+  const getOptionHref = (option: CourseTypeOption) =>
+    option.id === "standard" && categoryId
+      ? `${option.href}?${new URLSearchParams({ categoryId })}`
+      : option.href;
 
   return (
     <main
@@ -116,7 +122,7 @@ const CourseTypeSelectorPage = () => {
               title={t(`adminCourseTypeSelector.${option.id}.title`)}
               description={t(`adminCourseTypeSelector.${option.id}.description`)}
               features={option.featureKeys.map((featureKey) => t(featureKey))}
-              href={option.href}
+              href={getOptionHref(option)}
               icon={option.icon}
               accent={option.id}
               testId={option.testId}

@@ -1,4 +1,4 @@
-import { memo, type Ref, useCallback, useEffect, useRef, useState } from "react";
+import { memo, type ReactNode, type Ref, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   type CarouselApi,
@@ -36,6 +36,7 @@ type ModernCourseCarouselProps = {
   watchSlideIndex?: number;
   onWatchedSlideVisible?: (index: number) => void;
   rowRef?: Ref<HTMLElement>;
+  headerAction?: ReactNode;
 };
 
 const ModernCourseCarousel = ({
@@ -48,6 +49,7 @@ const ModernCourseCarousel = ({
   watchSlideIndex,
   onWatchedSlideVisible,
   rowRef,
+  headerAction,
 }: ModernCourseCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -179,83 +181,88 @@ const ModernCourseCarousel = ({
     watchSlideIndex,
   ]);
 
-  if (!courses.length) return null;
+  if (!courses.length && !headerAction) return null;
 
   return (
-    <section ref={rowRef} className="space-y-4 pb-6">
-      <h2 className="h2 px-4 text-2xl leading-snug md:px-8 md:text-[32px] md:leading-relaxed">
-        {title}
-      </h2>
+    <section ref={rowRef} className="group/row space-y-4 pb-6">
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-4 md:px-8">
+        <h2 className="h2 text-2xl leading-snug md:text-[32px] md:leading-relaxed">{title}</h2>
+        {headerAction}
+      </div>
 
-      <div className="group relative px-4 md:px-8 mt-10" data-course-row data-testid="course-row">
-        <Carousel opts={CAROUSEL_OPTIONS} setApi={setCarouselApi}>
-          <CarouselContent className="gap-4" viewportRef={viewportRef}>
-            {courses.map((course, index) => (
-              <CarouselItem
-                key={course.id}
-                ref={index === watchSlideIndex ? watchedSlideRef : undefined}
-                className="w-[320px] md:w-[380px] lg:w-[400px] !basis-auto"
-              >
-                <ModernCourseCard
-                  id={course.id}
-                  title={course.title}
-                  description={course.description}
-                  thumbnailUrl={course.thumbnailUrl}
-                  trailerUrl={course.trailerUrl}
-                  estimatedDurationMinutes={course.estimatedDurationMinutes}
-                  lessonCount={course.lessonCount}
-                  progressPercent={progressByCourseId[course.id]}
-                  category={course.category}
-                  className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
-                  enrolled={"enrolled" in course ? course.enrolled : false}
-                  hasFreeChapters={course.hasFreeChapters}
-                  dueDate={"dueDate" in course && course.dueDate ? new Date(course.dueDate) : null}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
+      {courses.length > 0 && (
+        <div className="group relative px-4 md:px-8 mt-10" data-course-row data-testid="course-row">
+          <Carousel opts={CAROUSEL_OPTIONS} setApi={setCarouselApi}>
+            <CarouselContent className="gap-4" viewportRef={viewportRef}>
+              {courses.map((course, index) => (
+                <CarouselItem
+                  key={course.id}
+                  ref={index === watchSlideIndex ? watchedSlideRef : undefined}
+                  className="w-[320px] md:w-[380px] lg:w-[400px] !basis-auto"
+                >
+                  <ModernCourseCard
+                    id={course.id}
+                    title={course.title}
+                    description={course.description}
+                    thumbnailUrl={course.thumbnailUrl}
+                    trailerUrl={course.trailerUrl}
+                    estimatedDurationMinutes={course.estimatedDurationMinutes}
+                    lessonCount={course.lessonCount}
+                    progressPercent={progressByCourseId[course.id]}
+                    category={course.category}
+                    className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
+                    enrolled={"enrolled" in course ? course.enrolled : false}
+                    hasFreeChapters={course.hasFreeChapters}
+                    dueDate={
+                      "dueDate" in course && course.dueDate ? new Date(course.dueDate) : null
+                    }
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
 
+            {canScrollPrev && (
+              <CarouselPrevious
+                iconSize={24}
+                className=" left-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+              />
+            )}
+            {(canScrollNext || hasNextPage) && (
+              <CarouselNext
+                iconSize={24}
+                disabled={isFetchingNextPage ? true : !canScrollNext && !hasNextPage}
+                loading={isFetchingNextPage}
+                onClick={handleNextClick}
+                className="right-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+              />
+            )}
+          </Carousel>
           {canScrollPrev && (
-            <CarouselPrevious
-              iconSize={24}
-              className=" left-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+            <div
+              aria-hidden
+              data-testid="course-row-arrow-block-left"
+              className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto"
             />
           )}
           {(canScrollNext || hasNextPage) && (
-            <CarouselNext
-              iconSize={24}
-              disabled={isFetchingNextPage ? true : !canScrollNext && !hasNextPage}
-              loading={isFetchingNextPage}
-              onClick={handleNextClick}
-              className="right-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+            <div
+              aria-hidden
+              data-testid="course-row-arrow-block-right"
+              className="absolute inset-y-0 right-0 z-[140] w-28 pointer-events-auto"
             />
           )}
-        </Carousel>
-        {canScrollPrev && (
-          <div
-            aria-hidden
-            data-testid="course-row-arrow-block-left"
-            className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto"
-          />
-        )}
-        {(canScrollNext || hasNextPage) && (
-          <div
-            aria-hidden
-            data-testid="course-row-arrow-block-right"
-            className="absolute inset-y-0 right-0 z-[140] w-28 pointer-events-auto"
-          />
-        )}
-        {canScrollPrev && (
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
-          </div>
-        )}
-        {(canScrollNext || hasNextPage) && (
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
-          </div>
-        )}
-      </div>
+          {canScrollPrev && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
+            </div>
+          )}
+          {(canScrollNext || hasNextPage) && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 };

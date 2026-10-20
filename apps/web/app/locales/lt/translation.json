@@ -4110,16 +4110,24 @@
       },
       "featuredCourse": {
         "label": "Teminis kursas",
-        "none": "Pasirinkite teminį kursą",
         "search": "Ieškoti paskelbtų kursų...",
         "empty": "Paskelbtų kursų nerasta",
-        "clear": "Išvalyti teminį kursą",
         "loadMore": "Įkelti daugiau kursų",
         "updated": "Teminis kursas atnaujintas",
-        "updateFailed": "Nepavyko atnaujinti teminio kurso"
+        "updateFailed": "Nepavyko atnaujinti teminio kurso",
+        "change": "Keisti rekomenduojamą",
+        "automatic": "Automatiškai (populiariausias kursas)",
+        "dialogDescription": "Pasirinkite paskelbtą kursą, kurį besimokantieji pirmiausia matys kursų puslapyje.",
+        "clickToChange": "Spustelėkite, kad pakeistumėte"
       },
       "lessonsCount_one": "{{count}} pamoka",
-      "lessonsCount_other": "{{count}} pamokų"
+      "lessonsCount_other": "{{count}} pamokų",
+      "inlineEdit": {
+        "addCourse": "Pridėti kursą",
+        "addCourseTo": "Pridėti kursą į {{category}}",
+        "addCategory": "Pridėti kategoriją",
+        "categoryPlaceholder": "Kategorijos pavadinimas"
+      }
     }
   },
   "studentQuizSummaryView": {

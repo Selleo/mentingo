@@ -4108,16 +4108,24 @@
       },
       "featuredCourse": {
         "label": "Hervorgehobener Kurs",
-        "none": "Hervorgehobenen Kurs auswählen",
         "search": "Veröffentlichte Kurse suchen...",
         "empty": "Keine veröffentlichten Kurse gefunden",
-        "clear": "Hervorgehobenen Kurs entfernen",
         "loadMore": "Weitere Kurse laden",
         "updated": "Hervorgehobener Kurs aktualisiert",
-        "updateFailed": "Hervorgehobener Kurs konnte nicht aktualisiert werden"
+        "updateFailed": "Hervorgehobener Kurs konnte nicht aktualisiert werden",
+        "change": "Hervorgehobenen ändern",
+        "automatic": "Automatisch (beliebtester Kurs)",
+        "dialogDescription": "Wähle den veröffentlichten Kurs, den Lernende zuerst auf der Kursseite sehen.",
+        "clickToChange": "Zum Ändern klicken"
       },
       "lessonsCount_one": "{{count}} Lektion",
-      "lessonsCount_other": "{{count}} Lektionen"
+      "lessonsCount_other": "{{count}} Lektionen",
+      "inlineEdit": {
+        "addCourse": "Kurs hinzufügen",
+        "addCourseTo": "Kurs zu {{category}} hinzufügen",
+        "addCategory": "Kategorie hinzufügen",
+        "categoryPlaceholder": "Kategoriename"
+      }
     }
   },
   "studentQuizSummaryView": {

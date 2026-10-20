@@ -16,6 +16,9 @@ import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { formatDuration } from "./utils";
 
+import type { CourseCardMediaState } from "./ModernCourseCard.types";
+import type { CSSProperties } from "react";
+
 const VIDEO_PRELOAD_DELAY_MS = 1000;
 const CARD_TRANSITION_DURATION = "900ms";
 const PANEL_TRANSITION_DURATION = "850ms";
@@ -36,7 +39,11 @@ const getEmbedUrlWithParams = (url: string): string => {
   return `${url}${separator}${params}`;
 };
 
-type ModernCourseCardProps = {
+type ModernCourseCardVariantProps =
+  | { variant?: "carousel"; popoutEnabled?: boolean }
+  | { variant: "picker"; onSelect: () => void; mediaState: CourseCardMediaState };
+
+type ModernCourseCardProps = ModernCourseCardVariantProps & {
   id: string;
   title: string;
   description?: string | null;
@@ -50,25 +57,27 @@ type ModernCourseCardProps = {
   enrolled?: boolean;
   hasFreeChapters?: boolean;
   dueDate?: Date | null;
-  popoutEnabled?: boolean;
 };
 
-const ModernCourseCard = ({
-  id,
-  title,
-  description,
-  thumbnailUrl,
-  trailerUrl,
-  estimatedDurationMinutes,
-  lessonCount,
-  progressPercent,
-  category,
-  className,
-  enrolled,
-  hasFreeChapters,
-  dueDate,
-  popoutEnabled = true,
-}: ModernCourseCardProps) => {
+const ModernCourseCard = (props: ModernCourseCardProps) => {
+  const {
+    id,
+    title,
+    description,
+    thumbnailUrl,
+    trailerUrl,
+    estimatedDurationMinutes,
+    lessonCount,
+    progressPercent,
+    category,
+    className,
+    enrolled,
+    hasFreeChapters,
+    dueDate,
+  } = props;
+  const isPicker = props.variant === "picker";
+  const popoutEnabled = props.variant !== "picker" && (props.popoutEnabled ?? true);
+  const mediaState = isPicker ? props.mediaState : "idle";
   const { t } = useTranslation();
   const { hasAccess: canUpdateLearningProgress } = usePermissions({
     required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
@@ -134,15 +143,18 @@ const ModernCourseCard = ({
     [description],
   );
 
+  const isMediaActive = isPicker ? mediaState === "play" : isHovered;
+  const shouldLoadMedia = !isPicker || mediaState !== "idle";
+
   useEffect(() => {
-    if (isEmbed || !trailerUrl) return;
+    if (isEmbed || !trailerUrl || !shouldLoadMedia) return;
     videoRef.current?.load();
-  }, [trailerUrl, isEmbed]);
+  }, [trailerUrl, isEmbed, shouldLoadMedia]);
 
   useEffect(() => {
     if (!videoRef.current || isEmbed) return;
 
-    if (isHovered) {
+    if (isMediaActive) {
       videoRef.current.currentTime = 0;
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
@@ -151,9 +163,12 @@ const ModernCourseCard = ({
     } else {
       videoRef.current.pause();
     }
-  }, [isHovered, isEmbed]);
+  }, [isMediaActive, isEmbed]);
 
   useEffect(() => {
+    // The picker reveals media once it is actually playing instead of after a hover delay.
+    if (isPicker && isMediaActive) return;
+
     if (isHovered && trailerUrl) {
       if (preloadTimeoutRef.current) {
         clearTimeout(preloadTimeoutRef.current);
@@ -169,7 +184,7 @@ const ModernCourseCard = ({
     }
     setShowVideo(false);
     setIsIframeLoaded(false);
-  }, [isHovered, trailerUrl]);
+  }, [isHovered, trailerUrl, isPicker, isMediaActive]);
 
   useEffect(() => {
     return () => {
@@ -196,150 +211,133 @@ const ModernCourseCard = ({
     </>
   );
 
-  return (
-    <div
-      ref={cardRef}
-      data-testid={title}
-      className={cn(
-        "group relative block w-full max-w-md cursor-pointer overflow-visible",
-        className,
-      )}
-      onMouseEnter={() => {
-        timeoutRef.current = setTimeout(() => {
-          setIsHovered(true);
-        }, 200);
-      }}
-      onMouseLeave={() => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  const isVideoVisible = isMediaActive && showVideo;
+  const isOverlayTextHidden = isPicker ? isVideoVisible : isHovered;
 
-        setIsHovered(false);
-        setShowVideo(false);
-      }}
-    >
-      <div className="aspect-video w-full" />
+  const surfaceStyle: CSSProperties = {
+    transform:
+      isHovered && popoutEnabled ? "scale(1.05) translateY(-32%)" : "scale(1) translateY(0px)",
+    transformOrigin: "center center",
+    zIndex: isHovered ? 120 : 10,
+    transitionDuration: CARD_TRANSITION_DURATION,
+    transitionTimingFunction: SMOOTH_EASE,
+    willChange: "transform",
+  };
 
-      <Link
-        to={`/course/${id}`}
-        data-testid="modern-course-card-link"
-        discover="none"
-        prefetch="none"
-        reloadDocument
-        className="absolute inset-0 transition-transform"
+  const cardBody = (
+    <>
+      <div
+        className={cn(
+          "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all rounded-lg",
+          {
+            "rounded-b-none": isHovered && popoutEnabled,
+          },
+        )}
         style={{
-          transform:
-            isHovered && popoutEnabled
-              ? "scale(1.05) translateY(-32%)"
-              : "scale(1) translateY(0px)",
-          transformOrigin: "center center",
-          zIndex: isHovered ? 120 : 10,
           transitionDuration: CARD_TRANSITION_DURATION,
           transitionTimingFunction: SMOOTH_EASE,
-          willChange: "transform",
         }}
-        tabIndex={0}
       >
-        <div
-          className={cn(
-            "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all rounded-lg",
-            {
-              "rounded-b-none": isHovered && popoutEnabled,
-            },
-          )}
-          style={{
-            transitionDuration: CARD_TRANSITION_DURATION,
-            transitionTimingFunction: SMOOTH_EASE,
-          }}
-        >
-          {canUpdateLearningProgress && (
-            <div
-              className="absolute left-4 right-4 top-4 z-30 flex flex-col gap-y-1 transition-opacity duration-300"
-              style={{ opacity: isHovered ? 0 : 1 }}
-            >
-              {hasFreeChapters && !enrolled && (
-                <CardBadge variant="successFilled">
-                  <Icon name="FreeRight" className="w-4" />
-                  {t("studentCoursesView.other.freeLessons")}
-                </CardBadge>
-              )}
-              {dueDate && (
-                <CategoryChip
-                  category={t("common.other.dueDate", { date: formatDate(dueDate, "dd.MM.yyyy") })}
-                  color="text-warning-600"
-                  className="bg-warning-50"
-                  textClassName="text-zest-900"
-                />
-              )}
-            </div>
-          )}
+        {canUpdateLearningProgress && (
+          <div
+            className="absolute left-4 right-4 top-4 z-30 flex flex-col gap-y-1 transition-opacity duration-300"
+            style={{ opacity: isOverlayTextHidden ? 0 : 1 }}
+          >
+            {hasFreeChapters && !enrolled && (
+              <CardBadge variant="successFilled">
+                <Icon name="FreeRight" className="w-4" />
+                {t("studentCoursesView.other.freeLessons")}
+              </CardBadge>
+            )}
+            {dueDate && (
+              <CategoryChip
+                category={t("common.other.dueDate", { date: formatDate(dueDate, "dd.MM.yyyy") })}
+                color="text-warning-600"
+                className="bg-warning-50"
+                textClassName="text-zest-900"
+              />
+            )}
+          </div>
+        )}
 
-          {trailerUrl ? (
-            <>
-              <div
+        {trailerUrl ? (
+          <>
+            <div
+              className={cn(
+                "absolute inset-0 transition-opacity",
+                isVideoVisible ? "opacity-0" : "opacity-100",
+              )}
+              style={{ transitionDuration: MEDIA_TRANSITION_DURATION }}
+            >
+              {image}
+            </div>
+
+            {isEmbed && embedSrc ? (
+              <iframe
+                src={isMediaActive ? embedSrc : undefined}
                 className={cn(
-                  "absolute inset-0 transition-opacity",
-                  isHovered && showVideo ? "opacity-0" : "opacity-100",
+                  "absolute inset-0 h-full w-full border-0 transition-opacity pointer-events-none no-controls",
+                  isVideoVisible && isIframeLoaded ? "opacity-100" : "opacity-0",
                 )}
                 style={{ transitionDuration: MEDIA_TRANSITION_DURATION }}
-              >
-                {image}
-              </div>
-
-              {isEmbed && embedSrc ? (
-                <iframe
-                  src={isHovered ? embedSrc : undefined}
-                  className={cn(
-                    "absolute inset-0 h-full w-full border-0 transition-opacity pointer-events-none no-controls",
-                    isHovered && showVideo && isIframeLoaded ? "opacity-100" : "opacity-0",
-                  )}
-                  style={{ transitionDuration: MEDIA_TRANSITION_DURATION }}
-                  allow="autoplay; encrypted-media"
-                  title={title}
-                  onLoad={() => setIsIframeLoaded(true)}
-                />
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={trailerUrl}
-                  preload="auto"
-                  className={cn(
-                    "absolute inset-0 h-full w-full object-cover transition-opacity pointer-events-none",
-                    isHovered && showVideo ? "opacity-100" : "opacity-0",
-                  )}
-                  style={{ transitionDuration: MEDIA_TRANSITION_DURATION }}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  controls={false}
-                />
-              )}
-            </>
-          ) : (
-            <div className="absolute inset-0">{image}</div>
-          )}
-
-          {showProgress && (
-            <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
-              <div
-                className="h-full bg-red-600 transition-all ease-out"
-                style={{
-                  width: `${progressPercent}%`,
-                  transitionDuration: CONTENT_TRANSITION_DURATION,
+                allow="autoplay; encrypted-media"
+                title={title}
+                onLoad={() => {
+                  setIsIframeLoaded(true);
+                  if (isPicker) setShowVideo(true);
                 }}
               />
-            </div>
-          )}
+            ) : (
+              <video
+                ref={videoRef}
+                src={shouldLoadMedia ? trailerUrl : undefined}
+                preload="auto"
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover transition-opacity pointer-events-none",
+                  isVideoVisible ? "opacity-100" : "opacity-0",
+                )}
+                style={{ transitionDuration: MEDIA_TRANSITION_DURATION }}
+                muted
+                loop
+                playsInline
+                autoPlay={!isPicker}
+                controls={false}
+                onPlaying={() => {
+                  if (isPicker) setShowVideo(true);
+                }}
+              />
+            )}
+          </>
+        ) : (
+          <div className="absolute inset-0">{image}</div>
+        )}
 
-          <div
-            className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity ease-out"
-            style={{ opacity: isHovered ? 0 : 1, transitionDuration: CONTENT_TRANSITION_DURATION }}
-          >
-            <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
-              {title}
-            </h3>
+        {showProgress && (
+          <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
+            <div
+              className="h-full bg-red-600 transition-all ease-out"
+              style={{
+                width: `${progressPercent}%`,
+                transitionDuration: CONTENT_TRANSITION_DURATION,
+              }}
+            />
           </div>
-        </div>
+        )}
 
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity ease-out"
+          style={{
+            opacity: isOverlayTextHidden ? 0 : 1,
+            transitionDuration: CONTENT_TRANSITION_DURATION,
+          }}
+        >
+          <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
+            {title}
+          </h3>
+        </div>
+      </div>
+
+      {!isPicker && (
         <div
           className="overflow-hidden rounded-b-lg bg-white shadow-xl transition-all"
           style={{
@@ -386,7 +384,58 @@ const ModernCourseCard = ({
             </div>
           </div>
         </div>
-      </Link>
+      )}
+    </>
+  );
+
+  return (
+    <div
+      ref={cardRef}
+      data-testid={title}
+      className={cn(
+        "group relative block w-full max-w-md cursor-pointer overflow-visible",
+        className,
+      )}
+      onMouseEnter={() => {
+        if (isPicker) return;
+
+        timeoutRef.current = setTimeout(() => {
+          setIsHovered(true);
+        }, 200);
+      }}
+      onMouseLeave={() => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+        setIsHovered(false);
+        setShowVideo(false);
+      }}
+    >
+      <div className="aspect-video w-full" />
+
+      {props.variant === "picker" ? (
+        <button
+          type="button"
+          onClick={props.onSelect}
+          data-testid="modern-course-card-select"
+          className="absolute inset-0 text-left transition-transform"
+          style={surfaceStyle}
+        >
+          {cardBody}
+        </button>
+      ) : (
+        <Link
+          to={`/course/${id}`}
+          data-testid="modern-course-card-link"
+          discover="none"
+          prefetch="none"
+          reloadDocument
+          className="absolute inset-0 transition-transform"
+          style={surfaceStyle}
+          tabIndex={0}
+        >
+          {cardBody}
+        </Link>
+      )}
     </div>
   );
 };

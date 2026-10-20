@@ -20,6 +20,7 @@ Administrators create, rename, translate, and delete categories from the categor
 - Search and sort categories in the administration list.
 - Find permitted categories through global search.
 - Delete categories that are no longer needed when they are not assigned to courses.
+- Add a category inline from the modern course catalogue and start a new course in any category from its row.
 
 ## End-User Value
 
@@ -37,6 +38,7 @@ Each tenant manages its own categories. Category titles are shown in the request
 - The category API preserves tenant isolation and localized titles.
 - Category deletion remains blocked while a course is assigned to the category.
 - Global search returns categories only to users with category read or management access.
+- On the modern course catalogue, the inline "Add category" row requires category-management access; the "+ Add course" action next to each category heading requires course-create access and opens course creation with the category pre-selected in the standard course form. A newly created category stays visible to its creator until it has a course, because the learner catalogue only lists categories that contain available courses.
 
 ## Test Evidence
 
