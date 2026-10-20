@@ -1,12 +1,26 @@
 import { randomUUID } from "node:crypto";
 
-import { SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
-import { and, eq, isNull } from "drizzle-orm";
+import {
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
+  COURSE_ENROLLMENT,
+  COURSE_STATUSES,
+  LESSON_TYPES,
+  SYSTEM_ROLE_SLUGS,
+  TENANT_STATUSES,
+} from "@repo/shared";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import sharp from "sharp";
 import request from "supertest";
 
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { SearchIndexService } from "src/global-search/search-index.service";
+import {
+  normalizeSearchText,
+  chunkSearchText,
+} from "src/global-search/semantic-search-index.chunking";
+import { SemanticSearchEmbeddingService } from "src/global-search/semantic-search-index.embedding.service";
+import { SemanticSearchIndexRepository } from "src/global-search/semantic-search-index.repository";
 import { DB } from "src/storage/db/db.providers";
 import {
   users,
@@ -17,12 +31,20 @@ import {
   courses,
   permissionUserRoles,
   resourceEntity,
+  searchDocuments,
+  studentCourses,
+  studentLessonProgress,
+  assessments,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
 } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createArticleFactory } from "../../../test/factory/article.factory";
+import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createLessonFactory } from "../../../test/factory/lesson.factory";
 import { createNewsFactory } from "../../../test/factory/news.factory";
 import { createQAFactory } from "../../../test/factory/qa.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -436,6 +458,11 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         "get_news",
         "list_qa_entries",
         "get_qa_entry",
+        "list_chapters",
+        "get_chapter",
+        "list_lessons",
+        "get_lesson",
+        "search_lessons",
       ].sort(),
     );
     const courseList = await call("list_courses", { language: "en", scope: "available" }, reader);
@@ -479,7 +506,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       expect(detail[key]).not.toHaveProperty("resources");
     }
     const result = await call("global_search", { searchQuery: "MCP", language: "en" }, reader);
-    for (const excluded of ["lessons", "users", "groups", "categories", "learningPaths"])
+    expect(result.lessons).toEqual([]);
+    for (const excluded of ["users", "groups", "categories", "learningPaths"])
       expect(result).not.toHaveProperty(excluded);
     expect(JSON.stringify(result)).not.toContain(draftCourseId);
     expect(JSON.stringify(result)).not.toContain(draftArticleId);
@@ -487,6 +515,541 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     await rejectedCall("create_course", { title: "Forbidden" }, reader);
     const otherReader = await issueClient(foreign.user, foreign.host, [MCP_SCOPES.STUDENT_READ]);
     await rejectedCall("get_article", { id: articleId, language: "en" }, otherReader);
+  });
+
+  describe("student-scope lesson reading", () => {
+    async function curriculum(
+      owner = admin,
+      status:
+        | typeof COURSE_STATUSES.PUBLISHED
+        | typeof COURSE_STATUSES.PRIVATE = COURSE_STATUSES.PUBLISHED,
+    ) {
+      const marker = `curriculum-${randomUUID()}`;
+      return runAsTenant(owner.tenantId, async () => {
+        const course = await createCourseFactory(db).create({
+          authorId: owner.user.id,
+          title: `Course ${marker}`,
+          status,
+          priceInCents: 0,
+          isArchived: false,
+          thumbnailS3Key: null,
+        });
+        const chapter = await createChapterFactory(db).create({
+          courseId: course.id,
+          authorId: owner.user.id,
+          title: `Chapter ${marker}`,
+          displayOrder: 1,
+          isFreemium: false,
+          lessonCount: 1,
+        });
+        const lesson = await createLessonFactory(db).create({
+          chapterId: chapter.id,
+          title: { en: "Learner content" },
+          description: {
+            en: `<p>Visible authored body ${marker}</p><script>scriptsecret-${marker}</script><img alt="quoted > hiddenattribute-${marker}" src="https://private.invalid/attribute-${marker}"><script>unclosedscript-${marker}`,
+          },
+        });
+        return {
+          marker,
+          course,
+          chapter,
+          lesson,
+          args: { courseId: course.id, chapterId: chapter.id, lessonId: lesson.id, language: "en" },
+        };
+      });
+    }
+
+    async function indexLesson(fixture: Awaited<ReturnType<typeof curriculum>>, owner = admin) {
+      await runAsTenant(owner.tenantId, async () => {
+        await app.get(SearchIndexService).refreshLesson(fixture.lesson.id);
+        const index = app.get(SemanticSearchIndexRepository);
+        const docs = await db
+          .select()
+          .from(searchDocuments)
+          .where(eq(searchDocuments.entityId, fixture.lesson.id));
+        for (const doc of docs) {
+          const source = await index.findSource({
+            entityType: doc.entityType,
+            entityId: doc.entityId,
+            documentType: doc.documentType,
+            language: doc.language,
+          });
+          if (!source) continue;
+          const chunks = chunkSearchText(normalizeSearchText(source.content));
+          if (chunks.length)
+            await index.replace(
+              source,
+              chunks,
+              chunks.map(() => [1, ...Array<number>(1535).fill(0)]),
+            );
+        }
+      });
+    }
+
+    it("globally finds authorized lessons in keyword and hybrid modes then reads them by result identity", async () => {
+      const visible = await curriculum();
+      const enrolledOnly = await curriculum(admin, COURSE_STATUSES.PRIVATE);
+      const hidden = await curriculum();
+      const foreignLesson = await curriculum(foreign);
+      await baseDb
+        .update(courses)
+        .set({ status: COURSE_STATUSES.DRAFT })
+        .where(eq(courses.id, hidden.course.id));
+      for (const fixture of [visible, enrolledOnly, hidden]) await indexLesson(fixture);
+      await indexLesson(foreignLesson, foreign);
+      const embed = jest
+        .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
+        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+      try {
+        for (const reader of await readers()) {
+          for (const mode of ["keyword", "hybrid"]) {
+            const found = await call(
+              "global_search",
+              { searchQuery: "Visible authored body", language: "en", mode },
+              reader,
+            );
+            expect(found.lessons).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ id: visible.lesson.id, courseId: visible.course.id }),
+              ]),
+            );
+            for (const fixture of [enrolledOnly, hidden, foreignLesson])
+              expect(found.lessons.map((row: ToolResult) => row.id)).not.toContain(
+                fixture.lesson.id,
+              );
+            const hit = found.lessons.find((row: ToolResult) => row.id === visible.lesson.id);
+            expect(Object.keys(hit).sort()).toEqual(
+              ["id", "title", "courseId", "matchedPassage", "url"].sort(),
+            );
+            const detail = await call(
+              "get_lesson",
+              { courseId: hit.courseId, lessonId: hit.id, language: "en" },
+              reader,
+            );
+            expect(detail.lesson.content).toContain(visible.marker);
+            expect(found).not.toHaveProperty("users");
+            expect(found).not.toHaveProperty("learningPaths");
+          }
+          await runAsTenant(reader.tenantId, async () =>
+            db.insert(studentCourses).values({
+              studentId: reader.user.id,
+              courseId: enrolledOnly.course.id,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            }),
+          );
+          const enrolled = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+            reader,
+          );
+          expect(enrolled.lessons.map((row: ToolResult) => row.id)).toContain(
+            enrolledOnly.lesson.id,
+          );
+          await runAsTenant(reader.tenantId, async () =>
+            db
+              .update(studentCourses)
+              .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+              .where(
+                and(
+                  eq(studentCourses.studentId, reader.user.id),
+                  eq(studentCourses.courseId, enrolledOnly.course.id),
+                ),
+              ),
+          );
+          const revoked = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+            reader,
+          );
+          expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(
+            enrolledOnly.lesson.id,
+          );
+          for (const query of [
+            `scriptsecret-${visible.marker}`,
+            `hiddenattribute-${visible.marker}`,
+            `unclosedscript-${visible.marker}`,
+          ]) {
+            const noHiddenMatches = await call(
+              "global_search",
+              { searchQuery: query, language: "en", mode: "keyword" },
+              reader,
+            );
+            expect(noHiddenMatches.lessons).toEqual([]);
+          }
+        }
+        const legacy = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH]);
+        const legacyResults = await call(
+          "global_search",
+          { searchQuery: "Visible authored body", language: "en" },
+          legacy,
+        );
+        expect(legacyResults).not.toHaveProperty("lessons");
+      } finally {
+        embed.mockRestore();
+      }
+    });
+
+    async function readers() {
+      return [
+        await issueClient(admin.user, admin.host, [MCP_SCOPES.STUDENT_READ]),
+        await issueClient(student.user, student.host, [MCP_SCOPES.STUDENT_READ]),
+      ];
+    }
+
+    async function assertUnavailable(
+      fixture: Awaited<ReturnType<typeof curriculum>>,
+      reader: Client,
+    ) {
+      const { lessonId: _lessonId, ...listArgs } = fixture.args;
+      expect(
+        (await call("list_chapters", { courseId: fixture.course.id, language: "en" }, reader))
+          .chapters,
+      ).toEqual([]);
+      const listed = await call("list_lessons", listArgs, reader);
+      expect(listed.data).toEqual([]);
+      expect(listed.pagination.totalItems).toBe(0);
+      const searched = await call(
+        "search_lessons",
+        { query: fixture.marker, language: "en" },
+        reader,
+      );
+      expect(searched.data).toEqual([]);
+      expect(searched.pagination.totalItems).toBe(0);
+      await rejectedCall("get_lesson", fixture.args, reader);
+    }
+
+    it("lets learner and admin readers enumerate and search unenrolled free public content without starting lessons or exposing quiz answers", async () => {
+      const fixture = await curriculum();
+      const quizSecret = `correct-answer-${randomUUID()}`;
+      const quiz = await runAsTenant(admin.tenantId, async () => {
+        const lesson = await createLessonFactory(db).create({
+          chapterId: fixture.chapter.id,
+          type: LESSON_TYPES.QUIZ,
+          thresholdScore: 50,
+          title: { en: "Learner quiz" },
+          description: { en: quizSecret },
+          displayOrder: 2,
+        });
+        const [assessment] = await db
+          .insert(assessments)
+          .values({ lessonId: lesson.id, passingScorePercentage: "50" })
+          .returning();
+        const [question] = await db
+          .insert(assessmentQuestions)
+          .values({
+            assessmentId: assessment.id,
+            questionType: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+            gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+            displayOrder: 1,
+            prompt: { en: "Which answer?" },
+          })
+          .returning();
+        await db.insert(assessmentQuestionChoiceOptions).values({
+          questionId: question.id,
+          language: "en",
+          displayOrder: 1,
+          isCorrect: true,
+          label: quizSecret,
+        });
+        return lesson;
+      });
+      for (const reader of await readers()) {
+        const chapters = await call(
+          "list_chapters",
+          { courseId: fixture.course.id, language: "en" },
+          reader,
+        );
+        expect(chapters.chapters).toEqual([expect.objectContaining({ id: fixture.chapter.id })]);
+        const listed = await call(
+          "list_lessons",
+          {
+            courseId: fixture.course.id,
+            chapterId: fixture.chapter.id,
+            language: "en",
+            pageSize: 1,
+          },
+          reader,
+        );
+        expect(listed.data).toEqual([expect.objectContaining({ id: fixture.lesson.id })]);
+        expect(listed.pagination.totalItems).toBe(2);
+        const detail = await call("get_lesson", fixture.args, reader);
+        expect(detail.lesson.content).toContain(`Visible authored body ${fixture.marker}`);
+        expect(JSON.stringify(detail)).not.toContain("scriptsecret");
+        expect(JSON.stringify(detail)).not.toContain("private.invalid");
+        const found = await call(
+          "search_lessons",
+          { query: fixture.marker, language: "en" },
+          reader,
+        );
+        expect(found.data).toEqual([expect.objectContaining({ id: fixture.lesson.id })]);
+        for (const query of [
+          `scriptsecret-${fixture.marker}`,
+          `attribute-${fixture.marker}`,
+          `hiddenattribute-${fixture.marker}`,
+          `unclosedscript-${fixture.marker}`,
+          quizSecret,
+        ]) {
+          expect((await call("search_lessons", { query, language: "en" }, reader)).data).toEqual(
+            [],
+          );
+        }
+        const quizRead = await call("get_lesson", { ...fixture.args, lessonId: quiz.id }, reader);
+        expect(quizRead.lesson).toEqual(
+          expect.objectContaining({ content: "", contentReadSupported: false }),
+        );
+        expect(JSON.stringify(quizRead)).not.toContain(quizSecret);
+        await runAsTenant(reader.tenantId, async () => {
+          expect(
+            await db
+              .select()
+              .from(studentLessonProgress)
+              .where(
+                and(
+                  eq(studentLessonProgress.studentId, reader.user.id),
+                  inArray(studentLessonProgress.lessonId, [fixture.lesson.id, quiz.id]),
+                ),
+              ),
+          ).toEqual([]);
+          expect(
+            await db
+              .select()
+              .from(studentCourses)
+              .where(
+                and(
+                  eq(studentCourses.studentId, reader.user.id),
+                  eq(studentCourses.courseId, fixture.course.id),
+                ),
+              ),
+          ).toEqual([]);
+        });
+      }
+    });
+
+    it("gives normal student account access the same free and enrolled lesson reads and search", async () => {
+      const reader = await issueClient(student.user, student.host, [MCP_SCOPES.ACCOUNT_ACCESS]);
+      const free = await curriculum();
+      const paid = await curriculum();
+      const privateCourse = await curriculum(admin, COURSE_STATUSES.PRIVATE);
+      await baseDb
+        .update(courses)
+        .set({ priceInCents: 1500 })
+        .where(eq(courses.id, paid.course.id));
+      for (const fixture of [free, paid, privateCourse]) await indexLesson(fixture);
+      const embed = jest
+        .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
+        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+      try {
+        const tools = (await rpc(reader, "tools/list")).result.tools.map(
+          (tool: ToolResult) => tool.name,
+        );
+        expect(tools).toEqual(
+          expect.arrayContaining([
+            "list_chapters",
+            "get_chapter",
+            "list_lessons",
+            "get_lesson",
+            "search_lessons",
+          ]),
+        );
+        expect(tools).not.toContain("create_course");
+        expect((await call("get_lesson", free.args, reader)).lesson.content).toContain(free.marker);
+        for (const fixture of [paid, privateCourse]) await assertUnavailable(fixture, reader);
+        for (const mode of ["keyword", "hybrid"]) {
+          const result = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode },
+            reader,
+          );
+          const ids = result.lessons.map((row: ToolResult) => row.id);
+          expect(ids).toContain(free.lesson.id);
+          for (const fixture of [paid, privateCourse]) expect(ids).not.toContain(fixture.lesson.id);
+        }
+        await runAsTenant(reader.tenantId, async () =>
+          db
+            .insert(studentCourses)
+            .values(
+              [paid, privateCourse].map((fixture) => ({
+                courseId: fixture.course.id,
+                studentId: reader.user.id,
+                status: COURSE_ENROLLMENT.ENROLLED,
+              })),
+            ),
+        );
+        for (const fixture of [paid, privateCourse])
+          expect((await call("get_lesson", fixture.args, reader)).lesson.content).toContain(
+            fixture.marker,
+          );
+        for (const mode of ["keyword", "hybrid"]) {
+          const result = await call(
+            "global_search",
+            { searchQuery: "Visible authored body", language: "en", mode },
+            reader,
+          );
+          const ids = result.lessons.map((row: ToolResult) => row.id);
+          for (const fixture of [free, paid, privateCourse])
+            expect(ids).toContain(fixture.lesson.id);
+        }
+        await runAsTenant(reader.tenantId, async () =>
+          db
+            .update(studentCourses)
+            .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+            .where(
+              and(
+                eq(studentCourses.studentId, reader.user.id),
+                inArray(studentCourses.courseId, [paid.course.id, privateCourse.course.id]),
+              ),
+            ),
+        );
+        for (const fixture of [paid, privateCourse]) await assertUnavailable(fixture, reader);
+        const revoked = await call(
+          "global_search",
+          { searchQuery: "Visible authored body", language: "en", mode: "hybrid" },
+          reader,
+        );
+        for (const fixture of [paid, privateCourse])
+          expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(fixture.lesson.id);
+      } finally {
+        embed.mockRestore();
+      }
+    });
+
+    it("requires own active enrollment for paid public lessons, including admin student scope", async () => {
+      const fixture = await curriculum();
+      // Exercise enrollment authorization with authored words, not UUID tokenization.
+      const searchQuery = "Visible authored body";
+      await baseDb
+        .update(courses)
+        .set({ priceInCents: 1500 })
+        .where(eq(courses.id, fixture.course.id));
+      await indexLesson(fixture);
+      const embed = jest
+        .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
+        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+      try {
+        for (const reader of await readers()) {
+          await assertUnavailable(fixture, reader);
+          for (const mode of ["keyword", "hybrid"]) {
+            const result = await call(
+              "global_search",
+              { searchQuery, language: "en", mode },
+              reader,
+            );
+            expect(result.lessons.map((row: ToolResult) => row.id)).not.toContain(
+              fixture.lesson.id,
+            );
+          }
+          await runAsTenant(reader.tenantId, async () =>
+            db.insert(studentCourses).values({
+              courseId: fixture.course.id,
+              studentId: reader.user.id,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            }),
+          );
+          expect((await call("get_lesson", fixture.args, reader)).lesson.content).toContain(
+            fixture.marker,
+          );
+          for (const mode of ["keyword", "hybrid"]) {
+            const result = await call(
+              "global_search",
+              { searchQuery, language: "en", mode },
+              reader,
+            );
+            expect(result.lessons.map((row: ToolResult) => row.id)).toContain(fixture.lesson.id);
+          }
+          await runAsTenant(reader.tenantId, async () =>
+            db
+              .update(studentCourses)
+              .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+              .where(
+                and(
+                  eq(studentCourses.courseId, fixture.course.id),
+                  eq(studentCourses.studentId, reader.user.id),
+                ),
+              ),
+          );
+          await assertUnavailable(fixture, reader);
+          const revoked = await call(
+            "global_search",
+            { searchQuery, language: "en", mode: "hybrid" },
+            reader,
+          );
+          expect(revoked.lessons.map((row: ToolResult) => row.id)).not.toContain(fixture.lesson.id);
+        }
+      } finally {
+        embed.mockRestore();
+      }
+    });
+
+    it("requires each reader's own active enrollment for private lessons and denies reads immediately after revocation", async () => {
+      const fixture = await curriculum(admin, COURSE_STATUSES.PRIVATE);
+      await runAsTenant(admin.tenantId, async () => {
+        await db.insert(studentCourses).values({
+          courseId: fixture.course.id,
+          studentId: target.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        });
+      });
+      for (const reader of await readers()) {
+        await assertUnavailable(fixture, reader);
+        await runAsTenant(reader.tenantId, async () => {
+          await db.insert(studentCourses).values({
+            courseId: fixture.course.id,
+            studentId: reader.user.id,
+            status: COURSE_ENROLLMENT.ENROLLED,
+          });
+        });
+        expect((await call("get_lesson", fixture.args, reader)).lesson.id).toBe(fixture.lesson.id);
+        expect(
+          (await call("search_lessons", { query: fixture.marker, language: "en" }, reader)).data,
+        ).toEqual([expect.objectContaining({ id: fixture.lesson.id })]);
+        await runAsTenant(reader.tenantId, async () => {
+          await db
+            .update(studentCourses)
+            .set({ status: COURSE_ENROLLMENT.NOT_ENROLLED })
+            .where(
+              and(
+                eq(studentCourses.courseId, fixture.course.id),
+                eq(studentCourses.studentId, reader.user.id),
+              ),
+            );
+        });
+        await assertUnavailable(fixture, reader);
+      }
+    });
+
+    it("denies draft, archived and foreign tenant lessons even to the course author with student scope", async () => {
+      const fixture = await curriculum();
+      const scopedReaders = await readers();
+      await runAsTenant(admin.tenantId, async () => {
+        await db.insert(studentCourses).values(
+          scopedReaders.map((reader) => ({
+            courseId: fixture.course.id,
+            studentId: reader.user.id,
+            status: COURSE_ENROLLMENT.ENROLLED,
+          })),
+        );
+        await db
+          .update(courses)
+          .set({ status: COURSE_STATUSES.DRAFT })
+          .where(eq(courses.id, fixture.course.id));
+      });
+      for (const reader of scopedReaders) await assertUnavailable(fixture, reader);
+      await runAsTenant(admin.tenantId, async () => {
+        await db
+          .update(courses)
+          .set({ status: COURSE_STATUSES.PUBLISHED, isArchived: true })
+          .where(eq(courses.id, fixture.course.id));
+      });
+      for (const reader of scopedReaders) await assertUnavailable(fixture, reader);
+      const foreignFixture = await curriculum(foreign);
+      for (const reader of scopedReaders) await assertUnavailable(foreignFixture, reader);
+      const foreignReader = await issueClient(foreign.user, foreign.host, [
+        MCP_SCOPES.STUDENT_READ,
+      ]);
+      expect((await call("get_lesson", foreignFixture.args, foreignReader)).lesson.id).toBe(
+        foreignFixture.lesson.id,
+      );
+    });
   });
 
   it("preserves the frozen management catalog for an existing legacy authoring grant", async () => {

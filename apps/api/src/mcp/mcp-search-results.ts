@@ -2,6 +2,7 @@ import { sanitizeRichTextSummary } from "@repo/shared";
 
 import type {
   McpContentSearchResponse,
+  McpLearnerContentSearchResponse,
   McpLinkedSearchResponse,
   McpSearchContext,
 } from "./mcp-search-results.types";
@@ -11,7 +12,7 @@ import type { GlobalSearchResponse } from "src/global-search/schemas/global-sear
 export function shapeMcpSearchResults(
   results: GlobalSearchResponse,
   context: McpSearchContext,
-): McpContentSearchResponse | McpLinkedSearchResponse {
+): McpContentSearchResponse | McpLinkedSearchResponse | McpLearnerContentSearchResponse {
   const resource = new URL(context.resource);
   if (!["https:", "http:"].includes(resource.protocol) || resource.username || resource.password) {
     throw new Error("Invalid bound MCP resource");
@@ -58,6 +59,17 @@ export function shapeMcpSearchResults(
       news: results.news.map((row) => content(row, pathUrl("news", row.id))),
       articles: results.articles.map((row) => content(row, pathUrl("articles", row.id))),
       qa: results.qa.map((row) => content(row, qaUrl(row.id))),
+      ...(context.includeLearnerLessons
+        ? {
+            lessons: results.lessons.map((row) => ({
+              id: row.id,
+              title: text(row.title) ?? "",
+              courseId: row.courseId,
+              matchedPassage: text(row.matchedPassage),
+              url: `${courseUrl(row.courseId)}/lesson/${encodeURIComponent(row.id)}`,
+            })),
+          }
+        : {}),
     };
   }
 

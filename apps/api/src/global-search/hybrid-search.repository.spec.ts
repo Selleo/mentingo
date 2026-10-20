@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT, COURSE_STATUSES, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 import { PgDialect } from "drizzle-orm/pg-core";
 
 import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
@@ -136,5 +136,84 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       await repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, embedding, actor),
     ).toEqual([]);
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("HybridSearchRepository MCP learner lesson eligibility", () => {
+  const actor: CurrentUserType = {
+    userId: "00000000-0000-0000-0000-000000000001",
+    tenantId: "00000000-0000-0000-0000-000000000002",
+    email: "reader@example.test",
+    permissions: [
+      PERMISSIONS.COURSE_READ,
+      PERMISSIONS.COURSE_READ_ASSIGNED,
+      PERMISSIONS.COURSE_UPDATE,
+    ],
+    roleSlugs: ["admin"],
+  };
+  const dialect = new PgDialect();
+
+  it("filters lesson documents and actor entitlement before keyword rank and semantic candidate limits", async () => {
+    const execute = jest.fn().mockResolvedValue([]);
+    const repository = new HybridSearchRepository({ execute } as unknown as DatabasePg);
+    await repository.findKeywordMatches(SEARCH_ENTITY_TYPES.LESSON, "policy", actor, false, true);
+    const keyword = dialect.sqlToQuery(execute.mock.calls[0][0]);
+    const semantic = dialect.sqlToQuery(
+      repository.buildSemanticCandidateQuery(
+        SEARCH_ENTITY_TYPES.LESSON,
+        [1, 0],
+        actor,
+        200,
+        [],
+        false,
+        true,
+      ),
+    );
+    for (const query of [keyword, semantic]) {
+      expect(query.sql).toContain("e.is_archived = false");
+      expect(query.sql).toContain("e.price_in_cents = 0");
+      for (const alias of ["l", "ch", "e", "sc"])
+        expect(query.sql).toContain(`${alias}.tenant_id =`);
+      expect(query.sql).toContain("sc.student_id =");
+      expect(query.sql).not.toContain("e.author_id");
+      expect(query.sql).toContain("s.metadata->>'resourceId' IS NULL");
+      expect(query.sql).toContain("s.document_type =");
+      expect(query.sql).toContain("AND l.type =");
+      expect(query.params).toEqual(
+        expect.arrayContaining([
+          actor.userId,
+          actor.tenantId,
+          COURSE_STATUSES.PUBLISHED,
+          COURSE_STATUSES.PRIVATE,
+          COURSE_ENROLLMENT.ENROLLED,
+          LESSON_TYPES.CONTENT,
+          "title",
+          "description",
+        ]),
+      );
+      expect(query.sql.indexOf("e.is_archived = false")).toBeLessThan(query.sql.indexOf("LIMIT"));
+    }
+    const sourceBranch = keyword.sql.split("UNION ALL")[0];
+    const gate = sourceBranch.match(/AND \$(\d+)\s+AND/);
+    expect(gate).not.toBeNull();
+    expect(keyword.params[Number(gate![1]) - 1]).toBe(false);
+  });
+
+  it("does not substitute management permissions when learner permissions are absent", async () => {
+    const repository = new HybridSearchRepository({} as DatabasePg);
+    const query = dialect.sqlToQuery(
+      repository.buildSemanticCandidateQuery(
+        SEARCH_ENTITY_TYPES.LESSON,
+        [1],
+        { ...actor, permissions: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN] },
+        200,
+        [],
+        false,
+        true,
+      ),
+    );
+    expect(query.sql).toContain("((false) OR (false))");
+    expect(query.sql).not.toContain("e.author_id");
+    expect(query.sql).not.toContain("student_courses");
   });
 });

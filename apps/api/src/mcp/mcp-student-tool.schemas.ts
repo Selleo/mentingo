@@ -44,3 +44,30 @@ export const getStudentQaInputSchema = Type.Object(
   { qaId: UUIDSchema, language },
   { additionalProperties: false },
 );
+
+export const listStudentChaptersInputSchema = Type.Object(
+  { courseId: UUIDSchema, language },
+  { additionalProperties: false },
+);
+export const getStudentChapterInputSchema = Type.Object(
+  { courseId: UUIDSchema, chapterId: UUIDSchema, language },
+  { additionalProperties: false },
+);
+export const listStudentLessonsInputSchema = Type.Object(
+  { courseId: UUIDSchema, chapterId: UUIDSchema, language, page, pageSize, query },
+  { additionalProperties: false },
+);
+export const getStudentLessonInputSchema = Type.Object(
+  { courseId: UUIDSchema, chapterId: Type.Optional(UUIDSchema), lessonId: UUIDSchema, language },
+  { additionalProperties: false },
+);
+export const searchStudentLessonsInputSchema = Type.Object(
+  {
+    courseId: Type.Optional(UUIDSchema),
+    language,
+    query: Type.String({ minLength: 1, maxLength: 200 }),
+    page,
+    pageSize,
+  },
+  { additionalProperties: false },
+);

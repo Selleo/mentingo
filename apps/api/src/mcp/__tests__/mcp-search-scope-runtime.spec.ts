@@ -118,6 +118,11 @@ describe("MCP search scope runtime enforcement", () => {
         "global_search",
         "list_courses",
         "get_course",
+        "list_chapters",
+        "get_chapter",
+        "list_lessons",
+        "get_lesson",
+        "search_lessons",
         "list_articles",
         "get_article",
         "list_news",
@@ -126,27 +131,118 @@ describe("MCP search scope runtime enforcement", () => {
         "get_qa_entry",
       ].sort(),
     );
-    expect(names).not.toEqual(
-      expect.arrayContaining(["get_lesson", "list_users", "create_course"]),
-    );
+    expect(names).not.toEqual(expect.arrayContaining(["list_users", "create_course"]));
   });
-  it("general access gives a learner canonical reads and no authoring or lesson tools", async () => {
+  it.each([MCP_SCOPES.STUDENT_READ, MCP_SCOPES.ACCOUNT_ACCESS, MCP_SCOPES.COURSES_READ])(
+    "%s learner calls preserve identity and recheck permission revocation",
+    async (scope) => {
+      const { rpc, service, getUserAccess } = await catalog(
+        [scope],
+        SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.STUDENT],
+      );
+      const listLessons = jest
+        .fn()
+        .mockResolvedValue({ data: [], pagination: { page: 1, perPage: 10, totalItems: 0 } });
+      Object.assign(service, { mcpStudentLessonRepository: { listLessons } });
+      const args = { courseId: actor.grant.userId, chapterId: actor.grant.userId, language: "en" };
+      const result = await rpc("tools/call", { name: "list_lessons", arguments: args });
+      expect(result.result.isError).not.toBe(true);
+      expect(listLessons).toHaveBeenCalledWith(
+        args,
+        expect.objectContaining({
+          userId: actor.grant.userId,
+          tenantId: actor.grant.tenantId,
+          roleSlugs: [],
+        }),
+      );
+      expect(listLessons.mock.calls[0][1].permissions).not.toContain(PERMISSIONS.COURSE_UPDATE);
+      getUserAccess.mockResolvedValueOnce({ permissions: [], roleSlugs: [] });
+      const denied = await rpc("tools/call", { name: "list_lessons", arguments: args });
+      expect(denied.result.isError).toBe(true);
+      expect(listLessons).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("general access includes the learner curriculum without authoring permissions", async () => {
     const { rpc } = await catalog(
       [MCP_SCOPES.ACCOUNT_ACCESS],
       SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.STUDENT],
     );
     const tools = (await rpc("tools/list")).result.tools;
     const names = tools.map((tool: { name: string }) => tool.name);
-    expect(names).toEqual(expect.arrayContaining(["list_courses", "get_course", "get_article"]));
-    expect(names.some((name: string) => name.includes("student"))).toBe(false);
-    expect(names).not.toEqual(
-      expect.arrayContaining(["create_course", "get_lesson", "list_users"]),
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "list_courses",
+        "get_course",
+        "get_article",
+        "list_chapters",
+        "get_chapter",
+        "list_lessons",
+        "get_lesson",
+        "search_lessons",
+      ]),
     );
+    expect(names.some((name: string) => name.includes("student"))).toBe(false);
+    expect(names).not.toEqual(expect.arrayContaining(["create_course", "list_users"]));
     expect(new Set(names).size).toBe(names.length);
     expect(
       tools.find((tool: { name: string }) => tool.name === "get_course").inputSchema.required,
     ).toContain("courseId");
   });
+
+  it("account access retains every student read tool plus other permitted account tools", async () => {
+    const permissions = SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.STUDENT];
+    const account = await catalog([MCP_SCOPES.ACCOUNT_ACCESS], permissions);
+    const capped = await catalog([MCP_SCOPES.STUDENT_READ], permissions);
+    const accountNames = (await account.rpc("tools/list")).result.tools.map(
+      (tool: { name: string }) => tool.name,
+    );
+    const cappedNames = (await capped.rpc("tools/list")).result.tools.map(
+      (tool: { name: string }) => tool.name,
+    );
+    expect(accountNames).toEqual(expect.arrayContaining(cappedNames));
+    expect(accountNames).toContain("update_my_profile");
+    expect(cappedNames).not.toContain("update_my_profile");
+  });
+
+  it.each([MCP_SCOPES.STUDENT_READ, MCP_SCOPES.ACCOUNT_ACCESS])(
+    "%s learner global search includes lesson content",
+    async (scope) => {
+      const { rpc, service } = await catalog(
+        [scope],
+        SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.STUDENT],
+      );
+      const search = jest.fn().mockResolvedValue({
+        searchMode: "keyword",
+        allCourses: [],
+        myCourses: [],
+        availableCourses: [],
+        lessons: [
+          {
+            id: actor.grant.userId,
+            courseId: actor.grant.tenantId,
+            title: "Authored lesson",
+            matchedPassage: "Visible body",
+          },
+        ],
+        news: [],
+        articles: [],
+        qa: [],
+      });
+      Object.assign(service, { globalSearchService: { search } });
+      const result = await rpc("tools/call", {
+        name: "global_search",
+        arguments: { searchQuery: "Visible body", language: "en" },
+      });
+      expect(result.result.isError).not.toBe(true);
+      expect(search.mock.calls[0][4]).toEqual(
+        expect.objectContaining({ includeLearnerLessons: true }),
+      );
+      expect(result.result.structuredContent.lessons).toEqual([
+        expect.objectContaining({ id: actor.grant.userId, matchedPassage: "Visible body" }),
+      ]);
+    },
+  );
 
   it("selects views per resource permission rather than a role heuristic", async () => {
     const { rpc } = await catalog(

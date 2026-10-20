@@ -10,7 +10,7 @@ Mentingo MCP (Model Context Protocol) gives a connected AI assistant access to m
 - Attach supporting files, upload video, and import SCORM packages through the existing upload flows.
 - Manage course publication, certificates, pricing, and assigned-group deadlines when your account permits it.
 
-The tools available to you depend on your approved connection access, your current account permissions, and the features enabled for your organisation. A connection does not grant additional access. Learner integrations can use `student:read` to search and read a limited student view without content management or administration.
+The tools available to you depend on your approved connection access, your current account permissions, and the features enabled for your organisation. A connection does not grant additional access. Learners can search and read accessible lesson content through a standard `account:access` connection. The optional `student:read` scope caps a connection to learner tools; it is not required for lesson reading.
 
 ## Connect to Mentingo
 
@@ -73,9 +73,9 @@ include its read counterpart.
 | Scope                                         | Intended access                                                                                                                    |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `account:access`                              | Standard permission-aware account access; default when scopes are omitted; exclusive                                               |
-| `student:read`                                | Exclusive learner search and the eight learner list/get tools below                                                                |
+| `student:read`                                | Optional exclusive cap to learner search and reader tools; not a prerequisite for lesson access                                    |
 | `search:read`                                 | Global search with current account permissions; learner projection without management permissions, broader results where permitted |
-| `courses:read`, `courses:write`               | Course, chapter and lesson management reads or mutations                                                                           |
+| `courses:read`, `courses:write`               | Course, chapter and lesson reads (learner or management view) or permitted mutations                                               |
 | `categories:read`, `categories:write`         | Category management reads or mutations                                                                                             |
 | `articles:read`, `articles:write`             | Article/section management reads or mutations                                                                                      |
 | `news:read`, `news:write`                     | News management reads or mutations                                                                                                 |
@@ -89,7 +89,9 @@ include its read counterpart.
 Management read scopes can expose authoring information, drafts or configuration
 when the account's existing permissions allow it. `readOnlyHint` describes whether a
 tool mutates data; it does not make its output suitable for students. Use
-`student:read` for a learner-limited view. It cannot be combined with any other scope.
+`student:read` to cap the whole connection to a learner-limited view. A normal
+learner already receives learner readers under `account:access`, or under granular
+read scopes that permit those tools. `student:read` cannot be combined with another scope.
 Granular scopes can be combined, for example `courses:read courses:write` for
 course editing. Granular scope mappings determine which tools a capped connection can use. Account access follows the currently supported tool catalog and current account permissions.
 
@@ -113,8 +115,8 @@ write scope is still needed for those tools. Scope approval never supplies missi
 account permissions. Review the exact scope list on the consent page.
 
 Do not request every advertised scope:
-account access and the student view are intentionally exclusive, and management read scopes have a
-broader data view.
+`account:access` and `student:read` are mutually exclusive scope choices, and
+management read scopes can expose a broader data view when permissions allow it.
 
 ### Existing connections
 
@@ -131,37 +133,96 @@ not silently converted into student access.
 
 ## Student integrations
 
-A `student:read` connection discovers `global_search` and these reader tools,
-subject to current account permissions and enabled tenant features:
+A learner using standard `account:access` can discover the following readers and
+`global_search` according to current permissions and enabled tenant features.
+Granular `courses:read` also permits learner course, chapter and lesson readers;
+`search:read` permits global search. The optional `student:read` cap restricts the
+connection to this learner catalog, including for administrators, without granting
+any additional permission:
 
 | Tools                             | Returned data                                                                                                               |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `list_courses`, `get_course`      | Available/enrolled course metadata: title, description, category, enrollment, chapter count, price/currency and source link |
+| `list_chapters`, `get_chapter`    | Ordered chapters in free public courses or actively enrolled paid public and private courses                                |
+| `list_lessons`, `get_lesson`      | Lesson metadata and bounded authored text for content lessons; other lesson types return metadata only                      |
+| `search_lessons`                  | Search localized lesson titles and content text across accessible courses, optionally within a course                       |
 | `list_articles`, `get_article`    | Published, unarchived articles in an available language; list metadata and bounded article text                             |
 | `list_news`, `get_news`           | Published learner-visible news in an available language; list metadata and bounded news text                                |
 | `list_qa_entries`, `get_qa_entry` | Learner-visible Q&A available in the requested language; list titles and bounded answers                                    |
 
-Mentingo intersects the connected account's **current** permissions with the default
-student permission set; it never grants a missing permission or impersonates another
-student. Elevated role shortcuts are excluded. Course detail explicitly rejects
+Learner readers intersect the connected account's **current** permissions with the
+default student permission set; they never grant a missing permission or impersonate
+another student. Elevated role shortcuts are excluded within the learner view.
+Learner course detail explicitly rejects
 drafts, archived courses and unenrolled private courses, including courses authored
-by the connected account. Course results never contain chapter/lesson bodies,
-assessments, internal authoring settings, private files or signed download URLs.
+by the connected account. Course results remain metadata only. The curriculum and
+lesson tools are available to normal learner account connections and permitted
+granular read connections, as well as the optional `student:read` cap. Account and
+granular connections with management permissions retain the existing management
+view for those resources; legacy authoring and search-only connections retain
+their existing views. Course catalog metadata, including
+paid public course listings, remains searchable; finding a course does not grant access to
+its curriculum or lesson content. Curriculum and lesson access requires a published,
+unarchived public course with exactly zero price (`priceInCents = 0`), or this
+account's own active enrollment in a published paid course or a private course.
+A private course requires enrollment even when its price is zero. Drafts and archived
+courses are unavailable even to an enrolled administrator or the course author.
+These lesson rules apply to every learner reader, regardless of whether the
+connection uses account access, permitted granular reads or `student:read`.
+Administrators using `student:read` receive the same learner rules; their normal
+management connections retain management access.
+These MCP reads do not start lessons, change progress, enforce the interactive
+lesson sequence, or create AI sessions. They do not enroll the account or change
+normal web lesson access, including freemium rules.
 
-Article, news and Q&A details contain sanitized original text only, capped at 16,000
+`get_lesson` requires `courseId`, `lessonId` and `language`; optional `chapterId`
+is also checked when supplied. Use lesson and course IDs from global search to
+fetch the actual lesson content.
+Content lessons return sanitized authored text; quiz, AI mentor, video/embed and
+other lesson types return metadata only with `contentReadSupported: false`.
+No assessment answers, hidden grading, AI configuration, file credentials, playback
+or signed download URLs are exposed. `search_lessons` supports `query`, optional
+`courseId`, `language`, `page` and `pageSize` (maximum 25), filtering authorization
+before retrieving and counting results. Keyword search matches the same sanitized
+text returned to learners, scanning authorized lessons in batches of 100 without
+requiring the optional search index. Its cost grows with the accessible lesson catalog.
+
+Content lesson, article, news and Q&A details contain sanitized original text only, capped at 16,000
 characters with `contentTruncated`. Resource objects, injected signed URLs, HTML
 attributes and active HTML are excluded. Titles are capped at 500 characters and
 summaries/course descriptions at 2,000. Lists return bounded pages: courses, articles
 and Q&A accept `pageSize` up to 25; news uses the existing learner API's fixed page
-size. List queries filter titles where supported. No upload or mutation tools are
-available, and direct calls to tools outside the scope are rejected.
+size. List queries filter titles where supported. The `student:read` cap exposes no
+upload or mutation tools. Account and granular connections retain their other
+permitted tools; adding learner readers does not expand their scope or permissions.
+Direct calls outside the approved scope are rejected.
 
 ### Student search and links
 
 The same reader tool names are used for account, granular and student connections. Tool discovery selects each resource view from the approved scope and current permissions: `student:read` always uses learner projections; account and granular read connections use the management view only with that resource's management permissions, otherwise the learner view. Role names do not choose the view. `get_course` uses `courseId`, `get_qa_entry` uses `qaId`, and article/news lookup uses `id`.
 
-Student search is restricted before retrieval to accessible course metadata, news,
-articles and Q&A. It excludes lesson, directory and development-path searches.
+Learner `global_search` includes accessible lesson results in keyword and hybrid
+modes under normal account access and permitted search scopes, as well as
+`student:read`. Start with `global_search(mode: "hybrid")`, then read the result
+with `get_lesson` or `get_article` before answering. Lesson visibility and safe
+source checks run before ranking and limits. Unenrolled access requires a published,
+unarchived public course with exactly zero price (`priceInCents = 0`). Published
+paid courses and private courses require the connected account's own active
+enrollment; private courses require enrollment regardless of price. Drafts and
+archives are excluded. Paid public course metadata can still appear in course
+search results without making its lessons readable. There is
+no administrator or author bypass within the learner view. Results contain lesson/course IDs, a bounded
+sanitized passage and a canonical link, without attachment filenames or file URLs.
+Only indexed lesson titles and authored content-lesson descriptions are eligible;
+assessment questions/answers, AI configuration and lesson files are excluded.
+Both keyword and hybrid learner lesson results require current normalized text
+chunks from background indexing; unindexed or stale lessons produce no result.
+The existing `semanticStatus` indicates hybrid readiness/fallback. Use
+`search_lessons` as a literal-text fallback without an index dependency. Directory
+and development-path searches remain excluded from the learner projection.
+Legacy authoring and legacy search-only grants retain their existing views;
+management account and granular connections retain their permitted management
+results.
 Course matching uses title/description documents only, including in hybrid mode;
 lesson or private file matches cannot cause a course hit. Course matched passages
 and attachment filenames are omitted from returned results. Editorial retrieval
@@ -186,7 +247,7 @@ After connecting, return to the assistant and ask:
 
 > Show my available Mentingo capabilities. Do not change any content.
 
-For management connections, the assistant can use `get_my_capabilities` when the approved scope set exposes it. A student or search-only connection instead uses its discovered tools; for `student:read`, ask it to list available or enrolled courses. Missing tools can reflect the approved scopes as well as account permissions and enabled features.
+For management connections, the assistant can use `get_my_capabilities` when the approved scope set exposes it. A connection capped to `student:read` or search instead uses its discovered tools; for `student:read`, ask it to list available or enrolled courses. Missing tools can reflect the approved scopes as well as account permissions and enabled features.
 
 ## Try a first task
 

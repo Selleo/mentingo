@@ -70,12 +70,18 @@ export function registerMcpSearchTools(
   let permissions = MCP_GLOBAL_SEARCH_PERMISSIONS;
   if (context.searchOnly) permissions = MCP_CONTENT_SEARCH_PERMISSIONS;
   if (context.studentOnly) permissions = MCP_STUDENT_SEARCH_PERMISSIONS;
+  let description =
+    "Search Mentingo globally in an explicit language. Returns grouped matches with IDs and canonical tenant URLs for accessible courses, lessons, development paths, news, articles, Q&A, users, categories and groups. Choose keyword or hybrid mode; results follow your current permissions and course access.";
+  if (context.includeLearnerLessons)
+    description =
+      "Search accessible courses, lessons, articles, news and Q&A using keyword or hybrid semantic search. Lesson results include lesson and course IDs plus a source link; call get_lesson with courseId, lessonId and language to read the content. Free public courses and your actively enrolled paid public or private courses only, including for administrators. Excludes drafts, archives, assessment answers, AI prompts and lesson files. Lesson results depend on the current text index.";
+  else if (context.searchOnly)
+    description =
+      "Search accessible Mentingo course metadata, news, articles and Q&A in an explicit language. Returns grouped matches with IDs and canonical tenant URLs. Course lesson content is excluded. Choose keyword or hybrid mode; results follow your current permissions.";
   server.registerTool(
     "global_search",
     {
-      description: context.searchOnly
-        ? "Search accessible Mentingo course metadata, news, articles and Q&A in an explicit language. Returns grouped matches with IDs and canonical tenant URLs. Course lesson content is excluded. Choose keyword or hybrid mode; results follow your current permissions."
-        : "Search Mentingo globally in an explicit language. Returns grouped matches with IDs and canonical tenant URLs for accessible courses, lessons, development paths, news, articles, Q&A, users, categories and groups. Choose keyword or hybrid mode; results follow your current permissions and course access.",
+      description,
       inputSchema: asMcpInputSchema(globalSearchInputSchema),
       annotations: { readOnlyHint: true },
     },
@@ -86,6 +92,7 @@ export function registerMcpSearchTools(
           result = await searchService.search(searchQuery, language, user, mode, {
             contentOnly: true,
             learnerOnly: true,
+            ...(context.includeLearnerLessons ? { includeLearnerLessons: true } : {}),
           });
         } else if (mode) {
           result = await searchService.search(searchQuery, language, user, mode);
