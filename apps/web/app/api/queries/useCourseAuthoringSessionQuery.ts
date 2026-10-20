@@ -21,9 +21,14 @@ export const authoringSessionQueryOptions = (courseId: string, sessionId: string
     retry: 1,
   });
 
-/** Refreshes a snapshot without replacing a newer websocket projection. */
-export const refreshAuthoringSession = async (courseId: string, sessionId: string) => {
+/** Refreshes monotonically; scoped owners can reject late results before any cache write. */
+export const refreshAuthoringSession = async (
+  courseId: string,
+  sessionId: string,
+  shouldCommit?: () => boolean,
+) => {
   const snapshot = await getAuthoringSession(courseId, sessionId);
+  if (shouldCommit && !shouldCommit()) return snapshot;
   queryClient.setQueryData<AuthoringSession>(authoringSessionKey(courseId, sessionId), (current) =>
     !current || snapshot.snapshotSequence >= current.snapshotSequence ? snapshot : current,
   );

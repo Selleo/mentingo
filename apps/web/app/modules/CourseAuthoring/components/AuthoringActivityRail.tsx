@@ -17,7 +17,6 @@ import { match } from "ts-pattern";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { parseFetchedResearchSources } from "../authoringSources";
@@ -30,6 +29,7 @@ import {
 import { AuthoringAssetDecision } from "./AuthoringAssetDecision";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
 import { AuthoringSourceChipRow } from "./AuthoringSourceCitation";
+import { AuthoringWorkProgressBar } from "./AuthoringWorkProgressBar";
 
 import type {
   ApplicationView,
@@ -516,10 +516,6 @@ export const AuthoringActivityRail = ({
 }: Props) => {
   const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const completed = tasks.filter((task) =>
-    ["succeeded", "failed", "superseded", "stopped"].includes(task.status),
-  ).length;
-  const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
   const succeeded = tasks.filter((task) => task.status === "succeeded").length;
   const lessonTasks = tasks.filter((task) => task.kind === "lesson");
   const lessonProgress = lessonTasks.flatMap((task) =>
@@ -917,6 +913,7 @@ export const AuthoringActivityRail = ({
 
   return (
     <aside className="space-y-4">
+      <AuthoringWorkProgressBar tasks={tasks} busy={busy} />
       {compact ? (
         <AuthoringCollapsibleSection
           title={t("courseAuthoring.activityRail.liveWork")}
@@ -975,13 +972,6 @@ export const AuthoringActivityRail = ({
               {connectionLabel}
             </Badge>
           </div>
-          <div className="mt-4 flex items-center justify-between text-xs text-neutral-600">
-            <span>
-              {t("courseAuthoring.activityRail.taskProgress", { completed, total: tasks.length })}
-            </span>
-            <span>{t("courseAuthoring.activityRail.progress", { value: progress })}</span>
-          </div>
-          <Progress value={progress} className="mt-2 h-1.5" />
           <div className="mt-4 space-y-2">
             {tasks.length === 0 && (
               <p className="text-sm text-neutral-600">{t("courseAuthoring.activityRail.noWork")}</p>

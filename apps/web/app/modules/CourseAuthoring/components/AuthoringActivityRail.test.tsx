@@ -451,7 +451,7 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(screen.queryByText("task_execution_failed")).toBeNull();
     expect(screen.getByText("Live work")).toBeVisible();
     expect(screen.queryByText("live")).toBeNull();
-    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(screen.getByRole("progressbar")).not.toHaveAttribute("aria-valuenow");
     expect(screen.queryByText("succeeded")).toBeNull();
     expect(screen.getByText("1 of 1 lessons complete")).toBeVisible();
 

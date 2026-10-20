@@ -150,37 +150,46 @@ const ToggleRow = ({
   checked: boolean;
   disabled?: boolean;
   onToggle: () => void;
-}) => (
-  <button
-    type="button"
-    className="flex min-h-10 w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
-    disabled={disabled}
-    aria-pressed={checked}
-    onClick={onToggle}
-  >
-    <span className={cn("shrink-0", checked ? "text-primary-700" : "text-neutral-500")}>
-      {icon}
-    </span>
-    <span className="min-w-0 flex-1">
-      <span className="block text-sm text-neutral-900">{label}</span>
-      {help && <span className="block truncate text-xs text-neutral-500">{help}</span>}
-    </span>
-    <span
-      aria-hidden="true"
-      className={cn(
-        "relative h-[18px] w-8 shrink-0 rounded-full transition-colors",
-        checked ? "bg-primary-600" : "bg-neutral-200",
-      )}
+}) => {
+  const helpId = useId();
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-describedby={help ? helpId : undefined}
+      className="flex min-h-10 w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
+      disabled={disabled}
+      aria-pressed={checked}
+      onClick={onToggle}
     >
-      <span
-        className={cn(
-          "absolute top-0.5 size-3.5 rounded-full bg-white shadow-sm transition-transform",
-          checked ? "translate-x-4" : "translate-x-0.5",
+      <span className={cn("shrink-0", checked ? "text-primary-700" : "text-neutral-500")}>
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm text-neutral-900">{label}</span>
+        {help && (
+          <span id={helpId} className="block whitespace-normal text-xs text-neutral-500">
+            {help}
+          </span>
         )}
-      />
-    </span>
-  </button>
-);
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "relative h-[18px] w-8 shrink-0 rounded-full transition-colors",
+          checked ? "bg-primary-600" : "bg-neutral-200",
+        )}
+      >
+        <span
+          className={cn(
+            "absolute top-0.5 size-3.5 rounded-full bg-white shadow-sm transition-transform",
+            checked ? "translate-x-4" : "translate-x-0.5",
+          )}
+        />
+      </span>
+    </button>
+  );
+};
 
 type ScopeViewProps = Pick<
   Props,
@@ -682,6 +691,7 @@ export const AuthoringToolsPopover = ({
                     <ToggleRow
                       icon={<Globe2 className="size-4" aria-hidden="true" />}
                       label={t("courseAuthoring.tools.webSearch")}
+                      help={t("courseAuthoring.tools.webSearchHelp")}
                       checked={policy.webEnabled}
                       disabled={disabled}
                       onToggle={toggleWebSearch}
@@ -689,6 +699,7 @@ export const AuthoringToolsPopover = ({
                     <ToggleRow
                       icon={<Brain className="size-4" aria-hidden="true" />}
                       label={t("courseAuthoring.tools.deepThinking")}
+                      help={t("courseAuthoring.tools.deepResearchHelp")}
                       checked={policy.researchDepth === "deep"}
                       disabled={disabled}
                       onToggle={toggleDeepThinking}

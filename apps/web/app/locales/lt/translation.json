@@ -6240,6 +6240,12 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "DI užbaigė šią užklausą. Atidarykite seansą ir peržiūrėkite rezultatą.",
+      "failed": "DI nepavyko užbaigti šios užklausos. Atidarykite seansą ir peržiūrėkite atkūrimo parinktis.",
+      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
+      "open": "Atidaryti seansą"
+    },
     "changeSet": {
       "ready": {
         "status": "Paruošta peržiūrai",
@@ -6532,7 +6538,9 @@
       "scopeWholeCourse": "Visas kursas",
       "scopeSelected": "Pasirinkta programa",
       "webSearch": "Paieška internete",
-      "deepThinking": "Išsamus tyrimas",
+      "deepThinking": "Išsami šaltinių paieška",
+      "deepResearchHelp": "Išsamiau tiria leidžiamus šaltinius. Neįjungia interneto prieigos.",
+      "webSearchHelp": "Leidžia ieškoti viešose interneto svetainėse.",
       "strictSourceMode": "Tik mano šaltiniai",
       "strictSourceModeHelp": "Tik užklausa ir pridėti failai",
       "back": "Atgal"
@@ -6609,9 +6617,10 @@
       "contentPending": "Šios pamokos turinys dar nesugeneruotas.",
       "readOnly": "Rengiamo turinio peržiūra yra tik skaitoma, kol ją pritaikysite."
     },
-    "openWorkspace": "Generuoti su DI",
+    "openWorkspace": "Redaguoti su DI",
     "openLegacyDraft": "Tęsti seną juodraštį",
     "activityRail": {
+      "inProgress": "Vykdoma… Eiga bus atnaujinta užbaigus kitą veiksmą.",
       "retryFailedParts": "Kartoti nepavykusias dalis",
       "retryProvider": "Kartoti prisijungimą",
       "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
