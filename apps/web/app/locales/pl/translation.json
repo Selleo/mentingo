@@ -6556,6 +6556,14 @@
       "understandingRequest": "Czytanie Twojej prośby…",
       "checkingCourse": "Sprawdzanie spójności kursu…",
       "planningOutline": "Planowanie konspektu kursu…",
+      "outlineProgress": {
+        "drafting": "Tworzenie konspektu…",
+        "reviewing": "Sprawdzanie konspektu…",
+        "repairing": "Dopracowywanie konspektu…",
+        "finalizing": "Przygotowywanie konspektu do przeglądu…",
+        "chapters": "Rozdziały w szkicu: {{count}}",
+        "iteration": "Przebieg {{count}}"
+      },
       "planningLessons": "Planowanie lekcji…",
       "writingLesson": "Pisanie lekcji…",
       "distinctTaskLabel": "{{label}} · {{number}}",

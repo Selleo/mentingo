@@ -6493,6 +6493,14 @@
       "understandingRequest": "Skaitoma jūsų užklausa…",
       "checkingCourse": "Tikrinamas kurso nuoseklumas…",
       "planningOutline": "Planuojama kurso struktūra…",
+      "outlineProgress": {
+        "drafting": "Rengiama struktūra…",
+        "reviewing": "Tikrinama struktūra…",
+        "repairing": "Tobulinama struktūra…",
+        "finalizing": "Struktūra ruošiama peržiūrai…",
+        "chapters": "Skyriai juodraštyje: {{count}}",
+        "iteration": "Etapas {{count}}"
+      },
       "planningLessons": "Planuojamos pamokos…",
       "writingLesson": "Rašoma pamoka…",
       "distinctTaskLabel": "{{label}} · {{number}}",

@@ -6227,6 +6227,14 @@
       "preparingResponse": "Préparation de votre réponse…",
       "understandingRequest": "Lecture de votre demande…",
       "planningOutline": "Planification du plan du cours…",
+      "outlineProgress": {
+        "drafting": "Rédaction du plan…",
+        "reviewing": "Vérification du plan…",
+        "repairing": "Amélioration du plan…",
+        "finalizing": "Préparation du plan pour révision…",
+        "chapters": "Chapitres dans le brouillon : {{count}}",
+        "iteration": "Passe {{count}}"
+      },
       "checkingCourse": "Vérification de la cohérence du cours…",
       "planningLessons": "Planification des leçons…",
       "writingLesson": "Rédaction d’une leçon…",

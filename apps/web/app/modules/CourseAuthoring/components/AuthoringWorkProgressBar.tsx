@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
+import { authoringOutlineProgressLabel } from "../authoringOutlineProgress";
+
 import type { AuthoringTask } from "../courseAuthoring.types";
 
 /** A unit counter is meaningful only when the server supplies the planned total. */
@@ -40,16 +42,30 @@ export const AuthoringWorkProgressBar = ({
       )
     : undefined;
   const chapters = planningTask?.workProgress?.chapters;
-  const total =
+  const outlineProgress = sameRequest
+    ? tasks.find(
+        (task) =>
+          task.status === "running" &&
+          task.kind === "plan" &&
+          task.workProgress?.stage === "outline" &&
+          task.workProgress.outlinePhase &&
+          task.workProgress.totalSteps &&
+          task.workProgress.completedSteps !== undefined,
+      )?.workProgress
+    : undefined;
+  let total =
     chapters?.length ?? Math.max(0, ...lessonProgress.map((item) => item.totalLessons ?? 0));
-  const completed = chapters
-    ? chapters.filter((chapter) => chapter.status === "complete").length
-    : Math.max(0, ...lessonProgress.map((item) => item.completedLessons ?? 0));
+  let completed = Math.max(0, ...lessonProgress.map((item) => item.completedLessons ?? 0));
+  if (chapters) completed = chapters.filter((chapter) => chapter.status === "complete").length;
+  if (outlineProgress) {
+    total = outlineProgress.totalSteps ?? 0;
+    completed = outlineProgress.completedSteps ?? 0;
+  }
   const hasCount = total > 0;
   if (!active && !busy && !hasCount) return null;
 
   const value = hasCount ? Math.min(100, (completed / total) * 100) : undefined;
-  const label = hasCount
+  let label = hasCount
     ? t(
         chapters
           ? "courseAuthoring.activityRail.chapterPlanningProgress"
@@ -57,6 +73,7 @@ export const AuthoringWorkProgressBar = ({
         { completed, total },
       )
     : t("courseAuthoring.activityRail.inProgress");
+  if (outlineProgress) label = authoringOutlineProgressLabel(outlineProgress, t);
 
   const done = hasCount && completed >= total;
 

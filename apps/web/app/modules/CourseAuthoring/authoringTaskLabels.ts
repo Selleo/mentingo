@@ -1,9 +1,14 @@
 import { match } from "ts-pattern";
 
+import { authoringOutlineProgressLabel } from "./authoringOutlineProgress";
+
 import type { AuthoringTask } from "./courseAuthoring.types";
 
 /** Names what the task is doing from its kind, falling back to the reported phase. */
-export const authoringPhaseLabel = (task: AuthoringTask, t: (key: string) => string) => {
+export const authoringPhaseLabel = (
+  task: AuthoringTask,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
   if (task.phase === "preparing") return t("courseAuthoring.conversation.preparingResponse");
   if (task.status === "queued" || task.status === "waiting_dependencies") {
     return t("courseAuthoring.conversation.preparingResponse");
@@ -20,6 +25,13 @@ export const authoringPhaseLabel = (task: AuthoringTask, t: (key: string) => str
   }
   if (task.phase === "researching" || task.phase === "source_working") {
     return t("courseAuthoring.conversation.readingSources");
+  }
+  if (
+    task.kind === "plan" &&
+    task.workProgress?.stage === "outline" &&
+    task.workProgress.outlinePhase
+  ) {
+    return authoringOutlineProgressLabel(task.workProgress, t);
   }
   if (task.kind === "course_review" || task.phase === "reviewing") {
     return t("courseAuthoring.conversation.checkingCourse");

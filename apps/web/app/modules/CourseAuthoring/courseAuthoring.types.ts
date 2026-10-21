@@ -33,6 +33,12 @@ export type AuthoringWorkProgressChapter = {
 
 export type AuthoringWorkProgress = {
   stage: AuthoringWorkProgressStage;
+  outlinePhase?: "drafting" | "reviewing" | "repairing" | "finalizing";
+  outlineIteration?: number;
+  draftedChapters?: number;
+  draftedLessons?: number;
+  completedSteps?: number;
+  totalSteps?: number;
   chapters?: AuthoringWorkProgressChapter[];
   completedLessons?: number;
   totalLessons?: number;

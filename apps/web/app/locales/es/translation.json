@@ -6441,6 +6441,14 @@
       "preparingResponse": "Preparando tu respuesta…",
       "understandingRequest": "Leyendo tu solicitud…",
       "planningOutline": "Planificando el esquema del curso…",
+      "outlineProgress": {
+        "drafting": "Redactando el esquema…",
+        "reviewing": "Comprobando el esquema…",
+        "repairing": "Ajustando el esquema…",
+        "finalizing": "Preparando el esquema para revisión…",
+        "chapters": "Capítulos en el borrador: {{count}}",
+        "iteration": "Pasada {{count}}"
+      },
       "checkingCourse": "Comprobando la coherencia del curso…",
       "planningLessons": "Planificando las lecciones…",
       "writingLesson": "Escribiendo una lección…",

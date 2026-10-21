@@ -6505,6 +6505,14 @@
       "understandingRequest": "Reading your request…",
       "checkingCourse": "Checking course coherence…",
       "planningOutline": "Planning the course outline…",
+      "outlineProgress": {
+        "drafting": "Drafting outline…",
+        "reviewing": "Checking outline…",
+        "repairing": "Refining outline…",
+        "finalizing": "Preparing outline for review…",
+        "chapters": "Chapters in draft: {{count}}",
+        "iteration": "Pass {{count}}"
+      },
       "planningLessons": "Planning the lessons…",
       "writingLesson": "Writing a lesson…",
       "distinctTaskLabel": "{{label}} · {{number}}",

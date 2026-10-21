@@ -6497,6 +6497,14 @@
       "understandingRequest": "Čtení vašeho požadavku…",
       "checkingCourse": "Kontrola návaznosti kurzu…",
       "planningOutline": "Plánování osnovy kurzu…",
+      "outlineProgress": {
+        "drafting": "Vytváření osnovy…",
+        "reviewing": "Kontrola osnovy…",
+        "repairing": "Dopracování osnovy…",
+        "finalizing": "Příprava osnovy k posouzení…",
+        "chapters": "Kapitoly v návrhu: {{count}}",
+        "iteration": "Průchod {{count}}"
+      },
       "planningLessons": "Plánování lekcí…",
       "writingLesson": "Psaní lekce…",
       "distinctTaskLabel": "{{label}} · {{number}}",

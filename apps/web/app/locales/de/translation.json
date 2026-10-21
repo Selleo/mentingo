@@ -6484,6 +6484,14 @@
       "understandingRequest": "Anfrage wird gelesen…",
       "checkingCourse": "Kurskohärenz prüfen…",
       "planningOutline": "Kursgliederung wird geplant…",
+      "outlineProgress": {
+        "drafting": "Gliederung wird erstellt…",
+        "reviewing": "Gliederung wird geprüft…",
+        "repairing": "Gliederung wird überarbeitet…",
+        "finalizing": "Gliederung wird zur Durchsicht vorbereitet…",
+        "chapters": "Kapitel im Entwurf: {{count}}",
+        "iteration": "Durchgang {{count}}"
+      },
       "planningLessons": "Lektionen werden geplant…",
       "writingLesson": "Lektion wird geschrieben…",
       "distinctTaskLabel": "{{label}} · {{number}}",

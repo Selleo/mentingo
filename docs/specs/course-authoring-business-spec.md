@@ -338,6 +338,12 @@ Live work has a progress bar that remains visible when its activity details are 
 chapter or lesson totals supply a completion count; work without a known total shows an indeterminate bar.
 Counts describe the current stage, rather than an estimate of the entire request's remaining time.
 
+Initial outline planning reports drafting, checking, refinement, and preparation for review.
+The existing bar advances after the draft and its checks finish, while streamed chapter counts
+and the current pass update its status text. Chapter counts describe a provisional draft;
+they do not mean the chapters are approved or written. Additional refinement passes keep the
+draft milestone visible, and the bar never reaches full completion before the task is ready.
+
 While the author remains signed in with Mentingo open, requests observed running can notify them
 when work finishes, fails or needs an answer, including after the drawer closes or another session
 is selected. The session currently visible in the drawer or standalone conversation does not

@@ -17,6 +17,93 @@ const task = (overrides: Partial<AuthoringTask> = {}): AuthoringTask => ({
 });
 
 describe("authoring progress", () => {
+  it("advances only at real outline milestones and shows streamed draft counts and repair passes", () => {
+    const outlineProgress = {
+      stage: "outline" as const,
+      outlinePhase: "drafting" as const,
+      outlineIteration: 1,
+      draftedChapters: 0,
+      draftedLessons: 0,
+      completedSteps: 0,
+      totalSteps: 3,
+    };
+    const { rerender } = render(
+      <AuthoringWorkProgressBar tasks={[task({ kind: "plan", workProgress: outlineProgress })]} />,
+    );
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0");
+    rerender(
+      <AuthoringWorkProgressBar
+        tasks={[
+          task({
+            kind: "plan",
+            workProgress: {
+              ...outlineProgress,
+              draftedChapters: 6,
+              draftedLessons: 18,
+            },
+          }),
+        ]}
+      />,
+    );
+    expect(screen.getByRole("progressbar")).toHaveAccessibleName(/Chapters in draft: 6/);
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0");
+    rerender(
+      <AuthoringWorkProgressBar
+        tasks={[
+          task({
+            kind: "plan",
+            workProgress: {
+              ...outlineProgress,
+              outlinePhase: "reviewing",
+              completedSteps: 1,
+            },
+          }),
+        ]}
+      />,
+    );
+    expect(Number(screen.getByRole("progressbar").getAttribute("aria-valuenow"))).toBeCloseTo(
+      100 / 3,
+    );
+    expect(screen.getByRole("progressbar")).toHaveAccessibleName(/Checking outline/);
+    rerender(
+      <AuthoringWorkProgressBar
+        tasks={[
+          task({
+            kind: "plan",
+            workProgress: {
+              ...outlineProgress,
+              outlinePhase: "repairing",
+              outlineIteration: 2,
+              completedSteps: 1,
+            },
+          }),
+        ]}
+      />,
+    );
+    expect(screen.getByRole("progressbar")).toHaveAccessibleName(/Refining outline.*Pass 2/);
+    expect(Number(screen.getByRole("progressbar").getAttribute("aria-valuenow"))).toBeCloseTo(
+      100 / 3,
+    );
+    rerender(
+      <AuthoringWorkProgressBar
+        tasks={[
+          task({
+            kind: "plan",
+            workProgress: {
+              ...outlineProgress,
+              outlinePhase: "finalizing",
+              completedSteps: 2,
+            },
+          }),
+        ]}
+      />,
+    );
+    expect(Number(screen.getByRole("progressbar").getAttribute("aria-valuenow"))).toBeCloseTo(
+      200 / 3,
+    );
+    expect(screen.getByRole("progressbar")).toHaveAccessibleName(/Preparing outline for review/);
+  });
+
   it("shows indeterminate progress when tasks may still expand", () => {
     render(
       <AuthoringWorkProgressBar tasks={[task(), task({ taskId: "failed", status: "failed" })]} />,
