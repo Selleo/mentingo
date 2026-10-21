@@ -16,6 +16,7 @@ export const COURSES_INLINE_EDIT_HANDLES = {
   FEATURED_COURSE_EDIT: "courses-inline-edit-featured-course",
   FEATURED_COURSE_CLEAR: "courses-inline-edit-featured-course-clear",
   COURSE_PICKER_DIALOG: "courses-inline-edit-course-picker-dialog",
+  COURSE_PICKER_LOAD_MORE: "courses-inline-edit-course-picker-load-more",
   COURSE_PICKER_SEARCH: "courses-inline-edit-course-picker-search",
   coursePickerOption: (courseId: string) => `courses-inline-edit-course-picker-option-${courseId}`,
   addCourseButton: (categoryId: string) => `courses-inline-edit-add-course-${categoryId}`,
