@@ -29,10 +29,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
-import {
-  NATIVE_ARCHIVE_DOWNLOAD_FILENAME,
-  NATIVE_ARCHIVE_LIMITS,
-} from "../native-archive.constants";
+import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 import {
   nativeArchiveJobResponseSchema,
   nativeArchiveStatusResponseSchema,
@@ -42,6 +39,7 @@ import {
 import { NativeArchiveImportService } from "../services/native-archive-import.service";
 import { NativeArchiveJobService } from "../services/native-archive-job.service";
 import { NativeArchiveTusService } from "../services/native-archive-tus.service";
+import { streamNativeArchiveDownload } from "../utils/native-archive-download.utils";
 
 @Controller("native-archives")
 export class NativeArchiveController {
@@ -269,14 +267,6 @@ export class NativeArchiveController {
     @Res() response: Response,
   ) {
     const file = await this.nativeArchiveJobService.getArchiveDownloadStream(id, actor);
-    response.setHeader("Content-Type", "application/zip");
-    response.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${NATIVE_ARCHIVE_DOWNLOAD_FILENAME}"`,
-    );
-    response.setHeader("Cache-Control", "private, no-store");
-
-    if (file.contentLength) response.setHeader("Content-Length", file.contentLength);
-    file.stream.pipe(response);
+    streamNativeArchiveDownload(file, response);
   }
 }

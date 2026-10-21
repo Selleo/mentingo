@@ -3550,3 +3550,42 @@ export const reportsExports = pgTable(
     expiryIdx: index("reports_exports_tenant_expiry_idx").on(table.tenantId, table.expiresAt),
   })),
 );
+
+export const contentMarketplaceCourseLineages = pgTable(
+  "content_marketplace_course_lineages",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .unique()
+      .notNull(),
+    listingId: uuid("listing_id").notNull(),
+    versionId: uuid("version_id").notNull(),
+    acquisitionId: uuid("acquisition_id").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("content_marketplace_course_lineages"),
+);
+
+export const nativeArchiveEntityMap = pgTable(
+  "native_archive_entity_map",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    entityType: text("entity_type").notNull().$type<MasterCourseEntityType>(),
+    sourceEntityId: uuid("source_entity_id").notNull(),
+    targetEntityId: uuid("target_entity_id").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("native_archive_entity_map", (table) => ({
+    sourceUniqueIdx: uniqueIndex("native_archive_entity_map_source_unique_idx").on(
+      table.courseId,
+      table.entityType,
+      table.sourceEntityId,
+    ),
+  })),
+);

@@ -36,7 +36,13 @@ export const COURSE_TRANSFER_CLAIM_OUTCOMES = {
 
 export const COURSE_TRANSFER_MODES = {
   SYNC: "sync",
+  ARCHIVE_SYNC: "archive-sync",
   DUPLICATE: "duplicate",
+} as const;
+
+export const COURSE_TRANSFER_ENTITY_MAP_SCOPES = {
+  EXPORT: "export",
+  ARCHIVE_COURSE: "archive-course",
 } as const;
 
 export const COURSE_TRANSFER_RESOURCE_REFERENCE_KINDS = {

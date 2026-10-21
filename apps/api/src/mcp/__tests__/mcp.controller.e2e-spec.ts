@@ -865,15 +865,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
           for (const fixture of [paid, privateCourse]) expect(ids).not.toContain(fixture.lesson.id);
         }
         await runAsTenant(reader.tenantId, async () =>
-          db
-            .insert(studentCourses)
-            .values(
-              [paid, privateCourse].map((fixture) => ({
-                courseId: fixture.course.id,
-                studentId: reader.user.id,
-                status: COURSE_ENROLLMENT.ENROLLED,
-              })),
-            ),
+          db.insert(studentCourses).values(
+            [paid, privateCourse].map((fixture) => ({
+              courseId: fixture.course.id,
+              studentId: reader.user.id,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            })),
+          ),
         );
         for (const fixture of [paid, privateCourse])
           expect((await call("get_lesson", fixture.args, reader)).lesson.content).toContain(

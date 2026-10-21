@@ -57,7 +57,8 @@
       "embeddingUnavailable": "Die Verarbeitung von KI-Dokumenten ist nicht verfügbar.",
       "unsupportedVersion": "Diese Mentingo-Paketversion wird nicht unterstützt.",
       "missingAsset": "Im Mentingo-Paket fehlt eine erforderliche Datei.",
-      "invalidArchive": "Diese ZIP-Datei ist kein gültiges Mentingo-Paket."
+      "invalidArchive": "Diese ZIP-Datei ist kein gültiges Mentingo-Paket.",
+      "courseNotSyncable": "Dieser Kurs wurde als bearbeitbare Kopie hinzugefügt und kann nicht synchronisiert werden. Löschen Sie ihn und fügen Sie ihn erneut aus dem Marktplatz hinzu."
     }
   },
   "aiConversations": {
@@ -2225,6 +2226,7 @@
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
         "phishing_report_read": "Berichte zu Phishing-Simulationen anzeigen.",
+        "content_marketplace_browse": "Den Content-Marktplatz durchsuchen und Kurse daraus kopieren (Kopieren erfordert auch das Erstellen von Kursen).",
         "account_read_self": "Eigene Kontodaten anzeigen.",
         "account_update_self": "Eigene Kontodaten bearbeiten.",
         "user_read_self": "Eigenes Benutzerprofil anzeigen.",
@@ -6073,7 +6075,8 @@
       "ownerInactive": "Der Besitzer des API-Schlüssels ist nicht mehr aktiv",
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
-      "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+      "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header",
+      "invalidPluginOrigin": "Verwenden Sie einen HTTPS-Plugin-Ursprung ohne Pfad (HTTP localhost ist in der Entwicklung erlaubt)"
     }
   },
   "luma": {
@@ -8060,6 +8063,56 @@
     "picker": {
       "search": "Suchen",
       "empty": "Keine Treffer"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Kategorie / Thema",
+    "allCategories": "Alle Kategorien",
+    "duration": "Dauer",
+    "anyDuration": "Beliebige Dauer",
+    "clearFilters": "Filter löschen",
+    "durations": {
+      "short": "Unter 1 Stunde",
+      "medium": "1–3 Stunden",
+      "long": "Über 3 Stunden"
+    },
+    "discover": "Entdecken Sie Kurse, die Kompetenzen in Ihrer Organisation stärken.",
+    "search": "Kurse, Themen oder Kompetenzen suchen…",
+    "clearSearch": "Suche löschen",
+    "recentTitle": "Kürzlich aktualisiert",
+    "recentDescription": "Entdecken Sie die neuesten Kursaktualisierungen im Marktplatz.",
+    "recentBadge": "Kürzlich aktualisiert",
+    "allCourses": "Alle Kurse",
+    "results": "Gefundene Kurse: {{count}}",
+    "sortBy": "Sortieren nach",
+    "sortRecent": "Zuletzt aktualisiert",
+    "sortTitle": "Titel (A–Z)",
+    "noResults": "Keine passenden Kurse gefunden. Versuchen Sie ein anderes Suchwort.",
+    "addToCourses": "Zu Kursen hinzufügen",
+    "title": "Content-Marktplatz",
+    "description": "Durchsuchen Sie ausgewählte Kurse und kopieren Sie sie in Ihre Organisation.",
+    "loading": "Wird geladen…",
+    "retry": "Erneut versuchen",
+    "unavailable": "Der Content-Marktplatz ist für diese Organisation nicht aktiviert. Wenden Sie sich an Ihren Administrator.",
+    "serviceError": "Der Content-Marktplatz ist nicht verfügbar. Bitte versuchen Sie es erneut.",
+    "empty": "Im Marktplatz sind noch keine Kurse verfügbar.",
+    "updated": "Aktualisiert am {{date}}",
+    "copying": "Kurs wird kopiert…",
+    "copyNotice": "Der Kurs wird als geteilter Kurs hinzugefügt, der nicht bearbeitet werden kann. Die Synchronisierung bringt ihn auf die neueste Version und behält den Lernfortschritt bei.",
+    "copyComplete": "Der Kurs wurde in Ihre Organisation kopiert.",
+    "copyUpdated": "Ihre Kopie dieses Kurses wurde aktualisiert.",
+    "copyFailed": "Der Kurs konnte nicht kopiert werden. Bitte versuchen Sie es erneut.",
+    "openCourse": "Kurs öffnen",
+    "sync": "Synchronisieren",
+    "syncing": "Wird synchronisiert…",
+    "syncNotice": "Aktualisieren Sie Ihre Kopie auf die neueste Version dieses Kurses.",
+    "firstPage": "Zur ersten Seite",
+    "error": {
+      "invalidQuery": "Ungültige Such- oder Seitenparameter für den Marktplatz.",
+      "unavailable": "Der Content-Marktplatz ist für diese Organisation nicht verfügbar.",
+      "listingNotFound": "Dieser Marktplatz-Kurs wurde nicht gefunden.",
+      "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
+      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
     }
   }
 }

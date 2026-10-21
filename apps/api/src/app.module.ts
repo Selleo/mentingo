@@ -50,6 +50,7 @@ import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PasswordChangeRequiredGuard } from "./common/guards/password-change-required.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
+import { ContentMarketplaceModule } from "./content-marketplace/content-marketplace.module";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
 import { EmailTemplateModule } from "./email-templates/email-template.module";
@@ -199,6 +200,7 @@ import type { RedisClient } from "src/redis";
     AudioModule,
     LumaModule,
     PhishingModule,
+    ContentMarketplaceModule,
     McpModule,
     LiveTrainingModule,
     CalendarModule,

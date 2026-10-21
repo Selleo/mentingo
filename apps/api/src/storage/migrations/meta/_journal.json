@@ -1548,6 +1548,20 @@
       "when": 1792055706227,
       "tag": "0220_course_transfer_reliability",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1792412798636,
+      "tag": "0221_add_content_marketplace_lineages_and_native_archive_entity_map",
+      "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1792412800728,
+      "tag": "0222_enable_content_marketplace_lineages_and_native_archive_entity_map_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -113,6 +113,7 @@ describe("NativeArchiveImportService", () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
     );
 
     const result = await service.importArchive("archive.zip", ACTOR);
@@ -183,6 +184,7 @@ describe("NativeArchiveImportService", () => {
       unusedDependency,
       unusedDependency,
       unusedDependency,
+      unusedDependency,
     );
 
     const result = await service.importArchive("archive.zip", ACTOR);
@@ -237,6 +239,7 @@ describe("NativeArchiveImportService", () => {
       unusedDependency,
       unusedDependency,
       unusedDependency,
+      unusedDependency,
     );
 
     await expect(service.importArchive("archive.zip", ACTOR)).rejects.toBeInstanceOf(
@@ -280,6 +283,7 @@ describe("NativeArchiveImportService", () => {
       unusedDependency,
       assetsService as never,
       new NativeArchiveValidationService(),
+      unusedDependency,
       unusedDependency,
       unusedDependency,
       unusedDependency,

@@ -91,6 +91,9 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@4.6.5))(zod@4.6.5)
+      '@mentingo/content-marketplace-sdk':
+        specifier: 0.1.0
+        version: 0.1.0
       '@mentingo/luma-sdk':
         specifier: 0.4.0
         version: 0.4.0
@@ -2450,11 +2453,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.hirok.io'
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.hirok.io'
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild/aix-ppc64@0.19.11':
     resolution: {integrity: sha512-FnzU0LyE3ySQk7UntJO4+qIiQgI7KoODnZg5xzXIrFJlKd2P2gwHsHY4927xj9y5PJmJSzULiUCWmv7iWnNa7g==}
@@ -4507,6 +4510,10 @@ packages:
 
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
+
+  '@mentingo/content-marketplace-sdk@0.1.0':
+    resolution: {integrity: sha512-E4ONXeomg7QojFSdyempCqtRkzGgX10moG/pHfGXODn6h/Lq5CSNKKbJcFbvM8jtEbt5IUV/yZQGrXPDICJLYA==}
+    engines: {node: '>=22.15.0'}
 
   '@mentingo/luma-sdk@0.4.0':
     resolution: {integrity: sha512-2icUB/SSp0MszfNptdSsNqtARg8vRIU7eDUXddX9Gzd41u2dA7fObGjSA2tl1yweYGx2FiOI3ymDWEoDcRXR3g==}
@@ -14711,6 +14718,7 @@ packages:
   next@14.1.4:
     resolution: {integrity: sha512-1WTaXeSrUwlz/XcnhGTY7+8eiaFvdet5z9u3V2jb+Ek1vFo0VhHKSAIJvDWfQpttWjnyw14kBeq28TPq7bTeEQ==}
     engines: {node: '>=18.17.0'}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -22081,6 +22089,8 @@ snapshots:
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
+
+  '@mentingo/content-marketplace-sdk@0.1.0': {}
 
   '@mentingo/luma-sdk@0.4.0':
     dependencies:

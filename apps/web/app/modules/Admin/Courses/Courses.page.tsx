@@ -39,6 +39,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { ContentMarketplaceLink } from "~/modules/ContentMarketplace/components/ContentMarketplaceLink";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
@@ -354,6 +355,7 @@ const Courses = () => {
           <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
         </div>
         <div className="ml-auto flex gap-3">
+          <ContentMarketplaceLink />
           {canManageCourses && (
             <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
               <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>

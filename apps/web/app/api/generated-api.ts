@@ -204,6 +204,7 @@ export interface CurrentUserResponse {
     permissions: (
       | "phishing.manage"
       | "phishing.report_read"
+      | "content_marketplace.browse"
       | "account.read_self"
       | "account.update_self"
       | "user.read_self"
@@ -31562,6 +31563,8 @@ export interface UpdateTenantApiKeysBody {
     | "PHISHING_API_KEY"
     | "PHISHING_BASE_URL"
     | "PHISHING_WEBHOOK_SECRET"
+    | "CONTENT_MARKETPLACE_BASE_URL"
+    | "CONTENT_MARKETPLACE_API_KEY"
     | "MICROSOFT_CLIENT_ID"
     | "MICROSOFT_CLIENT_SECRET"
     | "MICROSOFT_CALENDAR_CLIENT_ID"
@@ -31604,6 +31607,8 @@ export interface UpdateTenantApiKeysResponse {
       | "PHISHING_API_KEY"
       | "PHISHING_BASE_URL"
       | "PHISHING_WEBHOOK_SECRET"
+      | "CONTENT_MARKETPLACE_BASE_URL"
+      | "CONTENT_MARKETPLACE_API_KEY"
       | "MICROSOFT_CLIENT_ID"
       | "MICROSOFT_CLIENT_SECRET"
       | "MICROSOFT_CALENDAR_CLIENT_ID"
@@ -31783,6 +31788,84 @@ export interface UnenrollGroupsBody {
 export interface UnenrollGroupsResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetTenantCoursesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    thumbnailUrl: string | null;
+    status: "draft" | "published" | "private";
+    originType: "regular" | "master" | "exported";
+    chapterCount: number;
+    lessonCount: number;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+    };
+    updatedAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface StartCourseArchiveExportResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface GetCourseArchiveExportStatusResponse {
+  data: {
+    jobId: string;
+    state: string;
+    result: null | {
+      kind: "course" | "learning-path";
+      /** @format uuid */
+      rootId: string;
+      alreadyExists?: boolean;
+      createdCourseIds?: string[];
+      reusedCourseIds?: string[];
+    };
+    failedReason: string | null;
+  };
+}
+
+export interface SaveContentMarketplaceConnectionBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  baseUrl: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  apiKey: string;
+}
+
+export interface SaveContentMarketplaceConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface CheckContentMarketplaceConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    reachable: boolean;
+    enabled: boolean;
   };
 }
 
@@ -31972,6 +32055,84 @@ export interface CreateSupportSessionResponse {
   data: {
     redirectUrl: string;
     expiresAt: string;
+  };
+}
+
+export interface GetContentMarketplaceAvailabilityResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetContentMarketplaceFilterOptionsResponse {
+  data: {
+    categories: string[];
+  };
+}
+
+export interface ListContentMarketplaceListingsResponse {
+  data: ({
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    locales: string[];
+    hasThumbnail: boolean;
+    /** @format uuid */
+    versionId: string;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+      /** @min 0 */
+      lessonCount: number;
+    };
+    updatedAt: string;
+  } & {
+    copiedCourse: {
+      /** @format uuid */
+      id: string;
+      isOutdated: boolean;
+    } | null;
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetContentMarketplaceListingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    locales: string[];
+    hasThumbnail: boolean;
+    /** @format uuid */
+    versionId: string;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+      /** @min 0 */
+      lessonCount: number;
+    };
+    updatedAt: string;
+  } & {
+    copiedCourse: {
+      /** @format uuid */
+      id: string;
+      isOutdated: boolean;
+    } | null;
+  };
+}
+
+export interface CopyContentMarketplaceListingResponse {
+  data: {
+    jobId: string;
+    /** @format uuid */
+    acquisitionId: string;
   };
 }
 
@@ -43818,6 +43979,135 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Returns the non-archived courses of the tenant selected by X-Tenant-Id, with localized title and description, languages, a signed thumbnail URL and chapter and lesson counts. Requires a managing tenant key whose owner has the course export permission. Titles and descriptions use the given language and fall back to each course's base language.
+     *
+     * @tags Integration
+     * @name IntegrationCoursesControllerGetTenantCourses
+     * @summary List courses for an external catalog
+     * @request GET:/api/integration/courses
+     */
+    integrationCoursesControllerGetTenantCourses: (
+      query?: {
+        /** @maxLength 200 */
+        keyword?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTenantCoursesResponse, void>({
+        path: `/api/integration/courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Queues a native archive (mentingo-package zip) export of a course in the tenant selected by X-Tenant-Id and returns the job id. Poll GET /integration/native-archive/jobs/:jobId until the job completes, then download the archive. Requires a managing tenant key whose owner has the course export permission.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerStartCourseArchiveExport
+     * @summary Start a native archive export of a course
+     * @request POST:/api/integration/courses/{courseId}/native-archive
+     */
+    integrationNativeArchiveControllerStartCourseArchiveExport: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<StartCourseArchiveExportResponse, void>({
+        path: `/api/integration/courses/${courseId}/native-archive`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the state of a native archive export started with this integration key in the tenant selected by X-Tenant-Id. Finished archives can be downloaded for 24 hours.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerGetCourseArchiveExportStatus
+     * @summary Get a native archive export job
+     * @request GET:/api/integration/native-archive/jobs/{jobId}
+     */
+    integrationNativeArchiveControllerGetCourseArchiveExportStatus: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseArchiveExportStatusResponse, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Streams the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. The body is the archive itself, not a JSON envelope.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerDownloadCourseArchive
+     * @summary Download a native archive
+     * @request GET:/api/integration/native-archive/jobs/{jobId}/download
+     */
+    integrationNativeArchiveControllerDownloadCourseArchive: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}/download`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Atomically saves the content marketplace plugin origin and API key, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationContentMarketplaceControllerSaveContentMarketplaceConnection
+     * @summary Connect a tenant to the content marketplace
+     * @request PUT:/api/integration/tenants/{tenantId}/plugins/content-marketplace
+     */
+    integrationContentMarketplaceControllerSaveContentMarketplaceConnection: (
+      tenantId: string,
+      data: SaveContentMarketplaceConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SaveContentMarketplaceConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/content-marketplace`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Checks that Mentingo can authenticate to the configured content marketplace plugin and reports whether the marketplace is enabled for the tenant. Requires a managing tenant key with tenant management permission. No credentials are returned.
+     *
+     * @tags Integration
+     * @name IntegrationContentMarketplaceControllerCheckContentMarketplaceConnection
+     * @summary Verify tenant content marketplace connectivity
+     * @request GET:/api/integration/tenants/{tenantId}/plugins/content-marketplace
+     */
+    integrationContentMarketplaceControllerCheckContentMarketplaceConnection: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CheckContentMarketplaceConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/content-marketplace`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags Integration Admin
@@ -43999,6 +44289,128 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Reports whether the current tenant is connected to the content marketplace and has it enabled. Never fails because the marketplace is unreachable.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceAvailability
+     * @summary Check whether the content marketplace is available
+     * @request GET:/api/content-marketplace/configuration
+     */
+    contentMarketplaceControllerGetContentMarketplaceAvailability: (params: RequestParams = {}) =>
+      this.request<GetContentMarketplaceAvailabilityResponse, any>({
+        path: `/api/content-marketplace/configuration`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the categories of the published courses, for the catalog filters.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceFilterOptions
+     * @summary List content marketplace filter options
+     * @request GET:/api/content-marketplace/filter-options
+     */
+    contentMarketplaceControllerGetContentMarketplaceFilterOptions: (params: RequestParams = {}) =>
+      this.request<GetContentMarketplaceFilterOptionsResponse, any>({
+        path: `/api/content-marketplace/filter-options`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Search, filter and sort published courses and return one page with its total count. Each listing says which course the tenant copied it into, if any, and whether a newer version is available.
+     *
+     * @name ContentMarketplaceControllerListContentMarketplaceListings
+     * @summary Browse content marketplace courses
+     * @request GET:/api/content-marketplace/listings
+     */
+    contentMarketplaceControllerListContentMarketplaceListings: (
+      query?: {
+        /** @maxLength 200 */
+        keyword?: string;
+        /**
+         * @minLength 1
+         * @maxLength 500
+         */
+        category?: string;
+        duration?: "short" | "medium" | "long";
+        sortBy?: "recent" | "title";
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListContentMarketplaceListingsResponse, any>({
+        path: `/api/content-marketplace/listings`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns one published content marketplace listing, with the tenant's copy of it, if any.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceListing
+     * @summary Get a content marketplace course
+     * @request GET:/api/content-marketplace/listings/{listingId}
+     */
+    contentMarketplaceControllerGetContentMarketplaceListing: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetContentMarketplaceListingResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Streams the listing's thumbnail image.
+     *
+     * @name ContentMarketplaceControllerStreamContentMarketplaceThumbnail
+     * @summary Get a content marketplace course thumbnail
+     * @request GET:/api/content-marketplace/listings/{listingId}/thumbnail
+     */
+    contentMarketplaceControllerStreamContentMarketplaceThumbnail: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/content-marketplace/listings/${listingId}/thumbnail`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Downloads the listing's current version and queues a native archive import into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.
+     *
+     * @name ContentMarketplaceControllerCopyContentMarketplaceListing
+     * @summary Copy a content marketplace course into the tenant
+     * @request POST:/api/content-marketplace/listings/{listingId}/copy
+     */
+    contentMarketplaceControllerCopyContentMarketplaceListing: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CopyContentMarketplaceListingResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}/copy`,
+        method: "POST",
         format: "json",
         ...params,
       }),

@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ENTITY_TYPES } from "@repo/shared";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { processInBatches } from "src/common/utils/processInBatches";
@@ -84,7 +84,7 @@ export class CourseTransferAssetService {
         destination: "masterCourse.error.targetTenantMissing",
         foreignAsset: "masterCourse.error.foreignSourceAsset",
       }))
-      .with(COURSE_TRANSFER_MODES.DUPLICATE, () => ({
+      .with(COURSE_TRANSFER_MODES.ARCHIVE_SYNC, COURSE_TRANSFER_MODES.DUPLICATE, () => ({
         source: "courseDuplication.error.tenantMissing",
         destination: "courseDuplication.error.tenantMissing",
         foreignAsset: "courseDuplication.error.foreignSourceAsset",
@@ -101,7 +101,10 @@ export class CourseTransferAssetService {
     const resourceCollection = this.buildSourceResourceCollection(snapshot);
     const scormScopeId = match(policy)
       .with({ mode: COURSE_TRANSFER_MODES.SYNC }, ({ exportId }) => exportId)
-      .with({ mode: COURSE_TRANSFER_MODES.DUPLICATE }, () => destination.courseId)
+      .with(
+        { mode: P.union(COURSE_TRANSFER_MODES.ARCHIVE_SYNC, COURSE_TRANSFER_MODES.DUPLICATE) },
+        () => destination.courseId,
+      )
       .exhaustive();
 
     const scormPackages = await this.copySourceAssets(async () => {
@@ -110,10 +113,9 @@ export class CourseTransferAssetService {
         sourceTenantId,
         sourceTenantOrigin: sourceHost,
         targetTenantId: destination.tenantId,
-        uploadedResourceIdsByFileKey:
-          policy.mode === COURSE_TRANSFER_MODES.DUPLICATE
-            ? policy.uploadedResourceIdsByFileKey
-            : undefined,
+        uploadedResourceIdsByFileKey: match(policy)
+          .with({ mode: COURSE_TRANSFER_MODES.SYNC }, () => undefined)
+          .otherwise(({ uploadedResourceIdsByFileKey }) => uploadedResourceIdsByFileKey),
       });
 
       return this.prepareScormPackages(

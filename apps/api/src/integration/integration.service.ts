@@ -2,7 +2,6 @@ import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import {
-  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -21,6 +20,8 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantsService } from "src/super-admin/tenants.service";
 
 import { IntegrationRepository } from "./integration.repository";
+import { toPluginOrigin } from "./utils/integration-plugin-origin.utils";
+import { assertCanManageTenants } from "./utils/integration-tenant-access.utils";
 
 import type {
   CurrentAdminKeyData,
@@ -167,7 +168,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationTenantLifecycleResponse> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
 
     const keyTenantActor = { ...actor, tenantId: keyTenant.tenantId };
 
@@ -181,7 +182,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationTenantLifecycleResponse> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
 
     return this.tenantsService.updateTenantById(tenantId, {
       status: TENANT_STATUSES.INACTIVE,
@@ -193,7 +194,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<void> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
 
     await this.tenantsService.deleteTenantById(tenantId, keyTenant.tenantId);
   }
@@ -204,7 +205,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationTenantLifecycleResponse> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
 
     return this.tenantsService.updateTenantById(tenantId, input);
   }
@@ -215,7 +216,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationUpdateTenantApiKeysResponse> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
 
     const tenant = await this.integrationRepository.getTenantById(tenantId);
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
@@ -247,34 +248,14 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationPluginConfigured> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
     const tenant = await this.integrationRepository.getTenantById(tenantId);
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
-    let url: URL;
-    try {
-      url = new URL(input.baseUrl);
-    } catch {
-      throw new BadRequestException("Invalid plugin URL");
-    }
-    const local =
-      process.env.NODE_ENV !== "production" &&
-      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
-    if (
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== "/" ||
-      !(url.protocol === "https:" || (local && url.protocol === "http:"))
-    ) {
-      throw new BadRequestException(
-        "Use an HTTPS plugin origin (HTTP localhost is allowed in development)",
-      );
-    }
+    const origin = await toPluginOrigin(input.baseUrl);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
       this.envService.bulkUpsertEnv(
         [
-          { name: "PHISHING_BASE_URL", value: url.origin },
+          { name: "PHISHING_BASE_URL", value: origin },
           { name: "PHISHING_API_KEY", value: input.apiKey },
           { name: "PHISHING_WEBHOOK_SECRET", value: input.webhookSecret },
         ],
@@ -289,7 +270,7 @@ export class IntegrationService {
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
   ): Promise<IntegrationPluginStatus> {
-    this.assertCanManageTenants(actor, keyTenant);
+    assertCanManageTenants(actor, keyTenant);
     if (!(await this.integrationRepository.getTenantById(tenantId)))
       throw new NotFoundException("superAdminTenants.error.notFound");
     return this.tenantDbRunner.runWithTenant(tenantId, async () => {
@@ -345,15 +326,5 @@ export class IntegrationService {
     if (expected.length !== provided.length) return false;
 
     return timingSafeEqual(expected, provided);
-  }
-
-  private assertCanManageTenants(actor: CurrentUserType, keyTenant: IntegrationKeyTenantContext) {
-    if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE)) {
-      throw new NotFoundException("auth.error.missingPermission");
-    }
-
-    if (!keyTenant.isManaging) {
-      throw new NotFoundException("superAdminTenants.error.managingTenantRequired");
-    }
   }
 }

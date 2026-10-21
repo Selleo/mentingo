@@ -60,6 +60,7 @@ describe("NativeArchiveJobService", () => {
       tenantDbRunner as never,
       snapshotService as never,
       {} as never,
+      {} as never,
     );
 
     await service["processExportJob"](
@@ -83,6 +84,7 @@ describe("NativeArchiveJobService", () => {
     };
     const service = new NativeArchiveJobService(
       queueService as never,
+      {} as never,
       {} as never,
       {} as never,
       {} as never,
@@ -122,6 +124,7 @@ describe("NativeArchiveJobService", () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
     );
 
     await expect(service.getArchiveJobStatus("job-id", ACTOR)).resolves.toMatchObject({
@@ -142,6 +145,7 @@ describe("NativeArchiveJobService", () => {
         getQueue: jest.fn().mockReturnValue({ getJob: jest.fn().mockResolvedValue(job) }),
       } as never,
       storage as never,
+      {} as never,
       {} as never,
       {} as never,
       {} as never,
@@ -175,6 +179,7 @@ describe("NativeArchiveJobService", () => {
         getQueue: jest.fn().mockReturnValue({ getJobs: jest.fn().mockResolvedValue(jobs) }),
       } as never,
       storage as never,
+      {} as never,
       {} as never,
       {} as never,
       {} as never,

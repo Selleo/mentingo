@@ -24,6 +24,7 @@ export const QUEUE_NAMES = {
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
   VIDEO_METADATA: "video-metadata",
   REPORT_EXPORT: "report-export",
+  CONTENT_MARKETPLACE_EVENTS: "content-marketplace-events",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
