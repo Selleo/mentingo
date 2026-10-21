@@ -59,19 +59,18 @@ export const listStudentLessonsInputSchema = Type.Object(
 );
 export const getStudentLessonInputSchema = Type.Object(
   {
-    courseId: {
-      ...UUIDSchema,
+    courseId: Type.Clone(UUIDSchema, {
       description: "Course ID from the selected lesson's search or list result.",
-    },
-    chapterId: Type.Optional({
-      ...UUIDSchema,
-      description:
-        "Optional chapter filter. Omit when unknown, including after global_search; never invent an ID or send an all-zero placeholder.",
     }),
-    lessonId: {
-      ...UUIDSchema,
+    chapterId: Type.Optional(
+      Type.Clone(UUIDSchema, {
+        description:
+          "Optional chapter filter. Omit when unknown, including after global_search; never invent an ID or send an all-zero placeholder.",
+      }),
+    ),
+    lessonId: Type.Clone(UUIDSchema, {
       description: "ID of the selected lesson from global_search, search_lessons or list_lessons.",
-    },
+    }),
     language,
   },
   { additionalProperties: false },
