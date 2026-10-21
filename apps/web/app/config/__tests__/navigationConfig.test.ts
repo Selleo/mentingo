@@ -185,6 +185,16 @@ describe("mapNavigationItems", () => {
 describe("getNavigationConfig", () => {
   const t = ((key: string) => key) as TFunction;
 
+  it("does not include activity logs in the top-level navigation", () => {
+    const groups = getNavigationConfig(t);
+    expect(
+      groups.flatMap((group) => group.items).some((item) => item.path === "admin/activity-logs"),
+    ).toBe(false);
+    expect(findMatchingRoute("admin/activity-logs")).toEqual({
+      allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
+    });
+  });
+
   it("should hide phishing until the tenant capability is enabled", () => {
     const groups = getNavigationConfig(t);
 
