@@ -1,3 +1,4 @@
+import { ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -327,4 +328,47 @@ it("uses the final dependent Mentor write for the lesson and its configuration",
   expect(proposedMentorConfiguration(node).aiMentorConfiguration).toMatchObject({
     scenario: "Updated scenario",
   });
+});
+
+describe("proposed quiz numbering", () => {
+  it.each([0, 1, 10])(
+    "starts native preview at one for incoming positions starting at %s",
+    (start) => {
+      const questions = Object.values(ASSESSMENT_QUESTION_TYPES).map((questionType, index) => ({
+        id: `question-${index}`,
+        questionType,
+        title: `Author title ${index}`,
+        displayOrder: start + index,
+        prompt: `Prompt ${index}`,
+        options: [],
+      }));
+      const node: ReviewLessonNode = {
+        ...mentorNode,
+        lessonType: "quiz",
+        operations: [
+          {
+            operationId: "quiz-operation",
+            targetId: mentorNode.id,
+            type: AUTHORING_OPERATION_TYPE.LESSON_CREATE,
+            dependencies: [],
+            payload: { lessonType: "quiz", questions: [...questions].reverse() },
+          },
+        ],
+      };
+
+      expect(proposedLesson(node)?.questions).toEqual(
+        questions.map((question, index) =>
+          expect.objectContaining({
+            id: question.id,
+            type: question.questionType,
+            title: question.title,
+            displayOrder: index + 1,
+          }),
+        ),
+      );
+      expect(questions.map((question) => question.displayOrder)).toEqual(
+        questions.map((_, index) => start + index),
+      );
+    },
+  );
 });

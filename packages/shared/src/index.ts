@@ -70,6 +70,7 @@ export * from "./utils/certificate";
 export * from "./utils/courseAuthoringOrder";
 export * from "./utils/courseAuthoringOrder.types";
 export * from "./utils/emailTemplateLayout";
+export * from "./utils/normalizeAuthoringQuizQuestionOrder";
 export * from "./utils/permissions";
 export * from "./utils/sanitizeQuizQuestionTitle";
 export * from "./utils/sanitizeRichTextSummary";

@@ -12,6 +12,7 @@ import {
   ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   CourseAuthoringOrderError,
   ENTITY_TYPES,
+  normalizeAuthoringQuizQuestionOrder,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { load as loadHtml } from "cheerio";
@@ -605,19 +606,24 @@ export class CourseAuthoringApplyService {
             )
               throw new BadRequestException("courseAuthoring.errors.resourceOutsideCourse");
           }
-          const questions = payload.questions.map((question) => ({
-            ...question,
-            prompt: stripAuthoringHtmlStyles(question.prompt),
-            description:
-              question.description === null ? null : stripAuthoringHtmlStyles(question.description),
-            options: question.options.map((option) => ({
-              ...option,
-              label: stripAuthoringHtmlStyles(option.label),
-            })),
-            photoS3Key: question.photoS3Key?.startsWith("authoring-asset:")
-              ? this.assetKey(question.photoS3Key.slice("authoring-asset:".length), input)
-              : question.photoS3Key,
-          }));
+          // Authoring positions may start at zero; native learner numbering starts at one.
+          const questions = normalizeAuthoringQuizQuestionOrder(payload.questions).map(
+            (question) => ({
+              ...question,
+              prompt: stripAuthoringHtmlStyles(question.prompt),
+              description:
+                question.description === null
+                  ? null
+                  : stripAuthoringHtmlStyles(question.description),
+              options: question.options.map((option) => ({
+                ...option,
+                label: stripAuthoringHtmlStyles(option.label),
+              })),
+              photoS3Key: question.photoS3Key?.startsWith("authoring-asset:")
+                ? this.assetKey(question.photoS3Key.slice("authoring-asset:".length), input)
+                : question.photoS3Key,
+            }),
+          );
           const id = await this.lessonService.saveQuizFromAuthoring(
             {
               ...payload,
