@@ -1,3 +1,4 @@
+import { LOGIN_METHODS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import type { Static } from "@sinclair/typebox";
@@ -14,35 +15,37 @@ export const getEnvResponseSchema = Type.Object({
   value: Type.String(),
 });
 
-export const loginMethodsSchema = Type.Object({
-  google: Type.Boolean(),
-  microsoft: Type.Boolean(),
-  slack: Type.Boolean(),
-  magicLink: Type.Boolean(),
-  password: Type.Boolean(),
+export const loginMethodSchema = Type.Union(
+  Object.values(LOGIN_METHODS).map((method) => Type.Literal(method)),
+);
+
+export const loginMethodsResponseSchema = Type.Object({
+  [LOGIN_METHODS.GOOGLE]: Type.Boolean(),
+  [LOGIN_METHODS.MICROSOFT]: Type.Boolean(),
+  [LOGIN_METHODS.SLACK]: Type.Boolean(),
+  [LOGIN_METHODS.MAGIC_LINK]: Type.Boolean(),
+  [LOGIN_METHODS.PASSWORD]: Type.Boolean(),
 });
-export const loginMethodSetupSchema = Type.Object({
-  methods: loginMethodsSchema,
-  missing: Type.Object({
-    google: Type.Array(Type.String()),
-    microsoft: Type.Array(Type.String()),
-    slack: Type.Array(Type.String()),
+
+export const loginMethodSetupResponseSchema = Type.Object({
+  methods: loginMethodsResponseSchema,
+  missingCredentials: Type.Object({
+    [LOGIN_METHODS.GOOGLE]: Type.Array(Type.String()),
+    [LOGIN_METHODS.MICROSOFT]: Type.Array(Type.String()),
+    [LOGIN_METHODS.SLACK]: Type.Array(Type.String()),
   }),
 });
+
 export const updateLoginMethodSchema = Type.Object(
   {
-    method: Type.Union([
-      Type.Literal("google"),
-      Type.Literal("microsoft"),
-      Type.Literal("slack"),
-      Type.Literal("magicLink"),
-      Type.Literal("password"),
-    ]),
+    method: loginMethodSchema,
     enabled: Type.Boolean(),
-    configuration: Type.Optional(bulkUpsertEnvSchema),
   },
   { additionalProperties: false },
 );
+
+export type LoginMethodsResponse = Static<typeof loginMethodsResponseSchema>;
+export type LoginMethodSetupResponse = Static<typeof loginMethodSetupResponseSchema>;
 export type UpdateLoginMethodBody = Static<typeof updateLoginMethodSchema>;
 
 export const encryptedEnvSchema = Type.Object({

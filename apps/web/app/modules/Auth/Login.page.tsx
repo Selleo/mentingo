@@ -90,6 +90,7 @@ export default function LoginPage() {
   const isGoogleOAuthEnabled = loginMethods?.google ?? false;
   const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
   const isSlackOAuthEnabled = loginMethods?.slack ?? false;
+  const isMagicLinkEnabled = loginMethods?.magicLink ?? false;
 
   const { mutateAsync: loginUser } = useLoginUser();
 
@@ -101,6 +102,8 @@ export default function LoginPage() {
     },
     isLoading: isGlobalSettingsLoading,
   } = useGlobalSettingsSuspense();
+
+  const isPasswordLoginVisible = !isSSOEnforced && Boolean(loginMethods?.password);
 
   useEffect(() => {
     if (magicLinkToken && !isGlobalSettingsLoading && !hasTriggeredMagicLink.current) {
@@ -159,7 +162,7 @@ export default function LoginPage() {
           }}
         />
       )}
-      <Card className="mx-auto max-w-sm" data-testid={LOGIN_PAGE_HANDLES.PAGE}>
+      <Card className="mx-auto w-full max-w-sm" data-testid={LOGIN_PAGE_HANDLES.PAGE}>
         <CardHeader>
           <CardTitle role="heading" className="text-2xl">
             <div className="mb-6 flex justify-center">
@@ -169,8 +172,12 @@ export default function LoginPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!isSSOEnforced && loginMethods?.password && (
-            <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+          {isPasswordLoginVisible && (
+            <form
+              className="grid gap-4"
+              onSubmit={handleSubmit(onSubmit)}
+              data-testid={LOGIN_PAGE_HANDLES.PASSWORD_LOGIN_FORM}
+            >
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("loginView.field.email")}</Label>
                 <Input
@@ -217,14 +224,14 @@ export default function LoginPage() {
           )}
 
           <SocialLogin
-            isSSOEnforced={isSSOEnforced || !loginMethods?.password}
-            isMagicLinkEnabled={loginMethods?.magicLink ?? false}
+            isEmailFormVisible={isPasswordLoginVisible}
+            isMagicLinkEnabled={isMagicLinkEnabled}
             isGoogleOAuthEnabled={isGoogleOAuthEnabled}
             isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
             isSlackOAuthEnabled={isSlackOAuthEnabled}
           />
 
-          {!inviteOnlyRegistration && loginMethods?.password && !isSSOEnforced && (
+          {!inviteOnlyRegistration && isPasswordLoginVisible && (
             <div className="mt-4 text-center text-sm">
               {t("loginView.other.dontHaveAccount")}{" "}
               <Link

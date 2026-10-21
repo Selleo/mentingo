@@ -1,159 +1,135 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Link } from "@remix-run/react";
+import { LOGIN_METHODS, OAUTH_LOGIN_METHODS } from "@repo/shared";
+import { ArrowUpRight, SquareAsterisk } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
-import { ApiClient } from "~/api/api-client";
-import { CONFIGURATION_STATE_QUERY_KEY } from "~/api/queries/admin/useConfigurationState";
+import { useUpdateLoginMethod } from "~/api/mutations/admin/useUpdateLoginMethod";
+import { useLoginMethodSetup } from "~/api/queries/admin/useLoginMethodSetup";
+import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
-import { SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
-import { SecretField } from "~/modules/Admin/Envs/Envs.page";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { OAUTH_LOGIN_METHOD_ENV_GROUP_IDS } from "~/modules/Admin/Envs/Envs.constants";
 
-import type { LoginMethod, LoginMethodSetup } from "~/api/queries/useLoginMethods";
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 
-type SecretKey = keyof typeof SECRET_METADATA;
-type Values = Partial<Record<SecretKey, string>>;
-const order: LoginMethod[] = ["google", "microsoft", "slack", "magicLink", "password"];
+import type { LoginMethod, OAuthLoginMethod } from "@repo/shared";
+import type { GetLoginMethodSetupResponse } from "~/api/generated-api";
+
+type LoginMethodSetup = GetLoginMethodSetupResponse["data"];
+
+const OAUTH_LOGIN_METHOD_VALUES: readonly LoginMethod[] = Object.values(OAUTH_LOGIN_METHODS);
+
+const isOAuthLoginMethod = (method: LoginMethod): method is OAuthLoginMethod =>
+  OAUTH_LOGIN_METHOD_VALUES.includes(method);
+
+const isMissingProviderCredentials = (method: LoginMethod, setup?: LoginMethodSetup) =>
+  isOAuthLoginMethod(method) && Boolean(setup?.missingCredentials[method].length);
+
+const LOGIN_METHOD_ICON_CLASS_NAME = "size-4 shrink-0";
+
+const renderLoginMethodIcon = (method: LoginMethod) =>
+  match(method)
+    .with(LOGIN_METHODS.GOOGLE, () => (
+      <Icon name="Google" className={LOGIN_METHOD_ICON_CLASS_NAME} />
+    ))
+    .with(LOGIN_METHODS.MICROSOFT, () => (
+      <Icon name="Microsoft" className={LOGIN_METHOD_ICON_CLASS_NAME} />
+    ))
+    .with(LOGIN_METHODS.SLACK, () => <Icon name="Slack" className={LOGIN_METHOD_ICON_CLASS_NAME} />)
+    .with(LOGIN_METHODS.MAGIC_LINK, () => (
+      <Icon name="WandSparkles" className={LOGIN_METHOD_ICON_CLASS_NAME} />
+    ))
+    .with(LOGIN_METHODS.PASSWORD, () => <SquareAsterisk className={LOGIN_METHOD_ICON_CLASS_NAME} />)
+    .exhaustive();
 
 export default function LoginMethods() {
   const { t } = useTranslation();
-  const client = useQueryClient();
-  const [provider, setProvider] = useState<"google" | "microsoft" | "slack" | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const form = useForm<Values>();
-  const setup = useQuery({
-    queryKey: ["loginMethodSetup"],
-    queryFn: async () =>
-      (await ApiClient.instance.get<{ data: LoginMethodSetup }>("/api/env/login-methods/setup"))
-        .data.data,
-  });
-  const update = useMutation({
-    mutationFn: async (data: {
-      method: LoginMethod;
-      enabled: boolean;
-      configuration?: { name: string; value: string }[];
-    }) =>
-      (await ApiClient.instance.post<{ data: LoginMethodSetup }>("/api/env/login-methods", data))
-        .data.data,
-    onSuccess: async (data) => {
-      client.setQueryData(["loginMethodSetup"], data);
-      await Promise.all(
-        [["loginMethods"], ["ssoEnabled"], ["secrets"], CONFIGURATION_STATE_QUERY_KEY].map(
-          (queryKey) => client.invalidateQueries({ queryKey }),
-        ),
-      );
-      setProvider(null);
-      form.reset();
-      setError(null);
-    },
-    onError: (err: { response?: { data?: { message?: string } } }) =>
-      setError(t(err.response?.data?.message ?? "loginMethods.errors.save")),
-  });
-  const close = () => {
-    if (!update.isPending) {
-      setProvider(null);
-      form.reset();
-      setError(null);
-    }
-  };
-  const toggle = (method: LoginMethod, enabled: boolean) => {
-    setError(null);
-    if (
-      enabled &&
-      (method === "google" || method === "microsoft" || method === "slack") &&
-      setup.data?.missing[method].length
-    ) {
-      form.reset();
-      setProvider(method);
-      return;
-    }
-    update.mutate({ method, enabled });
-  };
+
+  const { data: loginMethodSetup, isError: isLoginMethodSetupError } = useLoginMethodSetup();
+  const { mutate: updateLoginMethod, isPending: isUpdatingLoginMethod } = useUpdateLoginMethod();
+
   return (
-    <section className="space-y-4" aria-label={t("loginMethods.title")}>
-      <h3 className="text-xl font-semibold">{t("loginMethods.title")}</h3>
-      {setup.isError && <p role="alert">{t("loginMethods.errors.load")}</p>}
-      {order.map((method) => (
-        <div className="flex items-center justify-between gap-4" key={method}>
-          <Label htmlFor={`login-method-${method}`}>{t(`loginMethods.${method}`)}</Label>
-          <Switch
-            id={`login-method-${method}`}
-            checked={setup.data?.methods[method] ?? false}
-            disabled={!setup.data || update.isPending}
-            onCheckedChange={(enabled) => toggle(method, enabled)}
-          />
-        </div>
-      ))}
-      {error && !provider && (
-        <p role="alert" className="text-destructive">
-          {error}
-        </p>
-      )}
-      <Dialog
-        open={!!provider}
-        onOpenChange={(open) => {
-          if (!open) close();
-        }}
-      >
-        <DialogContent aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle>
-              {t("loginMethods.configure", {
-                provider: provider ? t(`loginMethods.${provider}`) : "",
-              })}
-            </DialogTitle>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={form.handleSubmit((values) => {
-              if (!provider) return;
-              const configuration = (setup.data?.missing[provider] ?? []).map((name) => ({
-                name,
-                value: values[name as SecretKey]?.trim() ?? "",
-              }));
-              if (configuration.some(({ value }) => !value)) {
-                setError(t("loginMethods.errors.missingConfiguration"));
-                return;
-              }
-              update.mutate({ method: provider, enabled: true, configuration });
-            })}
-          >
-            {provider &&
-              setup.data?.missing[provider].map((name) => {
-                const key = name as SecretKey;
-                const meta = SECRET_METADATA[key];
-                return (
-                  meta && (
-                    <SecretField
-                      key={key}
-                      name={key}
-                      {...meta}
-                      register={form.register}
-                      setValue={form.setValue}
-                      createOnly
-                    />
-                  )
-                );
-              })}
-            {error && (
-              <p role="alert" className="text-destructive">
-                {error}
-              </p>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" disabled={update.isPending} onClick={close}>
-                {t("common.button.cancel")}
-              </Button>
-              <Button type="submit" disabled={update.isPending}>
-                {t("adminEnvsView.form.save")}
-              </Button>
+    <Card id="login-methods" data-testid={SETTINGS_PAGE_HANDLES.LOGIN_METHODS_CARD}>
+      <CardHeader>
+        <CardTitle className="h5">{t("loginMethods.title")}</CardTitle>
+        <CardDescription className="body-lg-md">{t("loginMethods.description")}</CardDescription>
+      </CardHeader>
+      <CardContent className="body-sm-md flex flex-col divide-y divide-neutral-200">
+        {isLoginMethodSetupError && (
+          <p role="alert" className="pb-4 text-error-700">
+            {t("loginMethods.errors.load")}
+          </p>
+        )}
+        {Object.values(LOGIN_METHODS).map((method) => {
+          const isEnabled = loginMethodSetup?.methods[method] ?? false;
+          const isMissingCredentials = isMissingProviderCredentials(method, loginMethodSetup);
+          const isEnableBlocked = isMissingCredentials && !isEnabled;
+
+          const loginMethodSwitch = (
+            <Switch
+              id={`login-method-${method}`}
+              data-testid={SETTINGS_PAGE_HANDLES.loginMethodSwitch(method)}
+              checked={isEnabled}
+              disabled={!loginMethodSetup || isUpdatingLoginMethod || isEnableBlocked}
+              onCheckedChange={(enabled) => updateLoginMethod({ method, enabled })}
+            />
+          );
+
+          return (
+            <div className="flex items-center justify-between gap-4 py-3" key={method}>
+              <Label
+                htmlFor={`login-method-${method}`}
+                className="body-sm-md flex items-center gap-2"
+              >
+                {renderLoginMethodIcon(method)}
+                {t(`loginMethods.${method}`)}
+              </Label>
+              <div className="flex items-center gap-2">
+                {isOAuthLoginMethod(method) && isMissingCredentials && (
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link
+                      to={`/admin/envs#${OAUTH_LOGIN_METHOD_ENV_GROUP_IDS[method]}`}
+                      data-testid={SETTINGS_PAGE_HANDLES.loginMethodEnvsLink(method)}
+                    >
+                      {t("loginMethods.goToConfiguration")}
+                      <ArrowUpRight className="ml-1 size-4" />
+                    </Link>
+                  </Button>
+                )}
+                {isEnableBlocked ? (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex cursor-not-allowed">{loginMethodSwitch}</span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("loginMethods.notConfiguredTooltip")}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  loginMethodSwitch
+                )}
+              </div>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </section>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,48 +1,50 @@
+import { LOGIN_METHODS } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
+import { LOGIN_PAGE_HANDLES } from "../../data/auth/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
+import { openSettingsPageAtOriginFlow } from "../../flows/settings/open-settings-page.flow";
+import { toggleLoginMethodFlow } from "../../flows/settings/toggle-login-method.flow";
 
-test("organization login methods persist and disabled password disappears on the public login page", async ({
+test("disabling password login persists and hides the password form on the public login page", async ({
   withIsolatedWorkerPage,
   browser,
-}, testInfo) => {
-  await withIsolatedWorkerPage(USER_ROLE.admin, async ({ page, origin }) => {
-    await openSettingsPageFlow(page);
+}) => {
+  await withIsolatedWorkerPage(USER_ROLE.admin, async ({ page, origin, apiClient }) => {
+    const passwordSwitch = page.getByTestId(
+      SETTINGS_PAGE_HANDLES.loginMethodSwitch(LOGIN_METHODS.PASSWORD),
+    );
+
+    await openSettingsPageAtOriginFlow(page, origin);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-    const magic = page.getByRole("switch", { name: "Magic link", exact: true });
-    await expect(magic).toBeChecked();
-    const password = page.getByRole("switch", { name: "Password", exact: true });
-    await expect(password).toBeChecked();
-    await password.click();
-    await expect(password).not.toBeChecked();
-    const config = await page.request.get(`${origin}/api/env/login-methods`);
-    expect(config.ok()).toBeTruthy();
-    expect((await config.json()).data.password).toBe(false);
+    await expect(passwordSwitch).toBeChecked();
+
+    await toggleLoginMethodFlow(page, LOGIN_METHODS.PASSWORD);
+
+    await expect(passwordSwitch).not.toBeChecked();
+    await expect
+      .poll(async () => (await apiClient.api.envControllerGetLoginMethods()).data.data.password)
+      .toBe(false);
+
     await page.reload();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-    await expect(page.getByRole("switch", { name: "Password", exact: true })).not.toBeChecked();
-    await page.screenshot({
-      path: testInfo.outputPath("organization-login-methods.png"),
-      fullPage: true,
-    });
-    const publicContext = await browser.newContext({ baseURL: origin, ignoreHTTPSErrors: true });
+    await expect(passwordSwitch).not.toBeChecked();
+
+    const anonymousContext = await browser.newContext({ baseURL: origin });
     try {
-      const login = await publicContext.newPage();
-      await login.goto(`${origin}/auth/login`);
-      await expect(login.getByRole("link", { name: "Email me a login link" })).toBeVisible();
-      await expect(login.locator("form")).toHaveCount(0);
-      await expect(login.getByText("Or continue with", { exact: true })).toHaveCount(0);
-      await expect(login.getByText("Enter your email below to login to your account")).toHaveCount(
-        0,
-      );
-      await login.screenshot({
-        path: testInfo.outputPath("password-disabled-login.png"),
-        fullPage: true,
-      });
+      const loginPage = await anonymousContext.newPage();
+      await openLoginPageFlow(loginPage);
+
+      await expect(loginPage.getByTestId(LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK)).toBeVisible();
+      await expect(loginPage.getByTestId(LOGIN_PAGE_HANDLES.PASSWORD_LOGIN_FORM)).toHaveCount(0);
+      await expect(
+        loginPage.getByTestId(LOGIN_PAGE_HANDLES.ALTERNATIVE_LOGIN_SEPARATOR),
+      ).toHaveCount(0);
     } finally {
-      await publicContext.close();
+      await anonymousContext.close();
     }
   });
 });

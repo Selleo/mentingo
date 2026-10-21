@@ -1,3 +1,7 @@
+import { OAUTH_LOGIN_METHODS } from "@repo/shared";
+
+import type { OAuthLoginMethod } from "@repo/shared";
+
 export const SECRET_METADATA = {
   MICROSOFT_CLIENT_ID: {
     labelKey: "adminEnvsView.form.MICROSOFT_CLIENT_ID.label",
@@ -13,14 +17,6 @@ export const SECRET_METADATA = {
   },
   MICROSOFT_CALENDAR_CLIENT_SECRET: {
     labelKey: "adminEnvsView.form.MICROSOFT_CALENDAR_CLIENT_SECRET.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
-  MICROSOFT_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.MICROSOFT_OAUTH_ENABLED.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
-  VITE_MICROSOFT_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.VITE_MICROSOFT_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
   OPENAI_API_KEY: {
@@ -56,14 +52,6 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.GOOGLE_CLIENT_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
-  GOOGLE_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.GOOGLE_OAUTH_ENABLED.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
-  VITE_GOOGLE_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.VITE_GOOGLE_OAUTH_ENABLED.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
   STRIPE_WEBHOOK_SECRET: {
     labelKey: "adminEnvsView.form.STRIPE_WEBHOOK_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
@@ -82,14 +70,6 @@ export const SECRET_METADATA = {
   },
   SLACK_CLIENT_SECRET: {
     labelKey: "adminEnvsView.form.SLACK_CLIENT_SECRET.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
-  SLACK_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.SLACK_OAUTH_ENABLED.label",
-    placeholderKey: "adminEnvsView.form.placeholder",
-  },
-  VITE_SLACK_OAUTH_ENABLED: {
-    labelKey: "adminEnvsView.form.VITE_SLACK_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
   PHISHING_API_KEY: {
@@ -129,34 +109,19 @@ export const ENV_GROUPS = [
     id: "googleSignIn",
     titleKey: "adminEnvsView.groups.googleSignIn.title",
     descriptionKey: "adminEnvsView.groups.googleSignIn.description",
-    secretNames: [
-      "GOOGLE_CLIENT_ID",
-      "GOOGLE_CLIENT_SECRET",
-      "GOOGLE_OAUTH_ENABLED",
-      "VITE_GOOGLE_OAUTH_ENABLED",
-    ],
+    secretNames: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
   },
   {
     id: "microsoftSignIn",
     titleKey: "adminEnvsView.groups.microsoftSignIn.title",
     descriptionKey: "adminEnvsView.groups.microsoftSignIn.description",
-    secretNames: [
-      "MICROSOFT_CLIENT_ID",
-      "MICROSOFT_CLIENT_SECRET",
-      "MICROSOFT_OAUTH_ENABLED",
-      "VITE_MICROSOFT_OAUTH_ENABLED",
-    ],
+    secretNames: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET"],
   },
   {
     id: "slackSignIn",
     titleKey: "adminEnvsView.groups.slackSignIn.title",
     descriptionKey: "adminEnvsView.groups.slackSignIn.description",
-    secretNames: [
-      "SLACK_CLIENT_ID",
-      "SLACK_CLIENT_SECRET",
-      "SLACK_OAUTH_ENABLED",
-      "VITE_SLACK_OAUTH_ENABLED",
-    ],
+    secretNames: ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"],
   },
   {
     id: "microsoftCalendar",
@@ -206,3 +171,11 @@ export const ENV_GROUPS = [
   descriptionKey: string;
   secretNames: ReadonlyArray<SecretName>;
 }>;
+
+export type EnvGroupId = (typeof ENV_GROUPS)[number]["id"];
+
+export const OAUTH_LOGIN_METHOD_ENV_GROUP_IDS = {
+  [OAUTH_LOGIN_METHODS.GOOGLE]: "googleSignIn",
+  [OAUTH_LOGIN_METHODS.MICROSOFT]: "microsoftSignIn",
+  [OAUTH_LOGIN_METHODS.SLACK]: "slackSignIn",
+} as const satisfies Record<OAuthLoginMethod, EnvGroupId>;

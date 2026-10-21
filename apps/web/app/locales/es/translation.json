@@ -14,11 +14,12 @@
     "slack": "Slack",
     "magicLink": "Enlace de acceso",
     "password": "Contraseña",
-    "configure": "Configurar {{provider}}",
+    "description": "Elige cómo pueden iniciar sesión las personas de tu organización.",
+    "goToConfiguration": "Ir a la configuración",
+    "notConfiguredTooltip": "Añade todas las variables de entorno necesarias para habilitar este método de inicio de sesión.",
     "errors": {
       "disabled": "Este método de acceso está desactivado.",
-      "invalidConfiguration": "Configuración del proveedor no válida.",
-      "missingConfiguration": "Complete todos los campos obligatorios del proveedor.",
+      "missingConfiguration": "Primero añade las credenciales del proveedor en la configuración del entorno.",
       "lastMethod": "Mantenga al menos un método de acceso utilizable activado.",
       "save": "No se pudieron guardar los métodos de acceso.",
       "load": "No se pudieron cargar los métodos de acceso."
@@ -1681,6 +1682,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Calendario de Microsoft",
+        "contentMarketplace": "Marketplace de contenidos",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1692,6 +1695,8 @@
         "bunny": "Transmita videos y entregue contenido de manera eficiente",
         "google_authorization": "Permitir que los usuarios inicien sesión con su cuenta Google",
         "microsoft_authorization": "Permitir que los usuarios inicien sesión con su cuenta Microsoft",
+        "microsoft_calendar": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook.",
+        "contentMarketplace": "Descubre e importa cursos listos desde el marketplace de contenidos.",
         "slack_authorization": "Permitir que los usuarios inicien sesión con su cuenta Slack",
         "openAI": "Habilitar las funciones de AI Mentor",
         "luma": "Habilite las funciones de generación de cursos de IA",
@@ -2510,12 +2515,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Secreto de cliente del calendario de Microsoft"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "OAuth de Microsoft en Vite habilitado (verdadero/falso)"
-      },
       "OPENAI_API_KEY": {
         "label": "Clave de API de OpenAI"
       },
@@ -2541,12 +2540,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Secreto del cliente de Google"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "OAuth de Google en Vite habilitado (verdadero/falso)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Secreto del webhook de Stripe"
       },
@@ -2561,12 +2554,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secreto del cliente de Slack"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "OAuth de Slack en Vite habilitado (verdadero/falso)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Clave"

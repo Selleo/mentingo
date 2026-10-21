@@ -2,34 +2,23 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { dbAls } from "src/storage/db/db-als.store";
 import { secrets, settings } from "src/storage/schema";
 
+import type { GlobalSettings } from "src/common/types";
 import type { EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
 export class EnvRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async withLoginMethodsLock<T>(operation: () => Promise<T>): Promise<T> {
-    const tenantId = dbAls.getStore()?.tenantId;
-    if (!tenantId) throw new Error("Tenant context required");
-    return this.db.transaction(async (trx) => {
-      await trx.execute(
-        sql`SELECT pg_advisory_xact_lock(hashtextextended(${`login-methods:${tenantId}`}, 0))`,
-      );
-      return operation();
-    });
-  }
-
-  async getEnforceSSO() {
-    const [record] = await this.db
-      .select({
-        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
-      })
+  async findGlobalSettingsForUpdate() {
+    const [globalSettings] = await this.db
+      .select({ settings: settings.settings })
       .from(settings)
-      .where(isNull(settings.userId));
-    return record?.enforceSSO ?? false;
+      .where(isNull(settings.userId))
+      .for("update");
+
+    return globalSettings?.settings as GlobalSettings | undefined;
   }
 
   async bulkUpsertEnv(data: EncryptedEnvBody[]) {

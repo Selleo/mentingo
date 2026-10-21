@@ -19,44 +19,49 @@ import {
   isEnvSetupResponseSchema,
   isConfiguredResponseSchema,
   lumaConfiguredResponseSchema,
-  loginMethodsSchema,
-  loginMethodSetupSchema,
+  loginMethodsResponseSchema,
+  loginMethodSetupResponseSchema,
   updateLoginMethodSchema,
   UpdateLoginMethodBody,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
+import { LoginMethodsService } from "src/env/services/login-methods.service";
 
 @Controller("env")
 @UseGuards(PermissionsGuard)
 export class EnvController {
-  constructor(private readonly envService: EnvService) {}
+  constructor(
+    private readonly envService: EnvService,
+    private readonly loginMethodsService: LoginMethodsService,
+  ) {}
 
   @Public()
   @Get("login-methods")
-  @Validate({ response: baseResponse(loginMethodsSchema) })
+  @Validate({ response: baseResponse(loginMethodsResponseSchema) })
   async getLoginMethods() {
-    return new BaseResponse(await this.envService.getLoginMethods());
+    return new BaseResponse(await this.loginMethodsService.getLoginMethods());
   }
 
   @Get("login-methods/setup")
   @RequirePermission(PERMISSIONS.ENV_MANAGE)
-  @Validate({ response: baseResponse(loginMethodSetupSchema) })
+  @Validate({ response: baseResponse(loginMethodSetupResponseSchema) })
   async getLoginMethodSetup() {
-    return new BaseResponse(await this.envService.getLoginMethodSetup());
+    return new BaseResponse(await this.loginMethodsService.getLoginMethodSetup());
   }
 
   @Post("login-methods")
   @RequirePermission(PERMISSIONS.ENV_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateLoginMethodSchema }],
-    response: baseResponse(loginMethodSetupSchema),
+    response: baseResponse(loginMethodSetupResponseSchema),
   })
   async updateLoginMethod(
     @Body() data: UpdateLoginMethodBody,
-    @CurrentUser() actor: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    await this.envService.updateLoginMethod(data, actor);
-    return new BaseResponse(await this.envService.getLoginMethodSetup());
+    await this.loginMethodsService.updateLoginMethod(data, currentUser);
+
+    return new BaseResponse(await this.loginMethodsService.getLoginMethodSetup());
   }
 
   @Post("bulk")

@@ -12,6 +12,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import {
   AUTOMATION_EVENT_KINDS,
+  LOGIN_METHODS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
@@ -31,7 +32,7 @@ import { createUserNotificationEvent } from "src/automation-execution/utils/crea
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
-import { EnvService } from "src/env/services/env.service";
+import { LoginMethodsService } from "src/env/services/login-methods.service";
 import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
 import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
@@ -75,11 +76,6 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 
 @Injectable()
 export class AuthService {
-  private async assertLoginMethod(method: "password" | "magicLink") {
-    if (!(await this.envService.getLoginMethods())[method]) {
-      throw new UnauthorizedException("loginMethods.errors.disabled");
-    }
-  }
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -97,7 +93,7 @@ export class AuthService {
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly userPasswordEmailService: UserPasswordEmailService,
     private readonly notificationAccountActionService: NotificationAccountActionService,
-    private readonly envService: EnvService,
+    private readonly loginMethodsService: LoginMethodsService,
   ) {}
 
   public async register({
@@ -108,7 +104,7 @@ export class AuthService {
     language,
     formAnswers,
   }: CreateAccountBody) {
-    await this.assertLoginMethod("password");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.PASSWORD);
     const [existingUser] = await this.db
       .select({ id: users.id })
       .from(users)
@@ -184,9 +180,8 @@ export class AuthService {
 
     const { avatarReference, ...userWithoutAvatar } = createdUser;
 
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser), dbInstance);
 
@@ -256,9 +251,8 @@ export class AuthService {
     }
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);
@@ -444,7 +438,7 @@ export class AuthService {
   }
 
   public async validateUser(email: string, password: string) {
-    await this.assertLoginMethod("password");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.PASSWORD);
     const [userWithCredentials] = await this.db
       .select({
         id: users.id,
@@ -579,7 +573,7 @@ export class AuthService {
   }
 
   public async forgotPassword(email: string) {
-    await this.assertLoginMethod("password");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.PASSWORD);
     try {
       await this.userPasswordEmailService.sendForgotPasswordEmail(email);
     } catch {
@@ -588,7 +582,7 @@ export class AuthService {
   }
 
   public async createPassword(data: CreatePasswordBody) {
-    await this.assertLoginMethod("password");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.PASSWORD);
     const { createToken: token, password, language } = data;
     const createToken = await this.createPasswordService.getOneByToken(token);
 
@@ -628,7 +622,7 @@ export class AuthService {
   }
 
   public async resetPassword(token: string, newPassword: string) {
-    await this.assertLoginMethod("password");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.PASSWORD);
     const resetToken = await this.resetPasswordService.getOneByToken(token);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
@@ -812,7 +806,7 @@ export class AuthService {
   }
 
   async createMagicLink(email: string) {
-    await this.assertLoginMethod("magicLink");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.MAGIC_LINK);
     try {
       const user = await this.userService.getUserByEmail(email);
 
@@ -848,7 +842,7 @@ export class AuthService {
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
-    await this.assertLoginMethod("magicLink");
+    await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.MAGIC_LINK);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
     const dateNow = new Date();

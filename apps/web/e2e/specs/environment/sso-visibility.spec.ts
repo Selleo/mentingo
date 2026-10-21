@@ -1,55 +1,54 @@
+import { LOGIN_METHODS } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ENV_SECRET_NAMES, SSO_LOGIN_HANDLES } from "../../data/environment/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
-import { getEffectiveSsoSecretValue, upsertEnvSecretValue } from "../../utils/environment";
 
-const SECRET_NAME = ENV_SECRET_NAMES.VITE_GOOGLE_OAUTH_ENABLED;
+import type { Browser } from "@playwright/test";
 
 test.setTimeout(180 * 1000);
 
-test("frontend SSO button follows the tenant env value", async ({
-  apiClient,
-  cleanup,
-  createWorkspacePage,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async () => {
-    const originalValue = await getEffectiveSsoSecretValue(apiClient, SECRET_NAME);
+const openAnonymousLoginPage = async (browser: Browser, origin: string) => {
+  const context = await browser.newContext({ baseURL: origin });
+  const page = await context.newPage();
+  await openLoginPageFlow(page);
 
-    cleanup.add(async () => {
-      await upsertEnvSecretValue(apiClient, SECRET_NAME, originalValue);
+  return { context, page };
+};
+
+test("frontend SSO button follows the organization's Google login switch", async ({
+  browser,
+  withIsolatedWorkerPage,
+}) => {
+  await withIsolatedWorkerPage(USER_ROLE.admin, async ({ apiClient, origin }) => {
+    await apiClient.api.envControllerBulkUpsertEnv([
+      { name: ENV_SECRET_NAMES.GOOGLE_CLIENT_ID, value: "e2e-google-client-id" },
+      { name: ENV_SECRET_NAMES.GOOGLE_CLIENT_SECRET, value: "e2e-google-client-secret" },
+    ]);
+    await apiClient.api.envControllerUpdateLoginMethod({
+      method: LOGIN_METHODS.GOOGLE,
+      enabled: true,
     });
 
-    await upsertEnvSecretValue(apiClient, SECRET_NAME, "true");
+    const enabledLogin = await openAnonymousLoginPage(browser, origin);
+    try {
+      await expect(enabledLogin.page.getByTestId(SSO_LOGIN_HANDLES.GOOGLE)).toBeVisible();
+    } finally {
+      await enabledLogin.context.close();
+    }
 
-    await expect
-      .poll(async () => (await apiClient.api.envControllerGetFrontendSsoEnabled()).data.data.google)
-      .toBe("true");
+    await apiClient.api.envControllerUpdateLoginMethod({
+      method: LOGIN_METHODS.GOOGLE,
+      enabled: false,
+    });
+
+    const disabledLogin = await openAnonymousLoginPage(browser, origin);
+    try {
+      await expect(disabledLogin.page.getByTestId(SSO_LOGIN_HANDLES.GOOGLE)).toHaveCount(0);
+    } finally {
+      await disabledLogin.context.close();
+    }
   });
-
-  const enabledPage = await createWorkspacePage();
-  try {
-    await openLoginPageFlow(enabledPage.page);
-    await expect(enabledPage.page.getByTestId(SSO_LOGIN_HANDLES.GOOGLE)).toBeVisible();
-  } finally {
-    await enabledPage.context.close();
-  }
-
-  await withWorkerPage(USER_ROLE.admin, async () => {
-    await upsertEnvSecretValue(apiClient, SECRET_NAME, "false");
-
-    await expect
-      .poll(async () => (await apiClient.api.envControllerGetFrontendSsoEnabled()).data.data.google)
-      .toBe("false");
-  });
-
-  const disabledPage = await createWorkspacePage();
-  try {
-    await openLoginPageFlow(disabledPage.page);
-    await expect(disabledPage.page.getByTestId(SSO_LOGIN_HANDLES.GOOGLE)).toHaveCount(0);
-  } finally {
-    await disabledPage.context.close();
-  }
 });

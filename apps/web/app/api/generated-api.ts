@@ -8586,6 +8586,55 @@ export interface DeleteAnnouncementResponse {
   };
 }
 
+export interface GetLoginMethodsResponse {
+  data: {
+    google: boolean;
+    microsoft: boolean;
+    slack: boolean;
+    magicLink: boolean;
+    password: boolean;
+  };
+}
+
+export interface GetLoginMethodSetupResponse {
+  data: {
+    methods: {
+      google: boolean;
+      microsoft: boolean;
+      slack: boolean;
+      magicLink: boolean;
+      password: boolean;
+    };
+    missingCredentials: {
+      google: string[];
+      microsoft: string[];
+      slack: string[];
+    };
+  };
+}
+
+export interface UpdateLoginMethodBody {
+  method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+  enabled: boolean;
+}
+
+export interface UpdateLoginMethodResponse {
+  data: {
+    methods: {
+      google: boolean;
+      microsoft: boolean;
+      slack: boolean;
+      magicLink: boolean;
+      password: boolean;
+    };
+    missingCredentials: {
+      google: string[];
+      microsoft: string[];
+      slack: string[];
+    };
+  };
+}
+
 export type BulkUpsertEnvBody = {
   name: string;
   value: string;
@@ -31563,13 +31612,10 @@ export interface UpdateTenantApiKeysBody {
     | "PHISHING_API_KEY"
     | "PHISHING_BASE_URL"
     | "PHISHING_WEBHOOK_SECRET"
-    | "CONTENT_MARKETPLACE_BASE_URL"
-    | "CONTENT_MARKETPLACE_API_KEY"
     | "MICROSOFT_CLIENT_ID"
     | "MICROSOFT_CLIENT_SECRET"
     | "MICROSOFT_CALENDAR_CLIENT_ID"
     | "MICROSOFT_CALENDAR_CLIENT_SECRET"
-    | "MICROSOFT_OAUTH_ENABLED"
     | "OPENAI_API_KEY"
     | "BUNNY_STREAM_API_KEY"
     | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -31578,16 +31624,11 @@ export interface UpdateTenantApiKeysBody {
     | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
     | "GOOGLE_CLIENT_ID"
     | "GOOGLE_CLIENT_SECRET"
-    | "GOOGLE_OAUTH_ENABLED"
-    | "VITE_GOOGLE_OAUTH_ENABLED"
-    | "VITE_MICROSOFT_OAUTH_ENABLED"
     | "STRIPE_WEBHOOK_SECRET"
     | "STRIPE_SECRET_KEY"
     | "VITE_STRIPE_PUBLISHABLE_KEY"
     | "SLACK_CLIENT_ID"
     | "SLACK_CLIENT_SECRET"
-    | "SLACK_OAUTH_ENABLED"
-    | "VITE_SLACK_OAUTH_ENABLED"
     | "LUMA_API_KEY"
     | "LIVEKIT_URL"
     | "LIVEKIT_API_KEY"
@@ -31607,13 +31648,10 @@ export interface UpdateTenantApiKeysResponse {
       | "PHISHING_API_KEY"
       | "PHISHING_BASE_URL"
       | "PHISHING_WEBHOOK_SECRET"
-      | "CONTENT_MARKETPLACE_BASE_URL"
-      | "CONTENT_MARKETPLACE_API_KEY"
       | "MICROSOFT_CLIENT_ID"
       | "MICROSOFT_CLIENT_SECRET"
       | "MICROSOFT_CALENDAR_CLIENT_ID"
       | "MICROSOFT_CALENDAR_CLIENT_SECRET"
-      | "MICROSOFT_OAUTH_ENABLED"
       | "OPENAI_API_KEY"
       | "BUNNY_STREAM_API_KEY"
       | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -31622,16 +31660,11 @@ export interface UpdateTenantApiKeysResponse {
       | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
       | "GOOGLE_CLIENT_ID"
       | "GOOGLE_CLIENT_SECRET"
-      | "GOOGLE_OAUTH_ENABLED"
-      | "VITE_GOOGLE_OAUTH_ENABLED"
-      | "VITE_MICROSOFT_OAUTH_ENABLED"
       | "STRIPE_WEBHOOK_SECRET"
       | "STRIPE_SECRET_KEY"
       | "VITE_STRIPE_PUBLISHABLE_KEY"
       | "SLACK_CLIENT_ID"
       | "SLACK_CLIENT_SECRET"
-      | "SLACK_OAUTH_ENABLED"
-      | "VITE_SLACK_OAUTH_ENABLED"
       | "LUMA_API_KEY"
       | "LIVEKIT_URL"
       | "LIVEKIT_API_KEY"
@@ -40902,6 +40935,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name EnvControllerGetLoginMethods
+     * @request GET:/api/env/login-methods
+     */
+    envControllerGetLoginMethods: (params: RequestParams = {}) =>
+      this.request<GetLoginMethodsResponse, any>({
+        path: `/api/env/login-methods`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerUpdateLoginMethod
+     * @request POST:/api/env/login-methods
+     */
+    envControllerUpdateLoginMethod: (data: UpdateLoginMethodBody, params: RequestParams = {}) =>
+      this.request<UpdateLoginMethodResponse, any>({
+        path: `/api/env/login-methods`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetLoginMethodSetup
+     * @request GET:/api/env/login-methods/setup
+     */
+    envControllerGetLoginMethodSetup: (params: RequestParams = {}) =>
+      this.request<GetLoginMethodSetupResponse, any>({
+        path: `/api/env/login-methods/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EnvControllerBulkUpsertEnv
      * @request POST:/api/env/bulk
      */
@@ -44398,7 +44475,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Downloads the listing's current version and queues a native archive import into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.
+     * @description Queues a native archive import that downloads the listing's current version into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.
      *
      * @name ContentMarketplaceControllerCopyContentMarketplaceListing
      * @summary Copy a content marketplace course into the tenant

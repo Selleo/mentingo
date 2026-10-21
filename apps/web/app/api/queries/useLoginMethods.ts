@@ -1,18 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
-export type LoginMethod = "google" | "microsoft" | "slack" | "magicLink" | "password";
-export type LoginMethods = Record<LoginMethod, boolean>;
-export type LoginMethodSetup = {
-  methods: LoginMethods;
-  missing: Record<"google" | "microsoft" | "slack", string[]>;
-};
-export function useLoginMethods() {
-  return useQuery({
-    queryKey: ["loginMethods"],
-    staleTime: 0,
-    queryFn: async () =>
-      (await ApiClient.instance.get<{ data: LoginMethods }>("/api/env/login-methods")).data.data,
+import type { GetLoginMethodsResponse } from "~/api/generated-api";
+
+export const LOGIN_METHODS_QUERY_KEY = ["loginMethods"];
+
+export const loginMethodsQueryOptions = () =>
+  queryOptions({
+    queryKey: LOGIN_METHODS_QUERY_KEY,
+    queryFn: async () => {
+      const response = await ApiClient.api.envControllerGetLoginMethods();
+
+      return response.data;
+    },
+    select: (data: GetLoginMethodsResponse) => data.data,
   });
+
+export function useLoginMethods() {
+  return useQuery(loginMethodsQueryOptions());
 }

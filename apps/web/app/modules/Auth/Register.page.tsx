@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { useGlobalSettings, useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useLoginMethods } from "~/api/queries/useLoginMethods";
 import { useRegistrationForm } from "~/api/queries/useRegistrationForm";
-import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { Icon } from "~/components/Icon";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
@@ -48,18 +48,15 @@ export default function RegisterPage() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const selectedLanguage = useLanguageStore((state) => state.language);
-  const { data: ssoEnabled } = useSSOEnabled();
+  const { data: loginMethods } = useLoginMethods();
   const { data: globalSettings } = useGlobalSettings();
   const { data: registrationForm } = useRegistrationForm(selectedLanguage);
 
-  const isGoogleOAuthEnabled =
-    (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
+  const isGoogleOAuthEnabled = loginMethods?.google ?? false;
 
-  const isMicrosoftOAuthEnabled =
-    (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
+  const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
 
-  const isSlackOAuthEnabled =
-    (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
+  const isSlackOAuthEnabled = loginMethods?.slack ?? false;
 
   const requiredFieldIds = useMemo(
     () => registrationForm?.fields.filter((field) => field.required).map((field) => field.id) ?? [],
@@ -358,7 +355,8 @@ export default function RegisterPage() {
 
                 {isAnyProviderEnabled && (
                   <SocialLogin
-                    isSSOEnforced={isSSOEnforced}
+                    isEmailFormVisible={!isSSOEnforced}
+                    isMagicLinkEnabled={loginMethods?.magicLink ?? false}
                     isGoogleOAuthEnabled={isGoogleOAuthEnabled}
                     isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
                     isSlackOAuthEnabled={isSlackOAuthEnabled}
