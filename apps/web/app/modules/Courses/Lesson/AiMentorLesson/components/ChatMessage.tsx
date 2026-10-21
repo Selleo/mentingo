@@ -83,6 +83,10 @@ const ChatMessage = ({
     );
   }, [aiName, currentUserDisplayName, isAssistant, name, previewUser, t, user?.name, userName]);
 
+  // The stream can create an assistant message before its first text delta.
+  // ChatLoader owns the avatar/name until there is an actual reply to display.
+  if (isAssistant && contentNode == null && !textContent.trim()) return null;
+
   return (
     <div
       key={id}
