@@ -97,6 +97,59 @@ describe("global authoring notification ownership", () => {
     unmount();
   });
 
+  it.each([
+    ["waiting_author", "AI needs your input to continue."],
+    ["failed", "AI could not finish this request."],
+    ["completed", "AI’s response is ready."],
+    ["outline", "Your course outline is ready to review."],
+    ["changes", "Your course changes are ready to review."],
+  ] as const)("describes the %s outcome in the toast", (kind, description) => {
+    queryClient.setQueryData(key, session("running"));
+    const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
+    vi.setSystemTime(Date.now() + 10_000);
+    const ready = session(kind === "outline" || kind === "changes" ? "completed" : kind, 2);
+    if (kind === "outline" || kind === "changes") {
+      ready.tasks = [
+        {
+          taskId: "task-a",
+          requestId: "request-a",
+          status: "waiting_author",
+          errorCode: null,
+          outputId: "proposal-a",
+        },
+      ];
+      ready.records = [
+        {
+          id: "proposal-a",
+          kind: "proposal",
+          payload: {
+            taskId: "task-a",
+            revision: 1,
+            outline:
+              kind === "outline" ? [{ id: "chapter-a", title: "Introduction", lessons: [] }] : null,
+            operations:
+              kind === "changes"
+                ? [
+                    {
+                      operationId: "operation-a",
+                      type: "course.update",
+                      targetId: "course-a",
+                      dependencies: [],
+                      payload: { title: "New course title" },
+                    },
+                  ]
+                : [],
+          },
+        },
+      ];
+    }
+    act(() => {
+      queryClient.setQueryData(key, ready);
+    });
+    expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ description }));
+    unmount();
+  });
+
   it("preserves unguarded refresh callers and their monotonic cache behavior", async () => {
     mocks.getSession
       .mockResolvedValueOnce(session("running", 2))

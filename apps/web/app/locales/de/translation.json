@@ -6269,7 +6269,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "Die KI hat diese Anfrage abgeschlossen.",
+      "completed": "Die Antwort der KI ist bereit.",
+      "outline_ready": "Ihr Kursentwurf ist zur Prüfung bereit.",
+      "changes_ready": "Ihre Kursänderungen sind zur Prüfung bereit.",
       "failed": "Die KI konnte diese Anfrage nicht abschließen.",
       "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren.",
       "view": "Ansehen"

@@ -6013,7 +6013,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "L’IA a terminé cette demande.",
+      "completed": "La réponse de l’IA est prête.",
+      "outline_ready": "Le plan de votre cours est prêt à être vérifié.",
+      "changes_ready": "Les modifications de votre cours sont prêtes à être vérifiées.",
       "failed": "L’IA n’a pas pu terminer cette demande.",
       "waiting_author": "L’IA a besoin de votre réponse pour continuer.",
       "view": "Voir"

@@ -33,6 +33,45 @@ const session = (
 });
 const key = (sessionId = "session-1") => ["course-authoring", "course-1", "session", sessionId];
 
+const reviewSession = (kind: "outline" | "changes"): AuthoringSession => ({
+  ...session("completed", 2),
+  tasks: [
+    {
+      taskId: "task-1",
+      requestId: "request-1",
+      kind: "plan",
+      status: "waiting_author",
+      errorCode: null,
+      outputId: "proposal-1",
+    },
+  ],
+  records: [
+    {
+      id: "proposal-1",
+      kind: "proposal",
+      payload: {
+        id: "proposal-1",
+        revision: 1,
+        taskId: "task-1",
+        outline:
+          kind === "outline" ? [{ id: "chapter-1", title: "Introduction", lessons: [] }] : null,
+        operations:
+          kind === "changes"
+            ? [
+                {
+                  operationId: "op-1",
+                  type: "course.update",
+                  targetId: "course-1",
+                  dependencies: [],
+                  payload: { title: "Updated course" },
+                },
+              ]
+            : [],
+      },
+    },
+  ],
+});
+
 describe("global authoring work observer", () => {
   let client: QueryClient;
   let dispose: () => void;
@@ -73,6 +112,154 @@ describe("global authoring work observer", () => {
       "waiting_author",
       "waiting_author",
       "completed",
+    ]);
+  });
+
+  it("reports an unanswered question even when the turn is completed", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    const waiting = {
+      ...session("completed", 2),
+      records: [
+        {
+          id: "question-1",
+          kind: "question",
+          payload: {
+            taskId: "task-1",
+            requestId: "request-1",
+            revision: 1,
+            question: "Who is the course for?",
+          },
+        },
+      ],
+    };
+    client.setQueryData(key(), waiting);
+    client.setQueryData(key(), { ...waiting, snapshotSequence: 3 });
+    expect(notify.mock.calls.map(([outcome]) => outcome)).toEqual(["waiting_author"]);
+  });
+
+  it.each(["answered", "other request"])("ignores a question that belongs to %s", (kind) => {
+    start();
+    client.setQueryData(key(), session("running"));
+    client.setQueryData(key(), {
+      ...session("completed", 2),
+      records: [
+        {
+          id: "question-1",
+          kind: "question",
+          payload: {
+            taskId: "task-1",
+            requestId: kind === "other request" ? "another-request" : "request-1",
+            revision: 1,
+            question: "Who is the course for?",
+            answered: kind === "answered",
+          },
+        },
+      ],
+    });
+    expect(notify).toHaveBeenCalledWith("completed", expect.anything());
+  });
+
+  it.each(["outline", "changes"] as const)(
+    "announces %s review instead of generic input or completion",
+    (kind) => {
+      start();
+      client.setQueryData(key(), session("running"));
+      const ready = reviewSession(kind);
+      client.setQueryData(key(), ready);
+      client.setQueryData(key(), { ...ready, snapshotSequence: 3 });
+      expect(notify.mock.calls.map(([outcome]) => outcome)).toEqual([`${kind}_ready`]);
+    },
+  );
+
+  it("waits for sibling work before announcing reviewable changes", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    const ready = reviewSession("changes");
+    client.setQueryData(key(), {
+      ...ready,
+      tasks: [
+        ...ready.tasks,
+        {
+          taskId: "task-2",
+          requestId: "request-1",
+          status: "running",
+          errorCode: null,
+          outputId: null,
+        },
+      ],
+    });
+    expect(notify).not.toHaveBeenCalled();
+    client.setQueryData(key(), { ...ready, snapshotSequence: 3 });
+    expect(notify).toHaveBeenCalledWith("changes_ready", expect.anything());
+  });
+
+  it("does not announce already applied changes as awaiting review", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    const applied = reviewSession("changes");
+    applied.tasks[0].status = "succeeded";
+    applied.records[0].payload.status = "applied";
+    client.setQueryData(key(), applied);
+    expect(notify).toHaveBeenCalledWith("completed", expect.anything());
+  });
+
+  it("prioritizes an unresolved author action over another task's saved changes", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    const waiting = reviewSession("changes");
+    waiting.tasks.push({
+      taskId: "asset-1",
+      kind: "asset",
+      requestId: "request-1",
+      status: "waiting_author",
+      errorCode: null,
+      outputId: null,
+    });
+    client.setQueryData(key(), waiting);
+    expect(notify).toHaveBeenCalledWith("waiting_author", expect.anything());
+  });
+
+  it("updates an observed completion when its review record arrives later", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    client.setQueryData(key(), session("completed", 2));
+    client.setQueryData(key(), { ...reviewSession("outline"), snapshotSequence: 3 });
+    expect(notify.mock.calls.map(([outcome]) => outcome)).toEqual(["completed", "outline_ready"]);
+  });
+
+  it("keeps historical completed and review-ready requests quiet", () => {
+    client.setQueryData(key(), session("completed"));
+    client.setQueryData(key("older"), { ...reviewSession("outline"), sessionId: "older" });
+    start();
+    client.setQueryData(key(), reviewSession("changes"));
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it("replaces a review notice when a question arrives for the same observed request", () => {
+    start();
+    client.setQueryData(key(), session("running"));
+    const ready = reviewSession("outline");
+    client.setQueryData(key(), ready);
+    client.setQueryData(key(), {
+      ...ready,
+      snapshotSequence: 3,
+      records: [
+        ...ready.records,
+        {
+          id: "question-1",
+          kind: "question",
+          payload: {
+            taskId: "task-1",
+            revision: 1,
+            question: "May I research more sources?",
+          },
+        },
+      ],
+    });
+    expect(notify.mock.calls.map(([outcome]) => outcome)).toEqual([
+      "outline_ready",
+      "waiting_author",
     ]);
   });
 

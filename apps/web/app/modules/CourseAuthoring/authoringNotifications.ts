@@ -1,7 +1,14 @@
+import { projectWorkspaceRecords } from "./courseAuthoring.records";
+
 import type { AuthoringSession } from "./courseAuthoring.types";
 import type { QueryClient } from "@tanstack/react-query";
 
-export type AuthoringWorkOutcome = "completed" | "failed" | "waiting_author";
+export type AuthoringWorkOutcome =
+  | "completed"
+  | "failed"
+  | "waiting_author"
+  | "outline_ready"
+  | "changes_ready";
 type WorkStatus = AuthoringWorkOutcome | "active" | "stopped";
 type WatchedSession = {
   courseId: string;
@@ -12,6 +19,7 @@ type WatchedSession = {
 };
 
 const requestStatuses = (session: AuthoringSession) => {
+  const projection = projectWorkspaceRecords(session.records, session.tasks);
   const statuses = new Map<string, WorkStatus>();
   const requestIds = new Set([
     ...(session.turns ?? []).map((turn) => turn.requestId),
@@ -27,6 +35,36 @@ const requestStatuses = (session: AuthoringSession) => {
   requestIds.forEach((requestId) => {
     const turn = session.turns?.find((item) => item.requestId === requestId);
     const tasks = session.tasks.filter((task) => task.requestId === requestId);
+    const taskIds = new Set(tasks.map((task) => task.taskId));
+    const artifactIds = new Set(
+      turn?.parts.flatMap((part) => part.artifact?.artifactId ?? []) ?? [],
+    );
+    const proposals = projection.proposals.filter(
+      (proposal) =>
+        (artifactIds.has(proposal.id) || (proposal.taskId && taskIds.has(proposal.taskId))) &&
+        !tasks.some(
+          (task) =>
+            task.taskId === proposal.taskId && ["superseded", "stopped"].includes(task.status),
+        ),
+    );
+    const needsAnswer =
+      projection.questions.some(
+        (question) =>
+          !question.answered &&
+          (question.requestId === requestId ||
+            taskIds.has(question.taskId) ||
+            artifactIds.has(question.id)),
+      ) ||
+      tasks.some(
+        (task) =>
+          task.status === "waiting_author" &&
+          !proposals.some(
+            (proposal) =>
+              proposal.taskId === task.taskId &&
+              proposal.id === task.outputId &&
+              ["pending", "accepted"].includes(proposal.decision),
+          ),
+      );
     if (!turn && tasks.every((task) => task.kind === "source" || sourceTaskIds.has(task.taskId)))
       return;
     if (
@@ -36,15 +74,28 @@ const requestStatuses = (session: AuthoringSession) => {
       tasks.some((task) => ["queued", "running"].includes(task.status))
     ) {
       statuses.set(requestId, "active");
+    } else if (needsAnswer) {
+      statuses.set(requestId, "waiting_author");
     } else if (turn?.status === "failed" || tasks.some((task) => task.status === "failed")) {
       statuses.set(requestId, "failed");
+    } else if (tasks.some((task) => task.status === "waiting_dependencies")) {
+      statuses.set(requestId, "active");
+    } else if (
+      proposals.some((proposal) => proposal.decision === "pending" && proposal.outline?.length)
+    ) {
+      statuses.set(requestId, "outline_ready");
+    } else if (
+      proposals.some(
+        (proposal) =>
+          ["pending", "accepted"].includes(proposal.decision) && proposal.operations.length > 0,
+      )
+    ) {
+      statuses.set(requestId, "changes_ready");
     } else if (
       turn?.status === "waiting_author" ||
       tasks.some((task) => task.status === "waiting_author")
     ) {
       statuses.set(requestId, "waiting_author");
-    } else if (tasks.some((task) => task.status === "waiting_dependencies")) {
-      statuses.set(requestId, "active");
     } else if (
       turn?.status === "completed" ||
       (tasks.length > 0 &&
@@ -92,7 +143,7 @@ export const observeAuthoringWork = ({
       if (
         status === "active" &&
         (!before ||
-          ["failed", "completed", "stopped"].includes(before) ||
+          ["failed", "completed", "outline_ready", "changes_ready", "stopped"].includes(before) ||
           !startedAt.has(requestId))
       ) {
         startedAt.set(requestId, Date.now());
@@ -100,7 +151,10 @@ export const observeAuthoringWork = ({
       const isLongRunning = Date.now() - (startedAt.get(requestId) ?? Date.now()) >= longRunningMs;
       if (
         before &&
-        (before === "active" || before === "waiting_author") &&
+        (before === "active" ||
+          before === "waiting_author" ||
+          (startedAt.has(requestId) &&
+            ["waiting_author", "outline_ready", "changes_ready"].includes(status))) &&
         status !== before &&
         status !== "active" &&
         status !== "stopped" &&

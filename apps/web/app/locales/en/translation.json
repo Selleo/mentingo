@@ -6291,7 +6291,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "AI finished this request.",
+      "completed": "AI’s response is ready.",
+      "outline_ready": "Your course outline is ready to review.",
+      "changes_ready": "Your course changes are ready to review.",
       "failed": "AI could not finish this request.",
       "waiting_author": "AI needs your input to continue.",
       "view": "View"

@@ -6282,7 +6282,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "AI dokončila tento požadavek.",
+      "completed": "Odpověď AI je připravena.",
+      "outline_ready": "Osnova vašeho kurzu je připravena ke kontrole.",
+      "changes_ready": "Změny vašeho kurzu jsou připraveny ke kontrole.",
       "failed": "AI nemohla dokončit tento požadavek.",
       "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat.",
       "view": "Zobrazit"

@@ -6278,7 +6278,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "DI užbaigė šią užklausą.",
+      "completed": "DI atsakymas paruoštas.",
+      "outline_ready": "Jūsų kurso planas paruoštas peržiūrai.",
+      "changes_ready": "Jūsų kurso pakeitimai paruošti peržiūrai.",
       "failed": "DI nepavyko užbaigti šios užklausos.",
       "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
       "view": "Peržiūrėti"

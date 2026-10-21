@@ -6227,7 +6227,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "La IA ha terminado esta solicitud.",
+      "completed": "La respuesta de la IA está lista.",
+      "outline_ready": "El esquema de tu curso está listo para revisar.",
+      "changes_ready": "Los cambios de tu curso están listos para revisar.",
       "failed": "La IA no pudo terminar esta solicitud.",
       "waiting_author": "La IA necesita tu respuesta para continuar.",
       "view": "Ver"
