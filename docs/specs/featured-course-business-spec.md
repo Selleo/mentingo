@@ -26,7 +26,7 @@ Organizations can focus learner attention on timely training without duplicating
 
 ## How It Works
 
-An administrator with settings-management access opens the modern course list and clicks the hero banner (outside its Play and More info buttons). A dialog shows published, non-archived courses they can manage as cards with thumbnails, searchable by title in the active content language. After selection, the course appears in the hero area for learners who are eligible to see it. The administrator can change the selection, or choose "Automatic" to clear it, at any time.
+An administrator with settings-management access opens the modern course list and clicks the hero banner (outside its Play and More info buttons); hovering it shows an outline and a "Featured course · Click to change" tab. A dialog shows published, non-archived courses they can manage as cards with thumbnails, searchable by title in the active content language. After selection, the course appears in the hero area for learners who are eligible to see it. The administrator can change the selection, or choose "Automatic" to clear it, at any time.
 
 Mentingo accepts only published courses for a new selection. If the selected course later becomes unavailable through an individual or bulk status update, or is deleted, the global featured selection is cleared so the learner experience does not point at stale content. The selection is tenant-scoped and does not grant access to the course by itself.
 

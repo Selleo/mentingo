@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useForm } from "react-hook-form";
 
 import { useCreateCourse } from "~/api/mutations/useCreateCourse";
+import { ADD_COURSE_PARAMS } from "~/modules/Admin/AddCourse/utils/addCourseOrigin";
 import { addCourseFormSchema } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -22,7 +23,7 @@ export const useAddCourseForm = () => {
     defaultValues: {
       title: "",
       description: "",
-      categoryId: searchParams.get("categoryId") ?? "",
+      categoryId: searchParams.get(ADD_COURSE_PARAMS.CATEGORY_ID) ?? "",
       thumbnailS3Key: "",
       thumbnailUrl: "",
       language: language,

@@ -19,6 +19,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
 import { ContentMarketplaceCoursesRow } from "~/modules/ContentMarketplace/components/ContentMarketplaceCoursesRow";
+import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
 import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -153,6 +154,7 @@ const CategoryCoursesRow = ({
       watchSlideIndex={watchedSlideIndex}
       onWatchedSlideVisible={handleWatchedSlideVisible}
       rowRef={rowRef}
+      morphTitles
       headerAction={
         canAddCourses && (
           <AddCourseToCategoryButton categoryId={category.id} categoryTitle={category.title} />
@@ -175,6 +177,9 @@ const ModernCoursesView = () => {
   });
   const { hasAccess: canManageFeaturedCourse } = usePermissions({
     required: PERMISSIONS.SETTINGS_MANAGE,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
   const { hasAccess: canManageCategories } = usePermissions({
     required: PERMISSIONS.CATEGORY_MANAGE,
@@ -466,7 +471,9 @@ const ModernCoursesView = () => {
           {!isCategoriesLoading && <ContentMarketplaceCoursesRow />}
 
           {canManageCategories && !isCategoriesLoading && (
-            <AddCategoryRow onCreated={handleCategoryCreated} />
+            <div className="px-4 pb-6 md:px-8">
+              <AddCategoryRow onCreated={handleCategoryCreated} />
+            </div>
           )}
 
           {isFetchingNextCategoriesPage &&
@@ -480,7 +487,13 @@ const ModernCoursesView = () => {
 
   return (
     <PageWrapper isBarebones className="mb-4 min-h-screen w-full p-0" wrapperClassName="h-full">
-      <div className="min-h-screen">
+      <div className="relative min-h-screen">
+        {canManageCourses && (
+          <CoursesViewToggle
+            active="catalogue"
+            className="absolute right-4 top-4 z-30 md:right-8 md:top-8"
+          />
+        )}
         <div className="overflow-x-hidden">{renderCourses()}</div>
       </div>
     </PageWrapper>

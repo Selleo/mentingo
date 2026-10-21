@@ -14,6 +14,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { COURSE_TYPE_SELECTOR_HANDLES } from "../../../../e2e/data/courses/handles";
 
 import { CourseTypeCard } from "./components/CourseTypeCard";
+import { getAddCourseExitPath, withAddCourseContext } from "./utils/addCourseOrigin";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { LucideIcon } from "lucide-react";
@@ -70,11 +71,9 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 const CourseTypeSelectorPage = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const categoryId = searchParams.get("categoryId");
+  const exitPath = getAddCourseExitPath(searchParams);
   const getOptionHref = (option: CourseTypeOption) =>
-    option.id === "standard" && categoryId
-      ? `${option.href}?${new URLSearchParams({ categoryId })}`
-      : option.href;
+    option.id === "standard" ? withAddCourseContext(option.href, searchParams) : option.href;
 
   return (
     <main
@@ -86,7 +85,7 @@ const CourseTypeSelectorPage = () => {
           <BreadcrumbItem>
             <BreadcrumbLink asChild className="body-base-md text-primary-800">
               <Button asChild variant="outline" className="mr-2 w-min">
-                <Link to="/admin/courses" data-testid={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON}>
+                <Link to={exitPath} data-testid={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON}>
                   <ArrowLeft className="mr-2 size-3" />
                   {t("adminCourseTypeSelector.back")}
                 </Link>

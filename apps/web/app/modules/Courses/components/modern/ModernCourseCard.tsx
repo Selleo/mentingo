@@ -57,6 +57,7 @@ type ModernCourseCardProps = ModernCourseCardVariantProps & {
   enrolled?: boolean;
   hasFreeChapters?: boolean;
   dueDate?: Date | null;
+  titleMorphName?: string;
 };
 
 const ModernCourseCard = (props: ModernCourseCardProps) => {
@@ -74,6 +75,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
     enrolled,
     hasFreeChapters,
     dueDate,
+    titleMorphName,
   } = props;
   const isPicker = props.variant === "picker";
   const popoutEnabled = props.variant !== "picker" && (props.popoutEnabled ?? true);
@@ -331,7 +333,10 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
             transitionDuration: CONTENT_TRANSITION_DURATION,
           }}
         >
-          <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
+          <h3
+            className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg"
+            style={{ viewTransitionName: titleMorphName }}
+          >
             {title}
           </h3>
         </div>

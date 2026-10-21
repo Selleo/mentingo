@@ -25,6 +25,10 @@ export const COURSES_INLINE_EDIT_HANDLES = {
   MARKETPLACE_BROWSE_ALL: "courses-inline-edit-marketplace-browse-all",
 } as const;
 
+export const COURSES_VIEW_TOGGLE_HANDLES = {
+  TOGGLE: "courses-view-toggle",
+} as const;
+
 export const COURSES_PAGE_HANDLES = {
   PAGE: "courses-page",
   HEADING: "courses-page-heading",

@@ -62,35 +62,33 @@ export function AddCategoryRow({ onCreated }: AddCategoryRowProps) {
   };
 
   return (
-    <section className="pb-6">
-      <div className="flex items-center gap-3 px-4 md:px-8">
-        {isEditing ? (
-          <form onSubmit={handleSubmit} className="flex w-full max-w-2xl items-center gap-3">
-            <input
-              ref={inputRef}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={() => handleSubmit()}
-              disabled={isPending}
-              placeholder={t("studentCoursesView.modernView.inlineEdit.categoryPlaceholder")}
-              className="h2 w-full border-b-2 border-dashed border-primary-400 bg-transparent text-2xl leading-snug outline-none placeholder:text-neutral-300 md:text-[32px] md:leading-relaxed"
-              data-testid={COURSES_INLINE_EDIT_HANDLES.ADD_CATEGORY_INPUT}
-            />
-            {isPending && <Loader2 className="size-5 shrink-0 animate-spin text-primary-700" />}
-          </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="h2 flex items-center gap-3 text-2xl leading-snug text-neutral-300 transition-colors hover:text-primary-700 focus-visible:text-primary-700 focus-visible:outline-none md:text-[32px] md:leading-relaxed"
-            data-testid={COURSES_INLINE_EDIT_HANDLES.ADD_CATEGORY}
-          >
-            <Plus className="size-7" aria-hidden="true" />
-            {t("studentCoursesView.modernView.inlineEdit.addCategory")}
-          </button>
-        )}
-      </div>
-    </section>
+    <div className="flex min-w-0 items-center gap-3">
+      {isEditing ? (
+        <form onSubmit={handleSubmit} className="flex w-full max-w-2xl items-center gap-3">
+          <input
+            ref={inputRef}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => handleSubmit()}
+            disabled={isPending}
+            placeholder={t("studentCoursesView.modernView.inlineEdit.categoryPlaceholder")}
+            className="h2 w-full border-b-2 border-dashed border-primary-400 bg-transparent text-2xl leading-snug outline-none placeholder:text-neutral-300 md:text-[32px] md:leading-relaxed"
+            data-testid={COURSES_INLINE_EDIT_HANDLES.ADD_CATEGORY_INPUT}
+          />
+          {isPending && <Loader2 className="size-5 shrink-0 animate-spin text-primary-700" />}
+        </form>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          className="h2 flex items-center gap-3 text-2xl leading-snug text-neutral-300 transition-colors hover:text-primary-700 focus-visible:text-primary-700 focus-visible:outline-none md:text-[32px] md:leading-relaxed"
+          data-testid={COURSES_INLINE_EDIT_HANDLES.ADD_CATEGORY}
+        >
+          <Plus className="size-7" aria-hidden="true" />
+          {t("studentCoursesView.modernView.inlineEdit.addCategory")}
+        </button>
+      )}
+    </div>
   );
 }
