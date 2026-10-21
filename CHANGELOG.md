@@ -1,3 +1,27 @@
+<a name="v4.24.0"></a>
+
+## [v4.24.0] - 21.10.2026
+
+### Features:
+
+- introduce content marketplace to make discovering and accessing learning content easier ([#2054](https://github.com/Selleo/mentingo/issues/2054))
+
+- let student assistants read free public and enrolled lessons ([#2052](https://github.com/Selleo/mentingo/issues/2052))
+
+- automatically attach release films above release notes ([#2046](https://github.com/Selleo/mentingo/issues/2046))
+
+### Bug Fixes:
+
+- prevent session interruptions caused by issues during authentication token refresh ([#2057](https://github.com/Selleo/mentingo/issues/2057))
+
+- allow default MCP connections with account access ([#2048](https://github.com/Selleo/mentingo/issues/2048))
+
+### Chores:
+
+- allow demos to pause background search indexing ([#2060](https://github.com/Selleo/mentingo/issues/2060))
+
+- disable tracing for global-search embeddings ([#2051](https://github.com/Selleo/mentingo/issues/2051))
+
 <a name="v4.23.0"></a>
 
 ## [v4.23.0] - 16.10.2026
@@ -39,6 +63,8 @@
 - use shared mentingo package repository for the voice mentor and judge result UI ([#2023](https://github.com/Selleo/mentingo/issues/2023))
 
 ### Documentation:
+
+- update changelog for version v4.23.0
 
 - document Mentingo MCP capabilities and setup ([#2014](https://github.com/Selleo/mentingo/issues/2014))
 
@@ -3474,7 +3500,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.23.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.24.0...HEAD
+[v4.24.0]: https://github.com/Selleo/mentingo/compare/v4.23.0...v4.24.0
 [v4.23.0]: https://github.com/Selleo/mentingo/compare/v4.22.0...v4.23.0
 [v4.22.0]: https://github.com/Selleo/mentingo/compare/v4.21.0...v4.22.0
 [v4.21.0]: https://github.com/Selleo/mentingo/compare/v4.20.1...v4.21.0
