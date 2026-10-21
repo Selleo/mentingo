@@ -348,8 +348,8 @@ While the author remains signed in with Mentingo open, requests observed running
 when work finishes, fails or needs an answer, including after the drawer closes or another session
 is selected. The session currently visible in the drawer does not
 show background toasts; opening that session dismisses any existing notice. Notifications use
-the shared Mentingo toast with a short status message and no action button. Authors return through
-the course editor's AI drawer; saved authoring links redirect there with the same conversation selected.
+the shared Mentingo toast with a short status message and a compact **View** action that opens
+the course editor's AI drawer with the owning conversation selected. Saved authoring links redirect there too.
 Opening old completed conversations
 does not replay completion notifications. These are in-app notices, not email or closed-browser
 push notifications.

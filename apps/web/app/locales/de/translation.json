@@ -6271,7 +6271,8 @@
     "notifications": {
       "completed": "Die KI hat diese Anfrage abgeschlossen.",
       "failed": "Die KI konnte diese Anfrage nicht abschließen.",
-      "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren."
+      "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren.",
+      "view": "Ansehen"
     },
     "changeSet": {
       "ready": {

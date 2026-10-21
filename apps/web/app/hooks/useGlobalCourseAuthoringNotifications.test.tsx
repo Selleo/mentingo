@@ -1,6 +1,6 @@
 import "~/utils/mocks/i18next.mock";
 
-import { act, renderHook } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -8,6 +8,7 @@ import {
   refreshAuthoringSession,
 } from "~/api/queries/useCourseAuthoringSessionQuery";
 import { queryClient } from "~/api/queryClient";
+import { Toast, ToastProvider, ToastViewport } from "~/components/ui/toast";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import {
@@ -18,6 +19,7 @@ import {
 import { useGlobalCourseAuthoringNotifications } from "./useGlobalCourseAuthoringNotifications";
 
 import type { CurrentUserResponse } from "~/api/generated-api";
+import type { toast } from "~/components/ui/use-toast";
 import type {
   AuthoringSession,
   AuthoringTurnStatus,
@@ -25,13 +27,19 @@ import type {
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn<(...args: unknown[]) => Promise<AuthoringSession>>(),
-  toast: vi.fn(() => ({ id: "notice", dismiss: vi.fn(), update: vi.fn() })),
+  toast: vi.fn((_options: Parameters<typeof toast>[0]) => ({
+    id: "notice",
+    dismiss: vi.fn(),
+    update: vi.fn(),
+  })),
+  navigate: vi.fn(),
 }));
 
 vi.mock("~/modules/CourseAuthoring/courseAuthoring.api", () => ({
   getAuthoringSession: mocks.getSession,
 }));
 vi.mock("~/components/ui/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
+vi.mock("@remix-run/react", () => ({ useNavigate: () => mocks.navigate }));
 
 const session = (status: AuthoringTurnStatus, sequence = 1): AuthoringSession => ({
   schemaVersion: 1,
@@ -141,12 +149,43 @@ describe("global authoring notification ownership", () => {
     expect(mocks.toast).toHaveBeenCalledTimes(2);
     expect(mocks.toast).toHaveBeenLastCalledWith({
       description: expect.any(String),
+      action: expect.anything(),
       variant: "default",
       duration: 15_000,
     });
     unmount();
     expect(attention.dismiss).toHaveBeenCalledTimes(1);
   });
+
+  it.each(["current", "logout", "switch"] as const)(
+    "opens the exact course drawer only for the current actor (%s)",
+    (actor) => {
+      queryClient.setQueryData(key, session("running"));
+      const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
+      act(() => {
+        queryClient.setQueryData(key, session("waiting_author", 2));
+      });
+      const { action } = mocks.toast.mock.calls[0][0];
+      render(
+        <ToastProvider>
+          <Toast open>{action}</Toast>
+          <ToastViewport />
+        </ToastProvider>,
+      );
+      if (actor !== "current") {
+        act(() => setActor(actor === "switch" ? "actor-b" : undefined));
+      }
+      fireEvent.click(screen.getByRole("button", { name: "View" }));
+      if (actor === "current") {
+        expect(mocks.navigate).toHaveBeenCalledWith(
+          "/admin/beta-courses/course-a?tab=Curriculum&aiGeneration=true&sessionId=session-a",
+        );
+      } else {
+        expect(mocks.navigate).not.toHaveBeenCalled();
+      }
+      unmount();
+    },
+  );
 
   it.each([
     ["course-a", "session-b"],

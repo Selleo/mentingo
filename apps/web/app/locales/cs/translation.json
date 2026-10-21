@@ -6284,7 +6284,8 @@
     "notifications": {
       "completed": "AI dokončila tento požadavek.",
       "failed": "AI nemohla dokončit tento požadavek.",
-      "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat."
+      "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat.",
+      "view": "Zobrazit"
     },
     "changeSet": {
       "ready": {

@@ -48,7 +48,8 @@ type Props = {
   language: SupportedLanguages;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialSessionId?: string | null;
+  requestedSessionId?: string | null;
+  onSessionChange?: (sessionId: string) => void;
   onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
@@ -68,7 +69,8 @@ export const CourseGenerationDrawer = ({
   language,
   open,
   onOpenChange,
-  initialSessionId,
+  requestedSessionId,
+  onSessionChange,
   onPreviewInCurriculum,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
@@ -77,7 +79,7 @@ export const CourseGenerationDrawer = ({
   const [expanded, setExpanded] = useState(false);
   const [drawerHeight, setDrawerHeight] = useState<number | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    initialSessionId ?? null,
+    requestedSessionId ?? null,
   );
   const [selectedSessionSummary, setSelectedSessionSummary] =
     useState<AuthoringSessionSummary | null>(null);
@@ -106,6 +108,15 @@ export const CourseGenerationDrawer = ({
   const sessionSelectionKey = authoringSessionSelectionKey(courseId, language, tenantScope);
   const sessionCreateCommandKey = authoringSessionCreateCommandKey(sessionSelectionKey);
   useVisibleAuthoringSession(courseId, selectedSessionId, open);
+
+  /** Opens newly linked conversations without resetting the drawer's size or expansion. */
+  useEffect(() => {
+    if (!requestedSessionId) return;
+    setSelectedSessionId(requestedSessionId);
+    setSelectedSessionSummary((current) =>
+      current?.sessionId === requestedSessionId ? current : null,
+    );
+  }, [requestedSessionId]);
 
   useEffect(
     () => () => {
@@ -169,6 +180,7 @@ export const CourseGenerationDrawer = ({
     setSelectedSessionSummary(null);
     writeAuthoringSessionSelection(sessionSelectionKey, session.sessionId);
     setSessionMenuOpen(false);
+    onSessionChange?.(session.sessionId);
   };
 
   /** Switches the full timeline and releases the old socket subscription through remount cleanup. */
@@ -177,6 +189,7 @@ export const CourseGenerationDrawer = ({
     setSelectedSessionSummary(session);
     writeAuthoringSessionSelection(sessionSelectionKey, session.sessionId);
     setSessionMenuOpen(false);
+    onSessionChange?.(session.sessionId);
   };
   /** Prefers the explicitly chosen/created session so the trigger label stays correct while the popover's own list is search-filtered. */
   const selectedSession =

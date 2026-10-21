@@ -6229,7 +6229,8 @@
     "notifications": {
       "completed": "La IA ha terminado esta solicitud.",
       "failed": "La IA no pudo terminar esta solicitud.",
-      "waiting_author": "La IA necesita tu respuesta para continuar."
+      "waiting_author": "La IA necesita tu respuesta para continuar.",
+      "view": "Ver"
     },
     "changeSet": {
       "ready": {

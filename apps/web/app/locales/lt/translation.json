@@ -6280,7 +6280,8 @@
     "notifications": {
       "completed": "DI užbaigė šią užklausą.",
       "failed": "DI nepavyko užbaigti šios užklausos.",
-      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo."
+      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
+      "view": "Peržiūrėti"
     },
     "changeSet": {
       "ready": {

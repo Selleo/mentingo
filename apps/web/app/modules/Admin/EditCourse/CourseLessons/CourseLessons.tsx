@@ -73,6 +73,14 @@ const CourseLessons = ({
   const { id: courseId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const isAuthoringDrawerOpen = searchParams.get("aiGeneration") === "true";
+  const setAuthoringSession = useCallback(
+    (sessionId: string) => {
+      const next = new URLSearchParams(searchParams);
+      next.set("sessionId", sessionId);
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
   /** Preserve the curriculum route and its other filters while toggling the generation drawer. */
   const setAuthoringDrawerOpen = useCallback(
     (open: boolean) => {
@@ -447,10 +455,11 @@ const CourseLessons = ({
       )}
       {shouldShowAuthoringButton && courseId && (
         <CourseGenerationDrawer
-          key={`${courseId}:${language}:${searchParams.get("sessionId") ?? ""}`}
+          key={`${courseId}:${language}`}
           courseId={courseId}
           language={language}
-          initialSessionId={searchParams.get("sessionId")}
+          requestedSessionId={searchParams.get("sessionId")}
+          onSessionChange={setAuthoringSession}
           open={isAuthoringDrawerOpen}
           onOpenChange={setAuthoringDrawerOpen}
           onPreviewInCurriculum={handlePreviewInCurriculum}

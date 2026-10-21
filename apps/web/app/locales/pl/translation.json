@@ -6343,7 +6343,8 @@
     "notifications": {
       "completed": "AI zakończyło tę prośbę.",
       "failed": "AI nie mogło zakończyć tej prośby.",
-      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować."
+      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować.",
+      "view": "Zobacz"
     },
     "changeSet": {
       "ready": {

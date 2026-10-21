@@ -60,6 +60,7 @@ describe("CourseGenerationDrawer session menu", () => {
 
   it("opens the linked older conversation and allows selecting a different one", async () => {
     const user = userEvent.setup();
+    const onSessionChange = vi.fn();
     renderWith()
       .withQuery()
       .withI18n()
@@ -67,7 +68,8 @@ describe("CourseGenerationDrawer session menu", () => {
         <CourseGenerationDrawer
           courseId={COURSE_ID}
           language="en"
-          initialSessionId={allSessions[23].sessionId}
+          requestedSessionId={allSessions[23].sessionId}
+          onSessionChange={onSessionChange}
           open
           onOpenChange={() => {}}
         />,
@@ -82,6 +84,39 @@ describe("CourseGenerationDrawer session menu", () => {
     await waitFor(() =>
       expect(screen.getByLabelText("Open conversation")).toHaveTextContent(
         allSessions[0].sessionId,
+      ),
+    );
+    expect(onSessionChange).toHaveBeenCalledWith(allSessions[0].sessionId);
+  });
+
+  it("opens a newly linked session while the drawer is already mounted", async () => {
+    const { rerender } = renderWith()
+      .withQuery()
+      .withI18n()
+      .render(
+        <CourseGenerationDrawer
+          courseId={COURSE_ID}
+          language="en"
+          open
+          onOpenChange={() => {}}
+          requestedSessionId={allSessions[0].sessionId}
+        />,
+      );
+    expect(await screen.findByLabelText("Open conversation")).toHaveTextContent(
+      allSessions[0].sessionId,
+    );
+    rerender(
+      <CourseGenerationDrawer
+        courseId={COURSE_ID}
+        language="en"
+        open
+        onOpenChange={() => {}}
+        requestedSessionId={allSessions[23].sessionId}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("Open conversation")).toHaveTextContent(
+        allSessions[23].sessionId,
       ),
     );
   });

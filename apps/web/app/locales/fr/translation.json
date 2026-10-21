@@ -6015,7 +6015,8 @@
     "notifications": {
       "completed": "L’IA a terminé cette demande.",
       "failed": "L’IA n’a pas pu terminer cette demande.",
-      "waiting_author": "L’IA a besoin de votre réponse pour continuer."
+      "waiting_author": "L’IA a besoin de votre réponse pour continuer.",
+      "view": "Voir"
     },
     "changeSet": {
       "ready": {
