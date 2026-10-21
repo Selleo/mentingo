@@ -1,9 +1,9 @@
 import { COURSE_STATUSES } from "@repo/shared";
 import { Check, Loader2, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourses } from "~/api/queries/useCourses";
+import { useInfiniteCourses } from "~/api/queries/useInfiniteCourses";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,9 @@ import ModernCourseCard from "../ModernCourseCard";
 import { MEDIA_ITEM_ATTRIBUTE, useViewportMediaStates } from "./useViewportMediaStates";
 
 import type { ReactNode } from "react";
+
+// Start loading the next page about one picker height before the list runs out.
+const LOAD_MORE_ROOT_MARGIN = "0px 0px 100% 0px";
 
 type CoursePickerDialogProps = {
   open: boolean;
@@ -50,17 +53,34 @@ export function CoursePickerDialog({
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data: courses = [], isLoading } = useCourses(
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteCourses(
     {
       title: debouncedSearch.trim() || undefined,
       state: COURSE_STATUSES.PUBLISHED,
-      isArchived: false,
       language,
     },
     { enabled: open },
   );
+  const courses = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
 
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const loadMoreNode = loadMoreRef.current;
+    if (!scrollRoot || !loadMoreNode || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && !isFetchingNextPage) void fetchNextPage();
+      },
+      { root: scrollRoot, rootMargin: LOAD_MORE_ROOT_MARGIN },
+    );
+
+    observer.observe(loadMoreNode);
+
+    return () => observer.disconnect();
+  }, [scrollRoot, hasNextPage, isFetchingNextPage, fetchNextPage, courses.length]);
   const getMediaState = useViewportMediaStates(
     scrollRoot,
     courses.map((course) => course.id).join(),
@@ -151,6 +171,16 @@ export function CoursePickerDialog({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {!isLoading && hasNextPage && (
+            <div
+              ref={loadMoreRef}
+              className="flex justify-center py-6 text-neutral-500"
+              data-testid={COURSES_INLINE_EDIT_HANDLES.COURSE_PICKER_LOAD_MORE}
+            >
+              {isFetchingNextPage && <Loader2 className="size-5 animate-spin" aria-hidden="true" />}
             </div>
           )}
         </div>

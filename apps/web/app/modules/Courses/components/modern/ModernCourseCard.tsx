@@ -409,6 +409,8 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
         }, 200);
       }}
       onMouseLeave={() => {
+        // Picker media follows the viewport; hiding it here would never be undone.
+        if (isPicker) return;
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         setIsHovered(false);
