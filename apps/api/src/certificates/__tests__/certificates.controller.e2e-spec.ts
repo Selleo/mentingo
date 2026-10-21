@@ -46,6 +46,9 @@ import { CertificatesService } from "../certificates.service";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
+// The first PDF render launches the shared headless browser, which can exceed the default timeout on CI.
+const FIRST_PDF_RENDER_TIMEOUT_MS = 90_000;
+
 describe("CertificatesController (e2e)", () => {
   let app: INestApplication;
   let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
@@ -1691,48 +1694,52 @@ describe("CertificatesController (e2e)", () => {
     });
 
     describe("when user is logged in", () => {
-      it("returns pdf file", async () => {
-        const admin = await userFactory
-          .withCredentials({ password })
-          .withAdminSettings(db)
-          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
-        const student = await userFactory
-          .withCredentials({ password })
-          .withUserSettings(db)
-          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
-        const cookies = await cookieFor(student, app);
-        const category = await categoryFactory.create();
-        const course = await courseFactory.create({
-          title: "Python Basics",
-          authorId: admin.id,
-          categoryId: category.id,
-          thumbnailS3Key: null,
-          hasCertificate: true,
-        });
-        const [createdCertificate] = await db
-          .insert(certificates)
-          .values({
-            userId: student.id,
-            courseId: course.id,
-          })
-          .returning();
+      it(
+        "returns pdf file",
+        async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          const cookies = await cookieFor(student, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            title: "Python Basics",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+            hasCertificate: true,
+          });
+          const [createdCertificate] = await db
+            .insert(certificates)
+            .values({
+              userId: student.id,
+              courseId: course.id,
+            })
+            .returning();
 
-        const response = await request(app.getHttpServer())
-          .post("/api/certificates/download")
-          .set("Cookie", cookies)
-          .send({ certificateId: createdCertificate.id, language: "en" })
-          .expect(201);
+          const response = await request(app.getHttpServer())
+            .post("/api/certificates/download")
+            .set("Cookie", cookies)
+            .send({ certificateId: createdCertificate.id, language: "en" })
+            .expect(201);
 
-        expect(response.headers["content-type"]).toBe("application/pdf");
-        expect(response.headers["content-disposition"]).toContain(
-          'attachment; filename="Python Basics.pdf"',
-        );
-        expect(response.headers["content-disposition"]).toContain(
-          "filename*=UTF-8''Python%20Basics.pdf",
-        );
-        expect(response.body instanceof Buffer).toBe(true);
-        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
-      });
+          expect(response.headers["content-type"]).toBe("application/pdf");
+          expect(response.headers["content-disposition"]).toContain(
+            'attachment; filename="Python Basics.pdf"',
+          );
+          expect(response.headers["content-disposition"]).toContain(
+            "filename*=UTF-8''Python%20Basics.pdf",
+          );
+          expect(response.body instanceof Buffer).toBe(true);
+          expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+        },
+        FIRST_PDF_RENDER_TIMEOUT_MS,
+      );
 
       it("returns pdf file with custom filename", async () => {
         const admin = await userFactory

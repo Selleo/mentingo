@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link, useSearchParams } from "@remix-run/react";
 import { ArrowLeft, FileText, FolderUp, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { COURSE_TYPE_SELECTOR_HANDLES } from "../../../../e2e/data/courses/handles";
 
 import { CourseTypeCard } from "./components/CourseTypeCard";
+import { getAddCourseExitPath, withAddCourseContext } from "./utils/addCourseOrigin";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { LucideIcon } from "lucide-react";
@@ -69,6 +70,10 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 const CourseTypeSelectorPage = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const exitPath = getAddCourseExitPath(searchParams);
+  const getOptionHref = (option: CourseTypeOption) =>
+    option.id === "standard" ? withAddCourseContext(option.href, searchParams) : option.href;
 
   return (
     <main
@@ -80,7 +85,7 @@ const CourseTypeSelectorPage = () => {
           <BreadcrumbItem>
             <BreadcrumbLink asChild className="body-base-md text-primary-800">
               <Button asChild variant="outline" className="mr-2 w-min">
-                <Link to="/admin/courses" data-testid={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON}>
+                <Link to={exitPath} data-testid={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON}>
                   <ArrowLeft className="mr-2 size-3" />
                   {t("adminCourseTypeSelector.back")}
                 </Link>
@@ -116,7 +121,7 @@ const CourseTypeSelectorPage = () => {
               title={t(`adminCourseTypeSelector.${option.id}.title`)}
               description={t(`adminCourseTypeSelector.${option.id}.description`)}
               features={option.featureKeys.map((featureKey) => t(featureKey))}
-              href={option.href}
+              href={getOptionHref(option)}
               icon={option.icon}
               accent={option.id}
               testId={option.testId}

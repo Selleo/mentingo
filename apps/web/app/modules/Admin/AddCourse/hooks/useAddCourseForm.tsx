@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useForm } from "react-hook-form";
 
 import { useCreateCourse } from "~/api/mutations/useCreateCourse";
+import { ADD_COURSE_PARAMS } from "~/modules/Admin/AddCourse/utils/addCourseOrigin";
 import { addCourseFormSchema } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -12,6 +13,7 @@ import type { AddCourseFormValues } from "~/modules/Admin/AddCourse/validators/a
 
 export const useAddCourseForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { language } = useLanguageStore();
 
@@ -21,7 +23,7 @@ export const useAddCourseForm = () => {
     defaultValues: {
       title: "",
       description: "",
-      categoryId: "",
+      categoryId: searchParams.get(ADD_COURSE_PARAMS.CATEGORY_ID) ?? "",
       thumbnailS3Key: "",
       thumbnailUrl: "",
       language: language,

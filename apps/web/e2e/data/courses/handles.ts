@@ -12,12 +12,21 @@ export const COURSE_TAB_VALUES = {
 export type CourseTabValue = (typeof COURSE_TAB_VALUES)[keyof typeof COURSE_TAB_VALUES];
 export type CourseStatusFilterValue = CourseStatus | "all";
 
-export const COURSES_HEADER_HANDLES = {
-  FEATURED_COURSE_SELECT: "courses-header-featured-course-select",
-  FEATURED_COURSE_CLEAR: "courses-header-featured-course-clear",
-  FEATURED_COURSE_POPOVER: "courses-header-featured-course-popover",
-  FEATURED_COURSE_SEARCH: "courses-header-featured-course-search",
-  featuredCourseOption: (courseId: string) => `courses-header-featured-course-option-${courseId}`,
+export const COURSES_INLINE_EDIT_HANDLES = {
+  FEATURED_COURSE_EDIT: "courses-inline-edit-featured-course",
+  FEATURED_COURSE_CLEAR: "courses-inline-edit-featured-course-clear",
+  COURSE_PICKER_DIALOG: "courses-inline-edit-course-picker-dialog",
+  COURSE_PICKER_SEARCH: "courses-inline-edit-course-picker-search",
+  coursePickerOption: (courseId: string) => `courses-inline-edit-course-picker-option-${courseId}`,
+  addCourseButton: (categoryId: string) => `courses-inline-edit-add-course-${categoryId}`,
+  ADD_CATEGORY: "courses-inline-edit-add-category",
+  ADD_CATEGORY_INPUT: "courses-inline-edit-add-category-input",
+  MARKETPLACE_ROW: "courses-inline-edit-marketplace-row",
+  MARKETPLACE_BROWSE_ALL: "courses-inline-edit-marketplace-browse-all",
+} as const;
+
+export const COURSES_VIEW_TOGGLE_HANDLES = {
+  TOGGLE: "courses-view-toggle",
 } as const;
 
 export const COURSES_PAGE_HANDLES = {

@@ -1,6 +1,8 @@
+import { Link } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
-import { type Ref, useCallback, useEffect, useMemo, useRef } from "react";
+import { PlusIcon } from "lucide-react";
+import { type Ref, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -14,11 +16,16 @@ import {
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
+import { ContentMarketplaceCoursesRow } from "~/modules/ContentMarketplace/components/ContentMarketplaceCoursesRow";
+import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
 import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import CoursesHeader from "./CoursesHeader";
+import { AddCategoryRow } from "./admin/AddCategoryRow";
+import { AddCourseToCategoryButton } from "./admin/AddCourseToCategoryButton";
+import { FeaturedCourseDialog } from "./admin/FeaturedCourseDialog";
 import HeroBanner from "./HeroBanner";
 import HeroBannerSkeleton from "./HeroBannerSkeleton";
 import ModernCourseCarousel from "./ModernCourseCarousel";
@@ -35,7 +42,10 @@ type CategoryCoursesRowProps = {
   progressByCourseId: Record<string, number | undefined>;
   userId?: string;
   rowRef?: Ref<HTMLElement>;
+  canAddCourses: boolean;
 };
+
+type PendingCategory = { id: string; title: string };
 
 type HeroCourse = {
   id: string;
@@ -52,6 +62,7 @@ const CategoryCoursesRow = ({
   progressByCourseId,
   userId,
   rowRef,
+  canAddCourses,
 }: CategoryCoursesRowProps) => {
   const { language } = useLanguageStore();
   const prefetchedAfterPageRef = useRef(0);
@@ -128,7 +139,7 @@ const CategoryCoursesRow = ({
     return <ModernCourseRowSkeleton title={category.title} />;
   }
 
-  if (!courses.length) {
+  if (!courses.length && !canAddCourses) {
     return rowRef && <div ref={rowRef as Ref<HTMLDivElement>} className="h-px" />;
   }
 
@@ -143,6 +154,12 @@ const CategoryCoursesRow = ({
       watchSlideIndex={watchedSlideIndex}
       onWatchedSlideVisible={handleWatchedSlideVisible}
       rowRef={rowRef}
+      morphTitles
+      headerAction={
+        canAddCourses && (
+          <AddCourseToCategoryButton categoryId={category.id} categoryTitle={category.title} />
+        )
+      }
     />
   );
 };
@@ -158,9 +175,20 @@ const ModernCoursesView = () => {
     ...courseQueryOptions(featuredCourseId ?? "", language),
     enabled: Boolean(featuredCourseId),
   });
+  const { hasAccess: canManageFeaturedCourse } = usePermissions({
+    required: PERMISSIONS.SETTINGS_MANAGE,
+  });
   const { hasAccess: canManageCourses } = usePermissions({
     required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
+  const { hasAccess: canManageCategories } = usePermissions({
+    required: PERMISSIONS.CATEGORY_MANAGE,
+  });
+  const { hasAccess: canCreateCourse } = usePermissions({
+    required: PERMISSIONS.COURSE_CREATE,
+  });
+  const [pendingCategories, setPendingCategories] = useState<PendingCategory[]>([]);
+  const [isFeaturedDialogOpen, setIsFeaturedDialogOpen] = useState(false);
 
   const { data: availableHeroCoursesData, isLoading: isAvailableHeroCoursesLoading } =
     useInfiniteAvailableCourses(
@@ -203,6 +231,16 @@ const ModernCoursesView = () => {
         .sort((a, b) => a.title.localeCompare(b.title)) ?? [],
     [categoriesData],
   );
+
+  const emptyPendingCategories = useMemo(() => {
+    const loadedCategoryIds = new Set(categories.map((category) => category.id));
+
+    return pendingCategories.filter((category) => !loadedCategoryIds.has(category.id));
+  }, [categories, pendingCategories]);
+
+  const handleCategoryCreated = useCallback((category: PendingCategory) => {
+    setPendingCategories((current) => [...current, category]);
+  }, []);
 
   const studentCourses = useMemo(
     () => studentCoursesData?.pages.flatMap((page) => page.data) ?? [],
@@ -333,8 +371,16 @@ const ModernCoursesView = () => {
 
     if (!heroCourse) {
       return (
-        <div className="flex min-h-screen items-center justify-center text-neutral-600">
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-neutral-600">
           {t("studentCoursesView.other.cannotFindCourses")}
+          {canCreateCourse && (
+            <Button asChild>
+              <Link to="/admin/beta-courses/new">
+                <PlusIcon className="mr-1 size-5" />
+                {t("adminCourseView.settings.header")}
+              </Link>
+            </Button>
+          )}
         </div>
       );
     }
@@ -349,7 +395,16 @@ const ModernCoursesView = () => {
           estimatedDurationMinutes={heroCourse.estimatedDurationMinutes}
           lessonCount={heroCourse.lessonCount}
           courseSlug={heroCourse.slug}
+          onEditFeatured={canManageFeaturedCourse ? () => setIsFeaturedDialogOpen(true) : undefined}
         />
+
+        {canManageFeaturedCourse && (
+          <FeaturedCourseDialog
+            open={isFeaturedDialogOpen}
+            onOpenChange={setIsFeaturedDialogOpen}
+            featuredCourseId={featuredCourseId}
+          />
+        )}
 
         <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
           {match({ hasCourses: studentCourses.length > 0, isLoading: isStudentCoursesLoading })
@@ -393,9 +448,33 @@ const ModernCoursesView = () => {
                   progressByCourseId={progressByCourseId}
                   userId={currentUser?.id}
                   rowRef={index === categories.length - 1 ? lastCategoryRowRef : undefined}
+                  canAddCourses={canCreateCourse}
                 />
               )),
             )}
+
+          {canCreateCourse &&
+            emptyPendingCategories.map((category) => (
+              <ModernCourseCarousel
+                key={category.id}
+                title={category.title}
+                courses={[]}
+                headerAction={
+                  <AddCourseToCategoryButton
+                    categoryId={category.id}
+                    categoryTitle={category.title}
+                  />
+                }
+              />
+            ))}
+
+          {!isCategoriesLoading && <ContentMarketplaceCoursesRow />}
+
+          {canManageCategories && !isCategoriesLoading && (
+            <div className="px-4 pb-6 md:px-8">
+              <AddCategoryRow onCreated={handleCategoryCreated} />
+            </div>
+          )}
 
           {isFetchingNextCategoriesPage &&
             Array.from({ length: CATEGORY_PAGE_SIZE }).map((_, index) => (
@@ -408,9 +487,13 @@ const ModernCoursesView = () => {
 
   return (
     <PageWrapper isBarebones className="mb-4 min-h-screen w-full p-0" wrapperClassName="h-full">
-      <div className="min-h-screen">
-        {canManageCourses && <CoursesHeader />}
-
+      <div className="relative min-h-screen">
+        {canManageCourses && (
+          <CoursesViewToggle
+            active="catalogue"
+            className="absolute right-4 top-4 z-30 md:right-8 md:top-8"
+          />
+        )}
         <div className="overflow-x-hidden">{renderCourses()}</div>
       </div>
     </PageWrapper>
