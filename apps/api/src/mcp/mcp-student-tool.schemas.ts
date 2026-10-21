@@ -1,5 +1,5 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
+import { CloneType, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { COURSE_ENROLLMENT_SCOPES } from "src/courses/schemas/courseQuery";
@@ -59,16 +59,16 @@ export const listStudentLessonsInputSchema = Type.Object(
 );
 export const getStudentLessonInputSchema = Type.Object(
   {
-    courseId: Type.Clone(UUIDSchema, {
+    courseId: CloneType(UUIDSchema, {
       description: "Course ID from the selected lesson's search or list result.",
     }),
     chapterId: Type.Optional(
-      Type.Clone(UUIDSchema, {
+      CloneType(UUIDSchema, {
         description:
           "Optional chapter filter. Omit when unknown, including after global_search; never invent an ID or send an all-zero placeholder.",
       }),
     ),
-    lessonId: Type.Clone(UUIDSchema, {
+    lessonId: CloneType(UUIDSchema, {
       description: "ID of the selected lesson from global_search, search_lessons or list_lessons.",
     }),
     language,
