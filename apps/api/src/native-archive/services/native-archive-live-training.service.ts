@@ -97,7 +97,10 @@ export class NativeArchiveLiveTrainingService {
       await this.recordRestoredLiveTrainingLessons(targetCourseId, state.lessons, transaction);
     }
 
-    await this.courseTransferGraphRepository.refreshChapterLessonCounts(targetCourseId);
+    await this.courseTransferGraphRepository.refreshChapterLessonCounts(
+      targetCourseId,
+      transaction,
+    );
   }
 
   /** Tells whether syncing the archive would restore live-training lessons the course lacks. */

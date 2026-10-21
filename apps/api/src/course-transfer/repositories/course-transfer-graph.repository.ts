@@ -454,13 +454,13 @@ export class CourseTransferGraphRepository {
     await this.db.update(lessons).set(values).where(eq(lessons.id, lessonId));
   }
 
-  async refreshChapterLessonCounts(courseId: UUIDType) {
-    const chapterLessonCount = this.db
+  async refreshChapterLessonCounts(courseId: UUIDType, transaction: DatabasePg = this.db) {
+    const chapterLessonCount = transaction
       .select({ lessonCount: count() })
       .from(lessons)
       .where(eq(lessons.chapterId, chapters.id));
 
-    await this.db
+    await transaction
       .update(chapters)
       .set({ lessonCount: sql<number>`(${chapterLessonCount})` })
       .where(eq(chapters.courseId, courseId));
