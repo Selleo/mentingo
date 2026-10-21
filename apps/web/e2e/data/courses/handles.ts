@@ -21,6 +21,8 @@ export const COURSES_INLINE_EDIT_HANDLES = {
   addCourseButton: (categoryId: string) => `courses-inline-edit-add-course-${categoryId}`,
   ADD_CATEGORY: "courses-inline-edit-add-category",
   ADD_CATEGORY_INPUT: "courses-inline-edit-add-category-input",
+  MARKETPLACE_ROW: "courses-inline-edit-marketplace-row",
+  MARKETPLACE_BROWSE_ALL: "courses-inline-edit-marketplace-browse-all",
 } as const;
 
 export const COURSES_PAGE_HANDLES = {

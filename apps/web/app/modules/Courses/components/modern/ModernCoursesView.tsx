@@ -18,6 +18,7 @@ import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
+import { ContentMarketplaceCoursesRow } from "~/modules/ContentMarketplace/components/ContentMarketplaceCoursesRow";
 import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -461,6 +462,8 @@ const ModernCoursesView = () => {
                 }
               />
             ))}
+
+          {!isCategoriesLoading && <ContentMarketplaceCoursesRow />}
 
           {canManageCategories && !isCategoriesLoading && (
             <AddCategoryRow onCreated={handleCategoryCreated} />
