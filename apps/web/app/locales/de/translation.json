@@ -6269,10 +6269,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "Die KI hat diese Anfrage abgeschlossen. Öffnen Sie die Sitzung, um das Ergebnis zu sehen.",
-      "failed": "Die KI konnte diese Anfrage nicht abschließen. Öffnen Sie die Sitzung für Wiederherstellungsoptionen.",
-      "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren.",
-      "open": "Sitzung öffnen"
+      "completed": "Die KI hat diese Anfrage abgeschlossen.",
+      "failed": "Die KI konnte diese Anfrage nicht abschließen.",
+      "waiting_author": "Die KI benötigt Ihre Antwort, um fortzufahren."
     },
     "changeSet": {
       "ready": {

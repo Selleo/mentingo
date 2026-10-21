@@ -6282,10 +6282,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "AI dokončila tento požadavek. Otevřete relaci a zobrazte výsledek.",
-      "failed": "AI nemohla dokončit tento požadavek. Otevřete relaci a zkontrolujte možnosti obnovení.",
-      "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat.",
-      "open": "Otevřít relaci"
+      "completed": "AI dokončila tento požadavek.",
+      "failed": "AI nemohla dokončit tento požadavek.",
+      "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat."
     },
     "changeSet": {
       "ready": {

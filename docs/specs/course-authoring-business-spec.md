@@ -346,9 +346,11 @@ draft milestone visible, and the bar never reaches full completion before the ta
 
 While the author remains signed in with Mentingo open, requests observed running can notify them
 when work finishes, fails or needs an answer, including after the drawer closes or another session
-is selected. The session currently visible in the drawer or standalone conversation does not
+is selected. The session currently visible in the drawer does not
 show background toasts; opening that session dismisses any existing notice. Notifications use
-the shared Mentingo toast and open the owning conversation. Opening old completed conversations
+the shared Mentingo toast with a short status message and no action button. Authors return through
+the course editor's AI drawer; saved authoring links redirect there with the same conversation selected.
+Opening old completed conversations
 does not replay completion notifications. These are in-app notices, not email or closed-browser
 push notifications.
 

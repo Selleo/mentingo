@@ -1,47 +1,35 @@
 import { render, screen } from "@testing-library/react";
-import { useState } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter, Route, Routes, useLocation, useNavigationType } from "react-router-dom";
+import { describe, expect, it } from "vitest";
 
 import CourseAuthoringPage from "./CourseAuthoring.page";
 
-const route = vi.hoisted(() => ({ courseId: "course-a", sessionId: "session-a" }));
+const CourseEditorDestination = () => {
+  const { pathname, search } = useLocation();
+  const navigationType = useNavigationType();
+  return (
+    <output aria-label="Course editor destination">{`${navigationType} ${pathname}${search}`}</output>
+  );
+};
 
-vi.mock("@remix-run/react", () => ({
-  useParams: () => ({ id: route.courseId }),
-  useSearchParams: () => [new URLSearchParams({ sessionId: route.sessionId })],
-}));
-vi.mock("~/api/queries/useCourseAuthoringSessionsQuery", () => ({
-  useCourseAuthoringSessionsQuery: () => ({ data: [] }),
-}));
-vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
-  useLanguageStore: (select: (state: { language: string }) => string) => select({ language: "en" }),
-}));
-vi.mock("./CourseGenerationSession", () => ({
-  CourseGenerationSession: ({ courseId, sessionId }: { courseId: string; sessionId: string }) => {
-    // Like trackedApplication/exportId, this state belongs to the mounted session controller.
-    const [applicationOwner] = useState(`${courseId}:${sessionId}`);
-    return <output aria-label="Application owner">{applicationOwner}</output>;
-  },
-}));
-
-describe("authoring notification destination", () => {
-  beforeEach(() => {
-    route.courseId = "course-a";
-    route.sessionId = "session-a";
-  });
-
-  it("resets mounted application state when navigation opens a different session", () => {
-    const { rerender } = render(<CourseAuthoringPage />);
-    expect(screen.getByLabelText("Application owner")).toHaveTextContent("course-a:session-a");
-    route.sessionId = "session-b";
-    rerender(<CourseAuthoringPage />);
-    expect(screen.getByLabelText("Application owner")).toHaveTextContent("course-a:session-b");
-  });
-
-  it("resets mounted application state when navigation changes the course", () => {
-    const { rerender } = render(<CourseAuthoringPage />);
-    route.courseId = "course-b";
-    rerender(<CourseAuthoringPage />);
-    expect(screen.getByLabelText("Application owner")).toHaveTextContent("course-b:session-a");
+describe("saved authoring links", () => {
+  it.each([
+    [
+      "?sessionId=session-a&language=pl&tab=Status",
+      "sessionId=session-a&language=pl&tab=Curriculum&aiGeneration=true",
+    ],
+    ["", "tab=Curriculum&aiGeneration=true"],
+  ])("replaces the standalone page with the course drawer for %s", async (search, expected) => {
+    render(
+      <MemoryRouter initialEntries={[`/admin/beta-courses/course-a/authoring${search}`]}>
+        <Routes>
+          <Route path="/admin/beta-courses/:id/authoring" element={<CourseAuthoringPage />} />
+          <Route path="/admin/beta-courses/:id" element={<CourseEditorDestination />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByLabelText("Course editor destination")).toHaveTextContent(
+      `REPLACE /admin/beta-courses/course-a?${expected}`,
+    );
   });
 });

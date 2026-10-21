@@ -6278,10 +6278,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "DI užbaigė šią užklausą. Atidarykite seansą ir peržiūrėkite rezultatą.",
-      "failed": "DI nepavyko užbaigti šios užklausos. Atidarykite seansą ir peržiūrėkite atkūrimo parinktis.",
-      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
-      "open": "Atidaryti seansą"
+      "completed": "DI užbaigė šią užklausą.",
+      "failed": "DI nepavyko užbaigti šios užklausos.",
+      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo."
     },
     "changeSet": {
       "ready": {

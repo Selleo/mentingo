@@ -447,8 +447,10 @@ const CourseLessons = ({
       )}
       {shouldShowAuthoringButton && courseId && (
         <CourseGenerationDrawer
+          key={`${courseId}:${language}:${searchParams.get("sessionId") ?? ""}`}
           courseId={courseId}
           language={language}
+          initialSessionId={searchParams.get("sessionId")}
           open={isAuthoringDrawerOpen}
           onOpenChange={setAuthoringDrawerOpen}
           onPreviewInCurriculum={handlePreviewInCurriculum}

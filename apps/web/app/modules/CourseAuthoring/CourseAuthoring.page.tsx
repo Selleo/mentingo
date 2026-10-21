@@ -1,37 +1,20 @@
-/** Standalone compatibility route for saved authoring links; Curriculum opens the drawer. */
-import { type MetaFunction, useParams, useSearchParams } from "@remix-run/react";
+/** Redirects saved authoring links to the course editor's generation drawer. */
+import { type MetaFunction, Navigate, useParams, useSearchParams } from "@remix-run/react";
 
-import { useCourseAuthoringSessionsQuery } from "~/api/queries/useCourseAuthoringSessionsQuery";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { EDIT_COURSE_TABS } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { setPageTitle } from "~/utils/setPageTitle";
-
-import { useVisibleAuthoringSession } from "./authoringSessionVisibility";
-import { CourseGenerationSession } from "./CourseGenerationSession";
 
 /** Uses the product's localized generation title for direct route navigation. */
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "courseAuthoring.title");
 
-/** Supplies route identity to the shared session interaction without owning generation state. */
 const CourseAuthoringPage = () => {
   const { id = "" } = useParams();
   const [searchParams] = useSearchParams();
-  const language = useLanguageStore((state) => state.language);
-  const sessionsQuery = useCourseAuthoringSessionsQuery(id);
-  const sessionId =
-    searchParams.get("sessionId") ||
-    sessionsQuery.data?.find(
-      (session) => session.status === "active" || session.status === "paused",
-    )?.sessionId;
-  useVisibleAuthoringSession(id, sessionId);
+  const destinationParams = new URLSearchParams(searchParams);
+  destinationParams.set("tab", EDIT_COURSE_TABS.CURRICULUM);
+  destinationParams.set("aiGeneration", "true");
   return (
-    sessionId && (
-      <CourseGenerationSession
-        key={`${id}:${sessionId}`}
-        courseId={id}
-        language={language}
-        sessionId={sessionId}
-      />
-    )
+    <Navigate replace to={`/admin/beta-courses/${encodeURIComponent(id)}?${destinationParams}`} />
   );
 };
 

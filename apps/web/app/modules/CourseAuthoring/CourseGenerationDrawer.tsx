@@ -48,6 +48,7 @@ type Props = {
   language: SupportedLanguages;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialSessionId?: string | null;
   onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
@@ -67,6 +68,7 @@ export const CourseGenerationDrawer = ({
   language,
   open,
   onOpenChange,
+  initialSessionId,
   onPreviewInCurriculum,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
@@ -74,7 +76,9 @@ export const CourseGenerationDrawer = ({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [drawerHeight, setDrawerHeight] = useState<number | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    initialSessionId ?? null,
+  );
   const [selectedSessionSummary, setSelectedSessionSummary] =
     useState<AuthoringSessionSummary | null>(null);
   const [sessionMenuOpen, setSessionMenuOpen] = useState(false);
@@ -372,12 +376,12 @@ export const CourseGenerationDrawer = ({
             className={cn("min-h-0 flex-1 overflow-hidden", !open && "hidden")}
           >
             <div className="h-full min-w-0">
-              {selectedSession && (
+              {selectedSessionId && (
                 <CourseGenerationSession
-                  key={selectedSession.sessionId}
+                  key={selectedSessionId}
                   courseId={courseId}
                   language={language}
-                  sessionId={selectedSession.sessionId}
+                  sessionId={selectedSessionId}
                   embedded
                   onPreviewInCurriculum={onPreviewInCurriculum}
                   onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}

@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
@@ -26,7 +26,9 @@ vi.mock("~/api/queries/useCurrentUser", () => ({
 }));
 
 vi.mock("./CourseGenerationSession", () => ({
-  CourseGenerationSession: () => null,
+  CourseGenerationSession: ({ sessionId }: { sessionId: string }) => (
+    <output aria-label="Open conversation">{sessionId}</output>
+  ),
 }));
 
 vi.mock("./courseAuthoring.api", () => ({
@@ -52,6 +54,38 @@ vi.mock("./courseAuthoring.api", () => ({
 }));
 
 describe("CourseGenerationDrawer session menu", () => {
+  beforeEach(() => {
+    window.sessionStorage.clear();
+  });
+
+  it("opens the linked older conversation and allows selecting a different one", async () => {
+    const user = userEvent.setup();
+    renderWith()
+      .withQuery()
+      .withI18n()
+      .render(
+        <CourseGenerationDrawer
+          courseId={COURSE_ID}
+          language="en"
+          initialSessionId={allSessions[23].sessionId}
+          open
+          onOpenChange={() => {}}
+        />,
+      );
+
+    expect(await screen.findByLabelText("Open conversation")).toHaveTextContent(
+      allSessions[23].sessionId,
+    );
+    await user.click(await screen.findByTestId("course-authoring-session-menu-trigger"));
+    const list = await screen.findByTestId("course-authoring-session-menu-list");
+    await user.click(await within(list).findByText("Chat 1"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Open conversation")).toHaveTextContent(
+        allSessions[0].sessionId,
+      ),
+    );
+  });
+
   it("keeps the popover open and appends more sessions when Load more is clicked", async () => {
     const user = userEvent.setup();
     renderWith()

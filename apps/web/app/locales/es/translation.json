@@ -6227,10 +6227,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "La IA ha terminado esta solicitud. Abre la sesión para ver el resultado.",
-      "failed": "La IA no pudo terminar esta solicitud. Abre la sesión para revisar las opciones de recuperación.",
-      "waiting_author": "La IA necesita tu respuesta para continuar.",
-      "open": "Abrir sesión"
+      "completed": "La IA ha terminado esta solicitud.",
+      "failed": "La IA no pudo terminar esta solicitud.",
+      "waiting_author": "La IA necesita tu respuesta para continuar."
     },
     "changeSet": {
       "ready": {

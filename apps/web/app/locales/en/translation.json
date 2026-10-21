@@ -6291,10 +6291,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "AI finished this request. Open the session to see the result.",
-      "failed": "AI could not finish this request. Open the session to review recovery options.",
-      "waiting_author": "AI needs your input to continue.",
-      "open": "Open session"
+      "completed": "AI finished this request.",
+      "failed": "AI could not finish this request.",
+      "waiting_author": "AI needs your input to continue."
     },
     "changeSet": {
       "ready": {

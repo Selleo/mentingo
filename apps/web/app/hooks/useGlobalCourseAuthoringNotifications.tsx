@@ -1,11 +1,9 @@
-import { useNavigate } from "@remix-run/react";
 import { isAxiosError } from "axios";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { refreshAuthoringSession } from "~/api/queries/useCourseAuthoringSessionQuery";
 import { queryClient } from "~/api/queryClient";
-import { ToastAction } from "~/components/ui/toast";
 import { useToast } from "~/components/ui/use-toast";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
@@ -20,12 +18,11 @@ import {
 export const useGlobalCourseAuthoringNotifications = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const actorId = useCurrentUserStore((state) => state.currentUser?.id);
   const lastActor = useRef(actorId);
-  const presentation = useRef({ t, toast, navigate });
-  presentation.current = { t, toast, navigate };
+  const presentation = useRef({ t, toast });
+  presentation.current = { t, toast };
 
   useEffect(() => {
     if (!isLoggedIn || !actorId) return;
@@ -58,21 +55,7 @@ export const useGlobalCourseAuthoringNotifications = () => {
         notices.get(noticeKey)?.dismiss();
         notices.delete(noticeKey);
         if (authoringSessionVisibility.getState()[noticeKey]) return;
-        const open = presentation.current.t("courseAuthoring.notifications.open");
         const notice = presentation.current.toast({
-          action: (
-            <ToastAction
-              altText={open}
-              onClick={() =>
-                isCurrentActor() &&
-                presentation.current.navigate(
-                  `/admin/beta-courses/${encodeURIComponent(session.courseId)}/authoring?sessionId=${encodeURIComponent(session.sessionId)}`,
-                )
-              }
-            >
-              {open}
-            </ToastAction>
-          ),
           description: presentation.current.t(`courseAuthoring.notifications.${outcome}`),
           variant: outcome === "failed" ? "destructive" : "default",
           duration: outcome === "completed" ? 15_000 : Number.POSITIVE_INFINITY,

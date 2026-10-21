@@ -26,14 +26,12 @@ import type {
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn<(...args: unknown[]) => Promise<AuthoringSession>>(),
   toast: vi.fn(() => ({ id: "notice", dismiss: vi.fn(), update: vi.fn() })),
-  navigate: vi.fn(),
 }));
 
 vi.mock("~/modules/CourseAuthoring/courseAuthoring.api", () => ({
   getAuthoringSession: mocks.getSession,
 }));
 vi.mock("~/components/ui/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
-vi.mock("@remix-run/react", () => ({ useNavigate: () => mocks.navigate }));
 
 const session = (status: AuthoringTurnStatus, sequence = 1): AuthoringSession => ({
   schemaVersion: 1,
@@ -143,7 +141,6 @@ describe("global authoring notification ownership", () => {
     expect(mocks.toast).toHaveBeenCalledTimes(2);
     expect(mocks.toast).toHaveBeenLastCalledWith({
       description: expect.any(String),
-      action: expect.anything(),
       variant: "default",
       duration: 15_000,
     });

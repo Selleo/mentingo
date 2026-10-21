@@ -6341,10 +6341,9 @@
   },
   "courseAuthoring": {
     "notifications": {
-      "completed": "AI zakończyło tę prośbę. Otwórz sesję, aby zobaczyć wynik.",
-      "failed": "AI nie mogło zakończyć tej prośby. Otwórz sesję, aby sprawdzić opcje wznowienia.",
-      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować.",
-      "open": "Otwórz sesję"
+      "completed": "AI zakończyło tę prośbę.",
+      "failed": "AI nie mogło zakończyć tej prośby.",
+      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować."
     },
     "changeSet": {
       "ready": {
