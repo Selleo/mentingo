@@ -105,7 +105,7 @@ export function registerMcpStudentLessonTools(
     "get_lesson",
     {
       description:
-        "Read a lesson in a free public course or your actively enrolled paid public or private course. Returns bounded authored text for content lessons and metadata for other lesson types. Excludes quiz answers, AI prompts, embedded files and playback URLs. Does not start or complete the lesson.",
+        "Read a lesson in a free public course or your actively enrolled paid public or private course. Pass courseId, lessonId and language from the selected search/list result. chapterId is optional: omit it if unknown; do not invent it or pass an all-zero placeholder. You do not need to list chapters before reading a lesson found by global_search. Returns bounded authored text for content lessons and metadata for other lesson types. Excludes quiz answers, AI prompts, embedded files and playback URLs. Does not start or complete the lesson.",
       inputSchema: asMcpInputSchema(Schemas.getStudentLessonInputSchema),
       annotations: { readOnlyHint: true },
     },
