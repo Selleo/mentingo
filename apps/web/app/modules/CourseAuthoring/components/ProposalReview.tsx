@@ -39,7 +39,6 @@ import {
 } from "../review/curriculumReview.constants";
 
 import { AuthoringAssetDetails, AuthoringAssetTitle } from "./AuthoringAssetDetails";
-import { AuthoringLivePreview } from "./AuthoringLivePreview";
 import { AuthoringOperationPreview } from "./AuthoringOperationPreview";
 import { AuthoringRequestHistory } from "./AuthoringRequestHistory";
 
@@ -47,7 +46,6 @@ import type {
   AuthoringOperation,
   AuthoringRequestView,
   AuthoringTask,
-  PreviewView,
   ProposalView,
 } from "../courseAuthoring.types";
 const operationTranslationKeys: Record<string, string> = {
@@ -141,8 +139,6 @@ type Props = {
   requests?: AuthoringRequestView[];
   tasks?: AuthoringTask[];
   proposals: ProposalView[];
-  previews?: PreviewView[];
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposal?: (proposal: ProposalView) => void;
   busy?: boolean;
   onAccept: (proposal: ProposalView) => void | Promise<void>;
@@ -860,8 +856,6 @@ export const ProposalReview = ({
   requests = [],
   tasks = [],
   proposals,
-  previews = [],
-  onPreviewInCurriculum,
   onPreviewProposal,
   busy,
   onAccept,
@@ -989,18 +983,8 @@ export const ProposalReview = ({
     }
   };
 
-  if (proposals.length === 0 && previews.length === 0 && requests.length === 0) return null;
+  if (proposals.length === 0 && requests.length === 0) return null;
 
-  /** Keeps provisional output beside its originating request without enabling application. */
-  const renderPreview = (preview: PreviewView) => (
-    <AuthoringLivePreview
-      key={preview.taskId}
-      preview={preview}
-      onPreviewInCurriculum={
-        onPreviewInCurriculum ? () => onPreviewInCurriculum(preview) : undefined
-      }
-    />
-  );
   /** Shares selection and dependency checks across every conversation turn. */
   const renderProposal = (proposal: ProposalView) => {
     const applicationStatus = applicationStatusByProposalId[proposal.id];
@@ -1043,9 +1027,6 @@ export const ProposalReview = ({
       {requests.map((request) => (
         <section key={request.id} className="space-y-3">
           {showRequests && <AuthoringRequestHistory requests={[request]} />}
-          {previews
-            .filter((preview) => requestByTask.get(preview.taskId) === request.requestId)
-            .map(renderPreview)}
           {proposals
             .filter(
               (proposal) =>
@@ -1055,8 +1036,6 @@ export const ProposalReview = ({
             .map(renderProposal)}
         </section>
       ))}
-      {renderCards &&
-        previews.filter((preview) => isUnassociated(preview.taskId)).map(renderPreview)}
       {renderCards &&
         proposals.filter((proposal) => isUnassociated(proposal.taskId)).map(renderProposal)}
       {selectedAssets.length > 0 && (

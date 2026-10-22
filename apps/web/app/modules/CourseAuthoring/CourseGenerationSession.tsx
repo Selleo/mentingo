@@ -74,7 +74,6 @@ import type {
   CurriculumPreview,
   CurriculumPreviewActions,
   ProposalView,
-  PreviewView,
   QuestionView,
   ProposalRegeneration,
   SourcePolicy,
@@ -194,7 +193,6 @@ export const CourseGenerationSession = ({
   language,
   sessionId,
   embedded = false,
-  onPreviewInCurriculum,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
   onSessionUnavailable,
@@ -203,7 +201,6 @@ export const CourseGenerationSession = ({
   language: SupportedLanguages;
   sessionId: string;
   embedded?: boolean;
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
     actions: CurriculumPreviewActions,
@@ -1617,11 +1614,9 @@ export const CourseGenerationSession = ({
                 plans={plans}
                 proposalById={proposalById}
                 proposalGroups={proposalGroups}
-                previews={projection.previews}
                 questionsByRequest={questionsByRequest}
                 onAnswerQuestion={answerQuestion}
                 sources={projection.sources}
-                onPreviewInCurriculum={onPreviewInCurriculum}
                 chatError={authoringChat.error}
                 onRetryChat={() => void authoringChat.retryLatestRequest()}
               />
@@ -1659,8 +1654,6 @@ export const CourseGenerationSession = ({
               requests={projection.requests}
               tasks={agentTasks}
               proposals={projection.proposals}
-              previews={[]}
-              onPreviewInCurriculum={onPreviewInCurriculum}
               selectedProposalIds={selectedProposalIds}
               onSelectedProposalIdsChange={setSelectedProposalIds}
               renderCards={false}

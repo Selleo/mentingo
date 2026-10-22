@@ -39,7 +39,6 @@ import type {
   AuthoringSessionSummary,
   CurriculumPreview,
   CurriculumPreviewActions,
-  PreviewView,
 } from "./courseAuthoring.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -50,7 +49,6 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   requestedSessionId?: string | null;
   onSessionChange?: (sessionId: string) => void;
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
     actions: CurriculumPreviewActions,
@@ -71,7 +69,6 @@ export const CourseGenerationDrawer = ({
   onOpenChange,
   requestedSessionId,
   onSessionChange,
-  onPreviewInCurriculum,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
 }: Props) => {
@@ -396,7 +393,6 @@ export const CourseGenerationDrawer = ({
                   language={language}
                   sessionId={selectedSessionId}
                   embedded
-                  onPreviewInCurriculum={onPreviewInCurriculum}
                   onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
                   onCurriculumPreviewChange={onCurriculumPreviewChange}
                   onSessionUnavailable={recoverUnavailableSession}

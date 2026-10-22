@@ -33,14 +33,13 @@ import { compactLinkSeparators, extractTrailingSources } from "../authoringSourc
 
 import { AuthoringToolActivity } from "./AuthoringActivityRail";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
-import { AuthoringLivePreview } from "./AuthoringLivePreview";
 import { AuthoringPendingIndicator } from "./AuthoringPendingIndicator";
 import { AuthoringPlanStepList } from "./AuthoringPlanStepList";
 import { AuthoringMarkdownLink, AuthoringSourceChipRow } from "./AuthoringSourceCitation";
 
 import type { AuthoringChatMessage } from "../authoringChatTransport";
 import type { AuthoringTimelineDecoration } from "../authoringConversation";
-import type { PreviewView, QuestionView, SourceView } from "../courseAuthoring.types";
+import type { QuestionView, SourceView } from "../courseAuthoring.types";
 
 type PendingTask = { taskId: string; requestId: string; phaseLabel?: string };
 type PlanView = {
@@ -74,9 +73,7 @@ type Props = {
   plans?: PlanView[];
   proposalById?: Record<string, ReactNode>;
   proposalGroups?: ProposalGroup[];
-  previews?: PreviewView[];
   sources?: SourceView[];
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   questionsByRequest?: Record<string, QuestionView[]>;
   onAnswerQuestion?: (question: QuestionView, answer: string) => Promise<void>;
   chatError?: Error;
@@ -622,9 +619,7 @@ export const AuthoringAssistantMessages = ({
   plans = [],
   proposalById = {},
   proposalGroups = [],
-  previews = [],
   sources = [],
-  onPreviewInCurriculum,
   questionsByRequest = {},
   onAnswerQuestion,
   chatError,
@@ -725,20 +720,6 @@ export const AuthoringAssistantMessages = ({
           ),
         })),
     ),
-    ...previews.map((preview) => ({
-      id: `preview-${preview.taskId}`,
-      requestId: preview.requestId,
-      kind: "preview" as const,
-      taskId: preview.taskId,
-      value: (
-        <AuthoringLivePreview
-          preview={preview}
-          onPreviewInCurriculum={
-            onPreviewInCurriculum ? () => onPreviewInCurriculum(preview) : undefined
-          }
-        />
-      ),
-    })),
     ...taskActivities.map((activity) => ({
       id: `activity-${activity.taskId}`,
       requestId: activity.requestId,

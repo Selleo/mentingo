@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -40,7 +40,6 @@ import type { Sortable } from "~/components/SortableList/SortableList";
 import type {
   CurriculumPreview,
   CurriculumPreviewActions,
-  PreviewView,
 } from "~/modules/CourseAuthoring/courseAuthoring.types";
 
 interface CourseLessonsProps {
@@ -102,10 +101,7 @@ const CourseLessons = ({
     useState<CurriculumPreviewActions | null>(null);
   const { t } = useTranslation();
 
-  const availableCurriculumPreviewRef = useRef<CurriculumPreview | null>(null);
-
   const handleCurriculumPreviewChange = useCallback((preview: CurriculumPreview | null) => {
-    availableCurriculumPreviewRef.current = preview;
     if (!preview) {
       setAuthoringCurriculumPreview(null);
       setCurriculumPreviewActions(null);
@@ -113,32 +109,6 @@ const CourseLessons = ({
     }
     setAuthoringCurriculumPreview((activePreview) => syncReviewPreview(activePreview, preview));
   }, []);
-
-  const handlePreviewInCurriculum = useCallback(
-    (preview: PreviewView) => {
-      const currentPreview = availableCurriculumPreviewRef.current;
-      const curriculumPreview =
-        currentPreview && currentPreview.proposalId === preview.taskId
-          ? currentPreview
-          : {
-              proposalId: preview.taskId,
-              status: "streaming" as const,
-              outline: preview.outline.map((chapter, chapterIndex) => ({
-                id: `${preview.taskId}:chapter:${chapterIndex}`,
-                title: chapter.title,
-                lessons: chapter.lessons.map((lesson, lessonIndex) => ({
-                  id: `${preview.taskId}:chapter:${chapterIndex}:lesson:${lessonIndex}`,
-                  title: lesson.title,
-                  lessonType: lesson.lessonType,
-                })),
-              })),
-            };
-      setAuthoringCurriculumPreview(curriculumPreview);
-      setCurriculumPreviewActions(null);
-      setAuthoringDrawerOpen(false);
-    },
-    [setAuthoringDrawerOpen],
-  );
 
   const handlePreviewProposalInCurriculum = useCallback(
     (preview: CurriculumPreview, actions: CurriculumPreviewActions) => {
@@ -208,7 +178,6 @@ const CourseLessons = ({
   useEffect(() => {
     setAuthoringCurriculumPreview(null);
     setCurriculumPreviewActions(null);
-    availableCurriculumPreviewRef.current = null;
   }, [courseId, language]);
 
   useEffect(() => {
@@ -462,7 +431,6 @@ const CourseLessons = ({
           onSessionChange={setAuthoringSession}
           open={isAuthoringDrawerOpen}
           onOpenChange={setAuthoringDrawerOpen}
-          onPreviewInCurriculum={handlePreviewInCurriculum}
           onPreviewProposalInCurriculum={handlePreviewProposalInCurriculum}
           onCurriculumPreviewChange={handleCurriculumPreviewChange}
         />
