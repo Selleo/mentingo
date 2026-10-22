@@ -4,7 +4,10 @@ import { lookup } from "mime-types";
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
 export const resolveScormContentType = async (buffer: Buffer, filename: string) => {
-  const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>("file-type");
+  // Resolve from the API rather than load-esm's own dependency tree.
+  const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>(
+    require.resolve("file-type"),
+  );
   const detectedType = await fileTypeFromBuffer(buffer);
   const mimeTypeFromFilename = lookup(filename);
 

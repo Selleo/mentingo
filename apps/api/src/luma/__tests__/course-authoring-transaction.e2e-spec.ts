@@ -58,8 +58,8 @@ integration("course authoring receipt transaction with native tenant DB", () => 
     await connection.unsafe("CREATE TABLE courses(id uuid PRIMARY KEY)");
     await connection.unsafe("CREATE TABLE authoring_probe_writes(id uuid PRIMARY KEY)");
     for (const filename of [
-      "0201_course_authoring_applications.sql",
-      "0202_course_authoring_applications_rls.sql",
+      "0210_course_authoring_context_and_review.sql",
+      "0211_course_authoring_tenant_isolation.sql",
     ]) {
       const migration = await readFile(
         resolve(__dirname, "../../storage/migrations", filename),
@@ -144,4 +144,82 @@ integration("course authoring receipt transaction with native tenant DB", () => 
     ).rejects.toBeInstanceOf(ConflictException);
     expect(invocations).toBe(1);
   });
+
+  it("stores receipts as JSON objects and finds failures when a newer export applied", async () => {
+    const input = claim();
+    const failure = {
+      ...result(input),
+      status: "failed" as const,
+      reason: "courseAuthoring.errors.applicationFailed",
+    };
+    await runner.runWithTenant(tenantId, () => repository.recordFailureOnce(input, failure));
+    const [stored] =
+      await connection`SELECT jsonb_typeof(result) AS type FROM course_authoring_applications WHERE export_id=${input.exportId}`;
+    expect(stored.type).toBe("object");
+    const success = { ...claim(), sessionId: input.sessionId };
+    await runner.runWithTenant(tenantId, () =>
+      repository.applyOnce(success, async () => result(success)),
+    );
+    expect(
+      await runner.runWithTenant(tenantId, () =>
+        repository.latestTerminalSessionReceipt(tenantId, courseId, input.sessionId),
+      ),
+    ).toEqual(failure);
+    expect(
+      await runner.runWithTenant(tenantId, () =>
+        repository.latestTerminalSessionReceipt(tenantId, courseId, randomUUID()),
+      ),
+    ).toBeNull();
+    expect(
+      await runner.runWithTenant(tenantId, () =>
+        repository.latestTerminalSessionReceipt(randomUUID(), courseId, input.sessionId),
+      ),
+    ).toBeNull();
+    const [applied] =
+      await connection`SELECT jsonb_typeof(result) AS type FROM course_authoring_applications WHERE export_id=${success.exportId}`;
+    expect(applied.type).toBe("object");
+  });
+
+  it.each(["failed", "conflict", "applied"] as const)(
+    "migrates legacy JSON-string %s receipts before reading them normally",
+    async (status) => {
+      const input = claim();
+      const receipt = {
+        ...result(input),
+        status,
+        reason: "courseAuthoring.errors.applicationFailed",
+      };
+      await runner.runWithTenant(tenantId, () =>
+        injectedDb.insert(schema.courseAuthoringApplications).values({
+          ...input,
+          result: sql`${JSON.stringify(JSON.stringify(receipt))}::text::jsonb`,
+        }),
+      );
+      expect(
+        await runner.runWithTenant(tenantId, () =>
+          repository.latestTerminalSessionReceipt(tenantId, courseId, input.sessionId),
+        ),
+      ).toBeNull();
+      const migration = await readFile(
+        resolve(__dirname, "../../storage/migrations/0223_normalize_course_authoring_receipts.sql"),
+        "utf8",
+      );
+      await connection.unsafe(migration);
+      // Replaying the backfill leaves already corrected receipts unchanged.
+      await connection.unsafe(migration);
+      expect(
+        await runner.runWithTenant(tenantId, () =>
+          repository.latestTerminalSessionReceipt(tenantId, courseId, input.sessionId),
+        ),
+      ).toEqual(status === "applied" ? null : receipt);
+      expect(
+        await runner.runWithTenant(tenantId, () =>
+          repository.findReceipt(courseId, input.exportId, tenantId),
+        ),
+      ).toEqual(receipt);
+      const [stored] =
+        await connection`SELECT jsonb_typeof(result) AS type FROM course_authoring_applications WHERE export_id=${input.exportId}`;
+      expect(stored.type).toBe("object");
+    },
+  );
 });
