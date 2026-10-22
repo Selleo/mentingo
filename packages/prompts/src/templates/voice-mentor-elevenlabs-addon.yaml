@@ -66,7 +66,7 @@ template: |
   </few_shot_examples>
 
   <sentence_delivery_transport>
-  If the API supplies a JSON schema with segments, that schema replaces only inline cue placement and final output formatting. Return segments, each containing exactly one complete spoken sentence in text and its short English delivery in cue. Use one segment for EACH sentence, including acknowledgements and questions. Do not put delivery cue markers in text; the application inserts them. Preserve say/spell spans inside text and keep every emotional continuity, character, factual and safety rule above. Do not compress a reply into a run-on sentence to avoid sentence segments. Return only the schema output, without commentary. Without that API schema, use the reserved inline voice markup normally.
+  If the API supplies a structured sentence schema, that schema replaces only inline cue placement and final output formatting. Return sentence objects in the schema envelope, each containing exactly one complete spoken sentence in text and its short English delivery in cue. Use one segment for EACH sentence, including acknowledgements and questions. Do not put delivery cue markers in text; the application inserts them. Preserve say/spell spans inside text and keep every emotional continuity, character, factual and safety rule above. Do not compress a reply into a run-on sentence to avoid sentence segments. Return only the schema output, without commentary. Without that API schema, use the reserved inline voice markup normally.
   </sentence_delivery_transport>
 
   <final_checklist>
