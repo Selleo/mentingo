@@ -1,12 +1,13 @@
 import { Link } from "@remix-run/react";
 import { COURSE_PROGRESS_STATUSES } from "@repo/shared";
-import { BookOpen, Check, Clock3, GripVertical, Lock, Play, Plus, X } from "lucide-react";
+import { BookOpen, Check, GripVertical, Lock, Play, Plus, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList/SortableList";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { cn } from "~/lib/utils";
@@ -403,8 +404,8 @@ function TrailCourseStop({
     .with(TRAIL_STOP_STATES.IN_PROGRESS, () => ({
       ringClassName: "ring-warning-400",
       glowClassName: "bg-[color-mix(in_srgb,var(--warning-200)_70%,transparent)]",
-      badge: <Clock3 className="size-3.5" strokeWidth={2.5} />,
-      badgeClassName: "bg-warning-400 text-white",
+      badge: <Icon name="InProgress" className="size-4" />,
+      badgeClassName: "bg-white shadow",
       caption: t("learningPathsView.courseState.inProgress"),
     }))
     .with(TRAIL_STOP_STATES.NOT_STARTED, () => ({
