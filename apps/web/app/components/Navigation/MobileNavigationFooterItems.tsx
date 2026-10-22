@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useLogoutUser } from "~/api/mutations";
 import { cn } from "~/lib/utils";
 
+import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import { Icon } from "../Icon";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -16,6 +17,7 @@ interface MobileNavigationFooterItemsProps {
   setIsMobileNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showLabelsOn2xl?: boolean;
   hasConfigurationIssues?: boolean;
+  canViewActivityLogs?: boolean;
 }
 
 export const MobileNavigationFooterItems = ({
@@ -24,6 +26,7 @@ export const MobileNavigationFooterItems = ({
   setIsMobileNavOpen,
   showLabelsOn2xl,
   hasConfigurationIssues,
+  canViewActivityLogs,
 }: MobileNavigationFooterItemsProps) => {
   const { t } = useTranslation();
 
@@ -31,6 +34,20 @@ export const MobileNavigationFooterItems = ({
 
   return (
     <>
+      {canViewActivityLogs && (
+        <NavigationMenuItem
+          className="col-span-4 md:col-span-8 2xl:hidden"
+          item={{
+            iconName: "Timeline",
+            label: t("navigationSideBar.activityLogs"),
+            link: "/admin/activity-logs",
+            testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+          }}
+          setIsMobileNavOpen={setIsMobileNavOpen}
+          isFooter
+        />
+      )}
+
       <NavigationMenuItem
         className="col-span-1 md:col-span-2 2xl:hidden"
         item={{

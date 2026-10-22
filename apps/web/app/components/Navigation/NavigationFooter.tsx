@@ -46,6 +46,9 @@ export function NavigationFooter({
     required: [PERMISSIONS.ANNOUNCEMENT_READ],
   });
   const { t } = useTranslation();
+  const { hasAccess: canViewActivityLogs } = usePermissions({
+    required: [PERMISSIONS.ACTIVITY_LOG_READ],
+  });
 
   const hideLabels = isSidebarCollapsed;
 
@@ -70,6 +73,7 @@ export function NavigationFooter({
         userId={user?.id}
         isSupportMode={Boolean(user?.isSupportMode)}
         hasConfigurationIssues={hasConfigurationIssues}
+        canViewActivityLogs={canViewActivityLogs}
       />
 
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
@@ -128,6 +132,19 @@ export function NavigationFooter({
                       label: t("navigationSideBar.profile"),
                       link: `/profile/${user?.id}`,
                       testId: NAVIGATION_HANDLES.PROFILE_LINK,
+                    }}
+                  />
+                </DropdownMenuItem>
+              )}
+
+              {canViewActivityLogs && (
+                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                  <NavigationMenuItemLink
+                    item={{
+                      iconName: "Timeline",
+                      label: t("navigationSideBar.activityLogs"),
+                      link: "/admin/activity-logs",
+                      testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
                     }}
                   />
                 </DropdownMenuItem>
