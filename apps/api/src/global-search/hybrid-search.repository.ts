@@ -60,7 +60,7 @@ export class HybridSearchRepository {
         UNION ALL
         SELECT s.entity_id, s.language, ts_rank(c.search_vector, q.value) AS rank,
           ts_headline('simple', c.content, q.value,
-            'StartSel=,StopSel=,MaxWords=45,MinWords=15,MaxFragments=1') AS passage,
+            'StartSel="",StopSel="",MaxWords=45,MinWords=15,MaxFragments=1') AS passage,
           c.metadata->>'fileName' AS filename
         FROM search_chunks c JOIN search_documents s ON ${this.currentSource(actor)}
         CROSS JOIN q

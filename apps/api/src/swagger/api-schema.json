@@ -156575,379 +156575,230 @@
                   }
                 ]
               },
-              "allCourses": {
+              "results": {
+                "description": "Learning content ranked across types, with matching lessons nested under their course.",
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "relevanceScore": {
+                          "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                          "type": "number"
+                        },
+                        "matchedPassage": {
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "category": {
-                      "type": "string"
-                    },
-                    "thumbnailUrl": {
-                      "anyOf": [
-                        {
+                        "matchedAttachmentFileName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "type": {
+                          "const": "course",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "courseChapterCount": {
-                      "type": "number"
-                    },
-                    "completedChapterCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "myCourses": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "category": {
-                      "type": "string"
-                    },
-                    "thumbnailUrl": {
-                      "anyOf": [
-                        {
+                        "title": {
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "courseChapterCount": {
-                      "type": "number"
-                    },
-                    "completedChapterCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "availableCourses": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                        "category": {
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "category": {
-                      "type": "string"
-                    },
-                    "thumbnailUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string"
+                        "thumbnailUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "courseChapterCount": {
-                      "type": "number"
-                    },
-                    "completedChapterCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "learningPaths": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
+                        "courseChapterCount": {
+                          "type": "number"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "thumbnailReference": {
-                      "anyOf": [
-                        {
-                          "type": "string"
+                        "completedChapterCount": {
+                          "type": "number"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "courses": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
+                        "matched": {
+                          "description": "False when the course is shown only as the parent of matching lessons.",
+                          "type": "boolean"
+                        },
+                        "lessons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "relevanceScore": {
+                                "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                                "type": "number"
+                              },
+                              "matchedPassage": {
+                                "type": "string"
+                              },
+                              "matchedAttachmentFileName": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "type": {
+                                "const": "lesson",
+                                "type": "string"
+                              },
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "courseId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "chapterTitle": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "id",
+                              "title",
+                              "courseId"
+                            ]
                           }
                         },
-                        "required": [
-                          "id"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title",
-                    "courses"
-                  ]
-                }
-              },
-              "lessons": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
+                        "hiddenLessonCount": {
+                          "description": "Matching lessons in this course left out of the response to keep groups short.",
+                          "type": "number"
                         }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "title",
+                        "matched",
+                        "lessons",
+                        "hiddenLessonCount"
                       ]
                     },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "courseId": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title",
-                    "courseId"
-                  ]
-                }
-              },
-              "news": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                    {
+                      "type": "object",
+                      "properties": {
+                        "relevanceScore": {
+                          "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                          "type": "number"
+                        },
+                        "matchedPassage": {
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "articles": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                        "matchedAttachmentFileName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "type": {
+                          "const": "learningPath",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "qa": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "relevanceScore": {
-                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
-                      "type": "number"
-                    },
-                    "matchedPassage": {
-                      "type": "string"
-                    },
-                    "matchedAttachmentFileName": {
-                      "anyOf": [
-                        {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
+                        "title": {
+                          "type": "string"
+                        },
+                        "thumbnailUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "courseCount": {
+                          "type": "number"
                         }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "title",
+                        "courseCount"
                       ]
                     },
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
+                    {
+                      "type": "object",
+                      "properties": {
+                        "relevanceScore": {
+                          "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                          "type": "number"
+                        },
+                        "matchedPassage": {
+                          "type": "string"
+                        },
+                        "matchedAttachmentFileName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "news",
+                              "type": "string"
+                            },
+                            {
+                              "const": "article",
+                              "type": "string"
+                            },
+                            {
+                              "const": "qa",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "title"
+                      ]
                     }
-                  },
-                  "required": [
-                    "id",
-                    "title"
                   ]
                 }
               },
@@ -157065,14 +156916,7 @@
               }
             },
             "required": [
-              "allCourses",
-              "myCourses",
-              "availableCourses",
-              "learningPaths",
-              "lessons",
-              "news",
-              "articles",
-              "qa",
+              "results",
               "users",
               "categories",
               "groups"

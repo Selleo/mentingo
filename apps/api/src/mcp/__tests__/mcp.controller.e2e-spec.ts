@@ -404,9 +404,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   it("keeps explicit search:read responses account-permission filtered", async () => {
     const search = await issueClient(admin.user, admin.host, [MCP_SCOPES.SEARCH_READ]);
     const result = await call("global_search", { searchQuery: "MCP", language: "en" }, search);
-    expect(result).toHaveProperty("lessons");
-    expect(result.allCourses).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: draftCourseId })]),
+    // An administrator's search:read grant keeps the full authoring projection (the result tree
+    // plus administrative lists), not the restricted content-only one.
+    expect(result).toHaveProperty("users");
+    expect(result.results).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "course", id: draftCourseId, lessons: expect.any(Array) }),
+      ]),
     );
     await rejectedCall("list_courses", {}, search);
   });
@@ -1163,9 +1167,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
 
   it("globally searches localized content with learner and tenant access boundaries", async () => {
     const result = await call("global_search", { searchQuery: "Szkolenie", language: "pl" });
-    expect(result.allCourses).toEqual(
+    expect(result.results).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: draftCourseId, title: "Szkolenie ukryte MCP" }),
+        expect.objectContaining({
+          type: "course",
+          id: draftCourseId,
+          title: "Szkolenie ukryte MCP",
+        }),
       ]),
     );
     const learner = await call(

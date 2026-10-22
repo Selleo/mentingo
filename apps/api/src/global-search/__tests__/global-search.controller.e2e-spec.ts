@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import {
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
+  GLOBAL_SEARCH_RESULT_TYPES,
   LESSON_TYPES,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
@@ -30,7 +31,7 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
-import type { SupportedLanguages } from "@repo/shared";
+import type { GlobalSearchResultType, SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
 
@@ -79,6 +80,9 @@ describe("GlobalSearchController (e2e)", () => {
       })),
     });
   };
+
+  const ofType = (response: GlobalSearchResponse, type: GlobalSearchResultType) =>
+    response.results.filter((node) => node.type === type);
 
   const search = async (
     cookie: string | string[],
@@ -174,9 +178,10 @@ describe("GlobalSearchController (e2e)", () => {
       SUPPORTED_LANGUAGES.EN,
     );
 
-    expect(results.myCourses).toEqual([
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.COURSE)).toEqual([
       expect.objectContaining({
         id: course.id,
+        matched: true,
         completedChapterCount: 2,
         courseChapterCount: 3,
       }),
@@ -215,8 +220,24 @@ describe("GlobalSearchController (e2e)", () => {
       SUPPORTED_LANGUAGES.EN,
     );
 
-    expect(results.availableCourses).toEqual([expect.objectContaining({ id: activeCourse.id })]);
-    expect(results.myCourses).toEqual([expect.objectContaining({ id: archivedCourse.id })]);
+    expect(
+      ofType(results, GLOBAL_SEARCH_RESULT_TYPES.COURSE)
+        .map((node) => node.id)
+        .sort(),
+    ).toEqual([activeCourse.id, archivedCourse.id].sort());
+
+    const otherStudent = await userFactory
+      .withCredentials({ password })
+      .withUserSettings(db)
+      .create();
+    const otherResults = await search(
+      await cookieFor(otherStudent, app),
+      "Archive search course",
+      SUPPORTED_LANGUAGES.EN,
+    );
+    expect(ofType(otherResults, GLOBAL_SEARCH_RESULT_TYPES.COURSE)).toEqual([
+      expect.objectContaining({ id: activeCourse.id }),
+    ]);
   });
 
   it("uses requested-language search documents when they exist and match", async () => {
@@ -234,7 +255,9 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, "polish", SUPPORTED_LANGUAGES.PL);
 
-    expect(results.qa).toEqual([expect.objectContaining({ id: qa.id })]);
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.QA)).toEqual([
+      expect.objectContaining({ id: qa.id }),
+    ]);
   });
 
   it("searches non-requested language documents when requested-language documents are absent", async () => {
@@ -249,7 +272,9 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, "basefallback", SUPPORTED_LANGUAGES.PL);
 
-    expect(results.qa).toEqual([expect.objectContaining({ id: qa.id })]);
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.QA)).toEqual([
+      expect.objectContaining({ id: qa.id }),
+    ]);
   });
 
   it("searches all indexed languages even when requested-language documents exist", async () => {
@@ -267,7 +292,9 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, "visible-polish", SUPPORTED_LANGUAGES.EN);
 
-    expect(results.qa).toEqual([expect.objectContaining({ id: qa.id })]);
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.QA)).toEqual([
+      expect.objectContaining({ id: qa.id }),
+    ]);
   });
 
   it("returns entities that match through different indexed languages in one search", async () => {
@@ -293,7 +320,7 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, "sharedmultilingual", SUPPORTED_LANGUAGES.EN);
 
-    expect(results.qa).toEqual(
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.QA)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: englishQa.id }),
         expect.objectContaining({ id: polishQa.id }),
@@ -336,7 +363,9 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, "publicpolish", SUPPORTED_LANGUAGES.EN);
 
-    expect(results.news).toEqual([expect.objectContaining({ id: newsItem.id })]);
+    expect(ofType(results, GLOBAL_SEARCH_RESULT_TYPES.NEWS)).toEqual([
+      expect.objectContaining({ id: newsItem.id }),
+    ]);
   });
 
   it("uses the matched non-requested language when resolving lesson attachment matches", async () => {
@@ -395,10 +424,23 @@ describe("GlobalSearchController (e2e)", () => {
 
     const results = await search(cookie, attachmentSearchToken, SUPPORTED_LANGUAGES.PL);
 
-    expect(results.lessons).toEqual([
+    // The course did not match, but the tree still nests the lesson under it.
+    expect(results.results).toEqual([
       expect.objectContaining({
-        id: lesson.id,
-        matchedAttachmentFileName: originalFilename,
+        type: GLOBAL_SEARCH_RESULT_TYPES.COURSE,
+        id: course.id,
+        title: "Attachment fallback course",
+        matched: false,
+        hiddenLessonCount: 0,
+        lessons: [
+          expect.objectContaining({
+            type: GLOBAL_SEARCH_RESULT_TYPES.LESSON,
+            id: lesson.id,
+            courseId: course.id,
+            chapterTitle: "Attachment fallback chapter",
+            matchedAttachmentFileName: originalFilename,
+          }),
+        ],
       }),
     ]);
   });

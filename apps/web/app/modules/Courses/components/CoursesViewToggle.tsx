@@ -63,7 +63,7 @@ export function CoursesViewToggle({ active, className }: CoursesViewToggleProps)
               aria-label={label}
               style={MORPH_STYLE}
               className={cn(
-                "flex size-11 items-center justify-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/5 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 [&_svg]:size-5",
+                "flex size-11 items-center justify-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/5 transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 [&_svg]:size-5",
                 className,
               )}
               data-testid={COURSES_VIEW_TOGGLE_HANDLES.TOGGLE}

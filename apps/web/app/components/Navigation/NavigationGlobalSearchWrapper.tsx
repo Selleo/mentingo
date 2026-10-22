@@ -7,20 +7,19 @@ import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
-import {
-  GlobalSearchMac,
-  GlobalSearchWin,
-  KeyboardArrows,
-  KeyboardEnter,
-  KeyboardX,
-  Search,
-} from "../../assets/svgs";
+import { GlobalSearchMac, GlobalSearchWin, Search } from "../../assets/svgs";
 import { useDebounce } from "../../hooks/useDebounce";
 import { cn } from "../../lib/utils";
 import { SearchInput } from "../SearchInput/SearchInput";
 import { Dialog, DialogContent } from "../ui/dialog";
-import { Separator } from "../ui/separator";
 
+import { GlobalSearchAskAiRow } from "./GlobalSearch/GlobalSearchAskAiRow";
+import {
+  ASK_AI_INDEX,
+  GLOBAL_SEARCH_QUERY,
+  isNaturalLanguageQuery,
+  isSearchableQuery,
+} from "./GlobalSearch/globalSearchQuery";
 import { GlobalSearchResults } from "./GlobalSearch/GlobalSearchResults";
 import { NavigationMenuButton } from "./NavigationMenuButton";
 
@@ -69,10 +68,18 @@ export const NavigationGlobalSearchWrapper = ({
 
   const isMac =
     typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("mac");
+  const hasSearchableQuery = isSearchableQuery(searchParams);
+  const isAiMode = mode === GLOBAL_SEARCH_MODES.HYBRID;
+  const showAskAi = isSemanticConfigured && !isAiMode && hasSearchableQuery;
+  // Questions and sentences start on the AI row; title-like lookups start on the top match.
+  const isAskAiDefault = showAskAi && isNaturalLanguageQuery(searchParams);
+  const firstIndex = showAskAi ? ASK_AI_INDEX : 0;
+  const initialActiveIndex = (query: string) =>
+    isSemanticConfigured && isNaturalLanguageQuery(query) ? ASK_AI_INDEX : 0;
 
   useEffect(() => {
-    setActiveIndex(0);
-  }, [effectiveSearch, mode]);
+    setActiveIndex(isAskAiDefault ? ASK_AI_INDEX : 0);
+  }, [effectiveSearch, mode, isAskAiDefault]);
 
   useEffect(() => {
     if (!isSemanticConfigured) {
@@ -95,27 +102,41 @@ export const NavigationGlobalSearchWrapper = ({
     setIsGlobalSearchDialogOpen(false);
   };
 
+  /** Explicit AI opt-in: submits the current text once; editing the query returns to keywords. */
+  const startAiSearch = () => {
+    if (!isSemanticConfigured || !hasSearchableQuery) return;
+    setHybridSearch(searchParams.trim());
+    setActiveIndex(0);
+    totalItemsRef.current = 0;
+  };
+
+  const backToKeywords = () => {
+    setHybridSearch(null);
+    setActiveIndex(0);
+    totalItemsRef.current = 0;
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.nativeEvent.isComposing) return;
     if (e.target instanceof HTMLElement && e.target.closest("button, a, [role=button]")) return;
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      if (isSemanticConfigured && searchParams.trim().length >= 3 && !e.repeat) {
-        setHybridSearch(searchParams.trim());
-        setActiveIndex(0);
-        totalItemsRef.current = 0;
-      }
+      if (!e.repeat) startAiSearch();
+      return;
+    }
+    if (e.key === "Enter" && showAskAi && activeIndex === ASK_AI_INDEX) {
+      e.preventDefault();
+      if (!e.repeat) startAiSearch();
       return;
     }
     if (isDebouncing) return;
+    const lastIndex = totalItemsRef.current - 1;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % Math.max(1, totalItemsRef.current));
+      setActiveIndex((prev) => (prev >= lastIndex ? firstIndex : prev + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex(
-        (prev) => (prev - 1 + totalItemsRef.current) % Math.max(1, totalItemsRef.current),
-      );
+      setActiveIndex((prev) => (prev <= firstIndex ? Math.max(lastIndex, firstIndex) : prev - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
       const activeListItem = document.querySelector(`[data-search-index="${activeIndex}"]`);
@@ -167,87 +188,81 @@ export const NavigationGlobalSearchWrapper = ({
       <Dialog open={isGlobalSearchDialogOpen} onOpenChange={setIsGlobalSearchDialogOpen}>
         <DialogContent
           noCloseButton
+          // One column clamped to the dialog width, so long result text truncates instead of
+          // stretching the grid track past the dialog edge.
+          className="grid-cols-[minmax(0,1fr)]"
           style={{ padding: 0, overflow: "hidden" }}
           onKeyDown={handleKeyDown}
         >
-          <div className="flex flex-col gap-1 p-3">
+          <div className="flex flex-col gap-1 border-b border-neutral-100 p-3 pb-2">
             <SearchInput
               value={searchParams}
-              maxLength={500}
+              maxLength={GLOBAL_SEARCH_QUERY.MAX_LENGTH}
               onChange={(e) => {
-                setSearchParams(e.target.value.slice(0, 500));
+                const nextQuery = e.target.value.slice(0, GLOBAL_SEARCH_QUERY.MAX_LENGTH);
+                setSearchParams(nextQuery);
                 setHybridSearch(null);
-                setActiveIndex(0);
+                setActiveIndex(initialActiveIndex(nextQuery));
                 totalItemsRef.current = 0;
               }}
               aria-label={t("globalSearch.search")}
+              placeholder={t("globalSearch.search")}
+              leadingIcon={
+                isAiMode ? (
+                  <Sparkles
+                    className="absolute left-2 top-1/2 size-5 -translate-y-1/2 text-primary-600"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                ) : undefined
+              }
               rightAdornment={
-                <div className="absolute end-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
-                  {searchParams.length > 0 && (
-                    <button
-                      type="button"
-                      aria-label={t("globalSearch.clear")}
-                      onClick={() => {
-                        setSearchParams("");
-                        setHybridSearch(null);
-                        totalItemsRef.current = 0;
-                      }}
-                      className="rounded p-1 text-neutral-600 focus-visible:outline focus-visible:outline-primary-500"
-                    >
-                      <X className="size-4" aria-hidden />
-                    </button>
-                  )}
-                </div>
+                searchParams.length > 0 && (
+                  <button
+                    type="button"
+                    aria-label={t("globalSearch.clear")}
+                    onClick={() => {
+                      setSearchParams("");
+                      setHybridSearch(null);
+                      totalItemsRef.current = 0;
+                    }}
+                    className="absolute end-2 top-1/2 -translate-y-1/2 rounded p-1 text-neutral-600 focus-visible:outline focus-visible:outline-primary-500"
+                  >
+                    <X className="size-4" aria-hidden />
+                  </button>
+                )
               }
               wrapperClassName="w-full max-w-none"
-              className="!max-w-none pr-10"
+              className={cn(
+                "!max-w-none pr-10",
+                isAiMode && "border-primary-200 focus:border-primary-500",
+              )}
             />
-            {isSemanticConfigured && (
-              <button
-                type="button"
-                aria-label={t("globalSearch.aiSearch")}
-                title={
-                  mode === GLOBAL_SEARCH_MODES.HYBRID
-                    ? t("globalSearch.backToKeywords")
-                    : `${t("globalSearch.aiSearch")} (${isMac ? "⌘" : "Ctrl+"}Enter)`
-                }
-                aria-keyshortcuts="Meta+Enter Control+Enter"
-                disabled={searchParams.trim().length < 3}
-                aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
-                onClick={() => {
-                  setHybridSearch(mode === GLOBAL_SEARCH_MODES.HYBRID ? null : searchParams.trim());
-                  setActiveIndex(0);
-                  totalItemsRef.current = 0;
-                }}
-                className={cn(
-                  "inline-flex min-h-11 items-center justify-center gap-2 px-3 py-2 rounded-lg border shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
-                  {
-                    "border-primary-600 bg-primary-600 text-white hover:bg-primary-700":
-                      mode === GLOBAL_SEARCH_MODES.HYBRID,
-                    "border-primary-100 bg-primary-50 text-primary-700 hover:bg-primary-100":
-                      mode === GLOBAL_SEARCH_MODES.KEYWORD,
-                  },
-                )}
-              >
-                <Sparkles className="size-4" strokeWidth={1.75} aria-hidden />
-                <span>{t("globalSearch.aiSearch")}</span>
-              </button>
+            {showAskAi && (
+              <GlobalSearchAskAiRow
+                title={t("globalSearch.aiSearch")}
+                query={searchParams.trim()}
+                isActive={activeIndex === ASK_AI_INDEX}
+                onClick={startAiSearch}
+              />
             )}
-
-            <Separator className="my-2" />
-            {searchParams.trim().length < 3 && (
-              <div className="flex flex-col px-6 pt-4">
-                <span className="text-sm-md text-center ">
+          </div>
+          <div className="px-1.5 pb-2 pt-2">
+            {!hasSearchableQuery && (
+              <div className="flex flex-col px-6 py-6 text-center">
+                <span className="text-sm-md">
                   {companyName
                     ? t("globalSearch.searchIn", { companyName })
                     : t("common.other.search")}
                 </span>
-                <span className="mt-2 details text-center text-neutral-800">
-                  {t("globalSearch.searchInDescription")}
+                <span className="mt-2 details text-neutral-600">
+                  {isSemanticConfigured
+                    ? t("globalSearch.searchInDescriptionWithAi")
+                    : t("globalSearch.searchInDescription")}
                 </span>
               </div>
             )}
-            {searchParams.trim().length >= 3 && (
+            {hasSearchableQuery && (
               <GlobalSearchResults
                 debouncedSearch={effectiveSearch}
                 mode={mode}
@@ -257,39 +272,14 @@ export const NavigationGlobalSearchWrapper = ({
                 setTotalItems={(count) => {
                   totalItemsRef.current = count;
                 }}
+                onBackToKeywords={backToKeywords}
               />
             )}
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
-            {isSemanticConfigured && (
-              <div className="mr-auto flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-800">
-                <kbd className="inline-flex h-5 items-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-700">
-                  {isMac ? "⌘↵" : "Ctrl+↵"}
-                </kbd>
-                <Sparkles className="size-3.5 text-primary-600" aria-hidden />
-                <span>{t("globalSearch.aiSearch")}</span>
-              </div>
-            )}
-            <div className="text-md flex h-5 items-center gap-[6px]">
-              <KeyboardArrows />
-              <span className="details text-neutral-800">{t("globalSearch.navigate")}</span>
-            </div>
-            <div className="flex h-5 items-center gap-[6px]">
-              <KeyboardEnter />
-              <span className="details text-neutral-800">{t("globalSearch.goTo")}</span>
-            </div>
-            <div className="flex h-5 items-center gap-1.5 details text-neutral-800">
-              <div className="flex items-center gap-px">
-                <KeyboardX />
-                <span className="font-normal text-neutral-700">/</span>
-                {isMac ? (
-                  <GlobalSearchMac height={20} fill="#FCFCFC" />
-                ) : (
-                  <GlobalSearchWin height={20} fill="#FCFCFC" />
-                )}
-              </div>
-              <span>{t("globalSearch.close")}</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t border-neutral-100 bg-neutral-50 px-4 py-2.5">
+            <KeyHint keys="↑↓" label={t("globalSearch.navigate")} />
+            <KeyHint keys="↵" label={t("globalSearch.goTo")} />
+            <KeyHint keys="esc" label={t("globalSearch.close")} />
           </div>
         </DialogContent>
       </Dialog>
@@ -298,3 +288,12 @@ export const NavigationGlobalSearchWrapper = ({
 };
 
 NavigationGlobalSearchWrapper.displayName = "NavigationGlobalSearch";
+
+const KeyHint = ({ keys, label }: { keys: string; label: string }) => (
+  <span className="flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-600">
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-700">
+      {keys}
+    </kbd>
+    {label}
+  </span>
+);

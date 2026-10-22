@@ -1503,12 +1503,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "People, groups and categories",
     "aiSearch": "Search with AI",
     "hybridSearch": "Hybrid search",
     "backToKeywords": "Back to keyword search",
     "semanticUnavailable": "Semantic search is temporarily unavailable. Showing keyword matches.",
-    "semanticPending": "Some content is still being indexed. Results may be incomplete.",
     "searchFailed": "Search failed. Please try again.",
     "clear": "Clear search",
     "loading": "Searching…",
@@ -1520,6 +1518,21 @@
     "navigate": "Navigate",
     "goTo": "Go to",
     "close": "Close",
+    "contentResults": "Learning content",
+    "aiTryAgain": "Try describing what you need in other words, or go back to keyword search.",
+    "searchInDescriptionWithAi": "Type a title to jump to it, or describe what you need and search with AI.",
+    "types": {
+      "course": "Course",
+      "lesson": "Lesson",
+      "learningPath": "Development path",
+      "news": "News",
+      "article": "Article",
+      "qa": "Q&A",
+      "users": "User",
+      "groups": "Group",
+      "categories": "Category"
+    },
+    "moreInCourse": "+{{count}} more in this course",
     "entries": {
       "users": "Users",
       "categories": "Categories",

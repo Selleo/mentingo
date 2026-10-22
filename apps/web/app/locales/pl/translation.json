@@ -1747,12 +1747,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "Osoby, grupy i kategorie",
     "aiSearch": "Szukaj z AI",
     "hybridSearch": "Wyszukiwanie hybrydowe",
     "backToKeywords": "Wróć do wyszukiwania słów",
     "semanticUnavailable": "Wyszukiwanie semantyczne jest chwilowo niedostępne. Wyświetlamy dopasowania słów.",
-    "semanticPending": "Część treści jest nadal indeksowana. Wyniki mogą być niepełne.",
     "searchFailed": "Wyszukiwanie nie powiodło się. Spróbuj ponownie.",
     "clear": "Wyczyść wyszukiwanie",
     "loading": "Wyszukiwanie…",
@@ -1764,6 +1762,21 @@
     "navigate": "Nawigacja",
     "goTo": "Przejdź do",
     "close": "Zamknij",
+    "contentResults": "Materiały szkoleniowe",
+    "aiTryAgain": "Spróbuj opisać, czego potrzebujesz, innymi słowami lub wróć do wyszukiwania słów.",
+    "searchInDescriptionWithAi": "Wpisz tytuł, aby od razu przejść do treści, lub opisz, czego potrzebujesz, i szukaj z AI.",
+    "types": {
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "learningPath": "Ścieżka rozwoju",
+      "news": "Aktualność",
+      "article": "Artykuł",
+      "qa": "Pytania i odpowiedzi",
+      "users": "Użytkownik",
+      "groups": "Grupa",
+      "categories": "Kategoria"
+    },
+    "moreInCourse": "+{{count}} więcej w tym kursie",
     "entries": {
       "users": "Użytkownicy",
       "categories": "Kategorie",

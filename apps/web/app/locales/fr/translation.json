@@ -1498,12 +1498,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "Personnes, groupes et catégories",
     "aiSearch": "Rechercher avec l’IA",
     "hybridSearch": "Recherche hybride",
     "backToKeywords": "Revenir à la recherche par mots-clés",
     "semanticUnavailable": "La recherche sémantique est temporairement indisponible. Les résultats par mots-clés sont affichés.",
-    "semanticPending": "Une partie du contenu est encore en cours d’indexation. Les résultats peuvent être incomplets.",
     "searchFailed": "La recherche a échoué. Veuillez réessayer.",
     "clear": "Effacer la recherche",
     "loading": "Recherche en cours…",
@@ -1515,6 +1513,21 @@
     "navigate": "Naviguer",
     "goTo": "Aller à",
     "close": "Fermer",
+    "contentResults": "Contenu de formation",
+    "aiTryAgain": "Essayez de décrire votre besoin avec d’autres mots, ou revenez à la recherche par mots-clés.",
+    "searchInDescriptionWithAi": "Saisissez un titre pour y accéder directement, ou décrivez votre besoin et recherchez avec l’IA.",
+    "types": {
+      "course": "Cours",
+      "lesson": "Leçon",
+      "learningPath": "Parcours de développement",
+      "news": "Actualité",
+      "article": "Article",
+      "qa": "Questions-réponses",
+      "users": "Utilisateur",
+      "groups": "Groupe",
+      "categories": "Catégorie"
+    },
+    "moreInCourse": "+{{count}} autres dans ce cours",
     "entries": {
       "users": "Utilisateurs",
       "categories": "Catégories",

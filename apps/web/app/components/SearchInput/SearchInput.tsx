@@ -13,10 +13,12 @@ export type SearchInputProps = InputProps & {
   value?: string;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   rightAdornment?: ReactNode;
+  leadingIcon?: ReactNode;
 };
 
 export const SearchInput = ({
   rightAdornment,
+  leadingIcon,
   clearable,
   wrapperClassName,
   ...props
@@ -24,7 +26,9 @@ export const SearchInput = ({
   const { t } = useTranslation();
   return (
     <div className={cn("group relative max-w-2xl flex-grow", wrapperClassName)}>
-      <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform text-neutral-800 transition-colors group-focus-within:text-primary-500" />
+      {leadingIcon ?? (
+        <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform text-neutral-800 transition-colors group-focus-within:text-primary-500" />
+      )}
       <Input
         type="text"
         {...props}

@@ -1,16 +1,17 @@
-import { sanitizeRichTextSummary } from "@repo/shared";
+import { GLOBAL_SEARCH_RESULT_TYPES, sanitizeRichTextSummary } from "@repo/shared";
 
 import type {
   McpContentSearchResponse,
   McpLearnerContentSearchResponse,
+  McpLinkedResultNode,
   McpLinkedSearchResponse,
   McpSearchContext,
 } from "./mcp-search-results.types";
-import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
+import type { GlobalSearchResult } from "src/global-search/schemas/global-search.schema";
 
 /** Match the destinations used by the web GlobalSearch entries, without changing REST results. */
 export function shapeMcpSearchResults(
-  results: GlobalSearchResponse,
+  results: GlobalSearchResult,
   context: McpSearchContext,
 ): McpContentSearchResponse | McpLinkedSearchResponse | McpLearnerContentSearchResponse {
   const resource = new URL(context.resource);
@@ -34,7 +35,7 @@ export function shapeMcpSearchResults(
     // Explicit projection prevents future REST fields from silently expanding SEARCH scope.
     // The service attaches passages without their document type: course hits can include
     // resource matches, so course passage/attachment data is deliberately excluded here.
-    const course = (row: GlobalSearchResponse["allCourses"][number]) => ({
+    const course = (row: GlobalSearchResult["allCourses"][number]) => ({
       id: row.id,
       title: row.title,
       category: row.category,
@@ -43,7 +44,7 @@ export function shapeMcpSearchResults(
       completedChapterCount: row.completedChapterCount,
       url: courseUrl(row.id),
     });
-    const content = (row: GlobalSearchResponse["news"][number], url: string) => ({
+    const content = (row: GlobalSearchResult["news"][number], url: string) => ({
       id: row.id,
       title: row.title,
       matchedPassage: context.studentOnly ? text(row.matchedPassage) : row.matchedPassage,
@@ -73,25 +74,41 @@ export function shapeMcpSearchResults(
     };
   }
 
-  // Authoring integrations retain their existing permission-filtered groups and passages.
+  // Authoring integrations get the same ranked tree as the search dialog, uncapped, so agents
+  // see which course (and chapter) each lesson belongs to without follow-up calls.
+  const lessonUrl = (courseId: string, lessonId: string) =>
+    `${courseUrl(courseId)}/lesson/${encodeURIComponent(lessonId)}`;
+  const linkNode = (node: GlobalSearchResult["results"][number]): McpLinkedResultNode => {
+    switch (node.type) {
+      case GLOBAL_SEARCH_RESULT_TYPES.COURSE:
+        return {
+          ...node,
+          url: courseUrl(node.id),
+          lessons: node.lessons.map((lesson) => ({
+            ...lesson,
+            url: lessonUrl(lesson.courseId, lesson.id),
+          })),
+        };
+      case GLOBAL_SEARCH_RESULT_TYPES.LEARNING_PATH:
+        return {
+          ...node,
+          url: `${origin}/development-paths?${new URLSearchParams({
+            searchQuery: node.title,
+          }).toString()}`,
+        };
+      case GLOBAL_SEARCH_RESULT_TYPES.NEWS:
+        return { ...node, url: pathUrl("news", node.id) };
+      case GLOBAL_SEARCH_RESULT_TYPES.ARTICLE:
+        return { ...node, url: pathUrl("articles", node.id) };
+      default:
+        return { ...node, url: qaUrl(node.id) };
+    }
+  };
+
   return {
-    ...results,
-    allCourses: results.allCourses.map((row) => ({ ...row, url: courseUrl(row.id) })),
-    myCourses: results.myCourses.map((row) => ({ ...row, url: courseUrl(row.id) })),
-    availableCourses: results.availableCourses.map((row) => ({ ...row, url: courseUrl(row.id) })),
-    news: results.news.map((row) => ({ ...row, url: pathUrl("news", row.id) })),
-    articles: results.articles.map((row) => ({ ...row, url: pathUrl("articles", row.id) })),
-    qa: results.qa.map((row) => ({ ...row, url: qaUrl(row.id) })),
-    lessons: results.lessons.map((row) => ({
-      ...row,
-      url: `${courseUrl(row.courseId)}/lesson/${encodeURIComponent(row.id)}`,
-    })),
-    learningPaths: results.learningPaths.map((row) => ({
-      ...row,
-      url: `${origin}/development-paths?${new URLSearchParams({
-        searchQuery: row.title,
-      }).toString()}`,
-    })),
+    searchMode: results.searchMode,
+    semanticStatus: results.semanticStatus,
+    results: results.results.map(linkNode),
     users: results.users.map((row) => ({ ...row, url: pathUrl("admin/users", row.id) })),
     categories: results.categories.map((row) => ({
       ...row,

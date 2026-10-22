@@ -1502,12 +1502,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "Žmonės, grupės ir kategorijos",
     "aiSearch": "Ieškoti su DI",
     "hybridSearch": "Hibridinė paieška",
     "backToKeywords": "Grįžti prie paieškos pagal žodžius",
     "semanticUnavailable": "Semantinė paieška laikinai nepasiekiama. Rodomi paieškos pagal žodžius rezultatai.",
-    "semanticPending": "Dalis turinio dar indeksuojama. Rezultatai gali būti neišsamūs.",
     "searchFailed": "Paieška nepavyko. Bandykite dar kartą.",
     "clear": "Išvalyti paiešką",
     "loading": "Ieškoma…",
@@ -1519,6 +1517,21 @@
     "navigate": "Naršyti",
     "goTo": "Eikite į",
     "close": "Uždaryti",
+    "contentResults": "Mokymosi turinys",
+    "aiTryAgain": "Pabandykite aprašyti, ko jums reikia, kitais žodžiais arba grįžkite prie paieškos pagal žodžius.",
+    "searchInDescriptionWithAi": "Įveskite pavadinimą, kad iškart jį atidarytumėte, arba aprašykite, ko jums reikia, ir ieškokite su DI.",
+    "types": {
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "learningPath": "Tobulėjimo kelias",
+      "news": "Naujiena",
+      "article": "Straipsnis",
+      "qa": "Klausimai ir atsakymai",
+      "users": "Naudotojas",
+      "groups": "Grupė",
+      "categories": "Kategorija"
+    },
+    "moreInCourse": "+{{count}} daugiau šiame kurse",
     "entries": {
       "users": "Vartotojai",
       "categories": "Kategorijos",

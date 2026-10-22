@@ -637,6 +637,8 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
       expect(keyword.map((match) => match.entityId)).toEqual([file.entityId]);
       expect(semantic.map((match) => match.entityId)).toEqual([file.entityId]);
       expect(keyword[0].matchedPassage).toContain("thirty days");
+      // Unquoted empty StartSel/StopSel options leak headline markup into plain-text passages.
+      expect(keyword[0].matchedPassage).not.toMatch(/StopSel|<\/?b>/);
       expect(semantic[0].matchedAttachmentFileName).toBe("research-guide.pdf");
       const ordinary = new GlobalSearchRepository(fixtureDb, {} as never);
       expect(await ordinary.findMatches(type, "en", "research")).toEqual([]);

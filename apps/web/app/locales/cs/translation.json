@@ -1508,12 +1508,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "Lidé, skupiny a kategorie",
     "aiSearch": "Hledat pomocí AI",
     "hybridSearch": "Hybridní vyhledávání",
     "backToKeywords": "Zpět na hledání klíčových slov",
     "semanticUnavailable": "Sémantické vyhledávání je dočasně nedostupné. Zobrazují se shody klíčových slov.",
-    "semanticPending": "Část obsahu se stále indexuje. Výsledky mohou být neúplné.",
     "searchFailed": "Vyhledávání se nezdařilo. Zkuste to znovu.",
     "clear": "Vymazat hledání",
     "loading": "Vyhledávání…",
@@ -1525,6 +1523,21 @@
     "navigate": "Navigovat",
     "goTo": "Přejít na",
     "close": "Blízko",
+    "contentResults": "Výukový obsah",
+    "aiTryAgain": "Zkuste popsat, co potřebujete, jinými slovy, nebo se vraťte k hledání klíčových slov.",
+    "searchInDescriptionWithAi": "Zadejte název a přejděte přímo na obsah, nebo popište, co potřebujete, a hledejte pomocí AI.",
+    "types": {
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "learningPath": "Vzdělávací cesta",
+      "news": "Novinka",
+      "article": "Článek",
+      "qa": "Otázky a odpovědi",
+      "users": "Uživatel",
+      "groups": "Skupina",
+      "categories": "Kategorie"
+    },
+    "moreInCourse": "+{{count}} další v tomto kurzu",
     "entries": {
       "users": "Uživatelé",
       "categories": "Kategorie",

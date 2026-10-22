@@ -30382,97 +30382,62 @@ export interface SearchResponse {
   data: {
     searchMode?: "keyword" | "hybrid";
     semanticStatus?: "ready" | "unavailable" | "pending";
-    allCourses: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    myCourses: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    availableCourses: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    learningPaths: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      thumbnailReference?: string | null;
-      courses: {
-        /** @format uuid */
-        id: string;
-      }[];
-    }[];
-    lessons: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      /** @format uuid */
-      courseId: string;
-    }[];
-    news: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    articles: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    qa: {
-      /** Query-local rank fusion score, comparable across content types; not a probability. */
-      relevanceScore?: number;
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
+    /** Learning content ranked across types, with matching lessons nested under their course. */
+    results: (
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "course";
+          /** @format uuid */
+          id: string;
+          title: string;
+          category?: string;
+          thumbnailUrl?: string | null;
+          courseChapterCount?: number;
+          completedChapterCount?: number;
+          /** False when the course is shown only as the parent of matching lessons. */
+          matched: boolean;
+          lessons: {
+            /** Query-local rank fusion score, comparable across content types; not a probability. */
+            relevanceScore?: number;
+            matchedPassage?: string;
+            matchedAttachmentFileName?: string | null;
+            type: "lesson";
+            /** @format uuid */
+            id: string;
+            title: string;
+            /** @format uuid */
+            courseId: string;
+            chapterTitle?: string;
+          }[];
+          /** Matching lessons in this course left out of the response to keep groups short. */
+          hiddenLessonCount: number;
+        }
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "learningPath";
+          /** @format uuid */
+          id: string;
+          title: string;
+          thumbnailUrl?: string | null;
+          courseCount: number;
+        }
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "news" | "article" | "qa";
+          /** @format uuid */
+          id: string;
+          title: string;
+        }
+    )[];
     users: {
       /** @format uuid */
       id: string;
