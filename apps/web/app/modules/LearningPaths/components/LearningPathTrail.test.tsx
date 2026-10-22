@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react";
 
 import { renderWith } from "~/utils/testUtils";
 
-import { LearningPathCoursesSection } from "./LearningPathCoursesSection";
+import { LearningPathTrail } from "./LearningPathTrail";
 
 import type { LearningPathCoursePreview } from "./learningPaths.types";
 
@@ -17,35 +17,35 @@ const course: LearningPathCoursePreview = {
   thumbnailUrl: null,
   courseChapterCount: 1,
   progress: COURSE_PROGRESS_STATUSES.NOT_STARTED,
-  isLocked: false,
+  isLocked: true,
   completedAt: null,
 };
 
-const renderCourses = (showProgress: boolean) =>
+const renderTrail = (showProgress: boolean) =>
   renderWith().render(
-    <LearningPathCoursesSection
+    <LearningPathTrail
+      courses={[course]}
       availableCourseOptions={[]}
-      pathCourses={[course]}
-      isPending={false}
       canManage={false}
-      canPlayCourses={false}
+      canOpenCourses={false}
       showProgress={showProgress}
+      isPending={false}
       onAddCourses={async () => {}}
       onReorderCourses={async () => {}}
       onRemoveCourse={async () => {}}
     />,
   );
 
-describe("LearningPathCoursesSection", () => {
+describe("LearningPathTrail", () => {
   it("shows course progress for learners", () => {
-    renderCourses(true);
+    renderTrail(true);
 
-    expect(screen.getByText("Not started")).toBeInTheDocument();
+    expect(screen.getByText("Locked")).toBeInTheDocument();
   });
 
   it("hides course progress for the Group Manager view", () => {
-    renderCourses(false);
+    renderTrail(false);
 
-    expect(screen.queryByText("Not started")).not.toBeInTheDocument();
+    expect(screen.queryByText("Locked")).not.toBeInTheDocument();
   });
 });

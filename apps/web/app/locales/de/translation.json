@@ -5435,6 +5435,13 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Pfad starten",
+      "continue": "Pfad fortsetzen",
+      "review": "Pfad wiederholen",
+      "coursesCount_one": "{{count}} Kurs",
+      "coursesCount_other": "{{count}} Kurse"
+    },
     "title": "Entwicklungspfade",
     "description": "Durchsuchen Sie zugewiesene Entwicklungspfade und setzen Sie geordnete Kurssequenzen fort.",
     "searchPlaceholder": "Entwicklungspfade suchen",
@@ -5546,6 +5553,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Allgemein",
+      "certificate": "Zertifikat",
+      "export": "Export"
+    },
     "title": "Entwicklungspfade",
     "importPackage": {
       "title": "Entwicklungspfad importieren"
@@ -5627,6 +5639,14 @@
       "tooltip": "Basissprache dieses Entwicklungspfads ist {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Kurse zum Pfad hinzufügen",
+      "addDialogDescription": "Wähle einen oder mehrere Kurse aus. Sie werden am Ende des Pfads hinzugefügt.",
+      "searchPlaceholder": "Kurse suchen",
+      "noSearchResults": "Keine Kurse entsprechen deiner Suche.",
+      "noAvailableCourses": "Alle verfügbaren Kurse sind bereits in diesem Pfad.",
+      "selectedCount_one": "{{count}} Kurs ausgewählt",
+      "selectedCount_other": "{{count}} Kurse ausgewählt",
+      "addSelected": "Ausgewählte hinzufügen ({{count}})",
       "select": "Kurs auswählen",
       "add": "Kurs hinzufügen",
       "drag": "Zum Verschieben ziehen",

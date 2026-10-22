@@ -5440,6 +5440,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Pradėti kelią",
+      "continue": "Tęsti kelią",
+      "review": "Peržiūrėti kelią",
+      "coursesCount_one": "{{count}} kursas",
+      "coursesCount_few": "{{count}} kursai",
+      "coursesCount_many": "{{count}} kurso",
+      "coursesCount_other": "{{count}} kursų"
+    },
     "title": "Tobulėjimo keliai",
     "description": "Naršykite priskirtus tobulėjimo kelius ir tęskite sutvarkytas kursų sekas.",
     "searchPlaceholder": "Ieškoti tobulėjimo kelių",
@@ -5551,6 +5560,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Bendra",
+      "certificate": "Sertifikatas",
+      "export": "Eksportas"
+    },
     "title": "Tobulėjimo keliai",
     "importPackage": {
       "title": "Importuoti tobulėjimo kelią"
@@ -5632,6 +5646,16 @@
       "tooltip": "Šio tobulėjimo kelio pagrindinė kalba yra {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Pridėti kursų į kelią",
+      "addDialogDescription": "Pasirinkite vieną ar daugiau kursų. Jie bus pridėti kelio pabaigoje.",
+      "searchPlaceholder": "Ieškoti kursų",
+      "noSearchResults": "Paieškos neatitinka joks kursas.",
+      "noAvailableCourses": "Visi galimi kursai jau yra šiame kelyje.",
+      "selectedCount_one": "Pasirinktas {{count}} kursas",
+      "selectedCount_few": "Pasirinkti {{count}} kursai",
+      "selectedCount_many": "Pasirinkta {{count}} kurso",
+      "selectedCount_other": "Pasirinkta {{count}} kursų",
+      "addSelected": "Pridėti pasirinktus ({{count}})",
       "select": "Pasirinkite kursą",
       "add": "Pridėti kursą",
       "drag": "Tempkite, kad pakeistumėte kurso tvarką",

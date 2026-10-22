@@ -2,6 +2,7 @@ import { Navigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
+import { LEARNING_PATHS_PAGE_SIZE } from "~/api/queries/useLearningPaths";
 import { usePublicGlobalSettingsSuspense } from "~/api/queries/usePublicGlobalSettingsSuspense";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -14,6 +15,8 @@ import { LEARNING_PATHS_PAGE_HANDLES } from "../../../e2e/data/learning-paths/ha
 import { LOGIN_REDIRECT_URL } from "../Auth/constants";
 
 import { LearningPathsEmptyState } from "./components/LearningPathsEmptyState";
+import { LearningPathsMasonry } from "./components/LearningPathsMasonry";
+import { LearningPathsNextPageLoader } from "./components/LearningPathsNextPageLoader";
 import { LearningPathsPageHeader } from "./components/LearningPathsPageHeader";
 import { StudentLearningPathCard } from "./components/StudentLearningPathCard";
 import { useStudentLearningPathsPage } from "./hooks/useStudentLearningPathsPage";
@@ -31,11 +34,20 @@ function StudentLearningPathsPage({
   showCourseProgress: boolean;
 }) {
   const { t } = useTranslation();
-  const { language, learningPaths, enrollLearningPath, isEnrollPending } =
-    useStudentLearningPathsPage();
+  const {
+    language,
+    learningPathPages,
+    totalPaths,
+    hasNextLearningPathsPage,
+    isFetchingNextLearningPathsPage,
+    loadNextLearningPathsPage,
+    enrollLearningPath,
+    isEnrollPending,
+  } = useStudentLearningPathsPage();
 
   return (
     <PageWrapper
+      className="mb-8"
       breadcrumbs={[
         {
           title: t("learningPathsView.breadcrumbs.learningPaths"),
@@ -49,21 +61,30 @@ function StudentLearningPathsPage({
       >
         <LearningPathsPageHeader />
 
-        <div className="flex flex-col gap-4">
-          {learningPaths.data.map((learningPath) => (
-            <StudentLearningPathCard
-              key={learningPath.id}
-              learningPath={learningPath}
-              language={language}
-              isPending={isEnrollPending}
-              onEnroll={enrollLearningPath}
-              canSelfEnroll={canSelfEnroll}
-              showCourseProgress={showCourseProgress}
-            />
-          ))}
-        </div>
+        <LearningPathsMasonry
+          batchSize={LEARNING_PATHS_PAGE_SIZE}
+          batches={learningPathPages.map((learningPathPage) => ({
+            key: `learning-paths-page-${learningPathPage.pagination.page}`,
+            items: learningPathPage.data.map((learningPath) => (
+              <StudentLearningPathCard
+                key={learningPath.id}
+                learningPath={learningPath}
+                language={language}
+                isPending={isEnrollPending}
+                onEnroll={enrollLearningPath}
+                canSelfEnroll={canSelfEnroll}
+                showCourseProgress={showCourseProgress}
+              />
+            )),
+          }))}
+        />
+        <LearningPathsNextPageLoader
+          hasNextPage={hasNextLearningPathsPage}
+          isFetchingNextPage={isFetchingNextLearningPathsPage}
+          onLoadNextPage={loadNextLearningPathsPage}
+        />
 
-        {!learningPaths.data.length && <LearningPathsEmptyState />}
+        {!totalPaths && <LearningPathsEmptyState />}
       </section>
     </PageWrapper>
   );

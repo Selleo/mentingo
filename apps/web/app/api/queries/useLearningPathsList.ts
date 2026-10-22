@@ -1,10 +1,16 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  useQuery,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
 import type { SupportedLanguages } from "@repo/shared";
 
 export const LEARNING_PATHS_QUERY_KEY = ["learning-paths"];
+export const LEARNING_PATHS_PAGE_SIZE = 10;
 
 export type LearningPathListParams = {
   page?: number;
@@ -41,4 +47,35 @@ export function useLearningPaths(params?: LearningPathListParams, options?: Quer
 
 export function useLearningPathsSuspense(params?: LearningPathListParams, options?: QueryOptions) {
   return useSuspenseQuery(learningPathsQueryOptions(params, options));
+}
+
+export type InfiniteLearningPathListParams = Omit<LearningPathListParams, "page" | "perPage">;
+
+export const infiniteLearningPathsQueryOptions = (
+  params: InfiniteLearningPathListParams = {},
+  perPage = LEARNING_PATHS_PAGE_SIZE,
+) =>
+  infiniteQueryOptions({
+    queryKey: [...LEARNING_PATHS_QUERY_KEY, "infinite", params, perPage],
+    queryFn: async ({ pageParam }) => {
+      const response = await ApiClient.api.learningPathControllerGetLearningPaths({
+        page: pageParam,
+        perPage,
+        language: params.language,
+        searchQuery: params.searchQuery,
+      });
+
+      return response.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const loadedItemCount = lastPage.pagination.page * lastPage.pagination.perPage;
+      if (loadedItemCount >= lastPage.pagination.totalItems) return undefined;
+
+      return lastPage.pagination.page + 1;
+    },
+  });
+
+export function useSuspenseInfiniteLearningPaths(params?: InfiniteLearningPathListParams) {
+  return useSuspenseInfiniteQuery(infiniteLearningPathsQueryOptions(params));
 }

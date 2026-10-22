@@ -5187,6 +5187,13 @@
     "adminLearningPathEditor": "Editor de ruta de desarrollo"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Empezar ruta",
+      "continue": "Continuar ruta",
+      "review": "Repasar ruta",
+      "coursesCount_one": "{{count}} curso",
+      "coursesCount_other": "{{count}} cursos"
+    },
     "title": "Rutas de desarrollo",
     "description": "Explore las rutas de desarrollo asignadas y continúe con sus secuencias de cursos ordenadas.",
     "searchPlaceholder": "Buscar rutas de desarrollo",
@@ -5298,6 +5305,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "General",
+      "certificate": "Certificado",
+      "export": "Exportar"
+    },
     "title": "Rutas de desarrollo",
     "importPackage": {
       "title": "Importar ruta de desarrollo"
@@ -5379,6 +5391,14 @@
       "tooltip": "Este lenguaje base de ruta de desarrollo es {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Añadir cursos a la ruta",
+      "addDialogDescription": "Selecciona uno o más cursos. Se añadirán al final de la ruta.",
+      "searchPlaceholder": "Buscar cursos",
+      "noSearchResults": "Ningún curso coincide con tu búsqueda.",
+      "noAvailableCourses": "Todos los cursos disponibles ya están en esta ruta.",
+      "selectedCount_one": "{{count}} curso seleccionado",
+      "selectedCount_other": "{{count}} cursos seleccionados",
+      "addSelected": "Añadir seleccionados ({{count}})",
       "select": "Seleccione un curso",
       "add": "Agregar curso",
       "drag": "Arrastra para reordenar el curso",

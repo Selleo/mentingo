@@ -5444,6 +5444,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Zahájit cestu",
+      "continue": "Pokračovat v cestě",
+      "review": "Zopakovat cestu",
+      "coursesCount_one": "{{count}} kurz",
+      "coursesCount_few": "{{count}} kurzy",
+      "coursesCount_many": "{{count}} kurzu",
+      "coursesCount_other": "{{count}} kurzů"
+    },
     "title": "Rozvojové cesty",
     "description": "Procházejte přiřazené rozvojové cesty a pokračujte v uspořádaných sekvencích kurzů.",
     "searchPlaceholder": "Hledat rozvojové cesty",
@@ -5555,6 +5564,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Obecné",
+      "certificate": "Certifikát",
+      "export": "Export"
+    },
     "title": "Rozvojové cesty",
     "importPackage": {
       "title": "Importovat rozvojovou cestu"
@@ -5636,6 +5650,16 @@
       "tooltip": "Základní jazyk této cesty je {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Přidat kurzy do cesty",
+      "addDialogDescription": "Vyberte jeden nebo více kurzů. Budou přidány na konec cesty.",
+      "searchPlaceholder": "Hledat kurzy",
+      "noSearchResults": "Hledání neodpovídá žádný kurz.",
+      "noAvailableCourses": "Všechny dostupné kurzy už jsou v této cestě.",
+      "selectedCount_one": "Vybrán {{count}} kurz",
+      "selectedCount_few": "Vybrány {{count}} kurzy",
+      "selectedCount_many": "Vybráno {{count}} kurzu",
+      "selectedCount_other": "Vybráno {{count}} kurzů",
+      "addSelected": "Přidat vybrané ({{count}})",
       "select": "Vyberte kurz",
       "add": "Přidat kurz",
       "drag": "Přetáhněte pro změnu pořadí kurzu",

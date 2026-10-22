@@ -4972,6 +4972,13 @@
     "adminLearningPathEditor": "Éditeur de parcours de développement"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Commencer le parcours",
+      "continue": "Continuer le parcours",
+      "review": "Revoir le parcours",
+      "coursesCount_one": "{{count}} cours",
+      "coursesCount_other": "{{count}} cours"
+    },
     "title": "Parcours de développement",
     "description": "Consultez les parcours de développement qui vous sont attribués et reprenez votre progression.",
     "searchPlaceholder": "Rechercher des parcours de développement",
@@ -5083,6 +5090,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Général",
+      "certificate": "Certificat",
+      "export": "Export"
+    },
     "title": "Parcours de développement",
     "importPackage": {
       "title": "Importer un parcours de développement"
@@ -5164,6 +5176,14 @@
       "tooltip": "La langue de base de ce parcours de développement est {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Ajouter des cours au parcours",
+      "addDialogDescription": "Sélectionnez un ou plusieurs cours. Ils seront ajoutés à la fin du parcours.",
+      "searchPlaceholder": "Rechercher des cours",
+      "noSearchResults": "Aucun cours ne correspond à votre recherche.",
+      "noAvailableCourses": "Tous les cours disponibles sont déjà dans ce parcours.",
+      "selectedCount_one": "{{count}} cours sélectionné",
+      "selectedCount_other": "{{count}} cours sélectionnés",
+      "addSelected": "Ajouter la sélection ({{count}})",
       "select": "Sélectionnez un cours",
       "add": "Ajouter un cours",
       "drag": "Faites glisser pour réorganiser le cours",
