@@ -100,6 +100,9 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.148(zod@4.6.6))(zod@4.6.6)
+      '@mentingo/competencies-sdk':
+        specifier: link:..\..\..\mentingo-plugins\packages\competencies
+        version: link:../../../mentingo-plugins/packages/competencies
       '@mentingo/content-marketplace-sdk':
         specifier: 0.1.0
         version: 0.1.0

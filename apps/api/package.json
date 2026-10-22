@@ -58,6 +58,7 @@
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
     "@mentingo/content-marketplace-sdk": "0.1.0",
+    "@mentingo/competencies-sdk": "link:..\\..\\..\\mentingo-plugins\\packages\\competencies",
     "@mentingo/luma-sdk": "0.4.0",
     "@mentingo/phishing-simulation-sdk": "0.1.1",
     "@microsoft/microsoft-graph-client": "3.0.7",

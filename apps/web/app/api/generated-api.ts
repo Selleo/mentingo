@@ -202,6 +202,8 @@ export interface CurrentUserResponse {
     profilePictureUrl: string | null;
     roleSlugs: string[];
     permissions: (
+      | "competencies.use"
+      | "competencies.manage"
       | "phishing.manage"
       | "phishing.report_read"
       | "content_marketplace.browse"
@@ -32493,6 +32495,61 @@ export interface PhishingConnectionStatusResponse {
   };
 }
 
+export interface ConfigureCompetenciesConnectionBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  baseUrl: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  apiKey: string;
+}
+
+export interface ConfigureCompetenciesConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface CompetenciesConnectionStatusResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    reachable: boolean;
+    enabled: boolean;
+  };
+}
+
+export interface GetIntegrationLearningFactsResponse {
+  data: {
+    /** @format uuid */
+    subjectId: string;
+    /** @format uuid */
+    courseId: string;
+    revision: number;
+    facts: {
+      /** @format uuid */
+      courseId: string;
+      id: string;
+      revision: number;
+      /** @format uuid */
+      subjectId: string;
+      kind: "course" | "quiz" | "ai-mentor";
+      /** @format uuid */
+      resourceId: string;
+      learningStateId: string | null;
+      occurredAt: string;
+      validUntil: string | null;
+      outcome: "passed" | "failed" | "revoked";
+      score: number | null;
+    }[];
+  };
+}
+
 export interface GetTenantsResponse {
   data: {
     /** @format uuid */
@@ -32553,6 +32610,8 @@ export interface UpdateTenantResponse {
 
 export interface UpdateTenantApiKeysBody {
   name:
+    | "COMPETENCIES_API_KEY"
+    | "COMPETENCIES_BASE_URL"
     | "PHISHING_API_KEY"
     | "PHISHING_BASE_URL"
     | "PHISHING_WEBHOOK_SECRET"
@@ -32589,6 +32648,8 @@ export interface UpdateTenantApiKeysResponse {
     /** @format uuid */
     tenantId: string;
     updatedKeys: (
+      | "COMPETENCIES_API_KEY"
+      | "COMPETENCIES_BASE_URL"
       | "PHISHING_API_KEY"
       | "PHISHING_BASE_URL"
       | "PHISHING_WEBHOOK_SECRET"
@@ -35408,6 +35469,614 @@ export interface ConnectionProbeBody {
 export interface ConnectionProbeResponse {
   data: {
     nonce: string;
+  };
+}
+
+export interface GetCompetenciesConfigurationResponse {
+  data: {
+    enabled: boolean;
+    canManage: boolean;
+    canPlan: boolean;
+  };
+}
+
+export interface GetCompetenciesWorkspaceResponse {
+  data: {
+    revocations: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      conditionIds: string[];
+      reason: string;
+      revokedAt: string;
+      /** @format uuid */
+      revokedBy: string;
+    }[];
+    catalog: {
+      /** @minLength 1 */
+      name: string;
+      description: string;
+      category: string;
+      levels: {
+        id: string;
+        name: string;
+        conditions: {
+          id: string;
+          kind: "course" | "quiz" | "ai-mentor" | "observation" | "document";
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          /**
+           * @min 0
+           * @max 100
+           */
+          minimumScore?: number;
+          verifierIds?: string[];
+        }[];
+      }[];
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+    }[];
+    profiles: {
+      /** @minLength 1 */
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        levelId: string;
+      }[];
+      /** @format uuid */
+      id: string;
+      revision: number;
+      status: "published" | "archived";
+    }[];
+    publishedProfiles: {
+      /** @minLength 1 */
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        levelId: string;
+      }[];
+      /** @format uuid */
+      id: string;
+      revision: number;
+      status: "published" | "archived";
+    }[];
+    subjects: {
+      /** @format uuid */
+      id: string;
+      profileId: string | null;
+    }[];
+    verifiers: Record<string, string[]>;
+    conditionOverrides: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      conditionId: string;
+      conditionRevision: string;
+      isCurrent: boolean;
+      competencyRevision?: number;
+      status: "met" | "automatic";
+      comment: string;
+      createdAt: string;
+      /** @format uuid */
+      createdBy: string;
+    }[];
+    evidence: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /** @minLength 1 */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      actionId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: Record<string, string>;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    standings: {
+      /** @format uuid */
+      subjectId: string;
+      standing: {
+        /** @format uuid */
+        competencyId: string;
+        attainedLevelId: string | null;
+        currentLevelId: string | null;
+        effectiveFrom: string | null;
+        effectiveUntil: string | null;
+        attainedLevelName?: string | null;
+        expiring: boolean;
+        levels: {
+          levelId: string;
+          met: boolean;
+          conditions: {
+            conditionId: string;
+            met: boolean;
+            reason: string | null;
+            evidenceIds: string[];
+            effectiveFrom: string | null;
+            effectiveUntil: string | null;
+          }[];
+        }[];
+      };
+    }[];
+    assessments: {
+      /** @format uuid */
+      subjectId: string;
+      profileId: string | null;
+      profileRevision: number | null;
+      asOf: string;
+      coverage: number | null;
+      metCount: number;
+      requirementCount: number;
+      requirements: {
+        requirement: {
+          /** @format uuid */
+          competencyId: string;
+          levelId: string;
+        };
+        met: boolean;
+        standing: {
+          /** @format uuid */
+          competencyId: string;
+          attainedLevelId: string | null;
+          currentLevelId: string | null;
+          effectiveFrom: string | null;
+          effectiveUntil: string | null;
+          attainedLevelName?: string | null;
+          expiring: boolean;
+          levels: {
+            levelId: string;
+            met: boolean;
+            conditions: {
+              conditionId: string;
+              met: boolean;
+              reason: string | null;
+              evidenceIds: string[];
+              effectiveFrom: string | null;
+              effectiveUntil: string | null;
+            }[];
+          }[];
+        };
+      }[];
+    }[];
+    actions: {
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      levelId: string;
+      /** @minLength 1 */
+      objective: string;
+      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
+      /** @format uuid */
+      ownerId: string;
+      dueDate: string | null;
+      /** @format uuid */
+      courseId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      competencyRevision: number;
+      profileId: string | null;
+      profileRevision: number | null;
+      status: "planned" | "in_progress" | "completed" | "cancelled";
+      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
+      assignmentRequestId: string | null;
+      /** @format uuid */
+      createdBy: string;
+    }[];
+    actionHistory: {
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      levelId: string;
+      /** @minLength 1 */
+      objective: string;
+      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
+      /** @format uuid */
+      ownerId: string;
+      dueDate: string | null;
+      /** @format uuid */
+      courseId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      competencyRevision: number;
+      profileId: string | null;
+      profileRevision: number | null;
+      status: "planned" | "in_progress" | "completed" | "cancelled";
+      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
+      assignmentRequestId: string | null;
+      /** @format uuid */
+      createdBy: string;
+    }[];
+    warningDays: number | null;
+    asOf: string;
+    evidenceHistory: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /** @minLength 1 */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      actionId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: Record<string, string>;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    awardHistory: {
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      ruleRevision: number;
+      recordedAt: string;
+      standing: {
+        /** @format uuid */
+        competencyId: string;
+        attainedLevelId: string | null;
+        currentLevelId: string | null;
+        effectiveFrom: string | null;
+        effectiveUntil: string | null;
+        attainedLevelName?: string | null;
+        expiring: boolean;
+        levels: {
+          levelId: string;
+          met: boolean;
+          conditions: {
+            conditionId: string;
+            met: boolean;
+            reason: string | null;
+            evidenceIds: string[];
+            effectiveFrom: string | null;
+            effectiveUntil: string | null;
+          }[];
+        }[];
+      };
+    }[];
+    people: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      archived: boolean;
+      canPlan: boolean;
+    }[];
+    courses: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+    learningResources: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      kind: string;
+      /** @format uuid */
+      courseId: string;
+    }[];
+  };
+}
+
+export interface GetCompetencyRecordsResponse {
+  data: {
+    actions: {
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      levelId: string;
+      /** @minLength 1 */
+      objective: string;
+      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
+      /** @format uuid */
+      ownerId: string;
+      dueDate: string | null;
+      /** @format uuid */
+      courseId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      competencyRevision: number;
+      profileId: string | null;
+      profileRevision: number | null;
+      status: "planned" | "in_progress" | "completed" | "cancelled";
+      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
+      assignmentRequestId: string | null;
+      /** @format uuid */
+      createdBy: string;
+    }[];
+    evidence: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /** @minLength 1 */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      actionId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: Record<string, string>;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    /** @min 0 */
+    total: number;
+    people: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      archived: boolean;
+      canPlan: boolean;
+    }[];
+  };
+}
+
+export type ExecuteCompetenciesCommandBody =
+  | {
+      operation: "save_competency";
+      /** @format uuid */
+      id?: string;
+      revision?: number;
+      value: {
+        /** @minLength 1 */
+        name: string;
+        description: string;
+        category: string;
+        levels: {
+          id: string;
+          name: string;
+          conditions: {
+            id: string;
+            kind: "course" | "quiz" | "ai-mentor" | "observation" | "document";
+            description: string;
+            /** @format uuid */
+            resourceId?: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            minimumScore?: number;
+            verifierIds?: string[];
+          }[];
+        }[];
+      };
+    }
+  | {
+      operation: "archive_competency";
+      /** @format uuid */
+      id: string;
+      revision: number;
+    }
+  | {
+      operation: "save_profile";
+      /** @format uuid */
+      id?: string;
+      revision?: number;
+      value: {
+        /** @minLength 1 */
+        name: string;
+        description: string;
+        requirements: {
+          /** @format uuid */
+          competencyId: string;
+          levelId: string;
+        }[];
+      };
+    }
+  | {
+      operation: "delete_profile";
+      /** @format uuid */
+      id: string;
+      /** @min 1 */
+      revision: number;
+    }
+  | {
+      operation: "assign_profile";
+      /** @format uuid */
+      subjectId: string;
+      profileId: string | null;
+    }
+  | {
+      operation: "submit_evidence";
+      value: {
+        /** @format uuid */
+        requestId: string;
+        /** @format uuid */
+        subjectId: string;
+        /** @format uuid */
+        competencyId: string;
+        /** @minItems 1 */
+        conditionIds: string[];
+        kind: "observation" | "document" | "recognition";
+        /** @format date-time */
+        occurredAt: string;
+        validUntil: string | null;
+        /** @minLength 1 */
+        note: string;
+        /** @format uuid */
+        attachmentId?: string;
+        /** @format uuid */
+        actionId?: string;
+      };
+    }
+  | {
+      operation: "revoke_confirmation";
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @min 1 */
+      revision: number;
+      /** @minItems 1 */
+      conditionIds: string[];
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      reason: string;
+    }
+  | {
+      operation: "review_evidence";
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      version: number;
+      decision: "approved" | "rejected" | "revoked";
+      /** @minLength 1 */
+      reason: string;
+      /** @format uuid */
+      requestId: string;
+    }
+  | {
+      operation: "settings";
+      warningDays: number | null;
+    }
+  | {
+      operation: "create_action";
+      value: {
+        /** @format uuid */
+        subjectId: string;
+        /** @format uuid */
+        competencyId: string;
+        levelId: string;
+        /** @minLength 1 */
+        objective: string;
+        kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
+        /** @format uuid */
+        ownerId: string;
+        dueDate: string | null;
+        /** @format uuid */
+        courseId?: string;
+      };
+      /** @format uuid */
+      requestId: string;
+    }
+  | {
+      operation: "update_action";
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      version: number;
+      status: "planned" | "in_progress" | "completed" | "cancelled";
+      /** @minLength 1 */
+      objective: string;
+      /** @format uuid */
+      ownerId: string;
+      dueDate: string | null;
+    }
+  | {
+      operation: "set_condition_override";
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      revision: number;
+      conditionId: string;
+      status: "met" | "automatic";
+      /**
+       * @minLength 1
+       * @pattern \S
+       */
+      comment: string;
+    };
+
+export interface ExecuteCompetenciesCommandResponse {
+  data: {
+    id: string;
+  };
+}
+
+export interface AssignCompetenciesLearningBody {
+  /** @format uuid */
+  id: string;
+  /** @format uuid */
+  requestId: string;
+  /** @format uuid */
+  subjectId: string;
+}
+
+export interface AssignCompetenciesLearningResponse {
+  data: {
+    id: string;
+  };
+}
+
+export interface UploadCompetenciesAttachmentResponse {
+  data: {
+    id: string;
   };
 }
 
@@ -40484,6 +41153,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor" | "assistant";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name IngestionControllerIngest
      * @request POST:/api/ingestion/ingest
      */
@@ -43602,6 +44362,166 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AssistantControllerGetAvailability
+     * @request GET:/api/assistant/availability
+     */
+    assistantControllerGetAvailability: (params: RequestParams = {}) =>
+      this.request<GetAvailabilityResponse, any>({
+        path: `/api/assistant/availability`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListThreads
+     * @request GET:/api/assistant/threads
+     */
+    assistantControllerListThreads: (
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        archived?: boolean;
+        /** @maxLength 200 */
+        query?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListThreadsResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCreateThread
+     * @request POST:/api/assistant/threads
+     */
+    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetThread
+     * @request GET:/api/assistant/threads/{threadId}
+     */
+    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerUpdateThread
+     * @request PATCH:/api/assistant/threads/{threadId}
+     */
+    assistantControllerUpdateThread: (
+      threadId: string,
+      data: UpdateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListMessages
+     * @request GET:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerListMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMessagesResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerSendMessage
+     * @request POST:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerSendMessage: (
+      threadId: string,
+      data: SendMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendMessageResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCancelRun
+     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
+     */
+    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
+      this.request<CancelRunResponse, any>({
+        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name McpConsentControllerGetConsent
      * @request GET:/api/oauth/consent/{consent}
      */
@@ -44638,6 +45558,69 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<PhishingConnectionStatusResponse, void>({
         path: `/api/integration/tenants/${tenantId}/plugins/phishing`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerConfigureCompetenciesConnection
+     * @request PUT:/api/integration/tenants/{tenantId}/plugins/competencies
+     */
+    integrationControllerConfigureCompetenciesConnection: (
+      tenantId: string,
+      data: ConfigureCompetenciesConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ConfigureCompetenciesConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/competencies`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerCompetenciesConnectionStatus
+     * @request GET:/api/integration/tenants/{tenantId}/plugins/competencies
+     */
+    integrationControllerCompetenciesConnectionStatus: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CompetenciesConnectionStatusResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/competencies`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetIntegrationLearningFacts
+     * @request GET:/api/integration/learning-facts
+     */
+    integrationControllerGetIntegrationLearningFacts: (
+      query?: {
+        /** @format uuid */
+        subjectId?: string;
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetIntegrationLearningFactsResponse, void>({
+        path: `/api/integration/learning-facts`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -46025,6 +47008,159 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CompetenciesControllerGetCompetenciesConfiguration
+     * @request GET:/api/competencies/configuration
+     */
+    competenciesControllerGetCompetenciesConfiguration: (params: RequestParams = {}) =>
+      this.request<GetCompetenciesConfigurationResponse, any>({
+        path: `/api/competencies/configuration`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetenciesWorkspace
+     * @request GET:/api/competencies/workspace
+     */
+    competenciesControllerGetCompetenciesWorkspace: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        subjectId?: string;
+        /** @format uuid */
+        profileId?: string;
+        teamOnly?: "true" | "false";
+        view?: "plans" | "documents" | "summary" | "review";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetenciesWorkspaceResponse, any>({
+        path: `/api/competencies/workspace`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyRecords
+     * @request GET:/api/competencies/records
+     */
+    competenciesControllerGetCompetencyRecords: (
+      query?: {
+        /** @pattern ^[1-9][0-9]{0,5}$ */
+        page?: string;
+        kind?:
+          | "actions"
+          | "documents"
+          | "action-history"
+          | "action-evidence"
+          | "review-pending"
+          | "review-history";
+        /** @format uuid */
+        subjectId?: string;
+        /** @format uuid */
+        actionId?: string;
+        pageSize?: "10" | "20" | "50" | "100";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyRecordsResponse, any>({
+        path: `/api/competencies/records`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerExecuteCompetenciesCommand
+     * @request POST:/api/competencies/commands
+     */
+    competenciesControllerExecuteCompetenciesCommand: (
+      data: ExecuteCompetenciesCommandBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ExecuteCompetenciesCommandResponse, any>({
+        path: `/api/competencies/commands`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerAssignCompetenciesLearning
+     * @request POST:/api/competencies/assignments
+     */
+    competenciesControllerAssignCompetenciesLearning: (
+      data: AssignCompetenciesLearningBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AssignCompetenciesLearningResponse, any>({
+        path: `/api/competencies/assignments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerUploadCompetenciesAttachment
+     * @request POST:/api/competencies/attachments
+     */
+    competenciesControllerUploadCompetenciesAttachment: (
+      data: {
+        /** @format binary */
+        file: File;
+        /** @format uuid */
+        subjectId: string;
+        /** @format uuid */
+        competencyId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadCompetenciesAttachmentResponse, any>({
+        path: `/api/competencies/attachments`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerDownloadCompetenciesAttachment
+     * @request GET:/api/competencies/attachments/{id}
+     */
+    competenciesControllerDownloadCompetenciesAttachment: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/competencies/attachments/${id}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CalendarControllerGetEvents
      * @request GET:/api/calendar/events
      */
@@ -46310,257 +47446,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetAvailability
-     * @request GET:/api/assistant/availability
-     */
-    assistantControllerGetAvailability: (params: RequestParams = {}) =>
-      this.request<GetAvailabilityResponse, any>({
-        path: `/api/assistant/availability`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListThreads
-     * @request GET:/api/assistant/threads
-     */
-    assistantControllerListThreads: (
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        archived?: boolean;
-        /** @maxLength 200 */
-        query?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListThreadsResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCreateThread
-     * @request POST:/api/assistant/threads
-     */
-    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetThread
-     * @request GET:/api/assistant/threads/{threadId}
-     */
-    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
-      this.request<GetThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerUpdateThread
-     * @request PATCH:/api/assistant/threads/{threadId}
-     */
-    assistantControllerUpdateThread: (
-      threadId: string,
-      data: UpdateThreadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListMessages
-     * @request GET:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerListMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListMessagesResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerSendMessage
-     * @request POST:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerSendMessage: (
-      threadId: string,
-      data: SendMessageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SendMessageResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCancelRun
-     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
-     */
-    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
-      this.request<CancelRunResponse, any>({
-        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
-     * @request GET:/api/admin/ai-threads
-     */
-    adminAiThreadsControllerGetAdminAiThreadSummaries: (
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        /** @format uuid */
-        userId?: string;
-        /** @maxLength 200 */
-        search?: string;
-        /** @format date-time */
-        from?: string;
-        /** @format date-time */
-        to?: string;
-        type?: "practice" | "ai-mentor" | "assistant";
-        status?: "active" | "completed" | "archived";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadSummariesResponse, any>({
-        path: `/api/admin/ai-threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
-     * @request GET:/api/admin/ai-threads/{threadId}
-     */
-    adminAiThreadsControllerGetAdminAiThreadDetails: (
-      threadId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadDetailsResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
-     * @request GET:/api/admin/ai-threads/{threadId}/messages
-     */
-    adminAiThreadsControllerGetAdminAiThreadMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadMessagesResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

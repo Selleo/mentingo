@@ -6,6 +6,7 @@ import {
 } from "@repo/shared";
 
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
+import { routeAccessConfig } from "../routeAccessConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 import type { TFunction } from "i18next";
@@ -298,6 +299,31 @@ describe("getNavigationConfig", () => {
       allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
     });
   });
+  it.each([false, true])(
+    "places competencies after development paths with the same label for every role (personal: %s)",
+    (_personal) => {
+      const items = getNavigationConfig(
+        t,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        [],
+        true,
+      ).flatMap((group) => group.items);
+      const paths = items.map((item) => item.path);
+      expect(paths.indexOf("competencies")).toBe(paths.indexOf("development-paths") + 1);
+      expect(paths.indexOf("competencies")).toBeLessThan(paths.indexOf("articles"));
+      expect(items.find((item) => item.path === "competencies")).toMatchObject({
+        iconName: "Gem",
+        label: "competencies.title",
+        accessRequirement: routeAccessConfig.competencies,
+      });
+    },
+  );
 
   it("should hide phishing until the tenant capability is enabled", () => {
     const groups = getNavigationConfig(t);

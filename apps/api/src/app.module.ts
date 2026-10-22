@@ -53,6 +53,7 @@ import { PasswordChangeRequiredGuard } from "./common/guards/password-change-req
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { ContentMarketplaceModule } from "./content-marketplace/content-marketplace.module";
+import { CompetenciesModule } from "./competencies/competencies.module";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
 import { EmailTemplateModule } from "./email-templates/email-template.module";
@@ -205,6 +206,7 @@ import type { RedisClient } from "src/redis";
     LumaModule,
     PhishingModule,
     ContentMarketplaceModule,
+    CompetenciesModule,
     McpModule,
     LiveTrainingModule,
     CalendarModule,

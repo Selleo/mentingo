@@ -3,6 +3,7 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
+  COMPETENCIES: "competencies",
   AUTOMATION_EMAIL: "automation-email",
   EMAIL_TEMPLATE_TEST: "email-template-test",
   SEMANTIC_SEARCH_INDEX: "semantic-search-index",

@@ -5,6 +5,8 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
+import { assertSeparateTestDatabase } from "./assert-test-database";
+
 async function waitForPostgres(url: string, maxAttempts = 5): Promise<void> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -32,6 +34,7 @@ export default async function globalSetup() {
   const testDbUrl =
     process.env.DATABASE_TEST_URL ||
     "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
+  assertSeparateTestDatabase(mainDbUrl, testDbUrl);
 
   console.info("Setting up test database...");
 
