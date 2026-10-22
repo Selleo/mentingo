@@ -1496,12 +1496,10 @@
     }
   },
   "globalSearch": {
-    "administrativeResults": "Personas, grupos y categorías",
     "aiSearch": "Buscar con IA",
     "hybridSearch": "Búsqueda híbrida",
     "backToKeywords": "Volver a la búsqueda por palabras clave",
     "semanticUnavailable": "La búsqueda semántica no está disponible temporalmente. Se muestran coincidencias de palabras clave.",
-    "semanticPending": "Parte del contenido todavía se está indexando. Los resultados pueden estar incompletos.",
     "searchFailed": "La búsqueda ha fallado. Inténtalo de nuevo.",
     "clear": "Borrar búsqueda",
     "loading": "Buscando…",
@@ -1513,6 +1511,21 @@
     "navigate": "Navegar",
     "goTo": "Ir a",
     "close": "Cerrar",
+    "contentResults": "Contenido formativo",
+    "aiTryAgain": "Intenta describir lo que necesitas con otras palabras o vuelve a la búsqueda por palabras clave.",
+    "searchInDescriptionWithAi": "Escribe un título para ir directamente a él o describe lo que necesitas y busca con IA.",
+    "types": {
+      "course": "Curso",
+      "lesson": "Lección",
+      "learningPath": "Ruta de desarrollo",
+      "news": "Noticia",
+      "article": "Artículo",
+      "qa": "Preguntas y respuestas",
+      "users": "Usuario",
+      "groups": "Grupo",
+      "categories": "Categoría"
+    },
+    "moreInCourse": "+{{count}} más en este curso",
     "entries": {
       "users": "Usuarios",
       "categories": "Categorías",

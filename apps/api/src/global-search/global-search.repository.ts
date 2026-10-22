@@ -260,17 +260,14 @@ export class GlobalSearchRepository {
     );
 
     const rows = await this.db
-      .select({
-        id: lessons.id,
-        title: this.localizationService.getLocalizedSqlField(lessons.title, language, courses),
-        courseId: courses.id,
-      })
+      .select(this.lessonWithParentFields(language))
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(categories, eq(categories.id, courses.categoryId))
       .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
       .where(and(inArray(lessons.id, ids), accessCondition))
-      .groupBy(lessons.id, courses.id, courses.baseLanguage);
+      .groupBy(lessons.id, chapters.id, courses.id, courses.baseLanguage, categories.id);
 
     return this.sortByMatches(
       rows.map((row) => ({
@@ -497,6 +494,30 @@ export class GlobalSearchRepository {
         inArray(searchDocuments.language, match.languages),
       ),
     );
+  }
+
+  /**
+   * Lesson projection plus its chapter and course, so search can nest lessons under their course
+   * without another query. Lesson access already implies access to the parent course.
+   */
+  private lessonWithParentFields(language: SupportedLanguages) {
+    return {
+      id: lessons.id,
+      title: this.localizationService.getLocalizedSqlField(lessons.title, language, courses),
+      courseId: courses.id,
+      chapterTitle: this.localizationService.getLocalizedSqlField(
+        chapters.title,
+        language,
+        courses,
+      ),
+      courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language, courses),
+      courseThumbnailUrl: courses.thumbnailS3Key,
+      courseCategory: this.localizationService.getLocalizedSqlField(
+        categories.title,
+        language,
+        categories,
+      ),
+    };
   }
 
   private matchIds(matches: MatchRow[]) {

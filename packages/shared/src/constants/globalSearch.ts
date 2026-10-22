@@ -13,3 +13,16 @@ export const GLOBAL_SEARCH_SEMANTIC_STATUSES = {
 
 export type GlobalSearchSemanticStatus =
   (typeof GLOBAL_SEARCH_SEMANTIC_STATUSES)[keyof typeof GLOBAL_SEARCH_SEMANTIC_STATUSES];
+
+/** Node types in the hierarchical global search result tree. */
+export const GLOBAL_SEARCH_RESULT_TYPES = {
+  COURSE: "course",
+  LESSON: "lesson",
+  LEARNING_PATH: "learningPath",
+  NEWS: "news",
+  ARTICLE: "article",
+  QA: "qa",
+} as const;
+
+export type GlobalSearchResultType =
+  (typeof GLOBAL_SEARCH_RESULT_TYPES)[keyof typeof GLOBAL_SEARCH_RESULT_TYPES];

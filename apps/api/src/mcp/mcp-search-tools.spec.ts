@@ -17,7 +17,7 @@ import type { McpToolRunner } from "./mcp-tool-runner.types";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { GlobalSearchService } from "src/global-search/global-search.service";
-import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
+import type { GlobalSearchResult } from "src/global-search/schemas/global-search.schema";
 import type { SettingsService } from "src/settings/settings.service";
 
 const settings = {} as Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
@@ -85,7 +85,7 @@ describe("MCP global search", () => {
       roleSlugs: [],
       permissions: [PERMISSIONS.COURSE_READ_ASSIGNED],
     } as CurrentUserType;
-    const result: GlobalSearchResponse = {
+    const result: GlobalSearchResult = {
       myCourses: [{ id: "course-id", title: "Onboarding" }],
       allCourses: [],
       availableCourses: [],
@@ -97,6 +97,7 @@ describe("MCP global search", () => {
       users: [],
       categories: [],
       groups: [],
+      results: [],
     };
     const context = { resource: "https://tenant.example/mcp", searchOnly: false };
     const search = jest.fn().mockResolvedValue(result);

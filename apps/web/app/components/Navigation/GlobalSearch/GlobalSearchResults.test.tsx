@@ -10,7 +10,13 @@ import { GlobalSearchResults } from "./GlobalSearchResults";
 
 const search = vi.hoisted(() => ({
   data: {
-    articles: [{ id: "article", title: "A result" }],
+    results: [
+      { type: "article", id: "article", title: "A result" },
+      { type: "learningPath", id: "path", title: "Hidden path", courseCount: 1 },
+    ],
+    users: [],
+    groups: [],
+    categories: [],
     semanticStatus: undefined as GlobalSearchSemanticStatus | undefined,
   },
   isFetching: false,
@@ -18,24 +24,26 @@ const search = vi.hoisted(() => ({
 }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock("~/api/queries/useGlobalSearch", () => ({ useGlobalSearch: () => search }));
-vi.mock("~/api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({ data: {} }) }));
+vi.mock("~/api/queries/useGlobalSettings", () => ({
+  useGlobalSettings: () => ({ data: { learningPathsEnabled: false } }),
+}));
 vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
   useLanguageStore: (selector: (state: { language: string }) => unknown) =>
     selector({ language: "en" }),
 }));
 vi.mock("./GlobalSearchContent", () => ({
   GlobalSearchContent: ({
-    tabsToDisplay,
+    isFetching,
+    results,
   }: {
-    tabsToDisplay: { isFetching: boolean; items: { resultData: { title: string }[] }[] };
+    isFetching: boolean;
+    results: { title: string }[];
   }) => (
     <div>
-      {tabsToDisplay.isFetching && <span>Loading</span>}
-      {tabsToDisplay.items
-        .flatMap((section) => section.resultData)
-        .map((item, i) => (
-          <span key={i}>{item.title}</span>
-        ))}
+      {isFetching && <span>Loading</span>}
+      {results.map((node) => (
+        <span key={node.title}>{node.title}</span>
+      ))}
     </div>
   ),
 }));
@@ -60,10 +68,16 @@ describe("hybrid search feedback", () => {
     expect(screen.getByRole("status")).toHaveTextContent("globalSearch.semanticUnavailable");
     expect(screen.getByText("A result")).toBeInTheDocument();
   });
-  it("shows incomplete index coverage", () => {
+  it("leaves out learning paths when they are disabled", () => {
+    render(<GlobalSearchResults {...props} />);
+    expect(screen.getByText("A result")).toBeInTheDocument();
+    expect(screen.queryByText("Hidden path")).not.toBeInTheDocument();
+  });
+  it("does not warn about partially indexed content", () => {
     search.data.semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
     render(<GlobalSearchResults {...props} />);
-    expect(screen.getByRole("status")).toHaveTextContent("globalSearch.semanticPending");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByText("A result")).toBeInTheDocument();
   });
   it("hides stale results while the new input debounces", () => {
     render(<GlobalSearchResults {...props} isDebouncing />);

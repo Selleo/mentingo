@@ -1,37 +1,43 @@
-import { Link } from "@remix-run/react";
-import { upperFirst, toLower } from "lodash-es";
+import { toLower, upperFirst } from "lodash-es";
+import { UserRound } from "lucide-react";
 
+import { GlobalSearchResultRow } from "./GlobalSearchResultRow";
+
+import type { GlobalSearchEntryProps } from "./GlobalSearchResultRow";
 import type { SearchResponse } from "~/api/generated-api";
 
 export const UserEntry = ({
   item,
   onSelect,
-}: {
-  item: SearchResponse["data"]["users"][number];
-  onSelect: () => void;
-}) => {
+  typeLabel,
+  isActive,
+  showPassage,
+}: GlobalSearchEntryProps<SearchResponse["data"]["users"][number]>) => {
   const groupsText = item.groups
     .map((group) => upperFirst(toLower(group.name)))
     .slice(0, 2)
     .join(", ");
 
   return (
-    <Link
+    <GlobalSearchResultRow
       to={`/admin/users/${item.id}`}
-      onClick={onSelect}
-      className="group focus:outline-none focus-visible:outline-none"
-    >
-      <div className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
-        <img
-          src={item?.profilePictureUrl ?? ""}
-          alt={item.firstName}
-          className="size-4 rounded-full bg-[#D9D9D9]"
-        />
-        <span className="line-clamp-1 flex-1">
-          {item.firstName} {item.lastName}
-        </span>
-        <span className="text-md ps-3 text-neutral-600">{groupsText}</span>
-      </div>
-    </Link>
+      onSelect={onSelect}
+      leading={
+        item.profilePictureUrl ? (
+          <img
+            src={item.profilePictureUrl}
+            alt=""
+            className="size-full rounded-full object-cover"
+          />
+        ) : (
+          <UserRound className="size-4" aria-hidden />
+        )
+      }
+      title={`${item.firstName} ${item.lastName}`}
+      typeLabel={typeLabel}
+      meta={groupsText || undefined}
+      isActive={isActive}
+      showPassage={showPassage}
+    />
   );
 };

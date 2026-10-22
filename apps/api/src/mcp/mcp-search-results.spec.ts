@@ -1,15 +1,22 @@
-import { GLOBAL_SEARCH_MODES, GLOBAL_SEARCH_SEMANTIC_STATUSES } from "@repo/shared";
+import {
+  GLOBAL_SEARCH_MODES,
+  GLOBAL_SEARCH_RESULT_TYPES,
+  GLOBAL_SEARCH_SEMANTIC_STATUSES,
+} from "@repo/shared";
+
+import { buildSearchResultTree } from "src/global-search/global-search.result-tree";
 
 import { shapeMcpSearchResults } from "./mcp-search-results";
 
 import type {
+  McpContentSearchResponse,
   McpLinkedSearchResponse,
   McpLearnerContentSearchResponse,
 } from "./mcp-search-results.types";
-import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
+import type { GlobalSearchResult } from "src/global-search/schemas/global-search.schema";
 
-function response(): GlobalSearchResponse {
-  return {
+function response(): GlobalSearchResult {
+  const lists = {
     searchMode: GLOBAL_SEARCH_MODES.HYBRID,
     semanticStatus: GLOBAL_SEARCH_SEMANTIC_STATUSES.READY,
     allCourses: [
@@ -40,22 +47,41 @@ function response(): GlobalSearchResponse {
     ],
     categories: [{ id: "category/id", title: "Category" }],
     groups: [{ id: "group/id", name: "Group" }],
+  } satisfies Omit<GlobalSearchResult, "results">;
+  return {
+    ...lists,
+    results: buildSearchResultTree({
+      courseLists: [lists.myCourses, lists.allCourses, lists.availableCourses],
+      lessons: lists.lessons,
+      learningPaths: lists.learningPaths,
+      news: lists.news,
+      articles: lists.articles,
+      qa: lists.qa,
+    }),
   };
 }
+
+const nodeById = (results: McpLinkedSearchResponse, id: string) => {
+  const node = results.results.find((item) => item.id === id);
+  if (!node) throw new Error(`missing result ${id}`);
+  return node;
+};
 
 describe("MCP search result presentation", () => {
   const context = { resource: "https://tenant.example/mcp", searchOnly: false };
 
   it("uses the bound tenant origin and actual web view routes with encoded IDs", () => {
     const results = shapeMcpSearchResults(response(), context) as McpLinkedSearchResponse;
-    expect(results.allCourses[0].url).toBe("https://tenant.example/course/all%2Fid%3F");
-    expect(results.myCourses[0].url).toBe("https://tenant.example/course/my%2Fid");
-    expect(results.availableCourses[0].url).toBe("https://tenant.example/course/available%2Fid");
-    expect(results.news[0].url).toBe("https://tenant.example/news/news%2Fid");
-    expect(results.articles[0].url).toBe("https://tenant.example/articles/article%2Fid");
-    expect(results.qa[0].url).toBe("https://tenant.example/qa?qaId=qa%2Fid%3F");
-    expect(results.lessons[0].url).toBe("https://tenant.example/course/my%2Fid/lesson/lesson%2Fid");
-    expect(results.learningPaths[0].url).toBe(
+    expect(nodeById(results, "all/id?").url).toBe("https://tenant.example/course/all%2Fid%3F");
+    expect(nodeById(results, "available/id").url).toBe(
+      "https://tenant.example/course/available%2Fid",
+    );
+    expect(nodeById(results, "news/id").url).toBe("https://tenant.example/news/news%2Fid");
+    expect(nodeById(results, "article/id").url).toBe(
+      "https://tenant.example/articles/article%2Fid",
+    );
+    expect(nodeById(results, "qa/id?").url).toBe("https://tenant.example/qa?qaId=qa%2Fid%3F");
+    expect(nodeById(results, "path").url).toBe(
       "https://tenant.example/development-paths?searchQuery=Develop+%26+learn",
     );
     expect(results.users[0].url).toBe("https://tenant.example/admin/users/user%2Fid");
@@ -63,9 +89,42 @@ describe("MCP search result presentation", () => {
     expect(results.groups[0].url).toBe("https://tenant.example/admin/groups/group%2Fid");
   });
 
+  it("returns authoring results as a linked tree instead of per-type lists", () => {
+    const results = shapeMcpSearchResults(response(), context) as McpLinkedSearchResponse;
+    expect(Object.keys(results).sort()).toEqual(
+      ["categories", "groups", "results", "searchMode", "semanticStatus", "users"].sort(),
+    );
+    const course = nodeById(results, "my/id");
+    if (course.type !== GLOBAL_SEARCH_RESULT_TYPES.COURSE) throw new Error("expected a course");
+    expect(course.url).toBe("https://tenant.example/course/my%2Fid");
+    expect(course.lessons).toEqual([
+      expect.objectContaining({
+        id: "lesson/id",
+        courseId: "my/id",
+        matchedPassage: "Lesson body",
+        url: "https://tenant.example/course/my%2Fid/lesson/lesson%2Fid",
+      }),
+    ]);
+  });
+
+  it("replaces result-supplied URLs on tree nodes and nested lessons", () => {
+    const source = response();
+    for (const node of source.results) {
+      Object.assign(node, { url: "https://attacker.example" });
+      if (node.type === GLOBAL_SEARCH_RESULT_TYPES.COURSE)
+        for (const lesson of node.lessons)
+          Object.assign(lesson, { url: "https://attacker.example" });
+    }
+    const results = shapeMcpSearchResults(source, context);
+    expect(JSON.stringify(results)).not.toContain("attacker");
+  });
+
   it("projects SEARCH to authorized content groups, excluding lessons, admin data and course passages", () => {
     const source = response();
-    const results = shapeMcpSearchResults(source, { ...context, searchOnly: true });
+    const results = shapeMcpSearchResults(source, {
+      ...context,
+      searchOnly: true,
+    }) as McpContentSearchResponse;
     expect(Object.keys(results).sort()).toEqual(
       [
         "allCourses",
@@ -100,7 +159,10 @@ describe("MCP search result presentation", () => {
       lessonContent: "Secret",
     });
     Object.assign(source.news[0], { fileDownloadUrl: "https://private.example/file" });
-    const results = shapeMcpSearchResults(source, { ...context, searchOnly: true });
+    const results = shapeMcpSearchResults(source, {
+      ...context,
+      searchOnly: true,
+    }) as McpContentSearchResponse;
     expect(results).not.toHaveProperty("futureAdminData");
     expect(results.allCourses[0]).not.toHaveProperty("lessonContent");
     expect(results.allCourses[0].url).toBe("https://tenant.example/course/all%2Fid%3F");
@@ -113,8 +175,9 @@ describe("MCP search result presentation", () => {
     const results = shapeMcpSearchResults(source, context) as McpLinkedSearchResponse;
     expect(results.semanticStatus).toBe(GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE);
     expect(results.users[0].email).toBe("private@example.test");
-    expect(results.lessons[0].matchedPassage).toBe("Lesson body");
+    expect(JSON.stringify(results.results)).toContain("Lesson body");
     expect(source.users[0]).not.toHaveProperty("url");
+    expect(source.results[0]).not.toHaveProperty("url");
   });
 
   it.each(["file:///mcp", "javascript:alert(1)", "https://user:secret@tenant.example/mcp"])(

@@ -66,7 +66,7 @@ export class GlobalSearchController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSearchResponse>> {
     return new BaseResponse(
-      await this.globalSearchService.search(
+      await this.globalSearchService.searchResultTree(
         searchQuery,
         language ?? SUPPORTED_LANGUAGES.EN,
         currentUser,

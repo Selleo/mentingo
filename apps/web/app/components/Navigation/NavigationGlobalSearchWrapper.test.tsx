@@ -36,20 +36,25 @@ vi.mock("./GlobalSearch/GlobalSearchResults", () => ({
     debouncedSearch,
     mode,
     isDebouncing,
+    setTotalItems,
   }: {
     debouncedSearch: string;
     mode: string;
     isDebouncing: boolean;
-  }) => (
-    <div>
-      <output data-testid="request">
-        {JSON.stringify({ query: debouncedSearch, mode, isDebouncing })}
-      </output>
-      <div data-search-index="0">
-        <button onClick={selectResult}>Result</button>
+    setTotalItems: (count: number) => void;
+  }) => {
+    setTotalItems(1);
+    return (
+      <div>
+        <output data-testid="request">
+          {JSON.stringify({ query: debouncedSearch, mode, isDebouncing })}
+        </output>
+        <div data-search-index="0">
+          <button onClick={selectResult}>Result</button>
+        </div>
       </div>
-    </div>
-  ),
+    );
+  },
 }));
 
 const openSearch = () => {
@@ -57,6 +62,9 @@ const openSearch = () => {
   fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.findInApplication" }));
   return screen.getByRole("textbox", { name: "globalSearch.search" });
 };
+
+const askAi = () => screen.getByRole("button", { name: /^globalSearch\.aiSearch:/ });
+const queryAskAi = () => screen.queryByRole("button", { name: /^globalSearch\.aiSearch:/ });
 
 const request = () => JSON.parse(screen.getByTestId("request").textContent ?? "{}");
 
@@ -67,27 +75,14 @@ describe("global search mode", () => {
     selectResult.mockClear();
   });
 
-  it.each([
-    ["Macintosh", "⌘↵"],
-    ["Windows", "Ctrl+↵"],
-  ])("shows the AI keyboard hint in the footer on %s", (platform, shortcut) => {
-    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(platform);
-    openSearch();
-    expect(screen.getByText(shortcut).tagName).toBe("KBD");
-    expect(screen.getByRole("button", { name: "globalSearch.aiSearch" })).toHaveTextContent(
-      "globalSearch.aiSearch",
-    );
-  });
-
-  it("hides semantic search when AI is not configured and keeps keyword search working", () => {
+  it("hides the AI row when AI is not configured and keeps keyword search working", () => {
     aiConfiguration.data = { enabled: false };
     const input = openSearch();
-    expect(screen.queryByText("globalSearch.aiSearch")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "globalSearch.aiSearch" })).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "policy" } });
     act(() => {
       vi.advanceTimersByTime(300);
     });
+    expect(queryAskAi()).not.toBeInTheDocument();
     expect(request()).toEqual({
       query: "policy",
       mode: GLOBAL_SEARCH_MODES.KEYWORD,
@@ -97,10 +92,11 @@ describe("global search mode", () => {
     expect(input).toHaveValue("");
   });
 
-  it("keeps the sparkle hidden until configuration is known", () => {
+  it("keeps the AI row hidden until configuration is known", () => {
     aiConfiguration.data = undefined;
-    openSearch();
-    expect(screen.queryByRole("button", { name: "globalSearch.aiSearch" })).not.toBeInTheDocument();
+    const input = openSearch();
+    fireEvent.change(input, { target: { value: "policy" } });
+    expect(queryAskAi()).not.toBeInTheDocument();
   });
 
   it("returns to keyword mode if configuration is removed during hybrid search", () => {
@@ -109,17 +105,14 @@ describe("global search mode", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "globalSearch.search" }), {
       target: { value: "policy" },
     });
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.aiSearch" }));
+    fireEvent.click(askAi());
     expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
     aiConfiguration.data = { enabled: false };
     view.rerender(<NavigationGlobalSearchWrapper />);
     expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
-    expect(screen.queryByRole("button", { name: "globalSearch.aiSearch" })).not.toBeInTheDocument();
-    expect(screen.queryByText("globalSearch.hybridSearch")).not.toBeInTheDocument();
+    expect(queryAskAi()).not.toBeInTheDocument();
   });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
@@ -131,23 +124,18 @@ describe("global search mode", () => {
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(request()).toEqual({
-      query: "old query",
-      mode: GLOBAL_SEARCH_MODES.KEYWORD,
-      isDebouncing: false,
-    });
     fireEvent.change(input, { target: { value: "  current meaning  " } });
     expect(request().isDebouncing).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.aiSearch" }));
+    fireEvent.click(askAi());
     expect(request()).toEqual({
       query: "current meaning",
       mode: GLOBAL_SEARCH_MODES.HYBRID,
       isDebouncing: false,
     });
+    expect(queryAskAi()).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "new query" } });
     expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
-    expect(request().isDebouncing).toBe(true);
-    expect(screen.queryByText("globalSearch.hybridSearch")).not.toBeInTheDocument();
+    expect(askAi()).toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(300);
     });
@@ -158,17 +146,15 @@ describe("global search mode", () => {
     });
   });
 
-  it("does not let Enter on the sparkle button select a result", () => {
+  it("does not let Enter on the AI row select a result", () => {
     const input = openSearch();
     fireEvent.change(input, { target: { value: "meaning" } });
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    const sparkle = screen.getByRole("button", { name: "globalSearch.aiSearch" });
-    fireEvent.keyDown(sparkle, { key: "Enter" });
+    fireEvent.keyDown(askAi(), { key: "Enter" });
     expect(selectResult).not.toHaveBeenCalled();
-    fireEvent.click(sparkle);
-    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
+    expect(askAi()).toHaveAttribute("aria-keyshortcuts", "Meta+Enter Control+Enter");
   });
 
   it.each(["metaKey", "ctrlKey"] as const)(
@@ -182,45 +168,86 @@ describe("global search mode", () => {
         mode: GLOBAL_SEARCH_MODES.HYBRID,
         isDebouncing: false,
       });
-      expect(selectResult).not.toHaveBeenCalled();
       fireEvent.keyDown(input, { key: "Enter", [modifier]: true });
       expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
       expect(selectResult).not.toHaveBeenCalled();
     },
   );
 
-  it("does not run AI search from the shortcut without configuration or enough text", () => {
+  it("does not run AI search from the shortcut without configuration", () => {
     aiConfiguration.data = { enabled: false };
     const input = openSearch();
-    fireEvent.change(input, { target: { value: "policy" } });
+    fireEvent.change(input, { target: { value: "how do refunds work" } });
     act(() => {
       vi.advanceTimersByTime(300);
     });
     fireEvent.keyDown(input, { key: "Enter", ctrlKey: true });
     expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
-    expect(selectResult).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(selectResult).toHaveBeenCalledOnce();
   });
 
-  it("keeps ordinary Enter selecting the result", () => {
+  it("keeps Enter on the top match for title-like queries; ArrowUp reaches the AI row", () => {
     const input = openSearch();
     fireEvent.change(input, { target: { value: "policy" } });
     act(() => {
       vi.advanceTimersByTime(300);
     });
+    expect(askAi()).not.toHaveAttribute("aria-current");
     fireEvent.keyDown(input, { key: "Enter" });
     expect(selectResult).toHaveBeenCalledOnce();
+  });
+
+  it("reaches the AI row with ArrowUp from the top match", () => {
+    const input = openSearch();
+    fireEvent.change(input, { target: { value: "refund" } });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    fireEvent.keyDown(input, { key: "ArrowUp" });
+    expect(askAi()).toHaveAttribute("aria-current", "true");
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
+    expect(selectResult).not.toHaveBeenCalled();
+  });
+
+  it("highlights the AI row for questions so Enter runs AI, and ArrowDown returns to results", () => {
+    const input = openSearch();
+    fireEvent.change(input, { target: { value: "how do refunds work" } });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(askAi()).toHaveAttribute("aria-current", "true");
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(askAi()).not.toHaveAttribute("aria-current");
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(selectResult).toHaveBeenCalledOnce();
+  });
+
+  it("runs AI with Enter for a one-word question", () => {
+    const input = openSearch();
+    fireEvent.change(input, { target: { value: "refunds?" } });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(request()).toEqual({
+      query: "refunds?",
+      mode: GLOBAL_SEARCH_MODES.HYBRID,
+      isDebouncing: false,
+    });
   });
 
   it("requires three trimmed characters and clears the mode with the query", () => {
     const input = openSearch();
     fireEvent.change(input, { target: { value: " ab " } });
-    expect(screen.getByRole("button", { name: "globalSearch.aiSearch" })).toBeDisabled();
+    expect(queryAskAi()).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "abc" } });
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.aiSearch" }));
+    fireEvent.click(askAi());
+    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.HYBRID);
     fireEvent.click(screen.getByRole("button", { name: "globalSearch.clear" }));
     expect(input).toHaveValue("");
     expect(screen.queryByTestId("request")).not.toBeInTheDocument();
-    expect(screen.queryByText("globalSearch.hybridSearch")).not.toBeInTheDocument();
   });
 
   it("limits both keyword and hybrid requests to 500 characters", () => {
@@ -228,32 +255,7 @@ describe("global search mode", () => {
     expect(input).toHaveAttribute("maxlength", "500");
     fireEvent.change(input, { target: { value: "x".repeat(501) } });
     expect(input).toHaveValue("x".repeat(500));
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.aiSearch" }));
+    fireEvent.click(askAi());
     expect(request().query).toHaveLength(500);
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.aiSearch" }));
-    expect(request().query).toHaveLength(500);
-  });
-
-  it("exposes the AI shortcut and returns to keyword search from the same button", () => {
-    const input = openSearch();
-    fireEvent.change(input, { target: { value: "meaning" } });
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-    const toggle = screen.getByRole("button", { name: "globalSearch.aiSearch" });
-    expect(toggle).toHaveAttribute("aria-keyshortcuts", "Meta+Enter Control+Enter");
-    expect(toggle.getAttribute("title")).toContain("Enter");
-    expect(toggle).toHaveAttribute("aria-pressed", "false");
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-pressed", "true");
-    expect(toggle.getAttribute("title")).toContain("globalSearch.backToKeywords");
-    expect(screen.queryByText("globalSearch.hybridSearch")).not.toBeInTheDocument();
-    expect(screen.queryByText("globalSearch.backToKeywords")).not.toBeInTheDocument();
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-pressed", "false");
-    expect(request().mode).toBe(GLOBAL_SEARCH_MODES.KEYWORD);
   });
 });
