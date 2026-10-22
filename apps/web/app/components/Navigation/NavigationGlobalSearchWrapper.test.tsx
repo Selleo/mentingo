@@ -74,7 +74,9 @@ describe("global search mode", () => {
     vi.spyOn(navigator, "userAgent", "get").mockReturnValue(platform);
     openSearch();
     expect(screen.getByText(shortcut).tagName).toBe("KBD");
-    expect(screen.getByText("globalSearch.aiSearch")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "globalSearch.aiSearch" })).toHaveTextContent(
+      "globalSearch.aiSearch",
+    );
   });
 
   it("hides semantic search when AI is not configured and keeps keyword search working", () => {

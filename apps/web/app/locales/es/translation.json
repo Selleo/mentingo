@@ -1478,7 +1478,8 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "Búsqueda con IA",
+    "administrativeResults": "Personas, grupos y categorías",
+    "aiSearch": "Buscar con IA",
     "hybridSearch": "Búsqueda híbrida",
     "backToKeywords": "Volver a la búsqueda por palabras clave",
     "semanticUnavailable": "La búsqueda semántica no está disponible temporalmente. Se muestran coincidencias de palabras clave.",

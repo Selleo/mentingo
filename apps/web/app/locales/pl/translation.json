@@ -1729,7 +1729,8 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "Wyszukiwanie AI",
+    "administrativeResults": "Osoby, grupy i kategorie",
+    "aiSearch": "Szukaj z AI",
     "hybridSearch": "Wyszukiwanie hybrydowe",
     "backToKeywords": "Wróć do wyszukiwania słów",
     "semanticUnavailable": "Wyszukiwanie semantyczne jest chwilowo niedostępne. Wyświetlamy dopasowania słów.",

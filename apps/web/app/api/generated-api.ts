@@ -30334,6 +30334,8 @@ export interface SearchResponse {
     searchMode?: "keyword" | "hybrid";
     semanticStatus?: "ready" | "unavailable" | "pending";
     allCourses: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30345,6 +30347,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     myCourses: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30356,6 +30360,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     availableCourses: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30367,6 +30373,8 @@ export interface SearchResponse {
       completedChapterCount?: number;
     }[];
     learningPaths: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30379,6 +30387,8 @@ export interface SearchResponse {
       }[];
     }[];
     lessons: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30388,6 +30398,8 @@ export interface SearchResponse {
       courseId: string;
     }[];
     news: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30395,6 +30407,8 @@ export interface SearchResponse {
       title: string;
     }[];
     articles: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30402,6 +30416,8 @@ export interface SearchResponse {
       title: string;
     }[];
     qa: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -30422,6 +30438,8 @@ export interface SearchResponse {
       }[];
     }[];
     categories: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */

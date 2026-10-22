@@ -1484,7 +1484,8 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "KI-Suche",
+    "administrativeResults": "Personen, Gruppen und Kategorien",
+    "aiSearch": "Mit KI suchen",
     "hybridSearch": "Hybride Suche",
     "backToKeywords": "Zur Stichwortsuche",
     "semanticUnavailable": "Die semantische Suche ist vorübergehend nicht verfügbar. Stichworttreffer werden angezeigt.",

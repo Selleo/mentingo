@@ -171,6 +171,49 @@ describe("global search modes", () => {
       expect(result.learningPaths).toEqual([]);
     },
   );
+  it("exposes global relevance scores and attachment evidence across content types", async () => {
+    hybrid.findKeywordMatches.mockImplementation(async (type) => {
+      if (type === "lesson") return [{ entityId: actor.userId, rank: 0.1, languages: ["en"] }];
+      if (type === "articles")
+        return [
+          {
+            entityId: actor.tenantId,
+            rank: 0.8,
+            languages: ["en"],
+            matchedPassage: "Policy text",
+            matchedAttachmentFileName: "guide.pptx",
+          },
+        ];
+      return [];
+    });
+    Object.assign(keyword, {
+      getLessons: jest
+        .fn()
+        .mockResolvedValue([
+          {
+            id: actor.userId,
+            title: "Lesson",
+            courseId: actor.tenantId,
+            matchedAttachmentFileName: "legacy.pdf",
+          },
+        ]),
+      getArticles: jest.fn().mockResolvedValue([{ id: actor.tenantId, title: "Guide" }]),
+    });
+    const response = await service.search("policy", SUPPORTED_LANGUAGES.EN, {
+      ...actor,
+      permissions: [PERMISSIONS.COURSE_READ, PERMISSIONS.ARTICLE_READ_PUBLIC],
+    });
+    expect(response.articles[0].relevanceScore).toBeGreaterThan(
+      response.lessons[0].relevanceScore!,
+    );
+    expect(response.lessons[0].matchedAttachmentFileName).toBe("legacy.pdf");
+    expect(response.articles[0]).toMatchObject({
+      matchedPassage: "Policy text",
+      matchedAttachmentFileName: "guide.pptx",
+    });
+    hybrid.findKeywordMatches.mockResolvedValue([]);
+  });
+
   it("does not call providers for a short query", async () => {
     await service.search("ab", SUPPORTED_LANGUAGES.EN, actor, GLOBAL_SEARCH_MODES.HYBRID);
     expect(embeddings.embedQuery).not.toHaveBeenCalled();

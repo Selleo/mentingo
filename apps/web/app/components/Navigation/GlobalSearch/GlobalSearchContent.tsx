@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { NoData } from "~/assets/svgs";
@@ -112,16 +112,38 @@ export const GlobalSearchContent = ({
 }) => {
   const { t } = useTranslation();
 
+  // Keep the first course destination while sharing one ranked list and keyboard order.
+  const results = useMemo(() => {
+    const seenCourses = new Set<string>();
+    return tabsToDisplay.items
+      .flatMap((section) =>
+        section.resultData.flatMap((item) => {
+          const isCourse = ["allCourses", "myCourses", "availableCourses"].includes(
+            section.resultType,
+          );
+          if (isCourse && seenCourses.has(item.id)) return [];
+          if (isCourse) seenCourses.add(item.id);
+          const isAdministrative = ["users", "groups", "categories"].includes(section.resultType);
+          const score =
+            "relevanceScore" in item && typeof item.relevanceScore === "number"
+              ? item.relevanceScore
+              : undefined;
+          return [{ section, item, score, isAdministrative }];
+        }),
+      )
+      .sort((left, right) => {
+        if (left.isAdministrative !== right.isAdministrative) return left.isAdministrative ? 1 : -1;
+        if (left.isAdministrative) return 0;
+        if (left.score === undefined && right.score === undefined) return 0;
+        if (left.score === undefined) return 1;
+        if (right.score === undefined) return -1;
+        return right.score - left.score;
+      });
+  }, [tabsToDisplay.items]);
+
   useEffect(() => {
-    const sectionsWithItems = tabsToDisplay.items.filter(
-      (section) => Array.isArray(section.resultData) && section.resultData.length > 0,
-    );
-    const totalCount = sectionsWithItems.reduce(
-      (acc, section) => acc + section.resultData.length,
-      0,
-    );
-    setTotalItems(totalCount);
-  }, [tabsToDisplay.items, setTotalItems]);
+    setTotalItems(tabsToDisplay.isFetching ? 0 : results.length);
+  }, [results, tabsToDisplay.isFetching, setTotalItems]);
 
   useEffect(() => {
     const activeElement = document.querySelector(`[data-search-index="${activeIndex}"]`);
@@ -134,50 +156,49 @@ export const GlobalSearchContent = ({
     <>
       {!tabsToDisplay.isFetching ? (
         <div className="flex max-h-[400px] w-full flex-col gap-3 overflow-y-auto">
-          {(() => {
-            const sectionsWithItems = tabsToDisplay.items.filter(
-              (section) => Array.isArray(section.resultData) && section.resultData.length > 0,
-            );
-            if (sectionsWithItems.length === 0) {
-              return (
-                <div className="flex flex-col px-6 py-[50px]">
-                  <NoData className="mx-auto" />
-                  <span className="pt-4 text-center body-sm-md text-neutral-950">
-                    {t("globalSearch.notFound")}
-                  </span>
-                  <span className="text-center details text-neutral-800">
-                    {t("globalSearch.tryAgain")}
-                  </span>
-                </div>
-              );
-            }
-            let globalIndex = 0;
-            return sectionsWithItems.map((section) => {
-              const sectionId = `global-search-${section.resultType}`;
-              return (
-                <div key={section.resultType} className="w-full">
-                  <h3 id={sectionId} className="details-md px-2 py-0.5 text-neutral-600 mb-1">
+          {results.length === 0 ? (
+            <div className="flex flex-col px-6 py-[50px]">
+              <NoData className="mx-auto" />
+              <span className="pt-4 text-center body-sm-md text-neutral-950">
+                {t("globalSearch.notFound")}
+              </span>
+              <span className="text-center details text-neutral-800">
+                {t("globalSearch.tryAgain")}
+              </span>
+            </div>
+          ) : (
+            <ul className="space-y-1" aria-label={t("globalSearch.search")}>
+              {results.map(({ section, item, isAdministrative }, index) => (
+                <li
+                  key={`${section.resultType}-${item.id}`}
+                  data-search-index={index}
+                  className={cn("rounded-lg py-1", index === activeIndex && "bg-primary-100")}
+                >
+                  {isAdministrative && !results[index - 1]?.isAdministrative && (
+                    <h3 className="border-t border-neutral-200 px-2 pt-3 pb-1 text-sm text-neutral-600">
+                      {t("globalSearch.administrativeResults")}
+                    </h3>
+                  )}
+                  <span className="px-2 text-xs text-neutral-600">
                     {t(`globalSearch.entries.${section.resultType}`)}
-                  </h3>
-                  <ul aria-labelledby={sectionId} className="space-y-1">
-                    {section.resultData.map((item, index) => {
-                      const currentIndex = globalIndex++;
-                      const isActive = currentIndex === activeIndex;
-                      return (
-                        <li
-                          key={`${section.resultType}-${index}`}
-                          data-search-index={currentIndex}
-                          className={cn(isActive && "rounded-lg bg-primary-100")}
-                        >
-                          <section.Component item={item as never} onSelect={onSelect} />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              );
-            });
-          })()}
+                  </span>
+                  <section.Component item={item as never} onSelect={onSelect} />
+                  {!isAdministrative &&
+                    "matchedAttachmentFileName" in item &&
+                    item.matchedAttachmentFileName && (
+                      <span className="block line-clamp-1 px-2 text-xs text-neutral-600">
+                        {item.matchedAttachmentFileName}
+                      </span>
+                    )}
+                  {!isAdministrative && "matchedPassage" in item && item.matchedPassage && (
+                    <p className="line-clamp-2 px-2 text-xs text-neutral-600">
+                      {item.matchedPassage}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : (
         <div role="status" aria-label={t("globalSearch.loading")} className="mx-auto px-6 pt-4">

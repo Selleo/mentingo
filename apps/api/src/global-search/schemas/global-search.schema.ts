@@ -19,6 +19,12 @@ export const globalSearchQuerySchema = Type.Object({
 });
 
 const passageProperties = {
+  relevanceScore: Type.Optional(
+    Type.Number({
+      description:
+        "Query-local rank fusion score, comparable across content types; not a probability.",
+    }),
+  ),
   matchedPassage: Type.Optional(Type.String()),
   matchedAttachmentFileName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 };

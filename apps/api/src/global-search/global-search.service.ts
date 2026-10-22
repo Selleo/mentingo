@@ -9,7 +9,7 @@ import { GLOBAL_SEARCH_MIN_QUERY_LENGTH, SEARCH_ENTITY_TYPES } from "./global-se
 import { GlobalSearchRepository } from "./global-search.repository";
 import { GLOBAL_SEARCH_LESSON_ACCESS } from "./global-search.types";
 import { HybridSearchRepository } from "./hybrid-search.repository";
-import { fuseSearchMatches } from "./hybrid-search.utils";
+import { rankContentMatches } from "./hybrid-search.utils";
 import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 
 import type { GlobalSearchReadOptions, MatchRow } from "./global-search.types";
@@ -53,67 +53,52 @@ export class GlobalSearchService {
           : GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
       }
     }
-    const findMatches = async (
-      entityType: Parameters<GlobalSearchRepository["findMatches"]>[0],
-    ) => {
-      if (
-        options.contentOnly &&
-        ((entityType === SEARCH_ENTITY_TYPES.LESSON && !options.includeLearnerLessons) ||
-          entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
-      )
-        return [];
-      const metadataOnly = Boolean(
-        options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
-      );
-      if (options.includeLearnerLessons && entityType === SEARCH_ENTITY_TYPES.LESSON) {
-        const keyword = await this.hybridSearchRepository.findKeywordMatches(
-          entityType,
-          trimmedQuery,
-          currentUser,
-          false,
-          true,
+    // Keep source authorization in retrieval, then rank the eligible content globally.
+    const candidateGroups = await Promise.all(
+      Object.values(SEARCH_ENTITY_TYPES).map(async (entityType) => {
+        if (
+          options.contentOnly &&
+          ((entityType === SEARCH_ENTITY_TYPES.LESSON && !options.includeLearnerLessons) ||
+            entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
+        ) {
+          return { keyword: [], semantic: [] };
+        }
+        const metadataOnly = Boolean(
+          options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
         );
-        if (!embedding) return keyword;
-        const semantic = await this.hybridSearchRepository.findSemanticMatches(
-          entityType,
-          embedding,
-          currentUser,
-          false,
-          true,
+        const learnerLessons = Boolean(
+          options.includeLearnerLessons && entityType === SEARCH_ENTITY_TYPES.LESSON,
         );
-        return fuseSearchMatches(keyword, semantic);
-      }
-      const keyword = await this.hybridSearchRepository.findKeywordMatches(
-        entityType,
-        trimmedQuery,
-        currentUser,
-        metadataOnly,
-      );
-      if (!embedding) return keyword;
-      const semantic = await this.hybridSearchRepository.findSemanticMatches(
-        entityType,
-        embedding,
-        currentUser,
-        metadataOnly,
-      );
-      return fuseSearchMatches(keyword, semantic);
-    };
-
-    const [
-      courseMatches,
-      lessonMatches,
-      learningPathMatches,
-      newsMatches,
-      articleMatches,
-      qaMatches,
-    ] = await Promise.all([
-      findMatches(SEARCH_ENTITY_TYPES.COURSE),
-      findMatches(SEARCH_ENTITY_TYPES.LESSON),
-      findMatches(SEARCH_ENTITY_TYPES.LEARNING_PATH),
-      findMatches(SEARCH_ENTITY_TYPES.NEWS),
-      findMatches(SEARCH_ENTITY_TYPES.ARTICLE),
-      findMatches(SEARCH_ENTITY_TYPES.QA),
-    ]);
+        const args = [entityType, trimmedQuery, currentUser, metadataOnly] as const;
+        const keyword = learnerLessons
+          ? await this.hybridSearchRepository.findKeywordMatches(...args, true)
+          : await this.hybridSearchRepository.findKeywordMatches(...args);
+        let semantic: MatchRow[] = [];
+        if (embedding) {
+          const semanticArgs = [entityType, embedding, currentUser, metadataOnly] as const;
+          semantic = learnerLessons
+            ? await this.hybridSearchRepository.findSemanticMatches(...semanticArgs, true)
+            : await this.hybridSearchRepository.findSemanticMatches(...semanticArgs);
+        }
+        return {
+          keyword: keyword.map((match) => ({ ...match, entityType })),
+          semantic: semantic.map((match) => ({ ...match, entityType })),
+        };
+      }),
+    );
+    const rankedMatches = rankContentMatches(
+      candidateGroups.flatMap((group) => group.keyword),
+      candidateGroups.flatMap((group) => group.semantic),
+    );
+    const matchesFor = (
+      entityType: (typeof SEARCH_ENTITY_TYPES)[keyof typeof SEARCH_ENTITY_TYPES],
+    ) => rankedMatches.filter((match) => match.entityType === entityType);
+    const courseMatches = matchesFor(SEARCH_ENTITY_TYPES.COURSE);
+    const lessonMatches = matchesFor(SEARCH_ENTITY_TYPES.LESSON);
+    const learningPathMatches = matchesFor(SEARCH_ENTITY_TYPES.LEARNING_PATH);
+    const newsMatches = matchesFor(SEARCH_ENTITY_TYPES.NEWS);
+    const articleMatches = matchesFor(SEARCH_ENTITY_TYPES.ARTICLE);
+    const qaMatches = matchesFor(SEARCH_ENTITY_TYPES.QA);
 
     const [
       allCourses,
@@ -162,11 +147,16 @@ export class GlobalSearchService {
     const byId = new Map(matches.map((match) => [match.entityId, match]));
     return rows.slice(0, 10).map((row) => {
       const match = byId.get(row.id as MatchRow["entityId"]);
-      if (!match?.matchedPassage) return row;
+      if (!match) return row;
       return {
         ...row,
-        matchedPassage: match.matchedPassage,
-        matchedAttachmentFileName: match.matchedAttachmentFileName ?? null,
+        relevanceScore: match.rank,
+        ...(match.matchedPassage
+          ? {
+              matchedPassage: match.matchedPassage,
+              matchedAttachmentFileName: match.matchedAttachmentFileName ?? null,
+            }
+          : {}),
       };
     });
   }
