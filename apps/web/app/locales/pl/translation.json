@@ -6340,6 +6340,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "AI ma dla Ciebie odpowiedź.",
+      "outline_ready": "Plan Twojego kursu jest gotowy do sprawdzenia.",
+      "changes_ready": "Zmiany w Twoim kursie są gotowe do sprawdzenia.",
+      "failed": "AI nie mogło zakończyć tej prośby.",
+      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować.",
+      "view": "Zobacz"
+    },
     "changeSet": {
       "ready": {
         "status": "Do przejrzenia",
@@ -6389,6 +6397,7 @@
         "description": "Kurs nie został zmieniony."
       },
       "more": "+{{count}} więcej",
+      "readySoFar": "gotowe: {{count}}",
       "discard": "Odrzuć",
       "retry": "Spróbuj ponownie",
       "heading": "Proponowane zmiany",
@@ -6549,6 +6558,14 @@
       "understandingRequest": "Czytanie Twojej prośby…",
       "checkingCourse": "Sprawdzanie spójności kursu…",
       "planningOutline": "Planowanie konspektu kursu…",
+      "outlineProgress": {
+        "drafting": "Tworzenie konspektu…",
+        "reviewing": "Sprawdzanie konspektu…",
+        "repairing": "Dopracowywanie konspektu…",
+        "finalizing": "Przygotowywanie konspektu do przeglądu…",
+        "chapters": "Rozdziały w szkicu: {{count}}",
+        "iteration": "Przebieg {{count}}"
+      },
       "planningLessons": "Planowanie lekcji…",
       "writingLesson": "Pisanie lekcji…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6602,6 +6619,10 @@
       "questionProgress": "Pytanie {{current}} z {{total}}",
       "questionPrevious": "Poprzednie",
       "questionNext": "Następne",
+      "questionNeedsInput": "Potrzebna Twoja odpowiedź",
+      "questionSubmitHint": "Enter, aby wysłać · Shift+Enter, aby dodać nową linię",
+      "questionShortcutHint": "Naciśnij A–D, aby wybrać",
+      "pendingSlowHint": "Analizuję kurs, źródła i Twoją prośbę, aby wybrać kolejny krok. Może to potrwać do minuty.",
       "newChat": "New chat",
       "searchSessions": "Szukaj czatów...",
       "noSessionsFound": "Nie znaleziono czatów.",
@@ -6632,7 +6653,9 @@
       "scopeWholeCourse": "Cały kurs",
       "scopeSelected": "Wybrany zakres programu",
       "webSearch": "Wyszukiwanie w sieci",
-      "deepThinking": "Dogłębne badanie",
+      "deepThinking": "Pogłębione wyszukiwanie źródeł",
+      "deepResearchHelp": "Dokładniej analizuje dozwolone źródła. Nie włącza dostępu do internetu.",
+      "webSearchHelp": "Zezwala na wyszukiwanie publicznych stron internetowych.",
       "strictSourceMode": "Tylko moje źródła",
       "strictSourceModeHelp": "Tylko polecenie i załączone pliki",
       "back": "Wstecz"
@@ -6709,9 +6732,11 @@
       "contentPending": "Treść tej lekcji nie została jeszcze wygenerowana.",
       "readOnly": "Podgląd wersji roboczej jest tylko do odczytu do czasu zastosowania."
     },
-    "openWorkspace": "Generuj z AI",
+    "openWorkspace": "Edytuj z AI",
+    "createWorkspace": "Twórz z AI",
     "openLegacyDraft": "Kontynuuj starszą wersję roboczą",
     "activityRail": {
+      "inProgress": "Praca trwa… Postęp pojawi się po zakończeniu kolejnego etapu.",
       "retryFailedParts": "Ponów nieudane części",
       "retryProvider": "Ponów połączenie",
       "recoveringFailedParts": "Wznawianie nieudanych części…",
@@ -6740,7 +6765,6 @@
       "moreToolUpdates": "+{{count}} kolejnych aktualizacji narzędzi",
       "searchQueries": "Wyszukiwane hasła",
       "moreSearchQueries": "+{{count}} kolejnych zapytań",
-      "completedResearchSteps": "Ukończone kroki wyszukiwania: {{count}}",
       "chapterStatus": {
         "failed": "Niepowodzenie",
         "pending": "oczekuje",

@@ -6277,6 +6277,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "DI atsakymas paruoštas.",
+      "outline_ready": "Jūsų kurso planas paruoštas peržiūrai.",
+      "changes_ready": "Jūsų kurso pakeitimai paruošti peržiūrai.",
+      "failed": "DI nepavyko užbaigti šios užklausos.",
+      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
+      "view": "Peržiūrėti"
+    },
     "changeSet": {
       "ready": {
         "status": "Paruošta peržiūrai",
@@ -6326,6 +6334,7 @@
         "description": "Kursas nepakeistas."
       },
       "more": "+{{count}} daugiau",
+      "readySoFar": "jau paruošta: {{count}}",
       "discard": "Atmesti",
       "retry": "Bandyti dar kartą",
       "heading": "Siūlomi pakeitimai",
@@ -6486,6 +6495,14 @@
       "understandingRequest": "Skaitoma jūsų užklausa…",
       "checkingCourse": "Tikrinamas kurso nuoseklumas…",
       "planningOutline": "Planuojama kurso struktūra…",
+      "outlineProgress": {
+        "drafting": "Rengiama struktūra…",
+        "reviewing": "Tikrinama struktūra…",
+        "repairing": "Tobulinama struktūra…",
+        "finalizing": "Struktūra ruošiama peržiūrai…",
+        "chapters": "Skyriai juodraštyje: {{count}}",
+        "iteration": "Etapas {{count}}"
+      },
       "planningLessons": "Planuojamos pamokos…",
       "writingLesson": "Rašoma pamoka…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6539,6 +6556,10 @@
       "questionProgress": "Klausimas {{current}} iš {{total}}",
       "questionPrevious": "Ankstesnis",
       "questionNext": "Kitas",
+      "questionNeedsInput": "Reikia jūsų atsakymo",
+      "questionSubmitHint": "Enter – siųsti · Shift+Enter – nauja eilutė",
+      "questionShortcutHint": "Spauskite A–D, kad pasirinktumėte",
+      "pendingSlowHint": "Skaitomas kursas, šaltiniai ir jūsų užklausa, kad būtų nuspręstas kitas žingsnis. Tai gali užtrukti iki minutės.",
       "newChat": "New chat",
       "searchSessions": "Ieškoti pokalbių...",
       "noSessionsFound": "Pokalbių nerasta.",
@@ -6569,7 +6590,9 @@
       "scopeWholeCourse": "Visas kursas",
       "scopeSelected": "Pasirinkta programa",
       "webSearch": "Paieška internete",
-      "deepThinking": "Išsamus tyrimas",
+      "deepThinking": "Išsami šaltinių paieška",
+      "deepResearchHelp": "Išsamiau tiria leidžiamus šaltinius. Neįjungia interneto prieigos.",
+      "webSearchHelp": "Leidžia ieškoti viešose interneto svetainėse.",
       "strictSourceMode": "Tik mano šaltiniai",
       "strictSourceModeHelp": "Tik užklausa ir pridėti failai",
       "back": "Atgal"
@@ -6646,9 +6669,11 @@
       "contentPending": "Šios pamokos turinys dar nesugeneruotas.",
       "readOnly": "Rengiamo turinio peržiūra yra tik skaitoma, kol ją pritaikysite."
     },
-    "openWorkspace": "Generuoti su DI",
+    "openWorkspace": "Redaguoti su DI",
+    "createWorkspace": "Kurti su DI",
     "openLegacyDraft": "Tęsti seną juodraštį",
     "activityRail": {
+      "inProgress": "Vykdoma… Eiga bus atnaujinta užbaigus kitą veiksmą.",
       "retryFailedParts": "Kartoti nepavykusias dalis",
       "retryProvider": "Kartoti prisijungimą",
       "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
@@ -6675,7 +6700,6 @@
       "moreToolUpdates": "+{{count}} kitų įrankių pranešimų",
       "searchQueries": "Paieškos užklausos",
       "moreSearchQueries": "+{{count}} daugiau užklausų",
-      "completedResearchSteps": "Užbaigti tyrimo veiksmai: {{count}}",
       "chapterStatus": {
         "failed": "Nepavyko",
         "pending": "laukiama",

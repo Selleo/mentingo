@@ -1,3 +1,5 @@
+import { AUTHORING_PART_KIND, AUTHORING_TURN_STATUS } from "./courseAuthoring.constants";
+
 import type { AuthoringChatDataTypes, AuthoringChatMessage } from "./authoringChatTransport";
 import type {
   AuthoringTurn,
@@ -78,9 +80,12 @@ export const activeAssistantRequestIds = (
   chatMessages.forEach((message) => {
     if (message.role !== "assistant" || !message.metadata?.requestId) return;
     if (
-      !["waiting_author", "completed", "failed", "stopped"].includes(
-        message.metadata.turnStatus ?? "",
-      )
+      ![
+        AUTHORING_TURN_STATUS.WAITING_AUTHOR,
+        AUTHORING_TURN_STATUS.COMPLETED,
+        AUTHORING_TURN_STATUS.FAILED,
+        AUTHORING_TURN_STATUS.STOPPED,
+      ].some((value) => value === message.metadata?.turnStatus)
     ) {
       return;
     }
@@ -96,7 +101,8 @@ export const activeAssistantRequestIds = (
     (turns ?? [])
       .filter(
         (turn) =>
-          (turn.status === "queued" || turn.status === "running") &&
+          (turn.status === AUTHORING_TURN_STATUS.QUEUED ||
+            turn.status === AUTHORING_TURN_STATUS.RUNNING) &&
           durableRequestIds.has(turn.requestId) &&
           (latestTerminalChatSequenceByRequest.get(turn.requestId) ?? -1) < turn.updatedSequence,
       )
@@ -165,7 +171,10 @@ export const authoringPartTimelineSequence = (
   if (part.type !== "data-authoringPart") return null;
   const firstSequence = numberValue(part.data.firstSequence);
   const updatedSequence = numberValue(part.data.updatedSequence);
-  if (part.data.partKind === "question" || part.data.partKind === "proposal") {
+  if (
+    part.data.partKind === AUTHORING_PART_KIND.QUESTION ||
+    part.data.partKind === AUTHORING_PART_KIND.PROPOSAL
+  ) {
     return firstSequence ?? updatedSequence;
   }
   if (updatedSequence !== null && (firstSequence === null || updatedSequence > firstSequence)) {
@@ -225,7 +234,7 @@ export const projectAuthoringTimeline = <T>(
     const requestId = messageRequestId(message);
     authoringPartMarkers(message).forEach((part, partOrder) => {
       let identity = `part:${part.data.partId}`;
-      if (part.data.partKind === "tool" && part.data.tool) {
+      if (part.data.partKind === AUTHORING_PART_KIND.TOOL && part.data.tool) {
         identity = `tool:${part.data.taskId ?? "request"}:${part.data.tool.toolCallId}`;
       } else if (part.data.artifact) {
         identity = `artifact:${part.data.artifact.artifactKind}:${part.data.artifact.artifactId}`;
@@ -319,7 +328,10 @@ export const projectAuthoringTimeline = <T>(
     const assistantMessage = requestMessages.find((message) => message.role === "assistant");
     let sequence = decoration.sequence ?? null;
 
-    if (decoration.kind === "question" && exactPart?.data.partKind === "question") {
+    if (
+      decoration.kind === "question" &&
+      exactPart?.data.partKind === AUTHORING_PART_KIND.QUESTION
+    ) {
       // The question part itself renders the card at its original event position.
       return [];
     }
@@ -339,7 +351,7 @@ export const projectAuthoringTimeline = <T>(
     if (sequence === null && taskParts.length > 0) {
       const activityParts =
         decoration.kind === "activity"
-          ? taskParts.filter((part) => part.data.partKind === "tool")
+          ? taskParts.filter((part) => part.data.partKind === AUTHORING_PART_KIND.TOOL)
           : taskParts;
       const sequenceParts = activityParts.length > 0 ? activityParts : taskParts;
       const taskSequences = sequenceParts.flatMap((part) => {

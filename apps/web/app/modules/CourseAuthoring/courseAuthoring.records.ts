@@ -4,6 +4,19 @@ import { isEqual } from "lodash-es";
 
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import {
+  AUTHORING_APPLICATION_STATUS,
+  AUTHORING_LESSON_KIND,
+  AUTHORING_SOURCE_REFRESH_STATUS,
+  AUTHORING_SOURCE_STATUS,
+  AUTHORING_TASK_STATUS,
+} from "./courseAuthoring.constants";
+import {
+  AUTHORING_OPERATION_TYPE,
+  CURRICULUM_PREVIEW_STATUS,
+  PROPOSAL_DECISION,
+} from "./review/curriculumReview.constants";
+
 import type {
   ApplicationView,
   AuthoringApplicationDelta,
@@ -44,7 +57,8 @@ export const excludeAppliedProposals = (
   appliedProposalIds: ReadonlySet<string> = new Set(),
 ): ProposalView[] =>
   proposals.filter(
-    (proposal) => proposal.decision !== "applied" && !appliedProposalIds.has(proposal.id),
+    (proposal) =>
+      proposal.decision !== PROPOSAL_DECISION.APPLIED && !appliedProposalIds.has(proposal.id),
   );
 
 /** Reads a list of strings while dropping malformed entries. */
@@ -145,12 +159,12 @@ const parseOperations = (value: unknown): AuthoringOperation[] => {
   });
 };
 
-const curriculumOperationTypes = new Set([
-  "chapter.create",
-  "chapter.update",
-  "lesson.create",
-  "lesson.update",
-  "lesson.metadata.update",
+const curriculumOperationTypes = new Set<string>([
+  AUTHORING_OPERATION_TYPE.CHAPTER_CREATE,
+  AUTHORING_OPERATION_TYPE.CHAPTER_UPDATE,
+  AUTHORING_OPERATION_TYPE.LESSON_CREATE,
+  AUTHORING_OPERATION_TYPE.LESSON_UPDATE,
+  AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
 ]);
 
 const normalizePreviewProposal = (
@@ -233,7 +247,10 @@ export const curriculumPreviewFromProposal = (
 
   proposal.operations.forEach((operation) => {
     if (!curriculumOperationTypes.has(operation.type)) return;
-    if (operation.type === "chapter.create" || operation.type === "chapter.update") {
+    if (
+      operation.type === AUTHORING_OPERATION_TYPE.CHAPTER_CREATE ||
+      operation.type === AUTHORING_OPERATION_TYPE.CHAPTER_UPDATE
+    ) {
       const title = stringValue(operation.payload.title);
       const displayOrder = numberValue(operation.payload.displayOrder);
       if (!title) return;
@@ -249,7 +266,7 @@ export const curriculumPreviewFromProposal = (
       return;
     }
 
-    if (operation.type === "lesson.metadata.update") {
+    if (operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) {
       const parent = [...contextChapters.values()].find((chapter) =>
         chapter.lessons.some((lesson) => lesson.id === operation.targetId),
       );
@@ -314,7 +331,10 @@ export const curriculumPreviewFromProposal = (
   orderCourseAuthoringOperations(inspectIncomplete ? inspectionOperations : proposal.operations);
   return {
     proposalId: proposal.id,
-    status: proposal.decision === "accepted" ? "accepted" : "pending",
+    status:
+      proposal.decision === PROPOSAL_DECISION.ACCEPTED
+        ? CURRICULUM_PREVIEW_STATUS.ACCEPTED
+        : CURRICULUM_PREVIEW_STATUS.PENDING,
     operations: inspectIncomplete ? inspectionOperations : proposal.operations,
     ...(inspectIncomplete && missingDependencies.length > 0 ? { missingDependencies } : {}),
     outline,
@@ -330,7 +350,9 @@ export const curriculumPreviewFromProposals = (
   inspectIncomplete = false,
 ): CurriculumPreview | null => {
   const visibleProposals = proposals.filter(
-    (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
+    (proposal) =>
+      proposal.decision === PROPOSAL_DECISION.PENDING ||
+      proposal.decision === PROPOSAL_DECISION.ACCEPTED,
   );
   if (visibleProposals.length === 0) return null;
   const firstProposal = visibleProposals[0];
@@ -391,7 +413,7 @@ const parseOutline = (value: unknown): OutlineChapter[] | null => {
         !lessonId ||
         !lessonTitle ||
         !lessonType ||
-        !["content", "quiz", "ai_mentor"].includes(lessonType)
+        !Object.values(AUTHORING_LESSON_KIND).some((kind) => kind === lessonType)
       ) {
         return [];
       }
@@ -399,7 +421,7 @@ const parseOutline = (value: unknown): OutlineChapter[] | null => {
         {
           id: lessonId,
           title: lessonTitle,
-          lessonType: lessonType as "content" | "quiz" | "ai_mentor",
+          lessonType: lessonType as OutlineChapter["lessons"][number]["lessonType"],
           objectives: stringList(lesson.objectives),
         },
       ];
@@ -436,7 +458,8 @@ const latestDecisions = (records: AuthoringRecord[]) => {
         qualityConcernsAccepted: record.payload.qualityConcernsAccepted === true,
         status: stringValue(record.payload.status),
         acceptedCommandId:
-          record.payload.accepted === true && stringValue(record.payload.status) !== "applied"
+          record.payload.accepted === true &&
+          stringValue(record.payload.status) !== PROPOSAL_DECISION.APPLIED
             ? proposalId
             : (prior?.acceptedCommandId ?? null),
       });
@@ -450,16 +473,17 @@ const proposalDecision = (
   snapshotStatus: string | null,
 ): ProposalView["decision"] => {
   if (decision) {
-    if (decision.status === "applied") return "applied";
-    if (decision.status === "superseded") return "superseded";
-    return decision.accepted ? "accepted" : "rejected";
+    if (decision.status === PROPOSAL_DECISION.APPLIED) return PROPOSAL_DECISION.APPLIED;
+    if (decision.status === PROPOSAL_DECISION.SUPERSEDED) return PROPOSAL_DECISION.SUPERSEDED;
+    return decision.accepted ? PROPOSAL_DECISION.ACCEPTED : PROPOSAL_DECISION.REJECTED;
   }
-  if (snapshotStatus === "applied") return "applied";
-  if (snapshotStatus === "accepted") return "accepted";
-  if (snapshotStatus === "superseded") return "superseded";
+  if (snapshotStatus === PROPOSAL_DECISION.APPLIED) return PROPOSAL_DECISION.APPLIED;
+  if (snapshotStatus === PROPOSAL_DECISION.ACCEPTED) return PROPOSAL_DECISION.ACCEPTED;
+  if (snapshotStatus === PROPOSAL_DECISION.SUPERSEDED) return PROPOSAL_DECISION.SUPERSEDED;
   // Both outcomes are terminal declines; the request card presents an all-declined set as Discarded.
-  if (snapshotStatus === "rejected" || snapshotStatus === "discarded") return "rejected";
-  return "pending";
+  if (snapshotStatus === PROPOSAL_DECISION.REJECTED || snapshotStatus === "discarded")
+    return PROPOSAL_DECISION.REJECTED;
+  return PROPOSAL_DECISION.PENDING;
 };
 
 /** Projects a proposal record together with its latest decision state. */
@@ -500,12 +524,12 @@ const parseProposal = (
   };
 };
 
-const activePreviewStatuses = new Set([
-  "queued",
-  "running",
-  "waiting_author",
-  "waiting_dependencies",
-  "paused",
+const activePreviewStatuses = new Set<string>([
+  AUTHORING_TASK_STATUS.QUEUED,
+  AUTHORING_TASK_STATUS.RUNNING,
+  AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+  AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+  AUTHORING_TASK_STATUS.PAUSED,
 ]);
 
 /** Selects the latest authoritative outline without falling back to stale proposals or streams. */
@@ -517,8 +541,8 @@ export const latestCurriculumPreview = (
   const latestProposal = proposals.at(-1);
   if (latestProposal) {
     if (
-      latestProposal.decision === "rejected" ||
-      latestProposal.decision === "applied" ||
+      latestProposal.decision === PROPOSAL_DECISION.REJECTED ||
+      latestProposal.decision === PROPOSAL_DECISION.APPLIED ||
       appliedProposalIds.has(latestProposal.id)
     ) {
       return null;
@@ -538,7 +562,7 @@ export const latestCurriculumPreview = (
 
   return {
     proposalId: latestPreview.taskId,
-    status: "streaming",
+    status: CURRICULUM_PREVIEW_STATUS.STREAMING,
     outline: latestPreview.outline.map((chapter, chapterIndex) => ({
       id: `${latestPreview.taskId}:chapter:${chapterIndex}`,
       title: chapter.title,
@@ -583,7 +607,7 @@ const parsePreview = (record: AuthoringRecord, tasks: AuthoringTask[]): PreviewV
     taskId,
     requestId,
     revision,
-    status: tasks.find((task) => task.taskId === taskId)?.status ?? "unknown",
+    status: tasks.find((task) => task.taskId === taskId)?.status ?? AUTHORING_TASK_STATUS.UNKNOWN,
     title: stringValue(record.payload.title),
     lessonTitle: stringValue(record.payload.lessonTitle),
     contentText,
@@ -616,13 +640,25 @@ const parseSource = (record: AuthoringRecord): SourceView => {
       })
     : [];
   const readableSections = sections.filter(
-    (section) => section.status === "ready" || section.status === "partial",
+    (section) =>
+      section.status === AUTHORING_SOURCE_STATUS.READY ||
+      section.status === AUTHORING_SOURCE_STATUS.PARTIAL,
   ).length;
-  const knownStatus = ["queued", "processing", "ready", "partial", "failed"].includes(status ?? "")
+  const knownStatus = [
+    AUTHORING_SOURCE_STATUS.QUEUED,
+    AUTHORING_SOURCE_STATUS.PROCESSING,
+    AUTHORING_SOURCE_STATUS.READY,
+    AUTHORING_SOURCE_STATUS.PARTIAL,
+    AUTHORING_SOURCE_STATUS.FAILED,
+  ].some((value) => value === status)
     ? (status as SourceView["status"])
-    : "unknown";
+    : AUTHORING_SOURCE_STATUS.UNKNOWN;
   const completedStatus =
-    knownStatus === "partial" ? (readableSections > 0 ? "ready" : "failed") : knownStatus;
+    knownStatus === AUTHORING_SOURCE_STATUS.PARTIAL
+      ? readableSections > 0
+        ? AUTHORING_SOURCE_STATUS.READY
+        : AUTHORING_SOURCE_STATUS.FAILED
+      : knownStatus;
   return {
     id: stringValue(record.payload.sourceVersionId) ?? record.id,
     taskId: stringValue(record.payload.taskId),
@@ -714,7 +750,7 @@ const parseAssetTask = (
     taskId,
     parentTaskId: stringValue(record.payload.parentTaskId),
     request,
-    status: task?.status ?? "unknown",
+    status: task?.status ?? AUTHORING_TASK_STATUS.UNKNOWN,
     revision: question
       ? numberValue(question.payload.revision)
       : numberValue(record.payload.revision),
@@ -729,9 +765,13 @@ const parseApplication = (record: AuthoringRecord): ApplicationView => {
   const status = stringValue(record.payload.status);
   return {
     id: record.id,
-    status: ["applied", "conflict", "failed"].includes(status ?? "")
+    status: [
+      AUTHORING_APPLICATION_STATUS.APPLIED,
+      AUTHORING_APPLICATION_STATUS.CONFLICT,
+      AUTHORING_APPLICATION_STATUS.FAILED,
+    ].some((value) => value === status)
       ? (status as ApplicationView["status"])
-      : "pending",
+      : AUTHORING_APPLICATION_STATUS.PENDING,
     reason: stringValue(record.payload.reason),
   };
 };
@@ -762,7 +802,11 @@ const parseSourcePolicy = (payload: Record<string, unknown>): SourcePolicy | nul
 /** Projects replacement-source impact and mapping state from a durable report. */
 const parseSourceRefresh = (record: AuthoringRecord): SourceRefreshView | null => {
   const status = record.payload.status;
-  if (status !== "refreshed" && status !== "needs_mapping") return null;
+  if (
+    status !== AUTHORING_SOURCE_REFRESH_STATUS.REFRESHED &&
+    status !== AUTHORING_SOURCE_REFRESH_STATUS.NEEDS_MAPPING
+  )
+    return null;
   const oldSourceVersionId = stringValue(record.payload.oldSourceVersionId);
   const replacementSourceVersionId = stringValue(record.payload.replacementSourceVersionId);
   const suggestedSourcePolicy = isObject(record.payload.suggestedSourcePolicy)
@@ -942,7 +986,7 @@ export const projectWorkspaceRecords = (
 
       if (!question.answered) {
         const task = tasks.find((candidate) => candidate.taskId === question.taskId);
-        if (task && task.status !== "waiting_author") return;
+        if (task && task.status !== AUTHORING_TASK_STATUS.WAITING_AUTHOR) return;
       }
 
       projection.questions.push(question);

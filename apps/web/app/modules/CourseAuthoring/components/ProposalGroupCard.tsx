@@ -47,6 +47,7 @@ type Props = {
 };
 
 const VISIBLE_ROWS = 4;
+const VISIBLE_CARD_ROWS = 3;
 const VISIBLE_OUTLINE_LESSONS = 4;
 const emptyStatuses: Record<string, ProposalApplicationStatus> = {};
 
@@ -142,7 +143,20 @@ export const ProposalGroup = ({
       statusOf(proposal) === null,
   );
 
+  const liveProposals = proposals.filter(
+    (proposal) =>
+      proposal.decision !== PROPOSAL_DECISION.REJECTED &&
+      proposal.decision !== PROPOSAL_DECISION.SUPERSEDED,
+  );
+  // Lesson planning runs under the outline's request, so it must not relabel an approved outline.
+  const approvedOutlineOnly =
+    liveProposals.length > 0 &&
+    liveProposals.every(
+      (proposal) => proposal.decision === PROPOSAL_DECISION.ACCEPTED && isOutline(proposal),
+    );
+
   const state: ChangeSetState = (() => {
+    if (approvedOutlineOnly) return CHANGE_SET_STATE.OUTLINE_APPROVED;
     if (generationPending) return CHANGE_SET_STATE.GENERATING;
     if (
       statuses.some(
@@ -230,9 +244,8 @@ export const ProposalGroup = ({
     }
     proposal.operations.forEach((operation) => addRow(rowFor(proposal, operation)));
   });
-  const hiddenCount = Math.max(rows.length - VISIBLE_ROWS, 0);
   const hiddenChapterCount = Math.max(outlineChapters.length - VISIBLE_ROWS, 0);
-  const showDetails = state !== CHANGE_SET_STATE.REVISING;
+  const showDetails = state !== CHANGE_SET_STATE.REVISING && state !== CHANGE_SET_STATE.GENERATING;
 
   const canReview =
     Boolean(onReview) &&
@@ -253,35 +266,66 @@ export const ProposalGroup = ({
   );
   const Icon = STATE_ICON[state];
   const needsAction = canReview || canRetry;
+  const spinning = state === CHANGE_SET_STATE.APPLYING || state === CHANGE_SET_STATE.GENERATING;
+  const kindCounts = rows.reduce<Partial<Record<ChangedKind, number>>>((counts, row) => {
+    counts[row.kind] = (counts[row.kind] ?? 0) + 1;
+    return counts;
+  }, {});
+  const visibleRows = rows.slice(0, needsAction ? VISIBLE_CARD_ROWS : VISIBLE_ROWS);
+  const hiddenRowCount = rows.length - visibleRows.length;
+
+  const statusNode = (
+    <span
+      role="status"
+      aria-live="polite"
+      className={cn("inline-flex items-center gap-1.5 text-xs font-medium", STATE_TONE[state])}
+    >
+      <Icon className={cn("size-3.5", spinning && "motion-safe:animate-spin")} aria-hidden="true" />
+      {t(`courseAuthoring.changeSet.${state}.status`)}
+    </span>
+  );
 
   return (
     <section
       className={cn(
-        "max-w-xl space-y-2 rounded-lg border p-3 shadow-sm",
-        needsAction ? "border-primary-200 bg-primary-50" : "border-neutral-200 bg-white",
+        "max-w-xl space-y-2",
+        needsAction && "rounded-xl border border-primary-200 bg-primary-50/60 p-3 shadow-sm",
       )}
       data-testid={`course-authoring-proposal-group-${requestId}`}
       data-state={state}
       aria-label={heading}
     >
-      <div className="flex items-center justify-between gap-3 px-1">
-        <span className="text-sm font-semibold text-neutral-950">{heading}</span>
-        <span
-          role="status"
-          aria-live="polite"
-          className={cn("inline-flex items-center gap-1.5 text-xs font-medium", STATE_TONE[state])}
-        >
+      {needsAction ? (
+        <div className="flex items-center justify-between gap-3 px-1">
+          <span className="text-sm font-semibold text-neutral-950">{heading}</span>
+          {statusNode}
+        </div>
+      ) : (
+        <div className="flex min-h-7 items-center gap-2 px-1 text-[13px] leading-5">
           <Icon
             className={cn(
-              "size-3.5",
-              (state === CHANGE_SET_STATE.APPLYING || state === CHANGE_SET_STATE.GENERATING) &&
-                "animate-spin",
+              "size-3.5 shrink-0",
+              STATE_TONE[state],
+              spinning && "motion-safe:animate-spin",
             )}
             aria-hidden="true"
           />
-          {t(`courseAuthoring.changeSet.${state}.status`)}
-        </span>
-      </div>
+          <span className="text-neutral-800">{heading}</span>
+          <span
+            role="status"
+            aria-live="polite"
+            className={cn("min-w-0 truncate text-xs", STATE_TONE[state])}
+          >
+            {t(`courseAuthoring.changeSet.${state}.status`)}
+            {state === CHANGE_SET_STATE.GENERATING && rows.length > 0 && (
+              <span className="text-neutral-500">
+                {" · "}
+                {t("courseAuthoring.changeSet.readySoFar", { count: rows.length })}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
 
       {outlineChapters.length > 0 && showDetails && (
         <ol className="space-y-1" data-testid={`course-authoring-outline-${requestId}`}>
@@ -329,7 +373,7 @@ export const ProposalGroup = ({
                 {canReview ? (
                   <button
                     type="button"
-                    className="flex w-full items-start gap-2.5 rounded-md px-1 py-1 text-left text-sm enabled:hover:bg-white disabled:cursor-default"
+                    className="flex w-full items-start gap-2.5 rounded-md px-1 py-1 text-left text-sm enabled:hover:bg-neutral-100 disabled:cursor-default"
                     disabled={busy}
                     onClick={() => onReview?.(proposalId)}
                   >
@@ -352,11 +396,21 @@ export const ProposalGroup = ({
       )}
 
       {rows.length > 0 && showDetails && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
+          {Object.entries(kindCounts).map(([kind, count]) => (
+            <span key={kind} className="inline-flex items-center gap-1 text-xs">
+              <ReviewKindBadge kind={kind as ChangedKind} />
+              <span className="tabular-nums text-neutral-600">{count}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {rows.length > 0 && showDetails && (
         <ol className="space-y-0.5">
-          {rows.slice(0, VISIBLE_ROWS).map((row) => {
+          {visibleRows.map((row) => {
             const rowContent = (
               <>
-                <ReviewKindBadge kind={row.kind} className="w-16" />
                 <span className="min-w-0 flex-1 truncate">
                   <span className="font-medium text-neutral-800">{row.label}</span>
                   {row.detail && <span className="ml-2 text-neutral-500">{row.detail}</span>}
@@ -368,7 +422,7 @@ export const ProposalGroup = ({
                 {canReview ? (
                   <button
                     type="button"
-                    className="flex min-h-8 w-full items-center gap-2 rounded-md px-1 py-1 text-left text-sm enabled:hover:bg-white disabled:cursor-default"
+                    className="flex min-h-8 w-full items-center gap-2 rounded-md px-1 py-1 text-left text-sm enabled:hover:bg-neutral-100 disabled:cursor-default"
                     disabled={busy}
                     onClick={() => onReview?.(row.proposalId)}
                   >
@@ -382,20 +436,22 @@ export const ProposalGroup = ({
               </li>
             );
           })}
-          {hiddenCount > 0 && (
+          {hiddenRowCount > 0 && (
             <li className="px-1 py-1 text-xs text-neutral-500">
-              {t("courseAuthoring.changeSet.more", { count: hiddenCount })}
+              {t("courseAuthoring.changeSet.more", { count: hiddenRowCount })}
             </li>
           )}
         </ol>
       )}
 
-      <p className="px-1 text-xs text-neutral-600">
-        {t(`courseAuthoring.changeSet.${state}.description`)}
-      </p>
+      {state !== CHANGE_SET_STATE.GENERATING && !needsAction && (
+        <p className="px-1 text-xs text-neutral-500">
+          {t(`courseAuthoring.changeSet.${state}.description`)}
+        </p>
+      )}
 
       {(canReview || canRetry) && (
-        <div className="flex flex-wrap items-center gap-2 px-1 pt-1">
+        <div className="flex flex-wrap items-center gap-2 border-t border-primary-100 px-1 pt-2.5">
           {canReview && (
             <Button
               type="button"
@@ -423,6 +479,9 @@ export const ProposalGroup = ({
               {t("courseAuthoring.changeSet.discard")}
             </Button>
           )}
+          <span className="ml-auto text-xs text-neutral-500">
+            {t(`courseAuthoring.changeSet.${state}.description`)}
+          </span>
         </div>
       )}
     </section>

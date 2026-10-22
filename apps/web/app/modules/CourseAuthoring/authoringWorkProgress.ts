@@ -1,4 +1,9 @@
 import { attachAuthoringTaskFailures } from "./authoringTaskFailure";
+import {
+  AUTHORING_OUTLINE_PHASE,
+  AUTHORING_CHAPTER_PROGRESS_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "./courseAuthoring.constants";
 
 import type {
   AuthoringRecord,
@@ -18,12 +23,12 @@ const integerValue = (value: unknown, minimum: number): number | null =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= minimum ? value : null;
 
 const isWorkProgressStage = (value: unknown): value is AuthoringWorkProgressStage =>
-  value === "outline" ||
-  value === "lesson_planning" ||
-  value === "lesson_generation" ||
-  value === "validation" ||
-  value === "repairing" ||
-  value === "recovering";
+  value === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE ||
+  value === AUTHORING_WORK_PROGRESS_STAGE.LESSON_PLANNING ||
+  value === AUTHORING_WORK_PROGRESS_STAGE.LESSON_GENERATION ||
+  value === AUTHORING_WORK_PROGRESS_STAGE.VALIDATION ||
+  value === AUTHORING_WORK_PROGRESS_STAGE.REPAIRING ||
+  value === AUTHORING_WORK_PROGRESS_STAGE.RECOVERING;
 
 const parseChapter = (value: unknown): AuthoringWorkProgressChapter | null => {
   if (!isObject(value)) return null;
@@ -36,7 +41,10 @@ const parseChapter = (value: unknown): AuthoringWorkProgressChapter | null => {
     !chapterId ||
     !title ||
     lessonCount === null ||
-    (status !== "pending" && status !== "running" && status !== "complete" && status !== "failed")
+    (status !== AUTHORING_CHAPTER_PROGRESS_STATUS.PENDING &&
+      status !== AUTHORING_CHAPTER_PROGRESS_STATUS.RUNNING &&
+      status !== AUTHORING_CHAPTER_PROGRESS_STATUS.COMPLETE &&
+      status !== AUTHORING_CHAPTER_PROGRESS_STATUS.FAILED)
   ) {
     return null;
   }
@@ -70,6 +78,22 @@ const parseWorkProgress = (value: unknown): AuthoringWorkProgress | null => {
   }
   if (value.chapters !== undefined && !Array.isArray(value.chapters)) return null;
 
+  const outlinePhase = value.outlinePhase;
+  const hasOutlineProgress = outlinePhase !== undefined;
+  if (
+    hasOutlineProgress &&
+    (value.stage !== AUTHORING_WORK_PROGRESS_STAGE.OUTLINE ||
+      !Object.values(AUTHORING_OUTLINE_PHASE).some((phase) => phase === outlinePhase) ||
+      integerValue(value.outlineIteration, 1) === null ||
+      integerValue(value.draftedChapters, 0) === null ||
+      integerValue(value.draftedLessons, 0) === null ||
+      integerValue(value.completedSteps, 0) === null ||
+      integerValue(value.totalSteps, 1) === null ||
+      Number(value.completedSteps) >= Number(value.totalSteps))
+  ) {
+    return null;
+  }
+
   const lessonId = optionalString(value.lessonId);
   const lessonTitle = optionalString(value.lessonTitle);
   const chapterId = optionalString(value.chapterId);
@@ -77,6 +101,16 @@ const parseWorkProgress = (value: unknown): AuthoringWorkProgress | null => {
 
   return {
     stage: value.stage,
+    ...(hasOutlineProgress
+      ? {
+          outlinePhase: outlinePhase as AuthoringWorkProgress["outlinePhase"],
+          outlineIteration: value.outlineIteration as number,
+          draftedChapters: value.draftedChapters as number,
+          draftedLessons: value.draftedLessons as number,
+          completedSteps: value.completedSteps as number,
+          totalSteps: value.totalSteps as number,
+        }
+      : {}),
     ...(Array.isArray(value.failedLessonIds) &&
     value.failedLessonIds.every((id) => typeof id === "string")
       ? { failedLessonIds: value.failedLessonIds as string[] }

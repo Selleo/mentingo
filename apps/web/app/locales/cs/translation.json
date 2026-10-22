@@ -6281,6 +6281,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "Odpověď AI je připravena.",
+      "outline_ready": "Osnova vašeho kurzu je připravena ke kontrole.",
+      "changes_ready": "Změny vašeho kurzu jsou připraveny ke kontrole.",
+      "failed": "AI nemohla dokončit tento požadavek.",
+      "waiting_author": "AI potřebuje vaši odpověď, aby mohla pokračovat.",
+      "view": "Zobrazit"
+    },
     "changeSet": {
       "ready": {
         "status": "Ke kontrole",
@@ -6330,6 +6338,7 @@
         "description": "Kurz nebyl změněn."
       },
       "more": "+{{count}} další",
+      "readySoFar": "zatím hotovo: {{count}}",
       "discard": "Zahodit",
       "retry": "Zkusit znovu",
       "heading": "Navrhované změny",
@@ -6490,6 +6499,14 @@
       "understandingRequest": "Čtení vašeho požadavku…",
       "checkingCourse": "Kontrola návaznosti kurzu…",
       "planningOutline": "Plánování osnovy kurzu…",
+      "outlineProgress": {
+        "drafting": "Vytváření osnovy…",
+        "reviewing": "Kontrola osnovy…",
+        "repairing": "Dopracování osnovy…",
+        "finalizing": "Příprava osnovy k posouzení…",
+        "chapters": "Kapitoly v návrhu: {{count}}",
+        "iteration": "Průchod {{count}}"
+      },
       "planningLessons": "Plánování lekcí…",
       "writingLesson": "Psaní lekce…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6543,6 +6560,10 @@
       "questionProgress": "Otázka {{current}} z {{total}}",
       "questionPrevious": "Předchozí",
       "questionNext": "Další",
+      "questionNeedsInput": "Potřebujeme vaši odpověď",
+      "questionSubmitHint": "Enter pro odeslání · Shift+Enter pro nový řádek",
+      "questionShortcutHint": "Stiskněte A–D pro výběr",
+      "pendingSlowHint": "Čtu kurz, zdroje a váš požadavek, abych určil další krok. Může to trvat až minutu.",
       "newChat": "New chat",
       "searchSessions": "Hledat konverzace...",
       "noSessionsFound": "Nebyly nalezeny žádné konverzace.",
@@ -6573,7 +6594,9 @@
       "scopeWholeCourse": "Celý kurz",
       "scopeSelected": "Vybraný obsah kurzu",
       "webSearch": "Vyhledávání na webu",
-      "deepThinking": "Hloubkový průzkum",
+      "deepThinking": "Hloubkové vyhledávání zdrojů",
+      "deepResearchHelp": "Podrobněji zkoumá povolené zdroje. Nezapíná přístup k internetu.",
+      "webSearchHelp": "Povoluje vyhledávání na veřejných webových stránkách.",
       "strictSourceMode": "Jen moje zdroje",
       "strictSourceModeHelp": "Jen zadání a přiložené soubory",
       "back": "Zpět"
@@ -6650,9 +6673,11 @@
       "contentPending": "Obsah této lekce ještě nebyl vygenerován.",
       "readOnly": "Náhled konceptu je do použití pouze pro čtení."
     },
-    "openWorkspace": "Generovat s AI",
+    "openWorkspace": "Upravit pomocí AI",
+    "createWorkspace": "Vytvořit pomocí AI",
     "openLegacyDraft": "Pokračovat ve starším konceptu",
     "activityRail": {
+      "inProgress": "Probíhá zpracování… Průběh se aktualizuje po dokončení dalšího kroku.",
       "retryFailedParts": "Zopakovat neúspěšné části",
       "retryProvider": "Zopakovat připojení",
       "recoveringFailedParts": "Obnovování neúspěšných částí…",
@@ -6680,7 +6705,6 @@
       "moreToolUpdates": "+{{count}} dalších hlášení nástrojů",
       "searchQueries": "Vyhledávací dotazy",
       "moreSearchQueries": "+{{count}} dalších dotazů",
-      "completedResearchSteps": "Dokončené kroky rešerše: {{count}}",
       "chapterStatus": {
         "failed": "Neúspěšné",
         "pending": "čeká",

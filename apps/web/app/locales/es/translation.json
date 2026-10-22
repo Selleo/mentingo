@@ -6226,6 +6226,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "La respuesta de la IA está lista.",
+      "outline_ready": "El esquema de tu curso está listo para revisar.",
+      "changes_ready": "Los cambios de tu curso están listos para revisar.",
+      "failed": "La IA no pudo terminar esta solicitud.",
+      "waiting_author": "La IA necesita tu respuesta para continuar.",
+      "view": "Ver"
+    },
     "changeSet": {
       "ready": {
         "status": "Listo para revisar",
@@ -6275,6 +6283,7 @@
         "description": "Tu curso no se ha modificado."
       },
       "more": "+{{count}} más",
+      "readySoFar": "{{count}} listos por ahora",
       "discard": "Descartar",
       "retry": "Reintentar",
       "heading": "Cambios propuestos",
@@ -6434,6 +6443,14 @@
       "preparingResponse": "Preparando tu respuesta…",
       "understandingRequest": "Leyendo tu solicitud…",
       "planningOutline": "Planificando el esquema del curso…",
+      "outlineProgress": {
+        "drafting": "Redactando el esquema…",
+        "reviewing": "Comprobando el esquema…",
+        "repairing": "Ajustando el esquema…",
+        "finalizing": "Preparando el esquema para revisión…",
+        "chapters": "Capítulos en el borrador: {{count}}",
+        "iteration": "Pasada {{count}}"
+      },
       "checkingCourse": "Comprobando la coherencia del curso…",
       "planningLessons": "Planificando las lecciones…",
       "writingLesson": "Escribiendo una lección…",
@@ -6488,6 +6505,10 @@
       "questionProgress": "Pregunta {{current}} de {{total}}",
       "questionPrevious": "Anterior",
       "questionNext": "Siguiente",
+      "questionNeedsInput": "Necesitamos tu respuesta",
+      "questionSubmitHint": "Enter para enviar · Mayús+Enter para una nueva línea",
+      "questionShortcutHint": "Pulsa A–D para elegir",
+      "pendingSlowHint": "Leyendo tu curso, las fuentes y tu solicitud para decidir el siguiente paso. Puede tardar hasta un minuto.",
       "newChat": "New chat",
       "searchSessions": "Buscar chats...",
       "noSessionsFound": "No se encontraron chats.",
@@ -6518,7 +6539,9 @@
       "scopeWholeCourse": "Curso completo",
       "scopeSelected": "Contenido seleccionado",
       "webSearch": "Búsqueda web",
-      "deepThinking": "Investigación profunda",
+      "deepThinking": "Investigación profunda de fuentes",
+      "deepResearchHelp": "Examina con más detalle las fuentes permitidas. No habilita el acceso a internet.",
+      "webSearchHelp": "Permite buscar en sitios web públicos.",
       "strictSourceMode": "Solo mis fuentes",
       "strictSourceModeHelp": "Solo la instrucción y los archivos adjuntos",
       "back": "Atrás"
@@ -6595,9 +6618,11 @@
       "contentPending": "El contenido de esta lección aún no se ha generado.",
       "readOnly": "La vista previa del borrador es de solo lectura hasta que la apliques."
     },
-    "openWorkspace": "Generar con IA",
+    "openWorkspace": "Editar con IA",
+    "createWorkspace": "Crear con IA",
     "openLegacyDraft": "Continuar borrador anterior",
     "activityRail": {
+      "inProgress": "Trabajando… El progreso se actualizará al terminar el siguiente paso.",
       "retryFailedParts": "Reintentar las partes fallidas",
       "retryProvider": "Reintentar la conexión",
       "recoveringFailedParts": "Recuperando las partes fallidas…",
@@ -6624,7 +6649,6 @@
       "moreToolUpdates": "+{{count}} actualizaciones más de herramientas",
       "searchQueries": "Búsquedas",
       "moreSearchQueries": "+{{count}} consultas más",
-      "completedResearchSteps": "Pasos de investigación completados: {{count}}",
       "chapterStatus": {
         "failed": "Fallido",
         "pending": "en espera",

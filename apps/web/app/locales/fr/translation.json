@@ -6012,6 +6012,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "La réponse de l’IA est prête.",
+      "outline_ready": "Le plan de votre cours est prêt à être vérifié.",
+      "changes_ready": "Les modifications de votre cours sont prêtes à être vérifiées.",
+      "failed": "L’IA n’a pas pu terminer cette demande.",
+      "waiting_author": "L’IA a besoin de votre réponse pour continuer.",
+      "view": "Voir"
+    },
     "changeSet": {
       "ready": {
         "status": "Prêt à examiner",
@@ -6061,6 +6069,7 @@
         "description": "Votre cours n’a pas été modifié."
       },
       "more": "+{{count}} de plus",
+      "readySoFar": "{{count}} prêts pour l'instant",
       "discard": "Ignorer",
       "retry": "Réessayer",
       "heading": "Modifications proposées",
@@ -6220,6 +6229,14 @@
       "preparingResponse": "Préparation de votre réponse…",
       "understandingRequest": "Lecture de votre demande…",
       "planningOutline": "Planification du plan du cours…",
+      "outlineProgress": {
+        "drafting": "Rédaction du plan…",
+        "reviewing": "Vérification du plan…",
+        "repairing": "Amélioration du plan…",
+        "finalizing": "Préparation du plan pour révision…",
+        "chapters": "Chapitres dans le brouillon : {{count}}",
+        "iteration": "Passe {{count}}"
+      },
       "checkingCourse": "Vérification de la cohérence du cours…",
       "planningLessons": "Planification des leçons…",
       "writingLesson": "Rédaction d’une leçon…",
@@ -6274,6 +6291,10 @@
       "questionProgress": "Question {{current}} sur {{total}}",
       "questionPrevious": "Précédente",
       "questionNext": "Suivante",
+      "questionNeedsInput": "Votre réponse est requise",
+      "questionSubmitHint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
+      "questionShortcutHint": "Appuyez sur A–D pour choisir",
+      "pendingSlowHint": "Lecture de votre cours, des sources et de votre demande pour choisir l'étape suivante. Cela peut prendre jusqu'à une minute.",
       "newChat": "New chat",
       "searchSessions": "Rechercher des discussions...",
       "noSessionsFound": "Aucune discussion trouvée.",
@@ -6304,7 +6325,9 @@
       "scopeWholeCourse": "Cours entier",
       "scopeSelected": "Programme sélectionné",
       "webSearch": "Recherche web",
-      "deepThinking": "Recherche approfondie",
+      "deepThinking": "Recherche approfondie de sources",
+      "deepResearchHelp": "Examine plus en détail les sources autorisées. N’active pas l’accès à internet.",
+      "webSearchHelp": "Autorise la recherche sur les sites web publics.",
       "strictSourceMode": "Uniquement mes sources",
       "strictSourceModeHelp": "Uniquement la consigne et les fichiers joints",
       "back": "Retour"
@@ -6381,9 +6404,11 @@
       "contentPending": "Le contenu de cette leçon n’a pas encore été généré.",
       "readOnly": "L’aperçu du brouillon est en lecture seule jusqu’à son application."
     },
-    "openWorkspace": "Générer avec l’IA",
+    "openWorkspace": "Modifier avec l’IA",
+    "createWorkspace": "Créer avec l’IA",
     "openLegacyDraft": "Continuer l’ancien brouillon",
     "activityRail": {
+      "inProgress": "Traitement en cours… La progression sera actualisée après la prochaine étape.",
       "retryFailedParts": "Réessayer les parties en échec",
       "retryProvider": "Réessayer la connexion",
       "recoveringFailedParts": "Reprise des parties en échec…",
@@ -6410,7 +6435,6 @@
       "moreToolUpdates": "+{{count}} autres mises à jour d’outils",
       "searchQueries": "Requêtes de recherche",
       "moreSearchQueries": "+{{count}} requêtes de plus",
-      "completedResearchSteps": "Étapes de recherche terminées : {{count}}",
       "chapterStatus": {
         "failed": "Échec",
         "pending": "en attente",

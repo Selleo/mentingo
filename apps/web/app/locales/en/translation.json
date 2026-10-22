@@ -6290,6 +6290,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "AI’s response is ready.",
+      "outline_ready": "Your course outline is ready to review.",
+      "changes_ready": "Your course changes are ready to review.",
+      "failed": "AI could not finish this request.",
+      "waiting_author": "AI needs your input to continue.",
+      "view": "View"
+    },
     "changeSet": {
       "ready": {
         "status": "Ready to review",
@@ -6339,6 +6347,7 @@
         "description": "Nothing in your course was changed."
       },
       "more": "+{{count}} more",
+      "readySoFar": "{{count}} ready so far",
       "discard": "Discard",
       "retry": "Try again",
       "heading": "Proposed changes",
@@ -6498,6 +6507,14 @@
       "understandingRequest": "Reading your request…",
       "checkingCourse": "Checking course coherence…",
       "planningOutline": "Planning the course outline…",
+      "outlineProgress": {
+        "drafting": "Drafting outline…",
+        "reviewing": "Checking outline…",
+        "repairing": "Refining outline…",
+        "finalizing": "Preparing outline for review…",
+        "chapters": "Chapters in draft: {{count}}",
+        "iteration": "Pass {{count}}"
+      },
       "planningLessons": "Planning the lessons…",
       "writingLesson": "Writing a lesson…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6551,6 +6568,10 @@
       "questionProgress": "Question {{current}} of {{total}}",
       "questionPrevious": "Previous",
       "questionNext": "Next",
+      "questionNeedsInput": "Needs your input",
+      "questionSubmitHint": "Enter to send · Shift+Enter for a new line",
+      "questionShortcutHint": "Press A–D to choose",
+      "pendingSlowHint": "Reading your course, sources and request to decide the next step. This can take up to a minute.",
       "newChat": "New chat",
       "searchSessions": "Search chats...",
       "noSessionsFound": "No chats found.",
@@ -6582,6 +6603,8 @@
       "scopeSelected": "Selected curriculum",
       "webSearch": "Web search",
       "deepThinking": "Deep research",
+      "deepResearchHelp": "Searches permitted sources in more detail. Does not enable web access.",
+      "webSearchHelp": "Allows searching public websites.",
       "strictSourceMode": "Only my sources",
       "strictSourceModeHelp": "Prompt and attached files only",
       "back": "Back"
@@ -6658,9 +6681,11 @@
       "contentPending": "The content for this lesson hasn’t been generated yet.",
       "readOnly": "Draft preview is read-only until you apply it."
     },
-    "openWorkspace": "Generate with AI",
+    "openWorkspace": "Edit with AI",
+    "createWorkspace": "Create with AI",
     "openLegacyDraft": "Continue legacy generation draft",
     "activityRail": {
+      "inProgress": "Working… Progress will update when the next step finishes.",
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
@@ -6687,7 +6712,6 @@
       "moreToolUpdates": "+{{count}} more tool updates",
       "searchQueries": "Search queries",
       "moreSearchQueries": "+{{count}} more queries",
-      "completedResearchSteps": "Research steps complete: {{count}}",
       "chapterStatus": {
         "failed": "Failed",
         "pending": "waiting",

@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
 import { useCourseDuplicationNotifications } from "~/hooks/useCourseDuplicationNotifications";
+import { useGlobalCourseAuthoringNotifications } from "~/hooks/useGlobalCourseAuthoringNotifications";
 import { useGlobalScormImportNotifications } from "~/hooks/useGlobalScormImportNotifications";
 import { useGlobalVideoUploadNotifications } from "~/hooks/useGlobalVideoUploadNotifications";
 import { useLiveTrainingInvalidationSocket } from "~/hooks/useLiveTrainingInvalidationSocket";
@@ -56,6 +57,7 @@ function TourKeyboardHandler({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useGlobalVideoUploadNotifications();
+  useGlobalCourseAuthoringNotifications();
   useGlobalScormImportNotifications();
   useCourseDuplicationNotifications();
   useLiveTrainingInvalidationSocket();

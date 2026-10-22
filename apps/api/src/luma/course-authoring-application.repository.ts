@@ -76,7 +76,11 @@ export class CourseAuthoringApplicationRepository {
           throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
         return existing.result;
       }
-      await transaction.insert(courseAuthoringApplications).values({ ...claim, result });
+      await transaction.insert(courseAuthoringApplications).values({
+        ...claim,
+        // The text cast prevents postgres.js from encoding Drizzle's JSON text a second time.
+        result: sql`${JSON.stringify(result)}::text::jsonb`,
+      });
       return result;
     });
   }
@@ -243,7 +247,10 @@ export class CourseAuthoringApplicationRepository {
           throw new ConflictException("courseAuthoring.errors.applicationFailed");
       }
       const result = await apply(transaction);
-      await transaction.insert(courseAuthoringApplications).values({ ...claim, result });
+      await transaction.insert(courseAuthoringApplications).values({
+        ...claim,
+        result: sql`${JSON.stringify(result)}::text::jsonb`,
+      });
       const appliedKeys = Object.values(result.assetMappings);
       if (appliedKeys.length)
         await transaction

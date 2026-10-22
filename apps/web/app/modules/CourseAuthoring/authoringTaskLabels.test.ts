@@ -24,6 +24,26 @@ const t = (key: string, options?: Record<string, unknown>) => {
 };
 
 describe("authoringPhaseLabel", () => {
+  it("names the current outline pass without losing research or waiting states", () => {
+    const current = task({
+      kind: "plan",
+      workProgress: {
+        stage: "outline",
+        outlinePhase: "repairing",
+        outlineIteration: 2,
+        draftedChapters: 4,
+        draftedLessons: 12,
+        completedSteps: 1,
+        totalSteps: 3,
+      },
+    });
+    const translate = (key: string, options?: Record<string, unknown>) =>
+      `${key.split(".").at(-1)}${options?.count ? ` ${String(options.count)}` : ""}`;
+    expect(authoringPhaseLabel(current, translate)).toBe("repairing · chapters 4 · iteration 2");
+    expect(authoringPhaseLabel({ ...current, phase: "researching" }, t)).toBe("readingSources");
+    expect(authoringPhaseLabel({ ...current, status: "waiting_author" }, t)).toBe("waiting");
+  });
+
   it.each([
     ["route", "understandingRequest"],
     ["plan", "planningOutline"],

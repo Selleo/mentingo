@@ -31,6 +31,7 @@ import {
   selectAuthoringSession,
   writeAuthoringSessionSelection,
 } from "./authoringSessionSelection";
+import { useVisibleAuthoringSession } from "./authoringSessionVisibility";
 import { AuthoringSessionMenu } from "./components/AuthoringSessionMenu";
 import { CourseGenerationSession } from "./CourseGenerationSession";
 
@@ -38,7 +39,6 @@ import type {
   AuthoringSessionSummary,
   CurriculumPreview,
   CurriculumPreviewActions,
-  PreviewView,
 } from "./courseAuthoring.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -47,7 +47,8 @@ type Props = {
   language: SupportedLanguages;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
+  requestedSessionId?: string | null;
+  onSessionChange?: (sessionId: string) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
     actions: CurriculumPreviewActions,
@@ -66,14 +67,17 @@ export const CourseGenerationDrawer = ({
   language,
   open,
   onOpenChange,
-  onPreviewInCurriculum,
+  requestedSessionId,
+  onSessionChange,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
 }: Props) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [drawerHeight, setDrawerHeight] = useState<number | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    requestedSessionId ?? null,
+  );
   const [selectedSessionSummary, setSelectedSessionSummary] =
     useState<AuthoringSessionSummary | null>(null);
   const [sessionMenuOpen, setSessionMenuOpen] = useState(false);
@@ -100,6 +104,16 @@ export const CourseGenerationDrawer = ({
   const createSessionScopeRef = useRef<string | null>(null);
   const sessionSelectionKey = authoringSessionSelectionKey(courseId, language, tenantScope);
   const sessionCreateCommandKey = authoringSessionCreateCommandKey(sessionSelectionKey);
+  useVisibleAuthoringSession(courseId, selectedSessionId, open);
+
+  /** Opens newly linked conversations without resetting the drawer's size or expansion. */
+  useEffect(() => {
+    if (!requestedSessionId) return;
+    setSelectedSessionId(requestedSessionId);
+    setSelectedSessionSummary((current) =>
+      current?.sessionId === requestedSessionId ? current : null,
+    );
+  }, [requestedSessionId]);
 
   useEffect(
     () => () => {
@@ -163,6 +177,7 @@ export const CourseGenerationDrawer = ({
     setSelectedSessionSummary(null);
     writeAuthoringSessionSelection(sessionSelectionKey, session.sessionId);
     setSessionMenuOpen(false);
+    onSessionChange?.(session.sessionId);
   };
 
   /** Switches the full timeline and releases the old socket subscription through remount cleanup. */
@@ -171,6 +186,7 @@ export const CourseGenerationDrawer = ({
     setSelectedSessionSummary(session);
     writeAuthoringSessionSelection(sessionSelectionKey, session.sessionId);
     setSessionMenuOpen(false);
+    onSessionChange?.(session.sessionId);
   };
   /** Prefers the explicitly chosen/created session so the trigger label stays correct while the popover's own list is search-filtered. */
   const selectedSession =
@@ -370,14 +386,13 @@ export const CourseGenerationDrawer = ({
             className={cn("min-h-0 flex-1 overflow-hidden", !open && "hidden")}
           >
             <div className="h-full min-w-0">
-              {selectedSession && (
+              {selectedSessionId && (
                 <CourseGenerationSession
-                  key={selectedSession.sessionId}
+                  key={selectedSessionId}
                   courseId={courseId}
                   language={language}
-                  sessionId={selectedSession.sessionId}
+                  sessionId={selectedSessionId}
                   embedded
-                  onPreviewInCurriculum={onPreviewInCurriculum}
                   onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
                   onCurriculumPreviewChange={onCurriculumPreviewChange}
                   onSessionUnavailable={recoverUnavailableSession}

@@ -1,11 +1,14 @@
+import { AUTHORING_TASK_KIND, AUTHORING_TASK_STATUS } from "./courseAuthoring.constants";
+import { PROPOSAL_DECISION } from "./review/curriculumReview.constants";
+
 /** Keeps completed proposals out of review while their request can still produce more work. */
 import type { AssetTaskView, AuthoringTask, ProposalView } from "./courseAuthoring.types";
 
 const terminalStatuses = new Set<AuthoringTask["status"]>([
-  "succeeded",
-  "failed",
-  "superseded",
-  "stopped",
+  AUTHORING_TASK_STATUS.SUCCEEDED,
+  AUTHORING_TASK_STATUS.FAILED,
+  AUTHORING_TASK_STATUS.SUPERSEDED,
+  AUTHORING_TASK_STATUS.STOPPED,
 ]);
 
 /** Failed siblings allow saved results to be reviewed; unfinished siblings and assets do not. */
@@ -19,7 +22,7 @@ export const requestGenerationPending = (
   tasks.some((task) => {
     if (task.requestId !== requestId || terminalStatuses.has(task.status)) return false;
     const skipped =
-      task.kind === "asset" &&
+      task.kind === AUTHORING_TASK_KIND.ASSET &&
       assets.some(
         (asset) =>
           asset.taskId === task.taskId &&
@@ -27,11 +30,12 @@ export const requestGenerationPending = (
           omittedOptionalAssetIds.includes(asset.request.assetId),
       );
     if (skipped) return false;
-    if (task.status === "waiting_author") {
+    if (task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR) {
       return !proposals.some(
         (proposal) =>
           proposal.taskId === task.taskId &&
-          (proposal.decision === "pending" || proposal.decision === "accepted") &&
+          (proposal.decision === PROPOSAL_DECISION.PENDING ||
+            proposal.decision === PROPOSAL_DECISION.ACCEPTED) &&
           proposal.id === task.outputId,
       );
     }

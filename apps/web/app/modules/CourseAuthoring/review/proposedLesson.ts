@@ -3,6 +3,7 @@ import {
   AI_MENTOR_TYPE,
   AI_MENTOR_VOICE_MODE,
   orderCourseAuthoringOperations,
+  normalizeAuthoringQuizQuestionOrder,
 } from "@repo/shared";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/components/constants";
@@ -180,9 +181,11 @@ const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
       attemptsLimit: numberOrUndefined(payload.attemptsLimit) ?? base.attemptsLimit,
       quizCooldownInHours:
         numberOrUndefined(payload.quizCooldownInHours) ?? base.quizCooldownInHours,
-      questions: payload.questions
-        .map(toFormQuestion)
-        .filter((question): question is Question => question !== null),
+      questions: normalizeAuthoringQuizQuestionOrder(
+        payload.questions
+          .map(toFormQuestion)
+          .filter((question): question is Question => question !== null),
+      ),
     };
   }
 
