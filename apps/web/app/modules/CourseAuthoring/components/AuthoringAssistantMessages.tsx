@@ -30,6 +30,12 @@ import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/var
 
 import { projectAuthoringTimeline } from "../authoringConversation";
 import { compactLinkSeparators, extractTrailingSources } from "../authoringSources";
+import {
+  AUTHORING_ARTIFACT_KIND,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_TOOL_STATUS,
+} from "../courseAuthoring.constants";
 
 import { AuthoringToolActivity } from "./AuthoringActivityRail";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
@@ -449,15 +455,15 @@ const AssistantChatMessage = ({
   const repeatedQuestionIds = new Set<string>();
   const latestTextByTask = new Map<string, PartMarker>();
   message.parts.forEach((part) => {
-    if (isPartMarker(part) && part.data.partKind === "text" && part.data.taskId) {
+    if (isPartMarker(part) && part.data.partKind === AUTHORING_PART_KIND.TEXT && part.data.taskId) {
       latestTextByTask.set(part.data.taskId, part);
     }
   });
   message.parts.forEach((part) => {
     if (
       !isPartMarker(part) ||
-      part.data.partKind !== "question" ||
-      part.data.artifact?.artifactKind !== "question"
+      part.data.partKind !== AUTHORING_PART_KIND.QUESTION ||
+      part.data.artifact?.artifactKind !== AUTHORING_ARTIFACT_KIND.QUESTION
     ) {
       return;
     }
@@ -476,11 +482,12 @@ const AssistantChatMessage = ({
       {message.parts.map((part, index) => {
         if (!isPartMarker(part)) return null;
         let partNode: ReactNode = null;
-        if (part.data.partKind === "text" && part.data.text) {
+        if (part.data.partKind === AUTHORING_PART_KIND.TEXT && part.data.text) {
           const isActiveProgress =
-            (part.data.status === "streaming" || part.data.status === "started") &&
+            (part.data.status === AUTHORING_PART_STATUS.STREAMING ||
+              part.data.status === AUTHORING_PART_STATUS.STARTED) &&
             !repeatedQuestionTextIds.has(part.data.partId);
-          const isFailedProgress = part.data.status === "failed";
+          const isFailedProgress = part.data.status === AUTHORING_PART_STATUS.FAILED;
           const { text, sources } =
             isActiveProgress || isFailedProgress
               ? { text: part.data.text, sources: [] }
@@ -507,7 +514,7 @@ const AssistantChatMessage = ({
             </div>
           );
         }
-        if (part.data.partKind === "tool" && part.data.tool) {
+        if (part.data.partKind === AUTHORING_PART_KIND.TOOL && part.data.tool) {
           partNode = (
             <AuthoringToolActivity
               tool={part.data.tool}
@@ -515,11 +522,17 @@ const AssistantChatMessage = ({
             />
           );
         }
-        if (part.data.partKind === "proposal" && part.data.artifact?.artifactKind === "proposal") {
+        if (
+          part.data.partKind === AUTHORING_PART_KIND.PROPOSAL &&
+          part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.PROPOSAL
+        ) {
           const proposal = proposalById?.[part.data.artifact.artifactId];
           if (proposal) partNode = <div>{proposal}</div>;
         }
-        if (part.data.partKind === "question" && part.data.artifact?.artifactKind === "question") {
+        if (
+          part.data.partKind === AUTHORING_PART_KIND.QUESTION &&
+          part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.QUESTION
+        ) {
           const question = questions.find((entry) => entry.id === part.data.artifact?.artifactId);
           if (question && !renderedQuestionIds.has(question.id)) {
             renderedQuestionIds.add(question.id);
@@ -675,8 +688,8 @@ export const AuthoringAssistantMessages = ({
       message.role === "assistant"
         ? message.parts.flatMap((part) =>
             isPartMarker(part) &&
-            part.data.partKind === "tool" &&
-            part.data.tool?.status === "started" &&
+            part.data.partKind === AUTHORING_PART_KIND.TOOL &&
+            part.data.tool?.status === AUTHORING_TOOL_STATUS.STARTED &&
             part.data.taskId
               ? [part.data.taskId]
               : [],
@@ -777,12 +790,12 @@ export const AuthoringAssistantMessages = ({
   };
   const hasVisiblePart = (part: ChatPart, requestId: string) => {
     if (!isPartMarker(part)) return false;
-    if (part.data.partKind === "text") return Boolean(part.data.text?.trim());
-    if (part.data.partKind === "tool")
+    if (part.data.partKind === AUTHORING_PART_KIND.TEXT) return Boolean(part.data.text?.trim());
+    if (part.data.partKind === AUTHORING_PART_KIND.TOOL)
       return part.data.tool !== null && !groupedToolRequestIds.has(requestId);
-    if (part.data.partKind === "question") {
+    if (part.data.partKind === AUTHORING_PART_KIND.QUESTION) {
       return (
-        part.data.artifact?.artifactKind === "question" &&
+        part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.QUESTION &&
         (questionsByRequest[requestId] ?? []).some(
           (question) =>
             question.id === part.data.artifact?.artifactId &&
@@ -791,7 +804,7 @@ export const AuthoringAssistantMessages = ({
       );
     }
     return (
-      part.data.artifact?.artifactKind === "proposal" &&
+      part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.PROPOSAL &&
       Boolean(proposalById[part.data.artifact.artifactId])
     );
   };

@@ -1,15 +1,19 @@
+import {
+  AUTHORING_TASK_KIND,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_TURN_STATUS,
+  AUTHORING_WORK_STATUS,
+} from "./courseAuthoring.constants";
 import { projectWorkspaceRecords } from "./courseAuthoring.records";
+import { PROPOSAL_DECISION } from "./review/curriculumReview.constants";
 
+import type { AUTHORING_WORK_OUTCOME } from "./courseAuthoring.constants";
 import type { AuthoringSession } from "./courseAuthoring.types";
 import type { QueryClient } from "@tanstack/react-query";
 
 export type AuthoringWorkOutcome =
-  | "completed"
-  | "failed"
-  | "waiting_author"
-  | "outline_ready"
-  | "changes_ready";
-type WorkStatus = AuthoringWorkOutcome | "active" | "stopped";
+  (typeof AUTHORING_WORK_OUTCOME)[keyof typeof AUTHORING_WORK_OUTCOME];
+type WorkStatus = (typeof AUTHORING_WORK_STATUS)[keyof typeof AUTHORING_WORK_STATUS];
 type WatchedSession = {
   courseId: string;
   sessionId: string;
@@ -44,7 +48,10 @@ const requestStatuses = (session: AuthoringSession) => {
         (artifactIds.has(proposal.id) || (proposal.taskId && taskIds.has(proposal.taskId))) &&
         !tasks.some(
           (task) =>
-            task.taskId === proposal.taskId && ["superseded", "stopped"].includes(task.status),
+            task.taskId === proposal.taskId &&
+            [AUTHORING_TASK_STATUS.SUPERSEDED, AUTHORING_TASK_STATUS.STOPPED].some(
+              (value) => value === task.status,
+            ),
         ),
     );
     const needsAnswer =
@@ -57,54 +64,76 @@ const requestStatuses = (session: AuthoringSession) => {
       ) ||
       tasks.some(
         (task) =>
-          task.status === "waiting_author" &&
+          task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR &&
           !proposals.some(
             (proposal) =>
               proposal.taskId === task.taskId &&
               proposal.id === task.outputId &&
-              ["pending", "accepted"].includes(proposal.decision),
+              [PROPOSAL_DECISION.PENDING, PROPOSAL_DECISION.ACCEPTED].some(
+                (value) => value === proposal.decision,
+              ),
           ),
       );
-    if (!turn && tasks.every((task) => task.kind === "source" || sourceTaskIds.has(task.taskId)))
+    if (
+      !turn &&
+      tasks.every(
+        (task) => task.kind === AUTHORING_TASK_KIND.SOURCE || sourceTaskIds.has(task.taskId),
+      )
+    )
       return;
     if (
-      turn?.status === "queued" ||
-      turn?.status === "running" ||
-      turn?.status === "sending" ||
-      tasks.some((task) => ["queued", "running"].includes(task.status))
+      turn?.status === AUTHORING_TURN_STATUS.QUEUED ||
+      turn?.status === AUTHORING_TURN_STATUS.RUNNING ||
+      turn?.status === AUTHORING_TURN_STATUS.SENDING ||
+      tasks.some((task) =>
+        [AUTHORING_TASK_STATUS.QUEUED, AUTHORING_TASK_STATUS.RUNNING].some(
+          (value) => value === task.status,
+        ),
+      )
     ) {
-      statuses.set(requestId, "active");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.ACTIVE);
     } else if (needsAnswer) {
-      statuses.set(requestId, "waiting_author");
-    } else if (turn?.status === "failed" || tasks.some((task) => task.status === "failed")) {
-      statuses.set(requestId, "failed");
-    } else if (tasks.some((task) => task.status === "waiting_dependencies")) {
-      statuses.set(requestId, "active");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.WAITING_AUTHOR);
     } else if (
-      proposals.some((proposal) => proposal.decision === "pending" && proposal.outline?.length)
+      turn?.status === AUTHORING_TURN_STATUS.FAILED ||
+      tasks.some((task) => task.status === AUTHORING_TASK_STATUS.FAILED)
     ) {
-      statuses.set(requestId, "outline_ready");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.FAILED);
+    } else if (tasks.some((task) => task.status === AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES)) {
+      statuses.set(requestId, AUTHORING_WORK_STATUS.ACTIVE);
+    } else if (
+      proposals.some(
+        (proposal) => proposal.decision === PROPOSAL_DECISION.PENDING && proposal.outline?.length,
+      )
+    ) {
+      statuses.set(requestId, AUTHORING_WORK_STATUS.OUTLINE_READY);
     } else if (
       proposals.some(
         (proposal) =>
-          ["pending", "accepted"].includes(proposal.decision) && proposal.operations.length > 0,
+          [PROPOSAL_DECISION.PENDING, PROPOSAL_DECISION.ACCEPTED].some(
+            (value) => value === proposal.decision,
+          ) && proposal.operations.length > 0,
       )
     ) {
-      statuses.set(requestId, "changes_ready");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.CHANGES_READY);
     } else if (
-      turn?.status === "waiting_author" ||
-      tasks.some((task) => task.status === "waiting_author")
+      turn?.status === AUTHORING_TURN_STATUS.WAITING_AUTHOR ||
+      tasks.some((task) => task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR)
     ) {
-      statuses.set(requestId, "waiting_author");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.WAITING_AUTHOR);
     } else if (
-      turn?.status === "completed" ||
+      turn?.status === AUTHORING_TURN_STATUS.COMPLETED ||
       (tasks.length > 0 &&
-        tasks.some((task) => task.status === "succeeded") &&
-        tasks.every((task) => ["succeeded", "superseded"].includes(task.status)))
+        tasks.some((task) => task.status === AUTHORING_TASK_STATUS.SUCCEEDED) &&
+        tasks.every((task) =>
+          [AUTHORING_TASK_STATUS.SUCCEEDED, AUTHORING_TASK_STATUS.SUPERSEDED].some(
+            (value) => value === task.status,
+          ),
+        ))
     ) {
-      statuses.set(requestId, "completed");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.COMPLETED);
     } else {
-      statuses.set(requestId, "stopped");
+      statuses.set(requestId, AUTHORING_WORK_STATUS.STOPPED);
     }
   });
   return statuses;
@@ -141,9 +170,15 @@ export const observeAuthoringWork = ({
     requests.forEach((status, requestId) => {
       const before = previous?.requests.get(requestId);
       if (
-        status === "active" &&
+        status === AUTHORING_WORK_STATUS.ACTIVE &&
         (!before ||
-          ["failed", "completed", "outline_ready", "changes_ready", "stopped"].includes(before) ||
+          [
+            AUTHORING_WORK_STATUS.FAILED,
+            AUTHORING_WORK_STATUS.COMPLETED,
+            AUTHORING_WORK_STATUS.OUTLINE_READY,
+            AUTHORING_WORK_STATUS.CHANGES_READY,
+            AUTHORING_WORK_STATUS.STOPPED,
+          ].some((value) => value === before) ||
           !startedAt.has(requestId))
       ) {
         startedAt.set(requestId, Date.now());
@@ -151,14 +186,18 @@ export const observeAuthoringWork = ({
       const isLongRunning = Date.now() - (startedAt.get(requestId) ?? Date.now()) >= longRunningMs;
       if (
         before &&
-        (before === "active" ||
-          before === "waiting_author" ||
+        (before === AUTHORING_WORK_STATUS.ACTIVE ||
+          before === AUTHORING_WORK_STATUS.WAITING_AUTHOR ||
           (startedAt.has(requestId) &&
-            ["waiting_author", "outline_ready", "changes_ready"].includes(status))) &&
+            [
+              AUTHORING_WORK_STATUS.WAITING_AUTHOR,
+              AUTHORING_WORK_STATUS.OUTLINE_READY,
+              AUTHORING_WORK_STATUS.CHANGES_READY,
+            ].some((value) => value === status))) &&
         status !== before &&
-        status !== "active" &&
-        status !== "stopped" &&
-        (status !== "completed" || isLongRunning)
+        status !== AUTHORING_WORK_STATUS.ACTIVE &&
+        status !== AUTHORING_WORK_STATUS.STOPPED &&
+        (status !== AUTHORING_WORK_STATUS.COMPLETED || isLongRunning)
       ) {
         notify(status, session);
       }
@@ -178,7 +217,11 @@ export const observeAuthoringWork = ({
     if (event.type === "removed") {
       const watchedKey = `${key[1]}:${key[3]}`;
       // Query garbage collection must not abandon long-running background work.
-      if (![...(watched.get(watchedKey)?.requests.values() ?? [])].includes("active")) {
+      if (
+        ![...(watched.get(watchedKey)?.requests.values() ?? [])].includes(
+          AUTHORING_WORK_STATUS.ACTIVE,
+        )
+      ) {
         watched.delete(watchedKey);
       }
       return;
@@ -194,7 +237,8 @@ export const observeAuthoringWork = ({
     });
   const timer = setInterval(() => {
     watched.forEach((entry, key) => {
-      if (inFlight.has(key) || ![...entry.requests.values()].includes("active")) return;
+      if (inFlight.has(key) || ![...entry.requests.values()].includes(AUTHORING_WORK_STATUS.ACTIVE))
+        return;
       inFlight.add(key);
       void refresh(entry.courseId, entry.sessionId)
         .then(accept)

@@ -1,6 +1,15 @@
 /** Applies durable sequence rules to websocket events and requests snapshot recovery on gaps. */
 import { parseFetchedResearchSources } from "./authoringSources";
 import { parseAuthoringTaskFailure } from "./authoringTaskFailure";
+import {
+  AUTHORING_ARTIFACT_KIND,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_TOOL_STATUS,
+  AUTHORING_TURN_STATUS,
+} from "./courseAuthoring.constants";
+import { PROPOSAL_DECISION } from "./review/curriculumReview.constants";
 
 import type {
   AuthoringEvent,
@@ -59,24 +68,27 @@ const integerValue = (value: unknown, minimum: number): number | null =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= minimum ? value : null;
 
 const isTurnStatus = (value: unknown): value is AuthoringTurnStatus =>
-  value === "sending" ||
-  value === "queued" ||
-  value === "running" ||
-  value === "waiting_author" ||
-  value === "completed" ||
-  value === "failed" ||
-  value === "stopped";
+  value === AUTHORING_TURN_STATUS.SENDING ||
+  value === AUTHORING_TURN_STATUS.QUEUED ||
+  value === AUTHORING_TURN_STATUS.RUNNING ||
+  value === AUTHORING_TURN_STATUS.WAITING_AUTHOR ||
+  value === AUTHORING_TURN_STATUS.COMPLETED ||
+  value === AUTHORING_TURN_STATUS.FAILED ||
+  value === AUTHORING_TURN_STATUS.STOPPED;
 
 const isPartKind = (value: unknown): value is AuthoringPartKind =>
-  value === "text" || value === "tool" || value === "proposal" || value === "question";
+  value === AUTHORING_PART_KIND.TEXT ||
+  value === AUTHORING_PART_KIND.TOOL ||
+  value === AUTHORING_PART_KIND.PROPOSAL ||
+  value === AUTHORING_PART_KIND.QUESTION;
 
 const isPartStatus = (value: unknown): value is AuthoringTurnPartStatus =>
-  value === "streaming" ||
-  value === "completed" ||
-  value === "failed" ||
-  value === "started" ||
-  value === "stopped" ||
-  value === "review";
+  value === AUTHORING_PART_STATUS.STREAMING ||
+  value === AUTHORING_PART_STATUS.COMPLETED ||
+  value === AUTHORING_PART_STATUS.FAILED ||
+  value === AUTHORING_PART_STATUS.STARTED ||
+  value === AUTHORING_PART_STATUS.STOPPED ||
+  value === AUTHORING_PART_STATUS.REVIEW;
 
 const nullableString = (value: unknown): string | null => {
   if (value === null || value === undefined) return null;
@@ -89,7 +101,10 @@ const objectOrNull = (value: unknown): Record<string, unknown> | null => {
 };
 
 const isToolStatus = (value: unknown): value is NonNullable<AuthoringTurnPart["tool"]>["status"] =>
-  value === "started" || value === "completed" || value === "failed" || value === "stopped";
+  value === AUTHORING_TOOL_STATUS.STARTED ||
+  value === AUTHORING_TOOL_STATUS.COMPLETED ||
+  value === AUTHORING_TOOL_STATUS.FAILED ||
+  value === AUTHORING_TOOL_STATUS.STOPPED;
 
 const parseTurnPart = (
   rawPart: Record<string, unknown>,
@@ -159,7 +174,12 @@ const parseTurnPart = (
   if (rawArtifact) {
     const artifactKind = rawArtifact.artifactKind;
     const artifactId = stringValue(rawArtifact.artifactId);
-    if ((artifactKind !== "proposal" && artifactKind !== "question") || !artifactId) return null;
+    if (
+      (artifactKind !== AUTHORING_ARTIFACT_KIND.PROPOSAL &&
+        artifactKind !== AUTHORING_ARTIFACT_KIND.QUESTION) ||
+      !artifactId
+    )
+      return null;
     artifact = { artifactKind, artifactId };
   }
 
@@ -326,7 +346,13 @@ export const applyAuthoringEvent = (
     if (
       !proposalId ||
       !status ||
-      !["accepted", "rejected", "applied", "superseded", "discarded"].includes(status)
+      ![
+        PROPOSAL_DECISION.ACCEPTED,
+        PROPOSAL_DECISION.REJECTED,
+        PROPOSAL_DECISION.APPLIED,
+        PROPOSAL_DECISION.SUPERSEDED,
+        "discarded",
+      ].some((value) => value === status)
     ) {
       return null;
     }
@@ -336,7 +362,7 @@ export const applyAuthoringEvent = (
       payload: {
         proposalId,
         sequence: event.sequence,
-        accepted: status === "accepted" || status === "applied",
+        accepted: status === PROPOSAL_DECISION.ACCEPTED || status === PROPOSAL_DECISION.APPLIED,
         status,
       },
     };
@@ -369,14 +395,14 @@ export const applyAuthoringEvent = (
   const outputId = stringValue(recordPayload.outputId);
 
   const taskStatusByEvent: Record<string, AuthoringTask["status"]> = {
-    "task.queued": "queued",
-    "task.running": "running",
-    "task.waiting_author": "waiting_author",
-    "task.waiting_dependencies": "waiting_dependencies",
-    "task.succeeded": "succeeded",
-    "task.failed": "failed",
-    "task.superseded": "superseded",
-    "task.stopped": "stopped",
+    "task.queued": AUTHORING_TASK_STATUS.QUEUED,
+    "task.running": AUTHORING_TASK_STATUS.RUNNING,
+    "task.waiting_author": AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+    "task.waiting_dependencies": AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+    "task.succeeded": AUTHORING_TASK_STATUS.SUCCEEDED,
+    "task.failed": AUTHORING_TASK_STATUS.FAILED,
+    "task.superseded": AUTHORING_TASK_STATUS.SUPERSEDED,
+    "task.stopped": AUTHORING_TASK_STATUS.STOPPED,
   };
   const taskStatus = taskStatusByEvent[event.type];
   const isTaskUpdate = event.type === "task.updated";
@@ -387,15 +413,15 @@ export const applyAuthoringEvent = (
     const requestId = stringValue(taskSnapshot.requestId);
     const rawStatus = taskSnapshot.status;
     const supportedTaskStatuses: AuthoringTask["status"][] = [
-      "queued",
-      "running",
-      "waiting_author",
-      "waiting_dependencies",
-      "paused",
-      "succeeded",
-      "failed",
-      "superseded",
-      "stopped",
+      AUTHORING_TASK_STATUS.QUEUED,
+      AUTHORING_TASK_STATUS.RUNNING,
+      AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+      AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+      AUTHORING_TASK_STATUS.PAUSED,
+      AUTHORING_TASK_STATUS.SUCCEEDED,
+      AUTHORING_TASK_STATUS.FAILED,
+      AUTHORING_TASK_STATUS.SUPERSEDED,
+      AUTHORING_TASK_STATUS.STOPPED,
     ];
     let taskStatusValue = taskStatus ?? null;
     if (isTaskUpdate && supportedTaskStatuses.includes(rawStatus as AuthoringTask["status"])) {
@@ -415,11 +441,12 @@ export const applyAuthoringEvent = (
       status: taskStatusValue,
       phase: stringValue(taskSnapshot.phase) ?? phase ?? existingTask?.phase ?? null,
       errorCode:
-        taskStatusValue === "failed"
+        taskStatusValue === AUTHORING_TASK_STATUS.FAILED
           ? (stringValue(taskSnapshot.errorCode) ?? errorCode ?? existingTask?.errorCode ?? null)
           : null,
       failure:
-        taskStatusValue === "failed" || taskStatusValue === "waiting_author"
+        taskStatusValue === AUTHORING_TASK_STATUS.FAILED ||
+        taskStatusValue === AUTHORING_TASK_STATUS.WAITING_AUTHOR
           ? (parseAuthoringTaskFailure(taskSnapshot.failure) ?? existingTask?.failure ?? null)
           : null,
       outputId: stringValue(taskSnapshot.outputId) ?? outputId ?? existingTask?.outputId ?? null,

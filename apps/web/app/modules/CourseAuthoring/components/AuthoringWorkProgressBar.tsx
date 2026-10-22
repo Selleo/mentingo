@@ -4,6 +4,12 @@ import { useTranslation } from "react-i18next";
 import { cn } from "~/lib/utils";
 
 import { authoringOutlineProgressLabel } from "../authoringOutlineProgress";
+import {
+  AUTHORING_CHAPTER_PROGRESS_STATUS,
+  AUTHORING_TASK_KIND,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "../courseAuthoring.constants";
 
 import type { AuthoringTask } from "../courseAuthoring.types";
 
@@ -18,15 +24,22 @@ export const AuthoringWorkProgressBar = ({
   showLabel?: boolean;
 }) => {
   const { t } = useTranslation();
-  const active = tasks.some((task) => ["queued", "running"].includes(task.status));
+  const active = tasks.some((task) =>
+    [AUTHORING_TASK_STATUS.QUEUED, AUTHORING_TASK_STATUS.RUNNING].some(
+      (value) => value === task.status,
+    ),
+  );
   const sameRequest = new Set(tasks.map((task) => task.requestId)).size === 1;
   const lessonProgress = sameRequest
     ? tasks.flatMap((task) =>
-        task.status === "running" &&
+        task.status === AUTHORING_TASK_STATUS.RUNNING &&
         task.workProgress &&
-        ["lesson_generation", "validation", "repairing", "recovering"].includes(
-          task.workProgress.stage,
-        ) &&
+        [
+          AUTHORING_WORK_PROGRESS_STAGE.LESSON_GENERATION,
+          AUTHORING_WORK_PROGRESS_STAGE.VALIDATION,
+          AUTHORING_WORK_PROGRESS_STAGE.REPAIRING,
+          AUTHORING_WORK_PROGRESS_STAGE.RECOVERING,
+        ].some((stage) => stage === task.workProgress?.stage) &&
         task.workProgress.totalLessons &&
         task.workProgress.completedLessons !== undefined
           ? [task.workProgress]
@@ -36,8 +49,8 @@ export const AuthoringWorkProgressBar = ({
   const planningTask = sameRequest
     ? tasks.find(
         (task) =>
-          task.status === "running" &&
-          task.kind === "detailed_plan" &&
+          task.status === AUTHORING_TASK_STATUS.RUNNING &&
+          task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN &&
           task.workProgress?.chapters?.length,
       )
     : undefined;
@@ -45,9 +58,9 @@ export const AuthoringWorkProgressBar = ({
   const outlineProgress = sameRequest
     ? tasks.find(
         (task) =>
-          task.status === "running" &&
-          task.kind === "plan" &&
-          task.workProgress?.stage === "outline" &&
+          task.status === AUTHORING_TASK_STATUS.RUNNING &&
+          task.kind === AUTHORING_TASK_KIND.PLAN &&
+          task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE &&
           task.workProgress.outlinePhase &&
           task.workProgress.totalSteps &&
           task.workProgress.completedSteps !== undefined,
@@ -56,7 +69,10 @@ export const AuthoringWorkProgressBar = ({
   let total =
     chapters?.length ?? Math.max(0, ...lessonProgress.map((item) => item.totalLessons ?? 0));
   let completed = Math.max(0, ...lessonProgress.map((item) => item.completedLessons ?? 0));
-  if (chapters) completed = chapters.filter((chapter) => chapter.status === "complete").length;
+  if (chapters)
+    completed = chapters.filter(
+      (chapter) => chapter.status === AUTHORING_CHAPTER_PROGRESS_STATUS.COMPLETE,
+    ).length;
   if (outlineProgress) {
     total = outlineProgress.totalSteps ?? 0;
     completed = outlineProgress.completedSteps ?? 0;

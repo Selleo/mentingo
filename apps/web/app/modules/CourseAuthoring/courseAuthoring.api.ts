@@ -2,6 +2,7 @@
 import { ApiClient } from "~/api/api-client";
 
 import { parseFetchedResearchSources } from "./authoringSources";
+import { AUTHORING_TASK_STATUS } from "./courseAuthoring.constants";
 
 import type { AuthoringSessionCommandId } from "./authoringSessionSelection";
 import type {
@@ -19,16 +20,16 @@ import type {
   SendAuthoringCommandBody,
 } from "~/api/generated-api";
 
-const taskStatuses = new Set([
-  "queued",
-  "running",
-  "waiting_author",
-  "waiting_dependencies",
-  "paused",
-  "succeeded",
-  "failed",
-  "superseded",
-  "stopped",
+const taskStatuses = new Set<string>([
+  AUTHORING_TASK_STATUS.QUEUED,
+  AUTHORING_TASK_STATUS.RUNNING,
+  AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+  AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+  AUTHORING_TASK_STATUS.PAUSED,
+  AUTHORING_TASK_STATUS.SUCCEEDED,
+  AUTHORING_TASK_STATUS.FAILED,
+  AUTHORING_TASK_STATUS.SUPERSEDED,
+  AUTHORING_TASK_STATUS.STOPPED,
 ]);
 
 /** Normalize persisted citations to the same safe shape as live tool events. */
@@ -78,7 +79,7 @@ const normalizeSession = (session: OpenAuthoringSessionResponse["data"]): Author
     ...task,
     status: taskStatuses.has(task.status)
       ? (task.status as AuthoringSession["tasks"][number]["status"])
-      : "unknown",
+      : AUTHORING_TASK_STATUS.UNKNOWN,
   })),
 });
 

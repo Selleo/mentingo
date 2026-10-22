@@ -1,4 +1,11 @@
 import { parseFetchedResearchSources } from "./authoringSources";
+import {
+  AUTHORING_ARTIFACT_KIND,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_TOOL_STATUS,
+  AUTHORING_TURN_STATUS,
+} from "./courseAuthoring.constants";
 
 import type {
   AuthoringCommand,
@@ -37,7 +44,7 @@ export type AuthoringChatDataTypes = {
     toolCallId: string;
     toolName: string;
     display: string;
-    status: "started" | "completed" | "failed" | "stopped";
+    status: NonNullable<AuthoringTurnPart["tool"]>["status"];
     result: NonNullable<AuthoringTurnPart["tool"]>["result"];
   };
   authoringProposal: {
@@ -54,7 +61,7 @@ export type AuthoringChatMetadata = {
   requestId?: string;
   sourceVersionIds?: string[];
   firstSequence?: number;
-  turnStatus?: AuthoringTurnStatus | "sending";
+  turnStatus?: AuthoringTurnStatus;
   updatedSequence?: number;
 };
 
@@ -99,25 +106,31 @@ const integerValue = (value: unknown, minimum: number): number | null =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= minimum ? value : null;
 
 const isTurnStatus = (value: unknown): value is AuthoringTurnStatus =>
-  value === "queued" ||
-  value === "running" ||
-  value === "waiting_author" ||
-  value === "completed" ||
-  value === "failed" ||
-  value === "stopped";
+  value === AUTHORING_TURN_STATUS.QUEUED ||
+  value === AUTHORING_TURN_STATUS.RUNNING ||
+  value === AUTHORING_TURN_STATUS.WAITING_AUTHOR ||
+  value === AUTHORING_TURN_STATUS.COMPLETED ||
+  value === AUTHORING_TURN_STATUS.FAILED ||
+  value === AUTHORING_TURN_STATUS.STOPPED;
 
 const isPartKind = (value: unknown): value is AuthoringPartKind =>
-  value === "text" || value === "tool" || value === "proposal" || value === "question";
+  value === AUTHORING_PART_KIND.TEXT ||
+  value === AUTHORING_PART_KIND.TOOL ||
+  value === AUTHORING_PART_KIND.PROPOSAL ||
+  value === AUTHORING_PART_KIND.QUESTION;
 
 const isPartStatus = (value: unknown): value is AuthoringTurnPartStatus =>
-  value === "streaming" ||
-  value === "completed" ||
-  value === "failed" ||
-  value === "stopped" ||
-  value === "review";
+  value === AUTHORING_PART_STATUS.STREAMING ||
+  value === AUTHORING_PART_STATUS.COMPLETED ||
+  value === AUTHORING_PART_STATUS.FAILED ||
+  value === AUTHORING_PART_STATUS.STOPPED ||
+  value === AUTHORING_PART_STATUS.REVIEW;
 
 const isToolStatus = (value: unknown): value is NonNullable<AuthoringTurnPart["tool"]>["status"] =>
-  value === "started" || value === "completed" || value === "failed" || value === "stopped";
+  value === AUTHORING_TOOL_STATUS.STARTED ||
+  value === AUTHORING_TOOL_STATUS.COMPLETED ||
+  value === AUTHORING_TOOL_STATUS.FAILED ||
+  value === AUTHORING_TOOL_STATUS.STOPPED;
 
 const toolValue = (value: unknown): AuthoringTurnPart["tool"] => {
   if (value === null || value === undefined) return null;
@@ -168,7 +181,12 @@ const artifactValue = (value: unknown): AuthoringTurnPart["artifact"] => {
   const artifact = objectValue(value);
   const artifactKind = artifact?.artifactKind;
   const artifactId = stringValue(artifact?.artifactId);
-  if (!artifact || (artifactKind !== "proposal" && artifactKind !== "question") || !artifactId) {
+  if (
+    !artifact ||
+    (artifactKind !== AUTHORING_ARTIFACT_KIND.PROPOSAL &&
+      artifactKind !== AUTHORING_ARTIFACT_KIND.QUESTION) ||
+    !artifactId
+  ) {
     return null;
   }
 
@@ -333,7 +351,7 @@ const messageMetadataChunk = (
 const toolChunk = (
   part: AuthoringTurnPart,
 ): UIMessageChunk<AuthoringChatMetadata, AuthoringChatDataTypes> | null => {
-  if (part.partKind !== "tool" || !part.tool) return null;
+  if (part.partKind !== AUTHORING_PART_KIND.TOOL || !part.tool) return null;
   return {
     type: "data-authoringTool",
     id: part.partId,
@@ -353,7 +371,11 @@ const toolChunk = (
 const proposalChunk = (
   part: AuthoringTurnPart,
 ): UIMessageChunk<AuthoringChatMetadata, AuthoringChatDataTypes> | null => {
-  if (part.partKind !== "proposal" || part.artifact?.artifactKind !== "proposal") return null;
+  if (
+    part.partKind !== AUTHORING_PART_KIND.PROPOSAL ||
+    part.artifact?.artifactKind !== AUTHORING_ARTIFACT_KIND.PROPOSAL
+  )
+    return null;
   return {
     type: "data-authoringProposal",
     id: part.partId,
@@ -368,10 +390,10 @@ const proposalChunk = (
 };
 
 const terminalTurnStatuses = new Set<AuthoringTurnStatus>([
-  "waiting_author",
-  "completed",
-  "failed",
-  "stopped",
+  AUTHORING_TURN_STATUS.WAITING_AUTHOR,
+  AUTHORING_TURN_STATUS.COMPLETED,
+  AUTHORING_TURN_STATUS.FAILED,
+  AUTHORING_TURN_STATUS.STOPPED,
 ]);
 
 /** Creates one SDK stream for a durable authoring request. Cancellation only unsubscribes. */
@@ -424,7 +446,7 @@ const createRequestStream = (
         }
         controller.enqueue({
           type: "finish",
-          finishReason: status === "failed" ? "error" : "stop",
+          finishReason: status === AUTHORING_TURN_STATUS.FAILED ? "error" : "stop",
         });
         controller.close();
       };
@@ -457,12 +479,15 @@ const createRequestStream = (
         controller.enqueue({
           type: "start",
           messageId,
-          messageMetadata: { requestId: resolvedRequestId, turnStatus: "running" },
+          messageMetadata: {
+            requestId: resolvedRequestId,
+            turnStatus: AUTHORING_TURN_STATUS.RUNNING,
+          },
         });
       };
 
       const emitTextPart = (part: AuthoringTurnPart) => {
-        if (part.partKind !== "text") return;
+        if (part.partKind !== AUTHORING_PART_KIND.TEXT) return;
 
         endAllTextParts();
         const priorText = textByPartId.get(part.partId);
@@ -484,7 +509,7 @@ const createRequestStream = (
         }
 
         textByPartId.set(part.partId, nextText);
-        if (part.status !== "streaming") endTextPart(part.partId);
+        if (part.status !== AUTHORING_PART_STATUS.STREAMING) endTextPart(part.partId);
       };
 
       const handleEvent = (event: AuthoringEvent) => {
@@ -503,7 +528,7 @@ const createRequestStream = (
           const priorSequence = seenPartSequences.get(part.partId);
           if (priorSequence === undefined || part.updatedSequence > priorSequence) {
             seenPartSequences.set(part.partId, part.updatedSequence);
-            if (part.partKind === "text") {
+            if (part.partKind === AUTHORING_PART_KIND.TEXT) {
               emitTextPart(part);
             } else {
               endAllTextParts();

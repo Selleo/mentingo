@@ -26,6 +26,16 @@ import {
   authoringTaskRetryLabel,
   canRetryAuthoringTask,
 } from "../authoringTaskFailure";
+import {
+  AUTHORING_CONNECTION_STATE,
+  AUTHORING_OUTLINE_PHASE,
+  AUTHORING_APPLICATION_STATUS,
+  AUTHORING_CHAPTER_PROGRESS_STATUS,
+  AUTHORING_TASK_KIND,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_TOOL_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "../courseAuthoring.constants";
 
 import { AuthoringAssetDecision } from "./AuthoringAssetDecision";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
@@ -112,7 +122,13 @@ type ChapterWorkItem = {
 type CompactWorkItem = WorkItem | ChapterWorkItem | ResearchWorkItem;
 
 const canStopTask = (task: AuthoringTask) =>
-  ["queued", "running", "waiting_author", "waiting_dependencies", "paused"].includes(task.status);
+  [
+    AUTHORING_TASK_STATUS.QUEUED,
+    AUTHORING_TASK_STATUS.RUNNING,
+    AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+    AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+    AUTHORING_TASK_STATUS.PAUSED,
+  ].some((value) => value === task.status);
 
 /** Groups only real lesson tasks with chapter context from durable progress metadata. */
 const groupLessonWorkByChapter = (items: WorkItem[]): CompactWorkItem[] => {
@@ -120,7 +136,7 @@ const groupLessonWorkByChapter = (items: WorkItem[]): CompactWorkItem[] => {
   items.forEach((item) => {
     if (
       item.kind !== "task" ||
-      item.task.kind !== "lesson" ||
+      item.task.kind !== AUTHORING_TASK_KIND.LESSON ||
       !item.task.workProgress?.chapterId ||
       !item.task.workProgress.chapterTitle
     ) {
@@ -195,34 +211,53 @@ const groupLessonWorkByChapter = (items: WorkItem[]): CompactWorkItem[] => {
 
 /** Maps task state to the shared status badge variant. */
 const statusVariant = (status: AuthoringTask["status"]) => {
-  if (status === "succeeded") return "success" as const;
-  if (["failed", "stopped", "superseded"].includes(status)) return "blocked" as const;
+  if (status === AUTHORING_TASK_STATUS.SUCCEEDED) return "success" as const;
+  if (
+    [
+      AUTHORING_TASK_STATUS.FAILED,
+      AUTHORING_TASK_STATUS.STOPPED,
+      AUTHORING_TASK_STATUS.SUPERSEDED,
+    ].some((value) => value === status)
+  )
+    return "blocked" as const;
   return "inProgress" as const;
 };
 
 /** Maps task state to its localized activity label key. */
 const taskStatusKey = (status: AuthoringTask["status"]) =>
   match(status)
-    .with("succeeded", () => "complete")
-    .with("waiting_author", () => "waitingAuthor")
-    .with("waiting_dependencies", () => "waitingDependencies")
+    .with(AUTHORING_TASK_STATUS.SUCCEEDED, () => "complete")
+    .with(AUTHORING_TASK_STATUS.WAITING_AUTHOR, () => "waitingAuthor")
+    .with(AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES, () => "waitingDependencies")
     .otherwise((value) => value);
 
 /** Prefers the task kind: the phase can lag behind or describe a sibling step. */
 const taskKindKey = (task: AuthoringTask) => {
-  if (task.workProgress?.stage === "repairing") {
-    return task.kind === "lesson" ? "revisingLesson" : "revisingLessonPlan";
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.REPAIRING) {
+    return task.kind === AUTHORING_TASK_KIND.LESSON ? "revisingLesson" : "revisingLessonPlan";
   }
-  if (task.kind === "course_review" || task.phase === "reviewing") return "checkingCourse";
+  if (
+    task.kind === AUTHORING_TASK_KIND.COURSE_REVIEW ||
+    task.phase === AUTHORING_OUTLINE_PHASE.REVIEWING
+  )
+    return "checkingCourse";
   if (task.phase === "researching" || task.phase === "source_working") return "searchingSources";
-  if (task.workProgress?.stage === "validation") {
-    return task.kind === "lesson" ? "checkingLesson" : "checkingLessonPlan";
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.VALIDATION) {
+    return task.kind === AUTHORING_TASK_KIND.LESSON ? "checkingLesson" : "checkingLessonPlan";
   }
-  if (task.workProgress?.stage === "outline" || task.kind === "plan") return "planningOutline";
-  if (task.workProgress?.stage === "lesson_planning" || task.kind === "detailed_plan") {
+  if (
+    task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE ||
+    task.kind === AUTHORING_TASK_KIND.PLAN
+  )
+    return "planningOutline";
+  if (
+    task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.LESSON_PLANNING ||
+    task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN
+  ) {
     return "planningLessons";
   }
-  if (task.workProgress?.stage === "lesson_generation") return "generatingLesson";
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.LESSON_GENERATION)
+    return "generatingLesson";
   const kindOrPhase = task.kind ?? task.phase;
   if (!task.kind && task.phase === "preparing") return "preparingResponse";
   if (["route", "route_working"].includes(kindOrPhase ?? "")) return "understandingRequest";
@@ -272,18 +307,20 @@ const taskFailureLabel = (task: AuthoringTask, t: (key: string) => string) =>
 /** Maps task state to the activity icon used by the rail. */
 const taskStatusIcon = (status: AuthoringTask["status"]) =>
   match(status)
-    .with("succeeded", () => <CheckCircle2 className="size-3.5 text-success-700" />)
-    .with("failed", () => <AlertCircle className="size-3.5 text-destructive" />)
-    .with("running", () => (
+    .with(AUTHORING_TASK_STATUS.SUCCEEDED, () => (
+      <CheckCircle2 className="size-3.5 text-success-700" />
+    ))
+    .with(AUTHORING_TASK_STATUS.FAILED, () => <AlertCircle className="size-3.5 text-destructive" />)
+    .with(AUTHORING_TASK_STATUS.RUNNING, () => (
       <LoaderCircle className="size-3.5 text-primary-700 motion-safe:animate-spin" />
     ))
     .otherwise(() => <Clock3 className="size-3.5 text-neutral-400" />);
 
 /** Running, queued and finished states are already conveyed by the row icon. */
 const SELF_EVIDENT_TASK_STATUSES = new Set<AuthoringTask["status"]>([
-  "running",
-  "queued",
-  "succeeded",
+  AUTHORING_TASK_STATUS.RUNNING,
+  AUTHORING_TASK_STATUS.QUEUED,
+  AUTHORING_TASK_STATUS.SUCCEEDED,
 ]);
 
 const WEB_TOOL_NAMES = new Set(["web_search", "research"]);
@@ -413,7 +450,9 @@ const AuthoringResearchDiagnostics = ({ tools }: { tools: ToolActivity[] }) => {
   const messages = Array.from(
     new Set(
       tools.flatMap(({ tool }) =>
-        ["failed", "stopped"].includes(tool.status) &&
+        [AUTHORING_TOOL_STATUS.FAILED, AUTHORING_TOOL_STATUS.STOPPED].some(
+          (value) => value === tool.status,
+        ) &&
         tool.display.trim() &&
         tool.display !== tool.result?.query
           ? [tool.display]
@@ -436,8 +475,12 @@ const AuthoringResearchDiagnostics = ({ tools }: { tools: ToolActivity[] }) => {
 const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
   const orderedTools = [...tools].sort((left, right) => left.sequence - right.sequence);
   const representative =
-    orderedTools.find(({ tool }) => tool.status === "started") ??
-    orderedTools.find(({ tool }) => tool.status === "failed" || tool.status === "stopped") ??
+    orderedTools.find(({ tool }) => tool.status === AUTHORING_TOOL_STATUS.STARTED) ??
+    orderedTools.find(
+      ({ tool }) =>
+        tool.status === AUTHORING_TOOL_STATUS.FAILED ||
+        tool.status === AUTHORING_TOOL_STATUS.STOPPED,
+    ) ??
     orderedTools[orderedTools.length - 1];
   if (!representative) return null;
 
@@ -499,14 +542,18 @@ export const AuthoringToolActivity = ({
   const currentTopic = synthesisMatch?.[3]?.trim();
   const synthesisCount = synthesisMatch ? `${assessedCount}/${topicCount}` : tool.display;
   const incompletePersistedSynthesis =
-    tool.status === "completed" && synthesisMatch !== null && assessedCount < topicCount;
-  const displayStatus = incompletePersistedSynthesis ? "stopped" : tool.status;
+    tool.status === AUTHORING_TOOL_STATUS.COMPLETED &&
+    synthesisMatch !== null &&
+    assessedCount < topicCount;
+  const displayStatus = incompletePersistedSynthesis ? AUTHORING_TOOL_STATUS.STOPPED : tool.status;
   const synthesisProgress =
     synthesisMatch && topicCount > 0
       ? Math.min(100, Math.round((assessedCount / topicCount) * 100))
       : null;
-  const isRunning = displayStatus === "started";
-  const isProblem = displayStatus === "failed" || displayStatus === "stopped";
+  const isRunning = displayStatus === AUTHORING_TOOL_STATUS.STARTED;
+  const isProblem =
+    displayStatus === AUTHORING_TOOL_STATUS.FAILED ||
+    displayStatus === AUTHORING_TOOL_STATUS.STOPPED;
   const label = toolActivityLabel(tool, displayStatus, t);
   const counts = [
     typeof tool.result?.sourceCount === "number"
@@ -528,7 +575,7 @@ export const AuthoringToolActivity = ({
     );
   } else if (isProblem) {
     icon = <CircleAlert className="size-3.5 text-warning-600" aria-hidden="true" />;
-  } else if (displayStatus === "completed") {
+  } else if (displayStatus === AUTHORING_TOOL_STATUS.COMPLETED) {
     icon = <CheckCircle2 className="size-3.5 text-success-700" aria-hidden="true" />;
   }
 
@@ -577,7 +624,7 @@ export const AuthoringToolActivity = ({
                 className={cn(
                   "h-full rounded-full bg-primary-600 transition-[width,background-color] duration-500 motion-reduce:transition-none",
                   isRunning && "motion-safe:animate-pulse",
-                  displayStatus === "completed" && "bg-success-600",
+                  displayStatus === AUTHORING_TOOL_STATUS.COMPLETED && "bg-success-600",
                   isProblem && "bg-warning-500",
                 )}
                 style={{ width: `${synthesisProgress}%` }}
@@ -587,7 +634,7 @@ export const AuthoringToolActivity = ({
           <p
             className={cn(
               "shrink-0 text-xs tabular-nums text-neutral-500",
-              displayStatus === "completed" && "text-success-700",
+              displayStatus === AUTHORING_TOOL_STATUS.COMPLETED && "text-success-700",
             )}
           >
             {t("courseAuthoring.conversation.researchSynthesisProgress", {
@@ -625,8 +672,8 @@ export const AuthoringToolActivity = ({
 /** Maps socket state to the shared connection badge variant. */
 const connectionVariant = (connection: AuthoringConnectionState) =>
   match(connection)
-    .with("live", () => "success" as const)
-    .with("offline", () => "blocked" as const)
+    .with(AUTHORING_CONNECTION_STATE.LIVE, () => "success" as const)
+    .with(AUTHORING_CONNECTION_STATE.OFFLINE, () => "blocked" as const)
     .otherwise(() => "inProgress" as const);
 
 /** Renders durable task progress and human action inbox items. */
@@ -653,16 +700,20 @@ export const AuthoringActivityRail = ({
 }: Props) => {
   const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const succeeded = tasks.filter((task) => task.status === "succeeded").length;
-  const lessonTasks = tasks.filter((task) => task.kind === "lesson");
+  const succeeded = tasks.filter((task) => task.status === AUTHORING_TASK_STATUS.SUCCEEDED).length;
+  const lessonTasks = tasks.filter((task) => task.kind === AUTHORING_TASK_KIND.LESSON);
   const lessonProgress = lessonTasks.flatMap((task) =>
     task.workProgress &&
-    ["lesson_generation", "validation", "repairing"].includes(task.workProgress.stage)
+    [
+      AUTHORING_WORK_PROGRESS_STAGE.LESSON_GENERATION,
+      AUTHORING_WORK_PROGRESS_STAGE.VALIDATION,
+      AUTHORING_WORK_PROGRESS_STAGE.REPAIRING,
+    ].some((value) => value === task.workProgress?.stage)
       ? [task.workProgress]
       : [],
   );
   const completedLessons = Math.max(
-    lessonTasks.filter((task) => task.status === "succeeded").length,
+    lessonTasks.filter((task) => task.status === AUTHORING_TASK_STATUS.SUCCEEDED).length,
     ...lessonProgress.flatMap((item) =>
       item.completedLessons === undefined ? [] : [item.completedLessons],
     ),
@@ -675,16 +726,30 @@ export const AuthoringActivityRail = ({
   );
   const hasLessonWork = compact && lessonTasks.length > 0;
   const detailedPlanTask = tasks.find(
-    (task) => task.kind === "detailed_plan" && task.workProgress?.chapters?.length,
+    (task) =>
+      task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN && task.workProgress?.chapters?.length,
   );
   const plannedChapters = detailedPlanTask?.workProgress?.chapters ?? [];
   const completedChapters =
-    detailedPlanTask?.status === "succeeded"
+    detailedPlanTask?.status === AUTHORING_TASK_STATUS.SUCCEEDED
       ? plannedChapters.length
-      : plannedChapters.filter((chapter) => chapter.status === "complete").length;
+      : plannedChapters.filter(
+          (chapter) => chapter.status === AUTHORING_CHAPTER_PROGRESS_STATUS.COMPLETE,
+        ).length;
   const hasOpenWork =
-    tasks.some((task) => !["succeeded", "superseded", "stopped"].includes(task.status)) ||
-    tools.some(({ tool }) => tool.status === "started" || tool.status === "failed");
+    tasks.some(
+      (task) =>
+        ![
+          AUTHORING_TASK_STATUS.SUCCEEDED,
+          AUTHORING_TASK_STATUS.SUPERSEDED,
+          AUTHORING_TASK_STATUS.STOPPED,
+        ].some((value) => value === task.status),
+    ) ||
+    tools.some(
+      ({ tool }) =>
+        tool.status === AUTHORING_TOOL_STATUS.STARTED ||
+        tool.status === AUTHORING_TOOL_STATUS.FAILED,
+    );
   const workItems: WorkItem[] = [
     ...tasks.map((task, index) => ({
       kind: "task" as const,
@@ -701,11 +766,14 @@ export const AuthoringActivityRail = ({
   ].sort((left, right) => left.sequence - right.sequence || left.index - right.index);
   const compactWorkItems = groupResearchActivity(groupLessonWorkByChapter(workItems));
   const hasFailedWork =
-    tasks.some((task) => task.status === "failed") ||
-    tools.some(({ tool }) => tool.status === "failed");
+    tasks.some((task) => task.status === AUTHORING_TASK_STATUS.FAILED) ||
+    tools.some(({ tool }) => tool.status === AUTHORING_TOOL_STATUS.FAILED);
   const hasRunningWork =
-    tasks.some((task) => ["queued", "running"].includes(task.status)) ||
-    tools.some(({ tool }) => tool.status === "started");
+    tasks.some((task) =>
+      [AUTHORING_TASK_STATUS.QUEUED, AUTHORING_TASK_STATUS.RUNNING].some(
+        (value) => value === task.status,
+      ),
+    ) || tools.some(({ tool }) => tool.status === AUTHORING_TOOL_STATUS.STARTED);
   let liveWorkTone: "neutral" | "success" | "danger" = "neutral";
   if (hasFailedWork) liveWorkTone = "danger";
   else if (!hasOpenWork && tasks.length + tools.length > 0) liveWorkTone = "success";
@@ -715,9 +783,13 @@ export const AuthoringActivityRail = ({
     liveWorkIcon = <LoaderCircle className="size-3.5 text-primary-700 motion-safe:animate-spin" />;
   } else if (hasOpenWork) liveWorkIcon = <Clock3 className="size-3.5 text-neutral-500" />;
   const connectionLabel = match(connection)
-    .with("live", () => t("courseAuthoring.activityRail.connection.live"))
-    .with("offline", () => t("courseAuthoring.activityRail.connection.offline"))
-    .with("recovering", () => t("courseAuthoring.activityRail.connection.recovering"))
+    .with(AUTHORING_CONNECTION_STATE.LIVE, () => t("courseAuthoring.activityRail.connection.live"))
+    .with(AUTHORING_CONNECTION_STATE.OFFLINE, () =>
+      t("courseAuthoring.activityRail.connection.offline"),
+    )
+    .with(AUTHORING_CONNECTION_STATE.RECOVERING, () =>
+      t("courseAuthoring.activityRail.connection.recovering"),
+    )
     .otherwise(() => t("courseAuthoring.activityRail.connection.connecting"));
   const questionGroups = Object.entries(
     questions.reduce<Record<string, QuestionView[]>>((groups, question) => {
@@ -740,28 +812,31 @@ export const AuthoringActivityRail = ({
     });
   } else {
     workSummary = t("courseAuthoring.activityRail.stepsComplete", {
-      completed: succeeded + tools.filter(({ tool }) => tool.status === "completed").length,
+      completed:
+        succeeded +
+        tools.filter(({ tool }) => tool.status === AUTHORING_TOOL_STATUS.COMPLETED).length,
       total: tasks.length + tools.length,
     });
   }
 
   const taskLabelFor = (task: AuthoringTask) => {
     let label = taskLabels[task.taskId] ?? task.workProgress?.lessonTitle ?? taskKindLabel(task, t);
-    if (task.kind === "detailed_plan" && task.workProgress) label = taskKindLabel(task, t);
-    if (task.workProgress?.stage === "recovering") {
+    if (task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN && task.workProgress)
+      label = taskKindLabel(task, t);
+    if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.RECOVERING) {
       label = t("courseAuthoring.activityRail.recoveringFailedParts");
     }
     return label;
   };
   const currentActivity = [
     ...tasks
-      .filter((task) => task.status === "running")
+      .filter((task) => task.status === AUTHORING_TASK_STATUS.RUNNING)
       .map((task) => ({
         sequence: taskSequences[task.taskId] ?? 0,
         label: taskLabelFor(task),
       })),
     ...tools
-      .filter(({ tool }) => tool.status === "started")
+      .filter(({ tool }) => tool.status === AUTHORING_TOOL_STATUS.STARTED)
       .map(({ tool, sequence }) => ({
         sequence,
         label: toolActivityLabel(tool, tool.status, t),
@@ -769,17 +844,28 @@ export const AuthoringActivityRail = ({
   ]
     .sort((left, right) => left.sequence - right.sequence)
     .at(-1)?.label;
-  const needsAttention = hasFailedWork || tasks.some((task) => task.status === "waiting_author");
+  const needsAttention =
+    hasFailedWork || tasks.some((task) => task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR);
 
   const renderTask = (
     task: AuthoringTask,
     options: { showStop?: boolean; showChapterContext?: boolean } = {},
   ) => {
     let label = taskLabelFor(task);
-    if (["succeeded", "failed", "stopped", "superseded"].includes(task.status))
+    if (
+      [
+        AUTHORING_TASK_STATUS.SUCCEEDED,
+        AUTHORING_TASK_STATUS.FAILED,
+        AUTHORING_TASK_STATUS.STOPPED,
+        AUTHORING_TASK_STATUS.SUPERSEDED,
+      ].some((value) => value === task.status)
+    )
       label = label.replace(/(…|\.\.\.)$/, "");
     const canStop = options.showStop !== false && canStopTask(task);
-    const canDiscard = ["waiting_author", "waiting_dependencies"].includes(task.status);
+    const canDiscard = [
+      AUTHORING_TASK_STATUS.WAITING_AUTHOR,
+      AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+    ].some((value) => value === task.status);
     const requestAction = canDiscard && onDiscardRequest ? onDiscardRequest : onStopRequest;
     const requestActionLabel =
       canDiscard && onDiscardRequest
@@ -787,7 +873,10 @@ export const AuthoringActivityRail = ({
         : t("courseAuthoring.activityRail.stopRequest");
     let chapterContext: string | null = null;
     if (task.workProgress?.chapterTitle) {
-      if (task.workProgress.lessonTitle && task.workProgress.stage === "lesson_planning") {
+      if (
+        task.workProgress.lessonTitle &&
+        task.workProgress.stage === AUTHORING_WORK_PROGRESS_STAGE.LESSON_PLANNING
+      ) {
         chapterContext = t("courseAuthoring.activityRail.chapterLessonContext", {
           chapter: task.workProgress.chapterTitle,
           lesson: task.workProgress.lessonTitle,
@@ -807,7 +896,7 @@ export const AuthoringActivityRail = ({
             <span
               className={cn(
                 "min-w-0 flex-1 truncate text-neutral-700",
-                task.status === "running" && "text-neutral-900",
+                task.status === AUTHORING_TASK_STATUS.RUNNING && "text-neutral-900",
               )}
               title={label}
             >
@@ -859,38 +948,45 @@ export const AuthoringActivityRail = ({
           {options.showChapterContext !== false && chapterContext && (
             <p className={cn(ROW_DETAIL_CLASS, "text-xs text-neutral-500")}>{chapterContext}</p>
           )}
-          {task.kind === "detailed_plan" && task.workProgress?.chapters?.length && (
-            <ol className={cn(ROW_DETAIL_CLASS, "space-y-0.5")}>
-              {task.workProgress.chapters.map((chapter) => {
-                const chapterStatus = task.status === "succeeded" ? "complete" : chapter.status;
-                let iconStatus: AuthoringTask["status"] = "queued";
-                if (chapterStatus === "running") iconStatus = "running";
-                if (chapterStatus === "complete") iconStatus = "succeeded";
-                if (chapterStatus === "failed") iconStatus = "failed";
+          {task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN &&
+            task.workProgress?.chapters?.length && (
+              <ol className={cn(ROW_DETAIL_CLASS, "space-y-0.5")}>
+                {task.workProgress.chapters.map((chapter) => {
+                  const chapterStatus =
+                    task.status === AUTHORING_TASK_STATUS.SUCCEEDED
+                      ? AUTHORING_CHAPTER_PROGRESS_STATUS.COMPLETE
+                      : chapter.status;
+                  let iconStatus: AuthoringTask["status"] = AUTHORING_TASK_STATUS.QUEUED;
+                  if (chapterStatus === AUTHORING_CHAPTER_PROGRESS_STATUS.RUNNING)
+                    iconStatus = AUTHORING_TASK_STATUS.RUNNING;
+                  if (chapterStatus === AUTHORING_CHAPTER_PROGRESS_STATUS.COMPLETE)
+                    iconStatus = AUTHORING_TASK_STATUS.SUCCEEDED;
+                  if (chapterStatus === AUTHORING_CHAPTER_PROGRESS_STATUS.FAILED)
+                    iconStatus = AUTHORING_TASK_STATUS.FAILED;
 
-                return (
-                  <li
-                    key={chapter.chapterId}
-                    className="flex min-h-6 items-center gap-2 text-xs text-neutral-600"
-                  >
-                    <span className="shrink-0">{taskStatusIcon(iconStatus)}</span>
-                    <span className="min-w-0 flex-1 truncate" title={chapter.title}>
-                      {chapter.title}
-                    </span>
-                    <span className="shrink-0 text-neutral-500">
-                      {t("courseAuthoring.activityRail.chapterLessonCount", {
-                        count: chapter.lessonCount,
-                      })}
-                    </span>
-                    <span className="shrink-0 text-neutral-500">
-                      {t(`courseAuthoring.activityRail.chapterStatus.${chapterStatus}`)}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-          )}
-          {(task.status === "failed" || task.failure) && (
+                  return (
+                    <li
+                      key={chapter.chapterId}
+                      className="flex min-h-6 items-center gap-2 text-xs text-neutral-600"
+                    >
+                      <span className="shrink-0">{taskStatusIcon(iconStatus)}</span>
+                      <span className="min-w-0 flex-1 truncate" title={chapter.title}>
+                        {chapter.title}
+                      </span>
+                      <span className="shrink-0 text-neutral-500">
+                        {t("courseAuthoring.activityRail.chapterLessonCount", {
+                          count: chapter.lessonCount,
+                        })}
+                      </span>
+                      <span className="shrink-0 text-neutral-500">
+                        {t(`courseAuthoring.activityRail.chapterStatus.${chapterStatus}`)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          {(task.status === AUTHORING_TASK_STATUS.FAILED || task.failure) && (
             <p className={cn(ROW_DETAIL_CLASS, "text-xs text-destructive")}>
               {taskFailureLabel(task, t)}
             </p>
@@ -927,7 +1023,7 @@ export const AuthoringActivityRail = ({
         {options.showChapterContext !== false && chapterContext && (
           <p className="mt-2 pl-6 text-xs text-neutral-500">{chapterContext}</p>
         )}
-        {(task.status === "failed" || task.failure) && (
+        {(task.status === AUTHORING_TASK_STATUS.FAILED || task.failure) && (
           <div className="mt-2 text-xs text-destructive">
             <p>{taskFailureLabel(task, t)}</p>
           </div>
@@ -951,39 +1047,53 @@ export const AuthoringActivityRail = ({
   };
 
   const renderChapterWork = (group: ChapterWorkItem) => {
-    const failed = group.tasks.some((item) => item.task.status === "failed");
-    const allSucceeded = group.tasks.every((item) => item.task.status === "succeeded");
+    const failed = group.tasks.some((item) => item.task.status === AUTHORING_TASK_STATUS.FAILED);
+    const allSucceeded = group.tasks.every(
+      (item) => item.task.status === AUTHORING_TASK_STATUS.SUCCEEDED,
+    );
     const taskStatuses = group.tasks.map((item) => item.task.status);
-    let status: AuthoringTask["status"] = "queued";
-    if (failed) status = "failed";
-    else if (allSucceeded) status = "succeeded";
-    else if (taskStatuses.includes("running")) status = "running";
-    else if (taskStatuses.includes("waiting_author")) status = "waiting_author";
-    else if (taskStatuses.includes("paused")) status = "paused";
-    else if (taskStatuses.includes("waiting_dependencies")) status = "waiting_dependencies";
-    else if (taskStatuses.includes("queued")) status = "queued";
-    else if (taskStatuses.every((taskStatus) => taskStatus === "stopped")) status = "stopped";
-    else if (taskStatuses.every((taskStatus) => taskStatus === "superseded")) {
-      status = "superseded";
+    let status: AuthoringTask["status"] = AUTHORING_TASK_STATUS.QUEUED;
+    if (failed) status = AUTHORING_TASK_STATUS.FAILED;
+    else if (allSucceeded) status = AUTHORING_TASK_STATUS.SUCCEEDED;
+    else if (taskStatuses.includes(AUTHORING_TASK_STATUS.RUNNING))
+      status = AUTHORING_TASK_STATUS.RUNNING;
+    else if (taskStatuses.includes(AUTHORING_TASK_STATUS.WAITING_AUTHOR))
+      status = AUTHORING_TASK_STATUS.WAITING_AUTHOR;
+    else if (taskStatuses.includes(AUTHORING_TASK_STATUS.PAUSED))
+      status = AUTHORING_TASK_STATUS.PAUSED;
+    else if (taskStatuses.includes(AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES))
+      status = AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES;
+    else if (taskStatuses.includes(AUTHORING_TASK_STATUS.QUEUED))
+      status = AUTHORING_TASK_STATUS.QUEUED;
+    else if (taskStatuses.every((taskStatus) => taskStatus === AUTHORING_TASK_STATUS.STOPPED))
+      status = AUTHORING_TASK_STATUS.STOPPED;
+    else if (taskStatuses.every((taskStatus) => taskStatus === AUTHORING_TASK_STATUS.SUPERSEDED)) {
+      status = AUTHORING_TASK_STATUS.SUPERSEDED;
     }
     const total = Math.max(group.lessonCount, group.tasks.length);
     const completed = Math.min(
       total,
-      group.tasks.filter((item) => item.task.status === "succeeded").length,
+      group.tasks.filter((item) => item.task.status === AUTHORING_TASK_STATUS.SUCCEEDED).length,
     );
     const stopTask = group.tasks.find((item) => canStopTask(item.task))?.task;
     const canDiscard =
       stopTask &&
-      ["waiting_author", "waiting_dependencies"].includes(stopTask.status) &&
+      [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES].some(
+        (value) => value === stopTask.status,
+      ) &&
       Boolean(onDiscardRequest);
     const requestAction = canDiscard && onDiscardRequest ? onDiscardRequest : onStopRequest;
     const requestActionLabel = canDiscard
       ? t("courseAuthoring.activityRail.discardRequest")
       : t("courseAuthoring.activityRail.stopRequest");
-    const runningTasks = group.tasks.filter((item) => item.task.status === "running");
+    const runningTasks = group.tasks.filter(
+      (item) => item.task.status === AUTHORING_TASK_STATUS.RUNNING,
+    );
     const visibleRunningTasks = runningTasks.slice(0, 3);
     const actionableTasks = group.tasks.filter((item) =>
-      ["waiting_author", "failed"].includes(item.task.status),
+      [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.FAILED].some(
+        (value) => value === item.task.status,
+      ),
     );
     const visibleTasks = [...visibleRunningTasks, ...actionableTasks].sort(
       (left, right) => left.sequence - right.sequence || left.index - right.index,
@@ -998,10 +1108,14 @@ export const AuthoringActivityRail = ({
         !isWebTool(item.tool.tool) &&
         item.tool.taskId &&
         visibleTaskIds.has(item.tool.taskId) &&
-        item.tool.tool.status === "started",
+        item.tool.tool.status === AUTHORING_TOOL_STATUS.STARTED,
     );
     const problemTools = group.tools.filter(
-      (item) => !isWebTool(item.tool.tool) && ["failed", "stopped"].includes(item.tool.tool.status),
+      (item) =>
+        !isWebTool(item.tool.tool) &&
+        [AUTHORING_TOOL_STATUS.FAILED, AUTHORING_TOOL_STATUS.STOPPED].some(
+          (value) => value === item.tool.tool.status,
+        ),
     );
     const visibleTools = [...startedTools.slice(0, 3), ...problemTools];
     const omittedRunningCount = runningTasks.length - visibleRunningTasks.length;
@@ -1220,14 +1334,22 @@ export const AuthoringActivityRail = ({
         </section>
       )}
 
-      {assetTasks.some((asset) => ["waiting_author", "failed"].includes(asset.status)) && (
+      {assetTasks.some((asset) =>
+        [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.FAILED].some(
+          (value) => value === asset.status,
+        ),
+      ) && (
         <section className="rounded-xl border border-neutral-200 bg-white px-4">
           <h2 className="border-b border-neutral-100 py-3 text-xs font-medium text-neutral-800">
             {t("courseAuthoring.activityRail.assetDecisions")}
           </h2>
           <div className="divide-y divide-neutral-100">
             {assetTasks
-              .filter((asset) => ["waiting_author", "failed"].includes(asset.status))
+              .filter((asset) =>
+                [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.FAILED].some(
+                  (value) => value === asset.status,
+                ),
+              )
               .map((asset) => (
                 <AuthoringAssetDecision
                   key={asset.taskId}
@@ -1260,7 +1382,13 @@ export const AuthoringActivityRail = ({
                 <span>
                   {t("courseAuthoring.activityRail.apply", { id: application.id.slice(0, 8) })}
                 </span>
-                <Badge variant={application.status === "applied" ? "success" : "blocked"}>
+                <Badge
+                  variant={
+                    application.status === AUTHORING_APPLICATION_STATUS.APPLIED
+                      ? "success"
+                      : "blocked"
+                  }
+                >
                   {t(`courseAuthoring.activityRail.applicationStatus.${application.status}`)}
                 </Badge>
               </div>
