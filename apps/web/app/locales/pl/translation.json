@@ -1437,6 +1437,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Rozpocznij ścieżkę",
+      "continue": "Kontynuuj ścieżkę",
+      "review": "Powtórz ścieżkę",
+      "coursesCount_one": "{{count}} kurs",
+      "coursesCount_few": "{{count}} kursy",
+      "coursesCount_many": "{{count}} kursów",
+      "coursesCount_other": "{{count}} kursu"
+    },
     "title": "Ścieżki Rozwoju",
     "description": "Przeglądaj przypisane ścieżki rozwoju i kontynuuj uporządkowane sekwencje kursów.",
     "searchPlaceholder": "Szukaj ścieżek rozwoju",
@@ -1548,6 +1557,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Ogólne",
+      "certificate": "Certyfikat",
+      "export": "Eksport"
+    },
     "title": "Ścieżki Rozwoju",
     "importPackage": {
       "title": "Importuj ścieżkę rozwoju"
@@ -1629,6 +1643,16 @@
       "tooltip": "Język bazowy tej ścieżki to {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Dodaj kursy do ścieżki",
+      "addDialogDescription": "Wybierz jeden lub więcej kursów. Zostaną dodane na końcu ścieżki.",
+      "searchPlaceholder": "Szukaj kursów",
+      "noSearchResults": "Żaden kurs nie pasuje do wyszukiwania.",
+      "noAvailableCourses": "Wszystkie dostępne kursy są już w tej ścieżce.",
+      "selectedCount_one": "Wybrano {{count}} kurs",
+      "selectedCount_few": "Wybrano {{count}} kursy",
+      "selectedCount_many": "Wybrano {{count}} kursów",
+      "selectedCount_other": "Wybrano {{count}} kursu",
+      "addSelected": "Dodaj wybrane ({{count}})",
       "select": "Wybierz kurs",
       "add": "Dodaj kurs",
       "drag": "Przeciągnij, aby zmienić kolejność kursu",

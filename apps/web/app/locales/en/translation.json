@@ -5226,6 +5226,13 @@
     "adminLearningPathEditor": "Development Path Editor"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Start path",
+      "continue": "Continue path",
+      "review": "Review path",
+      "coursesCount_one": "{{count}} course",
+      "coursesCount_other": "{{count}} courses"
+    },
     "title": "Development Paths",
     "description": "Browse assigned development paths and continue through their ordered course sequences.",
     "searchPlaceholder": "Search development paths",
@@ -5337,6 +5344,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "General",
+      "certificate": "Certificate",
+      "export": "Export"
+    },
     "title": "Development Paths",
     "importPackage": {
       "title": "Import development path"
@@ -5418,6 +5430,14 @@
       "tooltip": "This development path base language is {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Add courses to the path",
+      "addDialogDescription": "Select one or more courses. They will be added at the end of the path.",
+      "searchPlaceholder": "Search courses",
+      "noSearchResults": "No courses match your search.",
+      "noAvailableCourses": "All available courses are already in this path.",
+      "selectedCount_one": "{{count}} course selected",
+      "selectedCount_other": "{{count}} courses selected",
+      "addSelected": "Add selected ({{count}})",
       "select": "Select a course",
       "add": "Add course",
       "drag": "Drag to reorder course",

@@ -1,7 +1,6 @@
-import { CheckCircle2, Trash, UserPlus } from "lucide-react";
+import { Trash, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -88,9 +87,14 @@ export function LearningPathCardActions({
     await onDelete();
   };
 
+  const hasManagementActions = canEdit || canExport || canDelete || canManageEnrollment;
+  const canSelfEnroll = !isEnrolled && Boolean(onEnrollCurrentUser);
+
+  if (!hasManagementActions && !canSelfEnroll) return null;
+
   return (
     <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-      {canEdit || canExport || canDelete || canManageEnrollment ? (
+      {hasManagementActions ? (
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           {canManageEnrollment &&
             !!onEnrollStudents &&
@@ -168,28 +172,18 @@ export function LearningPathCardActions({
           )}
         </div>
       ) : (
-        <>
-          {isEnrolled && (
-            <Badge variant="success" className="gap-1.5">
-              <CheckCircle2 className="size-3.5" />
-              {t("learningPathsView.enrollment.enrolled")}
-            </Badge>
-          )}
-          {!isEnrolled && onEnrollCurrentUser && (
-            <Button
-              type="button"
-              variant="primary"
-              className="gap-2"
-              disabled={isPending}
-              onClick={() => {
-                void onEnrollCurrentUser();
-              }}
-            >
-              <UserPlus className="size-4" />
-              {t("learningPathsView.enrollment.enroll")}
-            </Button>
-          )}
-        </>
+        <Button
+          type="button"
+          variant="primary"
+          className="gap-2"
+          disabled={isPending}
+          onClick={() => {
+            void onEnrollCurrentUser?.();
+          }}
+        >
+          <UserPlus className="size-4" />
+          {t("learningPathsView.enrollment.enroll")}
+        </Button>
       )}
     </div>
   );

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { match } from "ts-pattern";
 
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
@@ -10,7 +12,10 @@ type EditableTextProps = {
   value: string;
   fallback: string;
   canEdit: boolean;
+  multiline?: boolean;
+  wrap?: boolean;
   className?: string;
+  displayTextClassName?: string;
   inputClassName?: string;
   onEditingChange?: (isEditing: boolean) => void;
   onSave: (value: string) => Promise<void>;
@@ -22,7 +27,10 @@ export const LearningPathEditableText = ({
   value,
   fallback,
   canEdit,
+  multiline = false,
+  wrap = multiline,
   className,
+  displayTextClassName,
   inputClassName,
   onEditingChange,
   onSave,
@@ -45,13 +53,25 @@ export const LearningPathEditableText = ({
     await onSave(normalizedValue);
   };
 
+  const textLayoutClassName = cn(
+    match({ multiline, wrap })
+      .with({ multiline: true }, () => "whitespace-pre-wrap break-words")
+      .with({ wrap: true }, () => "whitespace-normal break-words")
+      .otherwise(() => "truncate"),
+    displayTextClassName,
+  );
+
   const cancel = () => {
     setDraftValue(value);
     setIsEditing(false);
   };
 
   if (!canEdit) {
-    return <span className={cn("block", className)}>{value || fallback}</span>;
+    return (
+      <span className={cn("block", className)}>
+        <span className={textLayoutClassName}>{value || fallback}</span>
+      </span>
+    );
   }
 
   if (!isEditing) {
@@ -66,7 +86,7 @@ export const LearningPathEditableText = ({
         onClick={() => setIsEditing(true)}
       >
         <span className="inline-flex max-w-full align-top">
-          <span className="min-w-0 truncate">{value || fallback}</span>
+          <span className={cn("min-w-0", textLayoutClassName)}>{value || fallback}</span>
         </span>
       </Button>
     );
@@ -75,20 +95,27 @@ export const LearningPathEditableText = ({
   const sharedProps = {
     value: draftValue,
     autoFocus: true,
-    className: cn("h-auto rounded-xl border-[1.5px] border-primary-300 px-3 py-2", inputClassName),
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => setDraftValue(event.target.value),
+    className: cn(
+      "!mt-0 h-auto min-h-0 rounded-xl border-[1.5px] border-primary-300 bg-white px-3 py-2",
+      className,
+      inputClassName,
+    ),
+    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setDraftValue(event.target.value),
     onBlur: save,
-    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (event.key === "Escape") {
         event.preventDefault();
         cancel();
       }
-      if (event.key === "Enter") {
+      if (event.key === "Enter" && !(multiline && event.shiftKey)) {
         event.preventDefault();
         void save();
       }
     },
   };
+
+  if (wrap) return <AutosizeTextarea {...sharedProps} minRows={1} maxRows={10} />;
 
   return <Input {...sharedProps} />;
 };

@@ -1,15 +1,21 @@
 import { LEARNING_PATH_STATUSES, type SupportedLanguages } from "@repo/shared";
-import { ImagePlus } from "lucide-react";
+import { Camera, ImagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { Icon } from "~/components/Icon";
 import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+import { cn } from "~/lib/utils";
+import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/LearningPathLanguageSelector";
+import { LearningPathHeroOutline } from "~/modules/LearningPaths/components/LearningPathHeroOutline";
+import { LearningPathStatusBadge } from "~/modules/LearningPaths/components/LearningPathStatusBadge";
 
 import type { CreateLearningPathBody } from "~/api/generated-api";
 
@@ -83,96 +89,128 @@ export function CreateLearningPathCard({
     });
   };
 
+  const editableFieldClassName =
+    "-mx-3 !mt-0 h-auto min-h-0 w-full rounded-xl border-[1.5px] border-dashed border-transparent bg-transparent px-3 py-2 placeholder:text-neutral-500 hover:border-primary-300 hover:bg-primary-50 focus-visible:border-solid focus-visible:border-primary-300 focus-visible:bg-white";
+  const selectedLanguage = courseLanguages.find((item) => item.key === language);
+
   return (
     <Form {...form}>
       <form
-        className="flex flex-col rounded-xl border border-primary-100 bg-white shadow-sm md:flex-row"
+        className="relative isolate rounded-2xl bg-white focus-within:z-30"
         onSubmit={form.handleSubmit(handleCreate)}
       >
-        <div className="p-5 md:pr-0">
-          <label className="relative block aspect-video w-full cursor-pointer overflow-hidden rounded-lg bg-neutral-100 md:w-[260px] md:max-w-[260px] md:rounded-tl-xl">
-            <img
-              src={thumbnailPreviewUrl || DefaultPhotoCourse}
-              alt={title || t("adminLearningPathsView.editor.createTitle")}
-              className="h-full w-full object-cover"
-              onError={(event) => {
-                event.currentTarget.src = DefaultPhotoCourse;
-              }}
-            />
-            <div className="absolute inset-0 grid place-items-center bg-white/90 text-neutral-900">
-              <div className="grid place-items-center gap-2 rounded-2xl bg-white px-4 py-3 text-neutral-900 shadow-sm">
-                <ImagePlus className="size-5" />
+        <label className="group relative block aspect-video w-full cursor-pointer overflow-hidden rounded-t-2xl bg-primary-100">
+          <img
+            src={thumbnailPreviewUrl || DefaultPhotoCourse}
+            alt={title || t("adminLearningPathsView.editor.createTitle")}
+            className="h-full w-full object-cover"
+            onError={(event) => {
+              event.currentTarget.src = DefaultPhotoCourse;
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,var(--color-white),rgba(255,255,255,0.55)_15%,rgba(255,255,255,0.2)_35%,transparent_60%)]" />
+          {thumbnailPreviewUrl ? (
+            <span className="absolute bottom-4 right-4 z-10 inline-flex h-8 items-center gap-2 rounded-full !bg-white px-3 text-xs font-semibold leading-none text-neutral-900 shadow-md">
+              <Camera className="size-4 shrink-0" />
+              {t("uploadFile.replace")}
+            </span>
+          ) : (
+            <span className="absolute inset-0 z-10 grid place-items-center">
+              <span className="grid place-items-center gap-2 rounded-2xl bg-white px-5 py-4 text-neutral-900 shadow-md transition group-hover:scale-105">
+                <ImagePlus className="size-6" />
                 <span className="text-xs font-semibold">{t("uploadFile.header")}</span>
-              </div>
-            </div>
-            <input
-              type="file"
-              accept=".png, .jpg, .jpeg"
-              className="sr-only"
-              disabled={isPending}
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) handleImageUpload(file);
-              }}
-            />
-          </label>
+              </span>
+            </span>
+          )}
+          <input
+            type="file"
+            accept=".png, .jpg, .jpeg"
+            className="sr-only"
+            disabled={isPending}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) handleImageUpload(file);
+            }}
+          />
+        </label>
+
+        <div className="absolute right-4 top-4 z-20 flex justify-end">
+          <LearningPathLanguageSelector
+            formKey={formKey}
+            language={value}
+            onChange={onChange}
+            isCreateMode
+          />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col p-5">
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-            <div className="grid min-w-0 flex-1 gap-2">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value ?? ""}
-                        placeholder={t("adminLearningPathsView.form.titlePlaceholder")}
-                        className="h-9 text-sm"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value ?? ""}
-                        placeholder={t("adminLearningPathsView.form.descriptionPlaceholder")}
-                        className="!mt-2 h-9 text-sm"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-              <LearningPathLanguageSelector
-                formKey={formKey}
-                language={value}
-                onChange={onChange}
-                isCreateMode
-              />
-            </div>
+        <div className="relative z-10 flex flex-col gap-4 px-5 pb-6 pt-2 md:px-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <LearningPathStatusBadge status={LEARNING_PATH_STATUSES.DRAFT} />
+            {selectedLanguage && (
+              <Badge variant="default" className="flex gap-2 bg-neutral-50 text-neutral-700">
+                <Icon name={selectedLanguage.iconName} className="size-4" />
+              </Badge>
+            )}
           </div>
 
-          <div className="mt-7 flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              {t("common.button.cancel")}
-            </Button>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <AutosizeTextarea
+                    {...field}
+                    value={field.value ?? ""}
+                    minRows={1}
+                    maxRows={4}
+                    placeholder={t("adminLearningPathsView.form.titlePlaceholder")}
+                    className={cn(
+                      editableFieldClassName,
+                      "h1 font-gothic text-2xl font-semibold leading-tight text-neutral-950 md:text-4xl",
+                    )}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") event.preventDefault();
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <AutosizeTextarea
+                    {...field}
+                    value={field.value ?? ""}
+                    minRows={1}
+                    maxRows={10}
+                    placeholder={t("adminLearningPathsView.form.descriptionPlaceholder")}
+                    className={cn(
+                      editableFieldClassName,
+                      "text-sm font-normal leading-6 text-neutral-800 md:text-base",
+                    )}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <div className="flex flex-wrap items-center gap-2 pt-1 md:gap-3">
             <Button type="submit" disabled={!title.trim() || !description.trim() || isPending}>
               {t("common.button.create")}
             </Button>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t("common.button.cancel")}
+            </Button>
           </div>
         </div>
+
+        <LearningPathHeroOutline />
       </form>
     </Form>
   );
