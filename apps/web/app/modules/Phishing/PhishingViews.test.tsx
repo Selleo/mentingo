@@ -237,7 +237,8 @@ describe("Phishing design system", () => {
     expect(screen.getByText("phishing.start")).toBeVisible();
     expect(screen.getByText("phishing.end")).toBeVisible();
     expect(document.querySelector('input[type="datetime-local"]')).toBeNull();
-    expect(screen.getAllByRole("button", { name: "common.other.selectDate" })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "phishing.start" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "phishing.end" })).toBeVisible();
   });
   it("offers accessible custom scenario, course and searchable audience controls", () => {
     showCreate();
