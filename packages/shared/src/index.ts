@@ -34,6 +34,7 @@ export * from "./constants/languages";
 export * from "./constants/learningPath";
 export * from "./constants/lessonTypes";
 export * from "./constants/liveTraining";
+export * from "./constants/loginMethods";
 export * from "./constants/loginPageDocuments";
 export * from "./constants/lumaCourseGeneration";
 export * from "./constants/lumaFileIngestion";

@@ -10,19 +10,23 @@ import { LOGIN_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
 import { SSO_LOGIN_HANDLES } from "../../../../e2e/data/environment/handles";
 
 interface SocialLoginProps {
-  isSSOEnforced?: boolean;
+  isMagicLinkEnabled: boolean;
+  isEmailFormVisible: boolean;
   isGoogleOAuthEnabled?: boolean;
   isMicrosoftOAuthEnabled?: boolean;
   isSlackOAuthEnabled?: boolean;
 }
 
 export function SocialLogin({
-  isSSOEnforced,
+  isMagicLinkEnabled,
+  isEmailFormVisible,
   isGoogleOAuthEnabled,
   isMicrosoftOAuthEnabled,
   isSlackOAuthEnabled,
 }: SocialLoginProps) {
   const { t } = useTranslation();
+  const isAnyAlternativeLoginEnabled =
+    isMagicLinkEnabled || isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled;
 
   const handleProviderSignIn = (provider: string) => () => {
     const authUrl = new URL(`${baseUrl}/api/auth/${provider}`);
@@ -33,8 +37,8 @@ export function SocialLogin({
 
   return (
     <>
-      {!isSSOEnforced && (
-        <div className="relative mt-4">
+      {isEmailFormVisible && isAnyAlternativeLoginEnabled && (
+        <div className="relative mt-4" data-testid={LOGIN_PAGE_HANDLES.ALTERNATIVE_LOGIN_SEPARATOR}>
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
@@ -46,12 +50,14 @@ export function SocialLogin({
         </div>
       )}
 
-      <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-        <Link to="/auth/magic-link" data-testid={LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK}>
-          <Icon name="WandSparkles" className="mr-2 size-4" />
-          {t("loginView.other.useMagicLink")}
-        </Link>
-      </Button>
+      {isMagicLinkEnabled && (
+        <Button type="button" variant="outline" className="mt-4 w-full" asChild>
+          <Link to="/auth/magic-link" data-testid={LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK}>
+            <Icon name="WandSparkles" className="mr-2 size-4" />
+            {t("loginView.other.useMagicLink")}
+          </Link>
+        </Button>
+      )}
 
       {isGoogleOAuthEnabled && (
         <ProviderOAuthLoginButton

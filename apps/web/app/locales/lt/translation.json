@@ -7,6 +7,24 @@
     "readyWorkflow": "Įtrauktas paleidiklis, el. laiško šablonas ir žymos",
     "useTemplate": "Naudoti šabloną"
   },
+  "loginMethods": {
+    "title": "Prisijungimo būdai",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Prisijungimo nuoroda",
+    "password": "Slaptažodis",
+    "description": "Pasirinkite, kaip jūsų organizacijos žmonės gali prisijungti.",
+    "goToConfiguration": "Eiti į konfigūraciją",
+    "notConfiguredTooltip": "Pridėkite visus reikiamus aplinkos kintamuosius, kad įjungtumėte šį prisijungimo būdą.",
+    "errors": {
+      "disabled": "Šis prisijungimo būdas išjungtas.",
+      "missingConfiguration": "Pirmiausia pridėkite tiekėjo prisijungimo duomenis aplinkos nustatymuose.",
+      "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "save": "Nepavyko išsaugoti prisijungimo būdų.",
+      "load": "Nepavyko įkelti prisijungimo būdų."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platformos logotipas",
     "title": "Prijungti {{clientName}} prie Mentingo?",
@@ -1671,6 +1689,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Microsoft kalendorius",
+        "contentMarketplace": "Turinio prekyvietė",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1682,6 +1702,8 @@
         "bunny": "Perduokite vaizdo įrašus ir efektyviai pateikite turinį",
         "google_authorization": "Leisti naudotojams prisijungti naudojant „Google“ paskyrą",
         "microsoft_authorization": "Leiskite vartotojams prisijungti naudojant „Microsoft“ paskyrą",
+        "microsoft_calendar": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais.",
+        "contentMarketplace": "Atraskite ir importuokite paruoštus kursus iš turinio prekyvietės.",
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
         "luma": "Įgalinti AI kursų generavimo funkcijas",
@@ -2501,12 +2523,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "„Microsoft“ kalendoriaus kliento paslaptis"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "„Microsoft OAuth“ įgalinta (teisinga / klaidinga)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth Enabled (teisinga / klaidinga)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI API raktas"
       },
@@ -2532,12 +2548,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "„Google“ kliento paslaptis"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "„Google OAuth“ įgalinta (teisinga / klaidinga)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite „Google OAuth“ įgalinta (teisinga / klaidinga)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe Webhook paslaptis"
       },
@@ -2552,12 +2562,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "„Slack OAuth“ įgalinta (tiesa / klaidinga)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "„Vite Slack OAuth“ įgalinta (teisinga / klaidinga)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
@@ -3995,8 +3999,6 @@
   },
   "loginView": {
     "header": "Prisijungti",
-    "subHeader": "Toliau įveskite savo el. pašto adresą, kad prisijungtumėte prie savo paskyros",
-    "subHeaderSSO": "Prisijunkite naudodami „Google“ / „Microsoft“ paskyrą",
     "validation": {
       "email": "Neteisingas el",
       "password": "Reikalingas slaptažodis"

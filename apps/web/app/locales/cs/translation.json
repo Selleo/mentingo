@@ -7,6 +7,24 @@
     "readyWorkflow": "Obsahuje spouštěč, šablonu e-mailu a značky",
     "useTemplate": "Použít šablonu"
   },
+  "loginMethods": {
+    "title": "Způsoby přihlášení",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Přihlašovací odkaz",
+    "password": "Heslo",
+    "description": "Zvolte, jak se mohou lidé ve vaší organizaci přihlašovat.",
+    "goToConfiguration": "Přejít na konfiguraci",
+    "notConfiguredTooltip": "Pro povolení této metody přihlášení doplňte všechny požadované proměnné prostředí.",
+    "errors": {
+      "disabled": "Tento způsob přihlášení je vypnutý.",
+      "missingConfiguration": "Nejprve přidejte přihlašovací údaje poskytovatele v nastavení prostředí.",
+      "lastMethod": "Ponechte zapnutý alespoň jeden použitelný způsob přihlášení.",
+      "save": "Způsoby přihlášení se nepodařilo uložit.",
+      "load": "Způsoby přihlášení se nepodařilo načíst."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo platformy",
     "title": "Připojit {{clientName}} k Mentingo?",
@@ -1677,6 +1695,8 @@
         "bunny": "Králíček CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Kalendář Microsoft",
+        "contentMarketplace": "Tržiště obsahu",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1688,6 +1708,8 @@
         "bunny": "Streamujte videa a dodávejte obsah efektivně",
         "google_authorization": "Povolit uživatelům přihlášení pomocí jejich účtu Google",
         "microsoft_authorization": "Umožněte uživatelům přihlásit se pomocí jejich účtu Microsoft",
+        "microsoft_calendar": "Synchronizujte živá školení s kalendáři Microsoft Outlook.",
+        "contentMarketplace": "Objevujte a importujte hotové kurzy z tržiště obsahu.",
         "slack_authorization": "Umožněte uživatelům přihlásit se pomocí účtu Slack",
         "openAI": "Povolit funkce AI Mentor",
         "luma": "Povolit funkce generování kurzů AI",
@@ -2507,12 +2529,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Tajný klíč klienta kalendáře Microsoft"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth povoleno (pravda/nepravda)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth povoleno (pravda/nepravda)"
-      },
       "OPENAI_API_KEY": {
         "label": "Klíč OpenAI API"
       },
@@ -2538,12 +2554,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Tajný klíč klienta Google"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth povoleno (pravda/nepravda)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth povoleno (pravda/nepravda)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Tajemství proužkového webhooku"
       },
@@ -2558,12 +2568,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Tajné tajemství klienta Slack"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth povoleno (pravda/nepravda)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth povoleno (pravda/nepravda)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API klíč"
@@ -4000,8 +4004,6 @@
   },
   "loginView": {
     "header": "Přihlášení",
-    "subHeader": "Níže zadejte svůj e-mail a přihlaste se ke svému účtu",
-    "subHeaderSSO": "Přihlaste se pomocí svého účtu Google/Microsoft",
     "validation": {
       "email": "Neplatný email",
       "password": "Je vyžadováno heslo"

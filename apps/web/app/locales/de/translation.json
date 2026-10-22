@@ -7,6 +7,24 @@
     "readyWorkflow": "Auslöser, E-Mail-Vorlage und Tags enthalten",
     "useTemplate": "Vorlage verwenden"
   },
+  "loginMethods": {
+    "title": "Anmeldemethoden",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Anmeldelink",
+    "password": "Passwort",
+    "description": "Legen Sie fest, wie sich Personen in Ihrer Organisation anmelden können.",
+    "goToConfiguration": "Zur Konfiguration",
+    "notConfiguredTooltip": "Fügen Sie alle erforderlichen Umgebungsvariablen hinzu, um diese Anmeldemethode zu aktivieren.",
+    "errors": {
+      "disabled": "Diese Anmeldemethode ist deaktiviert.",
+      "missingConfiguration": "Fügen Sie zuerst die Zugangsdaten des Anbieters in den Umgebungseinstellungen hinzu.",
+      "lastMethod": "Lassen Sie mindestens eine nutzbare Anmeldemethode aktiviert.",
+      "save": "Anmeldemethoden konnten nicht gespeichert werden.",
+      "load": "Anmeldemethoden konnten nicht geladen werden."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Plattformlogo",
     "title": "{{clientName}} mit Mentingo verbinden?",
@@ -1671,6 +1689,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Microsoft-Kalender",
+        "contentMarketplace": "Content-Marktplatz",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1682,6 +1702,8 @@
         "bunny": "Streamen Sie Videos und stellen Sie Inhalte effizient bereit",
         "google_authorization": "Erlauben Sie Benutzern, sich mit ihrem Google-Konto anzumelden",
         "microsoft_authorization": "Erlauben Sie Benutzern, sich mit ihrem Microsoft-Konto anzumelden",
+        "microsoft_calendar": "Live-Trainings mit Microsoft-Outlook-Kalendern synchronisieren.",
+        "contentMarketplace": "Fertige Kurse aus dem Content-Marktplatz entdecken und importieren.",
         "slack_authorization": "Erlauben Sie Benutzern, sich mit ihrem Slack-Konto anzumelden",
         "openAI": "Aktivieren Sie AI Mentor-Funktionen",
         "luma": "Aktivieren Sie die Funktionen zur KI-Kursgenerierung",
@@ -2501,12 +2523,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Microsoft-Kalender-Client-Geheimnis"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth aktiviert (wahr/falsch)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth aktiviert (wahr/falsch)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI-API-Schlüssel"
       },
@@ -2532,12 +2548,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Google-Client-Geheimnis"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth aktiviert (wahr/falsch)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth aktiviert (wahr/falsch)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe-Webhook-Geheimnis"
       },
@@ -2552,12 +2562,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack-Client-Geheimnis"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth aktiviert (wahr/falsch)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth aktiviert (wahr/falsch)"
       },
       "LUMA_API_KEY": {
         "label": "Luma-API-Schlüssel"
@@ -3993,8 +3997,6 @@
   },
   "loginView": {
     "header": "Login",
-    "subHeader": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
-    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
     "validation": {
       "email": "Ungültige E-Mail",
       "password": "Passwort ist erforderlich"

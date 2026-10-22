@@ -2243,10 +2243,6 @@
                 "type": "string"
               },
               {
-                "const": "MICROSOFT_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
                 "const": "OPENAI_API_KEY",
                 "type": "string"
               },
@@ -2279,18 +2275,6 @@
                 "type": "string"
               },
               {
-                "const": "GOOGLE_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_GOOGLE_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_MICROSOFT_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
                 "const": "STRIPE_WEBHOOK_SECRET",
                 "type": "string"
               },
@@ -2308,14 +2292,6 @@
               },
               {
                 "const": "SLACK_CLIENT_SECRET",
-                "type": "string"
-              },
-              {
-                "const": "SLACK_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_SLACK_OAUTH_ENABLED",
                 "type": "string"
               },
               {
@@ -2391,10 +2367,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "MICROSOFT_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
                       "const": "OPENAI_API_KEY",
                       "type": "string"
                     },
@@ -2427,18 +2399,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "GOOGLE_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_GOOGLE_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_MICROSOFT_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
                       "const": "STRIPE_WEBHOOK_SECRET",
                       "type": "string"
                     },
@@ -2456,14 +2416,6 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
-                      "type": "string"
-                    },
-                    {
-                      "const": "SLACK_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_SLACK_OAUTH_ENABLED",
                       "type": "string"
                     },
                     {

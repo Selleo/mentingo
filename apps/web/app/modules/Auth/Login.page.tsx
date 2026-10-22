@@ -9,12 +9,12 @@ import { version } from "~/../version.json";
 import { useHandleMagicLink } from "~/api/mutations/useHandleMagicLink";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useLoginMethods } from "~/api/queries/useLoginMethods";
 import useLoginPageFiles from "~/api/queries/useLoginPageFiles";
-import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
   const { t } = useTranslation();
 
-  const { data: ssoEnabled } = useSSOEnabled();
+  const { data: loginMethods } = useLoginMethods();
 
   const handlePreviewClick = (resource: LoginPageResource) => {
     setPreviewResource(resource);
@@ -87,14 +87,10 @@ export default function LoginPage() {
     setPreviewResource(null);
   };
 
-  const isGoogleOAuthEnabled =
-    (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
-
-  const isMicrosoftOAuthEnabled =
-    (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
-
-  const isSlackOAuthEnabled =
-    (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
+  const isGoogleOAuthEnabled = loginMethods?.google ?? false;
+  const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
+  const isSlackOAuthEnabled = loginMethods?.slack ?? false;
+  const isMagicLinkEnabled = loginMethods?.magicLink ?? false;
 
   const { mutateAsync: loginUser } = useLoginUser();
 
@@ -106,6 +102,8 @@ export default function LoginPage() {
     },
     isLoading: isGlobalSettingsLoading,
   } = useGlobalSettingsSuspense();
+
+  const isPasswordLoginVisible = !isSSOEnforced && Boolean(loginMethods?.password);
 
   useEffect(() => {
     if (magicLinkToken && !isGlobalSettingsLoading && !hasTriggeredMagicLink.current) {
@@ -164,7 +162,7 @@ export default function LoginPage() {
           }}
         />
       )}
-      <Card className="mx-auto max-w-sm" data-testid={LOGIN_PAGE_HANDLES.PAGE}>
+      <Card className="mx-auto w-full max-w-sm" data-testid={LOGIN_PAGE_HANDLES.PAGE}>
         <CardHeader>
           <CardTitle role="heading" className="text-2xl">
             <div className="mb-6 flex justify-center">
@@ -172,13 +170,14 @@ export default function LoginPage() {
             </div>
             {t("loginView.header")}
           </CardTitle>
-          <CardDescription>
-            {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isSSOEnforced && (
-            <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+          {isPasswordLoginVisible && (
+            <form
+              className="grid gap-4"
+              onSubmit={handleSubmit(onSubmit)}
+              data-testid={LOGIN_PAGE_HANDLES.PASSWORD_LOGIN_FORM}
+            >
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("loginView.field.email")}</Label>
                 <Input
@@ -225,13 +224,14 @@ export default function LoginPage() {
           )}
 
           <SocialLogin
-            isSSOEnforced={isSSOEnforced}
+            isEmailFormVisible={isPasswordLoginVisible}
+            isMagicLinkEnabled={isMagicLinkEnabled}
             isGoogleOAuthEnabled={isGoogleOAuthEnabled}
             isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
             isSlackOAuthEnabled={isSlackOAuthEnabled}
           />
 
-          {!inviteOnlyRegistration && (
+          {!inviteOnlyRegistration && isPasswordLoginVisible && (
             <div className="mt-4 text-center text-sm">
               {t("loginView.other.dontHaveAccount")}{" "}
               <Link

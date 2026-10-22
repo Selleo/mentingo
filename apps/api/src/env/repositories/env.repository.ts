@@ -1,14 +1,25 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { secrets, settings } from "src/storage/schema";
 
+import type { GlobalSettings } from "src/common/types";
 import type { EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
 export class EnvRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
+
+  async findGlobalSettingsForUpdate() {
+    const [globalSettings] = await this.db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(isNull(settings.userId))
+      .for("update");
+
+    return globalSettings?.settings as GlobalSettings | undefined;
+  }
 
   async bulkUpsertEnv(data: EncryptedEnvBody[]) {
     await this.db

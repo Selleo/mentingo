@@ -11492,6 +11492,65 @@
         }
       }
     },
+    "/api/env/login-methods": {
+      "get": {
+        "operationId": "EnvController_getLoginMethods",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginMethodsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "EnvController_updateLoginMethod",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLoginMethodBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLoginMethodResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/login-methods/setup": {
+      "get": {
+        "operationId": "EnvController_getLoginMethodSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginMethodSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/env/bulk": {
       "post": {
         "operationId": "EnvController_bulkUpsertEnv",
@@ -65387,6 +65446,222 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLoginMethodsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "google": {
+                "type": "boolean"
+              },
+              "microsoft": {
+                "type": "boolean"
+              },
+              "slack": {
+                "type": "boolean"
+              },
+              "magicLink": {
+                "type": "boolean"
+              },
+              "password": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "google",
+              "microsoft",
+              "slack",
+              "magicLink",
+              "password"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLoginMethodSetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "methods": {
+                "type": "object",
+                "properties": {
+                  "google": {
+                    "type": "boolean"
+                  },
+                  "microsoft": {
+                    "type": "boolean"
+                  },
+                  "slack": {
+                    "type": "boolean"
+                  },
+                  "magicLink": {
+                    "type": "boolean"
+                  },
+                  "password": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "google",
+                  "microsoft",
+                  "slack",
+                  "magicLink",
+                  "password"
+                ]
+              },
+              "missingCredentials": {
+                "type": "object",
+                "properties": {
+                  "google": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "microsoft": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "slack": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "google",
+                  "microsoft",
+                  "slack"
+                ]
+              }
+            },
+            "required": [
+              "methods",
+              "missingCredentials"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLoginMethodBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "method": {
+            "anyOf": [
+              {
+                "const": "google",
+                "type": "string"
+              },
+              {
+                "const": "microsoft",
+                "type": "string"
+              },
+              {
+                "const": "slack",
+                "type": "string"
+              },
+              {
+                "const": "magicLink",
+                "type": "string"
+              },
+              {
+                "const": "password",
+                "type": "string"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "method",
+          "enabled"
+        ]
+      },
+      "UpdateLoginMethodResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "methods": {
+                "type": "object",
+                "properties": {
+                  "google": {
+                    "type": "boolean"
+                  },
+                  "microsoft": {
+                    "type": "boolean"
+                  },
+                  "slack": {
+                    "type": "boolean"
+                  },
+                  "magicLink": {
+                    "type": "boolean"
+                  },
+                  "password": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "google",
+                  "microsoft",
+                  "slack",
+                  "magicLink",
+                  "password"
+                ]
+              },
+              "missingCredentials": {
+                "type": "object",
+                "properties": {
+                  "google": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "microsoft": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "slack": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "google",
+                  "microsoft",
+                  "slack"
+                ]
+              }
+            },
+            "required": [
+              "methods",
+              "missingCredentials"
             ]
           }
         },
@@ -161809,10 +162084,6 @@
                 "type": "string"
               },
               {
-                "const": "MICROSOFT_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
                 "const": "OPENAI_API_KEY",
                 "type": "string"
               },
@@ -161845,18 +162116,6 @@
                 "type": "string"
               },
               {
-                "const": "GOOGLE_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_GOOGLE_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_MICROSOFT_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
                 "const": "STRIPE_WEBHOOK_SECRET",
                 "type": "string"
               },
@@ -161874,14 +162133,6 @@
               },
               {
                 "const": "SLACK_CLIENT_SECRET",
-                "type": "string"
-              },
-              {
-                "const": "SLACK_OAUTH_ENABLED",
-                "type": "string"
-              },
-              {
-                "const": "VITE_SLACK_OAUTH_ENABLED",
                 "type": "string"
               },
               {
@@ -161957,10 +162208,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "MICROSOFT_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
                       "const": "OPENAI_API_KEY",
                       "type": "string"
                     },
@@ -161993,18 +162240,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "GOOGLE_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_GOOGLE_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_MICROSOFT_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
                       "const": "STRIPE_WEBHOOK_SECRET",
                       "type": "string"
                     },
@@ -162022,14 +162257,6 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
-                      "type": "string"
-                    },
-                    {
-                      "const": "SLACK_OAUTH_ENABLED",
-                      "type": "string"
-                    },
-                    {
-                      "const": "VITE_SLACK_OAUTH_ENABLED",
                       "type": "string"
                     },
                     {

@@ -7,6 +7,24 @@
     "readyWorkflow": "Trigger, email template, and tags included",
     "useTemplate": "Use template"
   },
+  "loginMethods": {
+    "title": "Login methods",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Magic link",
+    "password": "Password",
+    "description": "Choose how people in your organization can sign in.",
+    "goToConfiguration": "Go to configuration",
+    "notConfiguredTooltip": "Add all required environment variables to enable this login method.",
+    "errors": {
+      "disabled": "This login method is disabled.",
+      "missingConfiguration": "Add this provider's credentials in environment settings first.",
+      "lastMethod": "Keep at least one usable login method enabled.",
+      "save": "Unable to save login methods.",
+      "load": "Unable to load login methods."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platform logo",
     "title": "Connect {{clientName}} to Mentingo?",
@@ -1672,6 +1690,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Microsoft Calendar",
+        "contentMarketplace": "Content marketplace",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1683,6 +1703,8 @@
         "bunny": "Stream videos and deliver content efficiently",
         "google_authorization": "Allow users to sign in with their Google account",
         "microsoft_authorization": "Allow users to sign in with their Microsoft account",
+        "microsoft_calendar": "Sync live training sessions to Microsoft Outlook calendars.",
+        "contentMarketplace": "Discover and import ready-made courses from the content marketplace.",
         "slack_authorization": "Allow users to sign in with their Slack account",
         "openAI": "Enable AI Mentor features",
         "luma": "Enable AI Course Generation features",
@@ -2502,12 +2524,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Microsoft Calendar Client Secret"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth Enabled (true/false)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth Enabled (true/false)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI API Key"
       },
@@ -2533,12 +2549,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Google Client Secret"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth Enabled (true/false)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth Enabled (true/false)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe Webhook Secret"
       },
@@ -2553,12 +2563,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth Enabled (true/false)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth Enabled (true/false)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -3994,8 +3998,6 @@
   },
   "loginView": {
     "header": "Login",
-    "subHeader": "Enter your email below to login to your account",
-    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"

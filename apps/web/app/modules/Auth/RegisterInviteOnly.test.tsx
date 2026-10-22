@@ -26,8 +26,8 @@ vi.mock("~/api/queries/useRegistrationForm", () => ({
   useRegistrationForm: () => ({ data: null }),
 }));
 
-vi.mock("~/api/queries/useSSOEnabled", () => ({
-  useSSOEnabled: () => ({ data: null }),
+vi.mock("~/api/queries/useLoginMethods", () => ({
+  useLoginMethods: () => ({ data: undefined }),
 }));
 
 describe("Register page with invite-only registration", () => {

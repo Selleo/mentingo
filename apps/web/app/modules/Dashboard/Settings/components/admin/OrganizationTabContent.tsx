@@ -1,3 +1,4 @@
+import { useLoginMethods } from "~/api/queries/useLoginMethods";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { AgeLimitSelect } from "~/modules/Dashboard/Settings/components/admin/AgeLimitSelect";
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
@@ -8,24 +9,28 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { ConfigurationStatus } from "./ConfigurationStatus";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
+import LoginMethods from "./LoginMethods";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
 import type { GlobalSettings } from "../../types";
 
-const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
-const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
-
 interface OrganizationTabContentProps {
   globalSettings: GlobalSettings;
+  canManageEnvs?: boolean;
 }
 
-export default function OrganizationTabContent({ globalSettings }: OrganizationTabContentProps) {
+export default function OrganizationTabContent({
+  globalSettings,
+  canManageEnvs = false,
+}: OrganizationTabContentProps) {
   const { data: stripeConfigured } = useStripeConfigured();
-  const canEditSSOEnforcement = isGoogleOAuthEnabled || isMicrosoftOAuthEnabled;
+  const { data: loginMethods } = useLoginMethods();
+  const canEditSSOEnforcement = Boolean(loginMethods?.google || loginMethods?.microsoft);
 
   return (
     <>
       <ConfigurationStatus />
+      {canManageEnvs && <LoginMethods />}
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
       <InviteOnlyRegistration inviteOnlyRegistration={globalSettings.inviteOnlyRegistration} />
       <LiveTrainingMaxParallelSessionsSetting

@@ -122,4 +122,7 @@ export const SETTINGS_PAGE_HANDLES = {
   THEME_CONTRAST_INPUT: "settings-theme-contrast-input",
   THEME_SAVE: "settings-theme-save",
   THEME_CANCEL: "settings-theme-cancel",
+  LOGIN_METHODS_CARD: "settings-login-methods-card",
+  loginMethodSwitch: (method: string) => `settings-login-method-switch-${method}`,
+  loginMethodEnvsLink: (method: string) => `settings-login-method-envs-link-${method}`,
 } as const;

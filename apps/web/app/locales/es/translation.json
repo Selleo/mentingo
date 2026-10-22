@@ -7,6 +7,24 @@
     "readyWorkflow": "Incluye desencadenante, plantilla de correo y etiquetas",
     "useTemplate": "Usar plantilla"
   },
+  "loginMethods": {
+    "title": "Métodos de inicio de sesión",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Enlace de acceso",
+    "password": "Contraseña",
+    "description": "Elige cómo pueden iniciar sesión las personas de tu organización.",
+    "goToConfiguration": "Ir a la configuración",
+    "notConfiguredTooltip": "Añade todas las variables de entorno necesarias para habilitar este método de inicio de sesión.",
+    "errors": {
+      "disabled": "Este método de acceso está desactivado.",
+      "missingConfiguration": "Primero añade las credenciales del proveedor en la configuración del entorno.",
+      "lastMethod": "Mantenga al menos un método de acceso utilizable activado.",
+      "save": "No se pudieron guardar los métodos de acceso.",
+      "load": "No se pudieron cargar los métodos de acceso."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logotipo de la plataforma",
     "title": "¿Conectar {{clientName}} con Mentingo?",
@@ -1665,6 +1683,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Calendario de Microsoft",
+        "contentMarketplace": "Marketplace de contenidos",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1676,6 +1696,8 @@
         "bunny": "Transmita videos y entregue contenido de manera eficiente",
         "google_authorization": "Permitir que los usuarios inicien sesión con su cuenta Google",
         "microsoft_authorization": "Permitir que los usuarios inicien sesión con su cuenta Microsoft",
+        "microsoft_calendar": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook.",
+        "contentMarketplace": "Descubre e importa cursos listos desde el marketplace de contenidos.",
         "slack_authorization": "Permitir que los usuarios inicien sesión con su cuenta Slack",
         "openAI": "Habilitar las funciones de AI Mentor",
         "luma": "Habilite las funciones de generación de cursos de IA",
@@ -2494,12 +2516,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Secreto de cliente del calendario de Microsoft"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "OAuth de Microsoft en Vite habilitado (verdadero/falso)"
-      },
       "OPENAI_API_KEY": {
         "label": "Clave de API de OpenAI"
       },
@@ -2525,12 +2541,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Secreto del cliente de Google"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "OAuth de Google en Vite habilitado (verdadero/falso)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Secreto del webhook de Stripe"
       },
@@ -2545,12 +2555,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secreto del cliente de Slack"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth Habilitado (verdadero/falso)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "OAuth de Slack en Vite habilitado (verdadero/falso)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Clave"
@@ -3938,8 +3942,6 @@
   },
   "loginView": {
     "header": "Iniciar sesión",
-    "subHeader": "Ingrese su correo electrónico a continuación para iniciar sesión en su cuenta",
-    "subHeaderSSO": "Inicie sesión con su cuenta Google/Microsoft",
     "validation": {
       "email": "Correo electrónico no válido",
       "password": "Se requiere contraseña"
