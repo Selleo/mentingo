@@ -17,6 +17,8 @@ import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/Lear
 import { LearningPathHeroOutline } from "~/modules/LearningPaths/components/LearningPathHeroOutline";
 import { LearningPathStatusBadge } from "~/modules/LearningPaths/components/LearningPathStatusBadge";
 
+import { LEARNING_PATH_CREATE_DIALOG_HANDLES } from "../../../../../e2e/data/learning-paths/handles";
+
 import type { CreateLearningPathBody } from "~/api/generated-api";
 
 type CreateLearningPathCardProps = {
@@ -165,6 +167,7 @@ export function CreateLearningPathCard({
                     minRows={1}
                     maxRows={4}
                     placeholder={t("adminLearningPathsView.form.titlePlaceholder")}
+                    data-testid={LEARNING_PATH_CREATE_DIALOG_HANDLES.TITLE_INPUT}
                     className={cn(
                       editableFieldClassName,
                       "h1 font-gothic text-2xl font-semibold leading-tight text-neutral-950 md:text-4xl",
@@ -190,6 +193,7 @@ export function CreateLearningPathCard({
                     minRows={1}
                     maxRows={10}
                     placeholder={t("adminLearningPathsView.form.descriptionPlaceholder")}
+                    data-testid={LEARNING_PATH_CREATE_DIALOG_HANDLES.DESCRIPTION_INPUT}
                     className={cn(
                       editableFieldClassName,
                       "text-sm font-normal leading-6 text-neutral-800 md:text-base",
@@ -201,10 +205,19 @@ export function CreateLearningPathCard({
           />
 
           <div className="flex flex-wrap items-center gap-2 pt-1 md:gap-3">
-            <Button type="submit" disabled={!title.trim() || !description.trim() || isPending}>
+            <Button
+              type="submit"
+              disabled={!title.trim() || !description.trim() || isPending}
+              data-testid={LEARNING_PATH_CREATE_DIALOG_HANDLES.SUBMIT_BUTTON}
+            >
               {t("common.button.create")}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              data-testid={LEARNING_PATH_CREATE_DIALOG_HANDLES.CANCEL_BUTTON}
+            >
               {t("common.button.cancel")}
             </Button>
           </div>

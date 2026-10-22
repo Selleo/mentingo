@@ -13,6 +13,8 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import { LEARNING_PATH_TRAIL_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import { LearningPathAddCoursesDialog } from "./LearningPathAddCoursesDialog";
 
 import type {
@@ -316,7 +318,10 @@ function TrailCoursePreviewCard({
   const description = course.description ? stripHtmlTags(course.description) : undefined;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl">
+    <div
+      className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
+      data-testid={LEARNING_PATH_TRAIL_HANDLES.COURSE_PREVIEW}
+    >
       <div className="relative aspect-video bg-neutral-100">
         <img
           src={course.thumbnailUrl || DefaultPhotoCourse}
@@ -357,6 +362,7 @@ function TrailCoursePreviewCard({
             <Link
               to={`/course/${course.courseId}`}
               aria-label={title}
+              data-testid={LEARNING_PATH_TRAIL_HANDLES.COURSE_PREVIEW_OPEN_LINK}
               className="flex size-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md transition-transform duration-200 hover:scale-110"
             >
               <Play className="size-4" fill="currentColor" />
@@ -531,7 +537,14 @@ function TrailCourseStop({
     "absolute z-20 grid size-7 place-items-center rounded-full bg-white text-neutral-500 opacity-0 shadow ring-1 ring-neutral-200 transition-opacity hover:text-neutral-900 focus-visible:opacity-100 group-hover/stop:opacity-100";
 
   return (
-    <div className="group/stop relative" style={{ paddingTop: TRAIL_NODE_TOP }}>
+    <div
+      className="group/stop relative"
+      style={{ paddingTop: TRAIL_NODE_TOP }}
+      data-testid={LEARNING_PATH_TRAIL_HANDLES.stop(course.courseId)}
+      data-status={state}
+      data-current={isCurrent}
+      data-openable={isOpenable}
+    >
       {isOpenable ? (
         <Link to={`/course/${course.courseId}`} className={stopClassName}>
           {nodeWithPreview}
@@ -556,6 +569,7 @@ function TrailCourseStop({
             }}
             className={cn(trailNodeControlClassName, "cursor-grab active:cursor-grabbing")}
             aria-label={t("adminLearningPathsView.courses.drag")}
+            data-testid={LEARNING_PATH_TRAIL_HANDLES.dragHandle(course.courseId)}
           >
             <GripVertical className="size-3.5" />
           </SortableList.DragHandle>
@@ -569,6 +583,7 @@ function TrailCourseStop({
             }}
             className={cn(trailNodeControlClassName, "hover:text-error-600 disabled:opacity-50")}
             aria-label={t("adminLearningPathsView.courses.delete")}
+            data-testid={LEARNING_PATH_TRAIL_HANDLES.removeButton(course.courseId)}
           >
             <X className="size-3.5" />
           </button>
@@ -587,6 +602,7 @@ function TrailAddCourseStop({ isDisabled, onClick }: { isDisabled: boolean; onCl
       disabled={isDisabled}
       onClick={onClick}
       style={{ paddingTop: TRAIL_NODE_TOP }}
+      data-testid={LEARNING_PATH_TRAIL_HANDLES.ADD_COURSE_BUTTON}
       className="group relative z-10 flex w-full flex-col items-center gap-3 text-center disabled:cursor-not-allowed disabled:opacity-50"
     >
       <span className="grid size-[84px] shrink-0 place-items-center rounded-2xl border-[3px] border-dashed border-primary-300 bg-white text-primary-700 transition group-hover:border-primary-500 group-hover:bg-primary-50">
@@ -670,7 +686,7 @@ export function LearningPathTrail({
 
   return (
     <div className="flex flex-col gap-4">
-      <div ref={containerRef} className="w-full">
+      <div ref={containerRef} className="w-full" data-testid={LEARNING_PATH_TRAIL_HANDLES.TRAIL}>
         <div
           className={cn(
             "relative grid [&>.list-none]:absolute",

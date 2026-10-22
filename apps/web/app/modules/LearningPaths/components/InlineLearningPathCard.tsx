@@ -15,6 +15,8 @@ import { cn } from "~/lib/utils";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/LearningPathLanguageSelector";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import { LearningPathCardActions } from "./LearningPathCardActions";
 import { LearningPathCertificate } from "./LearningPathCertificate";
 import { LearningPathEditableText } from "./LearningPathEditableText";
@@ -246,7 +248,10 @@ export function InlineLearningPathCard({
   );
 
   return (
-    <article className="relative rounded-2xl bg-white focus-within:z-30">
+    <article
+      className="relative rounded-2xl bg-white focus-within:z-30"
+      data-testid={LEARNING_PATH_CARD_HANDLES.card(learningPath.id)}
+    >
       <header className="relative isolate rounded-2xl bg-white">
         <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-primary-100">
           <img
@@ -328,6 +333,7 @@ export function InlineLearningPathCard({
               { "-mx-3": canEdit },
             )}
             wrap
+            testId={LEARNING_PATH_CARD_HANDLES.TITLE}
             displayTextClassName="line-clamp-2"
             onSave={(title) => handleTextUpdate({ title })}
           />
@@ -337,6 +343,7 @@ export function InlineLearningPathCard({
             fallback={t("adminLearningPathsView.table.emptyDescription")}
             canEdit={canEdit}
             multiline
+            testId={LEARNING_PATH_CARD_HANDLES.DESCRIPTION}
             displayTextClassName="line-clamp-4"
             className={cn("w-full text-sm font-normal leading-6 text-neutral-800 md:text-base", {
               "-mx-3": canEdit,
@@ -357,7 +364,11 @@ export function InlineLearningPathCard({
             <div className="flex flex-wrap items-center gap-2 pt-1 md:gap-3">
               {learningPath.isEnrolled && nextCourse && (
                 <Button asChild>
-                  <Link to={`/course/${nextCourse.courseId}`} className="flex items-center gap-2">
+                  <Link
+                    to={`/course/${nextCourse.courseId}`}
+                    className="flex items-center gap-2"
+                    data-testid={LEARNING_PATH_CARD_HANDLES.CONTINUE_BUTTON}
+                  >
                     <Play className="size-4" fill="currentColor" />
                     <span className="text-sm font-semibold">{t(nextCourseActionLabel)}</span>
                   </Link>

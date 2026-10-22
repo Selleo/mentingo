@@ -4,6 +4,8 @@ import { match } from "ts-pattern";
 
 import { cn } from "~/lib/utils";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type { LearningPathCoursePreview } from "./learningPaths.types";
 
 const MAX_SEGMENTED_COURSE_COUNT = 20;
@@ -40,6 +42,7 @@ export function LearningPathProgressBar({ courses }: LearningPathProgressBarProp
 
       <div
         role="progressbar"
+        data-testid={LEARNING_PATH_CARD_HANDLES.PROGRESS_BAR}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={progressPercent}

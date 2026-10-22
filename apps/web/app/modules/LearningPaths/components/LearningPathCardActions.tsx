@@ -15,6 +15,8 @@ import {
 import { LearningPathEnrollmentDrawer } from "~/modules/LearningPaths/components/LearningPathEnrollmentDrawer";
 import { LearningPathSettingsDrawer } from "~/modules/LearningPaths/components/LearningPathSettingsDrawer";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type { FormEvent } from "react";
 import type { GetLearningPathsResponse, UpdateLearningPathBody } from "~/api/generated-api";
 import type { Option } from "~/components/ui/multiselect";
@@ -177,6 +179,7 @@ export function LearningPathCardActions({
           variant="primary"
           className="gap-2"
           disabled={isPending}
+          data-testid={LEARNING_PATH_CARD_HANDLES.ENROLL_BUTTON}
           onClick={() => {
             void onEnrollCurrentUser?.();
           }}

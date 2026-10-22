@@ -14,6 +14,7 @@ type EditableTextProps = {
   canEdit: boolean;
   multiline?: boolean;
   wrap?: boolean;
+  testId?: string;
   className?: string;
   displayTextClassName?: string;
   inputClassName?: string;
@@ -29,6 +30,7 @@ export const LearningPathEditableText = ({
   canEdit,
   multiline = false,
   wrap = multiline,
+  testId,
   className,
   displayTextClassName,
   inputClassName,
@@ -68,7 +70,7 @@ export const LearningPathEditableText = ({
 
   if (!canEdit) {
     return (
-      <span className={cn("block", className)}>
+      <span className={cn("block", className)} data-testid={testId}>
         <span className={textLayoutClassName}>{value || fallback}</span>
       </span>
     );
@@ -84,6 +86,7 @@ export const LearningPathEditableText = ({
           className,
         )}
         onClick={() => setIsEditing(true)}
+        data-testid={testId}
       >
         <span className="inline-flex max-w-full align-top">
           <span className={cn("min-w-0", textLayoutClassName)}>{value || fallback}</span>
@@ -95,6 +98,7 @@ export const LearningPathEditableText = ({
   const sharedProps = {
     value: draftValue,
     autoFocus: true,
+    "data-testid": testId && `${testId}-input`,
     className: cn(
       "!mt-0 h-auto min-h-0 rounded-xl border-[1.5px] border-primary-300 bg-white px-3 py-2",
       className,

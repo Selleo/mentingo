@@ -15,6 +15,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
+import { LEARNING_PATH_ADD_COURSES_DIALOG_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type { LearningPathCourseOption } from "./learningPaths.types";
 
 type LearningPathAddCoursesDialogProps = {
@@ -73,7 +75,10 @@ export function LearningPathAddCoursesDialog({
         if (!isDialogOpen && !isPending) resetAndClose();
       }}
     >
-      <DialogContent className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-3xl flex-col gap-5 rounded-2xl p-6 sm:rounded-2xl">
+      <DialogContent
+        data-testid={LEARNING_PATH_ADD_COURSES_DIALOG_HANDLES.DIALOG}
+        className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-3xl flex-col gap-5 rounded-2xl p-6 sm:rounded-2xl"
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-neutral-950">
             {t("adminLearningPathsView.courses.addDialogTitle")}
@@ -89,6 +94,7 @@ export function LearningPathAddCoursesDialog({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder={t("adminLearningPathsView.courses.searchPlaceholder")}
+            data-testid={LEARNING_PATH_ADD_COURSES_DIALOG_HANDLES.SEARCH_INPUT}
             className="pl-9"
           />
         </div>
@@ -104,6 +110,9 @@ export function LearningPathAddCoursesDialog({
                     <button
                       type="button"
                       aria-pressed={isSelected}
+                      data-testid={LEARNING_PATH_ADD_COURSES_DIALOG_HANDLES.option(
+                        courseOption.value,
+                      )}
                       onClick={() => toggleCourseSelection(courseOption.value)}
                       className={cn(
                         "group flex w-full flex-col gap-2 rounded-xl p-2 text-left ring-2 transition",
@@ -165,6 +174,7 @@ export function LearningPathAddCoursesDialog({
               type="button"
               disabled={!selectedCourseIds.length || isPending}
               onClick={() => void addSelectedCourses()}
+              data-testid={LEARNING_PATH_ADD_COURSES_DIALOG_HANDLES.SUBMIT_BUTTON}
             >
               {t("adminLearningPathsView.courses.addSelected", {
                 count: selectedCourseIds.length,

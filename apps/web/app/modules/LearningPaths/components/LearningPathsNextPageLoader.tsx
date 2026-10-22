@@ -1,6 +1,8 @@
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 const NEXT_PAGE_PREFETCH_MARGIN = "1500px";
 
 type LearningPathsNextPageLoaderProps = {
@@ -36,7 +38,12 @@ export function LearningPathsNextPageLoader({
   if (!hasNextPage) return null;
 
   return (
-    <div ref={sentinelRef} className="flex justify-center py-6" aria-live="polite">
+    <div
+      ref={sentinelRef}
+      className="flex justify-center py-6"
+      aria-live="polite"
+      data-testid={LEARNING_PATHS_PAGE_HANDLES.NEXT_PAGE_LOADER}
+    >
       {isFetchingNextPage && (
         <LoaderCircle className="size-8 animate-spin text-primary-700" aria-hidden />
       )}

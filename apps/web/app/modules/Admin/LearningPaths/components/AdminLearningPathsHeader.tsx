@@ -73,7 +73,13 @@ export function AdminLearningPathsHeader() {
           </Dialog>
         )}
         {canCreateLearningPaths && (
-          <Button type="button" variant="primary" className="gap-2" onClick={openCreateCard}>
+          <Button
+            type="button"
+            variant="primary"
+            className="gap-2"
+            onClick={openCreateCard}
+            data-testid={LEARNING_PATHS_PAGE_HANDLES.CREATE_BUTTON}
+          >
             <Plus className="size-4" />
             {t("adminLearningPathsView.buttons.create")}
           </Button>
