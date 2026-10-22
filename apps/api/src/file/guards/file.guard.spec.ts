@@ -1,6 +1,29 @@
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 
+import { FileGuard } from "./file.guard";
+
+jest.mock("load-esm", () => ({
+  loadEsm: jest.fn(async () => ({
+    fileTypeFromBuffer: async () => ({ ext: "png", mime: "image/png" }),
+  })),
+}));
+
+it("validates uploads in Jest with an ESM detector test double", async () => {
+  const buffer = Buffer.from("upload bytes supplied to the detector");
+  await expect(
+    FileGuard.validateFile(
+      {
+        buffer,
+        originalname: "image.png",
+        mimetype: "image/png",
+        size: buffer.length,
+      } as Express.Multer.File,
+      { allowedTypes: ["image/png"], maxSize: 1024 },
+    ),
+  ).resolves.toMatchObject({ type: { ext: "png", mime: "image/png" }, size: buffer.length });
+});
+
 // Native Node loads the actual ESM dependency without Jest VM flags or mocks.
 const FILE_GUARD_PROBE = `
   const { FileGuard } = require("./src/file/guards/file.guard");

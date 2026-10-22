@@ -1,6 +1,20 @@
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 
+import { resolveScormContentType } from "./scorm-content-type";
+
+jest.mock("load-esm", () => ({
+  loadEsm: jest.fn(async () => ({
+    fileTypeFromBuffer: async () => ({ ext: "png", mime: "image/png" }),
+  })),
+}));
+
+it("resolves SCORM asset types in Jest with an ESM detector test double", async () => {
+  await expect(
+    resolveScormContentType(Buffer.from("detected image bytes"), "image.jpg"),
+  ).resolves.toBe("image/png");
+});
+
 // Native Node loads the actual ESM dependency without Jest VM flags or mocks.
 const SCORM_CONTENT_TYPE_PROBE = `
   const { resolveScormContentType } = require("./src/scorm/scorm-content-type");
