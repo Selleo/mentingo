@@ -19,7 +19,7 @@ import {
   activeCourseLearningStateId,
   CourseRepetitionService,
 } from "src/course-repetition/course-repetition.service";
-import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
+import { CourseCompletedEvent, LessonCompletedEvent, LessonProgressChangedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
@@ -362,7 +362,24 @@ export class StudentLessonProgressService {
     dbInstance = this.db,
     resetStarted = false,
   }: MarkLessonAsIncompleteParams): Promise<MarkLessonProgressResult> {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+    if (dbInstance === this.db) {
+      return this.db.transaction((trx) =>
+        this.markLessonAsIncomplete({
+          id,
+          studentId,
+          userPermissions,
+          actor,
+          dbInstance: trx,
+          resetStarted,
+        }),
+      );
+    }
+
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(
+      id,
+      studentId,
+      dbInstance,
+    );
 
     const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
       id,
@@ -449,6 +466,15 @@ export class StudentLessonProgressService {
     );
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
+    await this.outboxPublisher.publishDurable(
+      new LessonProgressChangedEvent({
+        userId: studentId,
+        courseId: lesson.courseId,
+        lessonId: lesson.id,
+        actor: resolvedActor,
+      }),
+      dbInstance,
+    );
 
     return {
       messageKey: resetStarted

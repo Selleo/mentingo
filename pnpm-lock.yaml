@@ -91,6 +91,9 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@4.6.5))(zod@4.6.5)
+      '@mentingo/competencies-sdk':
+        specifier: link:..\..\..\mentingo-plugins\packages\competencies
+        version: link:../../../mentingo-plugins/packages/competencies
       '@mentingo/luma-sdk':
         specifier: 0.4.0
         version: 0.4.0

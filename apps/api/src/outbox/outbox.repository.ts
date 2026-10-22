@@ -45,6 +45,11 @@ export class OutboxRepository {
             OR event_type NOT IN (
               'NotificationEvent',
               'AutomationEmailDeliveryRequestedEvent',
+              'LessonCompletedEvent',
+              'LessonProgressChangedEvent',
+              'LearningSourceWithdrawnEvent',
+              'UserCourseFinishedEvent',
+              'CertificateArchivedEmailEvent',
               'LearningPathExportAppliedEvent',
               'CourseTransferRequestedEvent',
               'CourseTransferVideoMetadataRequestedEvent',
@@ -92,6 +97,11 @@ export class OutboxRepository {
         AND event_type IN (
           'NotificationEvent',
           'AutomationEmailDeliveryRequestedEvent',
+          'LessonCompletedEvent',
+          'LessonProgressChangedEvent',
+          'LearningSourceWithdrawnEvent',
+          'UserCourseFinishedEvent',
+          'CertificateArchivedEmailEvent',
           'LearningPathExportAppliedEvent',
               'CourseTransferRequestedEvent',
               'CourseTransferVideoMetadataRequestedEvent',

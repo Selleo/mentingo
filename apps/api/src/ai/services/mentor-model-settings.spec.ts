@@ -82,6 +82,7 @@ describe("Core Mentor model settings", () => {
         {} as never,
         {} as never,
         {} as never,
+        {} as never,
       );
       await service["streamCoreMentorChat"]({
         data: { threadId: "thread", content: "Question" } as never,

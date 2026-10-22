@@ -24,5 +24,15 @@ export const integrationPluginStatusSchema = Type.Object({
 });
 export type IntegrationPluginDiscovery = Static<typeof integrationPluginDiscoverySchema>;
 export type IntegrationPhishingConnection = Static<typeof integrationPhishingConnectionSchema>;
+export const integrationCompetenciesConnectionSchema = Type.Object(
+  {
+    baseUrl: Type.String({ minLength: 1, maxLength: 2000 }),
+    apiKey: Type.String({ minLength: 32, maxLength: 256, writeOnly: true }),
+  },
+  { additionalProperties: false },
+);
+export type IntegrationCompetenciesConnection = Static<
+  typeof integrationCompetenciesConnectionSchema
+>;
 export type IntegrationPluginConfigured = Static<typeof integrationPluginConfiguredSchema>;
 export type IntegrationPluginStatus = Static<typeof integrationPluginStatusSchema>;

@@ -51,6 +51,7 @@ export const routes: (
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
           route("dashboard", "modules/Dashboard/Home/HomeDashboard.page.tsx");
           route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
+          route("competencies", "modules/Competencies/Competencies.page.tsx");
           route("phishing", "modules/Phishing/Phishing.page.tsx");
           route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
           route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");

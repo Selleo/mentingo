@@ -12,6 +12,7 @@ import { IntegrationAdminController } from "./integration-admin.controller";
 import { IntegrationController } from "./integration.controller";
 import { IntegrationRepository } from "./integration.repository";
 import { IntegrationService } from "./integration.service";
+import { LearningFactsRepository } from "./repositories/learning-facts.repository";
 
 @Module({
   imports: [
@@ -23,6 +24,11 @@ import { IntegrationService } from "./integration.service";
     TenantsModule,
   ],
   controllers: [IntegrationController, IntegrationAdminController],
-  providers: [IntegrationService, IntegrationRepository, IntegrationApiKeyGuard],
+  providers: [
+    IntegrationService,
+    IntegrationRepository,
+    IntegrationApiKeyGuard,
+    LearningFactsRepository,
+  ],
 })
 export class IntegrationModule {}

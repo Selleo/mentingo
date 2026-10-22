@@ -45,6 +45,7 @@ import { hasPermission } from "src/common/permissions/permission.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
+import { LearningSourceWithdrawnEvent } from "src/events/learning/learning-source-withdrawn.event";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -409,6 +410,22 @@ export class CertificatesService implements OnModuleDestroy {
         CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
         trx,
       );
+      const resetTargets = await this.certificateRepository.findProgressResetTargetsForCertificates(
+        certificatesToReset.map((certificate) => certificate.id),
+        trx,
+      );
+      for (const target of resetTargets) {
+        for (const userId of target.userIds) {
+          await this.outboxPublisher.publishDurable(
+            new LearningSourceWithdrawnEvent({
+              userId,
+              courseId: target.courseId,
+              actor: currentUser,
+            }),
+            trx,
+          );
+        }
+      }
       return certificatesToReset;
     });
 

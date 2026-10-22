@@ -2,7 +2,9 @@ import { PERMISSIONS } from "@repo/shared";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
+import { matchesRequirement } from "~/common/permissions/permission.utils";
 
 import { Navigation } from "./Navigation";
 
@@ -21,6 +23,9 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({}
 vi.mock("~/api/queries/useLearningPaths", () => ({ useLearningPaths: () => ({}) }));
 vi.mock("~/api/queries/useStripeConfigured", () => ({ useStripeConfigured: () => ({}) }));
 vi.mock("~/api/queries/usePhishingConfiguration", () => ({ usePhishingConfiguration: vi.fn() }));
+vi.mock("~/api/queries/useCompetenciesConfiguration", () => ({
+  useCompetenciesConfiguration: vi.fn(),
+}));
 vi.mock("~/hooks/usePermissions", () => ({
   usePermissions: () => ({ hasAccess: false, permissions: state.permissions }),
 }));
@@ -33,16 +38,31 @@ vi.mock("./NavigationHeader", () => ({ NavigationHeader: () => null }));
 vi.mock("./NavigationFooter", () => ({ NavigationFooter: () => null }));
 vi.mock("./NavigationGlobalSearchWrapper", () => ({ NavigationGlobalSearchWrapper: () => null }));
 vi.mock("./NavigationMenu", () => ({
-  NavigationMenu: ({ menuItems }: { menuItems: LeafMenuItem[] }) => (
+  NavigationMenu: ({
+    menuItems,
+    permissions,
+  }: {
+    menuItems: LeafMenuItem[];
+    permissions: PermissionKey[];
+  }) => (
     <>
-      {menuItems.map((item) => (
-        <a key={item.link} href={item.link}>
-          {item.label}
-        </a>
-      ))}
+      {menuItems
+        .filter((item) => matchesRequirement(permissions, item.accessRequirement))
+        .map((item) => (
+          <a key={item.link} href={item.link}>
+            {item.label}
+          </a>
+        ))}
     </>
   ),
 }));
+
+beforeEach(() => {
+  vi.mocked(useCompetenciesConfiguration).mockReturnValue({
+    data: { enabled: false },
+    isError: false,
+  } as ReturnType<typeof useCompetenciesConfiguration>);
+});
 
 describe("Phishing navigation availability", () => {
   beforeEach(() => {
@@ -100,5 +120,49 @@ describe("Phishing navigation availability", () => {
 
     expect(usePhishingConfiguration).toHaveBeenCalledWith(false);
     expect(screen.queryByRole("link", { name: "phishing.title" })).not.toBeInTheDocument();
+  });
+});
+
+describe("Competencies navigation availability", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    state.permissions = [PERMISSIONS.COMPETENCIES_USE, PERMISSIONS.PHISHING_MANAGE];
+    vi.mocked(usePhishingConfiguration).mockReturnValue({
+      data: { enabled: true },
+      isError: false,
+    } as ReturnType<typeof usePhishingConfiguration>);
+  });
+  it.each([
+    { data: { enabled: false }, isError: false },
+    { data: undefined, isError: false },
+    { data: { enabled: true }, isError: true },
+  ])("hides unavailable competencies independently of enabled phishing", (configuration) => {
+    vi.mocked(useCompetenciesConfiguration).mockReturnValue(
+      configuration as ReturnType<typeof useCompetenciesConfiguration>,
+    );
+    render(<Navigation />);
+    expect(screen.queryByRole("link", { name: "competencies.title" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "phishing.title" })).toBeInTheDocument();
+  });
+  it("requires its own permission even if the capability was previously enabled", () => {
+    state.permissions = [PERMISSIONS.PHISHING_MANAGE];
+    vi.mocked(useCompetenciesConfiguration).mockReturnValue({
+      data: { enabled: true },
+      isError: false,
+    } as ReturnType<typeof useCompetenciesConfiguration>);
+    render(<Navigation />);
+    expect(useCompetenciesConfiguration).toHaveBeenCalledWith(false);
+    expect(screen.queryByRole("link", { name: "competencies.title" })).not.toBeInTheDocument();
+  });
+  it("shows competencies with its permission and enabled capability", () => {
+    vi.mocked(useCompetenciesConfiguration).mockReturnValue({
+      data: { enabled: true },
+      isError: false,
+    } as ReturnType<typeof useCompetenciesConfiguration>);
+    render(<Navigation />);
+    expect(screen.getByRole("link", { name: "competencies.title" })).toHaveAttribute(
+      "href",
+      "/competencies",
+    );
   });
 });

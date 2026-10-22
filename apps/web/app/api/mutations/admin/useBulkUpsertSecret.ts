@@ -26,6 +26,7 @@ export function useBulkUpsertSecret() {
       });
 
       queryClient.invalidateQueries({ queryKey: CONFIGURATION_STATE_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["competencies"] });
       queryClient.invalidateQueries(stripeConfiguredQueryOptions());
     },
     onError: (error) => {

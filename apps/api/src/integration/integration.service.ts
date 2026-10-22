@@ -1,5 +1,6 @@
 import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 
+import { createCompetenciesClient } from "@mentingo/competencies-sdk";
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import {
   BadRequestException,
@@ -30,6 +31,7 @@ import type {
   RotateAdminKeyData,
 } from "./integration.types";
 import type {
+  IntegrationCompetenciesConnection,
   IntegrationPluginDiscovery,
   IntegrationPhishingConnection,
   IntegrationPluginConfigured,
@@ -321,6 +323,78 @@ export class IntegrationService {
     query: IntegrationTrainingResultsQuery,
   ): Promise<IntegrationTrainingResultsData> {
     return this.integrationRepository.getTrainingResults(actor.tenantId, query);
+  }
+
+  async configureCompetenciesConnection(
+    tenantId: string,
+    input: IntegrationCompetenciesConnection,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginConfigured> {
+    this.assertCanManageTenants(actor, keyTenant);
+    if (!(await this.integrationRepository.getTenantById(tenantId)))
+      throw new NotFoundException("superAdminTenants.error.notFound");
+    let url: URL;
+    try {
+      url = new URL(input.baseUrl);
+    } catch {
+      throw new BadRequestException("Invalid plugin URL");
+    }
+    const local =
+      process.env.NODE_ENV !== "production" &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+    if (
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      url.pathname !== "/" ||
+      !(url.protocol === "https:" || (local && url.protocol === "http:"))
+    )
+      throw new BadRequestException(
+        "Use an HTTPS plugin origin (HTTP localhost is allowed in development)",
+      );
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.bulkUpsertEnv(
+        [
+          { name: "COMPETENCIES_BASE_URL", value: url.origin },
+          { name: "COMPETENCIES_API_KEY", value: input.apiKey },
+        ],
+        { ...actor, tenantId },
+      ),
+    );
+    return { tenantId };
+  }
+
+  async competenciesConnectionStatus(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginStatus> {
+    this.assertCanManageTenants(actor, keyTenant);
+    if (!(await this.integrationRepository.getTenantById(tenantId)))
+      throw new NotFoundException("superAdminTenants.error.notFound");
+    return this.tenantDbRunner.runWithTenant(tenantId, async () => {
+      try {
+        const [baseUrl, apiKey] = await Promise.all(
+          ["COMPETENCIES_BASE_URL", "COMPETENCIES_API_KEY"].map((name) =>
+            this.envService.getEnv(name),
+          ),
+        );
+        const configuration = await createCompetenciesClient({
+          tenantId,
+          baseURL: baseUrl.value,
+          apiKey: apiKey.value,
+        }).configuration();
+        return {
+          tenantId,
+          reachable: true,
+          enabled: configuration.capabilities.competencies.enabled,
+        };
+      } catch {
+        return { tenantId, reachable: false, enabled: false };
+      }
+    });
   }
 
   private buildRawApiKey() {
