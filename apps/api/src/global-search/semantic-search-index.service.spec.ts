@@ -1,3 +1,5 @@
+import { SEARCH_FILE_TYPES_MAP } from "src/ingestion/ingestion.config";
+
 import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { SemanticSearchIndexService } from "./semantic-search-index.service";
 
@@ -23,7 +25,7 @@ describe("semantic search indexing", () => {
     };
     const embedding = { embedTexts: jest.fn().mockResolvedValue([Array(1536).fill(0.2)]) };
     const s3 = { getFileSize: jest.fn(), getFileBuffer: jest.fn() };
-    const extraction = { extractText: jest.fn() };
+    const extraction = { extractSearchText: jest.fn() };
     const service = new SemanticSearchIndexService(
       repository as never,
       embedding as never,
@@ -32,6 +34,29 @@ describe("semantic search indexing", () => {
     );
     return { service, repository, embedding, s3, extraction };
   }
+
+  it.each(Object.values(SEARCH_FILE_TYPES_MAP))(
+    "extracts supported attachment %s before embedding",
+    async (mimetype) => {
+      const { service, repository, s3, extraction, embedding } = setup();
+      repository.findSource.mockResolvedValue({
+        ...source,
+        resourceReference: "tenant/file",
+        resourceContentType: mimetype,
+      } as never);
+      const buffer = Buffer.from("attachment");
+      s3.getFileSize.mockResolvedValue(buffer.length);
+      s3.getFileBuffer.mockResolvedValue(buffer);
+      extraction.extractSearchText.mockResolvedValue([
+        { pageContent: "Searchable attachment text" },
+      ]);
+      await service.process({ ...source, tenantId: "tenant" } as never);
+      expect(extraction.extractSearchText).toHaveBeenCalledWith({ buffer, mimetype });
+      expect(embedding.embedTexts).toHaveBeenCalledWith([
+        expect.stringContaining("Searchable attachment text"),
+      ]);
+    },
+  );
 
   it("does not replace searchable chunks when the provider fails", async () => {
     const { service, repository, embedding } = setup();
@@ -73,7 +98,7 @@ describe("semantic search indexing", () => {
       } as never);
       s3.getFileSize.mockResolvedValue(100);
       s3.getFileBuffer.mockResolvedValue(Buffer.from("pdf"));
-      extraction.extractText.mockResolvedValue([
+      extraction.extractSearchText.mockResolvedValue([
         { pageContent: "Hidden paragraph inside attachment" },
       ]);
       await service.process({ ...source, tenantId: "tenant" } as never);

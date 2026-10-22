@@ -17,10 +17,10 @@ export const ArticleEntry = ({
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >
-      <li className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
+      <div className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
         <Icon name="Articles" className="size-4 text-neutral-500" />
         <span className="line-clamp-1 flex-1 body-sm-md">{item.title}</span>
-      </li>
+      </div>
     </Link>
   );
 };

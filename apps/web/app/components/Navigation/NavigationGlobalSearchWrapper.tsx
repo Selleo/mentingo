@@ -197,46 +197,43 @@ export const NavigationGlobalSearchWrapper = ({
                       <X className="size-4" aria-hidden />
                     </button>
                   )}
-                  {isSemanticConfigured && (
-                    <button
-                      type="button"
-                      aria-label={t("globalSearch.aiSearch")}
-                      title={
-                        mode === GLOBAL_SEARCH_MODES.HYBRID
-                          ? t("globalSearch.backToKeywords")
-                          : `${t("globalSearch.aiSearch")} (${isMac ? "⌘" : "Ctrl+"}Enter)`
-                      }
-                      aria-keyshortcuts="Meta+Enter Control+Enter"
-                      disabled={searchParams.trim().length < 3}
-                      aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
-                      onClick={() => {
-                        setHybridSearch(
-                          mode === GLOBAL_SEARCH_MODES.HYBRID ? null : searchParams.trim(),
-                        );
-                        setActiveIndex(0);
-                        totalItemsRef.current = 0;
-                      }}
-                      className={cn(
-                        "inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
-                        {
-                          "border-primary-600 bg-primary-600 text-white hover:bg-primary-700":
-                            mode === GLOBAL_SEARCH_MODES.HYBRID,
-                          "border-primary-100 bg-primary-50 text-primary-700 hover:bg-primary-100":
-                            mode === GLOBAL_SEARCH_MODES.KEYWORD,
-                        },
-                      )}
-                    >
-                      <Sparkles className="size-5" strokeWidth={1.75} aria-hidden />
-                    </button>
-                  )}
                 </div>
               }
               wrapperClassName="w-full max-w-none"
-              className={cn("!max-w-none", {
-                "pr-20": isSemanticConfigured,
-                "pr-10": !isSemanticConfigured,
-              })}
+              className="!max-w-none pr-10"
             />
+            {isSemanticConfigured && (
+              <button
+                type="button"
+                aria-label={t("globalSearch.aiSearch")}
+                title={
+                  mode === GLOBAL_SEARCH_MODES.HYBRID
+                    ? t("globalSearch.backToKeywords")
+                    : `${t("globalSearch.aiSearch")} (${isMac ? "⌘" : "Ctrl+"}Enter)`
+                }
+                aria-keyshortcuts="Meta+Enter Control+Enter"
+                disabled={searchParams.trim().length < 3}
+                aria-pressed={mode === GLOBAL_SEARCH_MODES.HYBRID}
+                onClick={() => {
+                  setHybridSearch(mode === GLOBAL_SEARCH_MODES.HYBRID ? null : searchParams.trim());
+                  setActiveIndex(0);
+                  totalItemsRef.current = 0;
+                }}
+                className={cn(
+                  "inline-flex min-h-11 items-center justify-center gap-2 px-3 py-2 rounded-lg border shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-40",
+                  {
+                    "border-primary-600 bg-primary-600 text-white hover:bg-primary-700":
+                      mode === GLOBAL_SEARCH_MODES.HYBRID,
+                    "border-primary-100 bg-primary-50 text-primary-700 hover:bg-primary-100":
+                      mode === GLOBAL_SEARCH_MODES.KEYWORD,
+                  },
+                )}
+              >
+                <Sparkles className="size-4" strokeWidth={1.75} aria-hidden />
+                <span>{t("globalSearch.aiSearch")}</span>
+              </button>
+            )}
+
             <Separator className="my-2" />
             {searchParams.trim().length < 3 && (
               <div className="flex flex-col px-6 pt-4">

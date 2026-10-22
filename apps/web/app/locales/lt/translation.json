@@ -1484,7 +1484,8 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "DI paieška",
+    "administrativeResults": "Žmonės, grupės ir kategorijos",
+    "aiSearch": "Ieškoti su DI",
     "hybridSearch": "Hibridinė paieška",
     "backToKeywords": "Grįžti prie paieškos pagal žodžius",
     "semanticUnavailable": "Semantinė paieška laikinai nepasiekiama. Rodomi paieškos pagal žodžius rezultatai.",

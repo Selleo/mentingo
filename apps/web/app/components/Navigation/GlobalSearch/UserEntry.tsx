@@ -21,7 +21,7 @@ export const UserEntry = ({
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
+      <div className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
         <img
           src={item?.profilePictureUrl ?? ""}
           alt={item.firstName}
@@ -31,7 +31,7 @@ export const UserEntry = ({
           {item.firstName} {item.lastName}
         </span>
         <span className="text-md ps-3 text-neutral-600">{groupsText}</span>
-      </li>
+      </div>
     </Link>
   );
 };

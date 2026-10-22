@@ -1485,7 +1485,8 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "AI search",
+    "administrativeResults": "People, groups and categories",
+    "aiSearch": "Search with AI",
     "hybridSearch": "Hybrid search",
     "backToKeywords": "Back to keyword search",
     "semanticUnavailable": "Semantic search is temporarily unavailable. Showing keyword matches.",

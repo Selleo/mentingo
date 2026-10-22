@@ -156305,6 +156305,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156356,6 +156360,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156407,6 +156415,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156458,6 +156470,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156516,6 +156532,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156553,6 +156573,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156585,6 +156609,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156617,6 +156645,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },
@@ -156706,6 +156738,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "relevanceScore": {
+                      "description": "Query-local rank fusion score, comparable across content types; not a probability.",
+                      "type": "number"
+                    },
                     "matchedPassage": {
                       "type": "string"
                     },

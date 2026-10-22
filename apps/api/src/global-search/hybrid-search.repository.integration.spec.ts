@@ -7,6 +7,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
+import { SEARCH_FILE_TYPES_MAP } from "src/ingestion/ingestion.config";
 import { LocalizationService } from "src/localization/localization.service";
 import { McpStudentLessonRepository } from "src/mcp/mcp-student-lesson.repository";
 import { dbAls } from "src/storage/db/db-als.store";
@@ -602,6 +603,26 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     expect(discovered).toHaveLength(4);
   });
 
+  it.each([SEARCH_FILE_TYPES_MAP.PPTX, SEARCH_FILE_TYPES_MAP.XLSX, SEARCH_FILE_TYPES_MAP.CSV])(
+    "discovers and indexes existing %s attachments",
+    async (contentType) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC];
+      const file = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE, { contentType });
+      const index = await synchronizeAndIndexContentFile(file);
+      await dbAls.run({ tenantId }, async () => {
+        expect((await index.findSource(file))?.resourceContentType).toBe(contentType);
+        expect(await index.previewPendingCount(50)).toBe(0);
+      });
+      await enterTenantRole();
+      const matches = await repository.findSemanticMatches(
+        SEARCH_ENTITY_TYPES.ARTICLE,
+        queryVector,
+        actor,
+      );
+      expect(matches.map((match) => match.entityId)).toEqual([file.entityId]);
+    },
+  );
+
   it.each([SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
     "retrieves chunk-only keyword and semantic passages from %s files",
     async (type) => {
@@ -754,6 +775,41 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     );
     expect(matches.map((match) => match.entityId)).toEqual([courseId]);
     expect(matches[0].matchedPassage).toContain("thirty days");
+  });
+
+  it("rejects cosine similarity .54, accepts .56, and preserves the weaker exact keyword hit", async () => {
+    const strongerCourseId = await course();
+    await source({ content: "Reimbursement policy", chunk: "Reimbursement policy" });
+    await source({
+      entityId: strongerCourseId,
+      content: "Travel expenses",
+      chunk: "Travel expenses",
+    });
+    // Unit vectors against [1, 0, ...] have cosine similarity equal to their first component.
+    for (const [entityId, similarity] of [
+      [courseId, 0.54],
+      [strongerCourseId, 0.56],
+    ] as const) {
+      const vector = [similarity, Math.sqrt(1 - similarity ** 2), ...Array<number>(1534).fill(0)];
+      await fixtureDb.execute(sql`UPDATE search_chunks SET embedding = ${JSON.stringify(
+        vector,
+      )}::vector
+        WHERE tenant_id = ${tenantId} AND entity_id = ${entityId}`);
+    }
+    await enterTenantRole();
+    const semantic = await repository.findSemanticMatches(
+      SEARCH_ENTITY_TYPES.COURSE,
+      queryVector,
+      actor,
+    );
+    expect(semantic.map((match) => match.entityId)).toEqual([strongerCourseId]);
+    expect(semantic[0].rank).toBeCloseTo(0.56, 5);
+    const keyword = await repository.findKeywordMatches(
+      SEARCH_ENTITY_TYPES.COURSE,
+      "reimbursement",
+      actor,
+    );
+    expect(keyword.map((match) => match.entityId)).toEqual([courseId]);
   });
 
   it("keeps administrative backfill reads inside the selected tenant even with RLS bypass", async () => {

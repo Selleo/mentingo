@@ -20,7 +20,7 @@ export const MyCourseEntry = ({
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
+      <div className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
         <img
           src={item?.thumbnailUrl ?? ""}
           alt={item.title}
@@ -35,7 +35,7 @@ export const MyCourseEntry = ({
           />
           <span className="text-md text-neutral-950">{`${completedChapterCount}/${courseChapterCount}`}</span>
         </span>
-      </li>
+      </div>
     </Link>
   );
 };

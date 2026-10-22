@@ -20,7 +20,7 @@ export const LearningPathEntry = ({
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >
-      <li className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
+      <div className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
         <img
           src={item.thumbnailReference || DefaultPhotoCourse}
           alt={item.title}
@@ -34,7 +34,7 @@ export const LearningPathEntry = ({
           <BookOpen className="size-3.5" />
           {item.courses.length}
         </span>
-      </li>
+      </div>
     </Link>
   );
 };
