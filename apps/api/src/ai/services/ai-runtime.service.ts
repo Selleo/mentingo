@@ -39,7 +39,7 @@ import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import type { OpenAIProvider } from "@ai-sdk/openai";
-import type { AiMentorChatStreamResult, AiStreamTextResult } from "src/ai/ai-chat.types";
+import type { AiMentorChatStreamResult, AiCoreMentorStreamResult } from "src/ai/ai-chat.types";
 import type { AiRuntimeSource } from "src/ai/ai-runtime.types";
 import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-configuration.types";
 import type {
@@ -109,7 +109,7 @@ export class AiRuntimeService {
 
   async streamMentorChat(
     input: MentorChatOptions,
-    createCoreStream: () => Promise<AiStreamTextResult>,
+    createCoreStream: () => Promise<AiCoreMentorStreamResult>,
     abortSignal?: AbortSignal,
   ): Promise<AiMentorChatStreamResult> {
     const source = await this.resolveSource(AiCapability.AiMentorChat);
@@ -140,7 +140,7 @@ export class AiRuntimeService {
     return {
       source: AI_RUNTIME_SOURCES.CORE,
       textStream: coreStream.textStream,
-      coreStream,
+      coreStream: coreStream.coreStream,
     };
   }
 

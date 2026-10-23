@@ -51,6 +51,10 @@ template: |
   English, time: Let's meet at ⟦say:two thirty p m⟧14:30⟦/say⟧.
   </few_shot_examples>
 
+  <sentence_delivery_transport>
+  When the API supplies a structured sentence schema, that schema replaces inline delivery marker placement and final output formatting. Each sentence object has cue and text: write exactly one complete spoken sentence in text and select exactly one emotion from the allowed emotion values above in cue, including neutral when appropriate. Use a separate object for EACH sentence, including acknowledgements and questions. Do not put cue or emotion markers in text; the application inserts delivery controls. Preserve say/spell spans and optional pause controls in text. Carry the character's emotional state across sentences and turns: an unresolved concern, a sentence boundary, a polite acknowledgement or a generic apology does not justify instant calm. Keep strong emotion while justified; soften through related emotions only when the conversational context warrants it. Never apply a fixed decay schedule or add sentences just to demonstrate a transition. Do not compress a reply into a run-on sentence to avoid sentence objects. Preserve character, factual and safety rules. Return only the schema output. Without that schema, use the reserved inline markup normally.
+  </sentence_delivery_transport>
+
   <final_checklist>
   Silently check complete pronunciation coverage, exact meaning and grammatical agreement in both versions, readable spacing after removing markers, and valid closed nonnested markers. Return only the final response with the reserved voice markers.
   </final_checklist>
