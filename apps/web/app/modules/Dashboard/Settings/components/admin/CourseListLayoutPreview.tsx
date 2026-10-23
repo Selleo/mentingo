@@ -11,8 +11,8 @@ export function CourseListLayoutPreview({ type }: CourseListLayoutPreviewProps) 
 
   if (type === COURSE_LIST_LAYOUT_VARIANT.MODERN) {
     return (
-      <div className="bg-white rounded border border-neutral-200 p-4 h-96 overflow-hidden">
-        <div className="relative h-36 bg-gradient-to-br from-neutral-600 to-neutral-400 rounded overflow-hidden mb-4">
+      <div className="flex h-full flex-col gap-4 rounded border border-neutral-200 bg-white p-4">
+        <div className="relative h-36 bg-gradient-to-br from-neutral-600 to-neutral-400 rounded overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
           <div className="absolute bottom-4 left-4 space-y-2">
             <div className="h-2 w-20 bg-white/50 rounded"></div>
@@ -26,7 +26,7 @@ export function CourseListLayoutPreview({ type }: CourseListLayoutPreviewProps) 
           </div>
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2">
           <p className="text-xs font-semibold text-neutral-900">
             {t("adminPreferences.field.courseListLayoutPreview.continueLearning")}
           </p>
@@ -41,7 +41,7 @@ export function CourseListLayoutPreview({ type }: CourseListLayoutPreviewProps) 
           </div>
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2">
           <p className="text-xs font-semibold text-neutral-900">
             {t("adminPreferences.field.courseListLayoutPreview.topCourses")}
           </p>
@@ -59,26 +59,13 @@ export function CourseListLayoutPreview({ type }: CourseListLayoutPreviewProps) 
             ))}
           </div>
         </div>
-
-        <div className="space-y-2">
-          <div className="h-2 w-24 bg-neutral-300 rounded"></div>
-          <div className="grid grid-cols-4 gap-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="space-y-1.5">
-                <div className="h-9 bg-neutral-200 rounded"></div>
-                <div className="h-1 w-full bg-neutral-100 rounded"></div>
-                <div className="h-1 w-3/5 bg-neutral-100 rounded"></div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded border border-neutral-200 p-4 h-96 overflow-hidden">
-      <div className="space-y-2 mb-4">
+    <div className="flex h-full flex-col gap-4 rounded border border-neutral-200 bg-white p-4">
+      <div className="space-y-2">
         <p className="text-xs font-semibold text-neutral-900">
           {t("adminPreferences.field.courseListLayoutPreview.continueLearning")}
         </p>
@@ -98,7 +85,7 @@ export function CourseListLayoutPreview({ type }: CourseListLayoutPreviewProps) 
           {t("adminPreferences.field.courseListLayoutPreview.availableCourses")}
         </p>
         <div className="grid grid-cols-3 gap-3">
-          {[...Array(9)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="bg-neutral-100 rounded p-2 space-y-1.5">
               <div className="h-12 bg-neutral-200 rounded"></div>
               <div className="h-1.5 w-full bg-neutral-200 rounded"></div>

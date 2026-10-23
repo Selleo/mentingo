@@ -1,4 +1,5 @@
 import { useSearchParams } from "@remix-run/react";
+import { Building2, Palette, Plug, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -38,38 +39,41 @@ export function SettingsNavigationTabs({
   const [searchParams, setSearchParams] = useSearchParams();
 
   const adminTabs = [
-    { value: SETTINGS_TABS.ORGANIZATION, label: t("settings.tabs.organization") },
+    { value: SETTINGS_TABS.ORGANIZATION, label: t("settings.tabs.organization"), icon: Building2 },
     {
       value: SETTINGS_TABS.PLATFORM_CUSTOMIZATION,
       label: t("settings.tabs.platformCustomization"),
+      icon: Palette,
     },
   ];
 
   const allTabs = [
     ...(!hideAccountTab
-      ? [{ value: SETTINGS_TABS.ACCOUNT, label: t("settings.tabs.account") }]
+      ? [{ value: SETTINGS_TABS.ACCOUNT, label: t("settings.tabs.account"), icon: UserRound }]
       : []),
     ...(!hideAccountTab && hasIntegrationsAvailable
-      ? [{ value: SETTINGS_TABS.INTEGRATIONS, label: t("settings.tabs.integrations") }]
+      ? [{ value: SETTINGS_TABS.INTEGRATIONS, label: t("settings.tabs.integrations"), icon: Plug }]
       : []),
     ...(canManageSettings ? adminTabs : []),
   ];
 
+  const header = <h4 className="h4 text-neutral-950">{t("settings.title")}</h4>;
+
   if (isSupportMode && allTabs.length === 0) {
     return (
-      <Card id="settings-tabs" className="w-full">
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <h4 className="h4">{t("settings.title")}</h4>
+      <div className="flex w-full flex-col gap-y-6">
+        {header}
+        <Card id="settings-tabs" className="w-full">
+          <CardContent className="p-6">
             <p
               className="text-sm text-muted-foreground"
               data-testid={SETTINGS_PAGE_HANDLES.NO_AVAILABLE_SETTINGS}
             >
               {t("settings.supportModeNoAvailable")}
             </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -88,79 +92,71 @@ export function SettingsNavigationTabs({
     <Tabs
       value={activeTab}
       onValueChange={handleTabChange}
-      className="w-full bg-transparent flex flex-col gap-y-4"
+      className="flex w-full flex-col gap-y-6 bg-transparent"
     >
-      <Card id="settings-tabs" className="w-full">
-        <CardContent className="p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="h4">{t("settings.title")}</h4>
-          </div>
-          <div className="flex justify-start">
-            <TabsList className="inline-flex h-auto items-center justify-center rounded-md bg-primary-50 text-muted-foreground">
-              {allTabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  data-testid={match(tab.value)
-                    .with(SETTINGS_TABS.ACCOUNT, () => SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)
-                    .with(SETTINGS_TABS.INTEGRATIONS, () => SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB)
-                    .with(SETTINGS_TABS.ORGANIZATION, () => SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB)
-                    .otherwise(() => SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB)}
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-neutral-900 ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm relative"
-                >
-                  {tab.label}
-                  {hasConfigurationIssues && tab.value === SETTINGS_TABS.ORGANIZATION && (
-                    <span
-                      className="absolute top-1 right-1 size-2 rounded-full bg-error-500"
-                      data-testid={SETTINGS_PAGE_HANDLES.ORGANIZATION_WARNING_INDICATOR}
-                    />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </CardContent>
-      </Card>
+      {header}
 
-      <Card>
-        <CardContent className="p-6">
-          {!hideAccountTab && (
-            <TabsContent
-              value={SETTINGS_TABS.ACCOUNT}
-              className="space-y-6"
-              data-testid={SETTINGS_PAGE_HANDLES.ACCOUNT_CONTENT}
+      <div id="settings-tabs" className="overflow-x-auto border-b">
+        <TabsList className="h-auto min-w-max justify-start gap-2 rounded-none bg-transparent p-0">
+          {allTabs.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              data-testid={match(value)
+                .with(SETTINGS_TABS.ACCOUNT, () => SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)
+                .with(SETTINGS_TABS.INTEGRATIONS, () => SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB)
+                .with(SETTINGS_TABS.ORGANIZATION, () => SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB)
+                .otherwise(() => SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB)}
+              className="relative gap-2 rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary-600 data-[state=active]:bg-transparent data-[state=active]:text-primary-700 data-[state=active]:shadow-none"
             >
-              {accountContent}
-            </TabsContent>
-          )}
+              <Icon className="size-4" aria-hidden="true" />
+              {label}
+              {hasConfigurationIssues && value === SETTINGS_TABS.ORGANIZATION && (
+                <span
+                  className="absolute top-2 right-1 size-2 rounded-full bg-error-500"
+                  data-testid={SETTINGS_PAGE_HANDLES.ORGANIZATION_WARNING_INDICATOR}
+                />
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
 
-          {hasIntegrationsAvailable && (
-            <TabsContent
-              value={SETTINGS_TABS.INTEGRATIONS}
-              className="space-y-6"
-              data-testid={SETTINGS_PAGE_HANDLES.INTEGRATIONS_CONTENT}
-            >
-              {integrationsContent}
-            </TabsContent>
-          )}
+      {!hideAccountTab && (
+        <TabsContent
+          value={SETTINGS_TABS.ACCOUNT}
+          className="m-0 space-y-6"
+          data-testid={SETTINGS_PAGE_HANDLES.ACCOUNT_CONTENT}
+        >
+          {accountContent}
+        </TabsContent>
+      )}
 
-          <TabsContent
-            value={SETTINGS_TABS.ORGANIZATION}
-            className="space-y-6"
-            data-testid={SETTINGS_PAGE_HANDLES.ORGANIZATION_CONTENT}
-          >
-            {organizationContent}
-          </TabsContent>
+      {hasIntegrationsAvailable && (
+        <TabsContent
+          value={SETTINGS_TABS.INTEGRATIONS}
+          className="m-0 space-y-6"
+          data-testid={SETTINGS_PAGE_HANDLES.INTEGRATIONS_CONTENT}
+        >
+          {integrationsContent}
+        </TabsContent>
+      )}
 
-          <TabsContent
-            value={SETTINGS_TABS.PLATFORM_CUSTOMIZATION}
-            className="space-y-6"
-            data-testid={SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_CONTENT}
-          >
-            {customizePlatformContent}
-          </TabsContent>
-        </CardContent>
-      </Card>
+      <TabsContent
+        value={SETTINGS_TABS.ORGANIZATION}
+        className="m-0 space-y-6"
+        data-testid={SETTINGS_PAGE_HANDLES.ORGANIZATION_CONTENT}
+      >
+        {organizationContent}
+      </TabsContent>
+
+      <TabsContent
+        value={SETTINGS_TABS.PLATFORM_CUSTOMIZATION}
+        className="m-0 space-y-6"
+        data-testid={SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_CONTENT}
+      >
+        {customizePlatformContent}
+      </TabsContent>
     </Tabs>
   );
 }

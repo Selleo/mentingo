@@ -4569,7 +4569,8 @@
       "courseListLayoutClassic": "Classic",
       "courseListLayoutModern": "Modern",
       "courseListLayoutClassicDescription": "Traditional course grid layout",
-      "courseListLayoutModernDescription": "Hero section with featured courses",
+      "courseListLayoutModernDescription": "Hero section with featured courses and more details, like estimated learning time",
+      "courseListLayoutRecommended": "Recommended",
       "courseListLayoutPreview": {
         "continueLearning": "Continue learning",
         "topCourses": "Top 5 courses",

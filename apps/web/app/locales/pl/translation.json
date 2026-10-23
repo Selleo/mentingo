@@ -4880,7 +4880,8 @@
       "courseListLayoutClassic": "Klasyczny",
       "courseListLayoutModern": "Nowoczesny",
       "courseListLayoutClassicDescription": "Tradycyjny układ siatki kursów",
-      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami",
+      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami i dodatkowymi informacjami, np. szacowanym czasem nauki",
+      "courseListLayoutRecommended": "Zalecany",
       "courseListLayoutPreview": {
         "continueLearning": "Kontynuuj naukę",
         "topCourses": "Top 5 kursów",

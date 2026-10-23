@@ -4568,7 +4568,8 @@
       "courseListLayoutClassic": "Klassisch",
       "courseListLayoutModern": "Modern",
       "courseListLayoutClassicDescription": "Traditionelles Kursraster-Layout",
-      "courseListLayoutModernDescription": "Hero-Bereich mit hervorgehobenen Kursen",
+      "courseListLayoutModernDescription": "Hero-Bereich mit hervorgehobenen Kursen und mehr Details, z. B. der geschätzten Lernzeit",
+      "courseListLayoutRecommended": "Empfohlen",
       "courseListLayoutPreview": {
         "continueLearning": "Weiterlernen",
         "topCourses": "Top 5 Kurse",

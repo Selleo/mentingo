@@ -4297,6 +4297,7 @@
       "coursesVisibilityDescription": "Autoriser les visiteurs à consulter la liste des cours et à accéder aux leçons gratuites sans se connecter",
       "modernCourseList": "Utiliser la vue moderne de la liste des cours",
       "modernCourseListDescription": "Activez la nouvelle conception de la liste de cours avec les sections héros et meilleurs cours",
+      "courseListLayoutRecommended": "Recommandé",
       "courseDiscussions": "Activer les discussions sur les cours",
       "courseDiscussionsDescription": "Autoriser les utilisateurs inscrits à consulter et à participer aux fils de discussion du cours",
       "calendar": "Activer le calendrier",
