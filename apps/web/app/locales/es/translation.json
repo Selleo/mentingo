@@ -4507,7 +4507,8 @@
       "courseListLayoutClassic": "Clásico",
       "courseListLayoutModern": "Moderno",
       "courseListLayoutClassicDescription": "Diseño de cuadrícula de cursos tradicional",
-      "courseListLayoutModernDescription": "Sección hero con cursos destacados",
+      "courseListLayoutModernDescription": "Sección hero con cursos destacados y más detalles, como el tiempo estimado de aprendizaje",
+      "courseListLayoutRecommended": "Recomendado",
       "courseListLayoutPreview": {
         "continueLearning": "Continuar aprendiendo",
         "topCourses": "Top 5 cursos",

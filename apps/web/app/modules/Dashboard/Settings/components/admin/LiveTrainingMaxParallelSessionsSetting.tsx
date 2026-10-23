@@ -33,7 +33,7 @@ export function LiveTrainingMaxParallelSessionsSetting({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-lg border bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="space-y-0.5">
         <Label htmlFor="liveTrainingMaxParallelSessions" className="body-base-md">
           {t("adminPreferences.field.liveTrainingMaxParallelSessions")}

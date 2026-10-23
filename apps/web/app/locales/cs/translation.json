@@ -4577,7 +4577,8 @@
       "courseListLayoutClassic": "Klasické",
       "courseListLayoutModern": "Moderní",
       "courseListLayoutClassicDescription": "Tradiční rozvržení mřížky kurzů",
-      "courseListLayoutModernDescription": "Sekce hrdiny s doporučenými kurzy",
+      "courseListLayoutModernDescription": "Sekce hrdiny s doporučenými kurzy a dalšími podrobnostmi, například odhadovanou dobou studia",
+      "courseListLayoutRecommended": "Doporučeno",
       "courseListLayoutPreview": {
         "continueLearning": "Pokračovat ve studiu",
         "topCourses": "Top 5 kurzů",

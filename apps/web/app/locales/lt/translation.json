@@ -4572,7 +4572,8 @@
       "courseListLayoutClassic": "Klasikinis",
       "courseListLayoutModern": "Modernus",
       "courseListLayoutClassicDescription": "Tradicinis kursų tinklelio išdėstymas",
-      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais",
+      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais ir daugiau informacijos, pavyzdžiui, numatomu mokymosi laiku",
+      "courseListLayoutRecommended": "Rekomenduojama",
       "courseListLayoutPreview": {
         "continueLearning": "Tęsti mokymąsi",
         "topCourses": "5 populiariausi kursai",
