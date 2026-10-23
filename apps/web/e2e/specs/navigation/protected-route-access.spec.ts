@@ -63,6 +63,9 @@ const expectReportApiDenied = async (client: FixtureApiClient, status: number) =
 };
 
 const expectDeniedRoutes = async (page: Page, role: string) => {
+  // Each role checks dozens of redirects sequentially. Give only these matrix tests
+  // 270s (3 × the default 90s) on CI; keep individual action/assertion limits unchanged.
+  test.slow();
   for (const { path, requirement } of protectedRoutes) {
     if (matchesRequirement(SYSTEM_ROLE_PERMISSIONS[role], requirement)) continue;
     await test.step(path, async () => {
