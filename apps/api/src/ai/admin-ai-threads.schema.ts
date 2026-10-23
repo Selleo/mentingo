@@ -14,6 +14,7 @@ const nullableId = Type.Union([UUIDSchema, Type.Null()]);
 export const adminAiThreadTypeSchema = Type.Union([
   Type.Literal(AI_THREAD_TYPES.PRACTICE),
   Type.Literal(AI_THREAD_TYPES.AI_MENTOR),
+  Type.Literal(AI_THREAD_TYPES.ASSISTANT),
 ]);
 export const adminAiThreadPaginationSchema = Type.Object({
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
@@ -81,6 +82,15 @@ export const adminAiThreadMessageSchema = Type.Object({
   id: UUIDSchema,
   role: Type.Union([Type.Literal(MESSAGE_ROLE.USER), Type.Literal(MESSAGE_ROLE.MENTOR)]),
   content: Type.String(),
+  status: Type.Optional(
+    Type.Union([
+      Type.Literal("pending"),
+      Type.Literal("running"),
+      Type.Literal("complete"),
+      Type.Literal("failed"),
+      Type.Literal("cancelled"),
+    ]),
+  ),
   createdAt: Type.String(),
 });
 export type AdminAiThreadQuery = Static<typeof adminAiThreadQuerySchema>;

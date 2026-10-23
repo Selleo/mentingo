@@ -3589,3 +3589,5 @@ export const nativeArchiveEntityMap = pgTable(
     ),
   })),
 );
+
+export * from "./assistant.schema";

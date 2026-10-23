@@ -126,7 +126,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
               <LanguageProvider>{children}</LanguageProvider>
               {process.env.NODE_ENV === "development" && (
-                <ReactQueryDevtools initialIsOpen={false} />
+                <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
               )}
             </ThemeProvider>
           </TourProvider>

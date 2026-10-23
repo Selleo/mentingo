@@ -10,6 +10,7 @@ const loading = vi.hoisted(() => ({
   threadPending: false,
   messagesPending: false,
   background: false,
+  failed: false,
 }));
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: () => ({
@@ -45,9 +46,21 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
     data: {
       pages: [
         {
-          data: loading.background
-            ? [{ id: "saved", role: "assistant", content: "Previously loaded message" }]
-            : [],
+          data: [
+            ...(loading.failed
+              ? [
+                  {
+                    id: "failed",
+                    role: "assistant",
+                    content: "Saved partial answer",
+                    status: "failed",
+                  },
+                ]
+              : []),
+            ...(loading.background
+              ? [{ id: "saved", role: "assistant", content: "Previously loaded message" }]
+              : []),
+          ],
         },
       ],
     },
@@ -73,6 +86,7 @@ describe("conversation details", () => {
     loading.threadPending = false;
     loading.messagesPending = false;
     loading.background = false;
+    loading.failed = false;
   });
 
   it.each([true, false])(
@@ -93,6 +107,13 @@ describe("conversation details", () => {
     renderWith().render(<Page />);
     expect(await screen.findByText("Previously loaded message")).toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("preserves a partial assistant response and identifies its failed status", async () => {
+    loading.failed = true;
+    renderWith().render(<Page />);
+    expect(await screen.findByText("Saved partial answer")).toBeInTheDocument();
+    expect(screen.getByText("Interrupted by an error")).toBeInTheDocument();
   });
 
   it("opens details in its tab and shows saved evaluation in a dialog", async () => {

@@ -1569,6 +1569,34 @@
       "when": 1792662388266,
       "tag": "0223_normalize_course_authoring_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1792679024630,
+      "tag": "0224_core_assistant",
+      "breakpoints": true
+    },
+    {
+      "idx": 225,
+      "version": "7",
+      "when": 1792679093495,
+      "tag": "0225_enable_assistant_tenant_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1792679284142,
+      "tag": "0226_assistant_read_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 227,
+      "version": "7",
+      "when": 1792757341105,
+      "tag": "0227_assistant_run_activity",
+      "breakpoints": true
     }
   ]
 }

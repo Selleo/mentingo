@@ -37,6 +37,8 @@ Because current-user responses include permissions and onboarding state, Menting
 
 A user chooses the appropriate auth path from the login area. For email/password login, Mentingo validates credentials, checks archived status, applies login rate limiting, and decides whether MFA is still required. If MFA is required, the user receives temporary auth cookies and must complete the MFA page before entering the app.
 
+If the requested organization address does not identify an existing tenant, Mentingo returns a not-found response (404). The web app shows its not-found state rather than an expired-session message. Missing or invalid authentication on an existing tenant continues to return 401.
+
 For registration, Mentingo checks tenant settings first. If registration is invite-only, the registration page explains that an invitation is required and offers a link to sign in. If SSO is enforced or registration is invite-only, the API blocks self-registration. Otherwise, the registration flow validates identity fields, password rules, language, and tenant registration-form answers before creating the account and signing the user in.
 
 For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. A magic-link request expires from the time it was made; if the account email changes, a pending link is not sent to the former address and an already issued automation link cannot be used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.

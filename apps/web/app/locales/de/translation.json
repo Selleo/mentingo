@@ -103,12 +103,19 @@
     "empty": "Noch keine Gespräche.",
     "types": {
       "practice": "Übungssitzung",
-      "ai-mentor": "KI-Mentor-Lektion"
+      "ai-mentor": "KI-Mentor-Lektion",
+      "assistant": "Assistent"
     },
     "statuses": {
       "active": "In Bearbeitung",
       "completed": "Abgeschlossen",
       "archived": "Archiviert"
+    },
+    "messageStatuses": {
+      "pending": "Ausstehend",
+      "running": "In Bearbeitung",
+      "failed": "Durch Fehler unterbrochen",
+      "cancelled": "Gestoppt"
     }
   },
   "emailTemplates": {
@@ -981,6 +988,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "KI-Assistent",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "panel": "Panel",
@@ -2274,6 +2283,7 @@
         "file_delete": "Dateien direkt aus dem Plattformspeicher löschen.",
         "resource_library_manage": "Private Ressourcen in der Ressourcenbibliothek verwalten.",
         "ai_use": "KI-gestützte Plattformfunktionen verwenden.",
+        "assistant_use": "Den schreibgeschützten Assistenten nutzen und eigene Unterhaltungen verwalten.",
         "announcement_read": "Ankündigungen anzeigen.",
         "announcement_create": "Ankündigungen erstellen.",
         "news_read_public": "Verfügbare News-Beiträge anzeigen.",
@@ -5336,14 +5346,13 @@
       "resource": "Ressource:"
     },
     "actions": {
-      "save_automation_draft": "Automatisierungsentwurf gespeichert",
-      "simulate_automation": "Automatisierung simuliert",
-      "apply_automation": "Automatisierung veröffentlicht / angewendet",
-      "enable_automation": "Automatisierung aktiviert",
-      "disable_automation": "Automatisierung deaktiviert",
-      "duplicate_automation": "Automatisierung dupliziert",
-      "archive_automation": "Automatisierung archiviert",
-
+      "save_automation_draft": "Automatisierungsentwurf speichern",
+      "simulate_automation": "Automatisierung simulieren",
+      "apply_automation": "Automatisierung anwenden",
+      "enable_automation": "Automatisierung aktivieren",
+      "disable_automation": "Automatisierung deaktivieren",
+      "duplicate_automation": "Automatisierung duplizieren",
+      "archive_automation": "Automatisierung archivieren",
       "create": "Erstellt",
       "update": "Aktualisiert",
       "bulk_course_category_update": "Kurskategorie gesammelt aktualisiert",
@@ -5374,14 +5383,7 @@
       "start_learning_path": "Lernpfad gestartet",
       "complete_learning_path": "Lernpfad abgeschlossen",
       "play_scorm": "SCORM gestartet",
-      "complete_scorm": "SCORM abgeschlossen",
-      "save_automation_draft": "Automatisierungsentwurf speichern",
-      "simulate_automation": "Automatisierung simulieren",
-      "apply_automation": "Automatisierung anwenden",
-      "enable_automation": "Automatisierung aktivieren",
-      "disable_automation": "Automatisierung deaktivieren",
-      "duplicate_automation": "Automatisierung duplizieren",
-      "archive_automation": "Automatisierung archivieren"
+      "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
       "automation": "Automatisierung",
@@ -8147,5 +8149,101 @@
       "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
       "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
     }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Assistentenunterhaltung",
+      "open": "Assistentenunterhaltung öffnen",
+      "fullScreen": "Assistent vollständig öffnen",
+      "minimize": "Unterhaltung minimieren",
+      "dismiss": "Assistentenblase ausblenden",
+      "dragHint": "Zum Verschieben ziehen. Zum Ausblenden auf X ablegen. Pfeiltasten bewegen, Entf blendet aus.",
+      "dropToDismiss": "Zum Ausblenden ablegen"
+    },
+    "openSource": "In Mentingo öffnen",
+    "sourceTypes": {
+      "course": "Kurs",
+      "lesson": "Lektion",
+      "user": "Person",
+      "group": "Gruppe",
+      "category": "Kategorie",
+      "article": "Artikel",
+      "news": "Neuigkeit",
+      "qa": "Frage und Antwort",
+      "development_path": "Lernpfad",
+      "resource": "Ressource",
+      "reference": "Quelle"
+    },
+    "title": "Assistent",
+    "eyebrow": "Wissen aus Ihrem Arbeitsbereich",
+    "welcome": "Wie kann ich dir helfen?",
+    "intro": "Finden Sie Lernmaterialien, stellen Sie Fragen und prüfen Sie die Quellen. Im Rahmen Ihrer Zugriffsrechte.",
+    "newConversation": "Neue Unterhaltung",
+    "untitled": "Neue Unterhaltung",
+    "search": "Unterhaltungen suchen",
+    "recent": "Letzte Unterhaltungen",
+    "history": "Unterhaltungsverlauf",
+    "active": "Aktiv",
+    "archived": "Archiviert",
+    "archivedThreads": "Archivierte Unterhaltungen",
+    "showArchived": "Archiv anzeigen",
+    "showRecent": "Letzte Unterhaltungen anzeigen",
+    "noThreads": "Ihre Unterhaltungen erscheinen hier.",
+    "noMatches": "Keine passenden Unterhaltungen gefunden.",
+    "loading": "Unterhaltungen werden geladen…",
+    "loadError": "Die Unterhaltungen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loadMore": "Mehr laden",
+    "composerLabel": "Nachricht an den Assistenten",
+    "placeholder": "Fragen Sie zu Ihren Lerninhalten oder Ihrem Arbeitsbereich…",
+    "composerHint": "Enter zum Senden · Shift + Enter für eine neue Zeile",
+    "disclosure": "Antworten können Fehler enthalten. Prüfen Sie die Quellen. Berechtigte Administratoren können diese Unterhaltungen einsehen.",
+    "send": "Nachricht senden",
+    "stop": "Antwort stoppen",
+    "you": "Sie",
+    "working": "Ihre Anfrage wird bearbeitet…",
+    "activity": {
+      "starting": "Wird gestartet…",
+      "thinking": "Ich bearbeite deine Anfrage…",
+      "searching": "Ich suche in deinem Arbeitsbereich…",
+      "reading": "Ich lese die Inhalte…",
+      "writing": "Ich schreibe deine Antwort…"
+    },
+    "writing": "Antwort wird geschrieben…",
+    "sources": "Quellen",
+    "failed": "Ein Fehler hat die Antwort unterbrochen. Der obige Text ist möglicherweise unvollständig.",
+    "cancelled": "Antwort gestoppt. Der obige Text ist möglicherweise unvollständig.",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "rename": "Unterhaltung umbenennen",
+    "archive": "Unterhaltung archivieren",
+    "restore": "Unterhaltung wiederherstellen",
+    "save": "Speichern",
+    "close": "Schließen",
+    "threadUnavailable": "Diese Unterhaltung ist nicht verfügbar. Sie existiert möglicherweise nicht mehr oder Sie haben keinen Zugriff.",
+    "sendError": "Ihre Nachricht konnte nicht gesendet werden. Ihr Entwurf wurde behalten.",
+    "messageTooLong": "Deine Nachricht darf höchstens 8.000 Zeichen enthalten. Kürze den Entwurf, um ihn zu senden.",
+    "unavailable": "Der Assistent ist noch nicht konfiguriert. Wenden Sie sich an Ihren Administrator.",
+    "archivedNotice": "Diese Unterhaltung ist archiviert. Stellen Sie sie wieder her, um fortzufahren.",
+    "openHistory": "Unterhaltungsverlauf öffnen",
+    "hideHistory": "Unterhaltungsverlauf ausblenden",
+    "renameDescription": "Geben Sie der Unterhaltung einen leicht auffindbaren Namen.",
+    "readOnly": "Assistent mit Lesezugriff",
+    "loadEarlier": "Frühere Nachrichten laden",
+    "starters": {
+      "find": {
+        "label": "Lernmaterial finden",
+        "prompt": "Finde für mich zugängliche Kurse zum Onboarding."
+      },
+      "learn": {
+        "label": "Lernmöglichkeiten entdecken",
+        "prompt": "Auf welche Lernmaterialien kann ich zugreifen?"
+      },
+      "understand": {
+        "label": "Ein Thema verstehen",
+        "prompt": "Finde Materialien zu konstruktivem Feedback und erkläre die wichtigsten Ideen."
+      }
+    },
+    "latestMessage": "Zur neuesten Nachricht"
   }
 }

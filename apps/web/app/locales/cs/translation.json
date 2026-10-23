@@ -103,12 +103,19 @@
     "empty": "Zatím žádné konverzace.",
     "types": {
       "practice": "Cvičná relace",
-      "ai-mentor": "Lekce s AI mentorem"
+      "ai-mentor": "Lekce s AI mentorem",
+      "assistant": "Asistent"
     },
     "statuses": {
       "active": "Probíhá",
       "completed": "Dokončená",
       "archived": "Archivovaná"
+    },
+    "messageStatuses": {
+      "pending": "Čeká",
+      "running": "Probíhá",
+      "failed": "Přerušeno chybou",
+      "cancelled": "Zastaveno"
     }
   },
   "emailTemplates": {
@@ -987,6 +994,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "AI asistent",
     "settings": "Nastavení",
     "logout": "Odhlášení",
     "panel": "panel",
@@ -2280,6 +2289,7 @@
         "file_delete": "Může mazat soubory přímo z úložiště platformy.",
         "resource_library_manage": "Může spravovat soukromé zdroje v knihovně zdrojů.",
         "ai_use": "Může používat funkce platformy využívající AI.",
+        "assistant_use": "Může používat asistenta pouze pro čtení a spravovat vlastní konverzace.",
         "announcement_read": "Může zobrazit oznámení.",
         "announcement_create": "Může vytvářet oznámení.",
         "news_read_public": "Může zobrazit dostupné novinky.",
@@ -5345,14 +5355,13 @@
       "resource": "Zdroj:"
     },
     "actions": {
-      "save_automation_draft": "Koncept automatizace uložen",
-      "simulate_automation": "Automatizace simulována",
-      "apply_automation": "Automatizace publikována / použita",
-      "enable_automation": "Automatizace aktivována",
-      "disable_automation": "Automatizace deaktivována",
-      "duplicate_automation": "Automatizace duplikována",
-      "archive_automation": "Automatizace archivována",
-
+      "save_automation_draft": "Uložit koncept automatizace",
+      "simulate_automation": "Simulovat automatizaci",
+      "apply_automation": "Použít automatizaci",
+      "enable_automation": "Povolit automatizaci",
+      "disable_automation": "Zakázat automatizaci",
+      "duplicate_automation": "Duplikovat automatizaci",
+      "archive_automation": "Archivovat automatizaci",
       "create": "Vytvořeno",
       "update": "Aktualizováno",
       "bulk_course_category_update": "Hromadně aktualizována kategorie kurzů",
@@ -5383,14 +5392,7 @@
       "start_learning_path": "Vzdělávací cesta zahájena",
       "complete_learning_path": "Vzdělávací cesta dokončena",
       "play_scorm": "SCORM spuštěn",
-      "complete_scorm": "SCORM dokončen",
-      "save_automation_draft": "Uložit koncept automatizace",
-      "simulate_automation": "Simulovat automatizaci",
-      "apply_automation": "Použít automatizaci",
-      "enable_automation": "Povolit automatizaci",
-      "disable_automation": "Zakázat automatizaci",
-      "duplicate_automation": "Duplikovat automatizaci",
-      "archive_automation": "Archivovat automatizaci"
+      "complete_scorm": "SCORM dokončen"
     },
     "entity": {
       "automation": "Automatizace",
@@ -8160,5 +8162,101 @@
       "thumbnailNotFound": "Tento kurz z tržiště nemá náhled.",
       "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později."
     }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Konverzace s asistentem",
+      "open": "Otevřít konverzaci s asistentem",
+      "fullScreen": "Otevřít celého asistenta",
+      "minimize": "Minimalizovat konverzaci",
+      "dismiss": "Skrýt bublinu asistenta",
+      "dragHint": "Přetažením přesunete. Puštěním na X skryjete. Šipky přesouvají, Delete skryje.",
+      "dropToDismiss": "Pusťte pro skrytí"
+    },
+    "openSource": "Otevřít v Mentingo",
+    "sourceTypes": {
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "user": "Uživatel",
+      "group": "Skupina",
+      "category": "Kategorie",
+      "article": "Článek",
+      "news": "Novinka",
+      "qa": "Otázka a odpověď",
+      "development_path": "Vzdělávací cesta",
+      "resource": "Materiál",
+      "reference": "Zdroj"
+    },
+    "title": "Asistent",
+    "eyebrow": "Znalosti z vaší platformy",
+    "welcome": "Jak vám mohu pomoci?",
+    "intro": "Najděte vzdělávací materiály, ptejte se a ověřujte zdroje. V rámci vašich přístupových práv.",
+    "newConversation": "Nová konverzace",
+    "untitled": "Nová konverzace",
+    "search": "Hledat konverzace",
+    "recent": "Nedávné konverzace",
+    "history": "Historie konverzací",
+    "active": "Aktivní",
+    "archived": "Archivované",
+    "archivedThreads": "Archivované konverzace",
+    "showArchived": "Zobrazit archiv",
+    "showRecent": "Zobrazit nedávné konverzace",
+    "noThreads": "Zde se zobrazí vaše konverzace.",
+    "noMatches": "Žádné konverzace neodpovídají hledání.",
+    "loading": "Načítání konverzací…",
+    "loadError": "Konverzace se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "loadMore": "Načíst další",
+    "composerLabel": "Zpráva asistentovi",
+    "placeholder": "Zeptejte se na studium nebo obsah platformy…",
+    "composerHint": "Enter odešle · Shift + Enter vloží nový řádek",
+    "disclosure": "Odpovědi mohou obsahovat chyby. Ověřujte zdroje. Oprávnění správci mohou tyto konverzace prohlížet.",
+    "send": "Odeslat zprávu",
+    "stop": "Zastavit odpověď",
+    "you": "Vy",
+    "working": "Zpracovávám váš požadavek…",
+    "activity": {
+      "starting": "Spouštím…",
+      "thinking": "Zpracovávám váš požadavek…",
+      "searching": "Hledám informace…",
+      "reading": "Čtu obsah…",
+      "writing": "Píšu odpověď…"
+    },
+    "writing": "Píšu…",
+    "sources": "Zdroje",
+    "failed": "Odpověď přerušila chyba. Výše uvedený text může být neúplný.",
+    "cancelled": "Odpověď zastavena. Výše uvedený text může být neúplný.",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "rename": "Přejmenovat konverzaci",
+    "archive": "Archivovat konverzaci",
+    "restore": "Obnovit konverzaci",
+    "save": "Uložit",
+    "close": "Zavřít",
+    "threadUnavailable": "Tato konverzace není dostupná. Možná již neexistuje nebo k ní nemáte přístup.",
+    "sendError": "Zprávu se nepodařilo odeslat. Koncept byl zachován.",
+    "messageTooLong": "Zpráva může mít nejvýše 8 000 znaků. Před odesláním koncept zkraťte.",
+    "unavailable": "Asistent ještě není nakonfigurován. Obraťte se na správce.",
+    "archivedNotice": "Tato konverzace je archivována. Pro pokračování ji obnovte.",
+    "openHistory": "Otevřít historii konverzací",
+    "hideHistory": "Skrýt historii konverzací",
+    "renameDescription": "Pojmenujte konverzaci tak, abyste ji později snadno našli.",
+    "readOnly": "Asistent s přístupem pro čtení",
+    "loadEarlier": "Načíst starší zprávy",
+    "starters": {
+      "find": {
+        "label": "Najít vzdělávací materiál",
+        "prompt": "Najdi pro mě dostupné kurzy o onboardingu."
+      },
+      "learn": {
+        "label": "Prozkoumat možnosti studia",
+        "prompt": "K jakým vzdělávacím materiálům mám přístup?"
+      },
+      "understand": {
+        "label": "Porozumět tématu",
+        "prompt": "Najdi materiály o konstruktivní zpětné vazbě a vysvětli hlavní myšlenky."
+      }
+    },
+    "latestMessage": "Přejít na nejnovější zprávu"
   }
 }

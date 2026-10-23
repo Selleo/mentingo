@@ -1,19 +1,22 @@
-import { PERMISSIONS } from "@repo/shared";
+import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
 
 import { Navigation } from "./Navigation";
+import { useNavigationStore } from "./stores/navigationStore";
 
 import type { PermissionKey } from "~/common/permissions/permission.utils";
 import type { LeafMenuItem } from "~/config/navigationConfig";
 
-const state = vi.hoisted(() => ({ permissions: [] as PermissionKey[] }));
+const state = vi.hoisted(() => ({ permissions: [] as PermissionKey[], roleSlugs: [] as string[] }));
 
 vi.mock("@remix-run/react", () => ({ useLocation: () => ({ pathname: "/dashboard" }) }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
-vi.mock("~/api/queries", () => ({ useCurrentUser: () => ({ data: { id: "user" } }) }));
+vi.mock("~/api/queries", () => ({
+  useCurrentUser: () => ({ data: { id: "user", roleSlugs: state.roleSlugs } }),
+}));
 vi.mock("~/api/queries/admin/useConfigurationState", () => ({
   useConfigurationState: () => ({}),
 }));
@@ -33,14 +36,36 @@ vi.mock("./NavigationHeader", () => ({ NavigationHeader: () => null }));
 vi.mock("./NavigationFooter", () => ({ NavigationFooter: () => null }));
 vi.mock("./NavigationGlobalSearchWrapper", () => ({ NavigationGlobalSearchWrapper: () => null }));
 vi.mock("./NavigationMenu", () => ({
-  NavigationMenu: ({ menuItems }: { menuItems: LeafMenuItem[] }) => (
-    <>
-      {menuItems.map((item) => (
-        <a key={item.link} href={item.link}>
-          {item.label}
-        </a>
-      ))}
-    </>
+  NavigationMenu: ({
+    menuItems,
+    permissions,
+    isExpandable,
+    expandableLabel,
+    showNavigationLabels,
+    isSidebarCollapsed,
+  }: {
+    menuItems: LeafMenuItem[];
+    permissions: PermissionKey[];
+    isExpandable?: boolean;
+    expandableLabel?: string;
+    showNavigationLabels: boolean;
+    isSidebarCollapsed: boolean;
+  }) => (
+    <section
+      data-testid={`navigation-menu-${expandableLabel}`}
+      data-expandable={Boolean(isExpandable)}
+      data-labels={showNavigationLabels}
+      data-collapsed={isSidebarCollapsed}
+    >
+      {isExpandable && <span>{expandableLabel}</span>}
+      {menuItems
+        .filter((item) => matchesRequirement(permissions, item.accessRequirement))
+        .map((item) => (
+          <a key={item.link} href={item.link}>
+            {item.label}
+          </a>
+        ))}
+    </section>
   ),
 }));
 
@@ -48,6 +73,7 @@ describe("Phishing navigation availability", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     state.permissions = [PERMISSIONS.PHISHING_MANAGE];
+    state.roleSlugs = [];
   });
 
   it.each([
@@ -101,4 +127,100 @@ describe("Phishing navigation availability", () => {
     expect(usePhishingConfiguration).toHaveBeenCalledWith(false);
     expect(screen.queryByRole("link", { name: "phishing.title" })).not.toBeInTheDocument();
   });
+});
+
+describe("role-specific Assistant navigation presentation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(usePhishingConfiguration).mockReturnValue({
+      data: { enabled: false },
+      isError: false,
+    } as ReturnType<typeof usePhishingConfiguration>);
+  });
+
+  const personas = [
+    {
+      name: "student",
+      roles: [SYSTEM_ROLE_SLUGS.STUDENT],
+      permissions: [PERMISSIONS.COURSE_READ],
+      grouped: false,
+      conversations: false,
+    },
+    {
+      name: "content creator",
+      roles: [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
+      permissions: [PERMISSIONS.COURSE_CREATE],
+      grouped: false,
+      conversations: false,
+    },
+    {
+      name: "admin",
+      roles: [SYSTEM_ROLE_SLUGS.ADMIN],
+      permissions: [PERMISSIONS.AI_THREAD_READ],
+      grouped: true,
+      conversations: true,
+    },
+    {
+      name: "admin without conversation oversight",
+      roles: [SYSTEM_ROLE_SLUGS.ADMIN],
+      permissions: [],
+      grouped: true,
+      conversations: false,
+    },
+    {
+      name: "custom authorized reviewer",
+      roles: ["custom-reviewer"],
+      permissions: [PERMISSIONS.AI_THREAD_READ],
+      grouped: false,
+      conversations: true,
+    },
+    {
+      name: "multi-role admin and student",
+      roles: [SYSTEM_ROLE_SLUGS.ADMIN, SYSTEM_ROLE_SLUGS.STUDENT],
+      permissions: [PERMISSIONS.AI_THREAD_READ],
+      grouped: true,
+      conversations: true,
+    },
+  ];
+  const viewports = [
+    { mode: "mobile", width: 390, collapsed: false, labels: true },
+    { mode: "desktop", width: 1600, collapsed: false, labels: true },
+    { mode: "collapsed desktop", width: 1600, collapsed: true, labels: false },
+  ];
+
+  it.each(
+    personas.flatMap((persona) => viewports.map((viewport) => ({ ...persona, ...viewport }))),
+  )(
+    "preserves native $mode navigation for $name",
+    ({ roles, permissions, grouped, conversations, width, collapsed, labels }) => {
+      state.roleSlugs = roles;
+      state.permissions = permissions;
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        writable: true,
+        value: width,
+      });
+      useNavigationStore.setState({ isSidebarCollapsed: collapsed });
+      render(<Navigation />);
+      expect(screen.getByRole("link", { name: "navigationSideBar.aiAssistant" })).toHaveAttribute(
+        "href",
+        "/assistant",
+      );
+      const group = screen.queryByTestId("navigation-menu-navigationSideBar.ai");
+      if (grouped) {
+        expect(group).toHaveAttribute("data-expandable", "true");
+        expect(group).toHaveAttribute("data-labels", String(labels));
+        expect(group).toHaveAttribute("data-collapsed", String(collapsed));
+      } else {
+        expect(group).not.toBeInTheDocument();
+        const standalone = screen.getByTestId("navigation-menu-navigationSideBar.aiAssistant");
+        expect(standalone).toHaveAttribute("data-expandable", "false");
+        expect(standalone).toHaveAttribute("data-labels", String(labels));
+        expect(standalone).toHaveAttribute("data-collapsed", String(collapsed));
+      }
+      const history = screen.queryByRole("link", { name: "aiConversations.title" });
+      if (conversations) expect(history).toHaveAttribute("href", "/admin/ai-conversations");
+      else expect(history).not.toBeInTheDocument();
+    },
+  );
 });

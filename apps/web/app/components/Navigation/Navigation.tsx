@@ -113,6 +113,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         isLearningPathsEnabled,
         shouldShowLearningPaths,
         phishingConfiguration?.enabled === true && !isPhishingConfigurationError,
+        user?.roleSlugs ?? [],
       ),
     );
   }

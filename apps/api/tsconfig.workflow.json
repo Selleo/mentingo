@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": ["src/assistant/workflow/assistant.workflow.ts"],
+  "exclude": ["node_modules", "dist"]
+}

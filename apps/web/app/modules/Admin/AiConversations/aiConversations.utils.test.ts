@@ -7,6 +7,11 @@ import {
 } from "./aiConversations.utils";
 
 describe("conversation URL state", () => {
+  it("preserves the assistant type filter", () => {
+    expect(readConversationFilters(new URLSearchParams("type=assistant"), "en").type).toBe(
+      "assistant",
+    );
+  });
   it("ignores removed owner filters in legacy links", () => {
     const params = new URLSearchParams("userId=user-1&ownerName=Alex&type=practice");
     expect(readConversationFilters(params, "en")).not.toHaveProperty("userId");
