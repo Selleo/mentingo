@@ -7099,6 +7099,9 @@
     "description": "Realiza ejercicios controlados y asigna formación tras acciones de riesgo.",
     "newCampaign": "Nueva campaña",
     "details": "Detalles de la campaña",
+    "detailsDescription": "Pon nombre a la campaña y elige el correo simulado y el curso que se asigna tras una acción de riesgo.",
+    "sending": "Envío",
+    "sendingDescription": "Envía de inmediato o reparte los mensajes al azar en un intervalo de tiempo.",
     "audience": "Destinatarios",
     "loading": "Cargando…",
     "retry": "Reintentar",
@@ -7110,20 +7113,23 @@
     "name": "Nombre de campaña",
     "scenario": "Escenario",
     "choose": "Elige una opción",
-    "scenarioLanguage": "Los escenarios y las páginas de simulación del MVP están en inglés.",
-    "course": "Curso educativo (publicado, gratuito)",
+    "course": "Curso de seguimiento",
+    "courseHelp": "Se asigna automáticamente a quien haga clic en el enlace o envíe datos. Solo se muestran cursos publicados y gratuitos.",
     "people": "Personas",
-    "groups": "Grupos / departamentos",
+    "groups": "Grupos",
     "noOptions": "No hay opciones elegibles disponibles.",
     "selectionHelp": "Busca y selecciona personas o grupos. Los destinatarios duplicados reciben un solo mensaje.",
     "removeSelection": "Quitar {{label}}",
     "schedule": "Distribuir los envíos aleatoriamente en un intervalo",
-    "start": "Inicio (hora local)",
-    "end": "Fin (hora local)",
+    "start": "Inicio",
+    "end": "Fin",
     "startTooltip": "El primer momento en que se pueden enviar los correos de simulación, en tu hora local.",
     "endTooltip": "El último momento en que se pueden enviar los correos de simulación, en tu hora local. La ventana puede durar hasta 30 días.",
     "review": "Revisar campaña",
-    "reviewAudience": "{{people}} destinatarios únicos entre las personas y {{groups}} grupos seleccionados. La pertenencia se comprueba al iniciar.",
+    "reviewDescription": "Revisa los detalles antes de enviar los correos.",
+    "audienceCount_one": "{{count}} destinatario",
+    "audienceCount_other": "{{count}} destinatarios",
+    "audienceRecheck": "Las personas de varios grupos se cuentan una vez. La pertenencia se comprueba de nuevo al iniciar.",
     "authorization": "Al iniciar confirmas la autorización de tu organización. Después no se pueden cambiar los destinatarios ni el curso.",
     "launch": "Iniciar campaña",
     "edit": "Editar",
@@ -7132,7 +7138,6 @@
     "invalidCourse": "Elige un curso publicado y gratuito.",
     "createSuccess": "Campaña creada.",
     "cancelSuccess": "Mensajes pendientes cancelados.",
-    "hall": "Hall of Shame",
     "refresh": "Actualizar",
     "cancel": "Cancelar mensajes pendientes",
     "cancelConfirm": "Los mensajes que ya se están enviando pueden llegar. ¿Cancelar los demás?",
@@ -7143,14 +7148,14 @@
     "conflict": "Esta solicitud ya se usó para otra campaña.",
     "metrics": {
       "recipients": "Destinatarios",
-      "sent": "Enviados (aceptados por SMTP)",
+      "sent": "Enviados",
       "clicked": "Clics",
       "submitted": "Formularios enviados",
       "riskRate": "Riesgo"
     },
     "columns": {
       "person": "Persona",
-      "sent": "Enviados (aceptados por SMTP)",
+      "sent": "Enviados",
       "clicked": "Clics",
       "submitted": "Formularios enviados",
       "courseStatus": "Estado del curso",
@@ -7174,7 +7179,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Buscar por nombre o correo",
+    "filters": {
+      "all": "Todas las personas",
+      "atRisk": "Solo en riesgo",
+      "allGroups": "Todos los grupos"
+    },
+    "noMatches": "Ninguna persona coincide con los filtros.",
+    "sortBy": "Ordenar por {{column}}",
+    "outcomes": {
+      "title": "Resultados",
+      "submitted": "Enviaron datos",
+      "clickedOnly": "Solo hicieron clic",
+      "noAction": "Sin acción"
+    },
+    "recentActivity": "Actividad reciente",
+    "activityEmpty": "Aún no hay clics ni envíos.",
+    "activity": {
+      "clicked": "Hizo clic en el enlace",
+      "submitted": "Envió datos"
+    }
   },
   "reports": {
     "errors": {
