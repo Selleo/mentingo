@@ -22,5 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "exclude": ["node_modules", "dist", "src/assistant/workflow/assistant.workflow.ts"]
 }

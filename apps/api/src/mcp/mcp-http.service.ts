@@ -73,6 +73,7 @@ import {
   lessons as lessonRows,
   news as newsRows,
   resources as resourceRows,
+  users as userRows,
 } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
@@ -80,6 +81,15 @@ import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
 import { registerMcpCustomizationTools } from "./mcp-customization-tools";
 import { registerMcpGenericUploadTool } from "./mcp-generic-upload-tools";
+import { linkNativeReadResult } from "./mcp-native-links";
+import {
+  bindToolActor,
+  NATIVE_READ_TOOL_NAMES,
+  type BoundToolActor,
+  type NativeReadActor,
+  type NativeReadTool,
+  type NativeReadRegistration,
+} from "./mcp-native-read.types";
 import { MCP_CONTENT_SEARCH_PERMISSIONS, registerMcpSearchTools } from "./mcp-search-tools";
 import {
   asMcpStudentUser,
@@ -192,23 +202,24 @@ export class McpHttpService {
   }
 
   private createServer(
-    actor: McpToolActor,
+    actor: BoundToolActor,
     permissions: PermissionKey[],
     settings: Awaited<ReturnType<SettingsService["getGlobalSettings"]>>,
+    nativeCollector?: McpServer,
   ): McpServer {
-    const studentOnly = actor.grant.scopes.includes(MCP_SCOPES.STUDENT_READ);
+    const binding = bindToolActor(actor);
+    const studentOnly = binding.scopes.includes(MCP_SCOPES.STUDENT_READ);
     const learnerSearch =
       studentOnly ||
-      (!actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
-        !actor.grant.scopes.includes(MCP_SCOPES.SEARCH) &&
+      (!binding.scopes.includes(MCP_SCOPES.AUTHORING) &&
+        !binding.scopes.includes(MCP_SCOPES.SEARCH) &&
         !hasMcpManagementSearchAccess(permissions));
-    const learnerLessons =
-      learnerSearch && canUseMcpToolWithScopes("get_lesson", actor.grant.scopes);
+    const learnerLessons = learnerSearch && this.actorAllowsTool(actor, "get_lesson");
     const discoveryUser = asMcpStudentUser(
       {
-        userId: actor.grant.userId,
-        tenantId: actor.grant.tenantId,
-        email: actor.email,
+        userId: binding.userId,
+        tenantId: binding.tenantId,
+        email: binding.email,
         roleSlugs: [],
         permissions,
       },
@@ -218,15 +229,17 @@ export class McpHttpService {
     if (learnerLessons)
       instructions =
         "Search learner-visible courses, chapters, lessons, articles, news and Q&A. Use global_search with mode=hybrid to find relevant lessons and articles, then get_lesson/get_article to read their content. Use list_chapters/list_lessons to browse, or search_lessons for an unindexed literal text search. Free public courses and actively enrolled paid public or private courses only, including for administrators. This connection cannot modify content, update progress, access quiz answers, AI prompts, or file URLs.";
-    else if (actor.grant.scopes.includes(MCP_SCOPES.SEARCH))
+    else if (binding.scopes.includes(MCP_SCOPES.SEARCH))
       instructions =
         "Search learner-visible course metadata, articles, news and Q&A. No lesson content, modifications, administrative data or file URLs.";
-    const server = new McpServer(
-      { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
-      {
-        instructions,
-      },
-    );
+    const server =
+      nativeCollector ??
+      new McpServer(
+        { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
+        {
+          instructions,
+        },
+      );
     // Collect reader adapters without registering a second tool under the same name.
     const learnerTools = new Map<string, { config: unknown; callback: unknown }>();
     const readerCollector = {
@@ -238,7 +251,7 @@ export class McpHttpService {
       readerCollector,
       (permissions, operation) => this.run(actor, permissions, operation, "learner"),
       this.mcpStudentLessonRepository,
-      actor.grant.resource,
+      binding.resource,
     );
     const readerPermissions = {
       ...MCP_STUDENT_TOOL_PERMISSIONS,
@@ -254,7 +267,7 @@ export class McpHttpService {
         qa: this.qaService,
         assertFeatureEnabled: (feature) => this.assertFeatureEnabled(feature),
       },
-      actor.grant.resource,
+      binding.resource,
     );
     const registerTool = server.registerTool.bind(server);
     server.registerTool = ((name: string, config: unknown, callback: unknown) => {
@@ -262,20 +275,22 @@ export class McpHttpService {
       const useReader =
         Boolean(reader) &&
         (studentOnly ||
-          (!actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
+          (!binding.scopes.includes(MCP_SCOPES.AUTHORING) &&
             !canListMcpTool(name, permissions, settings)));
       const selected = useReader ? reader : undefined;
       const tool = Reflect.apply(registerTool, server, [
         name,
         selected?.config ?? config,
-        (input: unknown, extra: unknown) =>
-          traceMcpTool(name, actor, this.callContext.getStore(), input, () =>
+        (input: unknown, extra: unknown) => {
+          const execute = () =>
             Reflect.apply(
               (selected?.callback ?? callback) as (...args: unknown[]) => Promise<CallToolResult>,
               undefined,
               [input, extra],
-            ),
-          ),
+            );
+          if ("native" in actor) return execute();
+          return traceMcpTool(name, actor, this.callContext.getStore(), input, execute);
+        },
       ]) as RegisteredTool;
       const studentPermissions = Object.entries(readerPermissions).find(
         ([tool]) => tool === name,
@@ -294,16 +309,16 @@ export class McpHttpService {
         permissionsAllow =
           name === "global_search" &&
           hasAnyPermission(discoveryUser.permissions, MCP_STUDENT_SEARCH_PERMISSIONS);
-      } else if (name === "global_search" && actor.grant.scopes.includes(MCP_SCOPES.SEARCH)) {
+      } else if (name === "global_search" && binding.scopes.includes(MCP_SCOPES.SEARCH)) {
         permissionsAllow = hasAnyPermission(permissions, MCP_CONTENT_SEARCH_PERMISSIONS);
       }
-      if (!canUseMcpToolWithScopes(name, actor.grant.scopes) || !permissionsAllow) tool.disable();
+      if (!this.actorAllowsTool(actor, name) || !permissionsAllow) tool.disable();
       return tool;
     }) as typeof server.registerTool;
 
     if (
-      !actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
-      !actor.grant.scopes.includes(MCP_SCOPES.SEARCH) &&
+      !binding.scopes.includes(MCP_SCOPES.AUTHORING) &&
+      !binding.scopes.includes(MCP_SCOPES.SEARCH) &&
       (studentOnly || !canListMcpTool("get_lesson", permissions, settings))
     ) {
       const search = learnerTools.get("search_lessons")!;
@@ -326,9 +341,9 @@ export class McpHttpService {
         this.run(actor, [], async (user) => {
           const settings = await this.settingsService.getGlobalSettings();
           const available = (name: string) => {
-            if (!canUseMcpToolWithScopes(name, actor.grant.scopes)) return false;
+            if (!this.actorAllowsTool(actor, name)) return false;
             const management = canListMcpTool(name, user.permissions, settings);
-            if (actor.grant.scopes.includes(MCP_SCOPES.AUTHORING)) return management;
+            if (binding.scopes.includes(MCP_SCOPES.AUTHORING)) return management;
             const learner = asMcpStudentUser(user, settings);
             if (name === "global_search" && !hasMcpManagementSearchAccess(user.permissions))
               return hasAnyPermission(learner.permissions, MCP_STUDENT_SEARCH_PERMISSIONS);
@@ -3308,8 +3323,8 @@ export class McpHttpService {
         this.run(actor, permissions, operation, learnerSearch ? "learner" : "managementSearch"),
       this.globalSearchService,
       {
-        resource: actor.grant.resource,
-        searchOnly: learnerSearch || actor.grant.scopes.includes(MCP_SCOPES.SEARCH),
+        resource: binding.resource,
+        searchOnly: learnerSearch || binding.scopes.includes(MCP_SCOPES.SEARCH),
         studentOnly: learnerSearch,
         includeLearnerLessons: learnerLessons,
       },
@@ -3318,41 +3333,134 @@ export class McpHttpService {
     return server;
   }
 
+  private actorAllowsTool(actor: BoundToolActor, name: string) {
+    if ("native" in actor) return NATIVE_READ_TOOL_NAMES.has(name);
+    return canUseMcpToolWithScopes(name, actor.grant.scopes);
+  }
+
+  async listNativeReadTools(
+    userId: string,
+    tenantId: string,
+    origin: string,
+  ): Promise<NativeReadTool[]> {
+    const tools = await this.collectNativeReadTools(userId, tenantId, origin);
+    return [...tools.values()]
+      .filter((tool) => tool.enabled)
+      .map(({ name, config }) => ({
+        name,
+        description: config.description ?? "",
+        // TypeBox symbol metadata is not part of JSON Schema and cannot cross durable steps.
+        inputSchema: JSON.parse(
+          JSON.stringify(config.inputSchema["~standard"].jsonSchema.input()),
+        ) as Record<string, unknown>,
+      }));
+  }
+
+  async executeNativeReadTool(
+    userId: string,
+    tenantId: string,
+    origin: string,
+    name: string,
+    args: Record<string, unknown>,
+    onAuthorizedTool?: () => Promise<void>,
+  ) {
+    if (!NATIVE_READ_TOOL_NAMES.has(name))
+      throw new ForbiddenException("Assistant tool is not read-only");
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
+      const tools = await this.collectNativeReadTools(userId, tenantId, origin, onAuthorizedTool);
+      const tool = tools.get(name);
+      if (!tool?.enabled) throw new ForbiddenException("Assistant tool is unavailable");
+      const result = await tool.config.inputSchema["~standard"].validate(args);
+      if (result.issues) throw new BadRequestException("Invalid assistant tool input");
+      return this.callContext.run({ tool: name, arguments: args, requestId: randomUUID() }, () =>
+        tool.callback(result.value),
+      );
+    });
+  }
+
+  private async collectNativeReadTools(
+    userId: string,
+    tenantId: string,
+    origin: string,
+    onAuthorizedTool?: () => Promise<void>,
+  ) {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
+      const [account] = await this.db
+        .select({ email: userRows.email })
+        .from(userRows)
+        .where(
+          and(
+            eq(userRows.id, userId),
+            eq(userRows.tenantId, tenantId),
+            eq(userRows.archived, false),
+            sql`${userRows.deletedAt} IS NULL`,
+          ),
+        )
+        .limit(1);
+      if (!account) throw new ForbiddenException("Assistant account is unavailable");
+      const access = await this.permissionsService.getUserAccess(userId);
+      const settings = await this.settingsService.getGlobalSettings();
+      const actor: NativeReadActor = {
+        native: { userId, tenantId, email: account.email, resource: origin },
+        onAuthorizedTool,
+      };
+      const tools = new Map<string, NativeReadRegistration>();
+      const collector = {
+        registerTool: (
+          name: string,
+          config: NativeReadRegistration["config"],
+          callback: (input: unknown) => Promise<CallToolResult>,
+        ) => {
+          const entry = { name, config, callback, enabled: NATIVE_READ_TOOL_NAMES.has(name) };
+          if (entry.enabled) tools.set(name, entry);
+          return {
+            disable: () => {
+              entry.enabled = false;
+            },
+          };
+        },
+      } as unknown as McpServer;
+      this.createServer(actor, access.permissions, settings, collector);
+      return tools;
+    });
+  }
+
   private async run<T extends Record<string, unknown>>(
-    actor: McpToolActor,
+    actor: BoundToolActor,
     requiredPermissions: PermissionKey[],
     operation: (user: CurrentUserType) => Promise<T>,
     view?: "learner" | "managementSearch",
   ) {
+    const binding = bindToolActor(actor);
     const call = this.callContext.getStore();
     let auditUser: CurrentUserType = {
-      userId: actor.grant.userId,
-      tenantId: actor.grant.tenantId,
-      email: actor.email,
+      userId: binding.userId,
+      tenantId: binding.tenantId,
+      email: binding.email,
       roleSlugs: [],
       permissions: [],
     };
     try {
-      if (!canUseMcpToolWithScopes(call?.tool ?? "unknown", actor.grant.scopes)) {
+      if (!this.actorAllowsTool(actor, call?.tool ?? "unknown")) {
         throw new ForbiddenException("MCP integration scope does not allow this tool");
       }
-      const access = await this.permissionsService.getUserAccess(actor.grant.userId);
+      const access = await this.permissionsService.getUserAccess(binding.userId);
       const account: CurrentUserType = {
-        userId: actor.grant.userId,
-        tenantId: actor.grant.tenantId,
-        email: actor.email,
+        userId: binding.userId,
+        tenantId: binding.tenantId,
+        email: binding.email,
         roleSlugs: access.roleSlugs,
         permissions: access.permissions,
       };
       if (
         view === "managementSearch" &&
-        !actor.grant.scopes.includes(MCP_SCOPES.AUTHORING) &&
-        !actor.grant.scopes.includes(MCP_SCOPES.SEARCH) &&
+        !binding.scopes.includes(MCP_SCOPES.AUTHORING) &&
+        !binding.scopes.includes(MCP_SCOPES.SEARCH) &&
         !hasMcpManagementSearchAccess(account.permissions)
       )
         throw new ForbiddenException("MCP search access changed; rediscover available tools");
       const user =
-        view === "learner" || actor.grant.scopes.includes(MCP_SCOPES.STUDENT_READ)
+        view === "learner" || binding.scopes.includes(MCP_SCOPES.STUDENT_READ)
           ? asMcpStudentUser(account, await this.settingsService.getGlobalSettings())
           : account;
       if (
@@ -3362,11 +3470,21 @@ export class McpHttpService {
         throw new ForbiddenException("Missing MCP content permission");
       }
       auditUser = user;
+      if ("native" in actor) await actor.onAuthorizedTool?.();
       const result = await this.executeIdempotent(actor, call, () => operation(user));
       await this.auditCall(auditUser, actor, call, "success", result);
+      const linkedResult =
+        "native" in actor && call
+          ? linkNativeReadResult(call.tool, result, {
+              origin: binding.resource,
+              arguments: call.arguments,
+              user,
+              learner: view === "learner",
+            })
+          : result;
       const uploadResult = withMcpUploadInstructions(
-        result,
-        actor.grant.resource,
+        linkedResult,
+        binding.resource,
         call?.arguments ?? {},
       );
       const response = call ? { ...uploadResult, requestId: call.requestId } : uploadResult;
@@ -3399,10 +3517,11 @@ export class McpHttpService {
   }
 
   private async executeIdempotent<T extends Record<string, unknown>>(
-    actor: McpToolActor,
+    actor: BoundToolActor,
     call: McpCallContext | undefined,
     operation: () => Promise<T>,
   ): Promise<T> {
+    if ("native" in actor) return operation();
     const idempotencyKey = call?.arguments.idempotencyKey;
     if (typeof idempotencyKey !== "string" || !call) return operation();
 
@@ -3460,12 +3579,12 @@ export class McpHttpService {
 
   private async auditCall(
     user: CurrentUserType,
-    actor: McpToolActor,
+    actor: BoundToolActor,
     call: McpCallContext | undefined,
     outcome: "success" | "failure",
     result?: Record<string, unknown>,
   ): Promise<void> {
-    if (!call || call.tool === "unknown") return;
+    if ("native" in actor || !call || call.tool === "unknown") return;
     const entityId = [
       "lessonId",
       "chapterId",

@@ -7669,14 +7669,24 @@ export interface GetThreadResponse {
   data: {
     /** @format uuid */
     id: string;
-    aiMentorLessonId: string | null;
-    practiceSessionId: string | null;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string;
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    archived: boolean;
     createdAt: string;
     updatedAt: string;
-    status: "active" | "completed" | "archived";
+    latestRun?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      status: "pending" | "running" | "completed" | "failed" | "cancelled";
+      activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+      workflowRunId: string | null;
+      errorCode: string | null;
+      createdAt: string;
+      updatedAt: string;
+    } | null;
   };
 }
 
@@ -7734,7 +7744,7 @@ export interface GetAdminAiThreadSummariesResponse {
   data: {
     /** @format uuid */
     id: string;
-    type: "practice" | "ai-mentor";
+    type: "practice" | "ai-mentor" | "assistant";
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7766,7 +7776,7 @@ export interface GetAdminAiThreadDetailsResponse {
   data: {
     /** @format uuid */
     id: string;
-    type: "practice" | "ai-mentor";
+    type: "practice" | "ai-mentor" | "assistant";
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7814,6 +7824,7 @@ export interface GetAdminAiThreadMessagesResponse {
     id: string;
     role: "user" | "assistant";
     content: string;
+    status?: "pending" | "running" | "complete" | "failed" | "cancelled";
     createdAt: string;
   }[];
   pagination: {
@@ -31309,6 +31320,907 @@ export interface GetReportExportResponse {
   };
 }
 
+export interface GetAvailabilityResponse {
+  data: {
+    available: boolean;
+    reason: string | null;
+  };
+}
+
+export interface ListThreadsResponse {
+  data: {
+    items: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      /** @default "en" */
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      archived: boolean;
+      createdAt: string;
+      updatedAt: string;
+      latestRun?: {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        threadId: string;
+        status: "pending" | "running" | "completed" | "failed" | "cancelled";
+        activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+        workflowRunId: string | null;
+        errorCode: string | null;
+        createdAt: string;
+        updatedAt: string;
+      } | null;
+    }[];
+    page: number;
+    perPage: number;
+    totalItems: number;
+  };
+}
+
+export interface CreateThreadBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   * @pattern \S
+   */
+  title?: string;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface CreateThreadResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    archived: boolean;
+    createdAt: string;
+    updatedAt: string;
+    latestRun?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      status: "pending" | "running" | "completed" | "failed" | "cancelled";
+      activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+      workflowRunId: string | null;
+      errorCode: string | null;
+      createdAt: string;
+      updatedAt: string;
+    } | null;
+  };
+}
+
+export interface UpdateThreadBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   * @pattern \S
+   */
+  title?: string;
+  archived?: boolean;
+}
+
+export interface UpdateThreadResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    archived: boolean;
+    createdAt: string;
+    updatedAt: string;
+    latestRun?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      status: "pending" | "running" | "completed" | "failed" | "cancelled";
+      activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+      workflowRunId: string | null;
+      errorCode: string | null;
+      createdAt: string;
+      updatedAt: string;
+    } | null;
+  };
+}
+
+export interface ListMessagesResponse {
+  data: {
+    items: {
+      /** @format uuid */
+      id: string;
+      clientMessageId?: string | null;
+      /** @format uuid */
+      threadId: string;
+      role: "user" | "assistant";
+      text: string;
+      status: "pending" | "running" | "complete" | "failed" | "cancelled";
+      sources: {
+        title: string;
+        url: string;
+        entityType?:
+          | "course"
+          | "lesson"
+          | "user"
+          | "group"
+          | "category"
+          | "article"
+          | "news"
+          | "qa"
+          | "development_path"
+          | "resource";
+        /** @maxLength 300 */
+        description?: string;
+      }[];
+      createdAt: string;
+      updatedAt: string;
+    }[];
+    page: number;
+    perPage: number;
+    totalItems: number;
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      status: "pending" | "running" | "completed" | "failed" | "cancelled";
+      activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+      workflowRunId: string | null;
+      errorCode: string | null;
+      createdAt: string;
+      updatedAt: string;
+    } | null;
+  };
+}
+
+export interface SendMessageBody {
+  /** @format uuid */
+  clientMessageId: string;
+  /**
+   * @minLength 1
+   * @maxLength 8000
+   * @pattern \S
+   */
+  text: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface SendMessageResponse {
+  data: {
+    userMessage: {
+      /** @format uuid */
+      id: string;
+      clientMessageId?: string | null;
+      /** @format uuid */
+      threadId: string;
+      role: "user" | "assistant";
+      text: string;
+      status: "pending" | "running" | "complete" | "failed" | "cancelled";
+      sources: {
+        title: string;
+        url: string;
+        entityType?:
+          | "course"
+          | "lesson"
+          | "user"
+          | "group"
+          | "category"
+          | "article"
+          | "news"
+          | "qa"
+          | "development_path"
+          | "resource";
+        /** @maxLength 300 */
+        description?: string;
+      }[];
+      createdAt: string;
+      updatedAt: string;
+    };
+    assistantMessage: {
+      /** @format uuid */
+      id: string;
+      clientMessageId?: string | null;
+      /** @format uuid */
+      threadId: string;
+      role: "user" | "assistant";
+      text: string;
+      status: "pending" | "running" | "complete" | "failed" | "cancelled";
+      sources: {
+        title: string;
+        url: string;
+        entityType?:
+          | "course"
+          | "lesson"
+          | "user"
+          | "group"
+          | "category"
+          | "article"
+          | "news"
+          | "qa"
+          | "development_path"
+          | "resource";
+        /** @maxLength 300 */
+        description?: string;
+      }[];
+      createdAt: string;
+      updatedAt: string;
+    };
+    run: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      status: "pending" | "running" | "completed" | "failed" | "cancelled";
+      activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+      workflowRunId: string | null;
+      errorCode: string | null;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+}
+
+export interface CancelRunResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    status: "pending" | "running" | "completed" | "failed" | "cancelled";
+    activity?: ("starting" | "thinking" | "searching" | "reading" | "writing") | null;
+    workflowRunId: string | null;
+    errorCode: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface GetConsentResponse {
+  data: {
+    clientName: string;
+    clientId: string;
+    redirectUri: string;
+    accountEmail: string;
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    scopes: (
+      | "account:access"
+      | "authoring"
+      | "search"
+      | "student:read"
+      | "search:read"
+      | "courses:read"
+      | "courses:write"
+      | "categories:read"
+      | "categories:write"
+      | "articles:read"
+      | "articles:write"
+      | "news:read"
+      | "news:write"
+      | "qa:read"
+      | "qa:write"
+      | "learning_paths:read"
+      | "learning_paths:write"
+      | "users:read"
+      | "users:write"
+      | "groups:read"
+      | "groups:write"
+      | "platform:read"
+      | "platform:write"
+      | "files:write"
+    )[];
+  };
+}
+
+export interface CreateArticleSectionBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface CreateArticleSectionResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface GetArticleSectionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    assignedArticlesCount: number;
+  };
+}
+
+export interface UpdateArticleSectionBody {
+  translations: {
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title?: string;
+  }[];
+}
+
+export interface UpdateArticleSectionResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface AddNewLanguageToSectionBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface AddNewLanguageToSectionResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export type GetDraftArticlesResponse = {
+  id: string;
+  title: string;
+  status: string;
+  isPublic: boolean;
+  publishedAt: string | null;
+  authorName: string;
+  authorDeleted: boolean;
+  /** @format uuid */
+  authorId: string;
+  resources?: {
+    images: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    videos: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    attachments: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    coverImage?: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+  nextArticle?: string | null;
+  previousArticle?: string | null;
+}[];
+
+export interface GetArticleTocResponse {
+  data: {
+    sections: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      articles: {
+        /** @format uuid */
+        id: string;
+        title: string;
+      }[];
+    }[];
+  };
+}
+
+export interface GetArticleResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    plainContent: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    publishedAt: string | null;
+    authorName: string;
+    authorDeleted: boolean;
+    /** @format uuid */
+    authorId: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextArticle?: string | null;
+    previousArticle?: string | null;
+  };
+}
+
+export type GetArticlesResponse = {
+  id: string;
+  title: string;
+  status: string;
+  isPublic: boolean;
+  publishedAt: string | null;
+  authorName: string;
+  authorDeleted: boolean;
+  /** @format uuid */
+  authorId: string;
+  resources?: {
+    images: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    videos: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    attachments: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }[];
+    coverImage?: {
+      /** @format uuid */
+      id: string;
+      fileUrl: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+  nextArticle?: string | null;
+  previousArticle?: string | null;
+}[];
+
+export interface CreateArticleBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @format uuid */
+  sectionId: string;
+}
+
+export interface CreateArticleResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface UpdateArticleResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface AddNewLanguageBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface AddNewLanguageResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface UploadFileToArticleBody {
+  /**
+   * File
+   * @format binary
+   */
+  file?: File;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  title: string;
+  description: string;
+  visibility?: "public" | "private";
+}
+
+export interface UploadFileToArticleResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+  };
+}
+
+export interface GenerateArticlePreviewBody {
+  /** @format uuid */
+  articleId: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  content: string;
+}
+
+export interface GenerateArticlePreviewResponse {
+  data: {
+    parsedContent: string;
+  };
+}
+
+export interface GetDraftNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    publishedAt: string | null;
+    authorName: string;
+    authorDeleted: boolean;
+    /** @format uuid */
+    authorId: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GenerateNewsPreviewBody {
+  /** @format uuid */
+  newsId: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  content: string;
+}
+
+export interface GenerateNewsPreviewResponse {
+  data: {
+    parsedContent: string;
+  };
+}
+
+export interface GetNewsResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    plainContent: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    publishedAt: string | null;
+    authorName: string;
+    authorDeleted: boolean;
+    /** @format uuid */
+    authorId: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  };
+}
+
+export interface GetNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    publishedAt: string | null;
+    authorName: string;
+    authorDeleted: boolean;
+    /** @format uuid */
+    authorId: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string | null;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateNewsBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface CreateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface UpdateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface DeleteNewsLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    availableLocales: string[];
+  };
+}
+
+export interface DeleteNewsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UploadFileToNewsResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+  };
+}
+
+export interface GetQAResponse {
+  /** @format uuid */
+  id: string;
+  title: string | null;
+  description: string | null;
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+}
+
+export type GetAllQAResponse = {
+  /** @format uuid */
+  id: string;
+  title: string | null;
+  description: string | null;
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+}[];
+
+export interface CreateQABody {
+  title: string;
+  description: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface CreateQAResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UpdateQABody {
+  title?: string;
+  description?: string;
+}
+
 export type InitScormImportBody =
   | {
       action: "create-course";
@@ -32210,608 +33122,6 @@ export interface GetActivityLogsResponse {
     perPage: number;
   };
   appliedFilters?: object;
-}
-
-export interface GetQAResponse {
-  /** @format uuid */
-  id: string;
-  title: string | null;
-  description: string | null;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-}
-
-export type GetAllQAResponse = {
-  /** @format uuid */
-  id: string;
-  title: string | null;
-  description: string | null;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-}[];
-
-export interface CreateQABody {
-  title: string;
-  description: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-}
-
-export interface CreateQAResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-  };
-}
-
-export interface UpdateQABody {
-  title?: string;
-  description?: string;
-}
-
-export interface GetDraftNewsListResponse {
-  data: {
-    id: string;
-    title: string;
-    content: string;
-    summary: string;
-    status: string;
-    isPublic: boolean;
-    /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-    publishedAt: string | null;
-    authorName: string;
-    authorDeleted: boolean;
-    /** @format uuid */
-    authorId: string;
-    resources?: {
-      images: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      videos: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      attachments: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      coverImage?: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      };
-    };
-    createdAt: string;
-    updatedAt: string;
-    nextNews?: string | null;
-    previousNews?: string | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface GenerateNewsPreviewBody {
-  /** @format uuid */
-  newsId: string;
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  content: string;
-}
-
-export interface GenerateNewsPreviewResponse {
-  data: {
-    parsedContent: string;
-  };
-}
-
-export interface GetNewsResponse {
-  data: {
-    id: string;
-    title: string;
-    content: string;
-    plainContent: string;
-    summary: string;
-    status: string;
-    isPublic: boolean;
-    /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-    publishedAt: string | null;
-    authorName: string;
-    authorDeleted: boolean;
-    /** @format uuid */
-    authorId: string;
-    resources?: {
-      images: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      videos: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      attachments: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      coverImage?: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      };
-    };
-    createdAt: string;
-    updatedAt: string;
-    nextNews?: string | null;
-    previousNews?: string | null;
-  };
-}
-
-export interface GetNewsListResponse {
-  data: {
-    id: string;
-    title: string;
-    content: string;
-    summary: string;
-    status: string;
-    isPublic: boolean;
-    /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-    publishedAt: string | null;
-    authorName: string;
-    authorDeleted: boolean;
-    /** @format uuid */
-    authorId: string;
-    resources?: {
-      images: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      videos: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      attachments: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      coverImage?: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      };
-    };
-    createdAt: string;
-    updatedAt: string;
-    nextNews?: string | null;
-    previousNews?: string | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface CreateNewsBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-}
-
-export interface CreateNewsResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface UpdateNewsResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface AddNewLanguageBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-}
-
-export interface AddNewLanguageResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface DeleteNewsLanguageResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    availableLocales: string[];
-  };
-}
-
-export interface DeleteNewsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-  };
-}
-
-export interface UploadFileToNewsResponse {
-  data: {
-    /** @format uuid */
-    resourceId: string;
-  };
-}
-
-export interface CreateArticleSectionBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-}
-
-export interface CreateArticleSectionResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface GetArticleSectionResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-    assignedArticlesCount: number;
-  };
-}
-
-export interface UpdateArticleSectionBody {
-  translations: {
-    /** @default "en" */
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    title?: string;
-  }[];
-}
-
-export interface UpdateArticleSectionResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface AddNewLanguageToSectionBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-}
-
-export interface AddNewLanguageToSectionResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export type GetDraftArticlesResponse = {
-  id: string;
-  title: string;
-  status: string;
-  isPublic: boolean;
-  publishedAt: string | null;
-  authorName: string;
-  authorDeleted: boolean;
-  /** @format uuid */
-  authorId: string;
-  resources?: {
-    images: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    videos: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    attachments: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    coverImage?: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    };
-  };
-  createdAt: string;
-  updatedAt: string;
-  nextArticle?: string | null;
-  previousArticle?: string | null;
-}[];
-
-export interface GetArticleTocResponse {
-  data: {
-    sections: {
-      /** @format uuid */
-      id: string;
-      title: string;
-      articles: {
-        /** @format uuid */
-        id: string;
-        title: string;
-      }[];
-    }[];
-  };
-}
-
-export interface GetArticleResponse {
-  data: {
-    id: string;
-    title: string;
-    content: string;
-    plainContent: string;
-    summary: string;
-    status: string;
-    isPublic: boolean;
-    /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
-    publishedAt: string | null;
-    authorName: string;
-    authorDeleted: boolean;
-    /** @format uuid */
-    authorId: string;
-    resources?: {
-      images: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        fileUrlError?: boolean;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      videos: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        fileUrlError?: boolean;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      attachments: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        fileUrlError?: boolean;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      }[];
-      coverImage?: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string | null;
-        fileUrlError?: boolean;
-        title?: string;
-        description?: string;
-        fileName?: string;
-      };
-    };
-    createdAt: string;
-    updatedAt: string;
-    nextArticle?: string | null;
-    previousArticle?: string | null;
-  };
-}
-
-export type GetArticlesResponse = {
-  id: string;
-  title: string;
-  status: string;
-  isPublic: boolean;
-  publishedAt: string | null;
-  authorName: string;
-  authorDeleted: boolean;
-  /** @format uuid */
-  authorId: string;
-  resources?: {
-    images: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    videos: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    attachments: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }[];
-    coverImage?: {
-      /** @format uuid */
-      id: string;
-      fileUrl: string;
-      contentType: string | null;
-      fileUrlError?: boolean;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    };
-  };
-  createdAt: string;
-  updatedAt: string;
-  nextArticle?: string | null;
-  previousArticle?: string | null;
-}[];
-
-export interface CreateArticleBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  /** @format uuid */
-  sectionId: string;
-}
-
-export interface CreateArticleResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface UpdateArticleResponse {
-  data: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface UploadFileToArticleBody {
-  /**
-   * File
-   * @format binary
-   */
-  file?: File;
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  title: string;
-  description: string;
-  visibility?: "public" | "private";
-}
-
-export interface UploadFileToArticleResponse {
-  data: {
-    /** @format uuid */
-    resourceId: string;
-  };
-}
-
-export interface GenerateArticlePreviewBody {
-  /** @format uuid */
-  articleId: string;
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-  content: string;
-}
-
-export interface GenerateArticlePreviewResponse {
-  data: {
-    parsedContent: string;
-  };
 }
 
 export interface OpenAuthoringSessionBody {
@@ -35047,45 +35357,6 @@ export interface ConnectionProbeBody {
 export interface ConnectionProbeResponse {
   data: {
     nonce: string;
-  };
-}
-
-export interface GetConsentResponse {
-  data: {
-    clientName: string;
-    clientId: string;
-    redirectUri: string;
-    accountEmail: string;
-    /**
-     * @minItems 1
-     * @uniqueItems true
-     */
-    scopes: (
-      | "account:access"
-      | "authoring"
-      | "search"
-      | "student:read"
-      | "search:read"
-      | "courses:read"
-      | "courses:write"
-      | "categories:read"
-      | "categories:write"
-      | "articles:read"
-      | "articles:write"
-      | "news:read"
-      | "news:write"
-      | "qa:read"
-      | "qa:write"
-      | "learning_paths:read"
-      | "learning_paths:write"
-      | "users:read"
-      | "users:write"
-      | "groups:read"
-      | "groups:write"
-      | "platform:read"
-      | "platform:write"
-      | "files:write"
-    )[];
   };
 }
 
@@ -40142,97 +40413,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
-     * @request GET:/api/admin/ai-threads
-     */
-    adminAiThreadsControllerGetAdminAiThreadSummaries: (
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        /** @format uuid */
-        userId?: string;
-        /** @maxLength 200 */
-        search?: string;
-        /** @format date-time */
-        from?: string;
-        /** @format date-time */
-        to?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        type?: "practice" | "ai-mentor";
-        status?: "active" | "completed" | "archived";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadSummariesResponse, any>({
-        path: `/api/admin/ai-threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
-     * @request GET:/api/admin/ai-threads/{threadId}
-     */
-    adminAiThreadsControllerGetAdminAiThreadDetails: (
-      threadId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadDetailsResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
-     * @request GET:/api/admin/ai-threads/{threadId}/messages
-     */
-    adminAiThreadsControllerGetAdminAiThreadMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadMessagesResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name IngestionControllerIngest
      * @request POST:/api/ingestion/ingest
      */
@@ -43351,6 +43531,745 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name McpConsentControllerGetConsent
+     * @request GET:/api/oauth/consent/{consent}
+     */
+    mcpConsentControllerGetConsent: (consent: string, params: RequestParams = {}) =>
+      this.request<GetConsentResponse, any>({
+        path: `/api/oauth/consent/${consent}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerCreateArticleSection
+     * @request POST:/api/articles/section
+     */
+    articlesControllerCreateArticleSection: (
+      data: CreateArticleSectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateArticleSectionResponse, any>({
+        path: `/api/articles/section`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticleSection
+     * @request GET:/api/articles/section/{id}
+     */
+    articlesControllerGetArticleSection: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetArticleSectionResponse, any>({
+        path: `/api/articles/section/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerUpdateArticleSection
+     * @request PATCH:/api/articles/section/{id}
+     */
+    articlesControllerUpdateArticleSection: (
+      id: string,
+      data: UpdateArticleSectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateArticleSectionResponse, any>({
+        path: `/api/articles/section/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerDeleteArticleSection
+     * @request DELETE:/api/articles/section/{id}
+     */
+    articlesControllerDeleteArticleSection: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/articles/section/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerAddNewLanguageToSection
+     * @summary Add a new language to an article section
+     * @request POST:/api/articles/section/{id}/language
+     */
+    articlesControllerAddNewLanguageToSection: (
+      id: string,
+      data: AddNewLanguageToSectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddNewLanguageToSectionResponse, any>({
+        path: `/api/articles/section/${id}/language`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerDeleteArticleSectionLanguage
+     * @request DELETE:/api/articles/section/{id}/language
+     */
+    articlesControllerDeleteArticleSectionLanguage: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/articles/section/${id}/language`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetDraftArticles
+     * @request GET:/api/articles/drafts
+     */
+    articlesControllerGetDraftArticles: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDraftArticlesResponse, any>({
+        path: `/api/articles/drafts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticleToc
+     * @request GET:/api/articles/toc
+     */
+    articlesControllerGetArticleToc: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isDraftMode?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetArticleTocResponse, any>({
+        path: `/api/articles/toc`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticleResource
+     * @request GET:/api/articles/articles-resource/{resourceId}
+     */
+    articlesControllerGetArticleResource: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/articles/articles-resource/${resourceId}`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticle
+     * @request GET:/api/articles/{id}
+     */
+    articlesControllerGetArticle: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isDraftMode?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetArticleResponse, any>({
+        path: `/api/articles/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerUpdateArticle
+     * @request PATCH:/api/articles/{id}
+     */
+    articlesControllerUpdateArticle: (
+      id: string,
+      data: {
+        translations: string;
+        isPublic?: boolean;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateArticleResponse, any>({
+        path: `/api/articles/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerDeleteArticle
+     * @request DELETE:/api/articles/{id}
+     */
+    articlesControllerDeleteArticle: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/articles/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticles
+     * @request GET:/api/articles
+     */
+    articlesControllerGetArticles: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetArticlesResponse, any>({
+        path: `/api/articles`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerCreateArticle
+     * @request POST:/api/articles/article
+     */
+    articlesControllerCreateArticle: (data: CreateArticleBody, params: RequestParams = {}) =>
+      this.request<CreateArticleResponse, any>({
+        path: `/api/articles/article`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerAddNewLanguage
+     * @summary Add a new language to an article
+     * @request POST:/api/articles/article/{id}
+     */
+    articlesControllerAddNewLanguage: (
+      id: string,
+      data: AddNewLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddNewLanguageResponse, any>({
+        path: `/api/articles/article/${id}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerDeleteArticleLanguage
+     * @request DELETE:/api/articles/{id}/language
+     */
+    articlesControllerDeleteArticleLanguage: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/articles/${id}/language`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerUploadFileToArticle
+     * @request POST:/api/articles/{id}/upload
+     */
+    articlesControllerUploadFileToArticle: (
+      id: string,
+      data: UploadFileToArticleBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadFileToArticleResponse, any>({
+        path: `/api/articles/${id}/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGenerateArticlePreview
+     * @request POST:/api/articles/preview
+     */
+    articlesControllerGenerateArticlePreview: (
+      data: GenerateArticlePreviewBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GenerateArticlePreviewResponse, any>({
+        path: `/api/articles/preview`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetDraftNewsList
+     * @request GET:/api/news/drafts
+     */
+    newsControllerGetDraftNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDraftNewsListResponse, any>({
+        path: `/api/news/drafts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGenerateNewsPreview
+     * @request POST:/api/news/preview
+     */
+    newsControllerGenerateNewsPreview: (
+      data: GenerateNewsPreviewBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GenerateNewsPreviewResponse, any>({
+        path: `/api/news/preview`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNewsResource
+     * @request GET:/api/news/news-resource/{resourceId}
+     */
+    newsControllerGetNewsResource: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/news/news-resource/${resourceId}`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNews
+     * @request GET:/api/news/{id}
+     */
+    newsControllerGetNews: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUpdateNews
+     * @request PATCH:/api/news/{id}
+     */
+    newsControllerUpdateNews: (
+      id: string,
+      data: {
+        translations: string;
+        status?: "draft" | "published";
+        isPublic?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerAddNewLanguage
+     * @summary Add a new language to a news item
+     * @request POST:/api/news/{id}
+     */
+    newsControllerAddNewLanguage: (
+      id: string,
+      data: AddNewLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddNewLanguageResponse, any>({
+        path: `/api/news/${id}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerDeleteNews
+     * @request DELETE:/api/news/{id}
+     */
+    newsControllerDeleteNews: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNewsList
+     * @request GET:/api/news
+     */
+    newsControllerGetNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsListResponse, any>({
+        path: `/api/news`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerCreateNews
+     * @request POST:/api/news
+     */
+    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
+      this.request<CreateNewsResponse, any>({
+        path: `/api/news`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerDeleteNewsLanguage
+     * @request DELETE:/api/news/{id}/language
+     */
+    newsControllerDeleteNewsLanguage: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteNewsLanguageResponse, any>({
+        path: `/api/news/${id}/language`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUploadFileToNews
+     * @request POST:/api/news/{id}/upload
+     */
+    newsControllerUploadFileToNews: (
+      id: string,
+      data: {
+        /** @format binary */
+        file: File;
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        title: string;
+        description: string;
+        visibility?: "public" | "private";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadFileToNewsResponse, any>({
+        path: `/api/news/${id}/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerGetQa
+     * @request GET:/api/qa/{qaId}
+     */
+    qaControllerGetQa: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetQAResponse, any>({
+        path: `/api/qa/${qaId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerUpdateQa
+     * @request PATCH:/api/qa/{qaId}
+     */
+    qaControllerUpdateQa: (
+      qaId: string,
+      data: UpdateQABody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/${qaId}`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerDeleteQa
+     * @request DELETE:/api/qa/{qaId}
+     */
+    qaControllerDeleteQa: (qaId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/qa/${qaId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerGetAllQa
+     * @request GET:/api/qa
+     */
+    qaControllerGetAllQa: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllQAResponse, any>({
+        path: `/api/qa`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerCreateQa
+     * @request POST:/api/qa
+     */
+    qaControllerCreateQa: (data: CreateQABody, params: RequestParams = {}) =>
+      this.request<CreateQAResponse, any>({
+        path: `/api/qa`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerCreateLanguage
+     * @request POST:/api/qa/create-language/{qaId}
+     */
+    qaControllerCreateLanguage: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/create-language/${qaId}`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerDeleteLanguage
+     * @request DELETE:/api/qa/language/{qaId}
+     */
+    qaControllerDeleteLanguage: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/language/${qaId}`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerInitScormImport
      * @request POST:/api/scorm/import/init
      */
@@ -44605,731 +45524,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name QaControllerGetQa
-     * @request GET:/api/qa/{qaId}
-     */
-    qaControllerGetQa: (
-      qaId: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetQAResponse, any>({
-        path: `/api/qa/${qaId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerUpdateQa
-     * @request PATCH:/api/qa/{qaId}
-     */
-    qaControllerUpdateQa: (
-      qaId: string,
-      data: UpdateQABody,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/qa/${qaId}`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerDeleteQa
-     * @request DELETE:/api/qa/{qaId}
-     */
-    qaControllerDeleteQa: (qaId: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/qa/${qaId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerGetAllQa
-     * @request GET:/api/qa
-     */
-    qaControllerGetAllQa: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAllQAResponse, any>({
-        path: `/api/qa`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerCreateQa
-     * @request POST:/api/qa
-     */
-    qaControllerCreateQa: (data: CreateQABody, params: RequestParams = {}) =>
-      this.request<CreateQAResponse, any>({
-        path: `/api/qa`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerCreateLanguage
-     * @request POST:/api/qa/create-language/{qaId}
-     */
-    qaControllerCreateLanguage: (
-      qaId: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/qa/create-language/${qaId}`,
-        method: "POST",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name QaControllerDeleteLanguage
-     * @request DELETE:/api/qa/language/{qaId}
-     */
-    qaControllerDeleteLanguage: (
-      qaId: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/qa/language/${qaId}`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerGetDraftNewsList
-     * @request GET:/api/news/drafts
-     */
-    newsControllerGetDraftNewsList: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        /** @min 1 */
-        page?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetDraftNewsListResponse, any>({
-        path: `/api/news/drafts`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerGenerateNewsPreview
-     * @request POST:/api/news/preview
-     */
-    newsControllerGenerateNewsPreview: (
-      data: GenerateNewsPreviewBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<GenerateNewsPreviewResponse, any>({
-        path: `/api/news/preview`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerGetNewsResource
-     * @request GET:/api/news/news-resource/{resourceId}
-     */
-    newsControllerGetNewsResource: (
-      resourceId: string,
-      query?: {
-        preview?: "pdf";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/news/news-resource/${resourceId}`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerGetNews
-     * @request GET:/api/news/{id}
-     */
-    newsControllerGetNews: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetNewsResponse, any>({
-        path: `/api/news/${id}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerUpdateNews
-     * @request PATCH:/api/news/{id}
-     */
-    newsControllerUpdateNews: (
-      id: string,
-      data: {
-        translations: string;
-        status?: "draft" | "published";
-        isPublic?: boolean | "true" | "false";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateNewsResponse, any>({
-        path: `/api/news/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerAddNewLanguage
-     * @summary Add a new language to a news item
-     * @request POST:/api/news/{id}
-     */
-    newsControllerAddNewLanguage: (
-      id: string,
-      data: AddNewLanguageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<AddNewLanguageResponse, any>({
-        path: `/api/news/${id}`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerDeleteNews
-     * @request DELETE:/api/news/{id}
-     */
-    newsControllerDeleteNews: (id: string, params: RequestParams = {}) =>
-      this.request<DeleteNewsResponse, any>({
-        path: `/api/news/${id}`,
-        method: "DELETE",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerGetNewsList
-     * @request GET:/api/news
-     */
-    newsControllerGetNewsList: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        /** @min 1 */
-        page?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetNewsListResponse, any>({
-        path: `/api/news`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerCreateNews
-     * @request POST:/api/news
-     */
-    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
-      this.request<CreateNewsResponse, any>({
-        path: `/api/news`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerDeleteNewsLanguage
-     * @request DELETE:/api/news/{id}/language
-     */
-    newsControllerDeleteNewsLanguage: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteNewsLanguageResponse, any>({
-        path: `/api/news/${id}/language`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NewsControllerUploadFileToNews
-     * @request POST:/api/news/{id}/upload
-     */
-    newsControllerUploadFileToNews: (
-      id: string,
-      data: {
-        /** @format binary */
-        file: File;
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        title: string;
-        description: string;
-        visibility?: "public" | "private";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UploadFileToNewsResponse, any>({
-        path: `/api/news/${id}/upload`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerCreateArticleSection
-     * @request POST:/api/articles/section
-     */
-    articlesControllerCreateArticleSection: (
-      data: CreateArticleSectionBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateArticleSectionResponse, any>({
-        path: `/api/articles/section`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetArticleSection
-     * @request GET:/api/articles/section/{id}
-     */
-    articlesControllerGetArticleSection: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetArticleSectionResponse, any>({
-        path: `/api/articles/section/${id}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerUpdateArticleSection
-     * @request PATCH:/api/articles/section/{id}
-     */
-    articlesControllerUpdateArticleSection: (
-      id: string,
-      data: UpdateArticleSectionBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateArticleSectionResponse, any>({
-        path: `/api/articles/section/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerDeleteArticleSection
-     * @request DELETE:/api/articles/section/{id}
-     */
-    articlesControllerDeleteArticleSection: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/articles/section/${id}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerAddNewLanguageToSection
-     * @summary Add a new language to an article section
-     * @request POST:/api/articles/section/{id}/language
-     */
-    articlesControllerAddNewLanguageToSection: (
-      id: string,
-      data: AddNewLanguageToSectionBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<AddNewLanguageToSectionResponse, any>({
-        path: `/api/articles/section/${id}/language`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerDeleteArticleSectionLanguage
-     * @request DELETE:/api/articles/section/{id}/language
-     */
-    articlesControllerDeleteArticleSectionLanguage: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/articles/section/${id}/language`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetDraftArticles
-     * @request GET:/api/articles/drafts
-     */
-    articlesControllerGetDraftArticles: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetDraftArticlesResponse, any>({
-        path: `/api/articles/drafts`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetArticleToc
-     * @request GET:/api/articles/toc
-     */
-    articlesControllerGetArticleToc: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        isDraftMode?: boolean | "true" | "false";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetArticleTocResponse, any>({
-        path: `/api/articles/toc`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetArticleResource
-     * @request GET:/api/articles/articles-resource/{resourceId}
-     */
-    articlesControllerGetArticleResource: (
-      resourceId: string,
-      query?: {
-        preview?: "pdf";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/articles/articles-resource/${resourceId}`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetArticle
-     * @request GET:/api/articles/{id}
-     */
-    articlesControllerGetArticle: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        isDraftMode?: boolean | "true" | "false";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetArticleResponse, any>({
-        path: `/api/articles/${id}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerUpdateArticle
-     * @request PATCH:/api/articles/{id}
-     */
-    articlesControllerUpdateArticle: (
-      id: string,
-      data: {
-        translations: string;
-        isPublic?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateArticleResponse, any>({
-        path: `/api/articles/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerDeleteArticle
-     * @request DELETE:/api/articles/{id}
-     */
-    articlesControllerDeleteArticle: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/articles/${id}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGetArticles
-     * @request GET:/api/articles
-     */
-    articlesControllerGetArticles: (
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetArticlesResponse, any>({
-        path: `/api/articles`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerCreateArticle
-     * @request POST:/api/articles/article
-     */
-    articlesControllerCreateArticle: (data: CreateArticleBody, params: RequestParams = {}) =>
-      this.request<CreateArticleResponse, any>({
-        path: `/api/articles/article`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerAddNewLanguage
-     * @summary Add a new language to an article
-     * @request POST:/api/articles/article/{id}
-     */
-    articlesControllerAddNewLanguage: (
-      id: string,
-      data: AddNewLanguageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<AddNewLanguageResponse, any>({
-        path: `/api/articles/article/${id}`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerDeleteArticleLanguage
-     * @request DELETE:/api/articles/{id}/language
-     */
-    articlesControllerDeleteArticleLanguage: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/articles/${id}/language`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerUploadFileToArticle
-     * @request POST:/api/articles/{id}/upload
-     */
-    articlesControllerUploadFileToArticle: (
-      id: string,
-      data: UploadFileToArticleBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UploadFileToArticleResponse, any>({
-        path: `/api/articles/${id}/upload`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ArticlesControllerGenerateArticlePreview
-     * @request POST:/api/articles/preview
-     */
-    articlesControllerGenerateArticlePreview: (
-      data: GenerateArticlePreviewBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<GenerateArticlePreviewResponse, any>({
-        path: `/api/articles/preview`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name AnalyticsControllerGetActiveUsers
      * @request GET:/api/analytics/active-users
      */
@@ -45760,20 +45954,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name McpConsentControllerGetConsent
-     * @request GET:/api/oauth/consent/{consent}
-     */
-    mcpConsentControllerGetConsent: (consent: string, params: RequestParams = {}) =>
-      this.request<GetConsentResponse, any>({
-        path: `/api/oauth/consent/${consent}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CalendarControllerGetEvents
      * @request GET:/api/calendar/events
      */
@@ -46059,6 +46239,257 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetAvailability
+     * @request GET:/api/assistant/availability
+     */
+    assistantControllerGetAvailability: (params: RequestParams = {}) =>
+      this.request<GetAvailabilityResponse, any>({
+        path: `/api/assistant/availability`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListThreads
+     * @request GET:/api/assistant/threads
+     */
+    assistantControllerListThreads: (
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        archived?: boolean;
+        /** @maxLength 200 */
+        query?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListThreadsResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCreateThread
+     * @request POST:/api/assistant/threads
+     */
+    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetThread
+     * @request GET:/api/assistant/threads/{threadId}
+     */
+    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerUpdateThread
+     * @request PATCH:/api/assistant/threads/{threadId}
+     */
+    assistantControllerUpdateThread: (
+      threadId: string,
+      data: UpdateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListMessages
+     * @request GET:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerListMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMessagesResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerSendMessage
+     * @request POST:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerSendMessage: (
+      threadId: string,
+      data: SendMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendMessageResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCancelRun
+     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
+     */
+    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
+      this.request<CancelRunResponse, any>({
+        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        type?: "practice" | "ai-mentor" | "assistant";
+        status?: "active" | "completed" | "archived";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

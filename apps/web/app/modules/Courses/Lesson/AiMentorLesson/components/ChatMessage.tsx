@@ -118,13 +118,18 @@ const ChatMessage = ({
           isAssistant ? "items-start" : "items-end",
         )}
       >
-        <span className="text-sm font-semibold text-primary-900">{displayName}</span>
+        <span className="text-sm font-semibold text-primary-900 dark:text-primary-100">
+          {displayName}
+        </span>
 
         <div
           data-testid={contentTestId}
           className={cn(
-            "w-fit max-w-full rounded-xl text-sm leading-relaxed break-words text-gray-800",
-            { "px-4 py-2 bg-primary-100": !isAssistant && !contentNodeOwnsSurface },
+            "w-fit max-w-full rounded-xl text-sm leading-relaxed break-words text-foreground",
+            {
+              "px-4 py-2 bg-primary-100 dark:bg-primary-950":
+                !isAssistant && !contentNodeOwnsSurface,
+            },
           )}
         >
           {contentNode ??

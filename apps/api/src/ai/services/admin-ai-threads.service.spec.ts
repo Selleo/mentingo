@@ -1,5 +1,10 @@
 import { NotFoundException } from "@nestjs/common";
-import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  AI_THREAD_TYPES,
+  PERMISSIONS,
+  SYSTEM_ROLE_PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 
 import { AdminAiThreadsController } from "src/ai/admin-ai-threads.controller";
 import { AdminAiThreadsService } from "src/ai/services/admin-ai-threads.service";
@@ -106,6 +111,43 @@ describe("Admin AI conversations", () => {
     );
     expect(adminAiThreadsRepository.getThreadJudgementBlockingErrors).toHaveBeenCalledWith(
       "saved-judgement",
+    );
+  });
+
+  it("returns private assistant details without consulting lesson judgements", async () => {
+    adminAiThreadsRepository.findThreadSummaryById.mockResolvedValue({
+      id: "assistant-thread",
+      type: AI_THREAD_TYPES.ASSISTANT,
+      practiceSessionId: null,
+      aiMentorLessonId: null,
+      lessonId: null,
+      courseId: null,
+      courseTitle: null,
+      owner,
+    });
+    const detail = await adminAiThreadsService.getThread("assistant-thread");
+    expect(detail).toMatchObject({
+      type: AI_THREAD_TYPES.ASSISTANT,
+      evaluation: null,
+      lessonId: null,
+      practiceSessionId: null,
+    });
+    expect(adminAiThreadsRepository.findThreadJudgementByThreadId).not.toHaveBeenCalled();
+  });
+
+  it("routes assistant transcript reads to their distinct message store", async () => {
+    adminAiThreadsRepository.findThreadSummaryById.mockResolvedValue({
+      id: "assistant-thread",
+      type: AI_THREAD_TYPES.ASSISTANT,
+      owner,
+    });
+    adminAiThreadsRepository.getThreadMessages.mockResolvedValue({ data: [], pagination: {} });
+    await adminAiThreadsService.getThreadMessages("assistant-thread", { page: 2, perPage: 20 });
+    expect(adminAiThreadsRepository.getThreadMessages).toHaveBeenCalledWith(
+      "assistant-thread",
+      2,
+      20,
+      AI_THREAD_TYPES.ASSISTANT,
     );
   });
 

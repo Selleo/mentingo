@@ -119,19 +119,30 @@ export function ConversationReader({
                 )}
                 {thread &&
                   rows.map((message) => (
-                    <ChatMessage
-                      key={message.id}
-                      id={message.id}
-                      role={message.role}
-                      content={message.content}
-                      userName={ownerName}
-                      previewUser={{
-                        displayName: ownerName,
-                        profilePictureUrl: thread.owner.profilePictureUrl,
-                      }}
-                      messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
-                      testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
-                    />
+                    <div key={message.id} className="flex flex-col gap-2">
+                      <ChatMessage
+                        id={message.id}
+                        role={message.role}
+                        aiName={
+                          thread.type === AI_THREAD_TYPES.ASSISTANT
+                            ? t("aiConversations.types.assistant")
+                            : undefined
+                        }
+                        content={message.content}
+                        userName={ownerName}
+                        previewUser={{
+                          displayName: ownerName,
+                          profilePictureUrl: thread.owner.profilePictureUrl,
+                        }}
+                        messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
+                        testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
+                      />
+                      {message.status && message.status !== "complete" && (
+                        <p className="body-sm text-neutral-600">
+                          {t(`aiConversations.messageStatuses.${message.status}`)}
+                        </p>
+                      )}
+                    </div>
                   ))}
                 {thread && !messages.isPending && !messages.isError && rows.length === 0 && (
                   <p className="text-sm text-neutral-500">{t("aiConversations.emptyTranscript")}</p>

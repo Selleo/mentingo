@@ -121,12 +121,19 @@
     "empty": "Brak rozmów.",
     "types": {
       "practice": "Sesja treningowa",
-      "ai-mentor": "Lekcja z Mentorem AI"
+      "ai-mentor": "Lekcja z Mentorem AI",
+      "assistant": "Asystent"
     },
     "statuses": {
       "active": "W toku",
       "completed": "Zakończona",
       "archived": "Archiwalna"
+    },
+    "messageStatuses": {
+      "pending": "Oczekuje",
+      "running": "W trakcie",
+      "failed": "Przerwano z powodu błędu",
+      "cancelled": "Zatrzymano"
     }
   },
   "emailTemplates": {
@@ -1002,6 +1009,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "Asystent AI",
     "settings": "Ustawienia",
     "logout": "Wyloguj",
     "panel": "Panel",
@@ -2564,6 +2573,7 @@
         "file_delete": "Może usuwać pliki bezpośrednio z pamięci platformy.",
         "resource_library_manage": "Może zarządzać prywatnymi zasobami w Bibliotece zasobów.",
         "ai_use": "Może korzystać z funkcji platformy opartych na AI.",
+        "assistant_use": "Może korzystać z asystenta tylko do odczytu i zarządzać własnymi rozmowami.",
         "announcement_read": "Może przeglądać ogłoszenia.",
         "announcement_create": "Może tworzyć ogłoszenia.",
         "announcement_delete": "Może usuwać ogłoszenia.",
@@ -6113,14 +6123,13 @@
       "resource": "Zasób:"
     },
     "actions": {
-      "save_automation_draft": "Zapisano szkic automatyzacji",
-      "simulate_automation": "Przeprowadzono symulację automatyzacji",
-      "apply_automation": "Opublikowano / zastosowano automatyzację",
-      "enable_automation": "Aktywowano automatyzację",
-      "disable_automation": "Dezaktywowano automatyzację",
-      "duplicate_automation": "Zduplikowano automatyzację",
-      "archive_automation": "Zarchiwizowano automatyzację",
-
+      "save_automation_draft": "Zapisz wersję roboczą automatyzacji",
+      "simulate_automation": "Symuluj automatyzację",
+      "apply_automation": "Zastosuj automatyzację",
+      "enable_automation": "Włącz automatyzację",
+      "disable_automation": "Wyłącz automatyzację",
+      "duplicate_automation": "Duplikuj automatyzację",
+      "archive_automation": "Zarchiwizuj automatyzację",
       "create": "Utworzono",
       "update": "Zaktualizowano",
       "bulk_course_category_update": "Zbiorowo zaktualizowano kategorię kursów",
@@ -6151,14 +6160,7 @@
       "start_learning_path": "Rozpoczęto ścieżkę",
       "complete_learning_path": "Ukończono ścieżkę",
       "play_scorm": "Uruchomiono SCORM",
-      "complete_scorm": "Ukończono SCORM",
-      "save_automation_draft": "Zapisz wersję roboczą automatyzacji",
-      "simulate_automation": "Symuluj automatyzację",
-      "apply_automation": "Zastosuj automatyzację",
-      "enable_automation": "Włącz automatyzację",
-      "disable_automation": "Wyłącz automatyzację",
-      "duplicate_automation": "Duplikuj automatyzację",
-      "archive_automation": "Zarchiwizuj automatyzację"
+      "complete_scorm": "Ukończono SCORM"
     },
     "entity": {
       "automation": "Automatyzacja",
@@ -8285,5 +8287,101 @@
       "thumbnailNotFound": "Ten kurs z marketplace nie ma miniatury.",
       "serviceError": "Marketplace treści nie mógł zrealizować żądania. Spróbuj ponownie później."
     }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Rozmowa z asystentem",
+      "open": "Otwórz rozmowę z asystentem",
+      "fullScreen": "Otwórz pełny widok Assistant",
+      "minimize": "Zminimalizuj rozmowę",
+      "dismiss": "Ukryj dymek asystenta",
+      "dragHint": "Przeciągnij, aby przesunąć. Upuść na X, aby ukryć. Strzałki przesuwają, Delete ukrywa.",
+      "dropToDismiss": "Upuść, aby ukryć"
+    },
+    "openSource": "Otwórz w Mentingo",
+    "sourceTypes": {
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "user": "Użytkownik",
+      "group": "Grupa",
+      "category": "Kategoria",
+      "article": "Artykuł",
+      "news": "Aktualność",
+      "qa": "Pytanie i odpowiedź",
+      "development_path": "Ścieżka rozwoju",
+      "resource": "Materiał",
+      "reference": "Źródło"
+    },
+    "title": "Asystent",
+    "eyebrow": "Wiedza z Twojej platformy",
+    "welcome": "W czym mogę Ci pomóc?",
+    "intro": "Znajdź materiały do nauki, zadawaj pytania i sprawdzaj źródła. W ramach Twoich uprawnień.",
+    "newConversation": "Nowa rozmowa",
+    "untitled": "Nowa rozmowa",
+    "search": "Szukaj rozmów",
+    "recent": "Ostatnie rozmowy",
+    "history": "Historia rozmów",
+    "active": "Aktywne",
+    "archived": "Archiwalne",
+    "archivedThreads": "Zarchiwizowane rozmowy",
+    "showArchived": "Pokaż archiwum",
+    "showRecent": "Pokaż ostatnie rozmowy",
+    "noThreads": "Tutaj pojawią się Twoje rozmowy.",
+    "noMatches": "Brak rozmów pasujących do wyszukiwania.",
+    "loading": "Ładowanie rozmów…",
+    "loadError": "Nie udało się wczytać rozmów.",
+    "retry": "Spróbuj ponownie",
+    "loadMore": "Wczytaj więcej",
+    "composerLabel": "Wiadomość do asystenta",
+    "placeholder": "Zapytaj o naukę lub materiały na platformie…",
+    "composerHint": "Enter wysyła · Shift + Enter dodaje nowy wiersz",
+    "disclosure": "Odpowiedzi mogą zawierać błędy. Sprawdzaj źródła. Uprawnieni administratorzy mogą przeglądać te rozmowy.",
+    "send": "Wyślij wiadomość",
+    "stop": "Zatrzymaj odpowiedź",
+    "you": "Ty",
+    "working": "Pracuję nad Twoim pytaniem…",
+    "activity": {
+      "starting": "Rozpoczynam…",
+      "thinking": "Pracuję nad odpowiedzią…",
+      "searching": "Szukam informacji…",
+      "reading": "Czytam treści…",
+      "writing": "Piszę odpowiedź…"
+    },
+    "writing": "Piszę…",
+    "sources": "Źródła",
+    "failed": "Błąd przerwał odpowiedź. Powyższy tekst może być niepełny.",
+    "cancelled": "Odpowiedź zatrzymana. Powyższy tekst może być niepełny.",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "rename": "Zmień nazwę rozmowy",
+    "archive": "Archiwizuj rozmowę",
+    "restore": "Przywróć rozmowę",
+    "save": "Zapisz",
+    "close": "Zamknij",
+    "threadUnavailable": "Ta rozmowa jest niedostępna. Mogła zostać usunięta lub nie masz do niej dostępu.",
+    "sendError": "Nie udało się wysłać wiadomości. Zachowaliśmy jej treść.",
+    "messageTooLong": "Wiadomość może mieć maksymalnie 8000 znaków. Skróć wersję roboczą, aby ją wysłać.",
+    "unavailable": "Asystent nie jest jeszcze skonfigurowany. Skontaktuj się z administratorem.",
+    "archivedNotice": "Ta rozmowa jest zarchiwizowana. Przywróć ją, aby kontynuować.",
+    "openHistory": "Otwórz historię rozmów",
+    "hideHistory": "Ukryj historię rozmów",
+    "renameDescription": "Nadaj rozmowie nazwę, która ułatwi jej odnalezienie.",
+    "readOnly": "Asystent z dostępem do odczytu",
+    "loadEarlier": "Wczytaj wcześniejsze wiadomości",
+    "starters": {
+      "find": {
+        "label": "Znajdź materiały do nauki",
+        "prompt": "Znajdź dostępne dla mnie kursy o onboardingu."
+      },
+      "learn": {
+        "label": "Poznaj moje możliwości nauki",
+        "prompt": "Do jakich materiałów edukacyjnych mam dostęp?"
+      },
+      "understand": {
+        "label": "Zrozum temat",
+        "prompt": "Znajdź materiały o konstruktywnej informacji zwrotnej i wyjaśnij najważniejsze zagadnienia."
+      }
+    },
+    "latestMessage": "Przejdź do ostatniej wiadomości"
   }
 }

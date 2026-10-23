@@ -66,7 +66,7 @@ export default function AiConversationsPage() {
       name: "type",
       type: "select",
       placeholder: t("aiConversations.allTypes"),
-      options: [AI_THREAD_TYPES.PRACTICE, AI_THREAD_TYPES.AI_MENTOR].map((value) => ({
+      options: Object.values(AI_THREAD_TYPES).map((value) => ({
         value,
         label: t(`aiConversations.types.${value}`),
       })),

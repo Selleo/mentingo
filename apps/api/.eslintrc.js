@@ -56,6 +56,10 @@ module.exports = {
   },
   overrides: [
     {
+      files: ["src/assistant/workflow/assistant.workflow.ts"],
+      parserOptions: { project: "tsconfig.workflow.json" },
+    },
+    {
       files: [
         "src/automations/**/*.ts",
         "src/automation-execution/**/*.ts",

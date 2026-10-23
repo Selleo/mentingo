@@ -39,6 +39,7 @@ function buildGuard({
     configService as never,
     sessionRevocationService as never,
     mcpUploadGrants as never,
+    { resolveTenantId: jest.fn().mockResolvedValue("known-tenant") } as never,
   );
 
   return { guard, mcpUploadGrants };

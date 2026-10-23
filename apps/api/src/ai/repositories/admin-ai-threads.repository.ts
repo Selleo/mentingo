@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { AI_THREAD_TYPES, MESSAGE_ROLE } from "@repo/shared";
 import { and, asc, count, desc, eq, gte, inArray, lt, max, sql } from "drizzle-orm";
+import { unionAll } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
@@ -14,6 +15,8 @@ import {
   aiMentorPracticeSessions,
   aiMentorThreadMessages,
   aiMentorThreads,
+  assistantThreads,
+  assistantMessages,
   chapters,
   courses,
   lessons,
@@ -34,7 +37,7 @@ export class AdminAiThreadsRepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
-  private buildThreadSummariesQuery(adminAiThreadQuery: AdminAiThreadQuery) {
+  private buildMentorThreadSummariesQuery(adminAiThreadQuery: AdminAiThreadQuery) {
     const lessonTitle = this.localizationService.getLocalizedSqlField(
       lessons.title,
       adminAiThreadQuery.language,
@@ -104,6 +107,64 @@ export class AdminAiThreadsRepository {
       .leftJoin(courses, eq(courses.id, chapters.courseId));
   }
 
+  private buildAssistantThreadSummariesQuery() {
+    const visibleMessageFilter = and(
+      eq(assistantMessages.threadId, assistantThreads.id),
+      inArray(assistantMessages.role, ["user", "assistant"]),
+    );
+    const openingMessageQuery = this.db
+      .select({ preview: sql<string>`LEFT(${assistantMessages.text}, 160)` })
+      .from(assistantMessages)
+      .where(visibleMessageFilter)
+      .orderBy(asc(assistantMessages.createdAt), asc(assistantMessages.id))
+      .limit(1);
+    const lastMessageActivityQuery = this.db
+      .select({ createdAt: max(assistantMessages.createdAt) })
+      .from(assistantMessages)
+      .where(visibleMessageFilter);
+    return this.db
+      .select({
+        id: assistantThreads.id,
+        type: sql<AdminAiThreadSummary["type"]>`${AI_THREAD_TYPES.ASSISTANT}`.as("source_type"),
+        practiceSessionId: sql<string | null>`NULL`.as("practice_session_id"),
+        aiMentorLessonId: sql<string | null>`NULL`.as("ai_mentor_lesson_id"),
+        lessonId: sql<string | null>`NULL`.as("lesson_id"),
+        courseId: sql<string | null>`NULL`.as("course_id"),
+        courseTitle: sql<string | null>`NULL`.as("course_title"),
+        title:
+          sql<string>`COALESCE(NULLIF(${assistantThreads.title}, ''), (${openingMessageQuery}), '')`.as(
+            "resolved_title",
+          ),
+        openingPreview: sql<string | null>`(${openingMessageQuery})`.as("opening_preview"),
+        owner: {
+          id: sql<string>`${users.id}`.as("owner_id"),
+          firstName: users.firstName,
+          lastName: users.lastName,
+          avatarReference: users.avatarReference,
+        },
+        status: sql<
+          AdminAiThreadSummary["status"]
+        >`CASE WHEN ${assistantThreads.archived} THEN 'archived' ELSE 'active' END`.as(
+          "thread_status",
+        ),
+        language: assistantThreads.language,
+        createdAt: assistantThreads.createdAt,
+        lastActivityAt:
+          sql<string>`COALESCE((${lastMessageActivityQuery}), ${assistantThreads.createdAt})`.as(
+            "last_activity_at",
+          ),
+      })
+      .from(assistantThreads)
+      .innerJoin(users, eq(users.id, assistantThreads.userId));
+  }
+
+  private buildThreadSummariesQuery(adminAiThreadQuery: AdminAiThreadQuery) {
+    return unionAll(
+      this.buildMentorThreadSummariesQuery(adminAiThreadQuery),
+      this.buildAssistantThreadSummariesQuery(),
+    );
+  }
+
   async getThreadSummaries(adminAiThreadQuery: AdminAiThreadQuery) {
     const { page, perPage } = parsePagination(adminAiThreadQuery.page, adminAiThreadQuery.perPage);
     const adminAiThreadSummaries = this.buildThreadSummariesQuery(adminAiThreadQuery).as(
@@ -143,13 +204,24 @@ export class AdminAiThreadsRepository {
   }
 
   async findThreadSummaryById(threadId: UUIDType, adminAiThreadQuery: AdminAiThreadQuery = {}) {
-    const [threadSummary] = await this.buildThreadSummariesQuery(adminAiThreadQuery)
-      .where(eq(aiMentorThreads.id, threadId))
+    const summaries = this.buildThreadSummariesQuery(adminAiThreadQuery).as("thread_summaries");
+    const [threadSummary] = await this.db
+      .select()
+      .from(summaries)
+      .where(eq(summaries.id, threadId))
       .limit(1);
     return threadSummary;
   }
 
-  async getThreadMessages(threadId: UUIDType, page = 1, perPage = 100) {
+  async getThreadMessages(
+    threadId: UUIDType,
+    page = 1,
+    perPage = 100,
+    type?: AdminAiThreadSummary["type"],
+  ) {
+    if (type === AI_THREAD_TYPES.ASSISTANT) {
+      return this.getAssistantThreadMessages(threadId, page, perPage);
+    }
     const messageFilters = and(
       eq(aiMentorThreadMessages.threadId, threadId),
       inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.USER, MESSAGE_ROLE.MENTOR]),
@@ -168,6 +240,32 @@ export class AdminAiThreadsRepository {
         .limit(perPage)
         .offset((page - 1) * perPage),
       this.db.select({ total: count() }).from(aiMentorThreadMessages).where(messageFilters),
+    ]);
+    return { data, pagination: { page, perPage, totalItems: messageCounts[0].total } };
+  }
+
+  private async getAssistantThreadMessages(threadId: UUIDType, page: number, perPage: number) {
+    const messageFilters = and(
+      eq(assistantMessages.threadId, threadId),
+      inArray(assistantMessages.role, ["user", "assistant"]),
+    );
+    const [data, messageCounts] = await Promise.all([
+      this.db
+        .select({
+          id: assistantMessages.id,
+          role: sql<
+            AdminAiThreadMessage["role"]
+          >`CASE WHEN ${assistantMessages.role} = 'user' THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
+          content: assistantMessages.text,
+          status: assistantMessages.status,
+          createdAt: assistantMessages.createdAt,
+        })
+        .from(assistantMessages)
+        .where(messageFilters)
+        .orderBy(asc(assistantMessages.createdAt), asc(assistantMessages.id))
+        .limit(perPage)
+        .offset((page - 1) * perPage),
+      this.db.select({ total: count() }).from(assistantMessages).where(messageFilters),
     ]);
     return { data, pagination: { page, perPage, totalItems: messageCounts[0].total } };
   }
