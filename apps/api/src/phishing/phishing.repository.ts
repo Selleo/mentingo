@@ -1,13 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { and, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, sql, or, countDistinct } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { getGroupManagerGroupScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import { courses, groups, groupUsers, users, studentCourses } from "src/storage/schema";
 
+import type { PhishingOptionQuery, PhishingAudience } from "./phishing.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 @Injectable()
 export class PhishingRepository {
@@ -54,6 +56,81 @@ export class PhishingRepository {
       courses: training,
     };
   }
+
+  findUserOptions({ search, page }: PhishingOptionQuery) {
+    const label = sql<string>`${users.firstName} || ' ' || ${users.lastName} || ' (' || ${users.email} || ')'`;
+    return this.db
+      .select({ id: users.id, label })
+      .from(users)
+      .where(
+        and(
+          isNull(users.deletedAt),
+          eq(users.archived, false),
+          search ? sql`${label} ilike ${`%${search}%`}` : undefined,
+        ),
+      )
+      .orderBy(users.lastName, users.firstName, users.id)
+      .limit(21)
+      .offset((page - 1) * 20);
+  }
+
+  findGroupOptions({ language, search, page }: PhishingOptionQuery) {
+    const label = this.localization.getLocalizedSqlField(groups.name, language, groups);
+    return this.db
+      .select({ id: groups.id, label })
+      .from(groups)
+      .where(
+        search
+          ? this.localization.getLocalizedFieldSearchCondition(
+              groups.name,
+              `%${search}%`,
+              language,
+              { baseTable: groups, fallbackToBaseLanguage: true },
+            )
+          : undefined,
+      )
+      .orderBy(label, groups.id)
+      .limit(21)
+      .offset((page - 1) * 20);
+  }
+
+  findCourseOptions({ language, search, page }: PhishingOptionQuery) {
+    const label = this.localization.getLocalizedSqlField(courses.title, language, courses);
+    return this.db
+      .select({ id: courses.id, label })
+      .from(courses)
+      .where(
+        and(
+          ne(courses.status, "draft"),
+          eq(courses.priceInCents, 0),
+          search
+            ? this.localization.getLocalizedFieldSearchCondition(
+                courses.title,
+                `%${search}%`,
+                language,
+                { baseTable: courses, fallbackToBaseLanguage: true },
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(label, courses.id)
+      .limit(21)
+      .offset((page - 1) * 20);
+  }
+
+  countAudience({ userIds, groupIds }: PhishingAudience) {
+    return this.db
+      .select({ count: countDistinct(users.id) })
+      .from(users)
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .where(
+        and(
+          isNull(users.deletedAt),
+          eq(users.archived, false),
+          or(inArray(users.id, userIds), inArray(groupUsers.groupId, groupIds)),
+        ),
+      );
+  }
   async course(id: string) {
     const [course] = await this.db
       .select({ id: courses.id })
@@ -63,10 +140,23 @@ export class PhishingRepository {
   }
   async user(id: string) {
     const [user] = await this.db
-      .select({ id: users.id, email: users.email })
+      .select({ id: users.id, email: users.email, firstName: users.firstName })
       .from(users)
       .where(and(eq(users.id, id), isNull(users.deletedAt), eq(users.archived, false)));
     return user;
+  }
+
+  tenantOrigin(tenantId: string) {
+    return resolveTenantOrigin(this.db, tenantId);
+  }
+
+  async courseEmailTitle(id: string, language: SupportedLanguages) {
+    const [course] = await this.db
+      .select({ title: this.localization.getLocalizedSqlField(courses.title, language, courses) })
+      .from(courses)
+      .where(and(eq(courses.id, id), ne(courses.status, "draft"), eq(courses.priceInCents, 0)));
+
+    return course?.title;
   }
   async recipients(userIds: string[], groupIds: string[]) {
     const members = groupIds.length

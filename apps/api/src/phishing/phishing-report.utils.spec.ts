@@ -1,4 +1,4 @@
-import { filterPhishingRecipients, phishingTotals } from "./phishing-report.utils";
+import { scopeRecipientGroups, withRiskRate } from "./phishing-report.utils";
 
 const recipient = {
   userId: "user",
@@ -11,20 +11,16 @@ const recipient = {
   submittedAt: null,
   failed: false,
 };
-describe("phishing report scoping", () => {
-  it("removes other departments and recalculates totals from visible recipients", () => {
-    const visible = filterPhishingRecipients(
-      [recipient, { ...recipient, userId: "other", groupIds: ["three"] }],
-      ["one"],
-    );
-    expect(visible).toEqual([{ ...recipient, groupIds: ["one"] }]);
-    expect(phishingTotals(visible)).toMatchObject({ recipients: 1, risky: 1, riskRate: 100 });
+describe("phishing report helpers", () => {
+  it("hides memberships outside the manager's groups", () => {
+    expect(scopeRecipientGroups(recipient, ["one"])).toEqual({ ...recipient, groupIds: ["one"] });
   });
-  it("fails closed for managers without groups", () =>
-    expect(filterPhishingRecipients([recipient], [])).toEqual([]));
-  it("preserves administrator visibility and counts each risky recipient once", () => {
-    expect(filterPhishingRecipients([recipient], null)).toEqual([recipient]);
-    expect(phishingTotals([{ ...recipient, submittedAt: "now" }]).risky).toBe(1);
-    expect(phishingTotals([]).riskRate).toBe(0);
+  it("preserves administrator visibility", () => {
+    expect(scopeRecipientGroups(recipient, null)).toBe(recipient);
+  });
+  it("rounds the risk rate to two decimals and guards an empty campaign", () => {
+    const totals = { recipients: 3, sent: 3, clicked: 1, submitted: 0, risky: 1 };
+    expect(withRiskRate(totals).riskRate).toBe(33.33);
+    expect(withRiskRate({ ...totals, recipients: 0, risky: 0 }).riskRate).toBe(0);
   });
 });
