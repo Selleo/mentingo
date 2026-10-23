@@ -491,6 +491,9 @@ importers:
       eslint-plugin-unused-imports:
         specifier: 4.1.4
         version: 4.1.4(@typescript-eslint/eslint-plugin@6.0.0(@typescript-eslint/parser@6.0.0(eslint@8.42.0)(typescript@5.4.5))(eslint@8.42.0)(typescript@5.4.5))(eslint@8.42.0)
+      express:
+        specifier: 4.21.2
+        version: 4.21.2
       fishery:
         specifier: 2.2.2
         version: 2.2.2

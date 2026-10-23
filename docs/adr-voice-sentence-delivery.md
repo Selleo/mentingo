@@ -73,3 +73,7 @@ The API unit-test scripts launch Jest through Node with
 workflow uses `pnpm --filter=api test:ci`, so the same command enables SDK loading
 locally and in CI without manually setting `NODE_OPTIONS`. Watch, coverage and
 debug unit-test entry points use the same flag. E2E commands are unchanged.
+
+The API declares Express as a direct development dependency for the MCP runtime
+tests. They import it directly and must not depend on accidental transitive
+hoisting. Its pinned version matches the existing Nest Express adapter dependency.
