@@ -34,6 +34,16 @@ describe("checkRouteAccess", () => {
       expect(checkRouteAccess(route, [])).toBe(false);
     }
   });
+  it("does not grant wildcard access to a sibling prefix", () => {
+    expect(checkRouteAccess("admin/users-export", [PERMISSIONS.USER_MANAGE])).toBe(false);
+    expect(checkRouteAccess("super-administrator", [PERMISSIONS.TENANT_MANAGE])).toBe(false);
+  });
+
+  it("matches Remix case-insensitive and trailing-slash paths", () => {
+    expect(checkRouteAccess("REPORTS/", [PERMISSIONS.REPORT_READ])).toBe(true);
+    expect(checkRouteAccess("REPORTS/", [])).toBe(false);
+  });
+
   it("should allow access to exact matching routes", () => {
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE])).toBe(true);
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE_OWN])).toBe(true);
