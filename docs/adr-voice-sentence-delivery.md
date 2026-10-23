@@ -67,3 +67,9 @@ TypeScript checking and scoped ESLint passed on Node 22.15.0. The prompt package
 build passed and both YAML templates match the AI backend's bundled fallbacks.
 The matching backend passed 2,349 unit tests and its scoped lint/format/type checks.
 Live provider audio and human listening are still pending.
+
+The API unit-test scripts launch Jest through Node with
+`--experimental-vm-modules`, required for the installed ESM-only AI SDK. The CI
+workflow uses `pnpm --filter=api test:ci`, so the same command enables SDK loading
+locally and in CI without manually setting `NODE_OPTIONS`. Watch, coverage and
+debug unit-test entry points use the same flag. E2E commands are unchanged.
