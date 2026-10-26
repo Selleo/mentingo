@@ -198,7 +198,7 @@ describe("AiController (e2e)", () => {
     await expect(
       app
         .get(JudgeService)
-        .runJudge(
+        .evaluate(
           { threadId: previous.id, userId: owner.id },
           { userId: owner.id, permissions: [] },
         ),

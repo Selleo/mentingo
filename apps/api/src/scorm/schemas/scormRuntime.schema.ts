@@ -8,6 +8,7 @@ import type { Static } from "@sinclair/typebox";
 const scormRuntimeValuesSchema = Type.Record(Type.String(), Type.String());
 
 export const scormLaunchResponseSchema = Type.Object({
+  learningStateId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   attemptId: UUIDSchema,
   packageId: UUIDSchema,
   scoId: UUIDSchema,

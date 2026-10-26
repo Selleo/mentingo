@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Powtarzanie: {{completed}} z {{total}} lekcji",
+    "repeat": "Powtórz kurs",
+    "setting": "Zezwalaj na powtarzanie kursu",
+    "settingDescription": "Uczestnicy mogą powtórzyć ukończony kurs z nowym postępem.",
+    "completedOn": "Ukończono {{date}}",
+    "progress": "Powtarzanie: {{completed}} z {{total}} rozdziałów",
+    "errors": {
+      "staleState": "Odśwież kurs przed kontynuowaniem.",
+      "unavailable": "Teraz nie można powtórzyć tego kursu.",
+      "accessDenied": "Nie masz dostępu do powtarzania tego kursu."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatyzacje i e-maile",
     "templates": "Szablony automatyzacji",
@@ -6314,6 +6327,8 @@
       "certificate": "Certyfikat",
       "uponCompletion": "Po ukończeniu",
       "notIssuedYet": "Jeszcze niewydany",
+      "certificateDate": "Wydano",
+      "certificateExpiry": "Wygasa",
       "aboutAuthor": "O autorze"
     },
     "certificate": {

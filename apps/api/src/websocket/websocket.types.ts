@@ -2,6 +2,7 @@ import type { PermissionKey } from "@repo/shared";
 import type { Socket } from "socket.io";
 
 export interface HeartbeatPayload {
+  learningStateId?: string | null;
   lessonId: string;
   courseId: string;
   timestamp: number;
@@ -9,11 +10,13 @@ export interface HeartbeatPayload {
 }
 
 export interface JoinLessonPayload {
+  learningStateId?: string | null;
   lessonId: string;
   courseId: string;
 }
 
 export interface LeaveLessonPayload {
+  learningStateId?: string | null;
   lessonId: string;
 }
 

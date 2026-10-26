@@ -4000,6 +4000,43 @@
         }
       }
     },
+    "/api/course/{courseId}/repeat": {
+      "post": {
+        "operationId": "CourseController_repeatCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepeatCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepeatCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{courseId}/open": {
       "post": {
         "operationId": "CourseController_markCourseOpened",
@@ -7477,7 +7514,17 @@
     "/api/lesson/evaluation-quiz": {
       "post": {
         "operationId": "LessonController_evaluationQuiz",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -7608,6 +7655,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -8485,6 +8541,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -9411,7 +9476,17 @@
     "/api/ai/chat": {
       "post": {
         "operationId": "AiController_streamChat",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -9441,6 +9516,15 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -9467,6 +9551,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -11720,7 +11813,17 @@
     "/api/lesson-video-progress": {
       "post": {
         "operationId": "LessonVideoProgressController_upsertProgress",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -17011,6 +17114,15 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -17029,7 +17141,17 @@
     "/api/scorm/runtime/commit": {
       "post": {
         "operationId": "ScormController_commitScormAttempt",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -17056,7 +17178,17 @@
     "/api/scorm/runtime/finish": {
       "post": {
         "operationId": "ScormController_finishScormAttempt",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -33598,6 +33730,16 @@
             "items": {
               "type": "object",
               "properties": {
+                "repetitionCompletedChapterCount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -34014,6 +34156,107 @@
           "data"
         ]
       },
+      "RepeatCourseBody": {
+        "type": "object",
+        "properties": {
+          "currentStateId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentStateId"
+        ]
+      },
+      "RepeatCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "current": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "completedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "finishedChapterCount": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "completedAt",
+                      "finishedChapterCount"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "repetition": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "completedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "finishedChapterCount": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "completedAt",
+                      "finishedChapterCount"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "enabled",
+              "current",
+              "repetition"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "MarkCourseOpenedResponse": {
         "type": "object",
         "properties": {
@@ -34132,6 +34375,16 @@
             "items": {
               "type": "object",
               "properties": {
+                "repetitionCompletedChapterCount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -34505,6 +34758,16 @@
             "items": {
               "type": "object",
               "properties": {
+                "repetitionCompletedChapterCount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -34719,6 +34982,16 @@
             "items": {
               "type": "object",
               "properties": {
+                "repetitionCompletedChapterCount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -34933,6 +35206,87 @@
           "data": {
             "type": "object",
             "properties": {
+              "learningState": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "current": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "completedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedChapterCount": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "completedAt",
+                          "finishedChapterCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "repetition": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "completedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedChapterCount": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "completedAt",
+                          "finishedChapterCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "enabled",
+                  "current",
+                  "repetition"
+                ]
+              },
               "isArchived": {
                 "type": "boolean"
               },
@@ -36771,6 +37125,9 @@
       "UpdateCourseSettingsBody": {
         "type": "object",
         "properties": {
+          "repetitionEnabled": {
+            "type": "boolean"
+          },
           "lessonSequenceEnabled": {
             "type": "boolean"
           },
@@ -36884,6 +37241,10 @@
           "data": {
             "type": "object",
             "properties": {
+              "repetitionEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
               "lessonSequenceEnabled": {
                 "default": false,
                 "type": "boolean"
@@ -37496,6 +37857,26 @@
             "items": {
               "type": "object",
               "properties": {
+                "completedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "repetitionCompletedLessonsCount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "studentId": {
                   "format": "uuid",
                   "type": "string"
@@ -39636,6 +40017,17 @@
           "data": {
             "type": "object",
             "properties": {
+              "learningStateId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -161191,6 +161583,17 @@
           "data": {
             "type": "object",
             "properties": {
+              "learningStateId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "attemptId": {
                 "format": "uuid",
                 "type": "string"
@@ -177509,6 +177912,10 @@
                     "additionalProperties": false,
                     "type": "object",
                     "properties": {
+                      "repetitionEnabled": {
+                        "default": false,
+                        "type": "boolean"
+                      },
                       "lessonSequenceEnabled": {
                         "default": false,
                         "type": "boolean"

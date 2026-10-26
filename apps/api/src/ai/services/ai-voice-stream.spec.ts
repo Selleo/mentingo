@@ -42,6 +42,7 @@ describe("Voice stream persistence", () => {
         {} as never,
         { runWithTenant: async (_id: string, run: () => Promise<void>) => run() } as never,
         {} as never,
+        {} as never,
       );
       const result = await service.streamMessage(
         {

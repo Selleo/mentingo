@@ -98,8 +98,8 @@ const AiMentorLesson = ({
   const voiceResponseMessageIdRef = useRef<string | null>(null);
 
   const transport = useMemo(
-    () => createAiMentorChatTransport(lesson.threadId ?? ""),
-    [lesson.threadId],
+    () => createAiMentorChatTransport(lesson.threadId ?? "", lesson.learningStateId),
+    [lesson.threadId, lesson.learningStateId],
   );
 
   const { messages, setMessages, sendMessage, status } = useChat({
@@ -247,10 +247,13 @@ const AiMentorLesson = ({
 
   const handleJudge = useCallback(async () => {
     if (!lesson.threadId) return;
-    const response = await judgeLesson({ threadId: lesson.threadId });
+    const response = await judgeLesson({
+      threadId: lesson.threadId,
+      learningStateId: lesson.learningStateId,
+    });
     setLatestEvaluation(response.data);
     setShowEvaluationDialog(true);
-  }, [judgeLesson, lesson.threadId]);
+  }, [judgeLesson, lesson.threadId, lesson.learningStateId]);
 
   const handleRetakeLesson = async () => {
     if (!lesson.threadId) return;
@@ -259,7 +262,7 @@ const AiMentorLesson = ({
     setLatestEvaluation(null);
     setShowEvaluationDialog(false);
 
-    await retakeLesson({ lessonId: lesson.id });
+    await retakeLesson({ lessonId: lesson.id, learningStateId: lesson.learningStateId });
   };
 
   const isProcessing =

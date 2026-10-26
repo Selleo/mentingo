@@ -29,6 +29,12 @@ import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import {
+  COURSE_LEARNING_TARGET_ENTITIES,
+  COURSE_LEARNING_TARGET_FIELDS,
+  COURSE_LEARNING_TARGET_SOURCES,
+} from "src/course-repetition/course-learning-write.constants";
+import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 
 @Controller("ai")
 export class AiController {
@@ -100,7 +106,7 @@ export class AiController {
     @Query("thread") threadId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ResponseThreadBody>> {
-    return await this.threadService.findThread(threadId, currentUser);
+    return await this.threadService.findThread(threadId, currentUser, true);
   }
 
   @Get("thread/messages")
@@ -117,6 +123,12 @@ export class AiController {
   }
 
   @Post("chat")
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.THREAD_ID,
+    entity: COURSE_LEARNING_TARGET_ENTITIES.THREAD,
+    transactional: false,
+  })
   @RequirePermission(PERMISSIONS.AI_USE)
   @Validate({
     request: [{ type: "body", schema: streamChatSchema }],
@@ -139,6 +151,12 @@ export class AiController {
     });
   }
 
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.PARAMS,
+    field: COURSE_LEARNING_TARGET_FIELDS.THREAD_ID,
+    entity: COURSE_LEARNING_TARGET_ENTITIES.THREAD,
+    transactional: false,
+  })
   @Post("judge/:threadId")
   @RequirePermission(PERMISSIONS.AI_USE)
   @Validate({
@@ -152,6 +170,10 @@ export class AiController {
     return await this.aiService.runJudge({ threadId, userId: currentUser.userId }, currentUser);
   }
 
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.PARAMS,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
   @Post("retake/:lessonId")
   @RequirePermission(PERMISSIONS.AI_USE)
   @Validate({

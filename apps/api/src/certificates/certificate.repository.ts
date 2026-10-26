@@ -36,6 +36,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  courseLearningStates,
   certificates,
   users,
   courses,
@@ -1044,6 +1045,15 @@ export class CertificateRepository {
     if (!userIds.length) return;
 
     const dbInstance = trx || this.db;
+
+    await dbInstance
+      .delete(courseLearningStates)
+      .where(
+        and(
+          eq(courseLearningStates.courseId, courseId),
+          inArray(courseLearningStates.studentId, userIds),
+        ),
+      );
 
     const courseChapterIds = dbInstance
       .select({ id: chapters.id })

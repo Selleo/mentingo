@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Reprise : {{completed}} sur {{total}} leçons",
+    "repeat": "Reprendre le cours",
+    "setting": "Autoriser la reprise du cours",
+    "settingDescription": "Les participants peuvent reprendre un cours terminé avec une nouvelle progression.",
+    "completedOn": "Terminé le {{date}}",
+    "progress": "Reprise : {{completed}} sur {{total}} chapitres",
+    "errors": {
+      "staleState": "Actualisez le cours avant de continuer.",
+      "unavailable": "Ce cours ne peut pas être repris maintenant.",
+      "accessDenied": "Vous ne pouvez pas reprendre ce cours."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatisations et e-mails",
     "templates": "Modèles d’automatisation",
@@ -5984,6 +5997,8 @@
       "certificate": "Certificat",
       "uponCompletion": "À la fin du cours",
       "notIssuedYet": "Pas encore délivré",
+      "certificateDate": "Délivré",
+      "certificateExpiry": "Expire le",
       "aboutAuthor": "À propos de l'auteur"
     },
     "certificate": {

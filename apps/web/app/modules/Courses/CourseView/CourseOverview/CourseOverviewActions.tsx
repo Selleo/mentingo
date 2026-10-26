@@ -19,6 +19,7 @@ import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+import { CourseRepetition } from "../../components/CourseRepetition";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseOverviewActionsProps = {
@@ -43,8 +44,13 @@ export default function CourseOverviewActions({
   const { data: currentUser } = useCurrentUser();
   const isRegistrationEnabled = useIsRegistrationEnabled();
   const { mutateAsync: enrollCourse, isPending: isEnrolling } = useEnrollCourse();
-  const { course, isAdminExperience, canEditCourse, isCourseStudentModeActive } =
-    useCourseAccessProvider();
+  const {
+    course,
+    isAdminExperience,
+    canEditCourse,
+    isCourseStudentModeActive,
+    isEffectiveStudentExperience,
+  } = useCourseAccessProvider();
 
   const isGroupManager = hasPermission(
     currentUser?.permissions ?? [],
@@ -140,6 +146,8 @@ export default function CourseOverviewActions({
       );
     }
 
+    if (course.learningState?.current?.completedAt && !course.learningState.repetition) return null;
+
     return (
       <Button
         data-testid={COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON}
@@ -161,6 +169,9 @@ export default function CourseOverviewActions({
       className="flex flex-wrap items-center gap-2 sm:gap-3"
     >
       {renderPrimaryAction()}
+      {isEffectiveStudentExperience && !course.learningState?.repetition && (
+        <CourseRepetition course={course} />
+      )}
 
       <Button
         data-testid={COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON}

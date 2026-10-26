@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { buildOverdueCoursesEventFields } from "@repo/email-templates";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   AUTOMATION_EVENT_KINDS,
   SUPPORTED_LANGUAGES,
   COURSE_FEATURE,
@@ -84,6 +85,14 @@ import {
   getRestrictedIdsCondition,
   getRestrictedIdsSqlFragment,
 } from "src/common/utils/restrictedIds";
+import {
+  activeLearningState,
+  currentLearningState,
+} from "src/course-repetition/course-learning-state.sql";
+import {
+  activeCourseLearningStateId,
+  CourseRepetitionService,
+} from "src/course-repetition/course-repetition.service";
 import { CourseDurationService } from "src/courses/course-duration.service";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
@@ -125,6 +134,7 @@ import {
   certificates,
   chapters,
   courseStudentMode,
+  courseLearningStates,
   courses,
   coursesSummaryStats,
   groups,
@@ -289,6 +299,7 @@ export class CourseService {
   private readonly logger = new Logger(CourseService.name);
 
   constructor(
+    private readonly courseRepetitionService: CourseRepetitionService,
     @Inject("DB") private readonly db: DatabasePg,
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly fileService: FileService,
@@ -619,17 +630,30 @@ export class CourseService {
         courseId: courses.id,
         title: continueCourseTitle,
         thumbnailS3Key: courses.thumbnailS3Key,
-        completedChapterCount: studentCourses.finishedChapterCount,
+        completedChapterCount: sql<number>`COALESCE(${courseLearningStates.finishedChapterCount}, ${studentCourses.finishedChapterCount})`,
         courseChapterCount: courses.chapterCount,
       })
       .from(studentCourses)
       .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+        ),
+      )
       .where(
         and(
           eq(studentCourses.studentId, userId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-          eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
-          isNull(studentCourses.completedAt),
+          or(
+            and(
+              eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
+              isNull(studentCourses.completedAt),
+            ),
+            isNotNull(courseLearningStates.finishedChapterCount),
+          ),
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
@@ -1628,6 +1652,13 @@ export class CourseService {
     )
       throw new ForbiddenException("You have no access to this course");
 
+    if (currentUser && !isManagerPreview && isEnrolled) {
+      await this.db.transaction((trx) =>
+        this.courseRepetitionService.ensureCurrent(id, userId, trx),
+      );
+    }
+    const learningState = await this.courseRepetitionService.getInfo(id, userId);
+
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
@@ -1636,11 +1667,14 @@ export class CourseService {
           EXISTS (
             SELECT 1
             FROM ${studentChapterProgress}
-            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId}
+            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${
+              studentCourses.studentId
+            } = ${studentChapterProgress.studentId}
             WHERE ${studentChapterProgress.chapterId} = ${chapters.id}
               AND ${studentChapterProgress.courseId} = ${course.id}
               AND ${studentChapterProgress.studentId} = ${userId}
               AND ${studentChapterProgress.completedAt} IS NOT NULL
+              AND ${activeLearningState(studentChapterProgress.learningStateId)}
               AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
           )::BOOLEAN`,
         lessonCount: chapters.lessonCount,
@@ -1652,14 +1686,19 @@ export class CourseService {
         completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
         chapterProgress: sql<ProgressStatus>`
           CASE
-          WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
-            WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
+          WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${
+            PROGRESS_STATUSES.NOT_STARTED
+          }
+            WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${
+              PROGRESS_STATUSES.COMPLETED
+            }
             WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
               SELECT 1
               FROM ${studentLessonProgress}
               WHERE ${studentLessonProgress.chapterId} = ${chapters.id}
                 AND ${studentLessonProgress.studentId} = ${userId}
                 AND ${studentLessonProgress.isStarted} = TRUE
+                AND ${activeLearningState(studentLessonProgress.learningStateId)}
             ) THEN ${PROGRESS_STATUSES.IN_PROGRESS}
             ELSE ${PROGRESS_STATUSES.NOT_STARTED}
           END
@@ -1703,6 +1742,7 @@ export class CourseService {
                   studentLessonProgress.lessonId
                 }
                   AND ${studentLessonProgress.studentId} = ${userId}
+                  AND ${activeLearningState(studentLessonProgress.learningStateId)}
                 LEFT JOIN ${assessments} ON ${assessments.lessonId} = ${lessons.id}
                 LEFT JOIN ${assessmentQuestions} ON ${assessments.id} = ${
                   assessmentQuestions.assessmentId
@@ -1734,6 +1774,7 @@ export class CourseService {
         and(
           eq(studentChapterProgress.chapterId, chapters.id),
           eq(studentChapterProgress.studentId, userId),
+          activeLearningState(studentChapterProgress.learningStateId),
         ),
       )
       .leftJoin(
@@ -1780,6 +1821,9 @@ export class CourseService {
 
     return {
       ...courseData,
+      learningState,
+      completedChapterCount:
+        learningState.repetition?.finishedChapterCount ?? courseData.completedChapterCount,
       author,
       thumbnailUrl: thumbnailUrl ?? undefined,
       estimatedDurationSeconds: durationHierarchy.totalSeconds,
@@ -2436,6 +2480,7 @@ export class CourseService {
 
     const isScormCourse = createCourseBody.isScorm === true;
     const settings = sql`json_build_object(
+      'repetitionEnabled', false,
       'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
       'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
       'videoCompletionTrackingEnabled', ${
@@ -3683,12 +3728,14 @@ export class CourseService {
       );
     }
 
+    const learningStateId = await activeCourseLearningStateId(trx, studentId, courseId);
     if (courseChapterList.length > 0) {
       await trx
         .insert(studentChapterProgress)
         .values(
           courseChapterList.map((chapter) => ({
             studentId,
+            learningStateId,
             chapterId: chapter.id,
             courseId,
             completedLessonItemCount: 0,
@@ -3710,6 +3757,7 @@ export class CourseService {
             .values(
               chapterLessons.map((lesson) => ({
                 studentId,
+                learningStateId,
                 lessonId: lesson.id,
                 chapterId: chapter.id,
                 completedQuestionCount: 0,
@@ -4255,6 +4303,16 @@ export class CourseService {
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
       courseChapterCount: courses.chapterCount,
       completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
+      repetitionCompletedChapterCount: sql<number | null>`${this.db
+        .select({ finishedChapterCount: courseLearningStates.finishedChapterCount })
+        .from(courseLearningStates)
+        .where(
+          and(
+            eq(courseLearningStates.courseId, courses.id),
+            eq(courseLearningStates.studentId, studentCourses.studentId),
+            eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+          ),
+        )}`,
       priceInCents: courses.priceInCents,
       currency: courses.currency,
       hasFreeChapter: sql<boolean>`
@@ -4457,7 +4515,9 @@ export class CourseService {
             FROM ${studentLessonProgress} AS slp
             JOIN ${lessons} AS l ON slp.lesson_id = l.id
             JOIN ${chapters} AS ch ON l.chapter_id = ch.id
-            JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
+            JOIN ${studentCourses} AS sc ON ${currentLearningState(
+              sql.raw("slp.learning_state_id"),
+            )} AND slp.student_id = sc.student_id AND ch.course_id = sc.course_id
             JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
             WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
             ${scopedAliasCondition}
@@ -4733,6 +4793,26 @@ export class CourseService {
         studentAvatarKey: users.avatarReference,
         groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
+        completedAt: sql<string | null>`MAX(${studentCourses.completedAt})`,
+        repetitionCompletedLessonsCount: sql<number | null>`${this.db
+          .select({ count: sql<number>`${count(studentLessonProgress.id)}::int` })
+          .from(courseLearningStates)
+          .leftJoin(
+            studentLessonProgress,
+            and(
+              eq(studentLessonProgress.learningStateId, courseLearningStates.id),
+              eq(studentLessonProgress.studentId, courseLearningStates.studentId),
+              isNotNull(studentLessonProgress.completedAt),
+            ),
+          )
+          .where(
+            and(
+              eq(courseLearningStates.courseId, courseId),
+              eq(courseLearningStates.studentId, users.id),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+            ),
+          )
+          .groupBy(courseLearningStates.id)}`,
         lastActivity: lastActivityExpression,
         lastCompletedLessonName: lastCompletedLessonName,
       })
@@ -4839,7 +4919,13 @@ export class CourseService {
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
-      .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
+      .leftJoin(
+        studentLessonProgress,
+        and(
+          eq(studentLessonProgress.studentId, users.id),
+          currentLearningState(studentLessonProgress.learningStateId),
+        ),
+      )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, studentLessonProgress.studentId))
@@ -4854,7 +4940,13 @@ export class CourseService {
         totalCount: sql<number>`COUNT(DISTINCT (${studentLessonProgress.studentId}, ${studentLessonProgress.lessonId}))::INTEGER`,
       })
       .from(studentLessonProgress)
-      .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentLessonProgress.studentId, studentCourses.studentId),
+          currentLearningState(studentLessonProgress.learningStateId),
+        ),
+      )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
       .leftJoin(users, eq(studentCourses.studentId, users.id))
@@ -4951,7 +5043,13 @@ export class CourseService {
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
+      .leftJoin(
+        studentLessonProgress,
+        and(
+          eq(studentLessonProgress.studentId, users.id),
+          currentLearningState(studentLessonProgress.learningStateId),
+        ),
+      )
       .leftJoin(
         aiMentorStudentLessonProgress,
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
@@ -4972,7 +5070,13 @@ export class CourseService {
         studentLessonProgress,
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
       )
-      .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentLessonProgress.studentId, studentCourses.studentId),
+          currentLearningState(studentLessonProgress.learningStateId),
+        ),
+      )
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
@@ -5063,7 +5167,9 @@ export class CourseService {
           FROM ${studentLessonProgress} slp
           JOIN ${lessons} l ON slp.lesson_id = l.id
           JOIN ${chapters} ch ON l.chapter_id = ch.id
-          WHERE slp.student_id = ${users.id}
+          WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+            users.id
+          }
             AND ch.course_id = ${courseId}
         )`;
 
@@ -5072,7 +5178,9 @@ export class CourseService {
           FROM ${studentLessonProgress} slp
           JOIN ${lessons} l ON slp.lesson_id = l.id
           JOIN ${chapters} ch ON l.chapter_id = ch.id
-          WHERE slp.student_id = ${users.id}
+          WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+            users.id
+          }
             AND ch.course_id = ${courseId}
             AND slp.completed_at IS NOT NULL
         ), 0)::float`;
@@ -5106,7 +5214,9 @@ export class CourseService {
           FROM ${studentLessonProgress} slp
           JOIN ${lessons} l ON slp.lesson_id = l.id
           JOIN ${chapters} ch ON l.chapter_id = ch.id
-          WHERE slp.student_id = ${users.id}
+          WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+            users.id
+          }
             AND slp.chapter_id = ch.id
             AND ch.course_id = ${courseId}
         )`;
@@ -5136,7 +5246,9 @@ export class CourseService {
           JOIN ${lessons} ON slp.lesson_id = lessons.id
           JOIN ${chapters} ch ON lessons.chapter_id = ch.id
           JOIN ${courses} c ON c.id = ch.course_id
-          WHERE slp.student_id = ${users.id}
+          WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+            users.id
+          }
             AND ch.course_id = ${courseId}
             AND slp.completed_at IS NOT NULL
           ORDER BY slp.completed_at DESC
