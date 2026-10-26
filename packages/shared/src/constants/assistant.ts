@@ -56,3 +56,10 @@ export const ASSISTANT_MESSAGE_STATUSES = {
 } as const;
 export type AssistantMessageStatus =
   (typeof ASSISTANT_MESSAGE_STATUSES)[keyof typeof ASSISTANT_MESSAGE_STATUSES];
+
+export const ASSISTANT_OUTCOME_KINDS = {
+  ANSWER: "answer",
+  CONVERSATION: "conversation",
+} as const;
+export type AssistantOutcomeKind =
+  (typeof ASSISTANT_OUTCOME_KINDS)[keyof typeof ASSISTANT_OUTCOME_KINDS];

@@ -1,3 +1,5 @@
+import { ASSISTANT_OUTCOME_KINDS } from "@repo/shared";
+
 import type {
   AssistantOutcome,
   AssistantOutcomeEvidence,
@@ -16,7 +18,7 @@ export function validateAssistantOutcome(
       feedback: "Provide a nonempty reply before calling respond again.",
     };
   }
-  if (outcome.kind === "answer" && !evidence.successfulToolCalls) {
+  if (outcome.kind === ASSISTANT_OUTCOME_KINDS.ANSWER && !evidence.successfulToolCalls) {
     return {
       accepted: false,
       code: "NO_VERIFIED_EVIDENCE",
@@ -39,7 +41,8 @@ export function isAssistantOutcome(value: unknown): value is AssistantOutcome {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const outcome = value as Record<string, unknown>;
   return (
-    (outcome.kind === "answer" || outcome.kind === "conversation") &&
+    (outcome.kind === ASSISTANT_OUTCOME_KINDS.ANSWER ||
+      outcome.kind === ASSISTANT_OUTCOME_KINDS.CONVERSATION) &&
     typeof outcome.text === "string" &&
     typeof outcome.requiresReadableContent === "boolean"
   );

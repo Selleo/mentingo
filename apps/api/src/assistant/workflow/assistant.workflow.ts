@@ -1,4 +1,5 @@
 import { WorkflowAgent, type ModelCallStreamPart } from "@ai-sdk/workflow";
+import { ASSISTANT_OUTCOME_KINDS } from "@repo/shared";
 import { jsonSchema, tool } from "ai";
 import { FatalError, getWritable } from "workflow";
 
@@ -32,7 +33,7 @@ export async function assistantWorkflow(input: AssistantWorkflowInput) {
       inputSchema: jsonSchema<AssistantOutcome>({
         type: "object",
         properties: {
-          kind: { type: "string", enum: ["answer", "conversation"] },
+          kind: { type: "string", enum: Object.values(ASSISTANT_OUTCOME_KINDS) },
           requiresReadableContent: { type: "boolean" },
           text: { type: "string", minLength: 1, maxLength: 16000 },
         },

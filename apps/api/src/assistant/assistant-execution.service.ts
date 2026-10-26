@@ -1,5 +1,10 @@
 import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
-import { ASSISTANT_RUN_ACTIVITIES, TENANT_STATUSES, type AssistantRunActivity } from "@repo/shared";
+import {
+  ASSISTANT_OUTCOME_KINDS,
+  ASSISTANT_RUN_ACTIVITIES,
+  TENANT_STATUSES,
+  type AssistantRunActivity,
+} from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
@@ -145,7 +150,7 @@ export class AssistantExecutionService {
     input: AssistantRunIdentity,
     text: string,
     _sources?: AssistantSource[],
-    kind: AssistantOutcome["kind"] = "answer",
+    kind: AssistantOutcome["kind"] = ASSISTANT_OUTCOME_KINDS.ANSWER,
     requiresReadableContent = false,
   ) {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
@@ -164,7 +169,7 @@ export class AssistantExecutionService {
     input: AssistantRunIdentity,
     text: string,
     _sources?: AssistantSource[],
-    kind: AssistantOutcome["kind"] = "answer",
+    kind: AssistantOutcome["kind"] = ASSISTANT_OUTCOME_KINDS.ANSWER,
     requiresReadableContent = false,
   ) {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {

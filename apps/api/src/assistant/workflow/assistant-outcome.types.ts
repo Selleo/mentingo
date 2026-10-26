@@ -1,5 +1,7 @@
+import type { AssistantOutcomeKind } from "@repo/shared";
+
 export type AssistantOutcome = {
-  kind: "answer" | "conversation";
+  kind: AssistantOutcomeKind;
   text: string;
   requiresReadableContent: boolean;
 };
