@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && pnpm workflow:typecheck && node scripts/build-assistant-workflow.mjs",
+    "build": "nest build && pnpm workflow:typecheck && pnpm workflow:build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -34,8 +34,7 @@
     "db:seed-reports": "tsx ./src/seed/reports-seed.ts",
     "db:truncate-tables": "tsx ./src/seed/truncateTables.ts",
     "content-marketplace:mock": "tsx ./scripts/contentMarketplaceMock.ts",
-    "workflow:build": "node scripts/build-assistant-workflow.mjs",
-    "workflow:bootstrap": "node scripts/bootstrap-assistant-workflow.mjs",
+    "workflow:build": "node --input-type=module -e \"import { resolve } from 'node:path'; import { NestLocalBuilder } from '@workflow/nest/builder'; await new NestLocalBuilder({ workingDir: process.cwd(), dirs: ['src/assistant/workflow'], outDir: resolve('dist/workflow'), moduleType: 'commonjs', distDir: 'dist/src/assistant/workflow', sourcemap: false }).build();\"",
     "workflow:typecheck": "tsc --project tsconfig.workflow.json"
   },
   "dependencies": {

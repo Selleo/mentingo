@@ -6,7 +6,7 @@ The Assistant runs in the Core API using AI SDK Workflow and self-hosted Postgre
 
 1. Apply normal Core migrations with `pnpm --filter api db:migrate` using the intended environment context.
 2. Provision a dedicated empty PostgreSQL database for Workflow. It may use the same PostgreSQL server as Core, but **must not use the Core database**: upstream Workflow migrations own public enum names that conflict with Core.
-3. Set `WORKFLOW_POSTGRES_URL` through the deployment's private configuration. Run `pnpm --filter api workflow:bootstrap` in that same environment. The wrapper refuses an application database before running upstream migrations.
+3. Set `WORKFLOW_POSTGRES_URL` explicitly to that dedicated database through the deployment's private configuration, then run the SDK's `pnpm --filter api exec bootstrap` command in the same environment. The SDK falls back to `DATABASE_URL` when `WORKFLOW_POSTGRES_URL` is absent, so verify the dedicated URL is set before invoking it. This runs upstream Workflow migrations, separately from Core migrations.
 4. Build with `pnpm --filter api build`, then start the API through the existing deployment command. Development startup rebuilds the Workflow bundle when Workflow is configured.
 
 The unreleased Assistant migrations are consolidated into `0224_core_assistant` (tables, columns and indexes) and `0225_enable_assistant_tenant_rls` (tenant policies). A local database that already applied the earlier four-migration development history must be recreated or explicitly reconciled before using this history; do not rerun the squashed migrations against it blindly.
