@@ -25,13 +25,14 @@ export function useUpdateAssistantThread(threadId: string) {
         async () => (await ApiClient.api.assistantControllerUpdateThread(threadId, body)).data.data,
       ),
     onSuccess: async (_result, _body, session) => {
-      session!.assertCurrent();
-      const scope = session!.scope;
+      if (!session) throw new AssistantSessionChangedError();
+      session.assertCurrent();
+      const scope = session.scope;
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: assistantThreadKey(threadId, scope) }),
         queryClient.invalidateQueries({ queryKey: assistantThreadsKey(scope) }),
       ]);
-      session!.assertCurrent();
+      session.assertCurrent();
     },
     onError: (error) => {
       if (error instanceof AssistantSessionChangedError) return;

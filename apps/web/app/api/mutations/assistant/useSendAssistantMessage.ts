@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 import {
+  AssistantSessionChangedError,
   captureAssistantSession,
   inAssistantSession,
   useAssistantScope,
@@ -28,8 +29,9 @@ export function useSendAssistantMessage() {
         async () => (await ApiClient.api.assistantControllerSendMessage(threadId, body)).data.data,
       ),
     onSuccess: async (result, { threadId }, session) => {
-      session!.assertCurrent();
-      const scope = session!.scope;
+      if (!session) throw new AssistantSessionChangedError();
+      session.assertCurrent();
+      const scope = session.scope;
       const messagesKey = assistantMessagesKey(threadId, scope);
       // A newly created thread has no mounted transcript query until navigation.
       // Never replace an existing cache: it may already contain newer streamed output.
@@ -52,7 +54,7 @@ export function useSendAssistantMessage() {
         queryClient.invalidateQueries({ queryKey: assistantThreadKey(threadId, scope) }),
         queryClient.invalidateQueries({ queryKey: assistantThreadsKey(scope) }),
       ]);
-      session!.assertCurrent();
+      session.assertCurrent();
     },
   });
 }

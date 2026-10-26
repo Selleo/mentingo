@@ -97,10 +97,10 @@ export class AssistantSessionChangedError extends Error {
 
 /** A logout/login cycle invalidates pending work even when the same account signs in again. */
 export function captureAssistantSession(scope: AssistantScope | undefined) {
+  if (!scope) throw new AssistantSessionChangedError();
   const started = generation;
   const assertCurrent = () => {
     if (
-      !scope ||
       started !== generation ||
       JSON.stringify(scope) !== JSON.stringify(currentAssistantScope())
     ) {
@@ -108,7 +108,7 @@ export function captureAssistantSession(scope: AssistantScope | undefined) {
     }
   };
   assertCurrent();
-  return { scope: scope!, assertCurrent };
+  return { scope, assertCurrent };
 }
 
 export async function inAssistantSession<T>(

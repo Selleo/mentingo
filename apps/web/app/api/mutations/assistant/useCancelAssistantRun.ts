@@ -25,13 +25,14 @@ export function useCancelAssistantRun(threadId: string) {
         async () => (await ApiClient.api.assistantControllerCancelRun(threadId, runId)).data.data,
       ),
     onSuccess: async (_result, _body, session) => {
-      session!.assertCurrent();
-      const scope = session!.scope;
+      if (!session) throw new AssistantSessionChangedError();
+      session.assertCurrent();
+      const scope = session.scope;
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: assistantMessagesKey(threadId, scope) }),
         queryClient.invalidateQueries({ queryKey: assistantThreadKey(threadId, scope) }),
       ]);
-      session!.assertCurrent();
+      session.assertCurrent();
     },
     onError: (error) => {
       if (error instanceof AssistantSessionChangedError) return;

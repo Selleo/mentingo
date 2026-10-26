@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 import {
+  AssistantSessionChangedError,
   captureAssistantSession,
   inAssistantSession,
   useAssistantScope,
@@ -20,9 +21,10 @@ export function useCreateAssistantThread() {
         async () => (await ApiClient.api.assistantControllerCreateThread(body)).data.data,
       ),
     onSuccess: async (_result, _body, session) => {
-      session!.assertCurrent();
-      await queryClient.invalidateQueries({ queryKey: assistantThreadsKey(session!.scope) });
-      session!.assertCurrent();
+      if (!session) throw new AssistantSessionChangedError();
+      session.assertCurrent();
+      await queryClient.invalidateQueries({ queryKey: assistantThreadsKey(session.scope) });
+      session.assertCurrent();
     },
   });
 }
