@@ -103,7 +103,9 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
   }
 
   async start(input: AssistantRuntimeInput): Promise<{ workflowRunId: string }> {
-    if (!this.isAvailable())
+    const world = this.world;
+    const workflowId = this.workflowId;
+    if (!world || !workflowId)
       throw new ServiceUnavailableException("Assistant runtime is not configured");
     const { start, getRun } = await loadEsm<WorkflowApi>("workflow/api");
     const workflowRunId = assistantWorkflowRunId(input);
@@ -121,7 +123,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
         "core-assistant.enqueue",
         () =>
           start(
-            { workflowId: this.workflowId! },
+            { workflowId },
             [
               {
                 runId: input.runId,
@@ -132,7 +134,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
               },
             ],
             {
-              world: { ...this.world!, createRunId: () => workflowRunId.slice(5) },
+              world: { ...world, createRunId: () => workflowRunId.slice(5) },
             },
           ),
       );
