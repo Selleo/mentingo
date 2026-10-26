@@ -1,6 +1,6 @@
 import { useSearchParams } from "@remix-run/react";
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   useAddCoursesToLearningPath,
@@ -16,7 +16,7 @@ import {
 } from "~/api/mutations/useLearningPathMutations";
 import { useCurrentUserSuspense } from "~/api/queries";
 import { useGroupsQuery } from "~/api/queries/admin/useGroups";
-import { useLearningPathsSuspense } from "~/api/queries/useLearningPaths";
+import { useSuspenseInfiniteLearningPaths } from "~/api/queries/useLearningPaths";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -37,12 +37,17 @@ export function useAdminLearningPathsPage() {
   const [createLanguage, setCreateLanguage] = useState<SupportedLanguages>(appLanguage);
 
   const [isCreateOpen, setIsCreateOpen] = useState(searchParams.get("create") === "1");
-  const createCardRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: learningPaths } = useLearningPathsSuspense({
+  const {
+    data: learningPathsData,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useSuspenseInfiniteLearningPaths({
     language: appLanguage,
     searchQuery,
   });
+  const learningPathPages = learningPathsData.pages;
 
   const { data: groups = [] } = useGroupsQuery({ language: appLanguage });
 
@@ -99,14 +104,6 @@ export function useAdminLearningPathsPage() {
     setIsCreateOpen(searchParams.get("create") === "1");
   }, [searchParams]);
 
-  useEffect(() => {
-    if (!isCreateOpen) return;
-
-    requestAnimationFrame(() => {
-      createCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [isCreateOpen]);
-
   const openCreateCard = () => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("create", "1");
@@ -142,11 +139,13 @@ export function useAdminLearningPathsPage() {
 
   return {
     appLanguage,
-    learningPaths,
-    totalPaths: learningPaths.pagination.totalItems,
+    learningPathPages,
+    totalPaths: learningPathPages[0]?.pagination.totalItems ?? 0,
+    hasNextLearningPathsPage: hasNextPage,
+    isFetchingNextLearningPathsPage: isFetchingNextPage,
+    loadNextLearningPathsPage: () => void fetchNextPage(),
     createLanguage,
     setCreateLanguage,
-    createCardRef,
     isCreateOpen,
     openCreateCard,
     closeCreateCard,

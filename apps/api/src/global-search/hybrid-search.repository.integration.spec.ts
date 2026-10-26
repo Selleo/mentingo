@@ -1,12 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 
-import { COURSE_ENROLLMENT, PERMISSIONS, RESOURCE_VISIBILITY } from "@repo/shared";
+import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS, RESOURCE_VISIBILITY } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
+import { SEARCH_FILE_TYPES_MAP } from "src/ingestion/ingestion.config";
+import { LocalizationService } from "src/localization/localization.service";
+import { McpStudentLessonRepository } from "src/mcp/mcp-student-lesson.repository";
 import { dbAls } from "src/storage/db/db-als.store";
 import * as schema from "src/storage/schema";
 
@@ -57,11 +60,13 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     const url = new URL(databaseUrl!);
     if (
       !["127.0.0.1", "localhost"].includes(url.hostname) ||
-      url.port !== "25436" ||
-      url.pathname !== "/guidebook"
+      !(
+        (url.port === "25436" && url.pathname === "/guidebook") ||
+        /^\/mcp_search_[a-f0-9]{12}$/.test(url.pathname)
+      )
     ) {
       throw new Error(
-        "Search integration requires the isolated local #2036 database on port 25436",
+        "Search integration requires an isolated loopback #2036 or mcp_search_<12 hex> database",
       );
     }
     client = postgres(databaseUrl!, { max: 1, onnotice: () => undefined });
@@ -290,6 +295,213 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     await fixtureDb.execute(sql`SELECT set_config('app.tenant_id', ${scope}, true)`);
   }
 
+  it("filters learner lesson course access before keyword and semantic ranking, regardless of admin permission", async () => {
+    actor.permissions.push(PERMISSIONS.COURSE_READ_ASSIGNED);
+    await fixtureDb.execute(
+      sql`UPDATE lessons SET type = ${LESSON_TYPES.CONTENT} WHERE id = ${lessonId}`,
+    );
+    await source({
+      entityId: lessonId,
+      entityType: SEARCH_ENTITY_TYPES.LESSON,
+      content: "Curriculumneedle public content",
+      chunk: "Curriculumneedle public content",
+    });
+    const enrolledCourseId = await course("private");
+    const hiddenCourseId = await course("private");
+    const draftId = await course("draft");
+    const archivedId = await course();
+    const paidId = await course();
+    const enrolledPaidId = await course();
+    const negativePriceId = await course();
+    await fixtureDb.execute(
+      sql`UPDATE courses SET price_in_cents = 2500 WHERE id IN (${paidId}, ${enrolledPaidId})`,
+    );
+    await fixtureDb.execute(
+      sql`UPDATE courses SET price_in_cents = -1 WHERE id = ${negativePriceId}`,
+    );
+    await fixtureDb.execute(sql`UPDATE courses SET is_archived = true WHERE id = ${archivedId}`);
+    let privateLessonId = "";
+    let paidLessonId = "";
+    const allLessonIds = [lessonId];
+    for (const id of [
+      enrolledCourseId,
+      hiddenCourseId,
+      draftId,
+      archivedId,
+      paidId,
+      enrolledPaidId,
+      negativePriceId,
+    ]) {
+      const chapterId = randomUUID();
+      const idOfLesson = randomUUID();
+      await fixtureDb.execute(
+        sql`INSERT INTO chapters (id, tenant_id, course_id, author_id) VALUES (${chapterId}, ${tenantId}, ${id}, ${authorId})`,
+      );
+      await fixtureDb.execute(
+        sql`INSERT INTO lessons (id, tenant_id, chapter_id, type) VALUES (${idOfLesson}, ${tenantId}, ${chapterId}, ${LESSON_TYPES.CONTENT})`,
+      );
+      await source({
+        entityId: idOfLesson,
+        entityType: SEARCH_ENTITY_TYPES.LESSON,
+        content: "Curriculumneedle private content",
+        chunk: "Curriculumneedle private content",
+      });
+      allLessonIds.push(idOfLesson);
+      if (id === enrolledCourseId) privateLessonId = idOfLesson;
+      if (id === enrolledPaidId) paidLessonId = idOfLesson;
+    }
+    await fixtureDb.execute(
+      sql`INSERT INTO student_courses (tenant_id, student_id, course_id, status) VALUES (${tenantId}, ${actor.userId}, ${enrolledCourseId}, ${COURSE_ENROLLMENT.ENROLLED}), (${tenantId}, ${actor.userId}, ${enrolledPaidId}, ${COURSE_ENROLLMENT.ENROLLED}), (${tenantId}, ${authorId}, ${hiddenCourseId}, ${COURSE_ENROLLMENT.ENROLLED})`,
+    );
+    await enterTenantRole();
+    const keyword = await repository.findKeywordMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      "Curriculumneedle",
+      actor,
+      false,
+      true,
+    );
+    const semantic = await repository.findSemanticMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      queryVector,
+      actor,
+      false,
+      true,
+    );
+    const expected = [lessonId, privateLessonId, paidLessonId].sort();
+    for (const matches of [keyword, semantic])
+      expect(matches.map((match) => match.entityId).sort()).toEqual(expected);
+    const localization = new LocalizationService(fixtureDb);
+    const reader = new McpStudentLessonRepository(fixtureDb, localization);
+    const hydration = new GlobalSearchRepository(fixtureDb, localization);
+    const matches = allLessonIds.map((entityId) => ({
+      entityId,
+      languages: ["en" as const],
+      rank: 1,
+    }));
+    expect(
+      (await reader.listLessons({ language: "en", pageSize: 25 }, actor)).data
+        .map((row) => row.id)
+        .sort(),
+    ).toEqual(expected);
+    expect(
+      (await hydration.getLearnerLessons(matches, "en", actor)).map((row) => row.id).sort(),
+    ).toEqual(expected);
+    // A price change must immediately invalidate previously retrieved public matches.
+    await fixtureDb.execute(sql`RESET ROLE`);
+    await fixtureDb.execute(sql`UPDATE courses SET price_in_cents = 1000 WHERE id = ${courseId}`);
+    await enterTenantRole();
+    expect(
+      (await hydration.getLearnerLessons(matches, "en", actor)).map((row) => row.id).sort(),
+    ).toEqual([privateLessonId, paidLessonId].sort());
+    expect((await reader.listLessons({ language: "en", lessonId }, actor)).data).toEqual([]);
+    await fixtureDb.execute(sql`RESET ROLE`);
+    await fixtureDb.execute(sql`UPDATE student_courses SET status = ${COURSE_ENROLLMENT.NOT_ENROLLED}
+      WHERE student_id = ${actor.userId} AND course_id = ${enrolledPaidId} AND tenant_id = ${tenantId}`);
+    await enterTenantRole();
+    const revokedKeyword = await repository.findKeywordMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      "Curriculumneedle",
+      actor,
+      false,
+      true,
+    );
+    const revokedSemantic = await repository.findSemanticMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      queryVector,
+      actor,
+      false,
+      true,
+    );
+    for (const matches of [revokedKeyword, revokedSemantic])
+      expect(matches.map((row) => row.entityId)).toEqual([privateLessonId]);
+    const remaining = await reader.listLessons({ language: "en", pageSize: 25 }, actor);
+    expect(remaining.data.map((row) => row.id)).toEqual([privateLessonId]);
+    expect(remaining.pagination.totalItems).toBe(1);
+    expect((await hydration.getLearnerLessons(matches, "en", actor)).map((row) => row.id)).toEqual([
+      privateLessonId,
+    ]);
+  });
+
+  it("searches only current safe learner chunks and excludes quiz, resource and raw HTML sources", async () => {
+    await fixtureDb.execute(
+      sql`UPDATE lessons SET type = ${LESSON_TYPES.CONTENT} WHERE id = ${lessonId}`,
+    );
+    await source({
+      entityId: lessonId,
+      entityType: SEARCH_ENTITY_TYPES.LESSON,
+      content: '<img alt="greater > hiddenattributeneedle"><script>scriptneedle</script>',
+      chunk: "Visiblelearnersentence only",
+    });
+    await source({
+      entityId: lessonId,
+      entityType: SEARCH_ENTITY_TYPES.LESSON,
+      documentType: "title",
+      content: "Unindexedrawneedle",
+      indexed: false,
+    });
+    for (const documentType of [
+      "question_title:secret",
+      "question_description:secret",
+      "answer_option:secret",
+      "resource:secret",
+    ]) {
+      await source({
+        entityId: lessonId,
+        entityType: SEARCH_ENTITY_TYPES.LESSON,
+        documentType,
+        content: "Quizandfileneedle",
+        chunk: "Quizandfileneedle",
+      });
+    }
+    const chapterId = randomUUID();
+    const quizId = randomUUID();
+    await fixtureDb.execute(
+      sql`INSERT INTO chapters (id, tenant_id, course_id, author_id) VALUES (${chapterId}, ${tenantId}, ${courseId}, ${authorId})`,
+    );
+    await fixtureDb.execute(
+      sql`INSERT INTO lessons (id, tenant_id, chapter_id, type, threshold_score) VALUES (${quizId}, ${tenantId}, ${chapterId}, ${LESSON_TYPES.QUIZ}, 50)`,
+    );
+    await source({
+      entityId: quizId,
+      entityType: SEARCH_ENTITY_TYPES.LESSON,
+      documentType: "description",
+      content: "Quizandfileneedle",
+      chunk: "Quizandfileneedle",
+    });
+    await enterTenantRole();
+    for (const query of [
+      "hiddenattributeneedle",
+      "scriptneedle",
+      "Unindexedrawneedle",
+      "Quizandfileneedle",
+    ]) {
+      expect(
+        await repository.findKeywordMatches(SEARCH_ENTITY_TYPES.LESSON, query, actor, false, true),
+      ).toEqual([]);
+    }
+    expect(
+      (
+        await repository.findKeywordMatches(
+          SEARCH_ENTITY_TYPES.LESSON,
+          "Visiblelearnersentence",
+          actor,
+          false,
+          true,
+        )
+      ).map((row) => row.entityId),
+    ).toEqual([lessonId]);
+    const semantic = await repository.findSemanticMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      queryVector,
+      actor,
+      false,
+      true,
+    );
+    expect(semantic.map((row) => row.entityId)).toEqual([lessonId]);
+    expect(semantic[0].matchedPassage).toBe("Visiblelearnersentence only");
+  });
+
   it("previews unmaterialized file sources without writes and deduplicates indexed source identities", async () => {
     const article = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE);
     const newsFile = await contentFile(SEARCH_ENTITY_TYPES.NEWS);
@@ -391,6 +603,26 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     expect(discovered).toHaveLength(4);
   });
 
+  it.each([SEARCH_FILE_TYPES_MAP.PPTX, SEARCH_FILE_TYPES_MAP.XLSX, SEARCH_FILE_TYPES_MAP.CSV])(
+    "discovers and indexes existing %s attachments",
+    async (contentType) => {
+      actor.permissions = [PERMISSIONS.ARTICLE_READ_PUBLIC];
+      const file = await contentFile(SEARCH_ENTITY_TYPES.ARTICLE, { contentType });
+      const index = await synchronizeAndIndexContentFile(file);
+      await dbAls.run({ tenantId }, async () => {
+        expect((await index.findSource(file))?.resourceContentType).toBe(contentType);
+        expect(await index.previewPendingCount(50)).toBe(0);
+      });
+      await enterTenantRole();
+      const matches = await repository.findSemanticMatches(
+        SEARCH_ENTITY_TYPES.ARTICLE,
+        queryVector,
+        actor,
+      );
+      expect(matches.map((match) => match.entityId)).toEqual([file.entityId]);
+    },
+  );
+
   it.each([SEARCH_ENTITY_TYPES.ARTICLE, SEARCH_ENTITY_TYPES.NEWS])(
     "retrieves chunk-only keyword and semantic passages from %s files",
     async (type) => {
@@ -405,6 +637,8 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
       expect(keyword.map((match) => match.entityId)).toEqual([file.entityId]);
       expect(semantic.map((match) => match.entityId)).toEqual([file.entityId]);
       expect(keyword[0].matchedPassage).toContain("thirty days");
+      // Unquoted empty StartSel/StopSel options leak headline markup into plain-text passages.
+      expect(keyword[0].matchedPassage).not.toMatch(/StopSel|<\/?b>/);
       expect(semantic[0].matchedAttachmentFileName).toBe("research-guide.pdf");
       const ordinary = new GlobalSearchRepository(fixtureDb, {} as never);
       expect(await ordinary.findMatches(type, "en", "research")).toEqual([]);
@@ -543,6 +777,41 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     );
     expect(matches.map((match) => match.entityId)).toEqual([courseId]);
     expect(matches[0].matchedPassage).toContain("thirty days");
+  });
+
+  it("rejects cosine similarity .54, accepts .56, and preserves the weaker exact keyword hit", async () => {
+    const strongerCourseId = await course();
+    await source({ content: "Reimbursement policy", chunk: "Reimbursement policy" });
+    await source({
+      entityId: strongerCourseId,
+      content: "Travel expenses",
+      chunk: "Travel expenses",
+    });
+    // Unit vectors against [1, 0, ...] have cosine similarity equal to their first component.
+    for (const [entityId, similarity] of [
+      [courseId, 0.54],
+      [strongerCourseId, 0.56],
+    ] as const) {
+      const vector = [similarity, Math.sqrt(1 - similarity ** 2), ...Array<number>(1534).fill(0)];
+      await fixtureDb.execute(sql`UPDATE search_chunks SET embedding = ${JSON.stringify(
+        vector,
+      )}::vector
+        WHERE tenant_id = ${tenantId} AND entity_id = ${entityId}`);
+    }
+    await enterTenantRole();
+    const semantic = await repository.findSemanticMatches(
+      SEARCH_ENTITY_TYPES.COURSE,
+      queryVector,
+      actor,
+    );
+    expect(semantic.map((match) => match.entityId)).toEqual([strongerCourseId]);
+    expect(semantic[0].rank).toBeCloseTo(0.56, 5);
+    const keyword = await repository.findKeywordMatches(
+      SEARCH_ENTITY_TYPES.COURSE,
+      "reimbursement",
+      actor,
+    );
+    expect(keyword.map((match) => match.entityId)).toEqual([courseId]);
   });
 
   it("keeps administrative backfill reads inside the selected tenant even with RLS bypass", async () => {

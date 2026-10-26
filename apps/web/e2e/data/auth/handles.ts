@@ -3,6 +3,8 @@ export const LOGIN_PAGE_HANDLES = {
   EMAIL: "auth-email-input",
   PASSWORD: "auth-password-input",
   LOGIN: "auth-login-button",
+  PASSWORD_LOGIN_FORM: "login-page-password-login-form",
+  ALTERNATIVE_LOGIN_SEPARATOR: "login-page-alternative-login-separator",
   FORGOT_PASSWORD_LINK: "login-page-forgot-password-link",
   MAGIC_LINK_LINK: "login-page-magic-link-link",
   REGISTER_LINK: "login-page-register-link",

@@ -12,3 +12,9 @@ export const openSettingsPageFlow = async (page: Page) => {
   await expect(page.locator(SETTINGS_PAGE_SELECTORS.PAGE)).toBeVisible();
   await expect(page.locator(SETTINGS_PAGE_SELECTORS.LANGUAGE_CARD)).toBeVisible();
 };
+
+/** Opens settings on an isolated tenant, whose page has no base URL of its own. */
+export const openSettingsPageAtOriginFlow = async (page: Page, origin: string) => {
+  await page.goto(new URL("/settings", origin).toString());
+  await expect(page.locator(SETTINGS_PAGE_SELECTORS.PAGE)).toBeVisible();
+};

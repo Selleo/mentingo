@@ -33,16 +33,18 @@ export const AutosizeTextarea = forwardRef<HTMLTextAreaElement, AutosizeTextarea
 
       const styles = window.getComputedStyle(element);
       const lineHeight = Number.parseFloat(styles.lineHeight);
+      const verticalBorder =
+        Number.parseFloat(styles.borderTopWidth) + Number.parseFloat(styles.borderBottomWidth);
       const verticalChrome =
         Number.parseFloat(styles.paddingTop) +
         Number.parseFloat(styles.paddingBottom) +
-        Number.parseFloat(styles.borderTopWidth) +
-        Number.parseFloat(styles.borderBottomWidth);
+        verticalBorder;
       const maxHeight = lineHeight * maxRows + verticalChrome;
 
       element.style.height = "auto";
-      element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
-      element.style.overflowY = element.scrollHeight > maxHeight ? "auto" : "hidden";
+      const contentHeight = element.scrollHeight + verticalBorder;
+      element.style.height = `${Math.min(contentHeight, maxHeight)}px`;
+      element.style.overflowY = contentHeight > maxHeight ? "auto" : "hidden";
     };
 
     useLayoutEffect(resize, [maxRows, value]);

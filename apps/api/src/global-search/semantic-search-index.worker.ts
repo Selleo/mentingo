@@ -4,6 +4,7 @@ import { Worker } from "bullmq";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { isSemanticSearchBackgroundIndexingEnabled } from "./semantic-search-index.config";
 import { SemanticSearchIndexService } from "./semantic-search-index.service";
 
 import type { SemanticSearchIndexJob } from "./semantic-search-index.types";
@@ -11,21 +12,27 @@ import type { SemanticSearchIndexJob } from "./semantic-search-index.types";
 @Injectable()
 export class SemanticSearchIndexWorker implements OnModuleDestroy {
   private readonly logger = new Logger(SemanticSearchIndexWorker.name);
-  private readonly worker: Worker<SemanticSearchIndexJob>;
+  private readonly worker?: Worker<SemanticSearchIndexJob>;
 
   constructor(
-    queue: QueueService,
-    service: SemanticSearchIndexService,
-    tenants: TenantDbRunnerService,
+    queueService: QueueService,
+    semanticSearchIndexService: SemanticSearchIndexService,
+    tenantDbRunnerService: TenantDbRunnerService,
   ) {
+    if (!isSemanticSearchBackgroundIndexingEnabled()) {
+      this.logger.log("Semantic search background indexing is disabled");
+      return;
+    }
     this.worker = new Worker<SemanticSearchIndexJob>(
       QUEUE_NAMES.SEMANTIC_SEARCH_INDEX,
       async (job) => {
         if (job.name !== "index-source" || !job.data.tenantId)
           throw new Error("Invalid semantic indexing job");
-        await tenants.runWithTenant(job.data.tenantId, () => service.process(job.data));
+        await tenantDbRunnerService.runWithTenant(job.data.tenantId, () =>
+          semanticSearchIndexService.process(job.data),
+        );
       },
-      { connection: queue.getConnection(), concurrency: 2 },
+      { connection: queueService.getConnection(), concurrency: 2 },
     );
     this.worker.on("failed", (job) =>
       this.logger.warn(
@@ -36,6 +43,6 @@ export class SemanticSearchIndexWorker implements OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this.worker.close();
+    await this.worker?.close();
   }
 }

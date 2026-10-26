@@ -158,12 +158,14 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           isSidebarCollapsed={isSidebarCollapsed}
         />
 
-        <NavigationGlobalSearchWrapper
-          useCompactVariant={isSidebarCollapsed}
-          containerClassName={cn("hidden w-full 2xl:block", {
-            "2xl:flex 2xl:justify-center": isSidebarCollapsed,
-          })}
-        />
+        {/* Mount one search per breakpoint: a CSS-hidden copy still registers ⌘K and opens a
+            second dialog. Below 2xl the header renders the search instead. */}
+        {is2xlBreakpoint && (
+          <NavigationGlobalSearchWrapper
+            useCompactVariant={isSidebarCollapsed}
+            containerClassName={cn("w-full", { "flex justify-center": isSidebarCollapsed })}
+          />
+        )}
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav

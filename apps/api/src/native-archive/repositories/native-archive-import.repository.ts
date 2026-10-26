@@ -53,7 +53,7 @@ export class NativeArchiveImportRepository {
 
   async findCourseByArchiveIdentity(sourceId: UUIDType, originalId: UUIDType, tenantId: UUIDType) {
     const [row] = await this.db
-      .select({ id: courses.id })
+      .select({ id: courses.id, originType: courses.originType })
       .from(courses)
       .where(
         and(

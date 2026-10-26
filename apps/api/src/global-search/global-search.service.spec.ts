@@ -129,6 +129,91 @@ describe("global search modes", () => {
     });
   });
 
+  it.each([GLOBAL_SEARCH_MODES.KEYWORD, GLOBAL_SEARCH_MODES.HYBRID])(
+    "opts into learner-safe lesson retrieval in %s while retaining other content restrictions",
+    async (mode) => {
+      const getLearnerLessons = jest
+        .fn()
+        .mockResolvedValue([{ id: actor.userId, title: "Lesson", courseId: actor.tenantId }]);
+      const getCourseRows = jest.fn().mockResolvedValue([]);
+      Object.assign(keyword, { getLearnerLessons, getCourseRows });
+      const learner = { ...actor, permissions: [PERMISSIONS.COURSE_READ_ASSIGNED] };
+      const result = await service.search(
+        "customer objections",
+        SUPPORTED_LANGUAGES.EN,
+        learner,
+        mode,
+        {
+          contentOnly: true,
+          learnerOnly: true,
+          includeLearnerLessons: true,
+        },
+      );
+      expect(hybrid.findKeywordMatches).toHaveBeenCalledTimes(5);
+      expect(hybrid.findKeywordMatches).toHaveBeenCalledWith(
+        "lesson",
+        "customer objections",
+        learner,
+        false,
+        true,
+      );
+      if (mode === GLOBAL_SEARCH_MODES.HYBRID)
+        expect(hybrid.findSemanticMatches).toHaveBeenCalledWith(
+          "lesson",
+          [1],
+          learner,
+          false,
+          true,
+        );
+      expect(getLearnerLessons).toHaveBeenCalledWith([], SUPPORTED_LANGUAGES.EN, learner);
+      expect(result.lessons[0].id).toBe(actor.userId);
+      expect(result.users).toEqual([]);
+      expect(result.learningPaths).toEqual([]);
+    },
+  );
+  it("exposes global relevance scores and attachment evidence across content types", async () => {
+    hybrid.findKeywordMatches.mockImplementation(async (type) => {
+      if (type === "lesson") return [{ entityId: actor.userId, rank: 0.1, languages: ["en"] }];
+      if (type === "articles")
+        return [
+          {
+            entityId: actor.tenantId,
+            rank: 0.8,
+            languages: ["en"],
+            matchedPassage: "Policy text",
+            matchedAttachmentFileName: "guide.pptx",
+          },
+        ];
+      return [];
+    });
+    Object.assign(keyword, {
+      getLessons: jest
+        .fn()
+        .mockResolvedValue([
+          {
+            id: actor.userId,
+            title: "Lesson",
+            courseId: actor.tenantId,
+            matchedAttachmentFileName: "legacy.pdf",
+          },
+        ]),
+      getArticles: jest.fn().mockResolvedValue([{ id: actor.tenantId, title: "Guide" }]),
+    });
+    const response = await service.search("policy", SUPPORTED_LANGUAGES.EN, {
+      ...actor,
+      permissions: [PERMISSIONS.COURSE_READ, PERMISSIONS.ARTICLE_READ_PUBLIC],
+    });
+    expect(response.articles[0].relevanceScore).toBeGreaterThan(
+      response.lessons[0].relevanceScore!,
+    );
+    expect(response.lessons[0].matchedAttachmentFileName).toBe("legacy.pdf");
+    expect(response.articles[0]).toMatchObject({
+      matchedPassage: "Policy text",
+      matchedAttachmentFileName: "guide.pptx",
+    });
+    hybrid.findKeywordMatches.mockResolvedValue([]);
+  });
+
   it("does not call providers for a short query", async () => {
     await service.search("ab", SUPPORTED_LANGUAGES.EN, actor, GLOBAL_SEARCH_MODES.HYBRID);
     expect(embeddings.embedQuery).not.toHaveBeenCalled();

@@ -14,6 +14,10 @@ export const TEST_DATA = {
   group: {
     namePrefix: "E2E Group",
   },
+  learningPath: {
+    titlePrefix: "E2E Learning Path",
+    descriptionPrefix: "E2E learning path description",
+  },
   tenant: {
     namePrefix: "E2E Tenant",
     hostPrefix: "e2e-tenant",

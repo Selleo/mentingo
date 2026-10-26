@@ -1,38 +1,54 @@
 /** UI contracts for the authoring session, projection, native operations, and review state. */
+import type {
+  AUTHORING_APPLICATION_STATUS,
+  AUTHORING_ARTIFACT_KIND,
+  AUTHORING_CHAPTER_PROGRESS_STATUS,
+  AUTHORING_CONNECTION_STATE,
+  AUTHORING_FAILURE_CATEGORY,
+  AUTHORING_LESSON_KIND,
+  AUTHORING_OUTLINE_PHASE,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_RECOVERY_ACTION,
+  AUTHORING_SESSION_STATUS,
+  AUTHORING_SOURCE_REFRESH_STATUS,
+  AUTHORING_SOURCE_STATUS,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_TOOL_STATUS,
+  AUTHORING_TURN_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "./courseAuthoring.constants";
+import type {
+  CURRICULUM_PREVIEW_STATUS,
+  PROPOSAL_DECISION,
+} from "./review/curriculumReview.constants";
 import type { ReviewProposal } from "./review/curriculumReview.types";
 import type { SupportedLanguages } from "@repo/shared";
 
-export type AuthoringSessionStatus = "active" | "paused" | "stopped" | "discarded";
+export type AuthoringSessionStatus =
+  (typeof AUTHORING_SESSION_STATUS)[keyof typeof AUTHORING_SESSION_STATUS];
 export type AuthoringTaskStatus =
-  | "queued"
-  | "running"
-  | "waiting_author"
-  | "waiting_dependencies"
-  | "paused"
-  | "succeeded"
-  | "failed"
-  | "superseded"
-  | "stopped"
-  | "unknown";
+  (typeof AUTHORING_TASK_STATUS)[keyof typeof AUTHORING_TASK_STATUS];
 
 export type AuthoringWorkProgressStage =
-  | "outline"
-  | "lesson_planning"
-  | "lesson_generation"
-  | "validation"
-  | "repairing"
-  | "recovering";
+  (typeof AUTHORING_WORK_PROGRESS_STAGE)[keyof typeof AUTHORING_WORK_PROGRESS_STAGE];
 
 export type AuthoringWorkProgressChapter = {
   chapterId: string;
   title: string;
   lessonCount: number;
-  status: "pending" | "running" | "complete" | "failed";
+  status: (typeof AUTHORING_CHAPTER_PROGRESS_STATUS)[keyof typeof AUTHORING_CHAPTER_PROGRESS_STATUS];
   failureCode?: string;
 };
 
 export type AuthoringWorkProgress = {
   stage: AuthoringWorkProgressStage;
+  outlinePhase?: (typeof AUTHORING_OUTLINE_PHASE)[keyof typeof AUTHORING_OUTLINE_PHASE];
+  outlineIteration?: number;
+  draftedChapters?: number;
+  draftedLessons?: number;
+  completedSteps?: number;
+  totalSteps?: number;
   chapters?: AuthoringWorkProgressChapter[];
   completedLessons?: number;
   totalLessons?: number;
@@ -47,15 +63,9 @@ export type AuthoringWorkProgress = {
 
 export type AuthoringTaskFailure = {
   code: string;
-  category:
-    | "generation"
-    | "evidence"
-    | "author_decision"
-    | "provider"
-    | "configuration"
-    | "internal";
+  category: (typeof AUTHORING_FAILURE_CATEGORY)[keyof typeof AUTHORING_FAILURE_CATEGORY];
   stage: string;
-  recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+  recoveryAction: (typeof AUTHORING_RECOVERY_ACTION)[keyof typeof AUTHORING_RECOVERY_ACTION];
   retryable: boolean;
   affectedChapterIds: string[];
   affectedLessonIds: string[];
@@ -78,23 +88,12 @@ export type AuthoringTask = {
 };
 
 export type AuthoringTurnStatus =
-  | "sending"
-  | "queued"
-  | "running"
-  | "waiting_author"
-  | "completed"
-  | "failed"
-  | "stopped";
+  (typeof AUTHORING_TURN_STATUS)[keyof typeof AUTHORING_TURN_STATUS];
 
-export type AuthoringPartKind = "text" | "tool" | "proposal" | "question";
+export type AuthoringPartKind = (typeof AUTHORING_PART_KIND)[keyof typeof AUTHORING_PART_KIND];
 
 export type AuthoringTurnPartStatus =
-  | "streaming"
-  | "completed"
-  | "failed"
-  | "started"
-  | "stopped"
-  | "review";
+  (typeof AUTHORING_PART_STATUS)[keyof typeof AUTHORING_PART_STATUS];
 
 export type AuthoringTurnPart = {
   requestId: string;
@@ -113,7 +112,7 @@ export type AuthoringTurnPart = {
     toolCallId: string;
     toolName: string;
     display: string;
-    status: "started" | "completed" | "failed" | "stopped";
+    status: (typeof AUTHORING_TOOL_STATUS)[keyof typeof AUTHORING_TOOL_STATUS];
     result?: {
       query?: string | null;
       queries?: string[] | null;
@@ -123,7 +122,7 @@ export type AuthoringTurnPart = {
     } | null;
   } | null;
   artifact?: {
-    artifactKind: "proposal" | "question";
+    artifactKind: (typeof AUTHORING_ARTIFACT_KIND)[keyof typeof AUTHORING_ARTIFACT_KIND];
     artifactId: string;
   } | null;
 };
@@ -193,7 +192,7 @@ export type AuthoringEvent = {
   payload: Record<string, unknown>;
 };
 
-export type LessonKind = "content" | "quiz" | "ai_mentor";
+export type LessonKind = (typeof AUTHORING_LESSON_KIND)[keyof typeof AUTHORING_LESSON_KIND];
 
 export type OutlineLesson = {
   id: string;
@@ -313,7 +312,7 @@ export type ProposalView = {
   evidenceCount: number;
   operations: AuthoringOperation[];
   outline: OutlineChapter[] | null;
-  decision: "accepted" | "rejected" | "superseded" | "applied" | "pending";
+  decision: (typeof PROPOSAL_DECISION)[keyof typeof PROPOSAL_DECISION];
   acceptedCommandId?: string | null;
   parentProposalId: string | null;
   manual: boolean;
@@ -329,7 +328,7 @@ export type CurriculumPreview = {
   /** The durable items represented by a combined course-level review preview. */
   proposalIds?: string[];
   reviewGroupId?: string;
-  status: "pending" | "accepted" | "streaming";
+  status: (typeof CURRICULUM_PREVIEW_STATUS)[keyof typeof CURRICULUM_PREVIEW_STATUS];
   operations?: AuthoringOperation[];
   /** Proposals behind the preview, so each change can be accepted or rejected in place. */
   proposals?: ReviewProposal[];
@@ -414,7 +413,7 @@ export type SourceView = {
   id: string;
   taskId?: string | null;
   name: string;
-  status: "queued" | "processing" | "ready" | "partial" | "failed" | "unknown";
+  status: (typeof AUTHORING_SOURCE_STATUS)[keyof typeof AUTHORING_SOURCE_STATUS];
   selected: boolean;
   mediaType: string | null;
   readableSections: number | null;
@@ -433,7 +432,7 @@ export type SourceView = {
 
 export type SourceRefreshView = {
   refreshId: string | null;
-  status: "refreshed" | "needs_mapping";
+  status: (typeof AUTHORING_SOURCE_REFRESH_STATUS)[keyof typeof AUTHORING_SOURCE_REFRESH_STATUS];
   oldSourceVersionId: string;
   replacementSourceVersionId: string;
   affectedTaskIds: string[];
@@ -473,7 +472,7 @@ export type QuestionView = {
 
 export type ApplicationView = {
   id: string;
-  status: "applied" | "conflict" | "failed" | "pending";
+  status: (typeof AUTHORING_APPLICATION_STATUS)[keyof typeof AUTHORING_APPLICATION_STATUS];
   reason: string | null;
 };
 
@@ -489,7 +488,7 @@ export type AuthoringRequestView = {
 export type OptimisticAuthoringRequest = AuthoringRequestView & {
   commandId: string;
   request: AuthoringRequest;
-  status: "sending" | "failed";
+  status: typeof AUTHORING_TURN_STATUS.SENDING | typeof AUTHORING_TURN_STATUS.FAILED;
 };
 
 /** Sanitized assistant response emitted by an authoring route. */
@@ -505,11 +504,18 @@ export type AssistantMessageView = {
   partId?: string;
   partKind?: AuthoringPartKind;
   firstSequence?: number;
-  partStatus?: "streaming" | "completed" | "failed";
+  partStatus?:
+    | typeof AUTHORING_PART_STATUS.STREAMING
+    | typeof AUTHORING_PART_STATUS.COMPLETED
+    | typeof AUTHORING_PART_STATUS.FAILED;
   turnStatus?: AuthoringTurnStatus;
   toolCallId?: string | null;
   toolName?: string | null;
-  toolStatus?: "started" | "completed" | "failed" | null;
+  toolStatus?:
+    | typeof AUTHORING_TOOL_STATUS.STARTED
+    | typeof AUTHORING_TOOL_STATUS.COMPLETED
+    | typeof AUTHORING_TOOL_STATUS.FAILED
+    | null;
   proposalId?: string | null;
   proposalRevision?: number | null;
   phase?: string | null;
@@ -562,4 +568,5 @@ export type CourseContext = {
   }>;
 };
 
-export type AuthoringConnectionState = "connecting" | "live" | "recovering" | "offline";
+export type AuthoringConnectionState =
+  (typeof AUTHORING_CONNECTION_STATE)[keyof typeof AUTHORING_CONNECTION_STATE];

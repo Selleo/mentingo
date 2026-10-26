@@ -20,12 +20,30 @@
     "readyWorkflow": "Déclencheur, modèle d’e-mail et balises inclus",
     "useTemplate": "Utiliser ce modèle"
   },
+  "loginMethods": {
+    "title": "Méthodes de connexion",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Lien de connexion",
+    "password": "Mot de passe",
+    "description": "Choisissez comment les membres de votre organisation peuvent se connecter.",
+    "goToConfiguration": "Aller à la configuration",
+    "notConfiguredTooltip": "Ajoutez toutes les variables d'environnement requises pour activer cette méthode de connexion.",
+    "errors": {
+      "disabled": "Cette méthode de connexion est désactivée.",
+      "missingConfiguration": "Ajoutez d'abord les identifiants du fournisseur dans les paramètres d'environnement.",
+      "lastMethod": "Gardez au moins une méthode de connexion utilisable activée.",
+      "save": "Impossible d’enregistrer les méthodes de connexion.",
+      "load": "Impossible de charger les méthodes de connexion."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo de la plateforme",
     "title": "Connecter {{clientName}} à Mentingo ?",
     "description": "Cet assistant peut utiliser Mentingo selon vos autorisations actuelles.",
     "searchDescription": "Autorisez cet assistant à rechercher les informations accessibles sur les cours, les articles de connaissances, les actualités et les questions-réponses, et à fournir des liens vers Mentingo. Il ne peut pas modifier le contenu, récupérer le contenu des leçons ni utiliser les outils d’administration.",
-    "studentDescription": "Accès apprenant uniquement : rechercher et lire les articles publiés, actualités, questions-réponses et métadonnées de cours accessibles. Sans leçons, fichiers privés, brouillons, administration ni modifications. Tous les utilisateurs Slack partagent l’accès apprenant du compte connecté.",
+    "studentDescription": "Accès apprenant en lecture seule : rechercher des cours et des leçons, parcourir les chapitres et lire les textes des leçons des cours publics gratuits, ou des cours publics et privés auxquels ce compte est activement inscrit. Les informations sur les cours publics payants restent visibles. Les administrateurs suivent les mêmes règles. Aucun brouillon, cours archivé, modification, réponse aux quiz, instruction IA ni URL de fichier. Les articles, actualités et questions-réponses publiés sont également disponibles. Tous les utilisateurs Slack partagent l’accès apprenant du compte connecté.",
     "accountDescription": "Autorisez cet assistant à utiliser les outils Mentingo disponibles pour votre compte, y compris la lecture et les modifications. Vos autorisations actuelles et les paramètres de votre organisation restent applicables. Vérifiez le compte et l’adresse de redirection avant d’autoriser l’accès.",
     "explicitDescription": "Vérifiez les autorisations demandées ci-dessous. Elles limitent l’assistant dans les droits de votre compte ; la lecture via les outils de gestion peut inclure des brouillons et des données administratives.",
     "requestedScopes": "Autorisations demandées",
@@ -70,7 +88,8 @@
       "embeddingUnavailable": "Le traitement des documents IA est indisponible.",
       "unsupportedVersion": "Cette version du package Mentingo n’est pas prise en charge.",
       "missingAsset": "Un fichier requis manque dans le package Mentingo.",
-      "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide."
+      "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide.",
+      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace."
     }
   },
   "aiConversations": {
@@ -1492,11 +1511,10 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "Recherche IA",
+    "aiSearch": "Rechercher avec l’IA",
     "hybridSearch": "Recherche hybride",
     "backToKeywords": "Revenir à la recherche par mots-clés",
     "semanticUnavailable": "La recherche sémantique est temporairement indisponible. Les résultats par mots-clés sont affichés.",
-    "semanticPending": "Une partie du contenu est encore en cours d’indexation. Les résultats peuvent être incomplets.",
     "searchFailed": "La recherche a échoué. Veuillez réessayer.",
     "clear": "Effacer la recherche",
     "loading": "Recherche en cours…",
@@ -1508,6 +1526,21 @@
     "navigate": "Naviguer",
     "goTo": "Aller à",
     "close": "Fermer",
+    "contentResults": "Contenu de formation",
+    "aiTryAgain": "Essayez de décrire votre besoin avec d’autres mots, ou revenez à la recherche par mots-clés.",
+    "searchInDescriptionWithAi": "Saisissez un titre pour y accéder directement, ou décrivez votre besoin et recherchez avec l’IA.",
+    "types": {
+      "course": "Cours",
+      "lesson": "Leçon",
+      "learningPath": "Parcours de développement",
+      "news": "Actualité",
+      "article": "Article",
+      "qa": "Questions-réponses",
+      "users": "Utilisateur",
+      "groups": "Groupe",
+      "categories": "Catégorie"
+    },
+    "moreInCourse": "+{{count}} autres dans ce cours",
     "entries": {
       "users": "Utilisateurs",
       "categories": "Catégories",
@@ -1678,6 +1711,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Calendrier Microsoft",
+        "contentMarketplace": "Place de marché de contenus",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1689,6 +1724,8 @@
         "bunny": "Diffuser efficacement les vidéos et autres contenus",
         "google_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Google",
         "microsoft_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Microsoft",
+        "microsoft_calendar": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook.",
+        "contentMarketplace": "Découvrez et importez des cours prêts à l'emploi depuis la place de marché de contenus.",
         "slack_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Slack",
         "openAI": "Activer les fonctionnalités d'AI Mentor",
         "luma": "Activer les fonctionnalités de génération de cours par l'IA",
@@ -2233,6 +2270,7 @@
       "descriptions": {
         "phishing_manage": "Créer et gérer des simulations de phishing.",
         "phishing_report_read": "Consulter les rapports des simulations de phishing.",
+        "content_marketplace_browse": "Parcourir la place de marché de contenus et copier ses cours (la copie nécessite aussi la création de cours).",
         "account_read_self": "Afficher les détails de leur propre compte.",
         "account_update_self": "Modifiez les détails de leur propre compte.",
         "user_read_self": "Afficher leur propre profil utilisateur.",
@@ -2506,12 +2544,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Secret client du calendrier Microsoft"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth activé (vrai/faux)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth activé (vrai/faux)"
-      },
       "OPENAI_API_KEY": {
         "label": "Clé API OpenAI"
       },
@@ -2537,12 +2569,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Secret client Google"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth activé (vrai/faux)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth activé (vrai/faux)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Secret du webhook à rayures"
       },
@@ -2557,12 +2583,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secret client Slack"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth activé (vrai/faux)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth activé (vrai/faux)"
       },
       "LUMA_API_KEY": {
         "label": "Clé API Luma"
@@ -3761,8 +3781,6 @@
   },
   "loginView": {
     "header": "Se connecter",
-    "subHeader": "Saisissez vos identifiants pour accéder à votre compte",
-    "subHeaderSSO": "Connectez-vous avec Google ou Microsoft",
     "validation": {
       "email": "E-mail invalide",
       "password": "Le mot de passe est requis"
@@ -3868,16 +3886,24 @@
       },
       "featuredCourse": {
         "label": "Cours à la une",
-        "none": "Choisir un cours à la une",
         "search": "Rechercher des cours publiés...",
         "empty": "Aucun cours publié trouvé",
-        "clear": "Supprimer le cours à la une",
         "loadMore": "Charger plus de cours",
         "updated": "Cours à la une mis à jour",
-        "updateFailed": "Impossible de mettre à jour le cours à la une"
+        "updateFailed": "Impossible de mettre à jour le cours à la une",
+        "change": "Changer la mise en avant",
+        "automatic": "Automatique (cours le plus populaire)",
+        "dialogDescription": "Choisissez le cours publié que les apprenants verront en premier sur la page des cours.",
+        "clickToChange": "Cliquez pour modifier"
       },
       "lessonsCount_one": "{{count}} leçon",
-      "lessonsCount_other": "{{count}} leçons"
+      "lessonsCount_other": "{{count}} leçons",
+      "inlineEdit": {
+        "addCourse": "Ajouter un cours",
+        "addCourseTo": "Ajouter un cours à {{category}}",
+        "addCategory": "Ajouter une catégorie",
+        "categoryPlaceholder": "Nom de la catégorie"
+      }
     }
   },
   "studentQuizSummaryView": {
@@ -4284,6 +4310,7 @@
       "coursesVisibilityDescription": "Autoriser les visiteurs à consulter la liste des cours et à accéder aux leçons gratuites sans se connecter",
       "modernCourseList": "Utiliser la vue moderne de la liste des cours",
       "modernCourseListDescription": "Activez la nouvelle conception de la liste de cours avec les sections héros et meilleurs cours",
+      "courseListLayoutRecommended": "Recommandé",
       "courseDiscussions": "Activer les discussions sur les cours",
       "courseDiscussionsDescription": "Autoriser les utilisateurs inscrits à consulter et à participer aux fils de discussion du cours",
       "calendar": "Activer le calendrier",
@@ -4959,6 +4986,13 @@
     "adminLearningPathEditor": "Éditeur de parcours de développement"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Commencer le parcours",
+      "continue": "Continuer le parcours",
+      "review": "Revoir le parcours",
+      "coursesCount_one": "{{count}} cours",
+      "coursesCount_other": "{{count}} cours"
+    },
     "title": "Parcours de développement",
     "description": "Consultez les parcours de développement qui vous sont attribués et reprenez votre progression.",
     "searchPlaceholder": "Rechercher des parcours de développement",
@@ -5070,6 +5104,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Général",
+      "certificate": "Certificat",
+      "export": "Export"
+    },
     "title": "Parcours de développement",
     "importPackage": {
       "title": "Importer un parcours de développement"
@@ -5151,6 +5190,14 @@
       "tooltip": "La langue de base de ce parcours de développement est {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Ajouter des cours au parcours",
+      "addDialogDescription": "Sélectionnez un ou plusieurs cours. Ils seront ajoutés à la fin du parcours.",
+      "searchPlaceholder": "Rechercher des cours",
+      "noSearchResults": "Aucun cours ne correspond à votre recherche.",
+      "noAvailableCourses": "Tous les cours disponibles sont déjà dans ce parcours.",
+      "selectedCount_one": "{{count}} cours sélectionné",
+      "selectedCount_other": "{{count}} cours sélectionnés",
+      "addSelected": "Ajouter la sélection ({{count}})",
       "select": "Sélectionnez un cours",
       "add": "Ajouter un cours",
       "drag": "Faites glisser pour réorganiser le cours",
@@ -5561,6 +5608,32 @@
     "permissionsUpdated": "Vos autorisations ont été mises à jour. Actualisation de votre session pour appliquer un nouvel accès.",
     "refreshFailed": "Vos autorisations ont changé, mais l'actualisation de la session a échoué. Veuillez vous reconnecter."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Votre session a expiré",
+      "description": "Reconnectez-vous pour continuer."
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "description": "Vous n'avez pas l'autorisation d'afficher cette page. Contactez votre administrateur si vous pensez qu'il s'agit d'une erreur."
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée."
+    },
+    "connection": {
+      "title": "Problème de connexion",
+      "description": "Impossible de joindre le serveur. Vérifiez votre connexion internet et réessayez."
+    },
+    "unknown": {
+      "title": "Une erreur s'est produite",
+      "description": "Une erreur inattendue s'est produite. Réessayez dans un instant."
+    },
+    "action": {
+      "logIn": "Se connecter",
+      "tryAgain": "Réessayer"
+    }
+  },
   "tenantInactive": {
     "title": "Organisation désactivée",
     "description": "Cet espace de travail est actuellement inactif. Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur pour restaurer l'accès."
@@ -5599,7 +5672,8 @@
       "ownerInactive": "Le propriétaire de la clé API n'est plus actif",
       "ownerNotAdmin": "Le propriétaire de la clé API ne dispose plus des autorisations d'administrateur",
       "missingApiKeyHeader": "En-tête X-API-Key manquant",
-      "missingTenantIdHeader": "En-tête X-Tenant-Id manquant"
+      "missingTenantIdHeader": "En-tête X-Tenant-Id manquant",
+      "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)"
     }
   },
   "courseDuplication": {
@@ -5990,6 +6064,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "La réponse de l’IA est prête.",
+      "outline_ready": "Le plan de votre cours est prêt à être vérifié.",
+      "changes_ready": "Les modifications de votre cours sont prêtes à être vérifiées.",
+      "failed": "L’IA n’a pas pu terminer cette demande.",
+      "waiting_author": "L’IA a besoin de votre réponse pour continuer.",
+      "view": "Voir"
+    },
     "changeSet": {
       "ready": {
         "status": "Prêt à examiner",
@@ -6039,6 +6121,7 @@
         "description": "Votre cours n’a pas été modifié."
       },
       "more": "+{{count}} de plus",
+      "readySoFar": "{{count}} prêts pour l'instant",
       "discard": "Ignorer",
       "retry": "Réessayer",
       "heading": "Modifications proposées",
@@ -6198,6 +6281,14 @@
       "preparingResponse": "Préparation de votre réponse…",
       "understandingRequest": "Lecture de votre demande…",
       "planningOutline": "Planification du plan du cours…",
+      "outlineProgress": {
+        "drafting": "Rédaction du plan…",
+        "reviewing": "Vérification du plan…",
+        "repairing": "Amélioration du plan…",
+        "finalizing": "Préparation du plan pour révision…",
+        "chapters": "Chapitres dans le brouillon : {{count}}",
+        "iteration": "Passe {{count}}"
+      },
       "checkingCourse": "Vérification de la cohérence du cours…",
       "planningLessons": "Planification des leçons…",
       "writingLesson": "Rédaction d’une leçon…",
@@ -6252,6 +6343,10 @@
       "questionProgress": "Question {{current}} sur {{total}}",
       "questionPrevious": "Précédente",
       "questionNext": "Suivante",
+      "questionNeedsInput": "Votre réponse est requise",
+      "questionSubmitHint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
+      "questionShortcutHint": "Appuyez sur A–D pour choisir",
+      "pendingSlowHint": "Lecture de votre cours, des sources et de votre demande pour choisir l'étape suivante. Cela peut prendre jusqu'à une minute.",
       "newChat": "New chat",
       "searchSessions": "Rechercher des discussions...",
       "noSessionsFound": "Aucune discussion trouvée.",
@@ -6282,7 +6377,9 @@
       "scopeWholeCourse": "Cours entier",
       "scopeSelected": "Programme sélectionné",
       "webSearch": "Recherche web",
-      "deepThinking": "Recherche approfondie",
+      "deepThinking": "Recherche approfondie de sources",
+      "deepResearchHelp": "Examine plus en détail les sources autorisées. N’active pas l’accès à internet.",
+      "webSearchHelp": "Autorise la recherche sur les sites web publics.",
       "strictSourceMode": "Uniquement mes sources",
       "strictSourceModeHelp": "Uniquement la consigne et les fichiers joints",
       "back": "Retour"
@@ -6359,9 +6456,11 @@
       "contentPending": "Le contenu de cette leçon n’a pas encore été généré.",
       "readOnly": "L’aperçu du brouillon est en lecture seule jusqu’à son application."
     },
-    "openWorkspace": "Générer avec l’IA",
+    "openWorkspace": "Modifier avec l’IA",
+    "createWorkspace": "Créer avec l’IA",
     "openLegacyDraft": "Continuer l’ancien brouillon",
     "activityRail": {
+      "inProgress": "Traitement en cours… La progression sera actualisée après la prochaine étape.",
       "retryFailedParts": "Réessayer les parties en échec",
       "retryProvider": "Réessayer la connexion",
       "recoveringFailedParts": "Reprise des parties en échec…",
@@ -6388,7 +6487,6 @@
       "moreToolUpdates": "+{{count}} autres mises à jour d’outils",
       "searchQueries": "Requêtes de recherche",
       "moreSearchQueries": "+{{count}} requêtes de plus",
-      "completedResearchSteps": "Étapes de recherche terminées : {{count}}",
       "chapterStatus": {
         "failed": "Échec",
         "pending": "en attente",
@@ -7575,6 +7673,57 @@
       "automation_disable": "L’envoi a été arrêté car l’automatisation a changé.",
       "automation_archive": "L’envoi a été arrêté car l’automatisation a changé.",
       "automation_deleted": "L’envoi a été arrêté car l’automatisation a changé."
+    }
+  },
+  "contentMarketplace": {
+    "category": "Catégorie / sujet",
+    "allCategories": "Toutes les catégories",
+    "duration": "Durée",
+    "anyDuration": "Toutes les durées",
+    "clearFilters": "Effacer les filtres",
+    "durations": {
+      "short": "Moins de 1 heure",
+      "medium": "1–3 heures",
+      "long": "Plus de 3 heures"
+    },
+    "discover": "Découvrez des cours pour développer les compétences de votre organisation.",
+    "search": "Rechercher des cours, des sujets ou des compétences…",
+    "clearSearch": "Effacer la recherche",
+    "recentTitle": "Mis à jour récemment",
+    "recentDescription": "Découvrez les dernières mises à jour des cours du catalogue.",
+    "recentBadge": "Mis à jour récemment",
+    "allCourses": "Tous les cours",
+    "results": "Cours trouvés : {{count}}",
+    "sortBy": "Trier par",
+    "sortRecent": "Mis à jour récemment",
+    "sortTitle": "Titre (A–Z)",
+    "noResults": "Aucun cours ne correspond à votre recherche. Essayez un autre mot-clé.",
+    "addToCourses": "Ajouter aux cours",
+    "title": "Place de marché de contenus",
+    "browseAll": "Tout parcourir",
+    "description": "Parcourez des cours sélectionnés et copiez-les dans votre organisation.",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "unavailable": "La place de marché de contenus n'est pas activée pour cette organisation. Contactez votre administrateur.",
+    "serviceError": "La place de marché de contenus est indisponible. Veuillez réessayer.",
+    "empty": "Aucun cours n'est encore disponible sur la place de marché.",
+    "updated": "Mis à jour le {{date}}",
+    "copying": "Copie du cours…",
+    "copyNotice": "Le cours est ajouté comme cours partagé non modifiable. La synchronisation le met à jour vers la dernière version et conserve la progression des apprenants.",
+    "copyComplete": "Le cours a été copié dans votre organisation.",
+    "copyUpdated": "Votre copie de ce cours a été mise à jour.",
+    "copyFailed": "Le cours n'a pas pu être copié. Veuillez réessayer.",
+    "openCourse": "Ouvrir le cours",
+    "sync": "Synchroniser",
+    "syncing": "Synchronisation…",
+    "syncNotice": "Mettez à jour votre copie avec la dernière version de ce cours.",
+    "firstPage": "Revenir à la première page",
+    "error": {
+      "invalidQuery": "Paramètres de recherche ou de pagination du catalogue invalides.",
+      "unavailable": "La place de marché de contenus n'est pas disponible pour cette organisation.",
+      "listingNotFound": "Ce cours de la place de marché est introuvable.",
+      "thumbnailNotFound": "Ce cours de la place de marché n'a pas de miniature.",
+      "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard."
     }
   }
 }

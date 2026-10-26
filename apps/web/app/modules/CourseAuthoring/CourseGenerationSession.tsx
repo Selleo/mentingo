@@ -48,6 +48,18 @@ import { CourseGenerationInteraction } from "./components/CourseGenerationIntera
 import { ProposalGroup } from "./components/ProposalGroupCard";
 import { ProposalReview } from "./components/ProposalReview";
 import {
+  AUTHORING_APPLICATION_STATUS,
+  AUTHORING_APPLY_STATE,
+  AUTHORING_TASK_KIND,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_SESSION_STATUS,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_TOOL_STATUS,
+  AUTHORING_TURN_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "./courseAuthoring.constants";
+import {
   curriculumPreviewFromProposal,
   curriculumPreviewFromProposals,
   excludeAppliedProposals,
@@ -59,6 +71,10 @@ import { useCourseAuthoringChat } from "./hooks/useCourseAuthoringChat";
 import { useCourseAuthoringSession } from "./hooks/useCourseAuthoringSession";
 import { useCourseAuthoringSocket } from "./hooks/useCourseAuthoringSocket";
 import { targetedMentorOperationIds } from "./mentorReferenceFiles";
+import {
+  PROPOSAL_APPLICATION_STATUS,
+  PROPOSAL_DECISION,
+} from "./review/curriculumReview.constants";
 import { prepareCurriculumPreview } from "./review/prepareCurriculumPreview";
 import { toReviewProposals } from "./review/reviewProposals";
 
@@ -74,7 +90,6 @@ import type {
   CurriculumPreview,
   CurriculumPreviewActions,
   ProposalView,
-  PreviewView,
   QuestionView,
   ProposalRegeneration,
   SourcePolicy,
@@ -162,13 +177,17 @@ const canonicalToolTaskState = (messages: AuthoringChatMessage[]) => {
       const requestId = message.metadata?.requestId;
       if (!requestId) return;
       message.parts.forEach((part) => {
-        if (part.type !== "data-authoringPart" || part.data.partKind !== "tool") return;
+        if (part.type !== "data-authoringPart" || part.data.partKind !== AUTHORING_PART_KIND.TOOL)
+          return;
         if (part.data.taskId) {
           const taskIds = taskIdsByRequest.get(requestId) ?? new Set<string>();
           taskIds.add(part.data.taskId);
           taskIdsByRequest.set(requestId, taskIds);
         }
-        if (part.data.status === "streaming" || part.data.tool?.status === "started") {
+        if (
+          part.data.status === AUTHORING_PART_STATUS.STREAMING ||
+          part.data.tool?.status === AUTHORING_TOOL_STATUS.STARTED
+        ) {
           activeRequestIds.add(requestId);
         }
       });
@@ -180,11 +199,15 @@ const canonicalToolTaskState = (messages: AuthoringChatMessage[]) => {
 const isDuplicateResearchTask = (task: AuthoringTask, toolTaskIds: Set<string>) => {
   const phaseOrKind = task.phase ?? task.kind;
   const isResearchTask =
-    phaseOrKind === "research" ||
-    phaseOrKind === "source" ||
-    phaseOrKind === "source_refresh" ||
-    phaseOrKind === "source_selection";
-  const preservesRecoveryControls = ["failed", "stopped", "superseded"].includes(task.status);
+    phaseOrKind === AUTHORING_TASK_KIND.RESEARCH ||
+    phaseOrKind === AUTHORING_TASK_KIND.SOURCE ||
+    phaseOrKind === AUTHORING_TASK_KIND.SOURCE_REFRESH ||
+    phaseOrKind === AUTHORING_TASK_KIND.SOURCE_SELECTION;
+  const preservesRecoveryControls = [
+    AUTHORING_TASK_STATUS.FAILED,
+    AUTHORING_TASK_STATUS.STOPPED,
+    AUTHORING_TASK_STATUS.SUPERSEDED,
+  ].some((value) => value === task.status);
   return isResearchTask && toolTaskIds.has(task.taskId) && !preservesRecoveryControls;
 };
 
@@ -194,7 +217,6 @@ export const CourseGenerationSession = ({
   language,
   sessionId,
   embedded = false,
-  onPreviewInCurriculum,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
   onSessionUnavailable,
@@ -203,7 +225,6 @@ export const CourseGenerationSession = ({
   language: SupportedLanguages;
   sessionId: string;
   embedded?: boolean;
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
     actions: CurriculumPreviewActions,
@@ -214,8 +235,8 @@ export const CourseGenerationSession = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [applyState, setApplyState] = useState<
-    "idle" | "preparing" | "synchronizing" | "applying" | "applied" | "conflict" | "failed"
-  >("idle");
+    (typeof AUTHORING_APPLY_STATE)[keyof typeof AUTHORING_APPLY_STATE]
+  >(AUTHORING_APPLY_STATE.IDLE);
   const [trackedApplication] = useState(() => readTrackedApplication(id, sessionId));
   const [exportId, setExportId] = useState<string | null>(
     trackedApplication?.confirmed ? null : (trackedApplication?.exportId ?? null),
@@ -332,16 +353,19 @@ export const CourseGenerationSession = ({
   }, [context, t]);
   const applicationStatusByProposalId = useMemo(() => {
     const status = match(applyState)
-      .with("synchronizing", () => "synchronizing" as const)
-      .with("applying", () => "applying" as const)
-      .with("applied", () => "applied" as const)
-      .with("failed", () => "failed" as const)
-      .with("conflict", () => "conflict" as const)
+      .with(
+        PROPOSAL_APPLICATION_STATUS.SYNCHRONIZING,
+        () => PROPOSAL_APPLICATION_STATUS.SYNCHRONIZING,
+      )
+      .with(PROPOSAL_APPLICATION_STATUS.APPLYING, () => PROPOSAL_APPLICATION_STATUS.APPLYING)
+      .with(PROPOSAL_APPLICATION_STATUS.APPLIED, () => PROPOSAL_APPLICATION_STATUS.APPLIED)
+      .with(PROPOSAL_APPLICATION_STATUS.FAILED, () => PROPOSAL_APPLICATION_STATUS.FAILED)
+      .with(PROPOSAL_APPLICATION_STATUS.CONFLICT, () => PROPOSAL_APPLICATION_STATUS.CONFLICT)
       .otherwise(() => null);
     const entries: Array<readonly [string, ProposalApplicationStatus]> = [
       ...appliedProposalIds,
-    ].map((proposalId) => [proposalId, "applied"]);
-    if (status && status !== "applied") {
+    ].map((proposalId) => [proposalId, PROPOSAL_APPLICATION_STATUS.APPLIED]);
+    if (status && status !== PROPOSAL_APPLICATION_STATUS.APPLIED) {
       lastSubmittedApplyProposalIdsRef.current.forEach((proposalId) => {
         if (!appliedProposalIds.has(proposalId)) entries.push([proposalId, status]);
       });
@@ -409,7 +433,8 @@ export const CourseGenerationSession = ({
     if (
       application.proposalIds.every((proposalId) =>
         projection.proposals.some(
-          (proposal) => proposal.id === proposalId && proposal.decision === "applied",
+          (proposal) =>
+            proposal.id === proposalId && proposal.decision === PROPOSAL_DECISION.APPLIED,
         ),
       )
     ) {
@@ -435,7 +460,7 @@ export const CourseGenerationSession = ({
     [context?.chapters],
   );
   const curriculumPreview = useMemo(() => {
-    if (session?.status === "discarded") return null;
+    if (session?.status === AUTHORING_SESSION_STATUS.DISCARDED) return null;
 
     const preview = latestCurriculumPreview(
       projection.proposals,
@@ -512,7 +537,7 @@ export const CourseGenerationSession = ({
       } finally {
         lastSubmittedApplyProposalIdsRef.current = [];
         setExportId(null);
-        setApplyState("idle");
+        setApplyState(AUTHORING_APPLY_STATE.IDLE);
       }
     },
     [id, onCurriculumPreviewChange, refreshAfterConfirmedApply, sessionId, t, toast],
@@ -520,7 +545,7 @@ export const CourseGenerationSession = ({
   const applyMutation = useApplyCourseAuthoringProposals({
     courseId: id,
     sessionId: session?.sessionId,
-    onPreparing: () => setApplyState("preparing"),
+    onPreparing: () => setApplyState(AUTHORING_APPLY_STATE.PREPARING),
     onSuccess: async (result) => {
       activeApplicationRef.current = result.exportId;
       writeTrackedApplication(id, sessionId, {
@@ -528,23 +553,25 @@ export const CourseGenerationSession = ({
         proposalIds: lastSubmittedApplyProposalIdsRef.current,
       });
       setExportId(result.exportId);
-      if (result.status === "applied") {
+      if (result.status === AUTHORING_APPLICATION_STATUS.APPLIED) {
         await completeAppliedApplication(result.exportId);
         return;
       }
       setApplyState(
-        result.status === "queued" || result.status === "running" ? "applying" : result.status,
+        result.status === "queued" || result.status === "running"
+          ? AUTHORING_APPLY_STATE.APPLYING
+          : result.status,
       );
     },
     onError: (error) => {
       const message = isAxiosError(error) ? error.response?.data?.message : null;
       const errorKey = Array.isArray(message) ? message[0] : message;
       if (errorKey === "courseAuthoring.errors.receiptSynchronizationPending") {
-        setApplyState("synchronizing");
+        setApplyState(AUTHORING_APPLY_STATE.SYNCHRONIZING);
         toast({ description: t("courseAuthoring.errors.receiptSynchronizationPending") });
         return;
       }
-      setApplyState("failed");
+      setApplyState(AUTHORING_APPLY_STATE.FAILED);
       toast({
         variant: "destructive",
         description: getTranslatedApiErrorMessage(
@@ -558,19 +585,19 @@ export const CourseGenerationSession = ({
   const reviewBusy =
     busy ||
     applyMutation.isPending ||
-    applyState === "preparing" ||
-    applyState === "synchronizing" ||
-    applyState === "applying";
+    applyState === AUTHORING_APPLY_STATE.PREPARING ||
+    applyState === AUTHORING_APPLY_STATE.SYNCHRONIZING ||
+    applyState === AUTHORING_APPLY_STATE.APPLYING;
   const applicationQuery = useCourseAuthoringApplicationQuery(id, session?.sessionId, exportId);
   useEffect(() => {
     const result = applicationQuery.data;
     if (!result) return;
     if (result.status === "queued" || result.status === "running") {
       activeApplicationRef.current = result.exportId;
-      setApplyState("applying");
+      setApplyState(AUTHORING_APPLY_STATE.APPLYING);
       return;
     }
-    if (result.status === "applied") {
+    if (result.status === AUTHORING_APPLICATION_STATUS.APPLIED) {
       void completeAppliedApplication(result.exportId);
       return;
     }
@@ -578,7 +605,10 @@ export const CourseGenerationSession = ({
     const notificationKey = `${result.exportId}:${result.status}`;
     if (notifiedApplicationRef.current === notificationKey) return;
     notifiedApplicationRef.current = notificationKey;
-    if (result.status === "conflict" || result.status === "failed") {
+    if (
+      result.status === AUTHORING_APPLICATION_STATUS.CONFLICT ||
+      result.status === AUTHORING_APPLICATION_STATUS.FAILED
+    ) {
       // Restore historical status without announcing an old failure as a new error.
       if (activeApplicationRef.current !== result.exportId) return;
       activeApplicationRef.current = null;
@@ -594,7 +624,7 @@ export const CourseGenerationSession = ({
     }
     setExportId(null);
     writeTrackedApplication(id, sessionId, null);
-    setApplyState("idle");
+    setApplyState(AUTHORING_APPLY_STATE.IDLE);
   }, [applicationQuery.data, completeAppliedApplication, id, sessionId, t, toast]);
 
   /** Sends a workspace command and reports a localized success message. */
@@ -765,7 +795,7 @@ export const CourseGenerationSession = ({
   /** Persists the explicit source policy selected for future requests. */
   const selectSources = useCallback(
     (sourcePolicy: SourcePolicy) => {
-      if (!session || session.status !== "active") return;
+      if (!session || session.status !== AUTHORING_SESSION_STATUS.ACTIVE) return;
       latestSourcePolicyRef.current = sourcePolicy;
       commandMutation.mutate({ action: "sources.select", sourcePolicy });
     },
@@ -779,7 +809,7 @@ export const CourseGenerationSession = ({
       sourcePolicy?: SourcePolicy,
       selectedTaskIds?: string[],
     ) => {
-      if (!session || session.status !== "active") return;
+      if (!session || session.status !== AUTHORING_SESSION_STATUS.ACTIVE) return;
       commandMutation.mutate({
         action: "source.refresh",
         targetId: oldSourceVersionId,
@@ -869,7 +899,8 @@ export const CourseGenerationSession = ({
       // proposal.review only accepts pending proposals; request.discard preserves applied history.
       const discardable = proposals.filter(
         (proposal) =>
-          (proposal.decision === "pending" || proposal.decision === "accepted") &&
+          (proposal.decision === PROPOSAL_DECISION.PENDING ||
+            proposal.decision === PROPOSAL_DECISION.ACCEPTED) &&
           !appliedProposalIds.has(proposal.id),
       );
       if (
@@ -899,7 +930,7 @@ export const CourseGenerationSession = ({
       const selected = proposals.filter(
         (proposal) =>
           selectedProposalIds.includes(proposal.id) &&
-          proposal.decision !== "applied" &&
+          proposal.decision !== PROPOSAL_DECISION.APPLIED &&
           !appliedProposalIds.has(proposal.id),
       );
       const closure = proposalDependencyClosure(
@@ -916,11 +947,16 @@ export const CourseGenerationSession = ({
       const selectedIds = new Set(
         closure.ids.filter((proposalId) => {
           const proposal = projection.proposals.find((item) => item.id === proposalId);
-          return proposal?.decision !== "applied" && !appliedProposalIds.has(proposalId);
+          return (
+            proposal?.decision !== PROPOSAL_DECISION.APPLIED && !appliedProposalIds.has(proposalId)
+          );
         }),
       );
       const reviews = proposals
-        .filter((proposal) => proposal.decision === "pending" && selectedIds.has(proposal.id))
+        .filter(
+          (proposal) =>
+            proposal.decision === PROPOSAL_DECISION.PENDING && selectedIds.has(proposal.id),
+        )
         .map((proposal) => ({
           proposalId: proposal.id,
           expectedRevision: proposal.revision,
@@ -930,7 +966,7 @@ export const CourseGenerationSession = ({
       proposals
         .filter(
           (proposal) =>
-            proposal.decision === "pending" &&
+            proposal.decision === PROPOSAL_DECISION.PENDING &&
             rejectedProposalIds.includes(proposal.id) &&
             !selectedIds.has(proposal.id),
         )
@@ -984,7 +1020,7 @@ export const CourseGenerationSession = ({
         await reviewGroupAndApply(requestId, proposals, [proposal.id]);
         return;
       }
-      if (proposal.decision === "pending") {
+      if (proposal.decision === PROPOSAL_DECISION.PENDING) {
         await decideProposal(proposal, true);
       }
       if (proposal.operations.length === 0) return;
@@ -1043,7 +1079,7 @@ export const CourseGenerationSession = ({
       const appliedIds = new Set([
         ...appliedProposalIds,
         ...Object.entries(applicationStatusByProposalId)
-          .filter(([, status]) => status === "applied")
+          .filter(([, status]) => status === PROPOSAL_APPLICATION_STATUS.APPLIED)
           .map(([proposalId]) => proposalId),
       ]);
       let currentProposals = excludeAppliedProposals(proposals, appliedIds);
@@ -1071,7 +1107,9 @@ export const CourseGenerationSession = ({
       });
       if (!preview || !onPreviewProposalInCurriculum) return;
       const reviewable = currentProposals.filter(
-        (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
+        (proposal) =>
+          proposal.decision === PROPOSAL_DECISION.PENDING ||
+          proposal.decision === PROPOSAL_DECISION.ACCEPTED,
       );
       onPreviewProposalInCurriculum(
         {
@@ -1222,7 +1260,9 @@ export const CourseGenerationSession = ({
   );
   const agentTasks = attachAuthoringWorkProgress(
     session?.tasks.filter(
-      (task) => !sourceTaskIds.has(task.taskId) && !["route", "source"].includes(task.kind ?? ""),
+      (task) =>
+        !sourceTaskIds.has(task.taskId) &&
+        ![AUTHORING_TASK_KIND.ROUTE, AUTHORING_TASK_KIND.SOURCE].some((kind) => kind === task.kind),
     ) ?? [],
     session?.records ?? [],
   );
@@ -1242,7 +1282,12 @@ export const CourseGenerationSession = ({
     : activeAssistantRequestIds(session?.turns, projection.conversation, authoringChat.messages);
   const requestCanStillRun = (requestId: string) => {
     const turn = turnByRequestId.get(requestId);
-    return !turn || ["queued", "running"].includes(turn.status);
+    return (
+      !turn ||
+      [AUTHORING_TURN_STATUS.QUEUED, AUTHORING_TURN_STATUS.RUNNING].some(
+        (value) => value === turn.status,
+      )
+    );
   };
   const canonicalTools = canonicalToolTaskState(authoringChat.messages);
   const chatRequestId = activeChatRequestId(authoringChat.messages, authoringChat.status);
@@ -1253,7 +1298,9 @@ export const CourseGenerationSession = ({
     agentTasks
       .filter(
         (task) =>
-          ["queued", "running"].includes(task.status) &&
+          [AUTHORING_TASK_STATUS.QUEUED, AUTHORING_TASK_STATUS.RUNNING].some(
+            (value) => value === task.status,
+          ) &&
           requestCanStillRun(task.requestId) &&
           activeTurnRequestIds.has(task.requestId) &&
           !isDuplicateResearchTask(
@@ -1290,7 +1337,7 @@ export const CourseGenerationSession = ({
       item.kind === "part",
   );
   const livePlans = workParts.flatMap((item) =>
-    item.part.data.partKind === "text" && item.part.data.planSteps?.length
+    item.part.data.partKind === AUTHORING_PART_KIND.TEXT && item.part.data.planSteps?.length
       ? [
           {
             id: item.part.data.partId,
@@ -1331,7 +1378,7 @@ export const CourseGenerationSession = ({
   });
   const taskById = new Map((session?.tasks ?? []).map((task) => [task.taskId, task]));
   const toolParts = workParts.filter(
-    (item) => item.part.data.partKind === "tool" && item.part.data.tool,
+    (item) => item.part.data.partKind === AUTHORING_PART_KIND.TOOL && item.part.data.tool,
   );
   const requestIdsWithWork = new Set([
     ...activityTasks.map((task) => task.requestId),
@@ -1348,28 +1395,40 @@ export const CourseGenerationSession = ({
     );
     const requestWorkParts = workParts.filter((item) => item.requestId === requestId);
     const hasLessonWork =
-      requestWorkParts.some((item) => item.part.data.partKind === "proposal") &&
-      requestTasks.some((task) => ["detailed_plan", "lesson"].includes(task.kind ?? ""));
+      requestWorkParts.some((item) => item.part.data.partKind === AUTHORING_PART_KIND.PROPOSAL) &&
+      requestTasks.some((task) =>
+        [AUTHORING_TASK_KIND.DETAILED_PLAN, AUTHORING_TASK_KIND.LESSON].some(
+          (kind) => kind === task.kind,
+        ),
+      );
     const stages = hasLessonWork
       ? [
           {
-            phase: "outline",
+            phase: AUTHORING_WORK_PROGRESS_STAGE.OUTLINE,
             tasks: requestTasks.filter(
-              (task) => !["detailed_plan", "lesson"].includes(task.kind ?? ""),
+              (task) =>
+                ![AUTHORING_TASK_KIND.DETAILED_PLAN, AUTHORING_TASK_KIND.LESSON].some(
+                  (kind) => kind === task.kind,
+                ),
             ),
           },
           {
             phase: "lessons",
             tasks: requestTasks.filter((task) =>
-              ["detailed_plan", "lesson"].includes(task.kind ?? ""),
+              [AUTHORING_TASK_KIND.DETAILED_PLAN, AUTHORING_TASK_KIND.LESSON].some(
+                (kind) => kind === task.kind,
+              ),
             ),
           },
         ]
       : [{ phase: "request", tasks: requestTasks }];
     const outlineProposals = requestWorkParts.filter((item) => {
-      if (item.part.data.partKind !== "proposal") return false;
+      if (item.part.data.partKind !== AUTHORING_PART_KIND.PROPOSAL) return false;
       const proposalTask = taskById.get(item.part.data.taskId ?? "");
-      return proposalTask?.kind !== "lesson" && proposalTask?.kind !== "detailed_plan";
+      return (
+        proposalTask?.kind !== AUTHORING_TASK_KIND.LESSON &&
+        proposalTask?.kind !== AUTHORING_TASK_KIND.DETAILED_PLAN
+      );
     });
     const outlineSequence = Math.max(
       ...outlineProposals.map((item) => item.part.data.firstSequence),
@@ -1393,7 +1452,7 @@ export const CourseGenerationSession = ({
             item.requestId === requestId &&
             (phase === "request" ||
               (item.part.data.taskId && stageTaskIds.has(item.part.data.taskId)) ||
-              (phase === "outline" && !item.part.data.taskId)),
+              (phase === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE && !item.part.data.taskId)),
         )
         .flatMap((item) =>
           item.part.data.tool
@@ -1492,7 +1551,8 @@ export const CourseGenerationSession = ({
       if (requestId && proposalsByRequest.has(requestId)) return [];
       const applicationStatus = applicationStatusByProposalId[proposal.id];
       const canRetryApplication =
-        (applicationStatus === "failed" || applicationStatus === "synchronizing") &&
+        (applicationStatus === PROPOSAL_APPLICATION_STATUS.FAILED ||
+          applicationStatus === PROPOSAL_APPLICATION_STATUS.SYNCHRONIZING) &&
         pendingApplyRequest !== null;
       return [
         [
@@ -1617,11 +1677,9 @@ export const CourseGenerationSession = ({
                 plans={plans}
                 proposalById={proposalById}
                 proposalGroups={proposalGroups}
-                previews={projection.previews}
                 questionsByRequest={questionsByRequest}
                 onAnswerQuestion={answerQuestion}
                 sources={projection.sources}
-                onPreviewInCurriculum={onPreviewInCurriculum}
                 chatError={authoringChat.error}
                 onRetryChat={() => void authoringChat.retryLatestRequest()}
               />
@@ -1637,9 +1695,11 @@ export const CourseGenerationSession = ({
               onRefreshSource={refreshSource}
               sessionId={session.sessionId}
               reasoningControlAvailable={session.reasoningControlAvailable}
-              disabled={session.status === "discarded"}
+              disabled={session.status === AUTHORING_SESSION_STATUS.DISCARDED}
               isSubmitting={chatIsProcessing}
-              hasActiveGeneration={session.status === "active" && chatIsProcessing}
+              hasActiveGeneration={
+                session.status === AUTHORING_SESSION_STATUS.ACTIVE && chatIsProcessing
+              }
               onStopGeneration={() => {
                 command({ action: "session.stop" });
                 authoringChat.stop();
@@ -1659,8 +1719,6 @@ export const CourseGenerationSession = ({
               requests={projection.requests}
               tasks={agentTasks}
               proposals={projection.proposals}
-              previews={[]}
-              onPreviewInCurriculum={onPreviewInCurriculum}
               selectedProposalIds={selectedProposalIds}
               onSelectedProposalIdsChange={setSelectedProposalIds}
               renderCards={false}
@@ -1677,7 +1735,10 @@ export const CourseGenerationSession = ({
               readyAssetIds={projection.readyAssetIds}
               failedOptionalAssetIds={projection.assetTasks
                 .filter(
-                  (asset) => asset.status === "failed" && !asset.request.required && !asset.ready,
+                  (asset) =>
+                    asset.status === AUTHORING_TASK_STATUS.FAILED &&
+                    !asset.request.required &&
+                    !asset.ready,
                 )
                 .map((asset) => asset.request.assetId)}
               omittedOptionalAssetIds={omittedOptionalAssetIds}

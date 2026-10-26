@@ -744,7 +744,7 @@ describe("Course repetition (e2e)", () => {
     const f = await fixture(false, false);
     const completedAt = "2026-01-01T12:00:00.000Z";
     const migration = await readFile(
-      resolve(__dirname, "../../storage/migrations/0222_course_repetition_backfill.sql"),
+      resolve(__dirname, "../../storage/migrations/0225_course_repetition_backfill.sql"),
       "utf8",
     );
     await inTenant(async () => {

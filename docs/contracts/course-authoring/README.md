@@ -9,3 +9,15 @@ These JSON documents are examples validated against the current Luma Pydantic au
 - `mentor-operation.json`: typed teacher configuration. Creation still requires Core-valid judge configuration; the current nullable example is not proof of creation eligibility.
 
 AI producer structural validation passed. Core reports five TypeBox fixture tests passed. Full semantic validation, asset references, apply transaction behavior and SDK consumer tests remain distinct requirements. Baseline hashes here are placeholders, not hashes of live course data.
+
+Quiz question positions from authoring remain proposal ordering metadata and may
+start at zero or one. At the native form preview and Apply boundaries, Core uses
+`normalizeAuthoringQuizQuestionOrder` to preserve their stable order and assign
+consecutive native question numbers starting at one. Question IDs, author titles,
+question types and answer ordering remain unchanged. This also handles sparse
+positions. Existing live quizzes change only when an author applies a quiz proposal.
+
+The learner question list also displays consecutive ordinals from its rendered
+sequence, preserving the API's presentation order and question identity. Existing
+quizzes with legacy zero-based stored positions therefore display Question 1
+without reapplying a proposal or rewriting database rows.

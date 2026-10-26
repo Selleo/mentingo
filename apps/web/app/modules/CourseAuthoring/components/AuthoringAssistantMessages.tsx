@@ -1,31 +1,51 @@
 /** Renders the assistant transcript from durable parts in event order. */
 import { getUiMessageText } from "@repo/shared";
-import { Check, CircleAlert, FileText, RotateCcw } from "lucide-react";
-import { Fragment, type ReactNode, useState } from "react";
+import {
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  FileText,
+  Globe,
+  ListChecks,
+  LoaderCircle,
+  MessageCircleQuestion,
+  Pencil,
+  RotateCcw,
+  Telescope,
+} from "lucide-react";
+import { Fragment, type ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Markdown, { type Components } from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
-import { TypingDots } from "~/components/TypingDots";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 
 import { projectAuthoringTimeline } from "../authoringConversation";
 import { compactLinkSeparators, extractTrailingSources } from "../authoringSources";
+import {
+  AUTHORING_ARTIFACT_KIND,
+  AUTHORING_PART_KIND,
+  AUTHORING_PART_STATUS,
+  AUTHORING_TOOL_STATUS,
+} from "../courseAuthoring.constants";
 
 import { AuthoringToolActivity } from "./AuthoringActivityRail";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
-import { AuthoringLivePreview } from "./AuthoringLivePreview";
+import { AuthoringPendingIndicator } from "./AuthoringPendingIndicator";
+import { AuthoringPlanStepList } from "./AuthoringPlanStepList";
 import { AuthoringMarkdownLink, AuthoringSourceChipRow } from "./AuthoringSourceCitation";
 
 import type { AuthoringChatMessage } from "../authoringChatTransport";
 import type { AuthoringTimelineDecoration } from "../authoringConversation";
-import type { PreviewView, QuestionView, SourceView } from "../courseAuthoring.types";
+import type { QuestionView, SourceView } from "../courseAuthoring.types";
 
 type PendingTask = { taskId: string; requestId: string; phaseLabel?: string };
 type PlanView = {
@@ -59,9 +79,7 @@ type Props = {
   plans?: PlanView[];
   proposalById?: Record<string, ReactNode>;
   proposalGroups?: ProposalGroup[];
-  previews?: PreviewView[];
   sources?: SourceView[];
-  onPreviewInCurriculum?: (preview: PreviewView) => void;
   questionsByRequest?: Record<string, QuestionView[]>;
   onAnswerQuestion?: (question: QuestionView, answer: string) => Promise<void>;
   chatError?: Error;
@@ -73,23 +91,39 @@ type PartMarker = Extract<ChatPart, { type: "data-authoringPart" }>;
 
 const isPartMarker = (part: ChatPart): part is PartMarker => part.type === "data-authoringPart";
 
+const CHOICE_SHORTCUTS = ["A", "B", "C"];
+const OTHER_SHORTCUT = "D";
+
+const isTypingTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
 const AuthoringQuestionCard = ({
   question,
   onAnswer,
   hidePrompt = false,
+  header,
+  shortcuts = false,
 }: {
   question: QuestionView;
   onAnswer?: (question: QuestionView, answer: string) => Promise<void>;
   hidePrompt?: boolean;
+  header?: ReactNode;
+  shortcuts?: boolean;
 }) => {
   const { t } = useTranslation();
   const [answerText, setAnswerText] = useState("");
   const [localAnswer, setLocalAnswer] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [submittingAnswer, setSubmittingAnswer] = useState<string | null>(null);
   const [otherSelected, setOtherSelected] = useState(false);
+  const otherInputRef = useRef<HTMLTextAreaElement>(null);
+  const shortcutRef = useRef<(key: string) => boolean>(() => false);
+  const submitting = submittingAnswer !== null;
   const resolvedAnswer = question.answer ?? localAnswer;
   const resolved = question.answered || resolvedAnswer !== null;
   const capability = question.capability !== null;
+  const choices = question.choices.slice(0, 3);
+  const shortcutsEnabled = shortcuts && !resolved && !capability && choices.length > 0;
   let resolvedLabel = t("courseAuthoring.conversation.questionAnswered");
   if (question.capability === "deep_research") {
     resolvedLabel =
@@ -105,144 +139,43 @@ const AuthoringQuestionCard = ({
 
   const submit = async (answer: string) => {
     if (!answer || submitting || resolved || !onAnswer) return;
-    setSubmitting(true);
+    setSubmittingAnswer(answer);
     try {
       await onAnswer(question, answer);
       setLocalAnswer(answer);
     } catch {
       // The owning session has already reported the durable command error.
     } finally {
-      setSubmitting(false);
+      setSubmittingAnswer(null);
     }
   };
 
-  let responseNode: ReactNode;
-  if (resolved) {
-    responseNode = (
-      <div
-        className={cn(
-          "items-center gap-1.5 text-xs text-neutral-600",
-          capability ? "inline-flex" : "mt-2 flex",
-        )}
-        role="status"
-      >
-        <Check className="size-3.5 text-success-700" aria-hidden="true" />
-        {capability || !resolvedAnswer ? (
-          <span>{resolvedLabel}</span>
-        ) : (
-          <>
-            <span className="font-medium">{t("courseAuthoring.activityRail.yourAnswer")}:</span>{" "}
-            <span className="min-w-0 whitespace-pre-wrap break-words">{resolvedAnswer}</span>
-          </>
-        )}
-      </div>
-    );
-  } else if (capability) {
-    responseNode = (
-      <div className="inline-flex flex-wrap items-center gap-1.5">
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          className="h-7 border-primary-300 bg-primary-50 px-2.5 font-medium text-primary-800 hover:border-primary-500 hover:bg-primary-100"
-          disabled={submitting || !onAnswer}
-          onClick={() => void submit("allow")}
-        >
-          {t("courseAuthoring.conversation.allow")}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          className="h-7 border-neutral-300 bg-white px-2.5 text-neutral-700 hover:border-neutral-500 hover:bg-neutral-100"
-          disabled={submitting || !onAnswer}
-          onClick={() => void submit("deny")}
-        >
-          {t("courseAuthoring.conversation.deny")}
-        </Button>
-      </div>
-    );
-  } else if (question.choices.length > 0) {
-    responseNode = (
-      <div className="mt-3 space-y-1.5">
-        {question.choices.slice(0, 3).map((choice, index) => (
-          <button
-            key={choice}
-            type="button"
-            className="flex w-full items-start gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 text-left text-sm text-neutral-800 hover:border-primary-400 hover:bg-primary-50"
-            disabled={submitting || !onAnswer}
-            onClick={() => void submit(choice)}
-          >
-            <span className="shrink-0 font-semibold text-primary-700">
-              {String.fromCharCode(65 + index)}.
-            </span>
-            <span className="min-w-0 flex-1 whitespace-normal break-words">{choice}</span>
-          </button>
-        ))}
-        <button
-          type="button"
-          className="flex w-full items-start gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 text-left text-sm text-neutral-800 hover:border-primary-400 hover:bg-primary-50"
-          disabled={submitting || !onAnswer}
-          onClick={() => setOtherSelected(true)}
-        >
-          <span className="font-semibold text-primary-700">D.</span>
-          <span>{t("courseAuthoring.conversation.questionOther")}</span>
-        </button>
-        {otherSelected && (
-          <form
-            className="flex items-center gap-2 pt-1"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void submit(answerText.trim());
-            }}
-          >
-            <Input
-              className="h-8 bg-white text-sm"
-              value={answerText}
-              aria-label={t("courseAuthoring.activityRail.yourAnswer")}
-              placeholder={t("courseAuthoring.activityRail.yourAnswer")}
-              disabled={submitting || !onAnswer}
-              onChange={(event) => setAnswerText(event.target.value)}
-            />
-            <Button
-              type="submit"
-              size="sm"
-              disabled={submitting || !answerText.trim() || !onAnswer}
-            >
-              {t("courseAuthoring.conversation.answer")}
-            </Button>
-          </form>
-        )}
-      </div>
-    );
-  } else {
-    responseNode = (
-      <form
-        className="mt-2 flex items-center gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submit(answerText.trim());
-        }}
-      >
-        <Input
-          className="h-8 bg-white text-sm"
-          value={answerText}
-          aria-label={t("courseAuthoring.activityRail.yourAnswer")}
-          placeholder={t("courseAuthoring.activityRail.yourAnswer")}
-          disabled={submitting || !onAnswer}
-          onChange={(event) => setAnswerText(event.target.value)}
-        />
-        <Button type="submit" size="sm" disabled={submitting || !answerText.trim() || !onAnswer}>
-          {t("courseAuthoring.conversation.answer")}
-        </Button>
-        {otherSelected && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => setOtherSelected(false)}>
-            {t("courseAuthoring.conversation.questionSuggestions")}
-          </Button>
-        )}
-      </form>
-    );
-  }
+  shortcutRef.current = (key: string) => {
+    const choice = choices[CHOICE_SHORTCUTS.indexOf(key)];
+    if (choice) {
+      void submit(choice);
+      return true;
+    }
+    if (key === OTHER_SHORTCUT) {
+      setOtherSelected(true);
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (!shortcutsEnabled) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return;
+      if (shortcutRef.current(event.key.toUpperCase())) event.preventDefault();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [shortcutsEnabled]);
+
+  useEffect(() => {
+    if (otherSelected) otherInputRef.current?.focus();
+  }, [otherSelected]);
 
   let prompt = question.prompt;
   if (question.capability === "deep_research") {
@@ -252,24 +185,194 @@ const AuthoringQuestionCard = ({
   }
 
   if (capability) {
+    const CapabilityIcon = question.capability === "deep_research" ? Telescope : Globe;
     return (
       <div
-        className="flex max-w-xl flex-wrap items-center gap-x-2 gap-y-1 text-sm"
+        className="flex max-w-xl flex-wrap items-center gap-x-2 gap-y-1.5 text-sm"
         data-testid={`course-authoring-question-${question.id}`}
       >
-        <span className="font-medium text-neutral-800">{prompt}</span>
-        {responseNode}
+        <span className="inline-flex items-center gap-1.5 font-medium text-neutral-800">
+          <CapabilityIcon className="size-4 shrink-0 text-primary-700" aria-hidden="true" />
+          {prompt}
+        </span>
+        {resolved ? (
+          <span className="inline-flex items-center gap-1.5 text-xs text-neutral-600" role="status">
+            <Check className="size-3.5 shrink-0 text-success-700" aria-hidden="true" />
+            {resolvedLabel}
+          </span>
+        ) : (
+          <div className="inline-flex flex-wrap items-center gap-1.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="h-7 border-primary-300 bg-primary-50 px-2.5 font-medium text-primary-800 hover:border-primary-500 hover:bg-primary-100"
+              disabled={submitting || !onAnswer}
+              onClick={() => void submit("allow")}
+            >
+              {submittingAnswer === "allow" && (
+                <LoaderCircle className="mr-1 size-3 motion-safe:animate-spin" aria-hidden="true" />
+              )}
+              {t("courseAuthoring.conversation.allow")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="h-7 border-neutral-300 bg-white px-2.5 text-neutral-700 hover:border-neutral-500 hover:bg-neutral-100"
+              disabled={submitting || !onAnswer}
+              onClick={() => void submit("deny")}
+            >
+              {t("courseAuthoring.conversation.deny")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
 
+  if (resolved) {
+    return (
+      <div
+        className="w-full max-w-xl rounded-xl border border-neutral-200 bg-neutral-50/70 px-3.5 py-2.5 text-sm"
+        data-testid={`course-authoring-question-${question.id}`}
+      >
+        {header && <div className="-mr-1.5 mb-1 flex justify-end">{header}</div>}
+        {!hidePrompt && <p className="text-xs text-neutral-500">{prompt}</p>}
+        <div
+          className={cn("flex items-start gap-2 text-neutral-900", !hidePrompt && "mt-0.5")}
+          role="status"
+        >
+          <Check className="mt-0.5 size-3.5 shrink-0 text-success-700" aria-hidden="true" />
+          <p className="min-w-0 flex-1 whitespace-pre-wrap break-words leading-5">
+            {resolvedAnswer ?? resolvedLabel}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const answerForm = (
+    <form
+      className="rounded-xl border border-neutral-300 bg-white p-2 transition-colors focus-within:border-primary-500"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void submit(answerText.trim());
+      }}
+    >
+      <Textarea
+        ref={otherInputRef}
+        rows={2}
+        className="min-h-[44px] resize-none border-0 bg-transparent p-1.5"
+        value={answerText}
+        aria-label={t("courseAuthoring.activityRail.yourAnswer")}
+        placeholder={t("courseAuthoring.activityRail.yourAnswer")}
+        disabled={submitting || !onAnswer}
+        onChange={(event) => setAnswerText(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && choices.length > 0) {
+            setOtherSelected(false);
+            return;
+          }
+          if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+          event.preventDefault();
+          void submit(answerText.trim());
+        }}
+      />
+      <div className="flex items-center justify-between gap-2 px-1.5 pt-1">
+        <span className="hidden text-[11px] text-neutral-400 sm:inline">
+          {t("courseAuthoring.conversation.questionSubmitHint")}
+        </span>
+        <Button
+          type="submit"
+          size="sm"
+          className="ml-auto h-8 shrink-0 gap-1.5"
+          disabled={submitting || !answerText.trim() || !onAnswer}
+        >
+          {submitting && (
+            <LoaderCircle className="size-3.5 motion-safe:animate-spin" aria-hidden="true" />
+          )}
+          {t("courseAuthoring.conversation.answer")}
+        </Button>
+      </div>
+    </form>
+  );
+
   return (
     <div
-      className="max-w-xl rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-2 text-sm"
+      className="w-full max-w-xl overflow-hidden rounded-2xl border border-primary-200 bg-white text-sm shadow-sm"
       data-testid={`course-authoring-question-${question.id}`}
     >
-      {!hidePrompt && <p className="font-medium text-neutral-800">{prompt}</p>}
-      {responseNode}
+      <div className="flex min-h-10 items-center gap-2 border-b border-primary-100 bg-primary-50/70 px-4 py-1.5">
+        <MessageCircleQuestion className="size-4 shrink-0 text-primary-700" aria-hidden="true" />
+        <span className="text-xs font-semibold text-primary-800">
+          {t("courseAuthoring.conversation.questionNeedsInput")}
+        </span>
+        {header && <div className="ml-auto">{header}</div>}
+      </div>
+      <div className="space-y-4 p-4">
+        {!hidePrompt && (
+          <p className="text-base font-semibold leading-6 text-neutral-950">{prompt}</p>
+        )}
+        {choices.length > 0 ? (
+          <div className="space-y-2" role="group" aria-label={prompt}>
+            {choices.map((choice, index) => (
+              <Button
+                key={choice}
+                type="button"
+                variant="outline"
+                className={cn(
+                  "group h-auto min-h-12 w-full justify-start gap-3 whitespace-normal rounded-xl border-neutral-200 bg-white px-3 py-2.5 text-left font-normal text-neutral-800 hover:border-primary-400 hover:bg-primary-50 hover:text-neutral-950 hover:opacity-100",
+                  submittingAnswer === choice && "border-primary-500 bg-primary-50",
+                )}
+                disabled={submitting || !onAnswer}
+                onClick={() => void submit(choice)}
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50 text-[11px] font-semibold text-neutral-600 transition-colors group-hover:border-primary-300 group-hover:bg-white group-hover:text-primary-700">
+                  {CHOICE_SHORTCUTS[index]}.
+                </span>
+                <span className="min-w-0 flex-1 break-words leading-5">{choice}</span>
+                {submittingAnswer === choice ? (
+                  <LoaderCircle
+                    className="size-4 shrink-0 text-primary-600 motion-safe:animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <ArrowRight
+                    className="size-4 shrink-0 text-neutral-300 transition-colors group-hover:text-primary-600"
+                    aria-hidden="true"
+                  />
+                )}
+              </Button>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(
+                "group h-auto min-h-12 w-full justify-start gap-3 rounded-xl border-dashed border-neutral-300 bg-white px-3 py-2.5 text-left font-normal text-neutral-600 hover:border-primary-400 hover:bg-primary-50 hover:text-neutral-900",
+                otherSelected && "border-solid border-primary-400 bg-primary-50 text-primary-800",
+              )}
+              disabled={submitting || !onAnswer}
+              aria-expanded={otherSelected}
+              onClick={() => setOtherSelected(true)}
+            >
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50 text-[11px] font-semibold text-neutral-600 transition-colors group-hover:border-primary-300 group-hover:bg-white group-hover:text-primary-700">
+                {OTHER_SHORTCUT}.
+              </span>
+              <span className="flex-1">{t("courseAuthoring.conversation.questionOther")}</span>
+              <Pencil className="size-3.5 shrink-0" aria-hidden="true" />
+            </Button>
+            {otherSelected && answerForm}
+          </div>
+        ) : (
+          answerForm
+        )}
+        {shortcutsEnabled && (
+          <p className="hidden text-[11px] text-neutral-400 sm:block">
+            {t("courseAuthoring.conversation.questionShortcutHint")}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
@@ -277,27 +380,25 @@ const AuthoringQuestionCard = ({
 const authoringQuestionKey = (question: QuestionView) =>
   `assistant-question-${question.taskId}-${question.revision}`;
 
-const AuthoringPlanSteps = ({ planId, steps }: { planId: string; steps: string[] }) => {
+const AuthoringPlanSteps = ({
+  planId,
+  steps,
+  defaultOpen,
+}: {
+  planId: string;
+  steps: string[];
+  defaultOpen?: boolean;
+}) => {
   const { t } = useTranslation();
   return (
     <AuthoringCollapsibleSection
       title={t("courseAuthoring.activityRail.plan")}
+      icon={<ListChecks className="size-3.5 text-primary-700" />}
       summary={t("courseAuthoring.activityRail.planStepCount", { count: steps.length })}
+      defaultOpen={defaultOpen}
       testId={`course-authoring-plan-${planId}`}
     >
-      <ol className="space-y-1 py-1">
-        {steps.map((step, index) => (
-          <li
-            key={`${index}-${step}`}
-            className="flex items-start gap-3 text-sm leading-5 text-neutral-800"
-          >
-            <span className="w-4 shrink-0 text-right tabular-nums text-neutral-500">
-              {index + 1}.
-            </span>
-            <span>{step}</span>
-          </li>
-        ))}
-      </ol>
+      <AuthoringPlanStepList steps={steps} />
     </AuthoringCollapsibleSection>
   );
 };
@@ -354,15 +455,15 @@ const AssistantChatMessage = ({
   const repeatedQuestionIds = new Set<string>();
   const latestTextByTask = new Map<string, PartMarker>();
   message.parts.forEach((part) => {
-    if (isPartMarker(part) && part.data.partKind === "text" && part.data.taskId) {
+    if (isPartMarker(part) && part.data.partKind === AUTHORING_PART_KIND.TEXT && part.data.taskId) {
       latestTextByTask.set(part.data.taskId, part);
     }
   });
   message.parts.forEach((part) => {
     if (
       !isPartMarker(part) ||
-      part.data.partKind !== "question" ||
-      part.data.artifact?.artifactKind !== "question"
+      part.data.partKind !== AUTHORING_PART_KIND.QUESTION ||
+      part.data.artifact?.artifactKind !== AUTHORING_ARTIFACT_KIND.QUESTION
     ) {
       return;
     }
@@ -381,11 +482,12 @@ const AssistantChatMessage = ({
       {message.parts.map((part, index) => {
         if (!isPartMarker(part)) return null;
         let partNode: ReactNode = null;
-        if (part.data.partKind === "text" && part.data.text) {
+        if (part.data.partKind === AUTHORING_PART_KIND.TEXT && part.data.text) {
           const isActiveProgress =
-            (part.data.status === "streaming" || part.data.status === "started") &&
+            (part.data.status === AUTHORING_PART_STATUS.STREAMING ||
+              part.data.status === AUTHORING_PART_STATUS.STARTED) &&
             !repeatedQuestionTextIds.has(part.data.partId);
-          const isFailedProgress = part.data.status === "failed";
+          const isFailedProgress = part.data.status === AUTHORING_PART_STATUS.FAILED;
           const { text, sources } =
             isActiveProgress || isFailedProgress
               ? { text: part.data.text, sources: [] }
@@ -412,7 +514,7 @@ const AssistantChatMessage = ({
             </div>
           );
         }
-        if (part.data.partKind === "tool" && part.data.tool) {
+        if (part.data.partKind === AUTHORING_PART_KIND.TOOL && part.data.tool) {
           partNode = (
             <AuthoringToolActivity
               tool={part.data.tool}
@@ -420,11 +522,17 @@ const AssistantChatMessage = ({
             />
           );
         }
-        if (part.data.partKind === "proposal" && part.data.artifact?.artifactKind === "proposal") {
+        if (
+          part.data.partKind === AUTHORING_PART_KIND.PROPOSAL &&
+          part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.PROPOSAL
+        ) {
           const proposal = proposalById?.[part.data.artifact.artifactId];
           if (proposal) partNode = <div>{proposal}</div>;
         }
-        if (part.data.partKind === "question" && part.data.artifact?.artifactKind === "question") {
+        if (
+          part.data.partKind === AUTHORING_PART_KIND.QUESTION &&
+          part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.QUESTION
+        ) {
           const question = questions.find((entry) => entry.id === part.data.artifact?.artifactId);
           if (question && !renderedQuestionIds.has(question.id)) {
             renderedQuestionIds.add(question.id);
@@ -524,9 +632,7 @@ export const AuthoringAssistantMessages = ({
   plans = [],
   proposalById = {},
   proposalGroups = [],
-  previews = [],
   sources = [],
-  onPreviewInCurriculum,
   questionsByRequest = {},
   onAnswerQuestion,
   chatError,
@@ -582,8 +688,8 @@ export const AuthoringAssistantMessages = ({
       message.role === "assistant"
         ? message.parts.flatMap((part) =>
             isPartMarker(part) &&
-            part.data.partKind === "tool" &&
-            part.data.tool?.status === "started" &&
+            part.data.partKind === AUTHORING_PART_KIND.TOOL &&
+            part.data.tool?.status === AUTHORING_TOOL_STATUS.STARTED &&
             part.data.taskId
               ? [part.data.taskId]
               : [],
@@ -591,18 +697,24 @@ export const AuthoringAssistantMessages = ({
         : [],
     ),
   );
+  const visiblePlans = plans.filter((plan) => plan.planSteps.length > 0);
+  const latestPlanId = visiblePlans.at(-1)?.id;
   const timelineDecorations: AuthoringTimelineDecoration<ReactNode>[] = [
-    ...plans
-      .filter((plan) => plan.planSteps.length > 0)
-      .map((plan) => ({
-        id: `plan-${plan.id}`,
-        requestId: plan.requestId,
-        kind: "plan" as const,
-        taskId: plan.taskId,
-        partId: plan.partId,
-        sequence: plan.firstSequence,
-        value: <AuthoringPlanSteps planId={plan.id} steps={plan.planSteps.slice(0, 6)} />,
-      })),
+    ...visiblePlans.map((plan) => ({
+      id: `plan-${plan.id}`,
+      requestId: plan.requestId,
+      kind: "plan" as const,
+      taskId: plan.taskId,
+      partId: plan.partId,
+      sequence: plan.firstSequence,
+      value: (
+        <AuthoringPlanSteps
+          planId={plan.id}
+          steps={plan.planSteps.slice(0, 6)}
+          defaultOpen={plan.id === latestPlanId}
+        />
+      ),
+    })),
     ...Object.entries(questionsByRequest).flatMap(([requestId, questions]) =>
       questions
         .filter((question) => question.answered || typeof question.answer === "string")
@@ -621,20 +733,6 @@ export const AuthoringAssistantMessages = ({
           ),
         })),
     ),
-    ...previews.map((preview) => ({
-      id: `preview-${preview.taskId}`,
-      requestId: preview.requestId,
-      kind: "preview" as const,
-      taskId: preview.taskId,
-      value: (
-        <AuthoringLivePreview
-          preview={preview}
-          onPreviewInCurriculum={
-            onPreviewInCurriculum ? () => onPreviewInCurriculum(preview) : undefined
-          }
-        />
-      ),
-    })),
     ...taskActivities.map((activity) => ({
       id: `activity-${activity.taskId}`,
       requestId: activity.requestId,
@@ -659,12 +757,9 @@ export const AuthoringAssistantMessages = ({
         kind: "pending" as const,
         taskId: task.taskId,
         value: (
-          <div className="flex items-center gap-2 text-xs text-neutral-600" role="status">
-            <TypingDots className="gap-1 rounded-none bg-transparent p-0" dotClassName="size-1" />
-            <span className="loading-text-shimmer">
-              {task.phaseLabel ?? t("courseAuthoring.conversation.working")}
-            </span>
-          </div>
+          <AuthoringPendingIndicator
+            label={task.phaseLabel ?? t("courseAuthoring.conversation.working")}
+          />
         ),
       })),
   ];
@@ -695,12 +790,12 @@ export const AuthoringAssistantMessages = ({
   };
   const hasVisiblePart = (part: ChatPart, requestId: string) => {
     if (!isPartMarker(part)) return false;
-    if (part.data.partKind === "text") return Boolean(part.data.text?.trim());
-    if (part.data.partKind === "tool")
+    if (part.data.partKind === AUTHORING_PART_KIND.TEXT) return Boolean(part.data.text?.trim());
+    if (part.data.partKind === AUTHORING_PART_KIND.TOOL)
       return part.data.tool !== null && !groupedToolRequestIds.has(requestId);
-    if (part.data.partKind === "question") {
+    if (part.data.partKind === AUTHORING_PART_KIND.QUESTION) {
       return (
-        part.data.artifact?.artifactKind === "question" &&
+        part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.QUESTION &&
         (questionsByRequest[requestId] ?? []).some(
           (question) =>
             question.id === part.data.artifact?.artifactId &&
@@ -709,7 +804,7 @@ export const AuthoringAssistantMessages = ({
       );
     }
     return (
-      part.data.artifact?.artifactKind === "proposal" &&
+      part.data.artifact?.artifactKind === AUTHORING_ARTIFACT_KIND.PROPOSAL &&
       Boolean(proposalById[part.data.artifact.artifactId])
     );
   };
@@ -818,43 +913,48 @@ export const AuthoringAssistantMessages = ({
           role={"assistant" as const}
           aiName={aiName}
           contentNode={
-            <div className="max-w-xl space-y-3">
-              <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span>
-                  {t("courseAuthoring.conversation.questionProgress", {
-                    current: activePendingIndex + 1,
-                    total: pendingQuestions.length,
-                  })}
-                </span>
-                {pendingQuestions.length > 1 && (
-                  <div className="flex gap-1">
+            <AuthoringQuestionCard
+              key={`${activePendingQuestion.taskId}-${activePendingQuestion.revision}`}
+              question={activePendingQuestion}
+              onAnswer={onAnswerQuestion}
+              shortcuts
+              header={
+                pendingQuestions.length > 1 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-medium tabular-nums text-primary-800">
+                      {t("courseAuthoring.conversation.questionProgress", {
+                        current: activePendingIndex + 1,
+                        total: pendingQuestions.length,
+                      })}
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="size-7 rounded-md text-primary-800 hover:bg-primary-100"
                       disabled={activePendingIndex === 0}
+                      aria-label={t("courseAuthoring.conversation.questionPrevious")}
+                      title={t("courseAuthoring.conversation.questionPrevious")}
                       onClick={() => setPendingQuestionIndex(activePendingIndex - 1)}
                     >
-                      {t("courseAuthoring.conversation.questionPrevious")}
+                      <ChevronLeft className="size-4" aria-hidden="true" />
                     </Button>
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="size-7 rounded-md text-primary-800 hover:bg-primary-100"
                       disabled={activePendingIndex === pendingQuestions.length - 1}
+                      aria-label={t("courseAuthoring.conversation.questionNext")}
+                      title={t("courseAuthoring.conversation.questionNext")}
                       onClick={() => setPendingQuestionIndex(activePendingIndex + 1)}
                     >
-                      {t("courseAuthoring.conversation.questionNext")}
+                      <ChevronRight className="size-4" aria-hidden="true" />
                     </Button>
                   </div>
-                )}
-              </div>
-              <AuthoringQuestionCard
-                key={`${activePendingQuestion.taskId}-${activePendingQuestion.revision}`}
-                question={activePendingQuestion}
-                onAnswer={onAnswerQuestion}
-              />
-            </div>
+                )
+              }
+            />
           }
         />
       )}

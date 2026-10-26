@@ -44,6 +44,52 @@ const record = (
 });
 
 describe("attachAuthoringWorkProgress", () => {
+  it("restores the latest outline pass, milestones, and provisional counts", () => {
+    const outlineTask = task({ kind: "plan" });
+    const outlineProgress = {
+      stage: "outline",
+      outlinePhase: "reviewing",
+      outlineIteration: 2,
+      draftedChapters: 15,
+      draftedLessons: 45,
+      completedSteps: 1,
+      totalSteps: 3,
+    };
+    expect(
+      attachAuthoringWorkProgress(
+        [outlineTask],
+        [record(25, outlineProgress), record(24, { ...outlineProgress, draftedChapters: 4 })],
+      )[0].workProgress,
+    ).toEqual(outlineProgress);
+  });
+
+  it.each([
+    { outlinePhase: "unknown" },
+    { outlineIteration: 0 },
+    { draftedChapters: -1 },
+    { completedSteps: 3 },
+    { totalSteps: 0 },
+  ])("rejects malformed or prematurely complete outline metadata: %j", (invalid) => {
+    const outlineTask = task({ kind: "plan" });
+    expect(
+      attachAuthoringWorkProgress(
+        [outlineTask],
+        [
+          record(25, {
+            stage: "outline",
+            outlinePhase: "drafting",
+            outlineIteration: 1,
+            draftedChapters: 0,
+            draftedLessons: 0,
+            completedSteps: 0,
+            totalSteps: 3,
+            ...invalid,
+          }),
+        ],
+      ),
+    ).toEqual([outlineTask]);
+  });
+
   it("uses the latest sequenced progress record for each matching task", () => {
     const tasks = [task(), task({ taskId: "task-2" })];
     const records = [

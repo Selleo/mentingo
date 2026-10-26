@@ -204,6 +204,7 @@ export interface CurrentUserResponse {
     permissions: (
       | "phishing.manage"
       | "phishing.report_read"
+      | "content_marketplace.browse"
       | "account.read_self"
       | "account.update_self"
       | "user.read_self"
@@ -8630,6 +8631,55 @@ export interface MarkAnnouncementAsReadResponse {
 export interface DeleteAnnouncementResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetLoginMethodsResponse {
+  data: {
+    google: boolean;
+    microsoft: boolean;
+    slack: boolean;
+    magicLink: boolean;
+    password: boolean;
+  };
+}
+
+export interface GetLoginMethodSetupResponse {
+  data: {
+    methods: {
+      google: boolean;
+      microsoft: boolean;
+      slack: boolean;
+      magicLink: boolean;
+      password: boolean;
+    };
+    missingCredentials: {
+      google: string[];
+      microsoft: string[];
+      slack: string[];
+    };
+  };
+}
+
+export interface UpdateLoginMethodBody {
+  method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+  enabled: boolean;
+}
+
+export interface UpdateLoginMethodResponse {
+  data: {
+    methods: {
+      google: boolean;
+      microsoft: boolean;
+      slack: boolean;
+      magicLink: boolean;
+      password: boolean;
+    };
+    missingCredentials: {
+      google: string[];
+      microsoft: string[];
+      slack: string[];
+    };
   };
 }
 
@@ -30380,81 +30430,62 @@ export interface SearchResponse {
   data: {
     searchMode?: "keyword" | "hybrid";
     semanticStatus?: "ready" | "unavailable" | "pending";
-    allCourses: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    myCourses: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    availableCourses: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      category?: string;
-      thumbnailUrl?: string | null;
-      courseChapterCount?: number;
-      completedChapterCount?: number;
-    }[];
-    learningPaths: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      thumbnailReference?: string | null;
-      courses: {
-        /** @format uuid */
-        id: string;
-      }[];
-    }[];
-    lessons: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-      /** @format uuid */
-      courseId: string;
-    }[];
-    news: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    articles: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    qa: {
-      matchedPassage?: string;
-      matchedAttachmentFileName?: string | null;
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
+    /** Learning content ranked across types, with matching lessons nested under their course. */
+    results: (
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "course";
+          /** @format uuid */
+          id: string;
+          title: string;
+          category?: string;
+          thumbnailUrl?: string | null;
+          courseChapterCount?: number;
+          completedChapterCount?: number;
+          /** False when the course is shown only as the parent of matching lessons. */
+          matched: boolean;
+          lessons: {
+            /** Query-local rank fusion score, comparable across content types; not a probability. */
+            relevanceScore?: number;
+            matchedPassage?: string;
+            matchedAttachmentFileName?: string | null;
+            type: "lesson";
+            /** @format uuid */
+            id: string;
+            title: string;
+            /** @format uuid */
+            courseId: string;
+            chapterTitle?: string;
+          }[];
+          /** Matching lessons in this course left out of the response to keep groups short. */
+          hiddenLessonCount: number;
+        }
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "learningPath";
+          /** @format uuid */
+          id: string;
+          title: string;
+          thumbnailUrl?: string | null;
+          courseCount: number;
+        }
+      | {
+          /** Query-local rank fusion score, comparable across content types; not a probability. */
+          relevanceScore?: number;
+          matchedPassage?: string;
+          matchedAttachmentFileName?: string | null;
+          type: "news" | "article" | "qa";
+          /** @format uuid */
+          id: string;
+          title: string;
+        }
+    )[];
     users: {
       /** @format uuid */
       id: string;
@@ -30469,6 +30500,8 @@ export interface SearchResponse {
       }[];
     }[];
     categories: {
+      /** Query-local rank fusion score, comparable across content types; not a probability. */
+      relevanceScore?: number;
       matchedPassage?: string;
       matchedAttachmentFileName?: string | null;
       /** @format uuid */
@@ -31615,7 +31648,6 @@ export interface UpdateTenantApiKeysBody {
     | "MICROSOFT_CLIENT_SECRET"
     | "MICROSOFT_CALENDAR_CLIENT_ID"
     | "MICROSOFT_CALENDAR_CLIENT_SECRET"
-    | "MICROSOFT_OAUTH_ENABLED"
     | "OPENAI_API_KEY"
     | "BUNNY_STREAM_API_KEY"
     | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -31624,16 +31656,11 @@ export interface UpdateTenantApiKeysBody {
     | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
     | "GOOGLE_CLIENT_ID"
     | "GOOGLE_CLIENT_SECRET"
-    | "GOOGLE_OAUTH_ENABLED"
-    | "VITE_GOOGLE_OAUTH_ENABLED"
-    | "VITE_MICROSOFT_OAUTH_ENABLED"
     | "STRIPE_WEBHOOK_SECRET"
     | "STRIPE_SECRET_KEY"
     | "VITE_STRIPE_PUBLISHABLE_KEY"
     | "SLACK_CLIENT_ID"
     | "SLACK_CLIENT_SECRET"
-    | "SLACK_OAUTH_ENABLED"
-    | "VITE_SLACK_OAUTH_ENABLED"
     | "LUMA_API_KEY"
     | "LIVEKIT_URL"
     | "LIVEKIT_API_KEY"
@@ -31657,7 +31684,6 @@ export interface UpdateTenantApiKeysResponse {
       | "MICROSOFT_CLIENT_SECRET"
       | "MICROSOFT_CALENDAR_CLIENT_ID"
       | "MICROSOFT_CALENDAR_CLIENT_SECRET"
-      | "MICROSOFT_OAUTH_ENABLED"
       | "OPENAI_API_KEY"
       | "BUNNY_STREAM_API_KEY"
       | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -31666,16 +31692,11 @@ export interface UpdateTenantApiKeysResponse {
       | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
       | "GOOGLE_CLIENT_ID"
       | "GOOGLE_CLIENT_SECRET"
-      | "GOOGLE_OAUTH_ENABLED"
-      | "VITE_GOOGLE_OAUTH_ENABLED"
-      | "VITE_MICROSOFT_OAUTH_ENABLED"
       | "STRIPE_WEBHOOK_SECRET"
       | "STRIPE_SECRET_KEY"
       | "VITE_STRIPE_PUBLISHABLE_KEY"
       | "SLACK_CLIENT_ID"
       | "SLACK_CLIENT_SECRET"
-      | "SLACK_OAUTH_ENABLED"
-      | "VITE_SLACK_OAUTH_ENABLED"
       | "LUMA_API_KEY"
       | "LIVEKIT_URL"
       | "LIVEKIT_API_KEY"
@@ -31832,6 +31853,84 @@ export interface UnenrollGroupsBody {
 export interface UnenrollGroupsResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetTenantCoursesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    thumbnailUrl: string | null;
+    status: "draft" | "published" | "private";
+    originType: "regular" | "master" | "exported";
+    chapterCount: number;
+    lessonCount: number;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+    };
+    updatedAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface StartCourseArchiveExportResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface GetCourseArchiveExportStatusResponse {
+  data: {
+    jobId: string;
+    state: string;
+    result: null | {
+      kind: "course" | "learning-path";
+      /** @format uuid */
+      rootId: string;
+      alreadyExists?: boolean;
+      createdCourseIds?: string[];
+      reusedCourseIds?: string[];
+    };
+    failedReason: string | null;
+  };
+}
+
+export interface SaveContentMarketplaceConnectionBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  baseUrl: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  apiKey: string;
+}
+
+export interface SaveContentMarketplaceConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface CheckContentMarketplaceConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    reachable: boolean;
+    enabled: boolean;
   };
 }
 
@@ -32021,6 +32120,84 @@ export interface CreateSupportSessionResponse {
   data: {
     redirectUrl: string;
     expiresAt: string;
+  };
+}
+
+export interface GetContentMarketplaceAvailabilityResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetContentMarketplaceFilterOptionsResponse {
+  data: {
+    categories: string[];
+  };
+}
+
+export interface ListContentMarketplaceListingsResponse {
+  data: ({
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    locales: string[];
+    hasThumbnail: boolean;
+    /** @format uuid */
+    versionId: string;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+      /** @min 0 */
+      lessonCount: number;
+    };
+    updatedAt: string;
+  } & {
+    copiedCourse: {
+      /** @format uuid */
+      id: string;
+      isOutdated: boolean;
+    } | null;
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetContentMarketplaceListingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    locales: string[];
+    hasThumbnail: boolean;
+    /** @format uuid */
+    versionId: string;
+    metadata: {
+      category: string | null;
+      durationMinutes: number | null;
+      /** @min 0 */
+      lessonCount: number;
+    };
+    updatedAt: string;
+  } & {
+    copiedCourse: {
+      /** @format uuid */
+      id: string;
+      isOutdated: boolean;
+    } | null;
+  };
+}
+
+export interface CopyContentMarketplaceListingResponse {
+  data: {
+    jobId: string;
+    /** @format uuid */
+    acquisitionId: string;
   };
 }
 
@@ -40812,6 +40989,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name EnvControllerGetLoginMethods
+     * @request GET:/api/env/login-methods
+     */
+    envControllerGetLoginMethods: (params: RequestParams = {}) =>
+      this.request<GetLoginMethodsResponse, any>({
+        path: `/api/env/login-methods`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerUpdateLoginMethod
+     * @request POST:/api/env/login-methods
+     */
+    envControllerUpdateLoginMethod: (data: UpdateLoginMethodBody, params: RequestParams = {}) =>
+      this.request<UpdateLoginMethodResponse, any>({
+        path: `/api/env/login-methods`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetLoginMethodSetup
+     * @request GET:/api/env/login-methods/setup
+     */
+    envControllerGetLoginMethodSetup: (params: RequestParams = {}) =>
+      this.request<GetLoginMethodSetupResponse, any>({
+        path: `/api/env/login-methods/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EnvControllerBulkUpsertEnv
      * @request POST:/api/env/bulk
      */
@@ -43889,6 +44110,135 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Returns the non-archived courses of the tenant selected by X-Tenant-Id, with localized title and description, languages, a signed thumbnail URL and chapter and lesson counts. Requires a managing tenant key whose owner has the course export permission. Titles and descriptions use the given language and fall back to each course's base language.
+     *
+     * @tags Integration
+     * @name IntegrationCoursesControllerGetTenantCourses
+     * @summary List courses for an external catalog
+     * @request GET:/api/integration/courses
+     */
+    integrationCoursesControllerGetTenantCourses: (
+      query?: {
+        /** @maxLength 200 */
+        keyword?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTenantCoursesResponse, void>({
+        path: `/api/integration/courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Queues a native archive (mentingo-package zip) export of a course in the tenant selected by X-Tenant-Id and returns the job id. Poll GET /integration/native-archive/jobs/:jobId until the job completes, then download the archive. Requires a managing tenant key whose owner has the course export permission.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerStartCourseArchiveExport
+     * @summary Start a native archive export of a course
+     * @request POST:/api/integration/courses/{courseId}/native-archive
+     */
+    integrationNativeArchiveControllerStartCourseArchiveExport: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<StartCourseArchiveExportResponse, void>({
+        path: `/api/integration/courses/${courseId}/native-archive`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the state of a native archive export started with this integration key in the tenant selected by X-Tenant-Id. Finished archives can be downloaded for 24 hours.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerGetCourseArchiveExportStatus
+     * @summary Get a native archive export job
+     * @request GET:/api/integration/native-archive/jobs/{jobId}
+     */
+    integrationNativeArchiveControllerGetCourseArchiveExportStatus: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseArchiveExportStatusResponse, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Streams the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. The body is the archive itself, not a JSON envelope.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerDownloadCourseArchive
+     * @summary Download a native archive
+     * @request GET:/api/integration/native-archive/jobs/{jobId}/download
+     */
+    integrationNativeArchiveControllerDownloadCourseArchive: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}/download`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Atomically saves the content marketplace plugin origin and API key, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationContentMarketplaceControllerSaveContentMarketplaceConnection
+     * @summary Connect a tenant to the content marketplace
+     * @request PUT:/api/integration/tenants/{tenantId}/plugins/content-marketplace
+     */
+    integrationContentMarketplaceControllerSaveContentMarketplaceConnection: (
+      tenantId: string,
+      data: SaveContentMarketplaceConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SaveContentMarketplaceConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/content-marketplace`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Checks that Mentingo can authenticate to the configured content marketplace plugin and reports whether the marketplace is enabled for the tenant. Requires a managing tenant key with tenant management permission. No credentials are returned.
+     *
+     * @tags Integration
+     * @name IntegrationContentMarketplaceControllerCheckContentMarketplaceConnection
+     * @summary Verify tenant content marketplace connectivity
+     * @request GET:/api/integration/tenants/{tenantId}/plugins/content-marketplace
+     */
+    integrationContentMarketplaceControllerCheckContentMarketplaceConnection: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CheckContentMarketplaceConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/content-marketplace`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags Integration Admin
@@ -44070,6 +44420,128 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Reports whether the current tenant is connected to the content marketplace and has it enabled. Never fails because the marketplace is unreachable.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceAvailability
+     * @summary Check whether the content marketplace is available
+     * @request GET:/api/content-marketplace/configuration
+     */
+    contentMarketplaceControllerGetContentMarketplaceAvailability: (params: RequestParams = {}) =>
+      this.request<GetContentMarketplaceAvailabilityResponse, any>({
+        path: `/api/content-marketplace/configuration`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the categories of the published courses, for the catalog filters.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceFilterOptions
+     * @summary List content marketplace filter options
+     * @request GET:/api/content-marketplace/filter-options
+     */
+    contentMarketplaceControllerGetContentMarketplaceFilterOptions: (params: RequestParams = {}) =>
+      this.request<GetContentMarketplaceFilterOptionsResponse, any>({
+        path: `/api/content-marketplace/filter-options`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Search, filter and sort published courses and return one page with its total count. Each listing says which course the tenant copied it into, if any, and whether a newer version is available.
+     *
+     * @name ContentMarketplaceControllerListContentMarketplaceListings
+     * @summary Browse content marketplace courses
+     * @request GET:/api/content-marketplace/listings
+     */
+    contentMarketplaceControllerListContentMarketplaceListings: (
+      query?: {
+        /** @maxLength 200 */
+        keyword?: string;
+        /**
+         * @minLength 1
+         * @maxLength 500
+         */
+        category?: string;
+        duration?: "short" | "medium" | "long";
+        sortBy?: "recent" | "title";
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListContentMarketplaceListingsResponse, any>({
+        path: `/api/content-marketplace/listings`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns one published content marketplace listing, with the tenant's copy of it, if any.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceListing
+     * @summary Get a content marketplace course
+     * @request GET:/api/content-marketplace/listings/{listingId}
+     */
+    contentMarketplaceControllerGetContentMarketplaceListing: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetContentMarketplaceListingResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Streams the listing's thumbnail image.
+     *
+     * @name ContentMarketplaceControllerStreamContentMarketplaceThumbnail
+     * @summary Get a content marketplace course thumbnail
+     * @request GET:/api/content-marketplace/listings/{listingId}/thumbnail
+     */
+    contentMarketplaceControllerStreamContentMarketplaceThumbnail: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/content-marketplace/listings/${listingId}/thumbnail`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Queues a native archive import that downloads the listing's current version into the current tenant, authored by the caller. Poll GET /native-archives/jobs/:jobId for the result. Copying the same listing again updates the existing copy. Also requires the course create permission.
+     *
+     * @name ContentMarketplaceControllerCopyContentMarketplaceListing
+     * @summary Copy a content marketplace course into the tenant
+     * @request POST:/api/content-marketplace/listings/{listingId}/copy
+     */
+    contentMarketplaceControllerCopyContentMarketplaceListing: (
+      listingId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CopyContentMarketplaceListingResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}/copy`,
+        method: "POST",
         format: "json",
         ...params,
       }),

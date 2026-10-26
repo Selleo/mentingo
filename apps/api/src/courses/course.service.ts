@@ -411,20 +411,27 @@ export class CourseService {
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
     const data = await paginatedQuery;
+    const trailerUrls = await this.getCourseTrailerUrls(data.map((item) => item.id));
 
     const dataWithS3SignedUrls = await Promise.all(
       data.map(async (item) => {
-        if (!item.thumbnailUrl) return item;
+        const trailerUrl = trailerUrls[item.id] ?? null;
+        if (!item.thumbnailUrl) return { ...item, trailerUrl };
 
         try {
           const signedUrl = await this.getSignedCourseThumbnailUrl(item.thumbnailUrl);
           const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
             item.authorAvatarUrl,
           );
-          return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
+          return {
+            ...item,
+            thumbnailUrl: signedUrl,
+            trailerUrl,
+            authorAvatarUrl: authorAvatarSignedUrl,
+          };
         } catch (error) {
           this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-          return item;
+          return { ...item, trailerUrl };
         }
       }),
     );

@@ -1,29 +1,53 @@
-import { Link } from "@remix-run/react";
+import { GraduationCap } from "lucide-react";
 
-import type { SearchResponse } from "~/api/generated-api";
+import { SegmentedRing } from "~/assets/svgs";
+
+import { GlobalSearchResultRow } from "./GlobalSearchResultRow";
+
+import type { GlobalSearchCourseNode } from "./globalSearchNodes";
+import type { GlobalSearchEntryProps } from "./GlobalSearchResultRow";
 
 export const CourseEntry = ({
   item,
   onSelect,
-}: {
-  item: SearchResponse["data"]["allCourses"][number];
-  onSelect: () => void;
-}) => {
+  typeLabel,
+  isActive,
+  showPassage,
+}: GlobalSearchEntryProps<GlobalSearchCourseNode>) => {
+  const courseChapterCount = item.courseChapterCount ?? 0;
+  const completedChapterCount = item.completedChapterCount ?? 0;
+
   return (
-    <Link
+    <GlobalSearchResultRow
       to={`/course/${item.id}`}
-      onClick={onSelect}
-      className="group focus:outline-none focus-visible:outline-none"
-    >
-      <li className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
-        <img
-          src={item?.thumbnailUrl ?? ""}
-          alt={item.title}
-          className="size-4 rounded-sm bg-[#D9D9D9]"
-        />
-        <span className="line-clamp-1 flex-1 body-sm-md">{item.title}</span>
-        <span className="details-md ps-3 text-neutral-600">{item.category}</span>
-      </li>
-    </Link>
+      onSelect={onSelect}
+      leading={
+        item.thumbnailUrl ? (
+          <img src={item.thumbnailUrl} alt="" className="size-full object-cover" />
+        ) : (
+          <GraduationCap className="size-4" aria-hidden />
+        )
+      }
+      title={item.title}
+      typeLabel={typeLabel}
+      meta={
+        completedChapterCount > 0 ? (
+          <>
+            <SegmentedRing
+              segments={courseChapterCount}
+              completed={completedChapterCount}
+              size={12}
+            />
+            {`${completedChapterCount}/${courseChapterCount}`}
+          </>
+        ) : (
+          item.category
+        )
+      }
+      isActive={isActive}
+      matchedAttachmentFileName={item.matchedAttachmentFileName}
+      matchedPassage={item.matchedPassage}
+      showPassage={showPassage}
+    />
   );
 };

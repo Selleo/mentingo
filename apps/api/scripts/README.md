@@ -32,3 +32,19 @@ are repaired when one of the expected sizes is missing.
 ```sh
 npx tsx ./scripts/migrateImageVariants.ts
 ```
+
+# Content Marketplace Mock
+
+Runs a local fake of the content marketplace plugin and connects a local tenant to it, so the
+marketplace UI can be tested without a real plugin. It serves fixture listings with generated
+thumbnails and supports search, category, duration, sort and pagination.
+
+> **Note:** Development only. The tenant connection is written straight into the `secrets` table
+> using `MASTER_KEY` from `.env`. Copying a listing needs a real course export: pass
+> `--archive=<path>`; without it copies fail with a missing archive.
+
+```sh
+pnpm content-marketplace:mock -- --tenant=localhost:5173 --port=4010 --archive=./course-export.zip
+```
+
+`--tenant` is the tenant host (defaults to the oldest tenant) and `--port` defaults to `4010`.

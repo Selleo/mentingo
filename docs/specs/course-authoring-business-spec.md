@@ -103,9 +103,9 @@ When an author asks to add a chapter to an existing course, the assistant treats
 
 Voice input inserts a transcript into the editable request without submitting it. Authors can stop recording to keep the transcript or cancel the current recording while preserving their typed text. The text field grows to four lines before scrolling, keeping longer instructions readable without taking over the conversation.
 
-While an outline is being streamed or has been accepted for review, the authoring conversation keeps the draft available but does not replace Curriculum automatically. For a large accepted outline, Mentingo's connected AI service refines the lesson and source plan in bounded groups, then checks the complete plan before lesson writing begins; the author still approves the outline once and sees normal task progress. Review mode replaces the curriculum page with the proposed curriculum marked in place: new items are green and labelled **New**, edited items **Edited**, moved items **Moved** with their origin, and removed chapters and lessons stay visible, struck through, at their original position. Collapsed chapters summarize their changes and a **Changes only** switch hides unchanged rows. A flat sticky toolbar shows change counts, "change N of M" navigation (J/K), and one **Apply changes** action. All pending changes start included; the author can exclude or restore a change. A separate Request changes form accepts one instruction for the whole draft and sends it as a new conversation turn; the earlier iteration becomes read-only while the revision runs. Selecting a change shows the rationale and a before/after comparison without a second summary card above it. Quiz questions can expand for inspection, including visible fill-in-the-blank placements and answers, but their options cannot be added, removed, or reordered in read-only review. AI Mentor lessons, new or edited, use the editor's own AI Mentor form in the same read-only way, filled with the proposed name, scenario, voice, Mentor configuration and assessment; the configuration and assessment open in their usual dialogs for viewing only, without save, AI assistance, file upload, templates or the test button. Remaining educational concerns appear in a compact inline disclosure and require no acknowledgement. Excluding a change also excludes changes that depend on it; restoring it also restores prerequisites. Changes to lessons with existing assessment attempts still require the separate assessment-impact acknowledgement. Apply sends the selected verdicts in one fenced review command and starts one native course application. Entering or leaving review mode never mutates canonical query data or discards the draft. After Core confirms application, the workspace refreshes the curriculum queries, localized authoring context, and durable session before reporting the result. An automatic application failure or synchronization delay offers a retry; a conflict directs the author to regenerate. Neither state reports the draft as applied.
+During drafting, the authoring conversation shows the current iteration’s live work and progress. It does not show interim lesson or chapter-design preview cards or “Preview in curriculum” actions. Once a proposal is ready, authors use the final **Review outline** or **Review changes** action to inspect it in Curriculum. For a large accepted outline, Mentingo's connected AI service refines the lesson and source plan in bounded groups, then checks the complete plan before lesson writing begins; the author still approves the outline once and sees normal task progress. Review mode replaces the curriculum page with the proposed curriculum marked in place: new items are green and labelled **New**, edited items **Edited**, moved items **Moved** with their origin, and removed chapters and lessons stay visible, struck through, at their original position. Collapsed chapters summarize their changes and a **Changes only** switch hides unchanged rows. A flat sticky toolbar shows change counts, "change N of M" navigation (J/K), and one **Apply changes** action. All pending changes start included; the author can exclude or restore a change. A separate Request changes form accepts one instruction for the whole draft and sends it as a new conversation turn; the earlier iteration becomes read-only while the revision runs. Selecting a change shows the rationale and a before/after comparison without a second summary card above it. Quiz questions can expand for inspection, including visible fill-in-the-blank placements and answers, but their options cannot be added, removed, or reordered in read-only review. AI Mentor lessons, new or edited, use the editor's own AI Mentor form in the same read-only way, filled with the proposed name, scenario, voice, Mentor configuration and assessment; the configuration and assessment open in their usual dialogs for viewing only, without save, AI assistance, file upload, templates or the test button. Remaining educational concerns appear in a compact inline disclosure and require no acknowledgement. Excluding a change also excludes changes that depend on it; restoring it also restores prerequisites. Changes to lessons with existing assessment attempts still require the separate assessment-impact acknowledgement. Apply sends the selected verdicts in one fenced review command and starts one native course application. Entering or leaving review mode never mutates canonical query data or discards the draft. After Core confirms application, the workspace refreshes the curriculum queries, localized authoring context, and durable session before reporting the result. An automatic application failure or synchronization delay offers a retry; a conflict directs the author to regenerate. Neither state reports the draft as applied.
 
-Durable socket events advance only in sequence. A duplicate is ignored; contiguous events update the local canonical turn projection without requesting a full snapshot for every event. Review-creating events also carry the bounded durable proposal or question record required by the chat projection, so the review card appears immediately in its assistant turn. A gap or server resync signal starts one coordinated recovery operation, refreshes the authorized snapshot with bounded `0/500/1000/2000 ms` backoff, and rejoins from the recovered cursor. If a queued or running turn/task remains active while the socket is silent, the workspace performs one durable snapshot reconciliation after five seconds and rejoins from that snapshot; if work is still active, later silence checks back off to 10, 20 and 30 seconds. The watchdog rearms only while canonical work remains active and stops when it is terminal or idle, while any genuine socket event resets the delay to five seconds; the immediate snapshot emitted by the recovery rejoin preserves the current backoff. Permission revocation is terminal for that editor, so cached content is not kept visible after access is lost. The authoring chat uses the existing `@ai-sdk/react` lifecycle as its single optimistic/transcript owner, while its feature transport maps the durable command receipt and ordered socket events into assistant text, phases and tool progress. Each request retains its durable identity, while its text, tool activity, questions, plans and proposal artifacts appear in event order across the conversation, including after reload. A preview stays linked to its owning part, and a later result from an earlier request appears below intervening messages. The durable `turns` snapshot uses `firstSequence` and `updatedSequence` as ordering and update authority, so a shorter final answer replaces an older partial without creating a second response. Proposal decisions use their revision; selected pending proposals are accepted by one fenced review command before native application. Missing operation dependencies block the apply action. Core performs application asynchronously and the workspace polls its receipt until it is applied, conflicted or failed. Only after an applied status is confirmed does the workspace invalidate and refetch course and lesson query families so new curriculum appears without a manual refresh.
+Durable socket events advance only in sequence. A duplicate is ignored; contiguous events update the local canonical turn projection without requesting a full snapshot for every event. Review-creating events also carry the bounded durable proposal or question record required by the chat projection, so the review card appears immediately in its assistant turn. A gap or server resync signal starts one coordinated recovery operation, refreshes the authorized snapshot with bounded `0/500/1000/2000 ms` backoff, and rejoins from the recovered cursor. If a queued or running turn/task remains active while the socket is silent, the workspace performs one durable snapshot reconciliation after five seconds and rejoins from that snapshot; if work is still active, later silence checks back off to 10, 20 and 30 seconds. The watchdog rearms only while canonical work remains active and stops when it is terminal or idle, while any genuine socket event resets the delay to five seconds; the immediate snapshot emitted by the recovery rejoin preserves the current backoff. Permission revocation is terminal for that editor, so cached content is not kept visible after access is lost. The authoring chat uses the existing `@ai-sdk/react` lifecycle as its single optimistic/transcript owner, while its feature transport maps the durable command receipt and ordered socket events into assistant text, phases and tool progress. Each request retains its durable identity, while its text, tool activity, questions, plans and proposal artifacts appear in event order across the conversation, including after reload. A ready proposal stays linked to its owning part, and a later result from an earlier request appears below intervening messages. The durable `turns` snapshot uses `firstSequence` and `updatedSequence` as ordering and update authority, so a shorter final answer replaces an older partial without creating a second response. Proposal decisions use their revision; selected pending proposals are accepted by one fenced review command before native application. Missing operation dependencies block the apply action. Core performs application asynchronously and the workspace polls its receipt until it is applied, conflicted or failed. Only after an applied status is confirmed does the workspace invalidate and refetch course and lesson query families so new curriculum appears without a manual refresh.
 
 Task lifecycle events also carry safe task diagnostics and result identifiers. A retry reuses the failed task and clears its earlier error as soon as it is queued or running; a later success replaces the failed state in the open chat. The browser localizes these stable diagnostic codes and never receives worker exception text or tracebacks.
 
@@ -167,7 +167,7 @@ Research and uploaded document passages are stored in the authoring session, iso
 
 Detailed planning maps each lesson's objectives and Bloom level to practice, assessment criteria, evidence and explicit gaps. Writers receive that lesson map and can retrieve relevant passages or research a narrow missing fact when web access is enabled. The approved source permissions remain part of the task contract. Clearly labelled fictional exercises remain separate from the evidence supporting factual claims. Creator warnings do not become instructions asking learners to verify the course's own content.
 
-Once all lesson drafts exist, a course-wide review checks actual revision-pinned bodies for progression, repetition and assessment alignment. It can dispatch one bounded repair round for still-reviewable drafts; accepted, rejected or changed revisions are not silently regenerated. The same live-work view shows research, writing and course review using localized activity labels.
+Once all lesson drafts exist, a course-wide review checks actual revision-pinned bodies for clear errors and explicitly unmet requirements. Its findings remain advisory and do not automatically regenerate lessons. The same live-work view shows research, writing and course review using localized activity labels.
 
 The AI migration replaces the authoring JSON-vector index and preserves unrelated document knowledge. Upgrade, retrieval, downgrade and re-upgrade were verified in a disposable PostgreSQL database; no working database was migrated during implementation. Live-provider quality and authenticated end-to-end behavior remain unverified.
 
@@ -321,10 +321,85 @@ research within the existing budget before unresolved gaps are handed back.
 ### Iterative review policy
 
 Scoped edits return after structural checks without an extra educational review model pass or
-implicit web search. Larger drafts and assembled courses expose quality findings as advice, without
-automatically replacing proposals or generating lessons again. Authors request revisions explicitly.
-Task completion reports execution success; educational quality findings remain a separate review
-signal. Provider response time remains variable.
+implicit web search. Larger drafts receive one conservative educational review for clear factual
+contradictions, wrong answers, unanswerable assessments, scope violations, and explicitly unmet
+author requirements. Additional examples, practice, explanation, stylistic polish and other small
+improvements do not justify a rewrite. Automatic correction requires a structured finding identifying
+the target, supporting evidence, consequential impact and bounded correction; free-form advice alone
+cannot start one. A draft can receive at most one such correction using already permitted evidence.
+All thinking presets use the same reviewer rubric, model reasoning effort and correction budget,
+with no second advisory pass after repair. The thinking control still applies to generation.
+Recovery of a material factual-verification gap still receives fresh review. Structural, source,
+language and target-scope checks run on every draft before it becomes reviewable. Remaining concerns
+stay visible, and applying course changes remains a separate author decision. Task completion reports
+execution success; educational quality findings remain a separate signal. Provider response time
+remains variable; no duration estimate is shown for the thinking presets.
+
+### Following background work
+
+Course editors enter the workflow through **Create with AI** (**Twórz z AI** in Polish) while
+the course has no lessons, or **Edit with AI** (**Edytuj z AI**) once it contains lessons.
+Live work has a progress bar that remains visible when its activity details are collapsed. Known
+chapter or lesson totals supply a completion count; work without a known total shows an indeterminate bar.
+Counts describe the current stage, rather than an estimate of the entire request's remaining time.
+
+Initial outline planning reports drafting, checking, refinement, and preparation for review.
+The existing bar advances after the draft and its checks finish, while streamed chapter counts
+and the current pass update its status text. Chapter counts describe a provisional draft;
+they do not mean the chapters are approved or written. Additional refinement passes keep the
+draft milestone visible, and the bar never reaches full completion before the task is ready.
+
+While the author remains signed in with Mentingo open, requests observed running can notify them
+when work finishes, fails or needs an answer, including after the drawer closes or another session
+is selected. The session currently visible in the drawer does not
+show background toasts; opening that session dismisses any existing notice. Notifications use
+the shared Mentingo toast with a status message that distinguishes a question needing an answer,
+an outline awaiting review, course changes awaiting review, a ready response, and a failure.
+Pending questions and proposals are checked for the owning request, including when its turn is marked complete.
+A compact **View** action opens
+the course editor's AI drawer with the owning conversation selected. Saved authoring links redirect there too.
+Opening old completed conversations
+does not replay completion notifications. These are in-app notices, not email or closed-browser
+push notifications.
+
+Background refresh results are checked against the active signed-in author before they
+enter the shared session cache. Signing out, changing accounts or leaving the app's
+notification provider stops tracking and dismisses its notices. Opening another saved
+conversation resets session-specific review and application state.
+
+The **Deep research** option (**Pogłębione wyszukiwanie źródeł** in Polish) explains that it
+investigates permitted sources more thoroughly. Enabling it does not itself enable web access or
+change source permissions; the separate web-search option explains its access to public websites.
+
+### Recovering partial research
+
+Research activity retains the exact search queries and readable source links. Failed attempts
+show their recorded retrieval limitations beside the queries, including unavailable pages;
+these attempted URLs are not presented as verified source citations. Collecting saved evidence
+does not by itself count as a completed web search.
+
+A temporary analysis-provider outage leaves successful topic findings and fetched source pages
+available while identifying topics whose assessment is incomplete. Other topic assessments can
+finish independently. Temporary embedding outages can use the existing bounded text retrieval over
+the same permitted pages. Neither recovery treats an unassessed topic as supported or changes the
+author's source permissions.
+
+Unrecoverable research failures retain their actual failure category and recovery action instead
+of becoming a successful assistant reply that claims search or page retrieval failed. Provider
+connection problems can offer retry; configuration and service defects retain service guidance.
+
+Focused deterministic tests cover progress states, notification transitions and deduplication,
+partial research recovery and review-call budgets. Live provider latency, authenticated browser
+behavior and delivery after the browser closes have not been verified by these checks.
+
+Pre-PR validation on 2026-10-20: `pnpm --filter web test` passes 1,349 tests with 12
+existing skips under Node 22.15.0. Full web `lint-tsc` and touched-file Prettier checks
+pass; lint retains one existing warning in an unchanged test. The AI API unit suite
+passes all 2,337 tests; Python lint, formatting and compilation pass. Independent review
+verified the auth cleanup and route-remount fixes with 61 focused tests. Changed Python files retain their existing
+BasedPyright baseline without introducing diagnostics. No authenticated E2E, live-provider
+benchmark or deployment was run. API contracts and schemas are unchanged, so client generation
+and migrations are not required.
 
 ### Actionable generation recovery
 

@@ -80,7 +80,7 @@ function repository() {
 describe("NativeArchiveLiveTrainingService", () => {
   it("passes complete localized maps to the import repository", async () => {
     const archiveRepository = repository();
-    const service = new NativeArchiveLiveTrainingService(archiveRepository as never);
+    const service = new NativeArchiveLiveTrainingService(archiveRepository as never, {} as never);
 
     await service.restoreLiveTrainingLessons(
       snapshot({ en: "Workshop", pl: "Warsztat" }),
@@ -117,7 +117,7 @@ describe("NativeArchiveLiveTrainingService", () => {
       organizerUserId: "attacker-organizer",
       deletedAt: "2026-01-01T00:00:00.000Z",
     });
-    const service = new NativeArchiveLiveTrainingService(archiveRepository as never);
+    const service = new NativeArchiveLiveTrainingService(archiveRepository as never, {} as never);
 
     await service.restoreLiveTrainingLessons(
       sourceSnapshot,
@@ -140,7 +140,7 @@ describe("NativeArchiveLiveTrainingService", () => {
 
   it("rejects invalid localized event titles before creating the event", async () => {
     const archiveRepository = repository();
-    const service = new NativeArchiveLiveTrainingService(archiveRepository as never);
+    const service = new NativeArchiveLiveTrainingService(archiveRepository as never, {} as never);
 
     await expect(
       service.restoreLiveTrainingLessons(
@@ -162,7 +162,7 @@ describe("NativeArchiveLiveTrainingService", () => {
       ...sourceSnapshot.liveTrainingLessons[0],
       language: "xx",
     });
-    const service = new NativeArchiveLiveTrainingService(archiveRepository as never);
+    const service = new NativeArchiveLiveTrainingService(archiveRepository as never, {} as never);
 
     await expect(
       service.restoreLiveTrainingLessons(

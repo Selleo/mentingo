@@ -65,6 +65,7 @@ export function createNativeArchiveUploadE2EDoubles() {
   };
 
   const jobService = {
+    registerSourceArchiveDownloader: jest.fn(),
     enqueueArchiveImportFromFile: jest.fn(async (file: Express.Multer.File, actor: Actor) => {
       const key = `${actor.tenantId}/native-archive/uploads/multipart-${jobs.size + 1}.zip`;
       try {

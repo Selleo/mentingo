@@ -3,6 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { isSemanticSearchBackgroundIndexingEnabled } from "./semantic-search-index.config";
 import { SEMANTIC_SEARCH_BATCH_SIZE } from "./semantic-search-index.constants";
 import { SemanticSearchIndexQueueService } from "./semantic-search-index.queue.service";
 
@@ -20,6 +21,7 @@ export class SemanticSearchIndexCron {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async reconcile() {
+    if (!isSemanticSearchBackgroundIndexingEnabled()) return;
     if (this.running) return;
     this.running = true;
     try {

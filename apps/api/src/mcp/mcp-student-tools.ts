@@ -1,8 +1,9 @@
 import { NotFoundException } from "@nestjs/common";
-import { FEATURES, PERMISSIONS, sanitizeRichTextSummary, type PermissionKey } from "@repo/shared";
+import { FEATURES, PERMISSIONS, type PermissionKey } from "@repo/shared";
 
 import { COURSE_ENROLLMENT_SCOPES } from "src/courses/schemas/courseQuery";
 
+import { boundedMcpStudentText } from "./mcp-student-text";
 import * as Schemas from "./mcp-student-tool.schemas";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 
@@ -14,7 +15,7 @@ import type {
 import type { McpToolRunner } from "./mcp-tool-runner.types";
 import type { McpServer } from "@modelcontextprotocol/server";
 
-export const MCP_STUDENT_MAX_TEXT_LENGTH = 16000;
+export { MCP_STUDENT_MAX_TEXT_LENGTH } from "./mcp-student-text";
 export const MCP_STUDENT_MAX_SUMMARY_LENGTH = 2000;
 const MCP_STUDENT_MAX_TITLE_LENGTH = 500;
 export const MCP_STUDENT_TOOL_PERMISSIONS = {
@@ -36,18 +37,6 @@ export const MCP_STUDENT_TOOL_FEATURES = {
   list_qa_entries: FEATURES.QA,
   get_qa_entry: FEATURES.QA,
 } as const;
-
-/** Only authored text: discard embedded resource URLs, attributes and active HTML. */
-function boundedText(value: string | null | undefined, maxLength = MCP_STUDENT_MAX_TEXT_LENGTH) {
-  const text = sanitizeRichTextSummary(value ?? "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return {
-    text: text.slice(0, maxLength),
-    truncated: text.length > maxLength,
-  };
-}
 
 function pageRows<T extends { title: string | null }>(rows: T[], input: McpStudentPageQuery) {
   const page = input.page ?? 1;
@@ -82,9 +71,9 @@ export function registerMcpStudentTools(
     `${boundResource.origin}/qa?${new URLSearchParams({ qaId: id }).toString()}`;
   const courseMetadata = (course: McpStudentCourseMetadata) => ({
     id: course.id,
-    title: boundedText(course.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
-    description: boundedText(course.description, MCP_STUDENT_MAX_SUMMARY_LENGTH).text,
-    category: boundedText(course.category, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+    title: boundedMcpStudentText(course.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+    description: boundedMcpStudentText(course.description, MCP_STUDENT_MAX_SUMMARY_LENGTH).text,
+    category: boundedMcpStudentText(course.category, MCP_STUDENT_MAX_TITLE_LENGTH).text,
     enrolled: course.enrolled,
     courseChapterCount: course.courseChapterCount,
     priceInCents: course.priceInCents,
@@ -153,7 +142,7 @@ export function registerMcpStudentTools(
         return {
           data: result.data.map((row) => ({
             id: row.id,
-            title: boundedText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            title: boundedMcpStudentText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
             url: sourceUrl("articles", row.id),
           })),
           pagination: result.pagination,
@@ -173,11 +162,11 @@ export function registerMcpStudentTools(
       run(MCP_STUDENT_TOOL_PERMISSIONS.get_article, async (user) => {
         await services.assertFeatureEnabled(FEATURES.ARTICLES);
         const article = await services.articles.getArticle(id, language, false, user);
-        const content = boundedText(article.plainContent);
+        const content = boundedMcpStudentText(article.plainContent);
         return {
           article: {
             id: article.id,
-            title: boundedText(article.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            title: boundedMcpStudentText(article.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
             content: content.text,
             contentTruncated: content.truncated,
             url: sourceUrl("articles", article.id),
@@ -201,8 +190,8 @@ export function registerMcpStudentTools(
         return {
           data: result.data.map((row) => ({
             id: row.id,
-            title: boundedText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
-            summary: boundedText(row.summary, MCP_STUDENT_MAX_SUMMARY_LENGTH).text,
+            title: boundedMcpStudentText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            summary: boundedMcpStudentText(row.summary, MCP_STUDENT_MAX_SUMMARY_LENGTH).text,
             url: sourceUrl("news", row.id),
           })),
           pagination: result.pagination,
@@ -222,11 +211,11 @@ export function registerMcpStudentTools(
       run(MCP_STUDENT_TOOL_PERMISSIONS.get_news, async (user) => {
         await services.assertFeatureEnabled(FEATURES.NEWS);
         const news = await services.news.getNews(id, language, user);
-        const content = boundedText(news.plainContent);
+        const content = boundedMcpStudentText(news.plainContent);
         return {
           news: {
             id: news.id,
-            title: boundedText(news.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            title: boundedMcpStudentText(news.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
             content: content.text,
             contentTruncated: content.truncated,
             url: sourceUrl("news", news.id),
@@ -254,7 +243,7 @@ export function registerMcpStudentTools(
         return {
           data: result.data.map((row) => ({
             id: row.id,
-            title: boundedText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            title: boundedMcpStudentText(row.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
             url: qaUrl(row.id),
           })),
           pagination: result.pagination,
@@ -276,11 +265,11 @@ export function registerMcpStudentTools(
         const qa = await services.qa.getQA(id, language, user);
         if (!qa || !qa.availableLocales.includes(language))
           throw new NotFoundException("qaView.toast.notFound");
-        const content = boundedText(qa.description);
+        const content = boundedMcpStudentText(qa.description);
         return {
           qa: {
             id: qa.id,
-            title: boundedText(qa.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
+            title: boundedMcpStudentText(qa.title, MCP_STUDENT_MAX_TITLE_LENGTH).text,
             answer: content.text,
             contentTruncated: content.truncated,
             url: qaUrl(qa.id),

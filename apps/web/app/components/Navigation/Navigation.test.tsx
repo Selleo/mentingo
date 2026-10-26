@@ -29,9 +29,15 @@ vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
   useLanguageStore: () => "en",
 }));
 vi.mock("~/components/Icon", () => ({ Icon: () => null }));
-vi.mock("./NavigationHeader", () => ({ NavigationHeader: () => null }));
+vi.mock("./NavigationHeader", () => ({
+  // Mirrors the real header: it renders its own search below the 2xl breakpoint.
+  NavigationHeader: ({ is2xlBreakpoint }: { is2xlBreakpoint: boolean }) =>
+    is2xlBreakpoint ? null : <div data-testid="global-search" />,
+}));
 vi.mock("./NavigationFooter", () => ({ NavigationFooter: () => null }));
-vi.mock("./NavigationGlobalSearchWrapper", () => ({ NavigationGlobalSearchWrapper: () => null }));
+vi.mock("./NavigationGlobalSearchWrapper", () => ({
+  NavigationGlobalSearchWrapper: () => <div data-testid="global-search" />,
+}));
 vi.mock("./NavigationMenu", () => ({
   NavigationMenu: ({ menuItems }: { menuItems: LeafMenuItem[] }) => (
     <>
@@ -100,5 +106,18 @@ describe("Phishing navigation availability", () => {
 
     expect(usePhishingConfiguration).toHaveBeenCalledWith(false);
     expect(screen.queryByRole("link", { name: "phishing.title" })).not.toBeInTheDocument();
+  });
+});
+
+describe("global search mounting", () => {
+  it("mounts a single search below the 2xl breakpoint so ⌘K opens one dialog", () => {
+    vi.mocked(usePhishingConfiguration).mockReturnValue({
+      data: { enabled: false },
+      isError: false,
+    } as ReturnType<typeof usePhishingConfiguration>);
+
+    render(<Navigation />);
+
+    expect(screen.getAllByTestId("global-search")).toHaveLength(1);
   });
 });

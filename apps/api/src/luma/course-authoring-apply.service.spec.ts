@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
 import { FormatRegistry } from "@sinclair/typebox";
 import { load as loadHtml } from "cheerio";
 import { validate } from "uuid";
@@ -705,6 +706,61 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       undefined,
     );
   });
+
+  it.each(
+    [0, 1, 10].flatMap((firstPosition) =>
+      (["lesson.create", "lesson.update"] as const).map((type) => ({ firstPosition, type })),
+    ),
+  )(
+    "normalizes $type quiz positions starting at $firstPosition to native one-based numbering",
+    async ({ firstPosition, type }) => {
+      const test = setup();
+      test.input.acknowledgeAssessmentChanges = true;
+      const fixture = JSON.parse(
+        readFileSync(
+          resolve(__dirname, "../../../../docs/contracts/course-authoring/quiz-operation.json"),
+          "utf8",
+        ),
+      ) as AuthoringOperation;
+      if (fixture.type !== "lesson.update" || fixture.payload.lessonType !== "quiz")
+        throw new Error("Quiz fixture expected");
+      const expectedQuestions = fixture.payload.questions.map((question, index) => ({
+        ...question,
+        title: `Author title ${index}`,
+        displayOrder: index + 1,
+        photoS3Key: null,
+      }));
+      const incomingQuestions = expectedQuestions
+        .map((question, index) => ({ ...question, displayOrder: firstPosition + index }))
+        .reverse();
+      test.input.operations = [
+        {
+          ...fixture,
+          type,
+          operationId,
+          targetId: type === "lesson.update" ? lessonId : operationId,
+          chapterId,
+          displayOrder: 0,
+          baselineHash: type === "lesson.update" ? "b".repeat(64) : null,
+          payload: { ...fixture.payload, questions: incomingQuestions },
+        },
+      ];
+
+      await test.service.applyPreparedExport(test.input, actor);
+
+      expect(expectedQuestions.map((question) => question.questionType).sort()).toEqual(
+        Object.values(ASSESSMENT_QUESTION_TYPES).sort(),
+      );
+      expect(test.saveQuizFromAuthoring).toHaveBeenCalledWith(
+        expect.objectContaining({ questions: expectedQuestions }),
+        actor,
+        type === "lesson.update" ? lessonId : undefined,
+      );
+      expect(incomingQuestions.map((question) => question.displayOrder)).toEqual(
+        expectedQuestions.map((_, index) => firstPosition + index).reverse(),
+      );
+    },
+  );
 
   it("creates chapters in the operation locale", async () => {
     const test = setup();

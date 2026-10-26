@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
   COURSE_DUPLICATION_SOCKET,
   COURSE_DUPLICATION_STATUS,
@@ -14,7 +14,10 @@ import { CourseTransferService } from "src/course-transfer/services/course-trans
 import { COURSE_DUPLICATION_COPY_SUFFIX } from "src/courses/course-duplication.constants";
 import { CourseDuplicationQueueService } from "src/courses/course-duplication.queue.service";
 import { CourseDuplicationRepository } from "src/courses/course-duplication.repository";
+import { CourseDuplicatedEvent } from "src/events";
 import { SearchIndexService } from "src/global-search/search-index.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { WsGateway } from "src/websocket";
 
 import type { UUIDType } from "src/common";
@@ -25,12 +28,16 @@ import type { CourseDuplicationJobData } from "src/queue";
 
 @Injectable()
 export class CourseDuplicationService {
+  private readonly logger = new Logger(CourseDuplicationService.name);
+
   constructor(
     private readonly courseDuplicationRepository: CourseDuplicationRepository,
     private readonly courseDuplicationQueueService: CourseDuplicationQueueService,
     private readonly courseTransferService: CourseTransferService,
     private readonly searchIndexService: SearchIndexService,
     private readonly wsGateway: WsGateway,
+    private readonly outboxPublisher: OutboxPublisher,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
   async duplicateCourse(
@@ -76,11 +83,37 @@ export class CourseDuplicationService {
       });
 
       await this.searchIndexService.refreshCourse(data.targetCourseId);
-
-      this.publishStatus(jobId, data, COURSE_DUPLICATION_STATUS.COMPLETED);
     } catch (error) {
       this.publishStatus(jobId, data, COURSE_DUPLICATION_STATUS.FAILED);
       throw error;
+    }
+
+    this.publishStatus(jobId, data, COURSE_DUPLICATION_STATUS.COMPLETED);
+    await this.recordCourseDuplicated(data);
+  }
+
+  /**
+   * The copy is committed by course transfer, so the event cannot share its transaction.
+   * A delivery failure is logged instead of failing a duplication that already exists.
+   */
+  private async recordCourseDuplicated(data: CourseDuplicationJobData): Promise<void> {
+    const courseDuplicatedEvent = new CourseDuplicatedEvent(
+      data.tenantId,
+      data.sourceCourseId,
+      data.targetCourseId,
+      data.actor.userId,
+      new Date().toISOString(),
+    );
+
+    try {
+      await this.tenantDbRunnerService.transactionWithHandle((transaction) =>
+        this.outboxPublisher.publishDurable(courseDuplicatedEvent, transaction),
+      );
+    } catch (error) {
+      this.logger.error(
+        `[tenant=${data.tenantId}] Failed to record duplication of course ${data.sourceCourseId} into ${data.targetCourseId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
     }
   }
 

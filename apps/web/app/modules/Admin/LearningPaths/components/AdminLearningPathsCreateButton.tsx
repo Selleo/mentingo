@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../../e2e/data/learning-paths/handles";
 import { useAdminLearningPathsPageContext } from "../context/AdminLearningPathsPageContext";
 
 export function AdminLearningPathsCreateButton() {
@@ -10,10 +11,13 @@ export function AdminLearningPathsCreateButton() {
   return (
     <button
       type="button"
-      className="rounded-xl border border-dashed border-primary-200 bg-primary-50/30 py-5 text-center text-sm font-semibold text-primary-700 transition hover:bg-primary-50"
+      data-testid={LEARNING_PATHS_PAGE_HANDLES.CREATE_TILE}
+      className="flex min-h-[200px] w-full flex-1 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-primary-200 bg-white p-6 text-center text-sm font-semibold text-primary-700 transition hover:border-primary-400 hover:bg-primary-50"
       onClick={openCreateCard}
     >
-      <Plus className="mr-2 inline size-4" />
+      <span className="grid size-12 place-items-center rounded-full bg-primary-50">
+        <Plus className="size-5" />
+      </span>
       {t("adminLearningPathsView.buttons.create")}
     </button>
   );

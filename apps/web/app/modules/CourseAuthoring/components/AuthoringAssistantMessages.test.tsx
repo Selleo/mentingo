@@ -18,7 +18,6 @@ import type {
   AuthoringRecord,
   AuthoringTurn,
   AuthoringTurnPart,
-  PreviewView,
   QuestionView,
   SourceView,
 } from "../courseAuthoring.types";
@@ -329,126 +328,84 @@ describe("AuthoringAssistantMessages", () => {
     expect(screen.getByText("Here is the final chapter outline.")).toBeInTheDocument();
   });
 
-  it("keeps a preview in its owning turn when later messages arrive", () => {
-    const preview: PreviewView = {
-      id: "preview-1",
-      taskId: "task-1",
-      requestId: "request-1",
-      revision: 1,
-      status: "running",
-      title: "Safety lesson",
-      lessonTitle: null,
-      contentText: "Draft content",
-      outline: [],
-    };
-    const messages: AuthoringChatMessage[] = [
-      {
-        id: "request-1",
-        role: "user",
-        parts: [{ type: "text", text: "Draft safety lesson" }],
-        metadata: { requestId: "request-1" },
-      },
-      {
-        id: "request-1-assistant",
-        role: "assistant",
-        parts: [
-          authoringPart(
-            "request-1",
-            "request-1-assistant",
+  it.each([
+    { lessonTitle: "Check Rust foundations", contentHtml: "" },
+    { lessonTitle: "Review Rust skills", contentHtml: "<p>Draft text</p>" },
+    { title: "Rust course", outline: [{ title: "Rust basics", lessons: [] }] },
+  ])(
+    "omits interim preview cards while preserving current progress and final review: %j",
+    async (payload) => {
+      // Durable snapshots can still contain previews, including older reconnect records.
+      const projection = projectWorkspaceRecords([
+        {
+          id: "preview-record",
+          kind: "preview",
+          payload: {
+            provisional: true,
+            taskId: "generation-task",
+            requestId: "current-request",
+            revision: 1,
+            ...payload,
+          },
+        },
+      ]);
+      expect(projection.previews).toHaveLength(1);
+      const onReview = vi.fn();
+      renderWith().render(
+        <AuthoringAssistantMessages
+          {...projection}
+          chatMessages={[
             {
-              partId: "text-1",
-              partKind: "text",
-              status: "completed",
-              text: "The draft is underway.",
+              id: "earlier-request",
+              role: "user",
+              metadata: { requestId: "earlier-request", firstSequence: 1 },
+              parts: [{ type: "text", text: "Start a Rust course" }],
             },
-            2,
-          ),
-          authoringPart(
-            "request-1",
-            "request-1-assistant",
             {
-              partId: "tool-1",
-              partKind: "tool",
-              taskId: "task-1",
-              status: "streaming",
-              tool: {
-                toolCallId: "tool-1",
-                toolName: "lesson_generation",
-                display: "Generating lesson",
-                status: "started",
-                result: null,
-              },
+              id: "current-request",
+              role: "user",
+              metadata: { requestId: "current-request", firstSequence: 3 },
+              parts: [{ type: "text", text: "Add a foundations quiz" }],
             },
-            3,
-          ),
-          authoringPart(
-            "request-1",
-            "request-1-assistant",
+          ]}
+          pendingTasks={[
             {
-              partId: "text-1b",
-              partKind: "text",
-              taskId: "task-1",
-              status: "streaming",
-              text: "The lesson details are following.",
+              taskId: "generation-task",
+              requestId: "current-request",
+              phaseLabel: "Generating quiz",
             },
-            4,
-          ),
-        ],
-        metadata: { requestId: "request-1" },
-      },
-      {
-        id: "request-2",
-        role: "user",
-        parts: [{ type: "text", text: "Now add a quiz" }],
-        metadata: { requestId: "request-2" },
-      },
-      {
-        id: "request-2-assistant",
-        role: "assistant",
-        parts: [
-          authoringPart(
-            "request-2",
-            "request-2-assistant",
+          ]}
+          proposalGroups={[
             {
-              partId: "text-2",
-              partKind: "text",
-              status: "completed",
-              text: "The quiz is ready.",
+              requestId: "current-request",
+              taskId: "generation-task",
+              proposalIds: ["final-proposal"],
+              content: (
+                <button type="button" onClick={onReview}>
+                  Review changes
+                </button>
+              ),
             },
-            5,
-          ),
-        ],
-        metadata: { requestId: "request-2" },
-      },
-    ];
+          ]}
+        />,
+      );
 
-    const rendered = renderWith().render(
-      <AuthoringAssistantMessages chatMessages={messages} previews={[preview]} />,
-    );
-
-    const transcript = screen.getByTestId("course-authoring-assistant-messages");
-    expect(screen.getAllByRole("region", { name: "Live preview" })).toHaveLength(1);
-    expect(transcript.textContent?.indexOf("The draft is underway.")).toBeLessThan(
-      transcript.textContent?.indexOf("Safety lesson") ?? -1,
-    );
-    expect(transcript.textContent?.indexOf("Safety lesson")).toBeLessThan(
-      transcript.textContent?.indexOf("Now add a quiz") ?? -1,
-    );
-
-    rendered.rerender(
-      <AuthoringAssistantMessages
-        chatMessages={messages}
-        previews={[{ ...preview, revision: 2, title: "Updated safety lesson" }]}
-      />,
-    );
-
-    expect(screen.getAllByRole("region", { name: "Live preview" })).toHaveLength(1);
-    expect(screen.queryByText("Safety lesson", { exact: true })).toBeNull();
-    expect(screen.getByText("Updated safety lesson")).toBeInTheDocument();
-    expect(transcript.textContent?.indexOf("Updated safety lesson")).toBeLessThan(
-      transcript.textContent?.indexOf("Now add a quiz") ?? -1,
-    );
-  });
+      expect(screen.queryByRole("region", { name: "Live preview" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Preview in curriculum" }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Draft text")).not.toBeInTheDocument();
+      expect(screen.queryByText("Rust basics")).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent("Generating quiz");
+      const currentRequest = screen.getByTestId("course-authoring-request-current-request");
+      const progress = screen.getByRole("status");
+      expect(
+        currentRequest.compareDocumentPosition(progress) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      await userEvent.click(screen.getByRole("button", { name: "Review changes" }));
+      expect(onReview).toHaveBeenCalledOnce();
+    },
+  );
 
   it("keeps two durable request turns ordered while attaching delayed replies", () => {
     renderWith().render(
@@ -1198,7 +1155,7 @@ describe("AuthoringAssistantMessages", () => {
     );
 
     expect(screen.getByTestId("course-authoring-question-question-audience")).toHaveTextContent(
-      "Your answer: First-time managers",
+      "First-time managers",
     );
     expect(firstRequestIndex()).toBeLessThan(promptIndex());
     expect(promptIndex()).toBeLessThan(laterRequestIndex());
@@ -1208,7 +1165,6 @@ describe("AuthoringAssistantMessages", () => {
   });
 
   it("keeps the plan at its route message and places later progress after the reply", async () => {
-    const user = userEvent.setup();
     const question: QuestionView = {
       id: "course-title-question",
       taskId: "title-task",
@@ -1298,16 +1254,15 @@ describe("AuthoringAssistantMessages", () => {
     );
 
     const planToggle = screen.getByRole("button", { name: /^Plan/ });
-    expect(planToggle).toHaveAttribute("aria-expanded", "false");
+    expect(planToggle).toHaveAttribute("aria-expanded", "true");
     expect(planToggle).toHaveTextContent("2 steps");
-    expect(screen.queryByText("Confirm the title")).toBeNull();
-    await user.click(planToggle);
+    expect(screen.getByText("Confirm the title")).toBeVisible();
 
     const text = screen.getByTestId("course-authoring-assistant-messages").textContent ?? "";
     expect(text.indexOf("I can update the title.")).toBeLessThan(text.indexOf("Confirm the title"));
     expect(text.indexOf("Confirm the title")).toBeLessThan(text.indexOf(question.prompt));
-    expect(text.indexOf(question.prompt)).toBeLessThan(text.indexOf("Your answer"));
-    expect(text.indexOf("Your answer")).toBeLessThan(
+    expect(text.indexOf(question.prompt)).toBeLessThan(text.indexOf("Mentingo: Onboarding"));
+    expect(text.indexOf("Mentingo: Onboarding")).toBeLessThan(
       text.indexOf("I prepared a scoped edit for review."),
     );
     expect(text.indexOf("I prepared a scoped edit for review.")).toBeLessThan(
@@ -1426,7 +1381,8 @@ describe("AuthoringAssistantMessages", () => {
 
     const card = screen.getByTestId("course-authoring-question-question-clarification");
     expect(card).toHaveTextContent("Who is the course for?");
-    expect(card).toHaveTextContent(`Your answer: ${answer}`);
+    expect(card).toHaveTextContent(answer);
+    expect(card).not.toHaveTextContent("Your answer");
     expect(card.querySelector("form")).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "Your answer" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Answer" })).not.toBeInTheDocument();
@@ -1487,7 +1443,6 @@ describe("AuthoringAssistantMessages", () => {
 
     expect(screen.getByText("What is the audience?")).toBeVisible();
     expect(screen.getByText("Which teaching experience should the course assume?")).toBeVisible();
-    expect(screen.getByText("Your answer:")).toBeVisible();
     expect(screen.getByText("New teachers", { exact: true })).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Your answer" })).toHaveValue("");
     expect(onAnswerQuestion).toHaveBeenCalledWith(initialQuestion, "New teachers");
@@ -1573,6 +1528,68 @@ describe("AuthoringAssistantMessages", () => {
     expect(onAnswerQuestion).toHaveBeenCalledWith(first, "Support team");
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText(second.prompt)).toBeVisible();
+  });
+
+  it("answers the active pending question with letter shortcuts and Enter", async () => {
+    const user = userEvent.setup();
+    const onAnswerQuestion = vi.fn(async () => undefined);
+    const question: QuestionView = {
+      id: "shortcut-question",
+      taskId: "shortcut-task",
+      requestId: "request-shortcut",
+      revision: 1,
+      prompt: "Who is the course for?",
+      choices: ["New hires", "Managers", "Administrators"],
+      capability: null,
+      reason: null,
+      answer: null,
+      answered: false,
+    };
+
+    renderWith().render(
+      <AuthoringAssistantMessages
+        chatMessages={[]}
+        questionsByRequest={{ "request-shortcut": [question] }}
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    await user.keyboard("d");
+    const answer = screen.getByRole("textbox", { name: "Your answer" });
+    expect(answer).toHaveFocus();
+    await user.type(answer, "Team leads{Enter}");
+    expect(onAnswerQuestion).toHaveBeenCalledWith(question, "Team leads");
+    expect(await screen.findByText("Team leads", { exact: true })).toBeVisible();
+    await user.keyboard("b");
+    expect(onAnswerQuestion).toHaveBeenCalledTimes(1);
+  });
+
+  it("selects a suggestion with its letter shortcut", async () => {
+    const user = userEvent.setup();
+    const onAnswerQuestion = vi.fn(async () => undefined);
+    const question: QuestionView = {
+      id: "shortcut-choice",
+      taskId: "shortcut-choice-task",
+      requestId: "request-shortcut-choice",
+      revision: 1,
+      prompt: "How long should it be?",
+      choices: ["Short", "Medium", "Long"],
+      capability: null,
+      reason: null,
+      answer: null,
+      answered: false,
+    };
+
+    renderWith().render(
+      <AuthoringAssistantMessages
+        chatMessages={[]}
+        questionsByRequest={{ "request-shortcut-choice": [question] }}
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    await user.keyboard("b");
+    expect(onAnswerQuestion).toHaveBeenCalledWith(question, "Medium");
   });
 
   it("places a proposal at its server part position without adding another assistant header", () => {
@@ -1712,7 +1729,6 @@ describe("AuthoringAssistantMessages", () => {
   });
 
   it("orders the final response, current task activity and review chronologically", async () => {
-    const user = userEvent.setup();
     renderWith().render(
       <AuthoringAssistantMessages
         chatMessages={[
@@ -1793,8 +1809,6 @@ describe("AuthoringAssistantMessages", () => {
         ]}
       />,
     );
-
-    await user.click(screen.getByRole("button", { name: /^Plan/ }));
 
     const transcript = screen.getByTestId("course-authoring-assistant-messages").textContent ?? "";
     expect(transcript.indexOf("I will prepare it.")).toBeLessThan(transcript.indexOf("Plan steps"));
@@ -1933,7 +1947,7 @@ describe("AuthoringAssistantMessages", () => {
     expect(screen.getByRole("listitem")).toHaveTextContent("OWASP agent security guidance");
     expect(done).not.toHaveTextContent("succeeded");
     expect(screen.getByTestId("course-authoring-tool-tool-failed")).toHaveTextContent(
-      /Generating lesson\s*·\s*failed/,
+      /Generating lesson\s*failed/,
     );
   });
 

@@ -55,6 +55,7 @@ export const routes: (
           route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
           route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");
           route("phishing/:id/hall-of-shame", "modules/Phishing/PhishingHall.page.tsx");
+          route("content-marketplace", "modules/ContentMarketplace/ContentMarketplace.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");

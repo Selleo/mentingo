@@ -45,5 +45,6 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
     NativeArchiveTusService,
     NativeArchiveValidationService,
   ],
+  exports: [NativeArchiveJobService],
 })
 export class NativeArchiveModule {}

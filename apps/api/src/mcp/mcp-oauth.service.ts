@@ -16,6 +16,7 @@ import {
   isMcpScopeSet,
   isRequestableMcpScopeSet,
   parseMcpScopes,
+  normalizeMcpAuthorizationScopes,
   areMcpScopeSetsEqual,
 } from "./mcp-tool-scope";
 
@@ -155,7 +156,11 @@ export class McpOAuthService {
 
   async authorizationPage(req: Request, res: Response): Promise<void> {
     const query = this.stringParams(req.query);
-    const scope = req.query.scope === undefined ? MCP_SCOPES.ACCOUNT_ACCESS : query.scope;
+    const requestedScope = req.query.scope === undefined ? MCP_SCOPES.ACCOUNT_ACCESS : query.scope;
+    const scope =
+      typeof requestedScope === "string"
+        ? normalizeMcpAuthorizationScopes(parseMcpScopes(requestedScope)).join(" ")
+        : undefined;
     const resource = await this.resources.fromRequest(req);
     const client = query.client_id ? await this.getClient(query.client_id, "") : null;
     if (

@@ -1,151 +1,9 @@
 {
-  "id": "14657874-68fc-4438-8079-fc0ddd14da93",
-  "prevId": "0e01e8bc-8fe3-4bd0-9219-591cffe85b1a",
+  "id": "af2aa3b8-d3d5-4ea7-8839-6d220b2d67da",
+  "prevId": "46aa4071-1348-45ed-af8f-338c6edbaa3b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.course_learning_states": {
-      "name": "course_learning_states",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "student_id": {
-          "name": "student_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'current'"
-        },
-        "previous_state_id": {
-          "name": "previous_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "finished_chapter_count": {
-          "name": "finished_chapter_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        }
-      },
-      "indexes": {
-        "course_learning_states_tenant_id_idx": {
-          "name": "course_learning_states_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "course_learning_states_tenant_id_tenants_id_fk": {
-          "name": "course_learning_states_tenant_id_tenants_id_fk",
-          "tableFrom": "course_learning_states",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "course_learning_states_course_id_courses_id_fk": {
-          "name": "course_learning_states_course_id_courses_id_fk",
-          "tableFrom": "course_learning_states",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "tableTo": "courses",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "course_learning_states_student_id_users_id_fk": {
-          "name": "course_learning_states_student_id_users_id_fk",
-          "tableFrom": "course_learning_states",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "course_learning_states_learner_course_kind": {
-          "name": "course_learning_states_learner_course_kind",
-          "columns": [
-            "student_id",
-            "course_id",
-            "kind"
-          ],
-          "nullsNotDistinct": false
-        }
-      }
-    },
     "public.activity_logs": {
       "name": "activity_logs",
       "schema": "",
@@ -2316,12 +2174,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -2452,19 +2304,6 @@
         }
       },
       "foreignKeys": {
-        "ai_mentor_threads_learning_state_id_course_learning_states_id_fk": {
-          "name": "ai_mentor_threads_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "ai_mentor_threads",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "ai_mentor_threads_user_id_users_id_fk": {
           "name": "ai_mentor_threads_user_id_users_id_fk",
           "tableFrom": "ai_mentor_threads",
@@ -5192,6 +5031,119 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.content_marketplace_course_lineages": {
+      "name": "content_marketplace_course_lineages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "listing_id": {
+          "name": "listing_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version_id": {
+          "name": "version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "acquisition_id": {
+          "name": "acquisition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "content_marketplace_course_lineages_tenant_id_idx": {
+          "name": "content_marketplace_course_lineages_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "content_marketplace_course_lineages_course_id_courses_id_fk": {
+          "name": "content_marketplace_course_lineages_course_id_courses_id_fk",
+          "tableFrom": "content_marketplace_course_lineages",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "tableTo": "courses",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "content_marketplace_course_lineages_tenant_id_tenants_id_fk": {
+          "name": "content_marketplace_course_lineages_tenant_id_tenants_id_fk",
+          "tableFrom": "content_marketplace_course_lineages",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "content_marketplace_course_lineages_course_id_unique": {
+          "name": "content_marketplace_course_lineages_course_id_unique",
+          "columns": [
+            "course_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      }
+    },
     "public.course_authoring_applications": {
       "name": "course_authoring_applications",
       "schema": "",
@@ -7391,7 +7343,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"lessonSequenceEnabled\":false,\"quizFeedbackEnabled\":true,\"certificateSignature\":null,\"certificateFontColor\":\"#000000\",\"certificateValidity\":null,\"repetitionEnabled\":false,\"videoCompletionTrackingEnabled\":true}'::jsonb"
+          "default": "'{\"lessonSequenceEnabled\":false,\"quizFeedbackEnabled\":true,\"certificateSignature\":null,\"certificateFontColor\":\"#000000\",\"certificateValidity\":null,\"videoCompletionTrackingEnabled\":true}'::jsonb"
         },
         "base_language": {
           "name": "base_language",
@@ -10966,12 +10918,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -11114,19 +11060,6 @@
         }
       },
       "foreignKeys": {
-        "lesson_video_progress_learning_state_id_course_learning_states_id_fk": {
-          "name": "lesson_video_progress_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "lesson_video_progress",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "lesson_video_progress_student_id_users_id_fk": {
           "name": "lesson_video_progress_student_id_users_id_fk",
           "tableFrom": "lesson_video_progress",
@@ -11182,15 +11115,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "lesson_video_progress_student_id_lesson_id_resource_entity_id_learning_state_id_unique": {
-          "name": "lesson_video_progress_student_id_lesson_id_resource_entity_id_learning_state_id_unique",
+        "lesson_video_progress_student_id_lesson_id_resource_entity_id_unique": {
+          "name": "lesson_video_progress_student_id_lesson_id_resource_entity_id_unique",
           "columns": [
             "student_id",
             "lesson_id",
-            "resource_entity_id",
-            "learning_state_id"
+            "resource_entity_id"
           ],
-          "nullsNotDistinct": true
+          "nullsNotDistinct": false
         }
       }
     },
@@ -13552,6 +13484,138 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.native_archive_entity_map": {
+      "name": "native_archive_entity_map",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_entity_id": {
+          "name": "source_entity_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_entity_id": {
+          "name": "target_entity_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "native_archive_entity_map_tenant_id_idx": {
+          "name": "native_archive_entity_map_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "native_archive_entity_map_source_unique_idx": {
+          "name": "native_archive_entity_map_source_unique_idx",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_entity_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "native_archive_entity_map_course_id_courses_id_fk": {
+          "name": "native_archive_entity_map_course_id_courses_id_fk",
+          "tableFrom": "native_archive_entity_map",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "tableTo": "courses",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "native_archive_entity_map_tenant_id_tenants_id_fk": {
+          "name": "native_archive_entity_map_tenant_id_tenants_id_fk",
+          "tableFrom": "native_archive_entity_map",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.news": {
       "name": "news",
       "schema": "",
@@ -15442,12 +15506,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -15592,22 +15650,42 @@
           "with": {},
           "method": "btree",
           "concurrently": false
+        },
+        "scorm_attempts_student_package_sco_attempt_unique_idx": {
+          "name": "scorm_attempts_student_package_sco_attempt_unique_idx",
+          "columns": [
+            {
+              "expression": "student_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "package_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sco_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attempt_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
-        "scorm_attempts_learning_state_id_course_learning_states_id_fk": {
-          "name": "scorm_attempts_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "scorm_attempts",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "scorm_attempts_student_id_users_id_fk": {
           "name": "scorm_attempts_student_id_users_id_fk",
           "tableFrom": "scorm_attempts",
@@ -15688,19 +15766,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "scorm_attempts_student_package_sco_attempt_unique_idx": {
-          "name": "scorm_attempts_student_package_sco_attempt_unique_idx",
-          "columns": [
-            "student_id",
-            "package_id",
-            "sco_id",
-            "attempt_number",
-            "learning_state_id"
-          ],
-          "nullsNotDistinct": true
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.scorm_packages": {
       "name": "scorm_packages",
@@ -17066,12 +17132,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -17150,19 +17210,6 @@
         }
       },
       "foreignKeys": {
-        "student_chapter_progress_learning_state_id_course_learning_states_id_fk": {
-          "name": "student_chapter_progress_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "student_chapter_progress",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "student_chapter_progress_student_id_users_id_fk": {
           "name": "student_chapter_progress_student_id_users_id_fk",
           "tableFrom": "student_chapter_progress",
@@ -17218,15 +17265,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "student_chapter_progress_student_id_course_id_chapter_id_learning_state_id_unique": {
-          "name": "student_chapter_progress_student_id_course_id_chapter_id_learning_state_id_unique",
+        "student_chapter_progress_student_id_course_id_chapter_id_unique": {
+          "name": "student_chapter_progress_student_id_course_id_chapter_id_unique",
           "columns": [
             "student_id",
             "course_id",
-            "chapter_id",
-            "learning_state_id"
+            "chapter_id"
           ],
-          "nullsNotDistinct": true
+          "nullsNotDistinct": false
         }
       }
     },
@@ -17917,12 +17963,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -18081,19 +18121,6 @@
         }
       },
       "foreignKeys": {
-        "student_lesson_progress_learning_state_id_course_learning_states_id_fk": {
-          "name": "student_lesson_progress_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "student_lesson_progress",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "student_lesson_progress_student_id_users_id_fk": {
           "name": "student_lesson_progress_student_id_users_id_fk",
           "tableFrom": "student_lesson_progress",
@@ -18149,15 +18176,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "student_lesson_progress_student_id_lesson_id_chapter_id_learning_state_id_unique": {
-          "name": "student_lesson_progress_student_id_lesson_id_chapter_id_learning_state_id_unique",
+        "student_lesson_progress_student_id_lesson_id_chapter_id_unique": {
+          "name": "student_lesson_progress_student_id_lesson_id_chapter_id_unique",
           "columns": [
             "student_id",
             "lesson_id",
-            "chapter_id",
-            "learning_state_id"
+            "chapter_id"
           ],
-          "nullsNotDistinct": true
+          "nullsNotDistinct": false
         }
       }
     },
@@ -20159,12 +20185,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "learning_state_id": {
-          "name": "learning_state_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "assessment_id": {
           "name": "assessment_id",
           "type": "uuid",
@@ -20274,6 +20294,39 @@
             }
           ],
           "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "assessment_attempts_tenant_assessment_learner_number_idx": {
+          "name": "assessment_attempts_tenant_assessment_learner_number_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "assessment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "learner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attempt_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
           "with": {},
           "method": "btree",
           "concurrently": false
@@ -20401,19 +20454,6 @@
         }
       },
       "foreignKeys": {
-        "assessment_attempts_learning_state_id_course_learning_states_id_fk": {
-          "name": "assessment_attempts_learning_state_id_course_learning_states_id_fk",
-          "tableFrom": "assessment_attempts",
-          "columnsFrom": [
-            "learning_state_id"
-          ],
-          "tableTo": "course_learning_states",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "assessment_attempts_assessment_id_assessments_id_fk": {
           "name": "assessment_attempts_assessment_id_assessments_id_fk",
           "tableFrom": "assessment_attempts",
@@ -20455,19 +20495,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "assessment_attempts_tenant_assessment_learner_number_idx": {
-          "name": "assessment_attempts_tenant_assessment_learner_number_idx",
-          "columns": [
-            "tenant_id",
-            "assessment_id",
-            "learner_id",
-            "attempt_number",
-            "learning_state_id"
-          ],
-          "nullsNotDistinct": true
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.assessment_question_blank_answer_sets": {
       "name": "assessment_question_blank_answer_sets",

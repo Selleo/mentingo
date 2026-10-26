@@ -17,7 +17,7 @@ import type { McpToolRunner } from "./mcp-tool-runner.types";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { GlobalSearchService } from "src/global-search/global-search.service";
-import type { GlobalSearchResponse } from "src/global-search/schemas/global-search.schema";
+import type { GlobalSearchResult } from "src/global-search/schemas/global-search.schema";
 import type { SettingsService } from "src/settings/settings.service";
 
 const settings = {} as Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
@@ -85,7 +85,7 @@ describe("MCP global search", () => {
       roleSlugs: [],
       permissions: [PERMISSIONS.COURSE_READ_ASSIGNED],
     } as CurrentUserType;
-    const result: GlobalSearchResponse = {
+    const result: GlobalSearchResult = {
       myCourses: [{ id: "course-id", title: "Onboarding" }],
       allCourses: [],
       availableCourses: [],
@@ -97,6 +97,7 @@ describe("MCP global search", () => {
       users: [],
       categories: [],
       groups: [],
+      results: [],
     };
     const context = { resource: "https://tenant.example/mcp", searchOnly: false };
     const search = jest.fn().mockResolvedValue(result);
@@ -139,5 +140,51 @@ describe("MCP global search", () => {
     const searchHandler = registerTool.mock.calls[1][2];
     await searchHandler({ searchQuery: "onboarding", language: SUPPORTED_LANGUAGES.DE });
     expect(run).toHaveBeenLastCalledWith(MCP_CONTENT_SEARCH_PERMISSIONS, expect.any(Function));
+  });
+  it("opts only explicit student lesson search into the protected retrieval path", async () => {
+    const registerTool = jest.fn();
+    const actor = {
+      userId: "actor",
+      tenantId: "tenant",
+      permissions: [PERMISSIONS.COURSE_READ],
+    } as CurrentUserType;
+    const search = jest.fn().mockResolvedValue({
+      allCourses: [],
+      myCourses: [],
+      availableCourses: [],
+      lessons: [],
+      news: [],
+      articles: [],
+      qa: [],
+    });
+    const run = jest.fn(async (_permissions, operation) => operation(actor));
+    registerMcpSearchTools(
+      { registerTool } as unknown as McpServer,
+      run as McpToolRunner,
+      { search } as unknown as GlobalSearchService,
+      {
+        resource: "https://tenant.example/api/mcp",
+        searchOnly: true,
+        studentOnly: true,
+        includeLearnerLessons: true,
+      },
+    );
+    await registerTool.mock.calls[0][2]({
+      searchQuery: "customer",
+      language: SUPPORTED_LANGUAGES.EN,
+      mode: GLOBAL_SEARCH_MODES.HYBRID,
+    });
+    expect(search).toHaveBeenCalledWith(
+      "customer",
+      SUPPORTED_LANGUAGES.EN,
+      actor,
+      GLOBAL_SEARCH_MODES.HYBRID,
+      {
+        contentOnly: true,
+        learnerOnly: true,
+        includeLearnerLessons: true,
+      },
+    );
+    expect(registerTool.mock.calls[0][1].description).toContain("get_lesson");
   });
 });

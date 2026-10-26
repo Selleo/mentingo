@@ -1,4 +1,5 @@
 import type { SupportedLanguages } from "@repo/shared";
+import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import type { SortOption } from "~/types/sorting";
 
 export type ApiErrorResponse = {
@@ -7,6 +8,10 @@ export type ApiErrorResponse = {
   retryAfterSeconds?: number;
   translationParams?: Record<string, unknown>;
 };
+
+export type ApiError = AxiosError<ApiErrorResponse>;
+
+export type RetryableApiError = ApiError & { config: InternalAxiosRequestConfig };
 
 export type EmbedLessonResource = {
   id?: string;
@@ -25,3 +30,9 @@ export type AvailableCourseCategorySearchParams = {
   excludeCourseId?: string;
   language?: SupportedLanguages;
 };
+
+declare module "axios" {
+  interface AxiosRequestConfig {
+    _retry?: boolean;
+  }
+}

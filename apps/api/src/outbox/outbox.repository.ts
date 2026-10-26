@@ -1,10 +1,11 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, inArray, lt, notInArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { outboxEvents } from "src/storage/schema";
 
+import { OUTBOX_DIRECT_HANDLER_EVENT_TYPES } from "./outbox-direct-handler-events";
 import { OUTBOX_NOTIFY_CHANNEL } from "./outbox.constants";
 import { OUTBOX_STATUSES } from "./outbox.types";
 
@@ -42,21 +43,7 @@ export class OutboxRepository {
         FROM outbox_events
         WHERE status IN (${OUTBOX_STATUSES.PENDING}, ${OUTBOX_STATUSES.FAILED})
           AND (status <> ${OUTBOX_STATUSES.FAILED}
-            OR event_type NOT IN (
-              'NotificationEvent',
-              'AutomationEmailDeliveryRequestedEvent',
-              'LearningPathExportAppliedEvent',
-              'CourseTransferRequestedEvent',
-              'CourseTransferVideoMetadataRequestedEvent',
-              'BulkUpdateCourseCategoryEvent',
-              'UpdateCourseEvent',
-              'CreateChapterEvent',
-              'UpdateChapterEvent',
-              'DeleteChapterEvent',
-              'CreateLessonEvent',
-              'UpdateLessonEvent',
-              'DeleteLessonEvent'
-            )
+            OR ${notInArray(outboxEvents.eventType, [...OUTBOX_DIRECT_HANDLER_EVENT_TYPES])}
             OR updated_at < NOW() - INTERVAL '5 seconds')
         ORDER BY created_at ASC
         LIMIT 1
@@ -86,26 +73,16 @@ export class OutboxRepository {
   }
 
   async recoverStalledIntake(): Promise<void> {
-    await this.db.execute(sql`
-      UPDATE outbox_events SET status = 'pending', updated_at = NOW()
-      WHERE status = 'processing'
-        AND event_type IN (
-          'NotificationEvent',
-          'AutomationEmailDeliveryRequestedEvent',
-          'LearningPathExportAppliedEvent',
-              'CourseTransferRequestedEvent',
-              'CourseTransferVideoMetadataRequestedEvent',
-              'BulkUpdateCourseCategoryEvent',
-              'UpdateCourseEvent',
-              'CreateChapterEvent',
-              'UpdateChapterEvent',
-              'DeleteChapterEvent',
-              'CreateLessonEvent',
-              'UpdateLessonEvent',
-              'DeleteLessonEvent'
-        )
-        AND updated_at < NOW() - INTERVAL '5 minutes'
-    `);
+    await this.db
+      .update(outboxEvents)
+      .set({ status: OUTBOX_STATUSES.PENDING, updatedAt: sql`NOW()` })
+      .where(
+        and(
+          eq(outboxEvents.status, OUTBOX_STATUSES.PROCESSING),
+          inArray(outboxEvents.eventType, [...OUTBOX_DIRECT_HANDLER_EVENT_TYPES]),
+          lt(outboxEvents.updatedAt, sql`NOW() - INTERVAL '5 minutes'`),
+        ),
+      );
   }
 
   async markPublished(

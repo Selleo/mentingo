@@ -1,10 +1,13 @@
+import { useLocation } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { useForm, type UseFormRegister, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useBulkUpsertSecret } from "~/api/mutations/admin/useBulkUpsertSecret";
+import { LOGIN_METHOD_SETUP_QUERY_KEY } from "~/api/queries/admin/useLoginMethodSetup";
 import { useSecret } from "~/api/queries/admin/useSecret";
 import { liveKitConfiguredQueryOptions } from "~/api/queries/useLiveKitConfigured";
+import { LOGIN_METHODS_QUERY_KEY } from "~/api/queries/useLoginMethods";
 import { ssoEnabledQueryOptions } from "~/api/queries/useSSOEnabled";
 import { stripePublishableKeyQueryOptions } from "~/api/queries/useStripePublishableKey";
 import { queryClient } from "~/api/queryClient";
@@ -13,6 +16,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { cn } from "~/lib/utils";
 import { ENV_GROUPS, SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
 
 import { ENV_PAGE_HANDLES } from "../../../../e2e/data/environment/handles";
@@ -88,7 +92,17 @@ const SecretField = ({
 const Envs = (): React.ReactElement => {
   const { t } = useTranslation();
 
+  const { hash } = useLocation();
+  const highlightedGroupId = hash.slice(1);
   const { register, handleSubmit, watch, setValue } = useForm<FormValues>({ defaultValues: {} });
+
+  useEffect(() => {
+    if (!highlightedGroupId) return;
+
+    document
+      .getElementById(highlightedGroupId)
+      ?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  }, [highlightedGroupId]);
 
   const secrets = watch();
   const hasAnyValue = Object.values(secrets).some(Boolean);
@@ -106,6 +120,8 @@ const Envs = (): React.ReactElement => {
     await queryClient.invalidateQueries({ queryKey: ["secrets"] });
     await queryClient.invalidateQueries({ queryKey: ["phishing"] });
     await queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey });
+    await queryClient.invalidateQueries({ queryKey: LOGIN_METHODS_QUERY_KEY });
+    await queryClient.invalidateQueries({ queryKey: LOGIN_METHOD_SETUP_QUERY_KEY });
     await queryClient.invalidateQueries(stripePublishableKeyQueryOptions());
     await queryClient.invalidateQueries(liveKitConfiguredQueryOptions);
   };
@@ -141,7 +157,11 @@ const Envs = (): React.ReactElement => {
           {ENV_GROUPS.map((group) => (
             <section
               key={group.id}
-              className="mb-6 flex break-inside-avoid flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+              id={group.id}
+              className={cn(
+                "mb-6 flex scroll-mt-6 break-inside-avoid flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm",
+                { "border-primary-500 ring-2 ring-primary-100": group.id === highlightedGroupId },
+              )}
             >
               <header className="flex flex-col gap-1">
                 <h2 className="body-base-md text-neutral-950">{t(group.titleKey)}</h2>

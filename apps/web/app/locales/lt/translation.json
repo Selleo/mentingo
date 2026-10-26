@@ -20,12 +20,30 @@
     "readyWorkflow": "Įtrauktas paleidiklis, el. laiško šablonas ir žymos",
     "useTemplate": "Naudoti šabloną"
   },
+  "loginMethods": {
+    "title": "Prisijungimo būdai",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Prisijungimo nuoroda",
+    "password": "Slaptažodis",
+    "description": "Pasirinkite, kaip jūsų organizacijos žmonės gali prisijungti.",
+    "goToConfiguration": "Eiti į konfigūraciją",
+    "notConfiguredTooltip": "Pridėkite visus reikiamus aplinkos kintamuosius, kad įjungtumėte šį prisijungimo būdą.",
+    "errors": {
+      "disabled": "Šis prisijungimo būdas išjungtas.",
+      "missingConfiguration": "Pirmiausia pridėkite tiekėjo prisijungimo duomenis aplinkos nustatymuose.",
+      "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "save": "Nepavyko išsaugoti prisijungimo būdų.",
+      "load": "Nepavyko įkelti prisijungimo būdų."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platformos logotipas",
     "title": "Prijungti {{clientName}} prie Mentingo?",
     "description": "Šis asistentas gali naudotis Mentingo pagal jūsų dabartinius leidimus.",
     "searchDescription": "Leiskite šiam asistentui ieškoti prieinamos kursų informacijos, žinių straipsnių, naujienų bei klausimų ir atsakymų ir pateikti nuorodas į Mentingo. Jis negali keisti turinio, gauti pamokų turinio ar naudoti administravimo įrankių.",
-    "studentDescription": "Tik mokinio prieiga: ieškoti ir skaityti paskelbtus straipsnius, naujienas, klausimus ir atsakymus bei prieinamus kursų metaduomenis. Be pamokų, privačių failų, juodraščių, administravimo ar pakeitimų. Visi Slack naudotojai dalijasi prijungtos paskyros mokinio prieiga.",
+    "studentDescription": "Mokinio prieiga tik skaityti: ieškoti kursų ir pamokų, naršyti skyrius ir skaityti pamokų tekstus nemokamuose viešuose kursuose arba viešuose ir privačiuose kursuose, į kuriuos ši paskyra turi aktyvią registraciją. Mokamų viešų kursų informacija lieka matoma. Administratoriams taikomos tos pačios taisyklės. Be juodraščių, archyvuotų kursų, pakeitimų, viktorinų atsakymų, DI instrukcijų ar failų URL. Taip pat pasiekiami paskelbti straipsniai, naujienos ir klausimai bei atsakymai. Visi Slack naudotojai dalijasi prijungtos paskyros mokinio prieiga.",
     "accountDescription": "Leiskite šiam asistentui naudoti jūsų paskyrai prieinamus Mentingo įrankius, įskaitant duomenų skaitymą ir pakeitimus. Visada taikomi dabartiniai jūsų leidimai ir organizacijos nustatymai. Prieš suteikdami prieigą patikrinkite paskyrą ir peradresavimo adresą.",
     "explicitDescription": "Peržiūrėkite prašomus leidimus žemiau. Jie riboja asistento prieigą pagal jūsų paskyros leidimus; valdymo įrankių skaitymo prieiga gali apimti juodraščius ir administravimo duomenis.",
     "requestedScopes": "Prašomi leidimai",
@@ -70,7 +88,8 @@
       "embeddingUnavailable": "AI dokumentų apdorojimas nepasiekiamas.",
       "unsupportedVersion": "Ši Mentingo paketo versija nepalaikoma.",
       "missingAsset": "Mentingo pakete trūksta būtino failo.",
-      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas."
+      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas.",
+      "courseNotSyncable": "Šis kursas buvo pridėtas kaip redaguojama kopija, todėl jo negalima sinchronizuoti. Ištrinkite jį ir pridėkite iš naujo iš prekyvietės."
     }
   },
   "aiConversations": {
@@ -1496,11 +1515,10 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "DI paieška",
+    "aiSearch": "Ieškoti su DI",
     "hybridSearch": "Hibridinė paieška",
     "backToKeywords": "Grįžti prie paieškos pagal žodžius",
     "semanticUnavailable": "Semantinė paieška laikinai nepasiekiama. Rodomi paieškos pagal žodžius rezultatai.",
-    "semanticPending": "Dalis turinio dar indeksuojama. Rezultatai gali būti neišsamūs.",
     "searchFailed": "Paieška nepavyko. Bandykite dar kartą.",
     "clear": "Išvalyti paiešką",
     "loading": "Ieškoma…",
@@ -1512,6 +1530,21 @@
     "navigate": "Naršyti",
     "goTo": "Eikite į",
     "close": "Uždaryti",
+    "contentResults": "Mokymosi turinys",
+    "aiTryAgain": "Pabandykite aprašyti, ko jums reikia, kitais žodžiais arba grįžkite prie paieškos pagal žodžius.",
+    "searchInDescriptionWithAi": "Įveskite pavadinimą, kad iškart jį atidarytumėte, arba aprašykite, ko jums reikia, ir ieškokite su DI.",
+    "types": {
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "learningPath": "Tobulėjimo kelias",
+      "news": "Naujiena",
+      "article": "Straipsnis",
+      "qa": "Klausimai ir atsakymai",
+      "users": "Naudotojas",
+      "groups": "Grupė",
+      "categories": "Kategorija"
+    },
+    "moreInCourse": "+{{count}} daugiau šiame kurse",
     "entries": {
       "users": "Vartotojai",
       "categories": "Kategorijos",
@@ -1682,6 +1715,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Microsoft kalendorius",
+        "contentMarketplace": "Turinio prekyvietė",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1693,6 +1728,8 @@
         "bunny": "Perduokite vaizdo įrašus ir efektyviai pateikite turinį",
         "google_authorization": "Leisti naudotojams prisijungti naudojant „Google“ paskyrą",
         "microsoft_authorization": "Leiskite vartotojams prisijungti naudojant „Microsoft“ paskyrą",
+        "microsoft_calendar": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais.",
+        "contentMarketplace": "Atraskite ir importuokite paruoštus kursus iš turinio prekyvietės.",
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
         "luma": "Įgalinti AI kursų generavimo funkcijas",
@@ -2238,6 +2275,7 @@
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
         "phishing_report_read": "Gali peržiūrėti sukčiavimo el. paštu simuliacijų ataskaitas.",
+        "content_marketplace_browse": "Naršyti turinio prekyvietę ir kopijuoti jos kursus (kopijuojant taip pat reikia teisės kurti kursus).",
         "account_read_self": "Gali peržiūrėti savo paskyros duomenis.",
         "account_update_self": "Gali redaguoti savo paskyros duomenis.",
         "user_read_self": "Gali peržiūrėti savo naudotojo profilį.",
@@ -2511,12 +2549,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "„Microsoft“ kalendoriaus kliento paslaptis"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "„Microsoft OAuth“ įgalinta (teisinga / klaidinga)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth Enabled (teisinga / klaidinga)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI API raktas"
       },
@@ -2542,12 +2574,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "„Google“ kliento paslaptis"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "„Google OAuth“ įgalinta (teisinga / klaidinga)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite „Google OAuth“ įgalinta (teisinga / klaidinga)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe Webhook paslaptis"
       },
@@ -2562,12 +2588,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "„Slack OAuth“ įgalinta (tiesa / klaidinga)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "„Vite Slack OAuth“ įgalinta (teisinga / klaidinga)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
@@ -4005,8 +4025,6 @@
   },
   "loginView": {
     "header": "Prisijungti",
-    "subHeader": "Toliau įveskite savo el. pašto adresą, kad prisijungtumėte prie savo paskyros",
-    "subHeaderSSO": "Prisijunkite naudodami „Google“ / „Microsoft“ paskyrą",
     "validation": {
       "email": "Neteisingas el",
       "password": "Reikalingas slaptažodis"
@@ -4121,16 +4139,24 @@
       },
       "featuredCourse": {
         "label": "Teminis kursas",
-        "none": "Pasirinkite teminį kursą",
         "search": "Ieškoti paskelbtų kursų...",
         "empty": "Paskelbtų kursų nerasta",
-        "clear": "Išvalyti teminį kursą",
         "loadMore": "Įkelti daugiau kursų",
         "updated": "Teminis kursas atnaujintas",
-        "updateFailed": "Nepavyko atnaujinti teminio kurso"
+        "updateFailed": "Nepavyko atnaujinti teminio kurso",
+        "change": "Keisti rekomenduojamą",
+        "automatic": "Automatiškai (populiariausias kursas)",
+        "dialogDescription": "Pasirinkite paskelbtą kursą, kurį besimokantieji pirmiausia matys kursų puslapyje.",
+        "clickToChange": "Spustelėkite, kad pakeistumėte"
       },
       "lessonsCount_one": "{{count}} pamoka",
-      "lessonsCount_other": "{{count}} pamokų"
+      "lessonsCount_other": "{{count}} pamokų",
+      "inlineEdit": {
+        "addCourse": "Pridėti kursą",
+        "addCourseTo": "Pridėti kursą į {{category}}",
+        "addCategory": "Pridėti kategoriją",
+        "categoryPlaceholder": "Kategorijos pavadinimas"
+      }
     }
   },
   "studentQuizSummaryView": {
@@ -4559,7 +4585,8 @@
       "courseListLayoutClassic": "Klasikinis",
       "courseListLayoutModern": "Modernus",
       "courseListLayoutClassicDescription": "Tradicinis kursų tinklelio išdėstymas",
-      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais",
+      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais ir daugiau informacijos, pavyzdžiui, numatomu mokymosi laiku",
+      "courseListLayoutRecommended": "Rekomenduojama",
       "courseListLayoutPreview": {
         "continueLearning": "Tęsti mokymąsi",
         "topCourses": "5 populiariausi kursai",
@@ -5427,6 +5454,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Pradėti kelią",
+      "continue": "Tęsti kelią",
+      "review": "Peržiūrėti kelią",
+      "coursesCount_one": "{{count}} kursas",
+      "coursesCount_few": "{{count}} kursai",
+      "coursesCount_many": "{{count}} kurso",
+      "coursesCount_other": "{{count}} kursų"
+    },
     "title": "Tobulėjimo keliai",
     "description": "Naršykite priskirtus tobulėjimo kelius ir tęskite sutvarkytas kursų sekas.",
     "searchPlaceholder": "Ieškoti tobulėjimo kelių",
@@ -5538,6 +5574,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Bendra",
+      "certificate": "Sertifikatas",
+      "export": "Eksportas"
+    },
     "title": "Tobulėjimo keliai",
     "importPackage": {
       "title": "Importuoti tobulėjimo kelią"
@@ -5619,6 +5660,16 @@
       "tooltip": "Šio tobulėjimo kelio pagrindinė kalba yra {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Pridėti kursų į kelią",
+      "addDialogDescription": "Pasirinkite vieną ar daugiau kursų. Jie bus pridėti kelio pabaigoje.",
+      "searchPlaceholder": "Ieškoti kursų",
+      "noSearchResults": "Paieškos neatitinka joks kursas.",
+      "noAvailableCourses": "Visi galimi kursai jau yra šiame kelyje.",
+      "selectedCount_one": "Pasirinktas {{count}} kursas",
+      "selectedCount_few": "Pasirinkti {{count}} kursai",
+      "selectedCount_many": "Pasirinkta {{count}} kurso",
+      "selectedCount_other": "Pasirinkta {{count}} kursų",
+      "addSelected": "Pridėti pasirinktus ({{count}})",
       "select": "Pasirinkite kursą",
       "add": "Pridėti kursą",
       "drag": "Tempkite, kad pakeistumėte kurso tvarką",
@@ -6027,6 +6078,32 @@
     "permissionsUpdated": "Jūsų leidimai buvo atnaujinti. Atnaujiname sesiją, kad pritaikytume naują prieigą.",
     "refreshFailed": "Leidimai pasikeitė, tačiau sesijos atnaujinimas nepavyko. Prisijunkite dar kartą."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Jūsų sesija baigėsi",
+      "description": "Prisijunkite iš naujo, kad galėtumėte tęsti."
+    },
+    "forbidden": {
+      "title": "Neturite prieigos",
+      "description": "Neturite teisės peržiūrėti šio puslapio. Jei manote, kad tai klaida, susisiekite su administratoriumi."
+    },
+    "notFound": {
+      "title": "Puslapis nerastas",
+      "description": "Ieškomas puslapis neegzistuoja arba buvo perkeltas."
+    },
+    "connection": {
+      "title": "Ryšio problema",
+      "description": "Nepavyko prisijungti prie serverio. Patikrinkite interneto ryšį ir bandykite dar kartą."
+    },
+    "unknown": {
+      "title": "Kažkas nepavyko",
+      "description": "Įvyko netikėta klaida. Bandykite dar kartą po akimirkos."
+    },
+    "action": {
+      "logIn": "Prisijungti",
+      "tryAgain": "Bandyti dar kartą"
+    }
+  },
   "tenantInactive": {
     "title": "Organizacija išjungta",
     "description": "Ši darbo sritis šiuo metu neaktyvi. Jei manote, kad tai klaida, susisiekite su administratoriumi, kad atkurtumėte prieigą."
@@ -6065,7 +6142,8 @@
       "ownerInactive": "API rakto savininkas nebėra aktyvus",
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
-      "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+      "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės",
+      "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)"
     }
   },
   "luma": {
@@ -6255,6 +6333,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "DI atsakymas paruoštas.",
+      "outline_ready": "Jūsų kurso planas paruoštas peržiūrai.",
+      "changes_ready": "Jūsų kurso pakeitimai paruošti peržiūrai.",
+      "failed": "DI nepavyko užbaigti šios užklausos.",
+      "waiting_author": "Kad galėtų tęsti, DI reikia jūsų atsakymo.",
+      "view": "Peržiūrėti"
+    },
     "changeSet": {
       "ready": {
         "status": "Paruošta peržiūrai",
@@ -6304,6 +6390,7 @@
         "description": "Kursas nepakeistas."
       },
       "more": "+{{count}} daugiau",
+      "readySoFar": "jau paruošta: {{count}}",
       "discard": "Atmesti",
       "retry": "Bandyti dar kartą",
       "heading": "Siūlomi pakeitimai",
@@ -6464,6 +6551,14 @@
       "understandingRequest": "Skaitoma jūsų užklausa…",
       "checkingCourse": "Tikrinamas kurso nuoseklumas…",
       "planningOutline": "Planuojama kurso struktūra…",
+      "outlineProgress": {
+        "drafting": "Rengiama struktūra…",
+        "reviewing": "Tikrinama struktūra…",
+        "repairing": "Tobulinama struktūra…",
+        "finalizing": "Struktūra ruošiama peržiūrai…",
+        "chapters": "Skyriai juodraštyje: {{count}}",
+        "iteration": "Etapas {{count}}"
+      },
       "planningLessons": "Planuojamos pamokos…",
       "writingLesson": "Rašoma pamoka…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6517,6 +6612,10 @@
       "questionProgress": "Klausimas {{current}} iš {{total}}",
       "questionPrevious": "Ankstesnis",
       "questionNext": "Kitas",
+      "questionNeedsInput": "Reikia jūsų atsakymo",
+      "questionSubmitHint": "Enter – siųsti · Shift+Enter – nauja eilutė",
+      "questionShortcutHint": "Spauskite A–D, kad pasirinktumėte",
+      "pendingSlowHint": "Skaitomas kursas, šaltiniai ir jūsų užklausa, kad būtų nuspręstas kitas žingsnis. Tai gali užtrukti iki minutės.",
       "newChat": "New chat",
       "searchSessions": "Ieškoti pokalbių...",
       "noSessionsFound": "Pokalbių nerasta.",
@@ -6547,7 +6646,9 @@
       "scopeWholeCourse": "Visas kursas",
       "scopeSelected": "Pasirinkta programa",
       "webSearch": "Paieška internete",
-      "deepThinking": "Išsamus tyrimas",
+      "deepThinking": "Išsami šaltinių paieška",
+      "deepResearchHelp": "Išsamiau tiria leidžiamus šaltinius. Neįjungia interneto prieigos.",
+      "webSearchHelp": "Leidžia ieškoti viešose interneto svetainėse.",
       "strictSourceMode": "Tik mano šaltiniai",
       "strictSourceModeHelp": "Tik užklausa ir pridėti failai",
       "back": "Atgal"
@@ -6624,9 +6725,11 @@
       "contentPending": "Šios pamokos turinys dar nesugeneruotas.",
       "readOnly": "Rengiamo turinio peržiūra yra tik skaitoma, kol ją pritaikysite."
     },
-    "openWorkspace": "Generuoti su DI",
+    "openWorkspace": "Redaguoti su DI",
+    "createWorkspace": "Kurti su DI",
     "openLegacyDraft": "Tęsti seną juodraštį",
     "activityRail": {
+      "inProgress": "Vykdoma… Eiga bus atnaujinta užbaigus kitą veiksmą.",
       "retryFailedParts": "Kartoti nepavykusias dalis",
       "retryProvider": "Kartoti prisijungimą",
       "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
@@ -6653,7 +6756,6 @@
       "moreToolUpdates": "+{{count}} kitų įrankių pranešimų",
       "searchQueries": "Paieškos užklausos",
       "moreSearchQueries": "+{{count}} daugiau užklausų",
-      "completedResearchSteps": "Užbaigti tyrimo veiksmai: {{count}}",
       "chapterStatus": {
         "failed": "Nepavyko",
         "pending": "laukiama",
@@ -8060,6 +8162,57 @@
     "picker": {
       "search": "Ieškoti",
       "empty": "Atitikmenų nerasta"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Kategorija / tema",
+    "allCategories": "Visos kategorijos",
+    "duration": "Trukmė",
+    "anyDuration": "Bet kokia trukmė",
+    "clearFilters": "Išvalyti filtrus",
+    "durations": {
+      "short": "Iki 1 valandos",
+      "medium": "1–3 valandos",
+      "long": "Daugiau nei 3 valandos"
+    },
+    "discover": "Atraskite kursus, kurie padeda ugdyti įgūdžius jūsų organizacijoje.",
+    "search": "Ieškoti kursų, temų ar įgūdžių…",
+    "clearSearch": "Išvalyti paiešką",
+    "recentTitle": "Neseniai atnaujinti",
+    "recentDescription": "Atraskite naujausius kursų atnaujinimus kataloge.",
+    "recentBadge": "Neseniai atnaujintas",
+    "allCourses": "Visi kursai",
+    "results": "Rasta kursų: {{count}}",
+    "sortBy": "Rikiuoti pagal",
+    "sortRecent": "Neseniai atnaujinti",
+    "sortTitle": "Pavadinimą (A–Z)",
+    "noResults": "Paiešką atitinkančių kursų nerasta. Pabandykite kitą raktažodį.",
+    "addToCourses": "Pridėti prie kursų",
+    "title": "Turinio prekyvietė",
+    "browseAll": "Naršyti viską",
+    "description": "Naršykite atrinktus kursus ir kopijuokite juos į savo organizaciją.",
+    "loading": "Įkeliama…",
+    "retry": "Bandyti dar kartą",
+    "unavailable": "Turinio prekyvietė šiai organizacijai neįjungta. Kreipkitės į administratorių.",
+    "serviceError": "Turinio prekyvietė nepasiekiama. Bandykite dar kartą.",
+    "empty": "Prekyvietėje dar nėra kursų.",
+    "updated": "Atnaujinta {{date}}",
+    "copying": "Kursas kopijuojamas…",
+    "copyNotice": "Kursas pridedamas kaip bendrinamas kursas, kurio negalima redaguoti. Sinchronizavimas jį atnaujina iki naujausios versijos ir išsaugo besimokančiųjų pažangą.",
+    "copyComplete": "Kursas nukopijuotas į jūsų organizaciją.",
+    "copyUpdated": "Jūsų šio kurso kopija atnaujinta.",
+    "copyFailed": "Kurso nukopijuoti nepavyko. Bandykite dar kartą.",
+    "openCourse": "Atidaryti kursą",
+    "sync": "Sinchronizuoti",
+    "syncing": "Sinchronizuojama…",
+    "syncNotice": "Atnaujinkite savo kopiją į naujausią šio kurso versiją.",
+    "firstPage": "Grįžti į pirmą puslapį",
+    "error": {
+      "invalidQuery": "Netinkami katalogo paieškos arba puslapiavimo parametrai.",
+      "unavailable": "Turinio prekyvietė šiai organizacijai nepasiekiama.",
+      "listingNotFound": "Šis prekyvietės kursas nerastas.",
+      "thumbnailNotFound": "Šis prekyvietės kursas neturi miniatiūros.",
+      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau."
     }
   }
 }

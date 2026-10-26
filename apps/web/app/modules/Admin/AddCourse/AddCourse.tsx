@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,7 @@ import { CourseDescriptionLimitMessage } from "./components/CourseDescriptionLim
 import { CourseMetadataFields } from "./components/CourseMetadataFields";
 import { CourseThumbnailUploadField } from "./components/CourseThumbnailUploadField";
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
+import { withAddCourseContext } from "./utils/addCourseOrigin";
 
 import type { MetaFunction } from "@remix-run/react";
 
@@ -30,6 +31,7 @@ const AddCourse = () => {
   const { isValid: isFormValid } = form.formState;
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(undefined);
 
@@ -70,7 +72,7 @@ const AddCourse = () => {
       </div>
       <div className="flex w-full max-w-[820px] flex-col gap-y-6 px-8">
         <Breadcrumb
-          backTo="/admin/beta-courses/new"
+          backTo={withAddCourseContext("/admin/beta-courses/new", searchParams)}
           currentLabel={t("adminCourseTypeSelector.standard.title")}
         />
         <hgroup className="gapy-y-1 flex flex-col">
@@ -133,7 +135,9 @@ const AddCourse = () => {
                   data-testid={CREATE_COURSE_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   className="rounded border-2 bg-white px-6 py-2 text-primary-800"
-                  onClick={() => navigate("/admin/beta-courses/new")}
+                  onClick={() =>
+                    navigate(withAddCourseContext("/admin/beta-courses/new", searchParams))
+                  }
                 >
                   {t("common.button.cancel")}
                 </Button>

@@ -1,8 +1,10 @@
 import {
   type GlobalSearchMode,
   GLOBAL_SEARCH_MODES,
+  GLOBAL_SEARCH_RESULT_TYPES,
   GLOBAL_SEARCH_SEMANTIC_STATUSES,
 } from "@repo/shared";
+import { CircleAlert } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,19 +12,19 @@ import { useGlobalSearch } from "~/api/queries/useGlobalSearch";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { ArticleEntry } from "./ArticleEntry";
-import { CategoryEntry } from "./CategoryEntry";
-import { CourseEntry } from "./CourseEntry";
 import { GlobalSearchContent } from "./GlobalSearchContent";
-import { GroupEntry } from "./GroupEntry";
-import { LearningPathEntry } from "./LearningPathEntry";
-import { LessonEntry } from "./LessonEntry";
-import { MyCourseEntry } from "./MyCourseEntry";
-import { NewsEntry } from "./NewsEntry";
-import { QAEntry } from "./QAEntry";
-import { UserEntry } from "./UserEntry";
 
-import type { GlobalSearchItem } from "./GlobalSearchContent";
+import type {
+  GlobalSearchAdministrativeResults,
+  GlobalSearchResultNode,
+} from "./globalSearchNodes";
+
+const NO_RESULTS: GlobalSearchResultNode[] = [];
+const NO_ADMINISTRATIVE_RESULTS: GlobalSearchAdministrativeResults = {
+  users: [],
+  groups: [],
+  categories: [],
+};
 
 export const GlobalSearchResults = ({
   debouncedSearch,
@@ -31,6 +33,7 @@ export const GlobalSearchResults = ({
   onSelect,
   activeIndex,
   setTotalItems,
+  onBackToKeywords,
 }: {
   debouncedSearch: string;
   mode?: GlobalSearchMode;
@@ -38,6 +41,7 @@ export const GlobalSearchResults = ({
   onSelect: () => void;
   activeIndex: number;
   setTotalItems: (count: number) => void;
+  onBackToKeywords?: () => void;
 }) => {
   const { data: globalSettings } = useGlobalSettings();
   const language = useLanguageStore((state) => state.language);
@@ -54,70 +58,29 @@ export const GlobalSearchResults = ({
     { enabled: isSearchReady && !isDebouncing },
   );
 
-  const tabsToDisplay = useMemo<{ isFetching: boolean; items: GlobalSearchItem[] }>(() => {
-    const mapped: GlobalSearchItem[] = [
-      {
-        resultType: "allCourses",
-        resultData: searchResults?.allCourses ?? [],
-        Component: CourseEntry,
-      },
-      {
-        resultType: "myCourses",
-        resultData: searchResults?.myCourses ?? [],
-        Component: MyCourseEntry,
-      },
-      {
-        resultType: "availableCourses",
-        resultData: searchResults?.availableCourses ?? [],
-        Component: CourseEntry,
-      },
-      {
-        resultType: "learningPaths",
-        resultData: isLearningPathsEnabled ? (searchResults?.learningPaths ?? []) : [],
-        Component: LearningPathEntry,
-      },
-      {
-        resultType: "lessons",
-        resultData: searchResults?.lessons ?? [],
-        Component: LessonEntry,
-      },
-      {
-        resultType: "users",
-        resultData: searchResults?.users ?? [],
-        Component: UserEntry,
-      },
-      {
-        resultType: "categories",
-        resultData: searchResults?.categories ?? [],
-        Component: CategoryEntry,
-      },
-      {
-        resultType: "groups",
-        resultData: searchResults?.groups ?? [],
-        Component: GroupEntry,
-      },
-      {
-        resultType: "news",
-        resultData: searchResults?.news ?? [],
-        Component: NewsEntry,
-      },
-      {
-        resultType: "articles",
-        resultData: searchResults?.articles ?? [],
-        Component: ArticleEntry,
-      },
-      {
-        resultType: "qa",
-        resultData: searchResults?.qa ?? [],
-        Component: QAEntry,
-      },
-    ];
-
-    return {
-      isFetching: isFetching || isDebouncing,
-      items: isFetching || isDebouncing || isError ? [] : mapped,
-    };
-  }, [isFetching, isDebouncing, isError, isLearningPathsEnabled, searchResults]);
+  const isPending = isFetching || isDebouncing;
+  const showResults = !isPending && !isError;
+  const results = useMemo(
+    () =>
+      showResults && searchResults
+        ? searchResults.results.filter(
+            (node) =>
+              isLearningPathsEnabled || node.type !== GLOBAL_SEARCH_RESULT_TYPES.LEARNING_PATH,
+          )
+        : NO_RESULTS,
+    [isLearningPathsEnabled, searchResults, showResults],
+  );
+  const administrative = useMemo(
+    () =>
+      showResults && searchResults
+        ? {
+            users: searchResults.users,
+            groups: searchResults.groups,
+            categories: searchResults.categories,
+          }
+        : NO_ADMINISTRATIVE_RESULTS,
+    [searchResults, showResults],
+  );
 
   useEffect(() => {
     if (isFetching || isDebouncing || isError) setTotalItems(0);
@@ -125,35 +88,50 @@ export const GlobalSearchResults = ({
 
   if (isError && !isDebouncing) {
     return (
-      <p role="alert" className="px-6 py-4 text-sm text-neutral-700">
-        {t("globalSearch.searchFailed")}
-      </p>
+      <div role="alert" className="flex flex-col items-center gap-2 px-6 py-8 text-center">
+        <span className="flex size-11 items-center justify-center rounded-full bg-red-50 text-red-600">
+          <CircleAlert className="size-5" aria-hidden />
+        </span>
+        <span className="body-sm-md text-neutral-950">{t("globalSearch.searchFailed")}</span>
+      </div>
     );
   }
 
+  const isAiRanked = mode === GLOBAL_SEARCH_MODES.HYBRID;
+  const isSettled = !isFetching && !isDebouncing;
+  // Partial indexing is not surfaced: results are still useful, and the notice read as an error.
+  // Only a failed AI request is shown, because the user explicitly asked for AI ranking.
+  const semanticNotice =
+    isAiRanked &&
+    isSettled &&
+    searchResults?.semanticStatus === GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE
+      ? t("globalSearch.semanticUnavailable")
+      : undefined;
+
   return (
     <>
-      {mode === GLOBAL_SEARCH_MODES.HYBRID &&
-        !isFetching &&
-        !isDebouncing &&
-        searchResults?.semanticStatus === GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE && (
-          <p role="status" className="px-2 py-1 text-xs text-neutral-600">
-            {t("globalSearch.semanticUnavailable")}
-          </p>
-        )}
-      {mode === GLOBAL_SEARCH_MODES.HYBRID &&
-        !isFetching &&
-        !isDebouncing &&
-        searchResults?.semanticStatus === GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING && (
-          <p role="status" className="px-2 py-1 text-xs text-neutral-600">
-            {t("globalSearch.semanticPending")}
-          </p>
-        )}
+      {semanticNotice && (
+        <p
+          role="status"
+          className="mx-2.5 mb-2 border-l-2 border-primary-200 py-1 pl-3 text-xs leading-5 text-neutral-600"
+        >
+          {semanticNotice}
+        </p>
+      )}
       <GlobalSearchContent
-        tabsToDisplay={tabsToDisplay}
+        isFetching={isPending}
+        results={results}
+        administrative={administrative}
         onSelect={onSelect}
         activeIndex={activeIndex}
         setTotalItems={setTotalItems}
+        query={debouncedSearch}
+        isAiRanked={isAiRanked}
+        emptyAction={
+          isAiRanked && onBackToKeywords
+            ? { label: t("globalSearch.backToKeywords"), onClick: onBackToKeywords }
+            : undefined
+        }
       />
     </>
   );

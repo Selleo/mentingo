@@ -20,12 +20,30 @@
     "readyWorkflow": "Trigger, email template, and tags included",
     "useTemplate": "Use template"
   },
+  "loginMethods": {
+    "title": "Login methods",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Magic link",
+    "password": "Password",
+    "description": "Choose how people in your organization can sign in.",
+    "goToConfiguration": "Go to configuration",
+    "notConfiguredTooltip": "Add all required environment variables to enable this login method.",
+    "errors": {
+      "disabled": "This login method is disabled.",
+      "missingConfiguration": "Add this provider's credentials in environment settings first.",
+      "lastMethod": "Keep at least one usable login method enabled.",
+      "save": "Unable to save login methods.",
+      "load": "Unable to load login methods."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Platform logo",
     "title": "Connect {{clientName}} to Mentingo?",
     "description": "This assistant can use Mentingo with your current permissions.",
     "searchDescription": "Allow this assistant to search accessible course metadata, knowledge articles, news and Q&A, and return links to Mentingo. It cannot modify content, retrieve lesson content or use administration tools.",
-    "studentDescription": "Student access only: search and read published articles, news, Q&A and accessible course metadata. No lessons, private files, drafts, administration or changes. All Slack users share the connected account’s learner access.",
+    "studentDescription": "Read-only learner access: search courses and lessons, browse chapters, and read authored lesson text in free public courses, or public and private courses this account is actively enrolled in. Paid public course listings remain visible. Administrators follow the same rules. No drafts, archived courses, changes, quiz answers, AI prompts or file URLs. Published articles, news and Q&A are also available. All Slack users share the connected account’s learner access.",
     "accountDescription": "Allow this assistant to use the Mentingo tools available to your account, including reading and making changes. Your current permissions and organisation settings always apply. Review the account and redirect address before allowing access.",
     "explicitDescription": "Review the requested permissions below. These scopes limit the assistant’s access within your current account permissions; read scopes for management tools can include drafts and administration data.",
     "requestedScopes": "Requested permissions",
@@ -70,7 +88,8 @@
       "embeddingUnavailable": "AI document processing is unavailable. Try again when it is configured.",
       "unsupportedVersion": "This Mentingo package version is not supported.",
       "missingAsset": "The Mentingo package is missing a required file.",
-      "invalidArchive": "This ZIP is not a valid Mentingo package."
+      "invalidArchive": "This ZIP is not a valid Mentingo package.",
+      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace."
     }
   },
   "aiConversations": {
@@ -1497,11 +1516,10 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "AI search",
+    "aiSearch": "Search with AI",
     "hybridSearch": "Hybrid search",
     "backToKeywords": "Back to keyword search",
     "semanticUnavailable": "Semantic search is temporarily unavailable. Showing keyword matches.",
-    "semanticPending": "Some content is still being indexed. Results may be incomplete.",
     "searchFailed": "Search failed. Please try again.",
     "clear": "Clear search",
     "loading": "Searching…",
@@ -1513,6 +1531,21 @@
     "navigate": "Navigate",
     "goTo": "Go to",
     "close": "Close",
+    "contentResults": "Learning content",
+    "aiTryAgain": "Try describing what you need in other words, or go back to keyword search.",
+    "searchInDescriptionWithAi": "Type a title to jump to it, or describe what you need and search with AI.",
+    "types": {
+      "course": "Course",
+      "lesson": "Lesson",
+      "learningPath": "Development path",
+      "news": "News",
+      "article": "Article",
+      "qa": "Q&A",
+      "users": "User",
+      "groups": "Group",
+      "categories": "Category"
+    },
+    "moreInCourse": "+{{count}} more in this course",
     "entries": {
       "users": "Users",
       "categories": "Categories",
@@ -1683,6 +1716,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Microsoft Calendar",
+        "contentMarketplace": "Content marketplace",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1694,6 +1729,8 @@
         "bunny": "Stream videos and deliver content efficiently",
         "google_authorization": "Allow users to sign in with their Google account",
         "microsoft_authorization": "Allow users to sign in with their Microsoft account",
+        "microsoft_calendar": "Sync live training sessions to Microsoft Outlook calendars.",
+        "contentMarketplace": "Discover and import ready-made courses from the content marketplace.",
         "slack_authorization": "Allow users to sign in with their Slack account",
         "openAI": "Enable AI Mentor features",
         "luma": "Enable AI Course Generation features",
@@ -2239,6 +2276,7 @@
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
         "phishing_report_read": "View phishing simulation reports.",
+        "content_marketplace_browse": "Browse the content marketplace and copy its courses (copying also needs course creation).",
         "account_read_self": "View their own account details.",
         "account_update_self": "Edit their own account details.",
         "user_read_self": "View their own user profile.",
@@ -2512,12 +2550,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Microsoft Calendar Client Secret"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth Enabled (true/false)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth Enabled (true/false)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI API Key"
       },
@@ -2543,12 +2575,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Google Client Secret"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth Enabled (true/false)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth Enabled (true/false)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe Webhook Secret"
       },
@@ -2563,12 +2589,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth Enabled (true/false)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth Enabled (true/false)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -4004,8 +4024,6 @@
   },
   "loginView": {
     "header": "Login",
-    "subHeader": "Enter your email below to login to your account",
-    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"
@@ -4120,16 +4138,24 @@
       },
       "featuredCourse": {
         "label": "Featured course",
-        "none": "Choose featured course",
         "search": "Search published courses...",
         "empty": "No published courses found",
-        "clear": "Clear featured course",
         "loadMore": "Load more courses",
         "updated": "Featured course updated",
-        "updateFailed": "Could not update featured course"
+        "updateFailed": "Could not update featured course",
+        "change": "Change featured",
+        "automatic": "Automatic (most popular course)",
+        "dialogDescription": "Pick the published course learners see first on the courses page.",
+        "clickToChange": "Click to change"
       },
       "lessonsCount_one": "{{count}} lesson",
-      "lessonsCount_other": "{{count}} lessons"
+      "lessonsCount_other": "{{count}} lessons",
+      "inlineEdit": {
+        "addCourse": "Add course",
+        "addCourseTo": "Add course to {{category}}",
+        "addCategory": "Add category",
+        "categoryPlaceholder": "Category name"
+      }
     }
   },
   "studentQuizSummaryView": {
@@ -4556,7 +4582,8 @@
       "courseListLayoutClassic": "Classic",
       "courseListLayoutModern": "Modern",
       "courseListLayoutClassicDescription": "Traditional course grid layout",
-      "courseListLayoutModernDescription": "Hero section with featured courses",
+      "courseListLayoutModernDescription": "Hero section with featured courses and more details, like estimated learning time",
+      "courseListLayoutRecommended": "Recommended",
       "courseListLayoutPreview": {
         "continueLearning": "Continue learning",
         "topCourses": "Top 5 courses",
@@ -5237,6 +5264,13 @@
     "adminLearningPathEditor": "Development Path Editor"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Start path",
+      "continue": "Continue path",
+      "review": "Review path",
+      "coursesCount_one": "{{count}} course",
+      "coursesCount_other": "{{count}} courses"
+    },
     "title": "Development Paths",
     "description": "Browse assigned development paths and continue through their ordered course sequences.",
     "searchPlaceholder": "Search development paths",
@@ -5348,6 +5382,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "General",
+      "certificate": "Certificate",
+      "export": "Export"
+    },
     "title": "Development Paths",
     "importPackage": {
       "title": "Import development path"
@@ -5429,6 +5468,14 @@
       "tooltip": "This development path base language is {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Add courses to the path",
+      "addDialogDescription": "Select one or more courses. They will be added at the end of the path.",
+      "searchPlaceholder": "Search courses",
+      "noSearchResults": "No courses match your search.",
+      "noAvailableCourses": "All available courses are already in this path.",
+      "selectedCount_one": "{{count}} course selected",
+      "selectedCount_other": "{{count}} courses selected",
+      "addSelected": "Add selected ({{count}})",
       "select": "Select a course",
       "add": "Add course",
       "drag": "Drag to reorder course",
@@ -5839,6 +5886,32 @@
     "permissionsUpdated": "Your permissions were updated. Refreshing your session to apply new access.",
     "refreshFailed": "Your permissions changed, but the session refresh failed. Please sign in again."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Your session has expired",
+      "description": "Log in again to continue where you left off."
+    },
+    "forbidden": {
+      "title": "You don't have access",
+      "description": "You don't have permission to view this page. Contact your administrator if you think this is a mistake."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for doesn't exist or has been moved."
+    },
+    "connection": {
+      "title": "Connection problem",
+      "description": "We couldn't reach the server. Check your internet connection and try again."
+    },
+    "unknown": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Try again in a moment."
+    },
+    "action": {
+      "logIn": "Log in",
+      "tryAgain": "Try again"
+    }
+  },
   "tenantInactive": {
     "title": "Organization Disabled",
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
@@ -5877,7 +5950,8 @@
       "ownerInactive": "API key owner is no longer active",
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
-      "missingTenantIdHeader": "Missing X-Tenant-Id header"
+      "missingTenantIdHeader": "Missing X-Tenant-Id header",
+      "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)"
     }
   },
   "courseDuplication": {
@@ -6268,6 +6342,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "AI’s response is ready.",
+      "outline_ready": "Your course outline is ready to review.",
+      "changes_ready": "Your course changes are ready to review.",
+      "failed": "AI could not finish this request.",
+      "waiting_author": "AI needs your input to continue.",
+      "view": "View"
+    },
     "changeSet": {
       "ready": {
         "status": "Ready to review",
@@ -6317,6 +6399,7 @@
         "description": "Nothing in your course was changed."
       },
       "more": "+{{count}} more",
+      "readySoFar": "{{count}} ready so far",
       "discard": "Discard",
       "retry": "Try again",
       "heading": "Proposed changes",
@@ -6476,6 +6559,14 @@
       "understandingRequest": "Reading your request…",
       "checkingCourse": "Checking course coherence…",
       "planningOutline": "Planning the course outline…",
+      "outlineProgress": {
+        "drafting": "Drafting outline…",
+        "reviewing": "Checking outline…",
+        "repairing": "Refining outline…",
+        "finalizing": "Preparing outline for review…",
+        "chapters": "Chapters in draft: {{count}}",
+        "iteration": "Pass {{count}}"
+      },
       "planningLessons": "Planning the lessons…",
       "writingLesson": "Writing a lesson…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6529,6 +6620,10 @@
       "questionProgress": "Question {{current}} of {{total}}",
       "questionPrevious": "Previous",
       "questionNext": "Next",
+      "questionNeedsInput": "Needs your input",
+      "questionSubmitHint": "Enter to send · Shift+Enter for a new line",
+      "questionShortcutHint": "Press A–D to choose",
+      "pendingSlowHint": "Reading your course, sources and request to decide the next step. This can take up to a minute.",
       "newChat": "New chat",
       "searchSessions": "Search chats...",
       "noSessionsFound": "No chats found.",
@@ -6560,6 +6655,8 @@
       "scopeSelected": "Selected curriculum",
       "webSearch": "Web search",
       "deepThinking": "Deep research",
+      "deepResearchHelp": "Searches permitted sources in more detail. Does not enable web access.",
+      "webSearchHelp": "Allows searching public websites.",
       "strictSourceMode": "Only my sources",
       "strictSourceModeHelp": "Prompt and attached files only",
       "back": "Back"
@@ -6636,9 +6733,11 @@
       "contentPending": "The content for this lesson hasn’t been generated yet.",
       "readOnly": "Draft preview is read-only until you apply it."
     },
-    "openWorkspace": "Generate with AI",
+    "openWorkspace": "Edit with AI",
+    "createWorkspace": "Create with AI",
     "openLegacyDraft": "Continue legacy generation draft",
     "activityRail": {
+      "inProgress": "Working… Progress will update when the next step finishes.",
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
@@ -6665,7 +6764,6 @@
       "moreToolUpdates": "+{{count}} more tool updates",
       "searchQueries": "Search queries",
       "moreSearchQueries": "+{{count}} more queries",
-      "completedResearchSteps": "Research steps complete: {{count}}",
       "chapterStatus": {
         "failed": "Failed",
         "pending": "waiting",
@@ -8091,6 +8189,57 @@
       "wrongNumberOfRoots": "Automation can have only 1 root",
       "treeNotConnected": "Not all provided steps are connected with each other",
       "bulkInsertFailed": "Could not update automation steps"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Category / topic",
+    "allCategories": "All categories",
+    "duration": "Duration",
+    "anyDuration": "Any duration",
+    "clearFilters": "Clear filters",
+    "durations": {
+      "short": "Under 1 hour",
+      "medium": "1–3 hours",
+      "long": "Over 3 hours"
+    },
+    "discover": "Discover courses to build skills across your organization.",
+    "search": "Search courses, topics or skills…",
+    "clearSearch": "Clear search",
+    "recentTitle": "Recently updated",
+    "recentDescription": "Explore the latest course updates in the marketplace.",
+    "recentBadge": "Recently updated",
+    "allCourses": "All courses",
+    "results": "Courses found: {{count}}",
+    "sortBy": "Sort by",
+    "sortRecent": "Recently updated",
+    "sortTitle": "Title (A–Z)",
+    "noResults": "No courses match your search. Try a different keyword.",
+    "addToCourses": "Add to courses",
+    "title": "Content marketplace",
+    "browseAll": "Browse all",
+    "description": "Browse curated courses and copy them into your organization.",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "unavailable": "The content marketplace is not enabled for this organization. Contact your administrator.",
+    "serviceError": "The content marketplace is unavailable. Please try again.",
+    "empty": "No courses are available in the marketplace yet.",
+    "updated": "Updated {{date}}",
+    "copying": "Copying the course…",
+    "copyNotice": "The course is added as a shared course that can't be edited. Sync updates it to the latest version and keeps learners' progress.",
+    "copyComplete": "The course was copied into your organization.",
+    "copyUpdated": "Your copy of this course was updated.",
+    "copyFailed": "The course could not be copied. Please try again.",
+    "openCourse": "Open course",
+    "sync": "Sync",
+    "syncing": "Syncing…",
+    "syncNotice": "Update your copy to the latest version of this course.",
+    "firstPage": "Back to first page",
+    "error": {
+      "invalidQuery": "Invalid marketplace search or pagination parameters.",
+      "unavailable": "The content marketplace is not available for this organization.",
+      "listingNotFound": "This marketplace course was not found.",
+      "thumbnailNotFound": "This marketplace course has no thumbnail.",
+      "serviceError": "The content marketplace could not complete the request. Try again later."
     }
   }
 }

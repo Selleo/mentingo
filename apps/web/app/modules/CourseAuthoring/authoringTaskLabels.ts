@@ -1,19 +1,34 @@
 import { match } from "ts-pattern";
 
+import { authoringOutlineProgressLabel } from "./authoringOutlineProgress";
+import {
+  AUTHORING_OUTLINE_PHASE,
+  AUTHORING_TASK_KIND,
+  AUTHORING_TASK_STATUS,
+  AUTHORING_WORK_PROGRESS_STAGE,
+} from "./courseAuthoring.constants";
+
 import type { AuthoringTask } from "./courseAuthoring.types";
 
 /** Names what the task is doing from its kind, falling back to the reported phase. */
-export const authoringPhaseLabel = (task: AuthoringTask, t: (key: string) => string) => {
+export const authoringPhaseLabel = (
+  task: AuthoringTask,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
   if (task.phase === "preparing") return t("courseAuthoring.conversation.preparingResponse");
-  if (task.status === "queued" || task.status === "waiting_dependencies") {
+  if (
+    task.status === AUTHORING_TASK_STATUS.QUEUED ||
+    task.status === AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES
+  ) {
     return t("courseAuthoring.conversation.preparingResponse");
   }
-  if (task.status === "waiting_author") return t("courseAuthoring.conversation.waiting");
-  if (task.workProgress?.stage === "recovering")
+  if (task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR)
+    return t("courseAuthoring.conversation.waiting");
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.RECOVERING)
     return t("courseAuthoring.activityRail.recoveringFailedParts");
-  if (task.workProgress?.stage === "repairing") {
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.REPAIRING) {
     return t(
-      task.kind === "lesson"
+      task.kind === AUTHORING_TASK_KIND.LESSON
         ? "courseAuthoring.activityRail.taskKind.revisingLesson"
         : "courseAuthoring.activityRail.taskKind.revisingLessonPlan",
     );
@@ -21,34 +36,65 @@ export const authoringPhaseLabel = (task: AuthoringTask, t: (key: string) => str
   if (task.phase === "researching" || task.phase === "source_working") {
     return t("courseAuthoring.conversation.readingSources");
   }
-  if (task.kind === "course_review" || task.phase === "reviewing") {
+  if (
+    task.kind === AUTHORING_TASK_KIND.PLAN &&
+    task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE &&
+    task.workProgress.outlinePhase
+  ) {
+    return authoringOutlineProgressLabel(task.workProgress, t);
+  }
+  if (
+    task.kind === AUTHORING_TASK_KIND.COURSE_REVIEW ||
+    task.phase === AUTHORING_OUTLINE_PHASE.REVIEWING
+  ) {
     return t("courseAuthoring.conversation.checkingCourse");
   }
-  if (task.workProgress?.stage === "validation") {
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.VALIDATION) {
     return t(
-      task.kind === "lesson"
+      task.kind === AUTHORING_TASK_KIND.LESSON
         ? "courseAuthoring.activityRail.taskKind.checkingLesson"
         : "courseAuthoring.activityRail.taskKind.checkingLessonPlan",
     );
   }
-  if (task.workProgress?.stage === "outline" || task.kind === "plan") {
+  if (
+    task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.OUTLINE ||
+    task.kind === AUTHORING_TASK_KIND.PLAN
+  ) {
     return t("courseAuthoring.conversation.planningOutline");
   }
-  if (task.workProgress?.stage === "lesson_planning" || task.kind === "detailed_plan") {
+  if (
+    task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.LESSON_PLANNING ||
+    task.kind === AUTHORING_TASK_KIND.DETAILED_PLAN
+  ) {
     return t("courseAuthoring.conversation.planningLessons");
   }
-  if (task.workProgress?.stage === "lesson_generation") {
+  if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.LESSON_GENERATION) {
     return t("courseAuthoring.conversation.writingLesson");
   }
   const key = match(task.kind ?? task.phase)
-    .with("route", "route_working", () => "conversation.understandingRequest")
-    .with("plan", () => "conversation.planningOutline")
-    .with("detailed_plan", () => "conversation.planningLessons")
+    .with(AUTHORING_TASK_KIND.ROUTE, "route_working", () => "conversation.understandingRequest")
+    .with(AUTHORING_TASK_KIND.PLAN, () => "conversation.planningOutline")
+    .with(AUTHORING_TASK_KIND.DETAILED_PLAN, () => "conversation.planningLessons")
     .with("planning", () => "activityRail.taskKind.planningCourse")
-    .with("lesson", "generating_lesson", "writing", () => "conversation.writingLesson")
-    .with("edit", "updating_course", "editing", () => "conversation.updatingCourse")
-    .with("source", "source_working", "researching", () => "conversation.readingSources")
-    .with("asset", "asset_working", () => "conversation.creatingVisual")
+    .with(
+      AUTHORING_TASK_KIND.LESSON,
+      "generating_lesson",
+      "writing",
+      () => "conversation.writingLesson",
+    )
+    .with(
+      AUTHORING_TASK_KIND.EDIT,
+      "updating_course",
+      "editing",
+      () => "conversation.updatingCourse",
+    )
+    .with(
+      AUTHORING_TASK_KIND.SOURCE,
+      "source_working",
+      "researching",
+      () => "conversation.readingSources",
+    )
+    .with(AUTHORING_TASK_KIND.ASSET, "asset_working", () => "conversation.creatingVisual")
     .otherwise(() => "conversation.working");
   return t(`courseAuthoring.${key}`);
 };

@@ -16,6 +16,7 @@ import _ from "lodash";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AI_MENTOR_REASONING_EFFORT, MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { voiceDeliverySentenceSchema } from "src/ai/schemas/voice-delivery.schema";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
@@ -44,6 +45,7 @@ import {
   TranslationStructureError,
   validateTranslationStructure,
 } from "src/ai/utils/translation-output";
+import { streamVoiceSentenceMarkup } from "src/ai/utils/voice-delivery";
 import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
@@ -61,11 +63,12 @@ import type { ModelMessage } from "ai";
 import type {
   AiStreamMessageInput,
   AiMentorChatStreamResult,
-  AiStreamTextResult,
+  AiCoreMentorStreamResult,
   AiTranscriptionResult,
   AiUiMessageStream,
 } from "src/ai/ai-chat.types";
 import type { AiPracticeReplayMessage } from "src/ai/ai-practice.types";
+import type { VoiceDeliverySentence } from "src/ai/schemas/voice-delivery.schema";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -325,7 +328,7 @@ export class AiService {
 
             return {
               ...stream,
-              textStream: this.persistLumaMentorChatStream({
+              textStream: this.persistMentorChatStream({
                 stream: stream.textStream,
                 data,
                 model,
@@ -804,12 +807,12 @@ export class AiService {
       topP: number;
     };
     persistOnFinish: boolean;
-  }): Promise<AiStreamTextResult> {
+  }): Promise<AiCoreMentorStreamResult> {
     const provider = await this.promptService.getOpenAI();
-    const { streamText } = await loadAiSdk();
+    const { streamText, Output, jsonSchema } = await loadAiSdk();
     const { instructions, messages } = this.toCorePrompt(prompt);
 
-    return streamText({
+    const options = {
       model: provider(model),
       instructions,
       messages,
@@ -823,6 +826,27 @@ export class AiService {
           }
         : generationConfig),
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CHAT),
+    };
+    if (isVoiceMentor) {
+      const response = streamText({
+        ...options,
+        output: Output.array({
+          element: jsonSchema<VoiceDeliverySentence>(() => voiceDeliverySentenceSchema),
+        }),
+      });
+      const stream = streamVoiceSentenceMarkup(
+        response.elementStream,
+        data.abortSignal,
+        () => response.output,
+      );
+      return {
+        textStream: persistOnFinish
+          ? this.persistMentorChatStream({ stream, data, model, currentUser, isVoiceMentor })
+          : stream,
+      };
+    }
+    const response = streamText({
+      ...options,
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 
@@ -846,9 +870,10 @@ export class AiService {
         trace.getActiveSpan()?.end();
       },
     });
+    return { textStream: response.textStream, coreStream: response };
   }
 
-  private async *persistLumaMentorChatStream({
+  private async *persistMentorChatStream({
     stream,
     data,
     model,

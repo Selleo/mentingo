@@ -16,6 +16,50 @@ vi.mock("~/api/queries", () => ({
 }));
 
 describe("ChatMessage", () => {
+  it.each([
+    { parts: [] },
+    { parts: [{ type: "text" as const, text: "" }] },
+    { parts: [{ type: "text" as const, text: " \n " }] },
+  ])("does not render an empty assistant placeholder with parts $parts", ({ parts }) => {
+    renderWith().render(
+      <ChatMessage
+        id="pending-reply"
+        {...{ role: "assistant" as const }}
+        aiName="Adam"
+        parts={parts}
+        testId="pending-reply"
+      />,
+    );
+
+    expect(screen.queryByTestId("pending-reply")).not.toBeInTheDocument();
+    expect(screen.queryByText("Adam")).not.toBeInTheDocument();
+  });
+
+  it("keeps custom assistant content without requiring text", () => {
+    renderWith().render(
+      <ChatMessage
+        id="custom-assistant"
+        {...{ role: "assistant" as const }}
+        aiName="Adam"
+        contentNode={<span>Custom reply</span>}
+      />,
+    );
+    expect(screen.getByText("Custom reply")).toBeInTheDocument();
+    expect(screen.getByText("Adam")).toBeInTheDocument();
+  });
+
+  it("renders an assistant reply supplied through content", () => {
+    renderWith().render(
+      <ChatMessage
+        id="reply"
+        {...{ role: "assistant" as const }}
+        aiName="Adam"
+        content="Odpowiedź mentora"
+      />,
+    );
+    expect(screen.getByText("Odpowiedź mentora")).toBeInTheDocument();
+  });
+
   it("keeps the default user message surface", () => {
     renderWith().render(
       <ChatMessage

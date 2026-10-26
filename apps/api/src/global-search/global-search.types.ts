@@ -3,6 +3,7 @@ import type {
   SEARCH_DOCUMENT_WEIGHTS,
   SEARCH_ENTITY_TYPES,
 } from "./global-search.constants";
+import type { GlobalSearchResult } from "./schemas/global-search.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
@@ -91,4 +92,27 @@ export type GlobalSearchLessonAccess =
   (typeof GLOBAL_SEARCH_LESSON_ACCESS)[keyof typeof GLOBAL_SEARCH_LESSON_ACCESS];
 
 /** Trusted integration projection and learner visibility controls. */
-export type GlobalSearchReadOptions = { contentOnly?: boolean; learnerOnly?: boolean };
+export type GlobalSearchReadOptions = {
+  contentOnly?: boolean;
+  learnerOnly?: boolean;
+  /** Trusted MCP student:read opt-in; does not broaden regular learner or legacy search. */
+  includeLearnerLessons?: boolean;
+};
+
+type GlobalSearchCourseRow = GlobalSearchResult["allCourses"][number];
+
+/** A lesson row with the parent course fields needed when the course itself did not match. */
+export type LessonWithParentRow = GlobalSearchResult["lessons"][number] & {
+  courseThumbnailUrl?: string | null;
+  courseCategory?: string | null;
+};
+
+export type SearchResultTreeInput = {
+  /** Course lists in preference order; the first occurrence of a course wins. */
+  courseLists: GlobalSearchCourseRow[][];
+  lessons: LessonWithParentRow[];
+  learningPaths: GlobalSearchResult["learningPaths"];
+  news: GlobalSearchResult["news"];
+  articles: GlobalSearchResult["articles"];
+  qa: GlobalSearchResult["qa"];
+};

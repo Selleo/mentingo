@@ -1,7 +1,7 @@
 import { RESOURCE_VISIBILITY, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
 
-import { ALLOWED_FILE_TYPES } from "src/ingestion/ingestion.config";
+import { SEARCH_EXTRACTABLE_FILE_TYPES } from "src/ingestion/ingestion.config";
 import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-library.constants";
 
 import { SEARCH_ENTITY_TYPES } from "./global-search.constants";
@@ -44,7 +44,7 @@ export function semanticSearchResourceSources(tenantId: string) {
       )})
         AND r.archived = false AND r.visibility <> ${RESOURCE_VISIBILITY.HIDDEN}
         AND r.content_type IN (${sql.join(
-          ALLOWED_FILE_TYPES.map((type) => sql`${type}`),
+          SEARCH_EXTRACTABLE_FILE_TYPES.map((type) => sql`${type}`),
           sql`, `,
         )})
         AND locale.lang IN (${sql.join(

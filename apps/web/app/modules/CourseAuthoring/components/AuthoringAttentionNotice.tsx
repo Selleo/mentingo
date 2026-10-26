@@ -12,6 +12,7 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 
+import { AUTHORING_CONNECTION_STATE, AUTHORING_TASK_STATUS } from "../courseAuthoring.constants";
 import { projectWorkspaceRecords } from "../courseAuthoring.records";
 import { useCourseAuthoringSocket } from "../hooks/useCourseAuthoringSocket";
 
@@ -47,9 +48,9 @@ export const AuthoringAttentionNotice = ({ courseId, language, onOpen }: Props) 
   const projection = projectWorkspaceRecords(session?.records ?? [], session?.tasks ?? []);
   const needsInput =
     projection.questions.length > 0 ||
-    projection.assetTasks.some((task) => task.status === "waiting_author");
+    projection.assetTasks.some((task) => task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR);
   // An offline socket includes permission revocation. Do not expose cached session data after access is lost.
-  if (!needsInput || connection === "offline") return null;
+  if (!needsInput || connection === AUTHORING_CONNECTION_STATE.OFFLINE) return null;
   return (
     <div className="fixed bottom-5 right-5 z-40" role="status" aria-live="polite">
       <Button type="button" onClick={onOpen} className="gap-2 shadow-lg">

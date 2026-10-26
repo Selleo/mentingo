@@ -8,4 +8,5 @@ export const SEMANTIC_SEARCH_ENTITY_LIMIT = 50;
 export const SEMANTIC_SEARCH_INITIAL_CANDIDATES = 200;
 export const SEMANTIC_SEARCH_MAX_CANDIDATE_BATCHES = 4;
 export const SEMANTIC_SEARCH_HNSW_EF_SEARCH = 200;
-export const SEMANTIC_SEARCH_MAX_DISTANCE = 0.65;
+// Provisional precision-first floor (cosine similarity >= 0.55); calibrate against judged queries.
+export const SEMANTIC_SEARCH_MAX_DISTANCE = 0.45;

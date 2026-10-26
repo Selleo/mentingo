@@ -59,7 +59,10 @@ export class FileGuard {
   }
 
   static async getFileType(file: Express.Multer.File | Buffer) {
-    const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>("file-type");
+    // Resolve the API dependency through an explicit export supported by Node and Jest.
+    const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>(
+      require.resolve("file-type/node"),
+    );
 
     return fileTypeFromBuffer(file instanceof Buffer ? file : file.buffer);
   }

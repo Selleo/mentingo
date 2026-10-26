@@ -20,12 +20,30 @@
     "readyWorkflow": "Zawiera wyzwalacz, szablon e-mail i znaczniki",
     "useTemplate": "Użyj szablonu"
   },
+  "loginMethods": {
+    "title": "Metody logowania",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "slack": "Slack",
+    "magicLink": "Link do logowania",
+    "password": "Hasło",
+    "description": "Wybierz, w jaki sposób osoby w Twojej organizacji mogą się logować.",
+    "goToConfiguration": "Przejdź do konfiguracji",
+    "notConfiguredTooltip": "Dodaj wszystkie wymagane zmienne środowiskowe, aby włączyć tę metodę logowania.",
+    "errors": {
+      "disabled": "Ta metoda logowania jest wyłączona.",
+      "missingConfiguration": "Najpierw dodaj dane uwierzytelniające dostawcy w ustawieniach środowiska.",
+      "lastMethod": "Pozostaw co najmniej jedną działającą metodę logowania.",
+      "save": "Nie udało się zapisać metod logowania.",
+      "load": "Nie udało się pobrać metod logowania."
+    }
+  },
   "mcpConnection": {
     "platformLogo": "Logo platformy",
     "title": "Połączyć {{clientName}} z Mentingo?",
     "description": "Ten asystent może korzystać z Mentingo zgodnie z Twoimi uprawnieniami.",
     "searchDescription": "Zezwól temu asystentowi na wyszukiwanie dostępnych informacji o kursach, artykułów wiedzy, aktualności oraz pytań i odpowiedzi i zwracanie linków do Mentingo. Nie może zmieniać treści, pobierać treści lekcji ani używać narzędzi administracyjnych.",
-    "studentDescription": "Tylko dostęp ucznia: wyszukiwanie i odczyt opublikowanych artykułów, aktualności, pytań i odpowiedzi oraz dostępnych metadanych kursów. Bez lekcji, prywatnych plików, wersji roboczych, administracji i zmian. Wszyscy użytkownicy Slacka korzystają z dostępu ucznia połączonego konta.",
+    "studentDescription": "Dostęp ucznia tylko do odczytu: wyszukiwanie kursów i lekcji, przeglądanie rozdziałów oraz czytanie treści lekcji w bezpłatnych kursach publicznych lub w kursach publicznych i prywatnych, na które to konto ma aktywny zapis. Informacje o płatnych kursach publicznych pozostają widoczne. Administratorów obowiązują te same zasady. Bez wersji roboczych, kursów archiwalnych, zmian, odpowiedzi do quizów, instrukcji AI ani adresów plików. Dostępne są też opublikowane artykuły, aktualności i pytania i odpowiedzi. Wszyscy użytkownicy Slacka korzystają z dostępu ucznia połączonego konta.",
     "accountDescription": "Zezwól temu asystentowi na używanie narzędzi Mentingo dostępnych dla Twojego konta, w tym odczytywanie danych i wprowadzanie zmian. Zawsze obowiązują Twoje aktualne uprawnienia i ustawienia organizacji. Przed udzieleniem dostępu sprawdź konto i adres przekierowania.",
     "explicitDescription": "Sprawdź uprawnienia poniżej. Ograniczają one dostęp asystenta w ramach uprawnień Twojego konta; odczyt w narzędziach zarządzania może obejmować wersje robocze i dane administracyjne.",
     "requestedScopes": "Żądane uprawnienia",
@@ -70,7 +88,8 @@
       "embeddingUnavailable": "Przetwarzanie dokumentów AI jest niedostępne.",
       "unsupportedVersion": "Ta wersja pakietu Mentingo nie jest obsługiwana.",
       "missingAsset": "W pakiecie Mentingo brakuje wymaganego pliku.",
-      "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo."
+      "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo.",
+      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z marketplace."
     }
   },
   "aiConversations": {
@@ -1449,6 +1468,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Rozpocznij ścieżkę",
+      "continue": "Kontynuuj ścieżkę",
+      "review": "Powtórz ścieżkę",
+      "coursesCount_one": "{{count}} kurs",
+      "coursesCount_few": "{{count}} kursy",
+      "coursesCount_many": "{{count}} kursów",
+      "coursesCount_other": "{{count}} kursu"
+    },
     "title": "Ścieżki Rozwoju",
     "description": "Przeglądaj przypisane ścieżki rozwoju i kontynuuj uporządkowane sekwencje kursów.",
     "searchPlaceholder": "Szukaj ścieżek rozwoju",
@@ -1560,6 +1588,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Ogólne",
+      "certificate": "Certyfikat",
+      "export": "Eksport"
+    },
     "title": "Ścieżki Rozwoju",
     "importPackage": {
       "title": "Importuj ścieżkę rozwoju"
@@ -1641,6 +1674,16 @@
       "tooltip": "Język bazowy tej ścieżki to {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Dodaj kursy do ścieżki",
+      "addDialogDescription": "Wybierz jeden lub więcej kursów. Zostaną dodane na końcu ścieżki.",
+      "searchPlaceholder": "Szukaj kursów",
+      "noSearchResults": "Żaden kurs nie pasuje do wyszukiwania.",
+      "noAvailableCourses": "Wszystkie dostępne kursy są już w tej ścieżce.",
+      "selectedCount_one": "Wybrano {{count}} kurs",
+      "selectedCount_few": "Wybrano {{count}} kursy",
+      "selectedCount_many": "Wybrano {{count}} kursów",
+      "selectedCount_other": "Wybrano {{count}} kursu",
+      "addSelected": "Dodaj wybrane ({{count}})",
       "select": "Wybierz kurs",
       "add": "Dodaj kurs",
       "drag": "Przeciągnij, aby zmienić kolejność kursu",
@@ -1741,11 +1784,10 @@
     }
   },
   "globalSearch": {
-    "aiSearch": "Wyszukiwanie AI",
+    "aiSearch": "Szukaj z AI",
     "hybridSearch": "Wyszukiwanie hybrydowe",
     "backToKeywords": "Wróć do wyszukiwania słów",
     "semanticUnavailable": "Wyszukiwanie semantyczne jest chwilowo niedostępne. Wyświetlamy dopasowania słów.",
-    "semanticPending": "Część treści jest nadal indeksowana. Wyniki mogą być niepełne.",
     "searchFailed": "Wyszukiwanie nie powiodło się. Spróbuj ponownie.",
     "clear": "Wyczyść wyszukiwanie",
     "loading": "Wyszukiwanie…",
@@ -1757,6 +1799,21 @@
     "navigate": "Nawigacja",
     "goTo": "Przejdź do",
     "close": "Zamknij",
+    "contentResults": "Materiały szkoleniowe",
+    "aiTryAgain": "Spróbuj opisać, czego potrzebujesz, innymi słowami lub wróć do wyszukiwania słów.",
+    "searchInDescriptionWithAi": "Wpisz tytuł, aby od razu przejść do treści, lub opisz, czego potrzebujesz, i szukaj z AI.",
+    "types": {
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "learningPath": "Ścieżka rozwoju",
+      "news": "Aktualność",
+      "article": "Artykuł",
+      "qa": "Pytania i odpowiedzi",
+      "users": "Użytkownik",
+      "groups": "Grupa",
+      "categories": "Kategoria"
+    },
+    "moreInCourse": "+{{count}} więcej w tym kursie",
     "entries": {
       "users": "Użytkownicy",
       "categories": "Kategorie",
@@ -1901,6 +1958,8 @@
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
+        "microsoft_calendar": "Kalendarz Microsoft",
+        "contentMarketplace": "Marketplace treści",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1912,6 +1971,8 @@
         "bunny": "Przesyłanie strumieniowe wideo i efektywna dostawa treści",
         "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
+        "microsoft_calendar": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook.",
+        "contentMarketplace": "Odkrywaj i importuj gotowe kursy z marketplace'u treści.",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
         "luma": "Włącz funkcje generowania kursów AI",
@@ -2463,6 +2524,7 @@
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
         "phishing_report_read": "Może przeglądać raporty z symulacji phishingu.",
+        "content_marketplace_browse": "Przeglądanie marketplace treści i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
         "account_read_self": "Może przeglądać własne dane konta.",
         "account_update_self": "Może edytować własne dane konta.",
         "user_read_self": "Może przeglądać własny profil użytkownika.",
@@ -2740,12 +2802,6 @@
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Klucz tajny klienta kalendarza Microsoft"
       },
-      "MICROSOFT_OAUTH_ENABLED": {
-        "label": "Microsoft OAuth Enabled (true/false)"
-      },
-      "VITE_MICROSOFT_OAUTH_ENABLED": {
-        "label": "Vite Microsoft OAuth Enabled (true/false)"
-      },
       "OPENAI_API_KEY": {
         "label": "OpenAI API Key"
       },
@@ -2771,12 +2827,6 @@
       "GOOGLE_CLIENT_SECRET": {
         "label": "Google Client Secret"
       },
-      "GOOGLE_OAUTH_ENABLED": {
-        "label": "Google OAuth Enabled (true/false)"
-      },
-      "VITE_GOOGLE_OAUTH_ENABLED": {
-        "label": "Vite Google OAuth Enabled (true/false)"
-      },
       "STRIPE_WEBHOOK_SECRET": {
         "label": "Stripe Webhook Secret"
       },
@@ -2788,12 +2838,6 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
-      },
-      "SLACK_OAUTH_ENABLED": {
-        "label": "Slack OAuth Enabled (true/false)"
-      },
-      "VITE_SLACK_OAUTH_ENABLED": {
-        "label": "Vite Slack OAuth Enabled (true/false)"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -4246,8 +4290,6 @@
   },
   "loginView": {
     "header": "Logowanie",
-    "subHeader": "Wprowadź swój email, aby zalogować się na swoje konto",
-    "subHeaderSSO": "Zaloguj się za pomocą swojego konta Google/Microsoft",
     "validation": {
       "email": "Nieprawidłowy email",
       "password": "Hasło jest wymagane"
@@ -4363,18 +4405,26 @@
       },
       "featuredCourse": {
         "label": "Wyróżniony kurs",
-        "none": "Wybierz wyróżniony kurs",
         "search": "Szukaj opublikowanych kursów...",
         "empty": "Nie znaleziono opublikowanych kursów",
-        "clear": "Wyczyść wyróżniony kurs",
         "loadMore": "Załaduj więcej kursów",
         "updated": "Wyróżniony kurs został zaktualizowany",
-        "updateFailed": "Nie udało się zaktualizować wyróżnionego kursu"
+        "updateFailed": "Nie udało się zaktualizować wyróżnionego kursu",
+        "change": "Zmień wyróżniony",
+        "automatic": "Automatycznie (najpopularniejszy kurs)",
+        "dialogDescription": "Wybierz opublikowany kurs, który uczestnicy zobaczą jako pierwszy na stronie kursów.",
+        "clickToChange": "Kliknij, aby zmienić"
       },
       "lessonsCount_one": "{{count}} lekcja",
       "lessonsCount_few": "{{count}} lekcje",
       "lessonsCount_many": "{{count}} lekcji",
-      "lessonsCount_other": "{{count}} lekcji"
+      "lessonsCount_other": "{{count}} lekcji",
+      "inlineEdit": {
+        "addCourse": "Dodaj kurs",
+        "addCourseTo": "Dodaj kurs do {{category}}",
+        "addCategory": "Dodaj kategorię",
+        "categoryPlaceholder": "Nazwa kategorii"
+      }
     }
   },
   "studentQuizSummaryView": {
@@ -4843,7 +4893,8 @@
       "courseListLayoutClassic": "Klasyczny",
       "courseListLayoutModern": "Nowoczesny",
       "courseListLayoutClassicDescription": "Tradycyjny układ siatki kursów",
-      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami",
+      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami i dodatkowymi informacjami, np. szacowanym czasem nauki",
+      "courseListLayoutRecommended": "Zalecany",
       "courseListLayoutPreview": {
         "continueLearning": "Kontynuuj naukę",
         "topCourses": "Top 5 kursów",
@@ -5884,6 +5935,32 @@
     "permissionsUpdated": "Twoje uprawnienia zostały zaktualizowane. Odświeżamy sesję, aby zastosować nowe dostępy.",
     "refreshFailed": "Uprawnienia zostały zmienione, ale odświeżenie sesji nie powiodło się. Zaloguj się ponownie."
   },
+  "errorPage": {
+    "sessionExpired": {
+      "title": "Twoja sesja wygasła",
+      "description": "Zaloguj się ponownie, aby kontynuować."
+    },
+    "forbidden": {
+      "title": "Brak dostępu",
+      "description": "Nie masz uprawnień do wyświetlenia tej strony. Jeśli uważasz, że to błąd, skontaktuj się z administratorem."
+    },
+    "notFound": {
+      "title": "Nie znaleziono strony",
+      "description": "Strona, której szukasz, nie istnieje lub została przeniesiona."
+    },
+    "connection": {
+      "title": "Problem z połączeniem",
+      "description": "Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie."
+    },
+    "unknown": {
+      "title": "Coś poszło nie tak",
+      "description": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę."
+    },
+    "action": {
+      "logIn": "Zaloguj się",
+      "tryAgain": "Spróbuj ponownie"
+    }
+  },
   "tenantInactive": {
     "title": "Organizacja wyłączona",
     "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."
@@ -5922,7 +5999,8 @@
       "ownerInactive": "Właściciel klucza API nie jest już aktywny",
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
-      "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+      "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id",
+      "invalidPluginOrigin": "Użyj adresu wtyczki HTTPS bez ścieżki (HTTP localhost jest dozwolony w środowisku deweloperskim)"
     }
   },
   "courseDuplication": {
@@ -6318,6 +6396,14 @@
     }
   },
   "courseAuthoring": {
+    "notifications": {
+      "completed": "AI ma dla Ciebie odpowiedź.",
+      "outline_ready": "Plan Twojego kursu jest gotowy do sprawdzenia.",
+      "changes_ready": "Zmiany w Twoim kursie są gotowe do sprawdzenia.",
+      "failed": "AI nie mogło zakończyć tej prośby.",
+      "waiting_author": "AI potrzebuje Twojej odpowiedzi, aby kontynuować.",
+      "view": "Zobacz"
+    },
     "changeSet": {
       "ready": {
         "status": "Do przejrzenia",
@@ -6367,6 +6453,7 @@
         "description": "Kurs nie został zmieniony."
       },
       "more": "+{{count}} więcej",
+      "readySoFar": "gotowe: {{count}}",
       "discard": "Odrzuć",
       "retry": "Spróbuj ponownie",
       "heading": "Proponowane zmiany",
@@ -6527,6 +6614,14 @@
       "understandingRequest": "Czytanie Twojej prośby…",
       "checkingCourse": "Sprawdzanie spójności kursu…",
       "planningOutline": "Planowanie konspektu kursu…",
+      "outlineProgress": {
+        "drafting": "Tworzenie konspektu…",
+        "reviewing": "Sprawdzanie konspektu…",
+        "repairing": "Dopracowywanie konspektu…",
+        "finalizing": "Przygotowywanie konspektu do przeglądu…",
+        "chapters": "Rozdziały w szkicu: {{count}}",
+        "iteration": "Przebieg {{count}}"
+      },
       "planningLessons": "Planowanie lekcji…",
       "writingLesson": "Pisanie lekcji…",
       "distinctTaskLabel": "{{label}} · {{number}}",
@@ -6580,6 +6675,10 @@
       "questionProgress": "Pytanie {{current}} z {{total}}",
       "questionPrevious": "Poprzednie",
       "questionNext": "Następne",
+      "questionNeedsInput": "Potrzebna Twoja odpowiedź",
+      "questionSubmitHint": "Enter, aby wysłać · Shift+Enter, aby dodać nową linię",
+      "questionShortcutHint": "Naciśnij A–D, aby wybrać",
+      "pendingSlowHint": "Analizuję kurs, źródła i Twoją prośbę, aby wybrać kolejny krok. Może to potrwać do minuty.",
       "newChat": "New chat",
       "searchSessions": "Szukaj czatów...",
       "noSessionsFound": "Nie znaleziono czatów.",
@@ -6610,7 +6709,9 @@
       "scopeWholeCourse": "Cały kurs",
       "scopeSelected": "Wybrany zakres programu",
       "webSearch": "Wyszukiwanie w sieci",
-      "deepThinking": "Dogłębne badanie",
+      "deepThinking": "Pogłębione wyszukiwanie źródeł",
+      "deepResearchHelp": "Dokładniej analizuje dozwolone źródła. Nie włącza dostępu do internetu.",
+      "webSearchHelp": "Zezwala na wyszukiwanie publicznych stron internetowych.",
       "strictSourceMode": "Tylko moje źródła",
       "strictSourceModeHelp": "Tylko polecenie i załączone pliki",
       "back": "Wstecz"
@@ -6687,9 +6788,11 @@
       "contentPending": "Treść tej lekcji nie została jeszcze wygenerowana.",
       "readOnly": "Podgląd wersji roboczej jest tylko do odczytu do czasu zastosowania."
     },
-    "openWorkspace": "Generuj z AI",
+    "openWorkspace": "Edytuj z AI",
+    "createWorkspace": "Twórz z AI",
     "openLegacyDraft": "Kontynuuj starszą wersję roboczą",
     "activityRail": {
+      "inProgress": "Praca trwa… Postęp pojawi się po zakończeniu kolejnego etapu.",
       "retryFailedParts": "Ponów nieudane części",
       "retryProvider": "Ponów połączenie",
       "recoveringFailedParts": "Wznawianie nieudanych części…",
@@ -6718,7 +6821,6 @@
       "moreToolUpdates": "+{{count}} kolejnych aktualizacji narzędzi",
       "searchQueries": "Wyszukiwane hasła",
       "moreSearchQueries": "+{{count}} kolejnych zapytań",
-      "completedResearchSteps": "Ukończone kroki wyszukiwania: {{count}}",
       "chapterStatus": {
         "failed": "Niepowodzenie",
         "pending": "oczekuje",
@@ -8146,6 +8248,57 @@
     "picker": {
       "search": "Szukaj",
       "empty": "Brak wyników"
+    }
+  },
+  "contentMarketplace": {
+    "category": "Kategoria / temat",
+    "allCategories": "Wszystkie kategorie",
+    "duration": "Czas trwania",
+    "anyDuration": "Dowolny czas",
+    "clearFilters": "Wyczyść filtry",
+    "durations": {
+      "short": "Poniżej 1 godziny",
+      "medium": "1–3 godziny",
+      "long": "Powyżej 3 godzin"
+    },
+    "discover": "Odkrywaj kursy, które rozwijają umiejętności w Twojej organizacji.",
+    "search": "Szukaj kursów, tematów lub umiejętności…",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "recentTitle": "Ostatnio zaktualizowane",
+    "recentDescription": "Poznaj najnowsze aktualizacje kursów w katalogu.",
+    "recentBadge": "Ostatnio zaktualizowany",
+    "allCourses": "Wszystkie kursy",
+    "results": "Znalezione kursy: {{count}}",
+    "sortBy": "Sortuj według",
+    "sortRecent": "Ostatnia aktualizacja",
+    "sortTitle": "Tytuł (A–Z)",
+    "noResults": "Brak kursów pasujących do wyszukiwania. Spróbuj innego słowa.",
+    "addToCourses": "Dodaj do kursów",
+    "title": "Marketplace treści",
+    "browseAll": "Przeglądaj wszystkie",
+    "description": "Przeglądaj wybrane kursy i kopiuj je do swojej organizacji.",
+    "loading": "Ładowanie…",
+    "retry": "Spróbuj ponownie",
+    "unavailable": "Marketplace treści nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
+    "serviceError": "Marketplace treści jest niedostępny. Spróbuj ponownie.",
+    "empty": "W marketplace nie ma jeszcze żadnych kursów.",
+    "updated": "Zaktualizowano {{date}}",
+    "copying": "Kopiowanie kursu…",
+    "copyNotice": "Kurs zostanie dodany jako kurs udostępniony, którego nie można edytować. Synchronizacja aktualizuje go do najnowszej wersji i zachowuje postępy uczestników.",
+    "copyComplete": "Kurs został skopiowany do Twojej organizacji.",
+    "copyUpdated": "Twoja kopia tego kursu została zaktualizowana.",
+    "copyFailed": "Nie udało się skopiować kursu. Spróbuj ponownie.",
+    "openCourse": "Otwórz kurs",
+    "sync": "Synchronizuj",
+    "syncing": "Synchronizowanie…",
+    "syncNotice": "Zaktualizuj swoją kopię do najnowszej wersji tego kursu.",
+    "firstPage": "Wróć do pierwszej strony",
+    "error": {
+      "invalidQuery": "Nieprawidłowe parametry wyszukiwania lub stronicowania katalogu.",
+      "unavailable": "Marketplace treści nie jest dostępny dla tej organizacji.",
+      "listingNotFound": "Nie znaleziono tego kursu w marketplace.",
+      "thumbnailNotFound": "Ten kurs z marketplace nie ma miniatury.",
+      "serviceError": "Marketplace treści nie mógł zrealizować żądania. Spróbuj ponownie później."
     }
   }
 }

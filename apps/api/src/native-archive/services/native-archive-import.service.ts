@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
-import { LESSON_TYPES, PERMISSIONS } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
+import { match } from "ts-pattern";
 import { v5 as uuidv5 } from "uuid";
 
 import { RagService } from "src/ai/services/rag.service";
@@ -11,13 +12,17 @@ import { CourseTransferGraphRepository } from "src/course-transfer/repositories/
 import { CourseTransferService } from "src/course-transfer/services/course-transfer.service";
 import { getTargetScormStorage } from "src/course-transfer/utils/course-transfer-graph.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { getScormPackagePrefix } from "src/scorm/scorm-storage-paths";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { NativeArchiveImportFinishedEvent } from "../events/native-archive-import-finished.event";
 import {
   NATIVE_ARCHIVE_DEFAULT_CURRENCY,
+  NATIVE_ARCHIVE_IMPORT_MODES,
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_KIND,
   NATIVE_ARCHIVE_LIMITS,
 } from "../native-archive.constants";
@@ -34,13 +39,16 @@ import { readNativeArchive } from "./native-archive-zip.service";
 
 import type { NativeArchiveLearningPathImportSnapshot } from "../native-archive-learning-path.types";
 import type {
+  NativeArchiveImportFinishedReport,
+  NativeArchiveImportMode,
   NativeArchiveImportPlan,
   NativeArchiveImportResult,
   NativeArchiveStagedAssets,
+  NativeArchiveKind,
   NativeArchiveValidatedCourseSnapshot,
   ParsedNativeArchive,
 } from "../native-archive.types";
-import type { UUIDType } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
 
@@ -57,15 +65,40 @@ export class NativeArchiveImportService {
     private readonly settingsService: SettingsService,
     private readonly ragService: RagService,
     private readonly s3Service: S3Service,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async importArchive(zipPath: string, actor: CurrentUserType): Promise<NativeArchiveImportResult> {
+  /**
+   * Imports a native archive. With an import finished report, the IMPORTED outcome is published
+   * in the same transaction that commits the imported content, so it is never lost or premature.
+   */
+  async importArchive(
+    zipPath: string,
+    actor: CurrentUserType,
+    importMode: NativeArchiveImportMode = NATIVE_ARCHIVE_IMPORT_MODES.COPY,
+    importFinishedReport?: NativeArchiveImportFinishedReport,
+  ): Promise<NativeArchiveImportResult> {
     const parsed = await readNativeArchive(zipPath);
 
     try {
       await this.assertImportPermissions(parsed, actor);
+      if (importMode === NATIVE_ARCHIVE_IMPORT_MODES.SYNC)
+        return await this.importSharedCourse(parsed, actor, importFinishedReport);
+
       const plan = await this.prepareImportPlan(parsed, actor.tenantId);
-      if (plan.alreadyExists) return this.createAlreadyExistsResult(parsed, plan.targetRootId);
+      if (plan.alreadyExists) {
+        if (importFinishedReport)
+          await this.tenantDbRunnerService.transactionWithHandle((transaction) =>
+            this.publishImportedOutcome(
+              importFinishedReport,
+              actor,
+              this.getImportedCourseId(parsed.manifest.kind, plan.targetRootId),
+              transaction,
+            ),
+          );
+
+        return this.createAlreadyExistsResult(parsed, plan.targetRootId);
+      }
 
       await this.assertLiveTrainingAvailable(plan.missing);
       const staged = await this.nativeArchiveAssetsService.stageArchiveAssets(
@@ -83,6 +116,7 @@ export class NativeArchiveImportService {
           staged,
           plan,
           plan.learningPath,
+          importFinishedReport,
         );
         return {
           kind: parsed.manifest.kind,
@@ -94,13 +128,150 @@ export class NativeArchiveImportService {
       } catch (error) {
         await staged.deleteStaged();
 
-        await this.deleteUncommittedCopiedFiles(plan, actor.tenantId);
+        await this.deleteUncommittedCopiedFiles(plan.missing, plan.courseIdMap, actor.tenantId);
 
         throw error;
       }
     } finally {
       await parsed.cleanup();
     }
+  }
+
+  /**
+   * Imports a course archive as a read-only shared course. Importing a newer archive of the same
+   * course updates that course in place, so its enrollments and learner progress are kept.
+   */
+  private async importSharedCourse(
+    parsed: ParsedNativeArchive,
+    actor: CurrentUserType,
+    importFinishedReport?: NativeArchiveImportFinishedReport,
+  ): Promise<NativeArchiveImportResult> {
+    if (parsed.manifest.kind !== NATIVE_ARCHIVE_KIND.COURSE)
+      throw new BadRequestException("nativeArchive.error.invalidArchive");
+
+    const snapshot = this.nativeArchiveValidationService.validateCourseSnapshot(
+      parsed.courses[parsed.manifest.rootId],
+    );
+    if (snapshot.course.id !== parsed.manifest.rootId)
+      throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
+
+    const originalId = snapshot.course.originalId ?? snapshot.course.id;
+    const existingCourse = await this.nativeArchiveImportRepository.findCourseByArchiveIdentity(
+      snapshot.course.id,
+      originalId,
+      actor.tenantId,
+    );
+    if (existingCourse && existingCourse.originType !== COURSE_ORIGIN_TYPES.EXPORTED)
+      throw new BadRequestException("nativeArchive.error.courseNotSyncable");
+
+    const targetCourseId = existingCourse?.id ?? this.getTargetId(originalId, actor.tenantId);
+    if (existingCourse) await this.assertMissingLiveTrainingAvailable(snapshot, targetCourseId);
+    else await this.assertLiveTrainingAvailable([snapshot]);
+    this.nativeArchiveValidationService.assertRequiredAssetsPresent(parsed, [snapshot]);
+
+    const staged = await this.nativeArchiveAssetsService.stageArchiveAssets(parsed, actor, [
+      snapshot,
+    ]);
+
+    const [stagedSnapshot] = staged.snapshots;
+    if (stagedSnapshot.course.authorMetadata)
+      stagedSnapshot.course.authorMetadata = {
+        ...stagedSnapshot.course.authorMetadata,
+        authorId: actor.userId,
+      };
+
+    try {
+      await this.attachEmbeddings(staged.snapshots);
+      const preparedSync = await this.courseTransferService.prepareArchiveCourseSync({
+        source: { tenantId: actor.tenantId, snapshot: stagedSnapshot },
+        destination: { tenantId: actor.tenantId, courseId: targetCourseId },
+        policy: {
+          mode: COURSE_TRANSFER_MODES.ARCHIVE_SYNC,
+          actorId: actor.userId,
+          uploadedResourceIdsByFileKey: staged.uploadedResourceIdsByFileKey,
+        },
+      });
+
+      await this.tenantDbRunnerService.transactionWithHandle(async (transaction) => {
+        if (!existingCourse) {
+          const categoryId = await this.resolveImportedCategoryId(stagedSnapshot);
+
+          await this.nativeArchiveImportRepository.createCourse(
+            buildNativeArchiveCourseInsert(
+              stagedSnapshot.course,
+              actor.userId,
+              categoryId,
+              targetCourseId,
+            ),
+          );
+          await this.courseTransferGraphRepository.ensureCourseSummaryStats(
+            targetCourseId,
+            actor.userId,
+          );
+        }
+
+        const { chapterMap } = await this.courseTransferService.syncPreparedArchiveCourse(
+          preparedSync,
+          transaction,
+        );
+        await this.nativeArchiveLiveTrainingService.syncLiveTrainingLessons(
+          stagedSnapshot,
+          chapterMap,
+          actor,
+          targetCourseId,
+          transaction,
+        );
+        await this.publishImportedOutcome(importFinishedReport, actor, targetCourseId, transaction);
+      });
+    } catch (error) {
+      await staged.deleteStaged();
+      if (!existingCourse)
+        await this.deleteUncommittedCopiedFiles(
+          [snapshot],
+          new Map([[snapshot.course.id, targetCourseId]]),
+          actor.tenantId,
+        );
+
+      throw error;
+    }
+
+    return {
+      kind: parsed.manifest.kind,
+      rootId: targetCourseId,
+      alreadyExists: Boolean(existingCourse),
+      createdCourseIds: existingCourse ? [] : [targetCourseId],
+      reusedCourseIds: [],
+    };
+  }
+
+  private async publishImportedOutcome(
+    importFinishedReport: NativeArchiveImportFinishedReport | undefined,
+    actor: CurrentUserType,
+    courseId: UUIDType | null,
+    transaction?: DatabasePg,
+  ): Promise<void> {
+    if (!importFinishedReport) return;
+
+    await this.outboxPublisher.publishDurable(
+      new NativeArchiveImportFinishedEvent(
+        actor.tenantId,
+        importFinishedReport.jobId,
+        actor.userId,
+        NATIVE_ARCHIVE_IMPORT_OUTCOMES.IMPORTED,
+        courseId,
+        null,
+        importFinishedReport.importSource,
+        new Date().toISOString(),
+      ),
+      transaction,
+    );
+  }
+
+  private getImportedCourseId(kind: NativeArchiveKind, rootId: UUIDType): UUIDType | null {
+    return match(kind)
+      .with(NATIVE_ARCHIVE_KIND.COURSE, () => rootId)
+      .with(NATIVE_ARCHIVE_KIND.LEARNING_PATH, () => null)
+      .exhaustive();
   }
 
   private async assertImportPermissions(parsed: ParsedNativeArchive, actor: CurrentUserType) {
@@ -225,10 +396,27 @@ export class NativeArchiveImportService {
     const includesLiveTraining = snapshots.some((snapshot) =>
       snapshot.lessons.some((lesson) => lesson.type === LESSON_TYPES.LIVE_TRAINING),
     );
-    if (
-      includesLiveTraining &&
-      !(await this.settingsService.getGlobalSettings()).liveTrainingEnabled
-    ) {
+    if (includesLiveTraining) await this.assertLiveTrainingEnabled();
+  }
+
+  private async assertMissingLiveTrainingAvailable(
+    snapshot: NativeArchiveValidatedCourseSnapshot,
+    targetCourseId: UUIDType,
+  ): Promise<void> {
+    const restoresLiveTraining = await this.tenantDbRunnerService.transactionWithHandle(
+      (transaction) =>
+        this.nativeArchiveLiveTrainingService.hasLiveTrainingLessonsToRestore(
+          snapshot,
+          targetCourseId,
+          transaction,
+        ),
+    );
+
+    if (restoresLiveTraining) await this.assertLiveTrainingEnabled();
+  }
+
+  private async assertLiveTrainingEnabled(): Promise<void> {
+    if (!(await this.settingsService.getGlobalSettings()).liveTrainingEnabled) {
       throw new BadRequestException("nativeArchive.error.liveTrainingUnavailable");
     }
   }
@@ -254,6 +442,7 @@ export class NativeArchiveImportService {
     staged: NativeArchiveStagedAssets,
     plan: NativeArchiveImportPlan,
     learningPath?: NativeArchiveLearningPathImportSnapshot,
+    importFinishedReport?: NativeArchiveImportFinishedReport,
   ): Promise<UUIDType[]> {
     return this.tenantDbRunnerService.transaction(async () => {
       const createdCourseIds: UUIDType[] = [];
@@ -277,6 +466,12 @@ export class NativeArchiveImportService {
         );
       }
 
+      await this.publishImportedOutcome(
+        importFinishedReport,
+        actor,
+        this.getImportedCourseId(parsed.manifest.kind, plan.targetRootId),
+      );
+
       return createdCourseIds;
     });
   }
@@ -291,25 +486,7 @@ export class NativeArchiveImportService {
     if (source.authorMetadata)
       source.authorMetadata = { ...source.authorMetadata, authorId: actor.userId };
 
-    const categoryTitle = snapshot.category.title[snapshot.category.baseLanguage];
-    if (typeof categoryTitle !== "string" || !categoryTitle) {
-      throw new BadRequestException("nativeArchive.error.invalidCategory");
-    }
-
-    const existingCategory = await this.courseTransferGraphRepository.findCategoryByBaseTitle(
-      categoryTitle,
-      snapshot.category.baseLanguage,
-    );
-    const categoryId =
-      existingCategory?.id ??
-      (
-        await this.courseTransferGraphRepository.createCategoryFromSource({
-          title: buildJsonbFieldWithMultipleEntries(snapshot.category.title),
-          baseLanguage: snapshot.category.baseLanguage,
-          availableLocales: snapshot.category.availableLocales,
-        })
-      )?.id;
-    if (!categoryId) throw new BadRequestException("nativeArchive.error.categoryCreationFailed");
+    const categoryId = await this.resolveImportedCategoryId(snapshot);
 
     await this.nativeArchiveImportRepository.createCourse(
       buildNativeArchiveCourseInsert(source, actor.userId, categoryId, targetCourseId),
@@ -334,6 +511,32 @@ export class NativeArchiveImportService {
       targetCourseId,
     );
     return targetCourseId;
+  }
+
+  private async resolveImportedCategoryId(
+    snapshot: NativeArchiveValidatedCourseSnapshot,
+  ): Promise<UUIDType> {
+    const categoryTitle = snapshot.category.title[snapshot.category.baseLanguage];
+    if (typeof categoryTitle !== "string" || !categoryTitle) {
+      throw new BadRequestException("nativeArchive.error.invalidCategory");
+    }
+
+    const existingCategory = await this.courseTransferGraphRepository.findCategoryByBaseTitle(
+      categoryTitle,
+      snapshot.category.baseLanguage,
+    );
+    const categoryId =
+      existingCategory?.id ??
+      (
+        await this.courseTransferGraphRepository.createCategoryFromSource({
+          title: buildJsonbFieldWithMultipleEntries(snapshot.category.title),
+          baseLanguage: snapshot.category.baseLanguage,
+          availableLocales: snapshot.category.availableLocales,
+        })
+      )?.id;
+    if (!categoryId) throw new BadRequestException("nativeArchive.error.categoryCreationFailed");
+
+    return categoryId;
   }
 
   private async createImportedLearningPath(
@@ -373,13 +576,14 @@ export class NativeArchiveImportService {
   }
 
   private async deleteUncommittedCopiedFiles(
-    plan: NativeArchiveImportPlan,
+    snapshots: NativeArchiveValidatedCourseSnapshot[],
+    courseIdMap: ReadonlyMap<UUIDType, UUIDType>,
     tenantId: UUIDType,
   ): Promise<void> {
     const uncommitted: { snapshot: SourceSnapshot; targetId: UUIDType }[] = [];
 
-    for (const snapshot of plan.missing) {
-      const targetId = plan.courseIdMap.get(snapshot.course.id);
+    for (const snapshot of snapshots) {
+      const targetId = courseIdMap.get(snapshot.course.id);
       if (
         targetId &&
         !(await this.courseTransferGraphRepository.findCourseByIdInTenant(targetId))

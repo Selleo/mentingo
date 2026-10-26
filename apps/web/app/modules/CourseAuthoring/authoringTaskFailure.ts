@@ -1,19 +1,13 @@
+import {
+  AUTHORING_FAILURE_CATEGORY,
+  AUTHORING_RECOVERY_ACTION,
+  AUTHORING_TASK_STATUS,
+} from "./courseAuthoring.constants";
+
 import type { AuthoringRecord, AuthoringTask, AuthoringTaskFailure } from "./courseAuthoring.types";
 
-const categories: AuthoringTaskFailure["category"][] = [
-  "generation",
-  "evidence",
-  "author_decision",
-  "provider",
-  "configuration",
-  "internal",
-];
-const actions: AuthoringTaskFailure["recoveryAction"][] = [
-  "retry_failed_parts",
-  "answer_question",
-  "retry_provider",
-  "service_fix",
-];
+const categories = Object.values(AUTHORING_FAILURE_CATEGORY);
+const actions = Object.values(AUTHORING_RECOVERY_ACTION);
 const isStrings = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
 
@@ -50,28 +44,34 @@ export const parseAuthoringTaskFailure = (value: unknown): AuthoringTaskFailure 
 };
 
 export const canRetryAuthoringTask = (task: AuthoringTask): boolean => {
-  if (task.status !== "failed") return false;
+  if (task.status !== AUTHORING_TASK_STATUS.FAILED) return false;
   if (!task.failure) return true;
   return (
     task.failure.retryable &&
-    (task.failure.recoveryAction === "retry_failed_parts" ||
-      task.failure.recoveryAction === "retry_provider")
+    (task.failure.recoveryAction === AUTHORING_RECOVERY_ACTION.RETRY_FAILED_PARTS ||
+      task.failure.recoveryAction === AUTHORING_RECOVERY_ACTION.RETRY_PROVIDER)
   );
 };
 
 export const authoringTaskRetryLabel = (task: AuthoringTask): string => {
-  if (task.failure?.recoveryAction === "retry_failed_parts") return "retryFailedParts";
-  if (task.failure?.recoveryAction === "retry_provider") return "retryProvider";
+  if (task.failure?.recoveryAction === AUTHORING_RECOVERY_ACTION.RETRY_FAILED_PARTS)
+    return "retryFailedParts";
+  if (task.failure?.recoveryAction === AUTHORING_RECOVERY_ACTION.RETRY_PROVIDER)
+    return "retryProvider";
   return "retry";
 };
 
 export const authoringTaskFailureLabel = (task: AuthoringTask): string => {
   if (task.failure) {
-    if (task.failure.recoveryAction === "answer_question") return "failureAnswerQuestion";
-    if (task.failure.recoveryAction === "service_fix" || !task.failure.retryable)
+    if (task.failure.recoveryAction === AUTHORING_RECOVERY_ACTION.ANSWER_QUESTION)
+      return "failureAnswerQuestion";
+    if (
+      task.failure.recoveryAction === AUTHORING_RECOVERY_ACTION.SERVICE_FIX ||
+      !task.failure.retryable
+    )
       return "failureServiceFix";
-    if (task.failure.category === "provider") return "failureProvider";
-    if (task.failure.category === "evidence") return "failureEvidence";
+    if (task.failure.category === AUTHORING_FAILURE_CATEGORY.PROVIDER) return "failureProvider";
+    if (task.failure.category === AUTHORING_FAILURE_CATEGORY.EVIDENCE) return "failureEvidence";
     return "failureGeneration";
   }
   return task.errorCode === "task_execution_failed" ? "taskExecutionFailed" : "taskFailed";
@@ -82,7 +82,11 @@ export const attachAuthoringTaskFailures = (
   records: AuthoringRecord[],
 ): AuthoringTask[] =>
   tasks.map((task) => {
-    if (task.status !== "failed" && task.status !== "waiting_author") return task;
+    if (
+      task.status !== AUTHORING_TASK_STATUS.FAILED &&
+      task.status !== AUTHORING_TASK_STATUS.WAITING_AUTHOR
+    )
+      return task;
     if (task.failure !== undefined) return task;
     let latest: AuthoringTaskFailure | null = null;
     let sequence = -1;

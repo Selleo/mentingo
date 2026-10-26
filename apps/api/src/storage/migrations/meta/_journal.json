@@ -1552,15 +1552,36 @@
     {
       "idx": 221,
       "version": "7",
-      "when": 1792406054481,
-      "tag": "0221_course_repetition_states",
+      "when": 1792412798636,
+      "tag": "0221_add_content_marketplace_lineages_and_native_archive_entity_map",
       "breakpoints": true
     },
     {
       "idx": 222,
       "version": "7",
-      "when": 1792406121599,
-      "tag": "0222_course_repetition_backfill",
+      "when": 1792412800728,
+      "tag": "0222_enable_content_marketplace_lineages_and_native_archive_entity_map_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 223,
+      "version": "7",
+      "when": 1792662388266,
+      "tag": "0223_normalize_course_authoring_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1793005794509,
+      "tag": "0224_course_repetition_states",
+      "breakpoints": true
+    },
+    {
+      "idx": 225,
+      "version": "7",
+      "when": 1793005806808,
+      "tag": "0225_course_repetition_backfill",
       "breakpoints": true
     }
   ]

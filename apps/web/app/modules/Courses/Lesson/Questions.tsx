@@ -10,14 +10,15 @@ type QuestionsProps = {
   lessonId: string;
 };
 
+/** Number the rendered sequence independently of legacy persisted ordering offsets. */
 export const Questions = ({ questions, isQuizCompleted = false, lessonId }: QuestionsProps) => {
-  return questions.map((question: Questions[number]) => {
+  return questions.map((question: Questions[number], index) => {
     if (!question) return null;
 
     return (
       <Question
         key={question.id}
-        question={question}
+        question={{ ...question, displayOrder: index + 1 }}
         isCompleted={isQuizCompleted}
         lessonId={lessonId}
       />

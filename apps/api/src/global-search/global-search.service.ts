@@ -7,13 +7,18 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH, SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { GlobalSearchRepository } from "./global-search.repository";
+import { buildSearchResultTree, limitLessonsPerCourse } from "./global-search.result-tree";
 import { GLOBAL_SEARCH_LESSON_ACCESS } from "./global-search.types";
 import { HybridSearchRepository } from "./hybrid-search.repository";
-import { fuseSearchMatches } from "./hybrid-search.utils";
+import { rankContentMatches } from "./hybrid-search.utils";
 import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 
-import type { GlobalSearchReadOptions, MatchRow } from "./global-search.types";
-import type { GlobalSearchMode, GlobalSearchResponse } from "./schemas/global-search.schema";
+import type { LessonWithParentRow, GlobalSearchReadOptions, MatchRow } from "./global-search.types";
+import type {
+  GlobalSearchMode,
+  GlobalSearchResponse,
+  GlobalSearchResult,
+} from "./schemas/global-search.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -26,13 +31,43 @@ export class GlobalSearchService {
     private readonly semanticSearchEmbeddingService: SemanticSearchEmbeddingService,
   ) {}
 
+  /**
+   * Search for the navigation dialog: the result tree with short course groups plus the
+   * keyword-only administrative lists. Per-type lists stay internal to MCP projections.
+   */
+  async searchResultTree(
+    searchQuery: string,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+    mode: GlobalSearchMode = GLOBAL_SEARCH_MODES.KEYWORD,
+  ): Promise<GlobalSearchResponse> {
+    const { searchMode, semanticStatus, results, users, categories, groups } = await this.search(
+      searchQuery,
+      language,
+      currentUser,
+      mode,
+    );
+    return {
+      ...(searchMode ? { searchMode } : {}),
+      ...(semanticStatus ? { semanticStatus } : {}),
+      results: limitLessonsPerCourse(results),
+      users,
+      categories,
+      groups,
+    };
+  }
+
+  /**
+   * Full authorized search result: per-type lists and the uncapped result tree. Access is enforced
+   * during retrieval and hydration; callers only project or regroup these rows.
+   */
   async search(
     searchQuery: string,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
     mode: GlobalSearchMode = GLOBAL_SEARCH_MODES.KEYWORD,
     options: GlobalSearchReadOptions = {},
-  ): Promise<GlobalSearchResponse> {
+  ): Promise<GlobalSearchResult> {
     const trimmedQuery = searchQuery.trim();
 
     if (trimmedQuery.length < GLOBAL_SEARCH_MIN_QUERY_LENGTH) {
@@ -40,7 +75,7 @@ export class GlobalSearchService {
     }
 
     let embedding: number[] | undefined;
-    let semanticStatus: GlobalSearchResponse["semanticStatus"];
+    let semanticStatus: GlobalSearchResult["semanticStatus"];
     if (mode === GLOBAL_SEARCH_MODES.HYBRID) {
       try {
         embedding = await this.semanticSearchEmbeddingService.embedQuery(trimmedQuery);
@@ -53,49 +88,52 @@ export class GlobalSearchService {
           : GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
       }
     }
-    const findMatches = async (
-      entityType: Parameters<GlobalSearchRepository["findMatches"]>[0],
-    ) => {
-      if (
-        options.contentOnly &&
-        (entityType === SEARCH_ENTITY_TYPES.LESSON ||
-          entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
-      )
-        return [];
-      const metadataOnly = Boolean(
-        options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
-      );
-      const keyword = await this.hybridSearchRepository.findKeywordMatches(
-        entityType,
-        trimmedQuery,
-        currentUser,
-        metadataOnly,
-      );
-      if (!embedding) return keyword;
-      const semantic = await this.hybridSearchRepository.findSemanticMatches(
-        entityType,
-        embedding,
-        currentUser,
-        metadataOnly,
-      );
-      return fuseSearchMatches(keyword, semantic);
-    };
-
-    const [
-      courseMatches,
-      lessonMatches,
-      learningPathMatches,
-      newsMatches,
-      articleMatches,
-      qaMatches,
-    ] = await Promise.all([
-      findMatches(SEARCH_ENTITY_TYPES.COURSE),
-      findMatches(SEARCH_ENTITY_TYPES.LESSON),
-      findMatches(SEARCH_ENTITY_TYPES.LEARNING_PATH),
-      findMatches(SEARCH_ENTITY_TYPES.NEWS),
-      findMatches(SEARCH_ENTITY_TYPES.ARTICLE),
-      findMatches(SEARCH_ENTITY_TYPES.QA),
-    ]);
+    // Keep source authorization in retrieval, then rank the eligible content globally.
+    const candidateGroups = await Promise.all(
+      Object.values(SEARCH_ENTITY_TYPES).map(async (entityType) => {
+        if (
+          options.contentOnly &&
+          ((entityType === SEARCH_ENTITY_TYPES.LESSON && !options.includeLearnerLessons) ||
+            entityType === SEARCH_ENTITY_TYPES.LEARNING_PATH)
+        ) {
+          return { keyword: [], semantic: [] };
+        }
+        const metadataOnly = Boolean(
+          options.learnerOnly && entityType === SEARCH_ENTITY_TYPES.COURSE,
+        );
+        const learnerLessons = Boolean(
+          options.includeLearnerLessons && entityType === SEARCH_ENTITY_TYPES.LESSON,
+        );
+        const args = [entityType, trimmedQuery, currentUser, metadataOnly] as const;
+        const keyword = learnerLessons
+          ? await this.hybridSearchRepository.findKeywordMatches(...args, true)
+          : await this.hybridSearchRepository.findKeywordMatches(...args);
+        let semantic: MatchRow[] = [];
+        if (embedding) {
+          const semanticArgs = [entityType, embedding, currentUser, metadataOnly] as const;
+          semantic = learnerLessons
+            ? await this.hybridSearchRepository.findSemanticMatches(...semanticArgs, true)
+            : await this.hybridSearchRepository.findSemanticMatches(...semanticArgs);
+        }
+        return {
+          keyword: keyword.map((match) => ({ ...match, entityType })),
+          semantic: semantic.map((match) => ({ ...match, entityType })),
+        };
+      }),
+    );
+    const rankedMatches = rankContentMatches(
+      candidateGroups.flatMap((group) => group.keyword),
+      candidateGroups.flatMap((group) => group.semantic),
+    );
+    const matchesFor = (
+      entityType: (typeof SEARCH_ENTITY_TYPES)[keyof typeof SEARCH_ENTITY_TYPES],
+    ) => rankedMatches.filter((match) => match.entityType === entityType);
+    const courseMatches = matchesFor(SEARCH_ENTITY_TYPES.COURSE);
+    const lessonMatches = matchesFor(SEARCH_ENTITY_TYPES.LESSON);
+    const learningPathMatches = matchesFor(SEARCH_ENTITY_TYPES.LEARNING_PATH);
+    const newsMatches = matchesFor(SEARCH_ENTITY_TYPES.NEWS);
+    const articleMatches = matchesFor(SEARCH_ENTITY_TYPES.ARTICLE);
+    const qaMatches = matchesFor(SEARCH_ENTITY_TYPES.QA);
 
     const [
       allCourses,
@@ -114,9 +152,7 @@ export class GlobalSearchService {
       this.getMyCourses(courseMatches, language, currentUser, options.learnerOnly),
       this.getAvailableCourses(courseMatches, language, currentUser),
       options.contentOnly ? [] : this.getLearningPaths(learningPathMatches, language, currentUser),
-      options.contentOnly
-        ? []
-        : this.getLessons(lessonMatches, language, trimmedQuery, currentUser),
+      this.getLessons(lessonMatches, language, trimmedQuery, currentUser, options),
       this.getNews(newsMatches, language, currentUser),
       this.getArticles(articleMatches, language, currentUser),
       this.getQA(qaMatches, language, currentUser),
@@ -125,37 +161,89 @@ export class GlobalSearchService {
       options.contentOnly ? [] : this.getGroups(trimmedQuery, language, currentUser),
     ]);
 
-    return this.resolveImageUrls({
-      searchMode: mode,
-      semanticStatus,
-      allCourses: this.withPassages(allCourses, courseMatches),
-      myCourses: this.withPassages(myCourses, courseMatches),
-      availableCourses: this.withPassages(availableCourses, courseMatches),
-      learningPaths: this.withPassages(learningPathsResults, learningPathMatches),
-      lessons: this.withPassages(lessonsResults, lessonMatches),
-      news: this.withPassages(newsResults, newsMatches),
-      articles: this.withPassages(articlesResults, articleMatches),
-      qa: this.withPassages(qaResults, qaMatches),
-      users: usersResults,
-      categories: categoriesResults,
-      groups: groupsResults,
-    });
+    const lessonsWithParents = this.withPassages<LessonWithParentRow>(
+      lessonsResults,
+      lessonMatches,
+    );
+    const [response, resolvedLessons] = await Promise.all([
+      this.resolveImageUrls({
+        searchMode: mode,
+        semanticStatus,
+        allCourses: this.withPassages(allCourses, courseMatches),
+        myCourses: this.withPassages(myCourses, courseMatches),
+        availableCourses: this.withPassages(availableCourses, courseMatches),
+        learningPaths: this.withPassages(learningPathsResults, learningPathMatches),
+        lessons: lessonsWithParents.map(
+          ({ courseThumbnailUrl: _thumbnail, courseCategory: _category, ...lesson }) => lesson,
+        ),
+        news: this.withPassages(newsResults, newsMatches),
+        articles: this.withPassages(articlesResults, articleMatches),
+        qa: this.withPassages(qaResults, qaMatches),
+        users: usersResults,
+        categories: categoriesResults,
+        groups: groupsResults,
+        results: [],
+      }),
+      this.resolveLessonParentImageUrls(lessonsWithParents),
+    ]);
+
+    return {
+      ...response,
+      results: buildSearchResultTree({
+        // Enrolled/authored rows carry progress, so they win when a course appears in several lists.
+        courseLists: [response.myCourses, response.allCourses, response.availableCourses],
+        lessons: resolvedLessons,
+        learningPaths: response.learningPaths,
+        news: response.news,
+        articles: response.articles,
+        qa: response.qa,
+      }),
+    };
+  }
+
+  /** Resolve parent course thumbnails once per course for lessons whose course may not have matched. */
+  private async resolveLessonParentImageUrls(
+    lessons: LessonWithParentRow[],
+  ): Promise<LessonWithParentRow[]> {
+    const thumbnailKeys = [
+      ...new Set(lessons.flatMap((lesson) => lesson.courseThumbnailUrl ?? [])),
+    ];
+    const resolvedUrls = new Map(
+      await Promise.all(
+        thumbnailKeys.map(
+          async (key) =>
+            [key, await this.fileService.getFileUrl(key, { quality: IMAGE_QUALITY.XXS })] as const,
+        ),
+      ),
+    );
+    return lessons.map((lesson) => ({
+      ...lesson,
+      courseThumbnailUrl: lesson.courseThumbnailUrl
+        ? (resolvedUrls.get(lesson.courseThumbnailUrl) ?? null)
+        : null,
+    }));
   }
 
   private withPassages<T extends { id: string }>(rows: T[], matches: MatchRow[]): T[] {
     const byId = new Map(matches.map((match) => [match.entityId, match]));
     return rows.slice(0, 10).map((row) => {
       const match = byId.get(row.id as MatchRow["entityId"]);
-      if (!match?.matchedPassage) return row;
+      if (!match) return row;
       return {
         ...row,
-        matchedPassage: match.matchedPassage,
-        matchedAttachmentFileName: match.matchedAttachmentFileName ?? null,
+        relevanceScore: match.rank,
+        ...(match.matchedPassage
+          ? {
+              // Indexed text keeps source layout; collapse it so excerpts read as one line.
+              matchedPassage: match.matchedPassage.replace(/\s+/g, " ").trim(),
+              matchedAttachmentFileName: match.matchedAttachmentFileName ?? null,
+            }
+          : {}),
       };
     });
   }
 
-  private async resolveImageUrls(response: GlobalSearchResponse): Promise<GlobalSearchResponse> {
+  private async resolveImageUrls(response: GlobalSearchResult): Promise<GlobalSearchResult> {
     const [allCourses, myCourses, availableCourses, learningPaths, users] = await Promise.all([
       this.resolveCourseImageUrls(response.allCourses),
       this.resolveCourseImageUrls(response.myCourses),
@@ -192,7 +280,7 @@ export class GlobalSearchService {
     };
   }
 
-  private resolveCourseImageUrls(courses: GlobalSearchResponse["allCourses"]) {
+  private resolveCourseImageUrls(courses: GlobalSearchResult["allCourses"]) {
     return Promise.all(
       courses.map(async (course) => ({
         ...course,
@@ -265,7 +353,11 @@ export class GlobalSearchService {
     language: SupportedLanguages,
     searchQuery: string,
     currentUser: CurrentUserType,
+    options: GlobalSearchReadOptions = {},
   ) {
+    if (options.includeLearnerLessons)
+      return this.globalSearchRepository.getLearnerLessons(matches, language, currentUser);
+    if (options.contentOnly) return [];
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ)) return [];
 
     if (hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)) {
@@ -384,7 +476,7 @@ export class GlobalSearchService {
     return this.globalSearchRepository.getGroups(searchQuery, language);
   }
 
-  private emptyResponse(): GlobalSearchResponse {
+  private emptyResponse(): GlobalSearchResult {
     return {
       allCourses: [],
       myCourses: [],
@@ -397,6 +489,7 @@ export class GlobalSearchService {
       users: [],
       categories: [],
       groups: [],
+      results: [],
     };
   }
 }

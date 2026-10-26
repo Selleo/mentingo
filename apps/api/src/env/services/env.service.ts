@@ -9,7 +9,12 @@ import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import { ALLOWED_SECRETS, ENCRYPTION_ALG, SERVICE_GROUPS } from "src/env/env.config";
+import {
+  ALLOWED_SECRETS,
+  ENCRYPTION_ALG,
+  INTERNAL_SECRETS,
+  SERVICE_GROUPS,
+} from "src/env/env.config";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { resolveVoiceTtsProvider } from "src/env/voice-tts-provider";
 import { UpdateEnvEvent } from "src/events";
@@ -31,11 +36,28 @@ export class EnvService {
   }
 
   async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
+    if (data.some((env) => !ALLOWED_SECRETS.includes(env.name))) {
+      throw new BadRequestException("Secret not supported");
+    }
+
+    await this.encryptAndStoreEnvs(data, actor);
+  }
+
+  /**
+   * Stores secrets that only internal flows may write, such as plugin connections, after the
+   * caller has validated their values. User-facing env endpoints must use `bulkUpsertEnv`.
+   */
+  async bulkUpsertInternalEnv(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
+    if (data.some((env) => !INTERNAL_SECRETS.includes(env.name))) {
+      throw new Error("Secret is not an internal secret");
+    }
+
+    await this.encryptAndStoreEnvs(data, actor);
+  }
+
+  private async encryptAndStoreEnvs(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
     const processedEnvs: EncryptedEnvBody[] = [];
     for (const env of data) {
-      if (!ALLOWED_SECRETS.includes(env.name)) {
-        throw new BadRequestException("Secret not supported");
-      }
       const dek = crypto.randomBytes(32);
       const iv = crypto.randomBytes(12);
 

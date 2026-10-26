@@ -68,8 +68,23 @@ describe("PromptService learner-name personalization", () => {
       envService as unknown as EnvService,
     );
 
+    service.onModuleInit();
     return { aiRepository, messageService, ragService, service, tokenService, envService };
   };
+
+  it("uses bundled transport guidance while leaving other managed prompts available", async () => {
+    const { service, envService } = createService();
+    service.onModuleInit();
+    envService.getLumaConfigured.mockResolvedValue({ voiceTtsProvider: "elevenlabs" });
+    const loadPrompt = jest.spyOn(service, "loadPrompt").mockResolvedValue("MANAGED POLICY");
+    const prompt = await service.buildPrompt(threadId, "Rozumiem.", true);
+    expect(
+      prompt.some((message) => message.content.includes("<sentence_delivery_transport>")),
+    ).toBe(true);
+    expect(prompt.some((message) => message.content.includes("natural spoken pl"))).toBe(true);
+    expect(loadPrompt).not.toHaveBeenCalledWith("voiceMentorElevenLabsAddon", expect.anything());
+    expect(loadPrompt).toHaveBeenCalledWith("voiceMentorInterruptionPolicy", {});
+  });
 
   it("appends the learner-name rules to the stored Roleplay prompt returned for the welcome", async () => {
     const { aiRepository, service, tokenService } = createService();
@@ -287,7 +302,9 @@ describe("PromptService learner-name personalization", () => {
 
     expect(prompt).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ content: "VOICE_MENTOR_ADDON" }),
+        expect.objectContaining({
+          content: expect.stringContaining("<sentence_delivery_transport>"),
+        }),
         expect.objectContaining({ content: "VOICE_MENTOR_TIMING_ADDON" }),
       ]),
     );

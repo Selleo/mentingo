@@ -21,6 +21,7 @@ describe("Core Mentor model settings", () => {
       generateText,
       generateObject,
       jsonSchema: jest.fn(),
+      Output: { array: jest.fn().mockReturnValue({ type: "array" }) },
       streamText,
     } as never);
   });
@@ -103,6 +104,68 @@ describe("Core Mentor model settings", () => {
       for (const key of ["temperature", "topP", "topK"]) {
         expect(request).not.toHaveProperty(key);
       }
+    },
+  );
+  it.each(["complete", "invalid-tail", "cancel"])(
+    "persists only a completed native voice reply: %s",
+    async (mode) => {
+      const abort = new AbortController();
+      const createMessages = jest.fn();
+      streamText.mockReturnValueOnce({
+        elementStream: (async function* () {
+          yield { cue: "frustrated", text: "Still waiting." };
+          if (mode === "cancel") abort.abort();
+          yield { cue: "frustrated", text: "Who can help?" };
+        })(),
+        get output() {
+          return mode === "invalid-tail"
+            ? Promise.reject(new Error("invalid tail"))
+            : Promise.resolve([]);
+        },
+      } as never);
+      const service = new AiService(
+        {} as never,
+        { countTokens: () => 1 } as never,
+        {} as never,
+        {} as never,
+        { createMessages } as never,
+        promptService as never,
+        {} as never,
+        {} as never,
+        {} as never,
+        {} as never,
+        {} as never,
+        { runWithTenant: async (_id: string, run: () => Promise<void>) => run() } as never,
+        {} as never,
+        {} as never,
+      );
+      const response = await service["streamCoreMentorChat"]({
+        data: { threadId: "thread", content: "Sorry.", abortSignal: abort.signal } as never,
+        model: OPENAI_MODELS.VOICE,
+        currentUser: { userId: "user", tenantId: "tenant" } as never,
+        isVoiceMentor: true,
+        prompt: [{ role: "user", content: "Sorry." }],
+        generationConfig: { temperature: 0.2, topP: 0.5, topK: 20 },
+        persistOnFinish: true,
+      });
+      const collect = async () => {
+        const parts = [];
+        for await (const part of response.textStream) parts.push(part);
+        return parts;
+      };
+      if (mode === "invalid-tail") {
+        await expect(collect()).rejects.toThrow("invalid tail");
+      } else {
+        const parts = await collect();
+        expect(parts[0]).toBe("⟦cue:frustrated⟧Still waiting. ");
+      }
+      if (mode === "complete") {
+        expect(createMessages).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ content: "Still waiting. Who can help? " }),
+        );
+      } else expect(createMessages).not.toHaveBeenCalled();
+      expect(streamText.mock.calls[0][0]).toHaveProperty("output");
     },
   );
 });

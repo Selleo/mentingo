@@ -17,7 +17,6 @@ import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
 import { useCategoriesSuspense, useCurrentUser } from "~/api/queries";
 import { useCoursesSuspense } from "~/api/queries/useCourses";
 import { hasPermission } from "~/common/permissions/permission.utils";
-import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -39,8 +38,10 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { ContentMarketplaceLink } from "~/modules/ContentMarketplace/components/ContentMarketplaceLink";
+import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
+import { getCourseTitleMorphName } from "~/modules/Courses/utils/coursesMorph";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
@@ -190,7 +191,12 @@ const Courses = () => {
         <SortButton<TCourse> column={column}>{t("adminCoursesView.field.title")}</SortButton>
       ),
       cell: ({ row }) => (
-        <div className="max-w-md truncate">{formatHtmlString(row.original.title)}</div>
+        <div
+          className="max-w-md truncate"
+          style={{ viewTransitionName: getCourseTitleMorphName(row.original.id) }}
+        >
+          {formatHtmlString(row.original.title)}
+        </div>
       ),
     },
     {
@@ -354,29 +360,14 @@ const Courses = () => {
           <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
         </div>
         <div className="ml-auto flex gap-3">
+          <ContentMarketplaceLink />
           {canManageCourses && (
             <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
               <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
             </Link>
           )}
 
-          {!isReadOnlyGroupManager && (
-            <ButtonGroup
-              className="not-sr-only"
-              buttons={[
-                {
-                  children: <DashboardIcon />,
-                  isActive: false,
-                  onClick: () => navigate("/courses"),
-                },
-                {
-                  children: <HamburgerIcon />,
-                  isActive: true,
-                  onClick: () => navigate("/admin/courses"),
-                },
-              ]}
-            />
-          )}
+          {!isReadOnlyGroupManager && <CoursesViewToggle active="manage" className="not-sr-only" />}
         </div>
         <div className="flex items-center justify-between gap-2">
           <SearchFilter
