@@ -213,7 +213,6 @@ export const storeFakePhishingPluginSettings = (
     }),
   ]);
 
-/** Signs a webhook body the way the plugin does: HMAC-SHA256 over `<timestamp>.<raw body>`. */
 export function signPhishingWebhook(
   rawBody: string,
   {

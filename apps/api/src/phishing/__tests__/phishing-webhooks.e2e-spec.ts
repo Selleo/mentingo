@@ -68,7 +68,6 @@ describe("Phishing plugin webhooks (e2e)", () => {
   const arrangeCourse = (status: CourseTest["status"] = COURSE_STATUSES.PUBLISHED) =>
     inTenant(() => courseFactory.create({ status, priceInCents: 0, title: "Phishing awareness" }));
 
-  /** A learner, the admin who launched the campaign, its course, and the plugin's campaign record. */
   const arrangeCampaign = async ({
     recipient = CAMPAIGN_RECIPIENT_STATES.CLICKED,
     courseStatus = COURSE_STATUSES.PUBLISHED,

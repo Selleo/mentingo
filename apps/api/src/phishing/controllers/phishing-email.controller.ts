@@ -29,7 +29,6 @@ export class PhishingEmailController {
     private readonly phishingEmailService: PhishingEmailService,
   ) {}
 
-  /** Renders a campaign email for the phishing plugin with this tenant's templates and branding. */
   @Public()
   @Post("email")
   @Validate({

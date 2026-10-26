@@ -31,7 +31,6 @@ export class PhishingWebhookController {
     private readonly phishingEnrollmentService: PhishingEnrollmentService,
   ) {}
 
-  /** Lets the phishing plugin confirm it shares this tenant's webhook secret. */
   @Public()
   @Post("webhook/probe")
   @Validate({

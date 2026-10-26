@@ -26,7 +26,6 @@ class GroupFactory extends Factory<GroupWithMembers> {
     return this.associations({ members: userIds });
   }
 
-  /** Assigns group managers, who then see this group's members in scoped reports. */
   withManagers(managerUserIds: string[]) {
     return this.associations({ managers: managerUserIds });
   }

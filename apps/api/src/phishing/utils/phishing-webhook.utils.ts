@@ -41,7 +41,6 @@ export function hasPhishingBodyWithinLimit(
   return Boolean(request.rawBody) && request.rawBody!.length <= maxBytes;
 }
 
-/** Checks the plugin's HMAC over the exact raw body bytes and its signing timestamp. */
 export function isSignedByPhishingPlugin(
   request: SignedPhishingRequest,
   secret: string | undefined,

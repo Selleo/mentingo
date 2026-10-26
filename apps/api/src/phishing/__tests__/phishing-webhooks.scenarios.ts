@@ -69,7 +69,6 @@ export const REJECTED_RISKY_ACTION_CASES = [
 
 export const TRUSTED_TRACKING_URL = "https://tracker.example.com/t/abc123";
 
-/** One of the plugin scenarios that maps to a built-in email template. */
 export const EMAIL_SCENARIO_ID = "course-reminder";
 
 export const UNKNOWN_SCENARIO_ID = "scenario-without-email";
