@@ -1,4 +1,4 @@
-import { ArrowUpRight, Copy, Check, LoaderCircle } from "lucide-react";
+import { Copy, Check, LoaderCircle } from "lucide-react";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
@@ -31,14 +31,6 @@ const markdownComponents = {
   img: ({ alt }: { alt?: string }) => <span>{alt}</span>,
 };
 
-/** People and administrative records are destinations, rather than reading references. */
-function isReadingReference(source: AssistantSource) {
-  if (source.entityType) return !["user", "group", "category"].includes(source.entityType);
-  // Historical messages predate typed references. Keep their content sources usable.
-  const path = new URL(source.url, "https://assistant.invalid").pathname;
-  return !/^\/(?:profile|admin\/(?:users|groups|categories))(?:\/|$)/.test(path);
-}
-
 export function AssistantMessageView({
   message,
   activity,
@@ -69,7 +61,6 @@ export function AssistantMessageView({
     }
   });
   const sourcesByUrl = new Map(sources.map((source) => [source.url, source]));
-  const readingReferences = sources.filter(isReadingReference);
 
   if (!isUser && running && !message.text) {
     return (
@@ -107,27 +98,6 @@ export function AssistantMessageView({
                 <LoaderCircle className="size-3.5 animate-spin motion-reduce:animate-none" />
                 {progressLabel}
               </p>
-            )}
-            {readingReferences.length > 0 && (
-              <div className="mt-5 border-t border-border pt-3">
-                <p className="mb-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  {t("assistant.sources")}
-                </p>
-                <ul className="space-y-1.5">
-                  {readingReferences.map((source) => (
-                    <li key={source.url}>
-                      <AssistantSourceLink
-                        testId={ASSISTANT_HANDLES.SOURCE}
-                        source={source}
-                        className="inline-flex max-w-full items-center gap-1.5 text-sm text-primary-700 dark:text-primary-300 underline-offset-4 hover:underline"
-                      >
-                        <span className="truncate">{source.title}</span>
-                        <ArrowUpRight className="size-3.5 shrink-0" />
-                      </AssistantSourceLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             )}
             {(message.status === "failed" || message.status === "cancelled") && (
               <p

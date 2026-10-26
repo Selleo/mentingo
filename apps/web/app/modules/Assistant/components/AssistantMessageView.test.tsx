@@ -37,7 +37,7 @@ const message: AssistantMessage = {
 describe("AssistantMessageView", () => {
   it("only makes evidence-backed links clickable", () => {
     renderView(<AssistantMessageView message={message} />);
-    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getByText("unverified").closest("a")).toBeNull();
     expect(screen.getAllByRole("link")[0]).toHaveAttribute("href", "/courses/onboarding");
   });
@@ -61,7 +61,7 @@ describe("AssistantMessageView", () => {
     expect(screen.getByRole("dialog")).toHaveTextContent("Audrey Student");
   });
 
-  it("shows reading materials separately while excluding people and administrative records", () => {
+  it("shows references only inline without duplicating them or listing unrelated retrieved records", () => {
     renderView(
       <AssistantMessageView
         message={{
@@ -76,12 +76,9 @@ describe("AssistantMessageView", () => {
         }}
       />,
     );
-    expect(screen.getByText("Sources")).toBeVisible();
-    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual([
-      "Onboarding",
-      "Onboarding",
-      "Guide",
-    ]);
+    expect(screen.queryByText("Sources")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Onboarding"]);
+    expect(screen.queryByText("Guide")).not.toBeInTheDocument();
   });
 
   it("keeps an inline preview open when polling rerenders the message", async () => {

@@ -19,7 +19,7 @@ The existing application login authenticates Assistant requests; users do not co
 
 Administrative AI Conversations uses the separate `ai_thread.read` permission. Personal thread ownership therefore does not imply that conversations are hidden from authorized administrators.
 
-Client message IDs deduplicate sends. Active runs prevent overlapping messages within a thread; cancellation preserves already saved text and permits a new message. Stable Workflow run IDs and pending handoff recovery prevent an ordinary request retry from creating duplicate execution. Assistant responses expose only links derived from authorized tool evidence. People, groups and categories remain inline destinations; reading materials can also appear in Sources.
+Client message IDs deduplicate sends. Active runs prevent overlapping messages within a thread; cancellation preserves already saved text and permits a new message. Stable Workflow run IDs and pending handoff recovery prevent an ordinary request retry from creating duplicate execution. Assistant responses expose only links derived from authorized tool evidence. Verified destinations appear inline in the answer with hover previews; no separate Sources list duplicates them.
 
 The web app remembers a selected nonarchived conversation ID in sessionStorage, scoped to origin, account and explicit support tenant when present. Returning to /assistant validates that pointer through the ordinary thread API before navigating. New conversation clears it. Transcript content remains server-side; restoring a thread never sends another message or restarts generation.
 
