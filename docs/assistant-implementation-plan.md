@@ -40,7 +40,7 @@ V2 boundaries: structured message parts and run events support contextual mini-c
 - Deterministic Workflow execution passed with real disposable Postgres; partial response checkpoints and continuous trace identity verified locally.
 - Desktop/mobile UI fixture inspected. Authenticated Hangar login, Assistant page, availability and thread history verified. Fixed boolean query parsing with six HTTP regressions. Full provider calls and remote Langfuse ingestion remain unverified.
 - Web production build passed on retry with Sentry upload disabled. Initial build hit a transient static-copy/SPA output race (ENOENT in build/server); no build configuration change was needed.
-- Worktree registered and running in Hangar, with isolated demo data and a separate Workflow database. Main-checkout configuration remains unchanged. Canonical URL ownership can change independently; use the worktree preview to verify this branch.
+- Worktree registered and running in Hangar, with isolated demo data and an initially separate Workflow database. The current deployment layout uses isolated SDK schemas in Core, protected by the pinned migration patch; see `assistant-runtime.md`. Main-checkout configuration remains unchanged. Canonical URL ownership can change independently; use the worktree preview to verify this branch.
 
 ## UI revision (2026-10-23)
 

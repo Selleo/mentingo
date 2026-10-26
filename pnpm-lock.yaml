@@ -12,6 +12,11 @@ overrides:
 
 packageExtensionsChecksum: sha256-v36u0YheWby3JsLGCkdr+taPlBvAiaAXTMe6dhYbXN4=
 
+patchedDependencies:
+  '@workflow/world-postgres@5.0.5':
+    hash: 17faa0f8b4812071ae25895734843f08baaa9c4f90b6af14683503018aa3e054
+    path: patches/@workflow__world-postgres@5.0.5.patch
+
 importers:
 
   .:
@@ -222,7 +227,7 @@ importers:
         version: 5.0.0
       '@workflow/world-postgres':
         specifier: 5.0.5
-        version: 5.0.5(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(postgres@3.4.4)(typescript@5.4.5)
+        version: 5.0.5(patch_hash=17faa0f8b4812071ae25895734843f08baaa9c4f90b6af14683503018aa3e054)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(postgres@3.4.4)(typescript@5.4.5)
       add:
         specifier: 2.0.6
         version: 2.0.6
@@ -30977,7 +30982,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@workflow/world-postgres@5.0.5(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(postgres@3.4.4)(typescript@5.4.5)':
+  '@workflow/world-postgres@5.0.5(patch_hash=17faa0f8b4812071ae25895734843f08baaa9c4f90b6af14683503018aa3e054)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(postgres@3.4.4)(typescript@5.4.5)':
     dependencies:
       '@vercel/queue': 0.8.0(@opentelemetry/api@1.9.0)
       '@workflow/errors': 5.0.5

@@ -55,6 +55,9 @@
           "zod": "3.25.76"
         }
       }
+    },
+    "patchedDependencies": {
+      "@workflow/world-postgres@5.0.5": "patches/@workflow__world-postgres@5.0.5.patch"
     }
   },
   "packageManager": "pnpm@10.22.0",
