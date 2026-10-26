@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { loadEsm } from "load-esm";
 
 import { AssistantExecutionService } from "../assistant-execution.service";
@@ -45,17 +46,20 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
   private world?: PostgresWorld;
   private workflowId?: string;
 
-  constructor(private readonly assistantExecutionService: AssistantExecutionService) {}
+  constructor(
+    private readonly assistantExecutionService: AssistantExecutionService,
+    private readonly configService: ConfigService,
+  ) {}
 
   isAvailable() {
     return Boolean(this.world && this.workflowId);
   }
 
   async onApplicationBootstrap() {
-    if (!process.env.WORKFLOW_POSTGRES_URL) return;
-    // This runtime owns the new Workflow SDK instance. Keep asynchronous SDK
-    // invocations in the assistant run trace rather than the linked default.
-    process.env.WORKFLOW_TRACE_MODE = "continuous";
+    if (process.env.BUILD_VERIFICATION === "true") return;
+    const connectionString = this.configService.getOrThrow<string>("database.urlApp");
+    // Keep one trace per run by default, while respecting an explicit SDK trace mode.
+    process.env.WORKFLOW_TRACE_MODE ??= "continuous";
     registerAssistantExecution(this.assistantExecutionService);
     if (process.env.NODE_ENV !== "production") {
       const { NestLocalBuilder } = await loadEsm<WorkflowBuilder>("@workflow/nest/builder");
@@ -81,7 +85,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
       loadEsm<{ setWorld(world: PostgresWorld): void }>("workflow/runtime"),
     ]);
     this.world = createWorld({
-      connectionString: process.env.WORKFLOW_POSTGRES_URL,
+      connectionString,
       queueConcurrency: 4,
       maxPoolSize: 6,
       jobPrefix: "mentingo_assistant_",
