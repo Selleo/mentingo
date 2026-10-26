@@ -1,5 +1,9 @@
 import {
   SUPPORTED_LANGUAGES,
+  ASSISTANT_MESSAGE_STATUSES,
+  ASSISTANT_RUN_STATUSES,
+  type AssistantRunStatus,
+  type AssistantMessageStatus,
   type SupportedLanguages,
   type AssistantRunActivity,
   type AssistantMessageRole,
@@ -27,8 +31,6 @@ export type AssistantSource = {
   entityType?: AssistantSourceType;
   description?: string;
 };
-export type AssistantRunStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
-export type AssistantMessageStatus = "pending" | "running" | "complete" | "failed" | "cancelled";
 
 export const assistantThreads = pgTable(
   "assistant_threads",
@@ -66,7 +68,10 @@ export const assistantMessages = pgTable(
       .notNull(),
     role: text("role").$type<AssistantMessageRole>().notNull(),
     text: text("text").notNull().default(""),
-    status: text("status").$type<AssistantMessageStatus>().notNull().default("complete"),
+    status: text("status")
+      .$type<AssistantMessageStatus>()
+      .notNull()
+      .default(ASSISTANT_MESSAGE_STATUSES.COMPLETE),
     sources: jsonb("sources").$type<AssistantSource[]>().notNull().default([]),
     clientMessageId: uuid("client_message_id"),
   },
@@ -105,7 +110,10 @@ export const assistantRuns = pgTable(
       .notNull(),
     language: text("language").$type<SupportedLanguages>().notNull(),
     origin: text("origin").notNull(),
-    status: text("status").$type<AssistantRunStatus>().notNull().default("pending"),
+    status: text("status")
+      .$type<AssistantRunStatus>()
+      .notNull()
+      .default(ASSISTANT_RUN_STATUSES.PENDING),
     activity: text("activity").$type<AssistantRunActivity>(),
     workflowRunId: text("workflow_run_id"),
     errorCode: text("error_code"),

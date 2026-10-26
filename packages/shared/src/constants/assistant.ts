@@ -35,3 +35,24 @@ export const ASSISTANT_SOURCE_TYPES = {
 } as const;
 export type AssistantSourceType =
   (typeof ASSISTANT_SOURCE_TYPES)[keyof typeof ASSISTANT_SOURCE_TYPES];
+
+/** Persisted generation lifecycle; completed runs can contain complete messages. */
+export const ASSISTANT_RUN_STATUSES = {
+  PENDING: "pending",
+  RUNNING: "running",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  CANCELLED: "cancelled",
+} as const;
+export type AssistantRunStatus =
+  (typeof ASSISTANT_RUN_STATUSES)[keyof typeof ASSISTANT_RUN_STATUSES];
+
+export const ASSISTANT_MESSAGE_STATUSES = {
+  PENDING: "pending",
+  RUNNING: "running",
+  COMPLETE: "complete",
+  FAILED: "failed",
+  CANCELLED: "cancelled",
+} as const;
+export type AssistantMessageStatus =
+  (typeof ASSISTANT_MESSAGE_STATUSES)[keyof typeof ASSISTANT_MESSAGE_STATUSES];

@@ -1,4 +1,10 @@
-import type { AssistantRunActivity, AssistantSourceType, AssistantMessageRole } from "@repo/shared";
+import type {
+  AssistantRunActivity,
+  AssistantSourceType,
+  AssistantMessageRole,
+  AssistantMessageStatus,
+  AssistantRunStatus,
+} from "@repo/shared";
 
 export type AssistantSource = {
   title: string;
@@ -21,7 +27,7 @@ export type AssistantMessage = {
   role: AssistantMessageRole;
   clientMessageId?: string | null;
   text: string;
-  status: "complete" | "pending" | "running" | "failed" | "cancelled";
+  status: AssistantMessageStatus;
   sources: AssistantSource[];
   createdAt: string;
 };
@@ -29,7 +35,7 @@ export type AssistantMessage = {
 export type AssistantRun = {
   id: string;
   threadId: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  status: AssistantRunStatus;
   errorCode: string | null;
   activity?: AssistantRunActivity | null;
 };

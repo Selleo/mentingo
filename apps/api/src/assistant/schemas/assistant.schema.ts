@@ -1,5 +1,7 @@
 import {
   ASSISTANT_MESSAGE_ROLES,
+  ASSISTANT_MESSAGE_STATUSES,
+  ASSISTANT_RUN_STATUSES,
   ASSISTANT_RUN_ACTIVITIES,
   ASSISTANT_SOURCE_TYPES,
   SUPPORTED_LANGUAGES,
@@ -18,13 +20,7 @@ export const assistantSourceSchema = Type.Object({
 export const assistantRunSchema = Type.Object({
   id: UUIDSchema,
   threadId: UUIDSchema,
-  status: Type.Union([
-    Type.Literal("pending"),
-    Type.Literal("running"),
-    Type.Literal("completed"),
-    Type.Literal("failed"),
-    Type.Literal("cancelled"),
-  ]),
+  status: Type.Enum(ASSISTANT_RUN_STATUSES),
   activity: Type.Optional(Type.Union([Type.Enum(ASSISTANT_RUN_ACTIVITIES), Type.Null()])),
   workflowRunId: Type.Union([Type.String(), Type.Null()]),
   errorCode: Type.Union([Type.String(), Type.Null()]),
@@ -44,18 +40,9 @@ export const assistantMessageSchema = Type.Object({
   id: UUIDSchema,
   clientMessageId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   threadId: UUIDSchema,
-  role: Type.Union([
-    Type.Literal(ASSISTANT_MESSAGE_ROLES.USER),
-    Type.Literal(ASSISTANT_MESSAGE_ROLES.ASSISTANT),
-  ]),
+  role: Type.Enum(ASSISTANT_MESSAGE_ROLES),
   text: Type.String(),
-  status: Type.Union([
-    Type.Literal("pending"),
-    Type.Literal("running"),
-    Type.Literal("complete"),
-    Type.Literal("failed"),
-    Type.Literal("cancelled"),
-  ]),
+  status: Type.Enum(ASSISTANT_MESSAGE_STATUSES),
   sources: Type.Array(assistantSourceSchema),
   createdAt: Type.String(),
   updatedAt: Type.String(),
