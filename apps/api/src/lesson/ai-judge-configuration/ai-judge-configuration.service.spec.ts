@@ -19,8 +19,8 @@ import type { AiJudgeConfigurationTranslationService } from "./ai-judge-configur
 import type { AiJudgeConfigurationRepository } from "./ai-judge-configuration.repository";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
-import type { MasterCourseService } from "src/courses/master-course.service";
+import type { CourseFeaturePolicyService } from "src/courses/editing/course-feature-policy.service";
+import type { MasterCourseService } from "src/courses/master-course/master-course.service";
 import type { AdminLessonService } from "src/lesson/services/adminLesson.service";
 
 const lessonId = "00000000-0000-4000-8000-000000000001" as UUIDType;

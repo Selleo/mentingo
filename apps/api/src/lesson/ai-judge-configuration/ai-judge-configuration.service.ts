@@ -2,8 +2,8 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { COURSE_FEATURE, ENTITY_TYPES, LESSON_TYPES, type SupportedLanguages } from "@repo/shared";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseFeaturePolicyService } from "src/courses/editing/course-feature-policy.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { DB } from "src/storage/db/db.providers";
 

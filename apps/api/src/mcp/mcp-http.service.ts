@@ -44,7 +44,7 @@ import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
-import { CourseTranslationService } from "src/courses/services/course-translation.service";
+import { CourseTranslationService } from "src/courses/translations/course-translation.service";
 import { FileService } from "src/file/file.service";
 import { GlobalSearchService } from "src/global-search/global-search.service";
 import { GroupService } from "src/group/group.service";

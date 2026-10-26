@@ -30,8 +30,8 @@ import {
   rewriteScormStorageReference,
   shouldSyncLesson,
 } from "src/course-transfer/utils/course-transfer-graph.utils";
-import { CourseDurationService } from "src/courses/course-duration.service";
-import { mergeResourceMetadataPreservingDuration } from "src/courses/utils/master-course-resource.utils";
+import { CourseDurationService } from "src/courses/duration/course-duration.service";
+import { mergeResourceMetadataPreservingDuration } from "src/courses/master-course/master-course-resource.utils";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { getBunnyVideoId } from "src/file/video-metadata.utils";
 import { LEARNING_PATH_ERRORS } from "src/learning-path/constants/learning-path.errors";

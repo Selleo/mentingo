@@ -6,7 +6,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
 import { CourseTransferSnapshotService } from "src/course-transfer/services/course-transfer-snapshot.service";
-import { MasterCourseRepository } from "src/courses/master-course.repository";
+import { MasterCourseRepository } from "src/courses/master-course/master-course.repository";
 import {
   getAllImageVariantKeys,
   isImageVariantReference,

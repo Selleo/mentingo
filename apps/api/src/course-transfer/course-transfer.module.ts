@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
-import { CourseDurationModule } from "src/courses/course-duration.module";
+import { CourseDurationModule } from "src/courses/duration/course-duration.module";
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { isOutboxProcessingEnabled } from "src/outbox/outbox.constants";

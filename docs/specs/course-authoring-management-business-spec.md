@@ -50,7 +50,7 @@ Managing-tenant administrators can instead share a master course with selected t
 - Course creation, own-course editing, any-course editing, enrollment, statistics, deletion, export, and category management have separate permission checks. Statistics additionally requires access to the specific course. Group deadline editing requires course-enrollment and group-read access.
 - Archive state is separate from draft, private, and published status. Catalog and direct-course access enforce archive visibility while retaining access for enrolled learners.
 - Mentingo package export and import live in `apps/api/src/native-archive`. ZIPs contain a versioned manifest and checked assets; tenant-scoped background jobs process them. Import maps source identities to destination IDs and checks for an existing course before creating one.
-- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied media belongs to the target tenant. Course language selection stays in the overview URL, and shared language and learning-outcome rules keep the UI and API aligned.
+- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course/master-course.service.ts`; copied media belongs to the target tenant. Course language selection stays in the overview URL, and shared language and learning-outcome rules keep the UI and API aligned.
 
 ## Test Evidence
 

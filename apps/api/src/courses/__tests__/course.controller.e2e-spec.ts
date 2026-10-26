@@ -21,8 +21,8 @@ import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { CourseDurationService } from "src/courses/course-duration.service";
 import { CourseService } from "src/courses/course.service";
+import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import { EnvService } from "src/env/services/env.service";
 import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";

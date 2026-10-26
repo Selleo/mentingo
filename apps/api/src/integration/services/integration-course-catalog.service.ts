@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-import { CourseDurationService } from "src/courses/course-duration.service";
+import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import { FileService } from "src/file/file.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
