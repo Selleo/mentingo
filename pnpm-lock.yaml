@@ -286,6 +286,9 @@ importers:
       file-type:
         specifier: 21.3.2
         version: 21.3.2
+      graphile-worker:
+        specifier: 0.16.6
+        version: 0.16.6(typescript@5.4.5)
       handlebars:
         specifier: 4.7.8
         version: 4.7.8
