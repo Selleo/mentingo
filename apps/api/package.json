@@ -119,7 +119,7 @@
     "drizzle-orm": "0.31.2",
     "drizzle-typebox": "0.1.1",
     "faker": "link:@types/@faker-js/faker",
-    "file-type": "21.3.0",
+    "file-type": "21.3.2",
     "handlebars": "4.7.8",
     "html-entities": "2.6.0",
     "jimp": "1.6.0",

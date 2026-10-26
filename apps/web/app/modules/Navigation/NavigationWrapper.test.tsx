@@ -1,6 +1,7 @@
+import { PERMISSIONS } from "@repo/shared";
 import { fireEvent, screen } from "@testing-library/react";
 import { useState } from "react";
-import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -9,8 +10,18 @@ import NavigationWrapper from "./NavigationWrapper";
 
 import type { ReactElement } from "react";
 
-const state = vi.hoisted(() => ({ user: { id: "actor" } as { id: string } | null, mounts: 0 }));
+const state = vi.hoisted(() => ({
+  user: { id: "actor", permissions: [] as string[] } as {
+    id: string;
+    permissions: string[];
+  } | null,
+  mounts: 0,
+  renderedPaths: [] as string[],
+}));
 vi.mock("~/api/queries", () => ({ useCurrentUser: () => ({ data: state.user }) }));
+vi.mock("~/api/queries/useCurrentUserSessionSuspense", () => ({
+  useCurrentUserSessionSuspense: () => ({ data: state.user }),
+}));
 vi.mock("~/components/Navigation/Navigation", () => ({ Navigation: () => <nav>Navigation</nav> }));
 vi.mock("~/modules/SupportMode/SupportModeBanner", () => ({ SupportModeBanner: () => null }));
 vi.mock("~/Guards/MFAGuard", () => ({
@@ -36,21 +47,27 @@ function NavigationLinks() {
     </>
   );
 }
-function renderLayout() {
+function PageContent() {
+  const { pathname } = useLocation();
+  state.renderedPaths.push(pathname);
+  return <div>Page content: {pathname}</div>;
+}
+function renderLayout(path = "/courses") {
   return renderWith().render(
-    <MemoryRouter initialEntries={["/courses"]}>
+    <MemoryRouter initialEntries={[path]}>
       <NavigationLinks />
       <Routes>
         <Route element={<NavigationWrapper />}>
-          <Route path="*" element={<div>Page content</div>} />
+          <Route path="*" element={<PageContent />} />
         </Route>
       </Routes>
     </MemoryRouter>,
   );
 }
 beforeEach(() => {
-  state.user = { id: "actor" };
+  state.user = { id: "actor", permissions: Object.values(PERMISSIONS) };
   state.mounts = 0;
+  state.renderedPaths = [];
 });
 describe("Assistant shared application host", () => {
   it("keeps a single dock mounted across content, user, admin and lesson pages", () => {
@@ -68,10 +85,17 @@ describe("Assistant shared application host", () => {
     }
     expect(state.mounts).toBe(1);
   });
+  it("retains staging's route guard before mounting a protected page", () => {
+    state.user = { id: "actor", permissions: [] };
+    renderLayout("/admin/users");
+    expect(state.renderedPaths).not.toContain("/admin/users");
+    expect(screen.queryByText("Page content: /admin/users")).not.toBeInTheDocument();
+    expect(screen.getByText("Page content: /")).toBeVisible();
+  });
   it("does not mount a dock for anonymous visitors", () => {
     state.user = null;
     renderLayout();
     expect(screen.queryByTestId("persistent-dock")).not.toBeInTheDocument();
-    expect(screen.getByText("Page content")).toBeVisible();
+    expect(screen.getByText("Page content: /courses")).toBeVisible();
   });
 });

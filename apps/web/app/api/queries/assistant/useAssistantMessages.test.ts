@@ -4,6 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { useAssistantMessages } from "./useAssistantMessages";
 
+vi.mock("~/api/assistantIdentity", () => ({
+  useAssistantScope: () => ["assistant", "https://tenant.example", "tenant", "user"],
+  currentAssistantScope: () => undefined,
+  inAssistantSession: (_scope: unknown, operation: () => unknown) => operation(),
+}));
+
 vi.mock("@tanstack/react-query", () => ({ useInfiniteQuery: vi.fn() }));
 
 const interval = (runStatus: string, messageStatus: string) => {

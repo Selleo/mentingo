@@ -9,6 +9,7 @@ import type {
 export type AssistantThread = typeof assistantThreads.$inferSelect;
 export type AssistantMessage = typeof assistantMessages.$inferSelect;
 export type AssistantRun = typeof assistantRuns.$inferSelect;
+export type AssistantRunCursor = Pick<AssistantRun, "createdAt" | "id">;
 export type AssistantRunIdentity = { runId: string; tenantId: string };
 export type AssistantStartInput = AssistantRunIdentity & {
   threadId: string;

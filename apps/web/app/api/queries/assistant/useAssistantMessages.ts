@@ -1,23 +1,36 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
+import {
+  currentAssistantScope,
+  inAssistantSession,
+  useAssistantScope,
+  type AssistantScope,
+} from "~/api/assistantIdentity";
 import { isAssistantRunActive } from "~/modules/Assistant/assistant.types";
 
-export const assistantMessagesKey = (threadId: string) =>
-  ["assistant", "messages", threadId] as const;
+export const assistantMessagesKey = (
+  threadId: string,
+  scope: AssistantScope | undefined = currentAssistantScope(),
+) => [...(scope ?? ["assistant", "anonymous"]), "messages", threadId] as const;
 export function useAssistantMessages(threadId: string) {
+  const scope = useAssistantScope();
   return useInfiniteQuery({
-    queryKey: assistantMessagesKey(threadId),
-    enabled: Boolean(threadId),
+    queryKey: assistantMessagesKey(threadId, scope),
+    enabled: Boolean(threadId && scope),
     staleTime: 0,
     initialPageParam: 1,
     queryFn: async ({ pageParam }) =>
-      (
-        await ApiClient.api.assistantControllerListMessages(threadId, {
-          page: pageParam,
-          perPage: 50,
-        })
-      ).data.data,
+      inAssistantSession(
+        scope,
+        async () =>
+          (
+            await ApiClient.api.assistantControllerListMessages(threadId, {
+              page: pageParam,
+              perPage: 50,
+            })
+          ).data.data,
+      ),
     getNextPageParam: (last) =>
       last.page * last.perPage < last.totalItems ? last.page + 1 : undefined,
     refetchInterval: (query) => {

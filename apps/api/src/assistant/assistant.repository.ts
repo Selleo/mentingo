@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
-import { and, asc, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -14,6 +14,7 @@ import { getAssistantMessageOrder } from "./assistant-message-order";
 import type {
   AssistantPageInput,
   AssistantRunIdentity,
+  AssistantRunCursor,
   AssistantRunUpdate,
   AssistantSendResult,
 } from "./assistant.types";
@@ -289,7 +290,7 @@ export class AssistantRepository {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, () =>
       this.db
         .update(assistantRuns)
-        .set({ workflowRunId })
+        .set({ workflowRunId, updatedAt: new Date().toISOString() })
         .where(
           and(
             eq(assistantRuns.tenantId, input.tenantId),
@@ -361,6 +362,34 @@ export class AssistantRepository {
         );
       return updated;
     });
+  }
+
+  async boundActiveRuns(tenantId: string, after?: AssistantRunCursor) {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, () =>
+      this.db
+        .select({
+          id: assistantRuns.id,
+          createdAt: assistantRuns.createdAt,
+          workflowRunId: assistantRuns.workflowRunId,
+        })
+        .from(assistantRuns)
+        .where(
+          and(
+            eq(assistantRuns.tenantId, tenantId),
+            inArray(assistantRuns.status, ["pending", "running"]),
+            isNotNull(assistantRuns.workflowRunId),
+            sql`${assistantRuns.updatedAt} < CURRENT_TIMESTAMP - interval '15 seconds'`,
+            after
+              ? or(
+                  gt(assistantRuns.createdAt, after.createdAt),
+                  and(eq(assistantRuns.createdAt, after.createdAt), gt(assistantRuns.id, after.id)),
+                )
+              : undefined,
+          ),
+        )
+        .orderBy(asc(assistantRuns.createdAt), asc(assistantRuns.id))
+        .limit(20),
+    );
   }
 
   async pendingRuns(tenantId: string) {

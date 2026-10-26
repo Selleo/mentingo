@@ -11,7 +11,7 @@ import { assistantWorkflowRunId } from "./assistant-run-id";
 import { startAssistantRunTrace, withAssistantTrace } from "./assistant-tracing";
 import { registerAssistantExecution } from "./assistant-workflow.bridge";
 
-import type { AssistantRuntimeInput } from "./assistant-workflow.types";
+import type { AssistantRuntimeInput, AssistantWorkflowRunState } from "./assistant-workflow.types";
 import type { OnApplicationBootstrap, OnApplicationShutdown } from "@nestjs/common";
 
 type PostgresWorld = ReturnType<(typeof import("@workflow/world-postgres"))["createWorld"]>;
@@ -21,7 +21,11 @@ type WorkflowApi = {
     args: unknown[],
     options?: { world: PostgresWorld; namespace?: string },
   ): Promise<{ runId: string }>;
-  getRun(runId: string): { exists: Promise<boolean>; cancel(): Promise<void> };
+  getRun(runId: string): {
+    exists: Promise<boolean>;
+    status: Promise<Exclude<AssistantWorkflowRunState, "missing">>;
+    cancel(): Promise<void>;
+  };
 };
 type WorkflowBuilder = {
   NestLocalBuilder: new (options: {
@@ -136,6 +140,17 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
       observation.end();
     }
     return { workflowRunId };
+  }
+
+  async getRunState(workflowRunId: string): Promise<AssistantWorkflowRunState> {
+    if (!this.isAvailable())
+      throw new ServiceUnavailableException("Assistant runtime is not configured");
+    const { getRun } = await loadEsm<WorkflowApi>("workflow/api");
+    const run = getRun(workflowRunId);
+    // The SDK returns false only for WorkflowRunNotFoundError. Transport and
+    // database errors must propagate, never masquerade as a missing run.
+    if (!(await run.exists)) return "missing";
+    return run.status;
   }
 
   async cancel(workflowRunId: string): Promise<void> {

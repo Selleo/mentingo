@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
-import { ASSISTANT_RUN_ACTIVITIES, type AssistantRunActivity } from "@repo/shared";
+import { ASSISTANT_RUN_ACTIVITIES, TENANT_STATUSES, type AssistantRunActivity } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
@@ -8,7 +8,7 @@ import { DatabasePg } from "src/common";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { users } from "src/storage/schema";
+import { tenants, users } from "src/storage/schema";
 
 import {
   collectAssistantSources,
@@ -38,6 +38,20 @@ export class AssistantExecutionService {
     const run = await this.assistantRepository.getRun(input);
     if (!["pending", "running"].includes(run.status))
       throw new ForbiddenException("Assistant run is no longer active");
+    const [tenant] = await this.db
+      .select({ status: tenants.status })
+      .from(tenants)
+      .where(eq(tenants.id, input.tenantId))
+      .limit(1);
+    if (tenant?.status !== TENANT_STATUSES.ACTIVE) {
+      // Background steps bypass HTTP tenant resolution. Suspension is terminal for this run,
+      // so reactivation cannot resume a previously authorized generation or overwrite its result.
+      await this.assistantRepository.updateRun(input, {
+        status: "failed",
+        errorCode: tenant ? "TENANT_INACTIVE" : "TENANT_NOT_FOUND",
+      });
+      throw new ForbiddenException("Assistant tenant access revoked");
+    }
     const [account] = await this.db
       .select({ id: users.id })
       .from(users)

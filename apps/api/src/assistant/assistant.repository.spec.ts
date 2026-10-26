@@ -1,4 +1,5 @@
 import { ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
+import { PgDialect } from "drizzle-orm/pg-core";
 
 import { AssistantRepository } from "./assistant.repository";
 
@@ -85,5 +86,66 @@ describe("Assistant durable progress", () => {
     expect(set.mock.calls[0][0]).toEqual(
       expect.objectContaining({ status: undefined, activity: "searching" }),
     );
+  });
+
+  it("terminal reconciliation retains previously persisted answer text and sources", async () => {
+    await repository.updateRun(identity, { status: "failed", errorCode: "WORKFLOW_FAILED" });
+    expect(set.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ status: "failed", errorCode: "WORKFLOW_FAILED", activity: null }),
+    );
+    expect(set.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ status: "failed", text: undefined, sources: undefined }),
+    );
+  });
+
+  it.each(["completed", "cancelled"] as const)(
+    "does not overwrite a Core %s state with a late Workflow failure",
+    async (status) => {
+      current = { ...current, status, activity: null };
+      await expect(
+        repository.updateRun(identity, { status: "failed", errorCode: "WORKFLOW_FAILED" }),
+      ).resolves.toEqual(current);
+      expect(set).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe("Assistant reconciliation scan boundaries", () => {
+  it("bounds and tenant-scopes stale bound runs while advancing past a stable cursor", async () => {
+    const where = jest.fn();
+    const orderBy = jest.fn();
+    const limit = jest.fn(async () => []);
+    const query = {
+      from: jest.fn(),
+      where,
+      orderBy,
+      limit,
+    };
+    query.from.mockReturnValue(query);
+    where.mockReturnValue(query);
+    orderBy.mockReturnValue(query);
+    const runWithTenant = jest.fn((_tenantId, callback) => callback());
+    const repository = new AssistantRepository(
+      { select: () => query } as never,
+      { runWithTenant } as never,
+    );
+    const cursor = { createdAt: "2026-10-23T12:00:00Z", id: "run-cursor" };
+    await repository.boundActiveRuns("tenant-isolated", cursor);
+    expect(runWithTenant).toHaveBeenCalledWith("tenant-isolated", expect.any(Function));
+    expect(limit).toHaveBeenCalledWith(20);
+    const statement = new PgDialect().sqlToQuery(where.mock.calls[0][0]);
+    expect(statement.params).toEqual([
+      "tenant-isolated",
+      "pending",
+      "running",
+      cursor.createdAt,
+      cursor.createdAt,
+      cursor.id,
+    ]);
+    expect(statement.sql).toContain('"workflow_run_id" is not null');
+    expect(statement.sql).toContain("CURRENT_TIMESTAMP - interval '15 seconds'");
+    expect(statement.sql).toContain('"created_at" >');
+    expect(statement.sql).toContain('"id" >');
+    expect(orderBy.mock.calls[0]).toHaveLength(2);
   });
 });

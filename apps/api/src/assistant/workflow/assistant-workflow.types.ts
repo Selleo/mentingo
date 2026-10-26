@@ -9,6 +9,14 @@ export type AssistantWorkflowInput = {
   threadId?: string;
   trace?: { traceId: string; spanId: string; traceFlags: number };
 };
+export type AssistantWorkflowRunState =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "missing";
+
 export type AssistantRuntimeInput = AssistantWorkflowInput & {
   createdAt: string;
   threadId: string;

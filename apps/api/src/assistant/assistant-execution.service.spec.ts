@@ -1,5 +1,7 @@
 import { ForbiddenException } from "@nestjs/common";
-import { ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
+import { ASSISTANT_RUN_ACTIVITIES, TENANT_STATUSES } from "@repo/shared";
+
+import { tenants, users } from "src/storage/schema";
 
 import { AssistantExecutionService } from "./assistant-execution.service";
 
@@ -24,6 +26,8 @@ describe("AssistantExecutionService", () => {
   };
   let assistantRepository: { getRun: jest.Mock; updateRun: jest.Mock; getHistory: jest.Mock };
   let activeAccount: jest.Mock;
+  let currentTenant: { status: string } | undefined;
+  let modelProvider: jest.Mock;
   let mcpHttpService: { executeNativeReadTool: jest.Mock; listNativeReadTools: jest.Mock };
   let service: AssistantExecutionService;
   let tenantDbRunnerService: { runWithTenant: jest.Mock };
@@ -35,6 +39,8 @@ describe("AssistantExecutionService", () => {
       getHistory: jest.fn().mockResolvedValue([]),
     };
     activeAccount = jest.fn().mockResolvedValue([{ id: "user-1" }]);
+    currentTenant = { status: TENANT_STATUSES.ACTIVE };
+    modelProvider = jest.fn(async () => () => ({ fixture: true }));
     mcpHttpService = {
       executeNativeReadTool: jest
         .fn()
@@ -42,18 +48,120 @@ describe("AssistantExecutionService", () => {
       listNativeReadTools: jest.fn().mockResolvedValue([]),
     };
     tenantDbRunnerService = { runWithTenant: jest.fn((_tenantId, callback) => callback()) };
-    const query = {
-      from: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      limit: activeAccount,
-    };
+    const select = jest.fn(() => ({
+      from: (table: unknown) => ({
+        where: () => ({
+          limit: async () => {
+            if (table === tenants) return currentTenant ? [currentTenant] : [];
+            if (table === users) return activeAccount();
+            throw new Error("Unexpected authorization query");
+          },
+        }),
+      }),
+    }));
     service = new AssistantExecutionService(
       assistantRepository as unknown as AssistantRepository,
       mcpHttpService as unknown as McpHttpService,
       tenantDbRunnerService as unknown as TenantDbRunnerService,
-      {} as AiRuntimeService,
-      { select: jest.fn(() => query) } as unknown as DatabasePg,
+      { getAISdkOpenAI: modelProvider } as unknown as AiRuntimeService,
+      { select } as unknown as DatabasePg,
     );
+  });
+
+  const operations = [
+    "loadContext",
+    "getModel",
+    "executeTool",
+    "checkpoint",
+    "complete",
+    "validateOutcome",
+    "setActivity",
+  ] as const;
+  const invoke = (operation: (typeof operations)[number]) => {
+    if (operation === "executeTool") return service.executeTool(identity, "global_search", {});
+    if (operation === "checkpoint") return service.checkpoint(identity, "Must not persist");
+    if (operation === "complete") return service.complete(identity, "Must not persist");
+    if (operation === "validateOutcome")
+      return service.validateOutcome(identity, {
+        kind: "conversation",
+        text: "Hello",
+        requiresReadableContent: false,
+      });
+    if (operation === "setActivity")
+      return service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.THINKING);
+    return service[operation](identity);
+  };
+
+  describe.each(["pending", "running"])("tenant suspension during a %s run", (status) => {
+    it.each(operations)(
+      "blocks %s after active tenant becomes inactive, allowing only a terminal status write",
+      async (operation) => {
+        assistantRepository.getRun.mockResolvedValue({ ...run, status });
+        // The run was authorized while queued/running; the current DB tenant row then changes.
+        await expect(
+          service.validateOutcome(identity, {
+            kind: "conversation",
+            text: "Hello",
+            requiresReadableContent: false,
+          }),
+        ).resolves.toEqual(expect.objectContaining({ accepted: true }));
+        currentTenant = { status: TENANT_STATUSES.INACTIVE };
+        await expect(invoke(operation)).rejects.toBeInstanceOf(ForbiddenException);
+        expect(modelProvider).not.toHaveBeenCalled();
+        expect(mcpHttpService.executeNativeReadTool).not.toHaveBeenCalled();
+        expect(mcpHttpService.listNativeReadTools).not.toHaveBeenCalled();
+        expect(assistantRepository.getHistory).not.toHaveBeenCalled();
+        expect(assistantRepository.updateRun).toHaveBeenCalledTimes(1);
+        expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
+          status: "failed",
+          errorCode: "TENANT_INACTIVE",
+        });
+        expect(tenantDbRunnerService.runWithTenant).toHaveBeenCalledWith(
+          identity.tenantId,
+          expect.any(Function),
+        );
+      },
+    );
+  });
+
+  it("loads authorized context normally while the tenant remains active", async () => {
+    await expect(service.loadContext(identity)).resolves.toMatchObject({
+      run,
+      messages: [],
+      tools: [],
+    });
+    expect(mcpHttpService.listNativeReadTools).toHaveBeenCalledWith(
+      run.userId,
+      identity.tenantId,
+      run.origin,
+    );
+    expect(assistantRepository.getHistory).toHaveBeenCalledWith(identity);
+    expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, { status: "running" });
+    expect(modelProvider).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the tenant row is absent", async () => {
+    currentTenant = undefined;
+    await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(modelProvider).not.toHaveBeenCalled();
+    expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
+      status: "failed",
+      errorCode: "TENANT_NOT_FOUND",
+    });
+  });
+
+  it("does not resume a suspended run when its tenant is reactivated", async () => {
+    currentTenant = { status: TENANT_STATUSES.INACTIVE };
+    await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
+    assistantRepository.getRun.mockResolvedValue({
+      ...run,
+      status: "failed",
+      errorCode: "TENANT_INACTIVE",
+    });
+    currentTenant = { status: TENANT_STATUSES.ACTIVE };
+    await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(modelProvider).not.toHaveBeenCalled();
+    expect(assistantRepository.updateRun).toHaveBeenCalledTimes(1);
   });
 
   it("rechecks an active account before every tool call and denies a removed account", async () => {

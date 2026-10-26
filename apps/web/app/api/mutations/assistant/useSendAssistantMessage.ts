@@ -1,13 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
+import {
+  captureAssistantSession,
+  inAssistantSession,
+  useAssistantScope,
+} from "~/api/assistantIdentity";
 import { assistantMessagesKey } from "~/api/queries/assistant/useAssistantMessages";
 import { assistantThreadKey } from "~/api/queries/assistant/useAssistantThread";
 import { assistantThreadsKey } from "~/api/queries/assistant/useAssistantThreads";
 import { queryClient } from "~/api/queryClient";
 
 export function useSendAssistantMessage() {
+  const scope = useAssistantScope();
   return useMutation({
+    onMutate: () => captureAssistantSession(scope),
     retry: false,
     mutationFn: async ({
       threadId,
@@ -15,9 +22,15 @@ export function useSendAssistantMessage() {
     }: {
       threadId: string;
       body: Parameters<typeof ApiClient.api.assistantControllerSendMessage>[1];
-    }) => (await ApiClient.api.assistantControllerSendMessage(threadId, body)).data.data,
-    onSuccess: async (result, { threadId }) => {
-      const messagesKey = assistantMessagesKey(threadId);
+    }) =>
+      inAssistantSession(
+        scope,
+        async () => (await ApiClient.api.assistantControllerSendMessage(threadId, body)).data.data,
+      ),
+    onSuccess: async (result, { threadId }, session) => {
+      session!.assertCurrent();
+      const scope = session!.scope;
+      const messagesKey = assistantMessagesKey(threadId, scope);
       // A newly created thread has no mounted transcript query until navigation.
       // Never replace an existing cache: it may already contain newer streamed output.
       if (queryClient.getQueryData(messagesKey) === undefined) {
@@ -35,10 +48,11 @@ export function useSendAssistantMessage() {
         });
       }
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: assistantMessagesKey(threadId) }),
-        queryClient.invalidateQueries({ queryKey: assistantThreadKey(threadId) }),
-        queryClient.invalidateQueries({ queryKey: assistantThreadsKey }),
+        queryClient.invalidateQueries({ queryKey: assistantMessagesKey(threadId, scope) }),
+        queryClient.invalidateQueries({ queryKey: assistantThreadKey(threadId, scope) }),
+        queryClient.invalidateQueries({ queryKey: assistantThreadsKey(scope) }),
       ]);
+      session!.assertCurrent();
     },
   });
 }

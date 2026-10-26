@@ -9,6 +9,7 @@ import { assistantMessagesKey } from "~/api/queries/assistant/useAssistantMessag
 import { assistantThreadKey } from "~/api/queries/assistant/useAssistantThread";
 import { queryClient } from "~/api/queryClient";
 import translations from "~/locales/en/translation.json";
+import { useAuthStore } from "~/modules/Auth/authStore";
 import { renderWith } from "~/utils/testUtils";
 
 import { ASSISTANT_HANDLES } from "../../../e2e/data/assistant/handles";
@@ -131,6 +132,8 @@ beforeEach(() => {
   actor.user.id = "33333333-3333-4333-8333-333333333333";
   actor.user.supportContext = undefined;
   queryClient.clear();
+  useAuthStore.setState({ isLoggedIn: true });
+  queryClient.setQueryData(["currentUser"], { data: actor.user });
   vi.resetAllMocks();
   vi.mocked(ApiClient.api.assistantControllerGetAvailability).mockResolvedValue(
     response({ available: true, reason: null }),
@@ -204,6 +207,7 @@ describe("AssistantPage", () => {
     await waitFor(() => expect(ApiClient.api.assistantControllerGetThread).toHaveBeenCalledOnce());
     act(() => {
       actor.user.id = "44444444-4444-4444-8444-444444444444";
+      queryClient.setQueryData(["currentUser"], { data: { ...actor.user } });
       actor.listeners.forEach((listener) => listener());
     });
     await screen.findByTestId(ASSISTANT_HANDLES.COMPOSER);

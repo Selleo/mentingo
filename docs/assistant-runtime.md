@@ -28,3 +28,11 @@ The web app remembers a selected nonarchived conversation ID in sessionStorage, 
 Database-backed HTTP tests cover ownership, tenant isolation, administrative access, idempotency, cancellation, archive behavior and unavailable execution. Deterministic Postgres Workflow smoke tests cover model/tool steps, partial text checkpoints and completion. Browser fixture checks cover desktop/mobile presentation. Live model behavior, remote tracing delivery and production deployment require environment-specific checks.
 
 V1 provides read-only conversations and source links. Contextual mini-chat, report changes and live editable artifacts are future work. Core owns those user-facing contracts so execution can evolve independently.
+
+## Pre-PR security hardening
+
+Assistant query caches are scoped by account, origin and support tenant. Logout invalidates pending requests and mutations so delayed results cannot repopulate another authenticated session. Background execution rechecks the tenant status as well as account and tool permissions; suspension permanently fails the current run.
+
+Every recovery tick also reconciles bounded batches of stale, already-bound runs against Workflow state. Confirmed missing, failed or cancelled workflows become terminal in Core, retaining partial output; transient World errors leave runs retryable. Keyset pagination prevents older live runs from starving later failures.
+
+The staging-based review includes regression coverage for these boundaries and preserves the staging route guard. This is not a claim that the repository has no vulnerabilities: existing dependency advisories require separate triage. Live provider behavior, remote Langfuse delivery, real microphone transcription and deployed restart/recovery still need environment-specific verification.

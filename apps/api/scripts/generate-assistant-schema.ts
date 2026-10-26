@@ -36,7 +36,10 @@ async function generateAssistantSchema() {
       servers: api.servers ?? [],
     });
     for (const path of Object.keys(api.paths)) {
-      if (path.startsWith("/api/assistant/") || path.startsWith("/api/admin/ai-threads"))
+      if (
+        (path.startsWith("/api/assistant/") || path.startsWith("/api/admin/ai-threads")) &&
+        !(path in generated.paths)
+      )
         delete api.paths[path];
     }
     Object.assign(api.paths, generated.paths);
