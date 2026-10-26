@@ -1,39 +1,17 @@
-import { defineRoutes } from "@remix-run/dev/dist/config/routes";
 import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
-import { matchPath } from "react-router-dom";
 
-import { routes } from "../../routes";
+import { getRouteLeaves } from "../../routeInventory";
 import { checkRouteAccess } from "../Guards/RouteGuard";
 
-import { routeAccessConfig } from "./routeAccessConfig";
-
-import type { RouteManifest } from "@remix-run/dev/dist/config/routes";
-
-// Derive leaf URLs from the actual Remix tree, not a separately maintained list.
-export async function getRoutePaths() {
-  const manifest: RouteManifest = await routes(defineRoutes);
-  const fullPath = (id: string): string => {
-    const entry = manifest[id];
-    const parent = entry.parentId && manifest[entry.parentId] ? fullPath(entry.parentId) : "";
-    return [parent, entry.path].filter(Boolean).join("/");
-  };
-  return Object.values(manifest)
-    .filter((entry) => !Object.values(manifest).some((child) => child.parentId === entry.id))
-    .map((entry) => fullPath(entry.id));
-}
-
 describe("route access inventory", () => {
-  it("explicitly covers every leaf in the Remix route tree", async () => {
-    for (const path of await getRoutePaths()) {
+  it("explicitly covers every leaf in the Remix route tree", () => {
+    for (const { path } of getRouteLeaves()) {
       expect(checkRouteAccess(path, Object.values(PERMISSIONS)), path).toBe(true);
     }
   });
 
-  it("audits every leaf against the permission matrix of every built-in role", async () => {
-    for (const path of await getRoutePaths()) {
-      const requirement = Object.entries(routeAccessConfig).find(([pattern]) =>
-        matchPath({ path: pattern, end: true }, `/${path}`),
-      )?.[1];
+  it("audits every leaf against the permission matrix of every built-in role", () => {
+    for (const { path, requirement } of getRouteLeaves()) {
       expect(requirement, path).toBeDefined();
       for (const [role, permissions] of Object.entries(SYSTEM_ROLE_PERMISSIONS)) {
         expect(checkRouteAccess(path, permissions), `${role}: ${path}`).toBe(

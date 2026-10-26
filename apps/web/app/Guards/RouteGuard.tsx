@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from "@remix-run/react";
+import { match } from "ts-pattern";
 
 import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
 import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
@@ -8,52 +9,49 @@ import { routeAccessConfig } from "../config/routeAccessConfig";
 
 import type { ReactNode } from "react";
 
+const routePatterns = Object.entries(routeAccessConfig);
+const exactRoutePatterns = routePatterns.filter(([pattern]) => !pattern.endsWith("/*"));
+const wildcardRoutePatterns = routePatterns.filter(([pattern]) => pattern.endsWith("/*"));
+
+const matchesExactPattern = (pattern: string, pathSegments: string[]) => {
+  const patternSegments = pattern.split("/");
+  if (patternSegments.length !== pathSegments.length) return false;
+
+  return patternSegments.every(
+    (segment, index) => segment.startsWith(":") || segment === pathSegments[index],
+  );
+};
+
+const matchesWildcardPattern = (pattern: string, path: string) => {
+  const prefix = pattern.slice(0, -2);
+  return path === prefix || path.startsWith(`${prefix}/`);
+};
+
+const findRouteRequirement = (path: string) => {
+  const pathSegments = path.split("/");
+
+  return (
+    exactRoutePatterns.find(([pattern]) => matchesExactPattern(pattern, pathSegments))?.[1] ??
+    wildcardRoutePatterns.find(([pattern]) => matchesWildcardPattern(pattern, path))?.[1]
+  );
+};
+
 export const checkRouteAccess = (path: string, permissions: PermissionKey[]) => {
-  path = path.replace(/^\//, "").replace(/\/$/, "").toLowerCase();
-  for (const [pattern, requirement] of Object.entries(routeAccessConfig)) {
-    const patternSegments = pattern.split("/");
-    const pathSegments = path.split("/");
+  const normalizedPath = path.replace(/^\//, "").replace(/\/$/, "").toLowerCase();
+  const requirement = findRouteRequirement(normalizedPath);
 
-    if (pattern.endsWith("/*")) {
-      const prefix = pattern.slice(0, -2);
-      if (path === prefix || path.startsWith(`${prefix}/`)) {
-        return matchesRequirement(permissions, requirement);
-      }
-      continue;
-    }
-
-    if (patternSegments.length !== pathSegments.length) {
-      continue;
-    }
-
-    const matches = patternSegments.every((segment, index) => {
-      if (segment.startsWith(":")) {
-        return true;
-      }
-
-      return segment === pathSegments[index];
-    });
-
-    if (matches) {
-      return matchesRequirement(permissions, requirement);
-    }
-  }
-
-  return false;
+  return Boolean(requirement && matchesRequirement(permissions, requirement));
 };
 
 export const RouteGuard = ({ children }: { children: ReactNode }) => {
   const { data: user } = useCurrentUserSessionSuspense();
-  const location = useLocation();
-  const path = location.pathname.replace(/^\//, "").replace(/\/$/, "");
-  const hasAccess = checkRouteAccess(path, user?.permissions ?? []);
+  const { pathname } = useLocation();
+  const hasAccess = checkRouteAccess(pathname, user?.permissions ?? []);
 
-  // A permission-protected route must never mount its children for an anonymous
-  // session, including routes sharing the public dashboard layout.
-  if (!user && !checkRouteAccess(path, [])) {
-    return <RequireAuthenticatedUser>{children}</RequireAuthenticatedUser>;
-  }
-  if (!hasAccess) return <Navigate to="/" replace />;
-
-  return <>{children}</>;
+  return match({ hasAccess, isAnonymous: !user })
+    .with({ hasAccess: true }, () => <>{children}</>)
+    .with({ isAnonymous: true }, () => (
+      <RequireAuthenticatedUser>{children}</RequireAuthenticatedUser>
+    ))
+    .otherwise(() => <Navigate to="/" replace />);
 };

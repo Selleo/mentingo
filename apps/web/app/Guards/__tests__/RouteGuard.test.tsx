@@ -1,7 +1,7 @@
 import { createRemixStub } from "@remix-run/testing";
 import { PERMISSIONS } from "@repo/shared";
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
@@ -14,6 +14,10 @@ vi.mock("~/api/queries/useCurrentUserSessionSuspense");
 describe("RouteGuard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    useNavigationHistoryStore.getState().clearHistory();
   });
 
   it("redirects anonymous reports access without mounting child queries and remembers the URL", async () => {
@@ -38,7 +42,6 @@ describe("RouteGuard", () => {
     expect(useNavigationHistoryStore.getState().navigationHistory[0]?.pathname).toBe(
       "/reports?language=pl",
     );
-    useNavigationHistoryStore.getState().clearHistory();
   });
 
   it("allows anonymous public routes without mounting an authenticated-only query", async () => {
