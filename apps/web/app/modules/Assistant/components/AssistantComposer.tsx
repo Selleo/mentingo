@@ -1,26 +1,17 @@
 import { VoiceLevelBars } from "@mentingo/voice";
 import { ArrowUp, LoaderCircle, Mic, Square, X } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
-import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
+import { DICTATION_PHASES } from "~/modules/Voice/dictation.constants";
+import { useTextDictation } from "~/modules/Voice/hooks/useTextDictation";
 
 import { ASSISTANT_HANDLES } from "../../../../e2e/data/assistant/handles";
 
 const MAX_MESSAGE_LENGTH = 8000;
-const TRANSCRIPTION_TIMEOUT_MS = 15_000;
-const VOICE_PHASES = {
-  IDLE: "idle",
-  STARTING: "starting",
-  RECORDING: "recording",
-  TRANSCRIBING: "transcribing",
-  CANCELLING: "cancelling",
-} as const;
-type VoicePhase = (typeof VOICE_PHASES)[keyof typeof VOICE_PHASES];
-
 type AssistantComposerProps = {
   value: string;
   onChange: (value: string) => void;
@@ -48,143 +39,26 @@ export function AssistantComposer({
   const composing = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const valueRef = useRef(value);
-  const mounted = useRef(true);
-  const operationRef = useRef(0);
-  const acceptsTranscript = useRef(false);
-  const voicePhaseRef = useRef<VoicePhase>(VOICE_PHASES.IDLE);
-  const pendingTranscript = useRef<{ received: boolean; stopped: boolean } | null>(null);
-  const transcriptionTimer = useRef<ReturnType<typeof setTimeout>>();
-  const [voicePhase, setVoicePhase] = useState<VoicePhase>(VOICE_PHASES.IDLE);
-  const [voiceLevel, setVoiceLevel] = useState(0);
-  const [voiceError, setVoiceError] = useState(false);
-
   useLayoutEffect(() => {
     valueRef.current = value;
   }, [value]);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-      acceptsTranscript.current = false;
-      operationRef.current += 1;
-      clearTimeout(transcriptionTimer.current);
-    };
-  }, []);
-
-  const setPhase = useCallback((phase: VoicePhase) => {
-    voicePhaseRef.current = phase;
-    if (mounted.current) setVoicePhase(phase);
-  }, []);
-  const finishVoice = useCallback(() => {
-    clearTimeout(transcriptionTimer.current);
-    pendingTranscript.current = null;
-    acceptsTranscript.current = false;
-    setPhase(VOICE_PHASES.IDLE);
-    if (mounted.current) setVoiceLevel(0);
-  }, [setPhase]);
-  const setTranscribedInput = useCallback(
-    (next: string | ((current: string) => string)) => {
-      if (!mounted.current || !acceptsTranscript.current) return;
-      const nextValue = typeof next === "function" ? next(valueRef.current) : next;
-      // Preserve the entire dictated draft, including over-limit text, so the user can edit it.
-      valueRef.current = nextValue;
-      onChange(nextValue);
-      const pending = pendingTranscript.current;
-      if (pending) {
-        pending.received = true;
-        if (pending.stopped) finishVoice();
-      }
-    },
-    [finishVoice, onChange],
-  );
-  const { startRecording, stopRecording, cancelTranscription } = useTranscription({
-    setInput: setTranscribedInput,
-    onLevelChange: setVoiceLevel,
-  });
-
-  const cancelVoice = useCallback(async () => {
-    operationRef.current += 1;
-    acceptsTranscript.current = false;
-    clearTimeout(transcriptionTimer.current);
-    pendingTranscript.current = null;
-    setPhase(VOICE_PHASES.CANCELLING);
-    try {
-      await cancelTranscription();
-    } catch {
-      if (mounted.current) setVoiceError(true);
-    } finally {
-      finishVoice();
-    }
-  }, [cancelTranscription, finishVoice, setPhase]);
-
-  useEffect(() => {
-    if (
-      (disabled || running || submitting) &&
-      voicePhaseRef.current !== VOICE_PHASES.IDLE &&
-      voicePhaseRef.current !== VOICE_PHASES.CANCELLING
-    ) {
-      void cancelVoice();
-    }
-  }, [cancelVoice, disabled, running, submitting]);
-
-  const startVoice = async () => {
-    if (disabled || running || submitting || voicePhaseRef.current !== VOICE_PHASES.IDLE) return;
-    const operation = ++operationRef.current;
-    acceptsTranscript.current = true;
-    setVoiceError(false);
-    setPhase(VOICE_PHASES.STARTING);
-    try {
-      const started = await startRecording();
-      if (!mounted.current || operation !== operationRef.current) return;
-      if (started) setPhase(VOICE_PHASES.RECORDING);
-      else {
-        finishVoice();
-        setVoiceError(true);
-      }
-    } catch {
-      if (!mounted.current || operation !== operationRef.current) return;
-      finishVoice();
-      setVoiceError(true);
-    }
-  };
-
-  const stopVoice = async () => {
-    if (voicePhaseRef.current !== VOICE_PHASES.RECORDING) return;
-    const operation = operationRef.current;
-    const pending = { received: false, stopped: false };
-    pendingTranscript.current = pending;
-    setPhase(VOICE_PHASES.TRANSCRIBING);
-    transcriptionTimer.current = setTimeout(() => {
-      if (!mounted.current || pendingTranscript.current !== pending) return;
-      setVoiceError(true);
-      void cancelVoice();
-    }, TRANSCRIPTION_TIMEOUT_MS);
-    try {
-      await stopRecording();
-      if (!mounted.current || operation !== operationRef.current) return;
-      pending.stopped = true;
-      if (pending.received) finishVoice();
-    } catch {
-      if (!mounted.current || operation !== operationRef.current) return;
-      finishVoice();
-      setVoiceError(true);
-    }
-  };
-
-  const voiceBusy = voicePhase !== VOICE_PHASES.IDLE;
-  const recording = voicePhase === VOICE_PHASES.RECORDING;
-  const showVoicePanel =
-    recording || voicePhase === VOICE_PHASES.TRANSCRIBING || voicePhase === VOICE_PHASES.CANCELLING;
+  const {
+    phase: voicePhase,
+    voiceLevel,
+    error: voiceError,
+    isBusy: voiceBusy,
+    isRecording: recording,
+    showVoicePanel,
+    isIdle,
+    start: startVoice,
+    stop: stopVoice,
+    cancel: cancelVoice,
+  } = useTextDictation({ value, onChange, blocked: disabled || running || submitting });
   const tooLong = value.length > MAX_MESSAGE_LENGTH;
   const canSend =
     Boolean(value.trim()) && !tooLong && !disabled && !submitting && !running && !voiceBusy;
   const submit = () => {
-    if (
-      canSend &&
-      voicePhaseRef.current === VOICE_PHASES.IDLE &&
-      valueRef.current.length <= MAX_MESSAGE_LENGTH
-    )
-      onSend();
+    if (canSend && isIdle() && valueRef.current.length <= MAX_MESSAGE_LENGTH) onSend();
   };
 
   useLayoutEffect(() => {
@@ -295,7 +169,7 @@ export function AssistantComposer({
               size="icon"
               className="size-8 shrink-0 rounded-lg"
               onClick={() => void cancelVoice()}
-              disabled={voicePhase === VOICE_PHASES.CANCELLING}
+              disabled={voicePhase === DICTATION_PHASES.CANCELLING}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.closeVoiceMode")}
             >
               <X className="size-4" />
@@ -310,7 +184,7 @@ export function AssistantComposer({
               disabled={disabled || submitting || running || voiceBusy}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
             >
-              {voicePhase === VOICE_PHASES.STARTING ? (
+              {voicePhase === DICTATION_PHASES.STARTING ? (
                 <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
               ) : (
                 <Mic className="size-4" />

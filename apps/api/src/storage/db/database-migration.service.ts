@@ -1,25 +1,30 @@
-import { join } from "node:path";
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
+import databaseConfiguration from "../../common/configuration/database";
 
-import { DatabasePg } from "src/common";
-
-import { DB_ADMIN } from "./db.providers";
-
-const MIGRATIONS_FOLDER = join(__dirname, "../migrations");
+import { DatabaseMigrationRepository } from "./database-migration.repository";
 
 @Injectable()
 export class DatabaseMigrationService {
   private readonly logger = new Logger(DatabaseMigrationService.name);
 
-  constructor(@Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg) {}
+  constructor(private readonly databaseMigrationRepository: DatabaseMigrationRepository) {}
 
   async runMigrations() {
-    this.logger.log("Running database migrations");
-
-    await migrate(this.dbAdmin, { migrationsFolder: MIGRATIONS_FOLDER });
-
-    this.logger.log("Database migrations completed");
+    this.logger.log("Running Core and Workflow database migrations");
+    try {
+      await this.databaseMigrationRepository.runMigrations();
+      this.logger.log("Database migrations completed");
+    } catch (error) {
+      this.logger.error(error instanceof Error ? error.message : "Database migrations failed");
+      throw error;
+    }
   }
+}
+
+/** Standalone migration entry: no AppModule, servers or AI providers are loaded. */
+export async function runDatabaseMigrations() {
+  const config = new ConfigService({ database: databaseConfiguration() });
+  await new DatabaseMigrationService(new DatabaseMigrationRepository(config)).runMigrations();
 }

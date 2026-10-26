@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TokenService } from "src/auth/token.service";
 import * as schema from "src/storage/schema";
 
+import { DatabaseMigrationRepository } from "./database-migration.repository";
 import { DatabaseMigrationService } from "./database-migration.service";
 import { TENANT_DB_IDLE_TRANSACTION_TIMEOUT_MS } from "./db.constants";
 import { DB, DB_APP, DB_ADMIN } from "./db.providers";
@@ -61,6 +62,7 @@ import type { DatabasePg } from "src/common";
         createTenantAwareDb(dbApp, runner),
     },
     DatabaseMigrationService,
+    DatabaseMigrationRepository,
     TenantDbRunnerService,
     TenantResolverService,
     TenantStateService,

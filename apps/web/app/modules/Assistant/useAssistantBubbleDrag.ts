@@ -1,6 +1,8 @@
 import { animate, useMotionValue, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+import { readAssistantSessionValue, writeAssistantSessionValue } from "./assistantSessionStorage";
+
 import type { KeyboardEvent, PointerEvent } from "react";
 
 export const BUBBLE_SIZE = 56;
@@ -68,9 +70,7 @@ export function useAssistantBubbleDrag(
       let stored: BubblePoint | null = null;
       if (!initialized) {
         try {
-          const value: unknown = JSON.parse(
-            window.sessionStorage.getItem(persistenceKey) ?? "null",
-          );
+          const value: unknown = JSON.parse(readAssistantSessionValue(persistenceKey) ?? "null");
           if (
             value &&
             typeof value === "object" &&
@@ -83,7 +83,7 @@ export function useAssistantBubbleDrag(
           )
             stored = { x: value.x, y: value.y };
         } catch {
-          /* Position persistence is optional. */
+          stored = null;
         }
       }
       const point = clampBubble(
@@ -118,11 +118,7 @@ export function useAssistantBubbleDrag(
     animate(x, point.x, transition);
     animate(y, point.y, transition);
     setPosition(point);
-    try {
-      window.sessionStorage.setItem(persistenceKey, JSON.stringify(point));
-    } catch {
-      /* Keep the in-memory position. */
-    }
+    writeAssistantSessionValue(persistenceKey, JSON.stringify(point));
   };
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     if (!viewport || event.button !== 0 || gesture.current) return;

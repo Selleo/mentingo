@@ -6,6 +6,6 @@
     "noEmit": true,
     "incremental": false
   },
-  "include": ["src/assistant/workflow/assistant.workflow.ts"],
+  "include": ["src/assistant/workflow/assistant.workflow.ts", "src/storage/workflow-schema.ts"],
   "exclude": ["node_modules", "dist"]
 }

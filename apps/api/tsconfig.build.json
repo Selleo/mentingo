@@ -5,6 +5,7 @@
     "test",
     "dist",
     "**/*spec.ts",
-    "src/assistant/workflow/assistant.workflow.ts"
+    "src/assistant/workflow/assistant.workflow.ts",
+    "src/storage/workflow-schema.ts"
   ]
 }

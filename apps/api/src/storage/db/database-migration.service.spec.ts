@@ -1,31 +1,17 @@
-import { join } from "node:path";
-
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-
 import { DatabaseMigrationService } from "./database-migration.service";
 
-import type { DatabasePg } from "src/common";
-
-jest.mock("drizzle-orm/postgres-js/migrator", () => ({
-  migrate: jest.fn(),
-}));
+import type { DatabaseMigrationRepository } from "./database-migration.repository";
 
 describe("DatabaseMigrationService", () => {
-  const dbAdmin = {} as DatabasePg;
-  const service = new DatabaseMigrationService(dbAdmin);
-  const migrateMock = jest.mocked(migrate);
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("runs Drizzle migrations from the API migrations folder", async () => {
-    migrateMock.mockResolvedValue();
-
+  it("uses the shared Core and Workflow migration path and propagates failures", async () => {
+    const runMigrations = jest.fn().mockResolvedValue(undefined);
+    const service = new DatabaseMigrationService({
+      runMigrations,
+    } as unknown as DatabaseMigrationRepository);
     await service.runMigrations();
-
-    expect(migrateMock).toHaveBeenCalledWith(dbAdmin, {
-      migrationsFolder: join(__dirname, "../migrations"),
-    });
+    expect(runMigrations).toHaveBeenCalledTimes(1);
+    const failure = new Error("Database migrations failed (42501)");
+    runMigrations.mockRejectedValueOnce(failure);
+    await expect(service.runMigrations()).rejects.toBe(failure);
   });
 });

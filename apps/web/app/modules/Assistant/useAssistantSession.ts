@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useAssistantThread } from "~/api/queries/assistant/useAssistantThread";
 
+import { readAssistantSessionValue, writeAssistantSessionValue } from "./assistantSessionStorage";
+
 import type { CurrentUserResponse } from "~/api/generated-api";
 
 const RESTORE_STATES = { PENDING: "pending", FAILED: "failed" } as const;
@@ -24,24 +26,15 @@ export function assistantSessionKey(actor: SessionActor, origin: string) {
 export const ASSISTANT_SESSION_CHANGED = "mentingo:assistant-session-changed";
 
 export function readAssistantSelection(key: string): string | null {
-  try {
-    const value = window.sessionStorage.getItem(key);
-    if (!value) return null;
-    if (/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(value)) return value;
-    window.sessionStorage.removeItem(key);
-  } catch {
-    // Blocked storage must not prevent a user from starting a conversation.
-  }
+  const value = readAssistantSessionValue(key);
+  if (!value) return null;
+  if (/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(value)) return value;
+  writeAssistantSessionValue(key, null);
   return null;
 }
 
 export function writeAssistantSelection(key: string, threadId: string | null) {
-  try {
-    if (threadId) window.sessionStorage.setItem(key, threadId);
-    else window.sessionStorage.removeItem(key);
-  } catch {
-    // Session persistence is optional when storage is unavailable or full.
-  }
+  writeAssistantSessionValue(key, threadId);
   window.dispatchEvent(new CustomEvent(ASSISTANT_SESSION_CHANGED, { detail: { key } }));
 }
 

@@ -24,7 +24,7 @@
     "test:debug": "node --experimental-vm-modules --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch",
-    "db:migrate": "drizzle-kit migrate --config ./drizzle.migrator.config.ts",
+    "db:migrate": "tsx -r dotenv/config -e \"require('./src/storage/db/database-migration.service').runDatabaseMigrations().catch(() => process.exitCode = 1)\"",
     "db:generate": "drizzle-kit generate --config ./drizzle.migrator.config.ts",
     "db:seed": "tsx ./src/seed/seed.ts",
     "db:seed-staging": "node dist/src/seed/seed.js",
@@ -35,7 +35,8 @@
     "db:truncate-tables": "tsx ./src/seed/truncateTables.ts",
     "content-marketplace:mock": "tsx ./scripts/contentMarketplaceMock.ts",
     "workflow:build": "node --input-type=module -e \"import { resolve } from 'node:path'; import { NestLocalBuilder } from '@workflow/nest/builder'; await new NestLocalBuilder({ workingDir: process.cwd(), dirs: ['src/assistant/workflow'], outDir: resolve('dist/workflow'), moduleType: 'commonjs', distDir: 'dist/src/assistant/workflow', sourcemap: false }).build();\"",
-    "workflow:typecheck": "tsc --project tsconfig.workflow.json"
+    "workflow:typecheck": "tsc --project tsconfig.workflow.json",
+    "db:migrate:prod": "node -r dotenv/config -e \"require('./dist/src/storage/db/database-migration.service').runDatabaseMigrations().catch(() => process.exitCode = 1)\""
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.8",

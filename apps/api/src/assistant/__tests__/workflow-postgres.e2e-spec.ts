@@ -16,18 +16,66 @@ async function docker(...args: string[]) {
   return execute("docker", args, { timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
 }
 
-async function bootstrap(connectionString: string) {
+async function bootstrap(connectionString: string, appConnection = connectionString) {
+  await execute("pnpm", ["db:migrate"], {
+    cwd: resolve(__dirname, "../../.."),
+    env: {
+      ...process.env,
+      DATABASE_URL: connectionString,
+      MIGRATOR_DATABASE_URL: connectionString,
+      LMS_DATABASE_URL: appConnection,
+    },
+    timeout: 120000,
+    maxBuffer: 4 * 1024 * 1024,
+  });
+}
+
+async function referenceBootstrap(connectionString: string) {
   await execute(process.execPath, [resolve(dirname(sdkEntry), "../bin/setup.js")], {
-    // Running outside the repository also prevents the SDK from loading .env.
     cwd: tmpdir(),
     env: { ...process.env, WORKFLOW_POSTGRES_URL: connectionString },
     timeout: 30000,
   });
 }
 
+async function workflowSignature(sql: postgres.Sql) {
+  const columns = await sql`
+    SELECT c.relname, a.attname, a.attnotnull,
+      CASE WHEN t.typtype='e' THEN 'enum:' || t.typname ELSE format_type(a.atttypid,a.atttypmod) END AS type,
+      pg_get_expr(d.adbin,d.adrelid) AS default_value
+    FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped
+    JOIN pg_type t ON t.oid=a.atttypid
+    LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum
+    WHERE n.nspname='workflow' AND c.relkind='r' ORDER BY c.relname,a.attname
+  `;
+  const indexes =
+    await sql`SELECT c.relname AS table_name, i.relname AS index_name, pg_get_indexdef(i.oid) AS definition, x.indisprimary FROM pg_index x JOIN pg_class c ON c.oid=x.indrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_class i ON i.oid=x.indexrelid WHERE n.nspname='workflow' ORDER BY c.relname,i.relname`;
+  const constraints =
+    await sql`SELECT c.relname,p.contype,CASE WHEN c.relname='workflow_invocations' AND p.contype='p' THEN 'workflow_invocations_primary' ELSE p.conname END AS conname,pg_get_constraintdef(p.oid) AS definition FROM pg_constraint p JOIN pg_class c ON c.oid=p.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='workflow' ORDER BY c.relname,conname`;
+  const enums =
+    await sql`SELECT t.typname, array_agg(e.enumlabel ORDER BY e.enumsortorder) AS labels FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace JOIN pg_enum e ON e.enumtypid=t.oid WHERE t.typname IN ('status','step_status','wait_status') AND t.oid IN (SELECT a.atttypid FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='workflow') GROUP BY t.oid,t.typname ORDER BY t.typname`;
+  return {
+    columns: [...columns],
+    // Only the invocations PK name differs between current model and historical SQL.
+    // Compare their complete index definitions/columns with only that generated name normalized.
+    indexes: indexes.map((row) => {
+      const knownNamingDifference = row.table_name === "workflow_invocations" && row.indisprimary;
+      return {
+        table_name: row.table_name,
+        index_name: knownNamingDifference ? "workflow_invocations_primary" : row.index_name,
+        definition: knownNamingDifference
+          ? row.definition.replace(row.index_name, "workflow_invocations_primary")
+          : row.definition,
+      };
+    }),
+    constraints: [...constraints],
+    enums: [...enums],
+  };
+}
+
 async function seedCore(sql: postgres.Sql) {
   await sql.unsafe(`
-    CREATE TYPE public.status AS ENUM ('draft', 'published', 'private');
     CREATE TYPE public.status_new AS ENUM ('application_owned');
     CREATE TYPE public.step_status AS ENUM ('todo', 'done');
     CREATE TYPE public.wait_status AS ENUM ('waiting', 'finished');
@@ -158,19 +206,29 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
       "127.0.0.1::5432",
       "--env",
       "POSTGRES_PASSWORD=workflow_schema_test",
-      "postgres:16-alpine",
+      "pgvector/pgvector:pg16",
     );
     const published = await docker("port", container, "5432/tcp");
     port = published.stdout.trim().split(":").pop()!;
-    for (let attempt = 0; attempt < 30; attempt++) {
-      try {
-        await docker("exec", container, "pg_isready", "-U", "postgres");
-        return;
-      } catch {
-        await sleep(200);
+    const readiness = postgres(
+      `postgres://postgres:workflow_schema_test@127.0.0.1:${port}/postgres`,
+      { max: 1, connect_timeout: 1 },
+    );
+    try {
+      for (let attempt = 0; attempt < 30; attempt++) {
+        try {
+          // Docker's initialization server can report Unix-socket readiness before
+          // restarting; only the final server accepts the published TCP connection.
+          await readiness`SELECT 1`;
+          return;
+        } catch {
+          await sleep(200);
+        }
       }
+      throw new Error("Disposable PostgreSQL did not become ready");
+    } finally {
+      await readiness.end();
     }
-    throw new Error("Disposable PostgreSQL did not become ready");
   });
 
   afterAll(async () => {
@@ -188,6 +246,7 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
 
   it("bootstraps and reruns without changing Core enums, OIDs, schema or records, then consumes SDK jobs", async () => {
     const { sql, connectionString } = await database("core_collision");
+    await bootstrap(connectionString);
     await seedCore(sql);
     const before = await outsideSnapshot(sql, "core_collision");
     await bootstrap(connectionString);
@@ -214,27 +273,26 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
       ...(await sql`SELECT * FROM workflow_drizzle.workflow_migrations ORDER BY id`),
     ]).toEqual(history);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
-    await sql.unsafe(`
-      CREATE ROLE workflow_runtime LOGIN PASSWORD 'workflow_runtime_test';
-      GRANT USAGE ON SCHEMA workflow, workflow_drizzle, graphile_worker TO workflow_runtime;
-      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA workflow, workflow_drizzle, graphile_worker TO workflow_runtime;
-      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA workflow, workflow_drizzle, graphile_worker TO workflow_runtime;
-      GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA workflow, workflow_drizzle, graphile_worker TO workflow_runtime;
-      -- Graphile's private tables use RLS without policies. Its worker role
-      -- must own its tables; ordinary DML grants alone cannot enqueue jobs.
-      ALTER SCHEMA graphile_worker OWNER TO workflow_runtime;
-      DO $$ DECLARE relation record; BEGIN
-        FOR relation IN
-          SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-          WHERE n.nspname = 'graphile_worker' AND c.relkind IN ('r', 'p')
-        LOOP
-          EXECUTE format('ALTER TABLE graphile_worker.%I OWNER TO workflow_runtime', relation.relname);
-        END LOOP;
-      END $$;
-    `);
+    await sql.unsafe("CREATE ROLE workflow_runtime LOGIN PASSWORD 'workflow_runtime_test'");
     const runtimeUrl = new URL(connectionString);
     runtimeUrl.username = "workflow_runtime";
     runtimeUrl.password = "workflow_runtime_test";
+    await Promise.all([
+      bootstrap(connectionString, runtimeUrl.href),
+      bootstrap(connectionString, runtimeUrl.href),
+    ]);
+    // The container entrypoint invokes this compiled command with production dependencies.
+    await execute("pnpm", ["db:migrate:prod"], {
+      cwd: resolve(__dirname, "../../.."),
+      env: {
+        ...process.env,
+        DATABASE_URL: connectionString,
+        MIGRATOR_DATABASE_URL: connectionString,
+        LMS_DATABASE_URL: runtimeUrl.href,
+      },
+      timeout: 60000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
     const runtimeSql = postgres(runtimeUrl.href, { max: 1 });
     connections.push(runtimeSql);
     await expect(runtimeSql`SELECT * FROM public.core_records`).rejects.toMatchObject({
@@ -245,5 +303,36 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     ).rejects.toMatchObject({ code: "42501" });
     await smokeQueue(runtimeUrl.href);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
+  });
+  it("follows current SDK schema with explicitly checked historical SQL differences", async () => {
+    const baseline = await database("schema_baseline");
+    const reference = await database("schema_reference");
+    await bootstrap(baseline.connectionString);
+    // Upstream historical SQL is safe only in this empty disposable reference database.
+    await referenceBootstrap(reference.connectionString);
+    const generated = await workflowSignature(baseline.sql);
+    const historical = await workflowSignature(reference.sql);
+    const specVersion = (row: Record<string, unknown>) =>
+      row.relname === "workflow_runs" && row.attname === "spec_version";
+    // SDK 5.0.5 exports integer, but historical migration 0005 still creates varchar.
+    // The generated current model is authoritative; assert this discrepancy explicitly.
+    expect(generated.columns.find(specVersion)?.type).toBe("integer");
+    expect(historical.columns.find(specVersion)?.type).toBe("character varying");
+    historical.columns = historical.columns.map((row) =>
+      specVersion(row) ? { ...row, type: "integer" } : row,
+    );
+    expect(generated).toEqual(historical);
+  });
+
+  it("refuses untracked or incomplete SDK schemas without blessing their tracker", async () => {
+    const { sql, connectionString } = await database("schema_partial");
+    await sql.unsafe("CREATE SCHEMA workflow; CREATE TABLE workflow.partial (id integer)");
+    await expect(bootstrap(connectionString)).rejects.toThrow();
+    expect([
+      ...(await sql`SELECT to_regclass('workflow_drizzle.workflow_migrations') AS tracker`),
+    ]).toEqual([{ tracker: null }]);
+    expect([...(await sql`SELECT to_regclass('workflow.partial') AS preserved`)]).toEqual([
+      { preserved: "workflow.partial" },
+    ]);
   });
 });

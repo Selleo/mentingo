@@ -11,6 +11,7 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { readAssistantSessionValue, writeAssistantSessionValue } from "./assistantSessionStorage";
 import { AssistantConversation } from "./components/AssistantConversation";
 import { BUBBLE_SIZE, useAssistantBubbleDrag } from "./useAssistantBubbleDrag";
 import {
@@ -43,11 +44,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
   const updateOpen = (next: boolean | ((value: boolean) => boolean)) => {
     const value = typeof next === "function" ? next(open) : next;
     setOpen(value);
-    try {
-      window.sessionStorage.setItem(openKey, String(value));
-    } catch {
-      /* In-memory state still works. */
-    }
+    writeAssistantSessionValue(openKey, String(value));
   };
   const [draft, setDraft] = useState("");
   const panel = useRef<HTMLElement>(null);
@@ -62,11 +59,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !event.defaultPrevented) {
         setOpen(false);
-        try {
-          window.sessionStorage.setItem(openKey, "false");
-        } catch {
-          /* Storage is optional. */
-        }
+        writeAssistantSessionValue(openKey, "false");
         bubble.current?.focus();
       }
     };
@@ -82,11 +75,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
   useEffect(() => {
     const sync = () => {
       setSelection(readAssistantSelection(sessionKey));
-      try {
-        setDismissed(window.sessionStorage.getItem(dismissalKey));
-      } catch {
-        /* Storage is optional. */
-      }
+      setDismissed(readAssistantSessionValue(dismissalKey));
     };
     sync();
     window.addEventListener(ASSISTANT_SESSION_CHANGED, sync);
@@ -98,12 +87,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
   }, [dismissalKey, pathname, sessionKey]);
 
   useEffect(() => {
-    let remembered = false;
-    try {
-      remembered = window.sessionStorage.getItem(openKey) === "true";
-    } catch {
-      /* Storage is optional. */
-    }
+    const remembered = readAssistantSessionValue(openKey) === "true";
     setOpen(Boolean(selection) && !onAssistant && remembered);
     setDraft("");
   }, [onAssistant, openKey, selection]);
@@ -113,11 +97,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
     setOpen(false);
     setValidated(null);
     setDismissed(null);
-    try {
-      window.sessionStorage.removeItem(dismissalKey);
-    } catch {
-      /* Storage is optional. */
-    }
+    writeAssistantSessionValue(dismissalKey, null);
   }, [dismissalKey, onAssistant]);
 
   useEffect(() => {
@@ -141,11 +121,7 @@ function ScopedAssistantDock({ sessionKey }: { sessionKey: string }) {
   const dismiss = () => {
     updateOpen(false);
     setDismissed(selection);
-    try {
-      if (selection) window.sessionStorage.setItem(dismissalKey, selection);
-    } catch {
-      /* In-memory dismissal still works. */
-    }
+    if (selection) writeAssistantSessionValue(dismissalKey, selection);
   };
   const drag = useAssistantBubbleDrag(
     dismiss,
