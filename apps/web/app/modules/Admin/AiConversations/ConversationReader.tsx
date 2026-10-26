@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { AI_THREAD_TYPES } from "@repo/shared";
+import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES } from "@repo/shared";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import { useAdminAiThreadMessages } from "~/api/queries/admin/useAdminAiThreadMe
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { AssistantMarkdown } from "~/modules/Assistant/components/AssistantMarkdown";
 import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
@@ -129,6 +130,12 @@ export function ConversationReader({
                             : undefined
                         }
                         content={message.content}
+                        contentNode={
+                          thread.type === AI_THREAD_TYPES.ASSISTANT &&
+                          message.role === ASSISTANT_MESSAGE_ROLES.ASSISTANT ? (
+                            <AssistantMarkdown text={message.content} />
+                          ) : undefined
+                        }
                         userName={ownerName}
                         previewUser={{
                           displayName: ownerName,

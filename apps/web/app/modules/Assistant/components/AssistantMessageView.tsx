@@ -4,10 +4,8 @@ import {
   ASSISTANT_RUN_ACTIVITIES,
 } from "@repo/shared";
 import { Copy, Check, LoaderCircle } from "lucide-react";
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { Button } from "~/components/ui/button";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
@@ -15,26 +13,9 @@ import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/Chat
 
 import { ASSISTANT_HANDLES } from "../../../../e2e/data/assistant/handles";
 
-import { AssistantSourceLink } from "./AssistantSourceLink";
+import { AssistantMarkdown } from "./AssistantMarkdown";
 
-import type { AssistantMessage, AssistantRun, AssistantSource } from "../assistant.types";
-
-const SourcesContext = createContext<Map<string, AssistantSource>>(new Map());
-
-function VerifiedMarkdownLink({ href, children }: { href?: string; children?: ReactNode }) {
-  const source = useContext(SourcesContext).get(href ?? "");
-  return source ? (
-    <AssistantSourceLink source={source}>{children}</AssistantSourceLink>
-  ) : (
-    <span>{children}</span>
-  );
-}
-
-// Stable renderer identities preserve an open preview during polling and streaming updates.
-const markdownComponents = {
-  a: VerifiedMarkdownLink,
-  img: ({ alt }: { alt?: string }) => <span>{alt}</span>,
-};
+import type { AssistantMessage, AssistantRun } from "../assistant.types";
 
 export function AssistantMessageView({
   message,
@@ -57,21 +38,6 @@ export function AssistantMessageView({
       ? ASSISTANT_RUN_ACTIVITIES.STARTING
       : ASSISTANT_RUN_ACTIVITIES.THINKING);
   const progressLabel = t(`assistant.activity.${phase}`);
-  const sources = message.sources.filter((source) => {
-    if (source.url.includes("\\") || source.url.startsWith("//")) return false;
-    try {
-      const url = new URL(source.url, "https://assistant.invalid");
-      return (
-        ["https:", "http:"].includes(url.protocol) &&
-        !url.username &&
-        !url.password &&
-        (/^https?:\/\//i.test(source.url) || source.url.startsWith("/"))
-      );
-    } catch {
-      return false;
-    }
-  });
-  const sourcesByUrl = new Map(sources.map((source) => [source.url, source]));
 
   if (!isUser && running && !message.text) {
     return (
@@ -92,15 +58,7 @@ export function AssistantMessageView({
       contentNode={
         isUser ? undefined : (
           <div className="min-w-0">
-            {message.text && (
-              <div className="prose prose-sm max-w-none break-words text-sm text-foreground prose-headings:font-semibold prose-headings:text-foreground prose-p:leading-6 prose-a:text-primary-700 dark:prose-a:text-primary-300 prose-pre:overflow-x-auto prose-pre:bg-neutral-100 dark:prose-pre:bg-neutral-800 prose-pre:text-foreground">
-                <SourcesContext.Provider value={sourcesByUrl}>
-                  <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                    {message.text}
-                  </Markdown>
-                </SourcesContext.Provider>
-              </div>
-            )}
+            {message.text && <AssistantMarkdown text={message.text} sources={message.sources} />}
             {running && (
               <p
                 role="status"

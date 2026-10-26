@@ -1,3 +1,5 @@
+import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES, ASSISTANT_MESSAGE_STATUSES } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { AI_CONVERSATIONS_HANDLES as HANDLES } from "../../data/ai-conversations/handles";
@@ -126,5 +128,47 @@ test("admin sees an unavailable transcript and can return to the list", async ({
     await expect(page.getByTestId(HANDLES.READER).getByRole("alert")).toBeVisible();
     await page.getByTestId(HANDLES.BACK).click();
     await expect(page.getByTestId(HANDLES.row(THREAD_ID))).toBeVisible();
+  });
+});
+
+test("admin Assistant history never requests model-provided images or links", async ({
+  withReadonlyPage,
+}) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await mockConversations(page);
+    const externalRequests: string[] = [];
+    await page.route("**://attacker.invalid/**", (route) => {
+      externalRequests.push(route.request().url());
+      return route.abort();
+    });
+    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}(?:\\?|$)`), (route) =>
+      route.fulfill({
+        json: { data: { ...conversation, type: AI_THREAD_TYPES.ASSISTANT, evaluation: null } },
+      }),
+    );
+    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}/messages(?:\\?|$)`), (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              id: "mock-model-response",
+              role: ASSISTANT_MESSAGE_ROLES.ASSISTANT,
+              status: ASSISTANT_MESSAGE_STATUSES.COMPLETE,
+              content:
+                "Saved Assistant answer.\n\n![preview][p]\n\n[p]: //attacker.invalid/pixel\n\n[unverified][x]\n\n[x]: //attacker.invalid/landing",
+              createdAt: conversation.lastActivityAt,
+            },
+          ],
+          pagination: { page: 1, perPage: 100, totalItems: 1 },
+        },
+      }),
+    );
+    await page.goto(`/admin/ai-conversations/${THREAD_ID}`);
+    const message = page.getByTestId(HANDLES.MESSAGE);
+    await expect(message).toContainText("Saved Assistant answer.");
+    await expect(message).toContainText("preview");
+    await expect(message.locator('img[src*="attacker.invalid"]')).toHaveCount(0);
+    await expect(message.locator('a[href*="attacker.invalid"]')).toHaveCount(0);
+    expect(externalRequests).toEqual([]);
   });
 });
