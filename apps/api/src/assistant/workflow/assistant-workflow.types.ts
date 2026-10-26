@@ -1,6 +1,6 @@
 import type { AssistantOutcome, AssistantOutcomeValidation } from "./assistant-outcome.types";
 import type { LanguageModelV4 } from "@ai-sdk/provider";
-import type { AssistantRunActivity } from "@repo/shared";
+import type { AssistantRunActivity, AssistantMessageRole } from "@repo/shared";
 
 export type AssistantWorkflowInput = {
   runId: string;
@@ -34,7 +34,7 @@ export type AssistantWorkflowContext = {
     origin: string;
     status: string;
   };
-  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  messages: Array<{ role: AssistantMessageRole; content: string }>;
   tools: Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>;
 };
 

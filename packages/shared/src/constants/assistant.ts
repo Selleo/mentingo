@@ -1,3 +1,13 @@
+import { MESSAGE_ROLE } from "./messageRole";
+
+export const ASSISTANT_MESSAGE_ROLES = {
+  USER: MESSAGE_ROLE.USER,
+  ASSISTANT: MESSAGE_ROLE.MENTOR,
+} as const;
+
+export type AssistantMessageRole =
+  (typeof ASSISTANT_MESSAGE_ROLES)[keyof typeof ASSISTANT_MESSAGE_ROLES];
+
 /** User-visible phases backed by actual Core Assistant runtime operations. */
 export const ASSISTANT_RUN_ACTIVITIES = {
   STARTING: "starting",

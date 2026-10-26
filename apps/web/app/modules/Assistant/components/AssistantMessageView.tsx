@@ -1,3 +1,4 @@
+import { ASSISTANT_MESSAGE_ROLES } from "@repo/shared";
 import { Copy, Check, LoaderCircle } from "lucide-react";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +43,7 @@ export function AssistantMessageView({
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(timer.current), []);
-  const isUser = message.role === "user";
+  const isUser = message.role === ASSISTANT_MESSAGE_ROLES.USER;
   const running = message.status === "pending" || message.status === "running";
   const phase = activity ?? (message.status === "pending" ? "starting" : "thinking");
   const progressLabel = t(`assistant.activity.${phase}`);

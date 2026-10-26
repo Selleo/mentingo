@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
+import { ASSISTANT_MESSAGE_ROLES, ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
 import { and, asc, count, desc, eq, gt, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -212,7 +212,7 @@ export class AssistantRepository {
         .values({
           tenantId: user.tenantId,
           threadId,
-          role: "user",
+          role: ASSISTANT_MESSAGE_ROLES.USER,
           text: input.text.trim(),
           clientMessageId: input.clientMessageId,
           createdAt: new Date(now).toISOString(),
@@ -223,7 +223,7 @@ export class AssistantRepository {
         .values({
           tenantId: user.tenantId,
           threadId,
-          role: "assistant",
+          role: ASSISTANT_MESSAGE_ROLES.ASSISTANT,
           status: "pending",
           createdAt: new Date(now + 1).toISOString(),
         })

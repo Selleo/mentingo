@@ -1,1 +1,0 @@
-ALTER TABLE "assistant_runs" ADD COLUMN "activity" text;

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { AI_THREAD_TYPES, MESSAGE_ROLE } from "@repo/shared";
+import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES, MESSAGE_ROLE } from "@repo/shared";
 import { and, asc, count, desc, eq, gte, inArray, lt, max, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 
@@ -110,7 +110,7 @@ export class AdminAiThreadsRepository {
   private buildAssistantThreadSummariesQuery() {
     const visibleMessageFilter = and(
       eq(assistantMessages.threadId, assistantThreads.id),
-      inArray(assistantMessages.role, ["user", "assistant"]),
+      inArray(assistantMessages.role, Object.values(ASSISTANT_MESSAGE_ROLES)),
     );
     const openingMessageQuery = this.db
       .select({ preview: sql<string>`LEFT(${assistantMessages.text}, 160)` })
@@ -247,7 +247,7 @@ export class AdminAiThreadsRepository {
   private async getAssistantThreadMessages(threadId: UUIDType, page: number, perPage: number) {
     const messageFilters = and(
       eq(assistantMessages.threadId, threadId),
-      inArray(assistantMessages.role, ["user", "assistant"]),
+      inArray(assistantMessages.role, Object.values(ASSISTANT_MESSAGE_ROLES)),
     );
     const [data, messageCounts] = await Promise.all([
       this.db
@@ -255,7 +255,7 @@ export class AdminAiThreadsRepository {
           id: assistantMessages.id,
           role: sql<
             AdminAiThreadMessage["role"]
-          >`CASE WHEN ${assistantMessages.role} = 'user' THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
+          >`CASE WHEN ${assistantMessages.role} = ${ASSISTANT_MESSAGE_ROLES.USER} THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
           content: assistantMessages.text,
           status: assistantMessages.status,
           createdAt: assistantMessages.createdAt,

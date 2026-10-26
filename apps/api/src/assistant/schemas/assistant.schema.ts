@@ -1,4 +1,5 @@
 import {
+  ASSISTANT_MESSAGE_ROLES,
   ASSISTANT_RUN_ACTIVITIES,
   ASSISTANT_SOURCE_TYPES,
   SUPPORTED_LANGUAGES,
@@ -43,7 +44,10 @@ export const assistantMessageSchema = Type.Object({
   id: UUIDSchema,
   clientMessageId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   threadId: UUIDSchema,
-  role: Type.Union([Type.Literal("user"), Type.Literal("assistant")]),
+  role: Type.Union([
+    Type.Literal(ASSISTANT_MESSAGE_ROLES.USER),
+    Type.Literal(ASSISTANT_MESSAGE_ROLES.ASSISTANT),
+  ]),
   text: Type.String(),
   status: Type.Union([
     Type.Literal("pending"),

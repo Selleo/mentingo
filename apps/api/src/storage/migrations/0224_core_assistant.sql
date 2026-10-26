@@ -23,8 +23,11 @@ CREATE TABLE IF NOT EXISTS "assistant_runs" (
 	"language" text NOT NULL,
 	"origin" text NOT NULL,
 	"status" text DEFAULT 'pending' NOT NULL,
+	"activity" text,
 	"workflow_run_id" text,
 	"error_code" text,
+	"successful_tool_calls" integer DEFAULT 0 NOT NULL,
+	"readable_tool_calls" integer DEFAULT 0 NOT NULL,
 	"sources" jsonb DEFAULT '[]'::jsonb NOT NULL
 );
 --> statement-breakpoint

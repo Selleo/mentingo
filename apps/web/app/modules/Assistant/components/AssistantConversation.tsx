@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "@remix-run/react";
+import { ASSISTANT_MESSAGE_ROLES } from "@repo/shared";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -80,7 +81,8 @@ export function AssistantConversation({
     pendingDraft &&
       persistedMessages.some(
         (message) =>
-          message.role === "user" && message.clientMessageId === pendingDraft.clientMessageId,
+          message.role === ASSISTANT_MESSAGE_ROLES.USER &&
+          message.clientMessageId === pendingDraft.clientMessageId,
       ),
   );
   const messages: AssistantMessage[] = [...persistedMessages];
@@ -88,7 +90,7 @@ export function AssistantConversation({
     messages.push({
       id: `pending-${pendingDraft.clientMessageId}`,
       threadId,
-      role: "user",
+      role: ASSISTANT_MESSAGE_ROLES.USER,
       text: pendingDraft.text,
       status: "complete",
       sources: [],

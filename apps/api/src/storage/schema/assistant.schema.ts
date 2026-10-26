@@ -2,6 +2,7 @@ import {
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
   type AssistantRunActivity,
+  type AssistantMessageRole,
   type AssistantSourceType,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
@@ -63,7 +64,7 @@ export const assistantMessages = pgTable(
     threadId: uuid("thread_id")
       .references(() => assistantThreads.id, { onDelete: "cascade" })
       .notNull(),
-    role: text("role").$type<"user" | "assistant">().notNull(),
+    role: text("role").$type<AssistantMessageRole>().notNull(),
     text: text("text").notNull().default(""),
     status: text("status").$type<AssistantMessageStatus>().notNull().default("complete"),
     sources: jsonb("sources").$type<AssistantSource[]>().notNull().default([]),

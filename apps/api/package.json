@@ -36,8 +36,7 @@
     "content-marketplace:mock": "tsx ./scripts/contentMarketplaceMock.ts",
     "workflow:build": "node scripts/build-assistant-workflow.mjs",
     "workflow:bootstrap": "node scripts/bootstrap-assistant-workflow.mjs",
-    "workflow:typecheck": "tsc --project tsconfig.workflow.json",
-    "workflow:smoke": "node scripts/smoke-assistant-workflow.mjs"
+    "workflow:typecheck": "tsc --project tsconfig.workflow.json"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.8",

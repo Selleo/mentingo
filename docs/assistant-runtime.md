@@ -9,6 +9,8 @@ The Assistant runs in the Core API using AI SDK Workflow and self-hosted Postgre
 3. Set `WORKFLOW_POSTGRES_URL` through the deployment's private configuration. Run `pnpm --filter api workflow:bootstrap` in that same environment. The wrapper refuses an application database before running upstream migrations.
 4. Build with `pnpm --filter api build`, then start the API through the existing deployment command. Development startup rebuilds the Workflow bundle when Workflow is configured.
 
+The unreleased Assistant migrations are consolidated into `0224_core_assistant` (tables, columns and indexes) and `0225_enable_assistant_tenant_rls` (tenant policies). A local database that already applied the earlier four-migration development history must be recreated or explicitly reconciled before using this history; do not rerun the squashed migrations against it blindly.
+
 An absent Workflow URL leaves Assistant execution unavailable without preventing ordinary API startup. An invalid configured database or missing production bundle fails startup visibly. No public Workflow execution endpoint or hosted Workflow service is required. Workflow jobs execute in the API process, so an API instance must remain running to process them.
 
 The runtime resolves model/provider credentials through Core's existing tenant-aware AI runtime. It uses the existing Langfuse/OpenTelemetry configuration, with one assistant run trace, user identity and thread session identity. Local trace assertions do not establish remote Langfuse delivery.

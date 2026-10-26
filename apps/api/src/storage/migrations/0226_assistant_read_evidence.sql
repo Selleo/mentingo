@@ -1,2 +1,0 @@
-ALTER TABLE "assistant_runs" ADD COLUMN "successful_tool_calls" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
-ALTER TABLE "assistant_runs" ADD COLUMN "readable_tool_calls" integer DEFAULT 0 NOT NULL;
