@@ -168,9 +168,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
         </div>
         {!is2xl && <AllArticlesTOC isMobile={true} />}
         <main className="relative flex-1 overflow-y-auto bg-primary-50">
-          <RouteGuard>
-            <Outlet />
-          </RouteGuard>
+          <Outlet />
         </main>
       </div>
     );
@@ -178,9 +176,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
   return (
     <main className="relative flex-1 overflow-y-auto bg-primary-50">
-      <RouteGuard>
-        <Outlet />
-      </RouteGuard>
+      <Outlet />
     </main>
   );
 };

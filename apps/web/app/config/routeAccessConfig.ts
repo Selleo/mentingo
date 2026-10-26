@@ -95,6 +95,10 @@ export const routeAccessConfig = createRouteConfig({
   "auth/register": PUBLIC,
   "auth/create-new-password": PUBLIC,
   "auth/password-recovery": PUBLIC,
+  "auth/magic-link": PUBLIC,
+  "auth/mfa": PUBLIC,
+  "auth/change-password": PUBLIC,
+  "tenant-inactive": PUBLIC,
   "oauth/connect": PUBLIC,
 
   // Client part
