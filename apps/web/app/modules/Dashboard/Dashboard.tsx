@@ -5,7 +5,6 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import { RouteGuard } from "~/Guards/RouteGuard";
 import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
