@@ -12,6 +12,7 @@ import postgres from "postgres";
 
 import databaseConfiguration from "../../common/configuration/database";
 
+import { DATABASE_MIGRATION_LOCK } from "./db.constants";
 import { WORKFLOW_BASELINE } from "./workflow-baseline.constants";
 
 @Injectable()
@@ -42,7 +43,7 @@ export class DatabaseMigrationService {
           }
         },
       });
-      await admin`SELECT pg_advisory_lock(19283746, 50607080)`;
+      await admin`SELECT pg_advisory_lock(${DATABASE_MIGRATION_LOCK[0]}, ${DATABASE_MIGRATION_LOCK[1]})`;
       const nonce = randomBytes(8);
       const identityLock = [nonce.readInt32BE(0), nonce.readInt32BE(4)];
       await admin`SELECT pg_advisory_lock(${identityLock[0]}, ${identityLock[1]})`;
