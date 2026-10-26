@@ -418,3 +418,27 @@ Authors can distinguish web discovery from reviewing the collected sources. Sour
 ### Reviewing an incomplete saved snapshot
 
 Course authors can inspect available generated content even when a saved snapshot is missing a required change. The workspace refreshes the snapshot once before opening this inspection view. It names the affected changes and missing dependencies, and keeps application unavailable until the dependency set is complete. Conflicting changes and circular dependencies receive specific errors; unexpected preview failures are reported separately. Server validation remains authoritative for applying changes.
+
+
+### Course generation cost and recovery safeguards (2026-10-26)
+
+The AI companion reuses verified research topics when later searches add pages for other gaps.
+Unfinished topic analyses stop at the shared deadline while completed findings remain available.
+Writer streams have a five-minute total deadline; timed-out lessons and source-fidelity failures
+can use the existing scoped retry action without restarting completed sibling lessons.
+
+Full lesson exports materialize the default fields Core requires before hashing. Core accepts a
+Python-produced quiz fixture with omitted source defaults, while preserving identity and hash
+validation. A selection whose generation has not settled reports `proposalNotReady`; a hash
+mismatch during failure reconciliation retains that diagnosis. Existing acceptance, baseline,
+required-asset and dependency checks continue to apply to partially completed courses.
+
+Validation is local: unit tests cover the producer/consumer export handoff and failure messages.
+Production cost savings, live-provider behavior and authenticated end-to-end recovery are not
+measured by these tests. Historical invalid frozen exports are not rewritten.
+
+
+Validation for this slice: 32 Core application-service tests pass on Node 22.15.0,
+including the Python-produced export fixture and existing atomic-apply handoff guards.
+Touched-file ESLint/Prettier pass. The companion AI authoring suite passes 1,660 tests;
+its changed files add no BasedPyright diagnostics over the existing baseline.
