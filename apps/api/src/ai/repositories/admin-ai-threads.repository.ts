@@ -1,5 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES, MESSAGE_ROLE } from "@repo/shared";
+import {
+  AI_THREAD_TYPES,
+  AI_THREAD_STATUSES,
+  ASSISTANT_MESSAGE_ROLES,
+  MESSAGE_ROLE,
+} from "@repo/shared";
 import { and, asc, count, desc, eq, gte, inArray, lt, max, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 
@@ -144,7 +149,7 @@ export class AdminAiThreadsRepository {
         },
         status: sql<
           AdminAiThreadSummary["status"]
-        >`CASE WHEN ${assistantThreads.archived} THEN 'archived' ELSE 'active' END`.as(
+        >`CASE WHEN ${assistantThreads.archived} THEN ${AI_THREAD_STATUSES.ARCHIVED} ELSE ${AI_THREAD_STATUSES.ACTIVE} END`.as(
           "thread_status",
         ),
         language: assistantThreads.language,

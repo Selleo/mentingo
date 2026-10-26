@@ -73,10 +73,10 @@ import {
   lessons as lessonRows,
   news as newsRows,
   resources as resourceRows,
-  users as userRows,
 } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
+import { McpActorRepository } from "./mcp-actor.repository";
 import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
 import { registerMcpCustomizationTools } from "./mcp-customization-tools";
@@ -114,7 +114,12 @@ import { traceMcpTool } from "./mcp-tracing";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { MCP_UPLOAD_INSTRUCTIONS_SERVER } from "./mcp-upload-guidance";
 import { withMcpUploadInstructions } from "./mcp-upload-response";
-import { MCP_SERVER_NAME, MCP_SERVER_VERSION } from "./mcp.constants";
+import {
+  MCP_READ_VIEWS,
+  MCP_SERVER_NAME,
+  MCP_SERVER_VERSION,
+  type McpReadView,
+} from "./mcp.constants";
 
 import type {
   McpCallContext,
@@ -166,6 +171,7 @@ export class McpHttpService {
     private readonly userService: UserService,
     private readonly groupService: GroupService,
     private readonly mcpStudentLessonRepository: McpStudentLessonRepository,
+    private readonly mcpActorRepository: McpActorRepository,
   ) {}
 
   async handle(req: Request, res: Response, actor: McpToolActor): Promise<void> {
@@ -249,7 +255,7 @@ export class McpHttpService {
     } as unknown as McpServer;
     registerMcpStudentLessonTools(
       readerCollector,
-      (permissions, operation) => this.run(actor, permissions, operation, "learner"),
+      (permissions, operation) => this.run(actor, permissions, operation, MCP_READ_VIEWS.LEARNER),
       this.mcpStudentLessonRepository,
       binding.resource,
     );
@@ -259,7 +265,7 @@ export class McpHttpService {
     };
     registerMcpStudentTools(
       readerCollector,
-      (permissions, operation) => this.run(actor, permissions, operation, "learner"),
+      (permissions, operation) => this.run(actor, permissions, operation, MCP_READ_VIEWS.LEARNER),
       {
         courses: this.courseService,
         articles: this.articlesService,
@@ -3320,7 +3326,12 @@ export class McpHttpService {
     registerMcpSearchTools(
       server,
       (permissions, operation) =>
-        this.run(actor, permissions, operation, learnerSearch ? "learner" : "managementSearch"),
+        this.run(
+          actor,
+          permissions,
+          operation,
+          learnerSearch ? MCP_READ_VIEWS.LEARNER : MCP_READ_VIEWS.MANAGEMENT_SEARCH,
+        ),
       this.globalSearchService,
       {
         resource: binding.resource,
@@ -3364,14 +3375,13 @@ export class McpHttpService {
     args: Record<string, unknown>,
     onAuthorizedTool?: () => Promise<void>,
   ) {
-    if (!NATIVE_READ_TOOL_NAMES.has(name))
-      throw new ForbiddenException("Assistant tool is not read-only");
+    if (!NATIVE_READ_TOOL_NAMES.has(name)) throw new ForbiddenException("common.toast.noAccess");
     return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       const tools = await this.collectNativeReadTools(userId, tenantId, origin, onAuthorizedTool);
       const tool = tools.get(name);
-      if (!tool?.enabled) throw new ForbiddenException("Assistant tool is unavailable");
+      if (!tool?.enabled) throw new ForbiddenException("assistant.errors.unavailable");
       const result = await tool.config.inputSchema["~standard"].validate(args);
-      if (result.issues) throw new BadRequestException("Invalid assistant tool input");
+      if (result.issues) throw new BadRequestException("assistant.errors.invalidToolInput");
       return this.callContext.run({ tool: name, arguments: args, requestId: randomUUID() }, () =>
         tool.callback(result.value),
       );
@@ -3385,19 +3395,8 @@ export class McpHttpService {
     onAuthorizedTool?: () => Promise<void>,
   ) {
     return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      const [account] = await this.db
-        .select({ email: userRows.email })
-        .from(userRows)
-        .where(
-          and(
-            eq(userRows.id, userId),
-            eq(userRows.tenantId, tenantId),
-            eq(userRows.archived, false),
-            sql`${userRows.deletedAt} IS NULL`,
-          ),
-        )
-        .limit(1);
-      if (!account) throw new ForbiddenException("Assistant account is unavailable");
+      const account = await this.mcpActorRepository.findActiveAccount({ userId, tenantId });
+      if (!account) throw new ForbiddenException("common.toast.noAccess");
       const access = await this.permissionsService.getUserAccess(userId);
       const settings = await this.settingsService.getGlobalSettings();
       const actor: NativeReadActor = {
@@ -3429,7 +3428,7 @@ export class McpHttpService {
     actor: BoundToolActor,
     requiredPermissions: PermissionKey[],
     operation: (user: CurrentUserType) => Promise<T>,
-    view?: "learner" | "managementSearch",
+    view?: McpReadView,
   ) {
     const binding = bindToolActor(actor);
     const call = this.callContext.getStore();
@@ -3453,14 +3452,14 @@ export class McpHttpService {
         permissions: access.permissions,
       };
       if (
-        view === "managementSearch" &&
+        view === MCP_READ_VIEWS.MANAGEMENT_SEARCH &&
         !binding.scopes.includes(MCP_SCOPES.AUTHORING) &&
         !binding.scopes.includes(MCP_SCOPES.SEARCH) &&
         !hasMcpManagementSearchAccess(account.permissions)
       )
         throw new ForbiddenException("MCP search access changed; rediscover available tools");
       const user =
-        view === "learner" || binding.scopes.includes(MCP_SCOPES.STUDENT_READ)
+        view === MCP_READ_VIEWS.LEARNER || binding.scopes.includes(MCP_SCOPES.STUDENT_READ)
           ? asMcpStudentUser(account, await this.settingsService.getGlobalSettings())
           : account;
       if (
@@ -3479,7 +3478,7 @@ export class McpHttpService {
               origin: binding.resource,
               arguments: call.arguments,
               user,
-              learner: view === "learner",
+              learner: view === MCP_READ_VIEWS.LEARNER,
             })
           : result;
       const uploadResult = withMcpUploadInstructions(

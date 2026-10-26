@@ -1,6 +1,6 @@
 import type { AssistantOutcome, AssistantOutcomeValidation } from "./assistant-outcome.types";
 import type { LanguageModelV4 } from "@ai-sdk/provider";
-import type { AssistantRunActivity, AssistantMessageRole } from "@repo/shared";
+import type { AssistantRunActivity, AssistantMessageRole, AssistantRunStatus } from "@repo/shared";
 
 export type AssistantWorkflowInput = {
   runId: string;
@@ -9,13 +9,7 @@ export type AssistantWorkflowInput = {
   threadId?: string;
   trace?: { traceId: string; spanId: string; traceFlags: number };
 };
-export type AssistantWorkflowRunState =
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "cancelled"
-  | "missing";
+export type { AssistantWorkflowRunState } from "@repo/shared";
 
 export type AssistantRuntimeInput = AssistantWorkflowInput & {
   createdAt: string;
@@ -32,7 +26,7 @@ export type AssistantWorkflowContext = {
     threadId: string;
     language: string;
     origin: string;
-    status: string;
+    status: AssistantRunStatus;
   };
   messages: Array<{ role: AssistantMessageRole; content: string }>;
   tools: Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>;

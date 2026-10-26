@@ -1,4 +1,8 @@
-import { sanitizeRichTextSummary, type AssistantSourceType } from "@repo/shared";
+import {
+  ASSISTANT_SOURCE_TYPES,
+  sanitizeRichTextSummary,
+  type AssistantSourceType,
+} from "@repo/shared";
 
 import type { AssistantSource } from "./assistant.types";
 
@@ -21,38 +25,41 @@ function sourceType(row: Record<string, unknown>, url: URL): AssistantSourceType
   )
     return;
   if (url.pathname === `/course/${id}` || url.pathname === `/admin/beta-courses/${id}`)
-    return "course";
-  if (url.pathname === `/profile/${id}` || url.pathname === `/admin/users/${id}`) return "user";
-  if (url.pathname === `/admin/groups/${id}`) return "group";
-  if (url.pathname === `/admin/categories/${id}`) return "category";
+    return ASSISTANT_SOURCE_TYPES.COURSE;
+  if (url.pathname === `/profile/${id}` || url.pathname === `/admin/users/${id}`)
+    return ASSISTANT_SOURCE_TYPES.USER;
+  if (url.pathname === `/admin/groups/${id}`) return ASSISTANT_SOURCE_TYPES.GROUP;
+  if (url.pathname === `/admin/categories/${id}`) return ASSISTANT_SOURCE_TYPES.CATEGORY;
   if (url.pathname === `/articles/${id}` || url.pathname === `/articles/${id}/edit`)
-    return "article";
-  if (url.pathname === `/news/${id}` || url.pathname === `/news/${id}/edit`) return "news";
+    return ASSISTANT_SOURCE_TYPES.ARTICLE;
+  if (url.pathname === `/news/${id}` || url.pathname === `/news/${id}/edit`)
+    return ASSISTANT_SOURCE_TYPES.NEWS;
   if (
     url.pathname === `/qa/${id}` ||
     (url.pathname === "/qa" && url.searchParams.get("qaId") === row.id)
   )
-    return "qa";
+    return ASSISTANT_SOURCE_TYPES.QA;
   if (
     url.pathname === "/development-paths" &&
     typeof row.title === "string" &&
     url.searchParams.get("searchQuery") === row.title
   )
-    return "development_path";
+    return ASSISTANT_SOURCE_TYPES.DEVELOPMENT_PATH;
   if (typeof row.courseId === "string") {
     const course = encodeURIComponent(row.courseId);
-    if (url.pathname === `/course/${course}/lesson/${id}`) return "lesson";
+    if (url.pathname === `/course/${course}/lesson/${id}`) return ASSISTANT_SOURCE_TYPES.LESSON;
     if (
-      (row.entityType === "lesson" || row.entityType === "resource") &&
+      (row.entityType === ASSISTANT_SOURCE_TYPES.LESSON ||
+        row.entityType === ASSISTANT_SOURCE_TYPES.RESOURCE) &&
       url.pathname === `/admin/beta-courses/${course}`
     )
       return row.entityType;
     if (
-      row.entityType === "resource" &&
+      row.entityType === ASSISTANT_SOURCE_TYPES.RESOURCE &&
       typeof row.lessonId === "string" &&
       url.pathname === `/course/${course}/lesson/${encodeURIComponent(row.lessonId)}`
     )
-      return "resource";
+      return ASSISTANT_SOURCE_TYPES.RESOURCE;
   }
 }
 
@@ -77,7 +84,7 @@ export function collectAssistantSources(result: unknown, origin: string): Assist
           if (typeof row.name === "string") title = row.name;
           if (typeof row.title === "string") title = row.title;
           const description =
-            entityType === "user"
+            entityType === ASSISTANT_SOURCE_TYPES.USER
               ? undefined
               : [row.summary, row.description, row.matchedPassage].find(
                   (value): value is string => typeof value === "string" && value.trim().length > 0,

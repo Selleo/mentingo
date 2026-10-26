@@ -133,6 +133,8 @@ export const assistantRuns = pgTable(
     ),
     activeThreadUnique: uniqueIndex("assistant_runs_active_thread_unique")
       .on(table.tenantId, table.threadId)
-      .where(sql`${table.status} in ('pending', 'running')`),
+      .where(
+        sql`${table.status} in (${ASSISTANT_RUN_STATUSES.PENDING}, ${ASSISTANT_RUN_STATUSES.RUNNING})`.inlineParams(),
+      ),
   })),
 );

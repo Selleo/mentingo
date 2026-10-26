@@ -37,6 +37,8 @@ describe("Assistant bound run reconciliation", () => {
     createSend: jest.Mock;
     getRun: jest.Mock;
     bindWorkflow: jest.Mock;
+    isAccountActive: jest.Mock;
+    findTenantState: jest.Mock;
   };
   let runtime: { isAvailable: jest.Mock; getRunState: jest.Mock; start: jest.Mock };
 
@@ -77,21 +79,13 @@ describe("Assistant bound run reconciliation", () => {
           : { ...baseRun, id: "run-2", status: "pending", workflowRunId: "world-run-2" },
       ),
       bindWorkflow: jest.fn(async () => undefined),
+      isAccountActive: jest.fn(async () => true),
+      findTenantState: jest.fn(async () => ({ host: "https://tenant.example", status: "active" })),
     };
     runtime = {
       isAvailable: jest.fn(() => true),
       getRunState: jest.fn(async () => "failed"),
       start: jest.fn(async () => ({ workflowRunId: "world-run-2" })),
-    };
-    const db = {
-      select: (selection: Record<string, unknown>) => ({
-        from: () => ({
-          where: () => ({
-            limit: async () =>
-              selection.host ? [{ host: "https://tenant.example" }] : [{ id: actor.userId }],
-          }),
-        }),
-      }),
     };
     service = new AssistantService(
       repository as never,
@@ -100,7 +94,6 @@ describe("Assistant bound run reconciliation", () => {
         runForEachTenant: async (callback: (tenantId: string) => Promise<void>) =>
           callback(actor.tenantId),
       } as never,
-      db as never,
     );
     jest
       .spyOn((service as unknown as { logger: { warn: () => void } }).logger, "warn")

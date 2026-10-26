@@ -1,4 +1,4 @@
-import type { AssistantOutcomeKind } from "@repo/shared";
+import type { AssistantOutcomeKind, AssistantOutcomeValidationCode } from "@repo/shared";
 
 export type AssistantOutcome = {
   kind: AssistantOutcomeKind;
@@ -15,6 +15,6 @@ export type AssistantOutcomeValidation =
   | { accepted: true; outcome: AssistantOutcome }
   | {
       accepted: false;
-      code: "EMPTY_RESPONSE" | "NO_VERIFIED_EVIDENCE" | "NO_READABLE_EVIDENCE";
+      code: AssistantOutcomeValidationCode;
       feedback: string;
     };

@@ -47,7 +47,9 @@ describe("Assistant durable Workflow state observation", () => {
 
   it("never treats an unconfigured runtime as missing execution", async () => {
     jest.spyOn(service, "isAvailable").mockReturnValue(false);
-    await expect(service.getRunState("persisted-workflow-id")).rejects.toThrow("not configured");
+    await expect(service.getRunState("persisted-workflow-id")).rejects.toThrow(
+      "assistant.errors.unavailable",
+    );
     expect(getRun).not.toHaveBeenCalled();
   });
 });

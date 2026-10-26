@@ -5814,7 +5814,8 @@
     "errors": {
       "generic": "Nie można uruchomić trybu wsparcia",
       "targetUserRequired": "Wybierz aktywnego użytkownika z wybranej organizacji",
-      "invalidSession": "Sesja wsparcia jest nieprawidłowa"
+      "invalidSession": "Sesja wsparcia jest nieprawidłowa",
+      "sessionExpired": "Sesja wsparcia wygasła. Rozpocznij nową sesję wsparcia."
     }
   },
   "superAdminTenantsView": {
@@ -8382,6 +8383,19 @@
         "prompt": "Znajdź materiały o konstruktywnej informacji zwrotnej i wyjaśnij najważniejsze zagadnienia."
       }
     },
-    "latestMessage": "Przejdź do ostatniej wiadomości"
+    "latestMessage": "Przejdź do ostatniej wiadomości",
+    "errors": {
+      "unavailable": "Asystent jest chwilowo niedostępny. Spróbuj ponownie później.",
+      "messageConflict": "Ta wiadomość jest w konflikcie z wcześniejszym żądaniem. Edytuj ją i spróbuj ponownie.",
+      "responseInProgress": "W tej rozmowie trwa już generowanie odpowiedzi.",
+      "responseInactive": "Ta odpowiedź nie jest już aktywna.",
+      "invalidToolInput": "Asystent nie mógł przetworzyć tego żądania. Spróbuj ponownie."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Nie znaleziono organizacji.",
+      "inactive": "Ta organizacja jest nieaktywna. Skontaktuj się z administratorem."
+    }
   }
 }

@@ -6,6 +6,9 @@ import { useAssistantThread } from "~/api/queries/assistant/useAssistantThread";
 
 import type { CurrentUserResponse } from "~/api/generated-api";
 
+const RESTORE_STATES = { PENDING: "pending", FAILED: "failed" } as const;
+type RestoreState = (typeof RESTORE_STATES)[keyof typeof RESTORE_STATES];
+
 type SessionActor = Pick<CurrentUserResponse["data"], "id"> & {
   supportContext?: Pick<
     NonNullable<CurrentUserResponse["data"]["supportContext"]>,
@@ -50,7 +53,7 @@ function isMissingThread(error: unknown) {
 export function useAssistantSession(key: string, threadId?: string) {
   const navigate = useNavigate();
   const [selection, setSelection] = useState<string | null>();
-  const [restore, setRestore] = useState<"pending" | "failed">("pending");
+  const [restore, setRestore] = useState<RestoreState>(RESTORE_STATES.PENDING);
   const [attempt, setAttempt] = useState(0);
   const [explicitNew, setExplicitNew] = useState(false);
   const [newConversationRevision, setNewConversationRevision] = useState(0);
@@ -102,7 +105,7 @@ export function useAssistantSession(key: string, threadId?: string) {
   useEffect(() => {
     if (threadId || !selection) return;
     let active = true;
-    setRestore("pending");
+    setRestore(RESTORE_STATES.PENDING);
     // Join the normal query's fresh request, rather than trusting a cached permission decision.
     void refetch({ cancelRefetch: false })
       .then((result) => {
@@ -112,11 +115,11 @@ export function useAssistantSession(key: string, threadId?: string) {
         } else if (result.isSuccess && result.data.id === selection) {
           navigate(`/assistant/${selection}`, { replace: true });
         } else {
-          setRestore("failed");
+          setRestore(RESTORE_STATES.FAILED);
         }
       })
       .catch(() => {
-        if (active) setRestore("failed");
+        if (active) setRestore(RESTORE_STATES.FAILED);
       });
     return () => {
       active = false;
@@ -126,14 +129,15 @@ export function useAssistantSession(key: string, threadId?: string) {
   const startNew = () => {
     setExplicitNew(true);
     remember(null);
-    setRestore("pending");
+    setRestore(RESTORE_STATES.PENDING);
     setNewConversationRevision((revision) => revision + 1);
   };
 
   return {
     isResuming:
-      !threadId && (selection === undefined || (Boolean(selection) && restore === "pending")),
-    resumeFailed: !threadId && Boolean(selection) && restore === "failed",
+      !threadId &&
+      (selection === undefined || (Boolean(selection) && restore === RESTORE_STATES.PENDING)),
+    resumeFailed: !threadId && Boolean(selection) && restore === RESTORE_STATES.FAILED,
     retryResume: () => setAttempt((value) => value + 1),
     newConversationRevision,
     startNew,

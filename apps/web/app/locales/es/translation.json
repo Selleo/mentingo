@@ -5702,7 +5702,8 @@
     "errors": {
       "generic": "No se pudo iniciar el modo de soporte",
       "targetUserRequired": "Elija un usuario activo de la organización seleccionada",
-      "invalidSession": "La sesión de soporte no es válida"
+      "invalidSession": "La sesión de soporte no es válida",
+      "sessionExpired": "Tu sesión de soporte ha caducado. Inicia una nueva sesión de soporte."
     }
   },
   "superAdminTenantsView": {
@@ -8233,6 +8234,19 @@
         "label": "Comprender un tema",
         "prompt": "Busca recursos sobre comentarios constructivos y explica las ideas principales."
       }
+    },
+    "errors": {
+      "unavailable": "El asistente no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+      "messageConflict": "Este mensaje entra en conflicto con una solicitud anterior. Edítalo e inténtalo de nuevo.",
+      "responseInProgress": "Ya se está generando una respuesta en esta conversación.",
+      "responseInactive": "Esta respuesta ya no está activa.",
+      "invalidToolInput": "El asistente no pudo procesar esta solicitud. Inténtalo de nuevo."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organización no encontrada.",
+      "inactive": "Esta organización está inactiva. Contacta con tu administrador."
     }
   }
 }

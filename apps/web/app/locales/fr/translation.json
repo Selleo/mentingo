@@ -5487,7 +5487,8 @@
     "errors": {
       "generic": "Impossible de démarrer le mode support",
       "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
-      "invalidSession": "La session d'assistance n'est pas valide"
+      "invalidSession": "La session d'assistance n'est pas valide",
+      "sessionExpired": "Votre session d’assistance a expiré. Démarrez une nouvelle session d’assistance."
     }
   },
   "superAdminTenantsView": {
@@ -7807,6 +7808,19 @@
         "label": "Comprendre un sujet",
         "prompt": "Trouve des ressources sur le feedback constructif et explique les idées principales."
       }
+    },
+    "errors": {
+      "unavailable": "L’assistant est temporairement indisponible. Réessayez plus tard.",
+      "messageConflict": "Ce message entre en conflit avec une demande précédente. Modifiez-le et réessayez.",
+      "responseInProgress": "Une réponse est déjà en cours de génération dans cette conversation.",
+      "responseInactive": "Cette réponse n’est plus active.",
+      "invalidToolInput": "L’assistant n’a pas pu traiter cette demande. Réessayez."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organisation introuvable.",
+      "inactive": "Cette organisation est inactive. Contactez votre administrateur."
     }
   }
 }

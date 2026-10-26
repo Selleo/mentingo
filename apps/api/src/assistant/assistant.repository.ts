@@ -1,17 +1,30 @@
 import { randomUUID } from "node:crypto";
 
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ASSISTANT_MESSAGE_ROLES, ASSISTANT_RUN_ACTIVITIES } from "@repo/shared";
+import {
+  ASSISTANT_MESSAGE_ROLES,
+  ASSISTANT_MESSAGE_STATUSES,
+  ASSISTANT_RUN_ACTIVITIES,
+  ASSISTANT_RUN_STATUSES,
+} from "@repo/shared";
 import { and, asc, count, desc, eq, gt, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { assistantMessages, assistantRuns, assistantThreads } from "src/storage/schema";
+import {
+  assistantMessages,
+  assistantRuns,
+  assistantThreads,
+  tenants,
+  users,
+} from "src/storage/schema";
 
 import { getAssistantMessageOrder } from "./assistant-message-order";
 
 import type {
+  AssistantActorIdentity,
+  AssistantTenantState,
   AssistantPageInput,
   AssistantRunIdentity,
   AssistantRunCursor,
@@ -27,6 +40,35 @@ export class AssistantRepository {
     @Inject(DB) private readonly db: DatabasePg,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
+
+  async findTenantState(tenantId: string): Promise<AssistantTenantState | undefined> {
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
+      const [tenant] = await this.db
+        .select({ host: tenants.host, status: tenants.status })
+        .from(tenants)
+        .where(eq(tenants.id, tenantId))
+        .limit(1);
+      return tenant;
+    });
+  }
+
+  async isAccountActive(actor: AssistantActorIdentity): Promise<boolean> {
+    return this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
+      const [account] = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(
+          and(
+            eq(users.id, actor.userId),
+            eq(users.tenantId, actor.tenantId),
+            eq(users.archived, false),
+            sql`${users.deletedAt} IS NULL`,
+          ),
+        )
+        .limit(1);
+      return Boolean(account);
+    });
+  }
 
   private owner(user: CurrentUserType, threadId?: string) {
     return and(
@@ -83,7 +125,7 @@ export class AssistantRepository {
       .from(assistantThreads)
       .where(this.owner(user, threadId))
       .limit(1);
-    if (!thread) throw new NotFoundException("Assistant conversation not found");
+    if (!thread) throw new NotFoundException("common.toast.notFound");
     const [latestRun] = await this.db
       .select()
       .from(assistantRuns)
@@ -112,7 +154,7 @@ export class AssistantRepository {
       .set({ ...input, title: input.title?.trim(), updatedAt: new Date().toISOString() })
       .where(this.owner(user, threadId))
       .returning();
-    if (!thread) throw new NotFoundException("Assistant conversation not found");
+    if (!thread) throw new NotFoundException("common.toast.notFound");
     return this.getThread(user, threadId);
   }
 
@@ -154,7 +196,7 @@ export class AssistantRepository {
         .from(assistantThreads)
         .where(this.owner(user, threadId))
         .for("update");
-      if (!thread) throw new NotFoundException("Assistant conversation not found");
+      if (!thread) throw new NotFoundException("common.toast.notFound");
       const [existing] = await this.db
         .select()
         .from(assistantMessages)
@@ -179,7 +221,7 @@ export class AssistantRepository {
           )
           .limit(1);
         if (!run || existing.text !== input.text.trim() || run.language !== input.language)
-          throw new ConflictException("Idempotency key was used for a different message");
+          throw new ConflictException("assistant.errors.messageConflict");
         const [assistantMessage] = await this.db
           .select()
           .from(assistantMessages)
@@ -192,8 +234,7 @@ export class AssistantRepository {
           .limit(1);
         return { userMessage: existing, assistantMessage, run };
       }
-      if (thread.archived)
-        throw new ConflictException("Unarchive this conversation before sending a message");
+      if (thread.archived) throw new ConflictException("assistant.archivedNotice");
       const [active] = await this.db
         .select({ id: assistantRuns.id })
         .from(assistantRuns)
@@ -201,11 +242,14 @@ export class AssistantRepository {
           and(
             eq(assistantRuns.tenantId, user.tenantId),
             eq(assistantRuns.threadId, threadId),
-            inArray(assistantRuns.status, ["pending", "running"]),
+            inArray(assistantRuns.status, [
+              ASSISTANT_RUN_STATUSES.PENDING,
+              ASSISTANT_RUN_STATUSES.RUNNING,
+            ]),
           ),
         )
         .limit(1);
-      if (active) throw new ConflictException("A response is already running in this conversation");
+      if (active) throw new ConflictException("assistant.errors.responseInProgress");
       const now = Date.now();
       const [userMessage] = await this.db
         .insert(assistantMessages)
@@ -224,7 +268,7 @@ export class AssistantRepository {
           tenantId: user.tenantId,
           threadId,
           role: ASSISTANT_MESSAGE_ROLES.ASSISTANT,
-          status: "pending",
+          status: ASSISTANT_MESSAGE_STATUSES.PENDING,
           createdAt: new Date(now + 1).toISOString(),
         })
         .returning();
@@ -262,7 +306,7 @@ export class AssistantRepository {
         .from(assistantRuns)
         .where(and(eq(assistantRuns.tenantId, tenantId), eq(assistantRuns.id, runId)))
         .limit(1);
-      if (!run) throw new NotFoundException("Assistant run not found");
+      if (!run) throw new NotFoundException("common.toast.notFound");
       return run;
     });
   }
@@ -277,7 +321,7 @@ export class AssistantRepository {
           and(
             eq(assistantMessages.tenantId, input.tenantId),
             eq(assistantMessages.threadId, run.threadId),
-            inArray(assistantMessages.status, ["complete"]),
+            inArray(assistantMessages.status, [ASSISTANT_MESSAGE_STATUSES.COMPLETE]),
           ),
         )
         .orderBy(...getAssistantMessageOrder("desc"))
@@ -308,8 +352,12 @@ export class AssistantRepository {
         .from(assistantRuns)
         .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
         .for("update");
-      if (!run) throw new NotFoundException("Assistant run not found");
-      if (!["pending", "running"].includes(run.status)) return run;
+      if (!run) throw new NotFoundException("common.toast.notFound");
+      if (
+        run.status !== ASSISTANT_RUN_STATUSES.PENDING &&
+        run.status !== ASSISTANT_RUN_STATUSES.RUNNING
+      )
+        return run;
       const now = new Date().toISOString();
       const sources = update.sources
         ? [
@@ -323,7 +371,10 @@ export class AssistantRepository {
         .set({
           status: update.status,
           activity:
-            update.status && ["completed", "failed", "cancelled"].includes(update.status)
+            update.status &&
+            (update.status === ASSISTANT_RUN_STATUSES.COMPLETED ||
+              update.status === ASSISTANT_RUN_STATUSES.FAILED ||
+              update.status === ASSISTANT_RUN_STATUSES.CANCELLED)
               ? null
               : update.activity,
           sources,
@@ -334,7 +385,10 @@ export class AssistantRepository {
         })
         .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
         .returning();
-      const messageStatus = update.status === "completed" ? "complete" : update.status;
+      const messageStatus =
+        update.status === ASSISTANT_RUN_STATUSES.COMPLETED
+          ? ASSISTANT_MESSAGE_STATUSES.COMPLETE
+          : update.status;
       await this.db
         .update(assistantMessages)
         .set({
@@ -376,7 +430,10 @@ export class AssistantRepository {
         .where(
           and(
             eq(assistantRuns.tenantId, tenantId),
-            inArray(assistantRuns.status, ["pending", "running"]),
+            inArray(assistantRuns.status, [
+              ASSISTANT_RUN_STATUSES.PENDING,
+              ASSISTANT_RUN_STATUSES.RUNNING,
+            ]),
             isNotNull(assistantRuns.workflowRunId),
             sql`${assistantRuns.updatedAt} < CURRENT_TIMESTAMP - interval '15 seconds'`,
             after
@@ -400,7 +457,7 @@ export class AssistantRepository {
         .where(
           and(
             eq(assistantRuns.tenantId, tenantId),
-            eq(assistantRuns.status, "pending"),
+            eq(assistantRuns.status, ASSISTANT_RUN_STATUSES.PENDING),
             sql`${assistantRuns.workflowRunId} IS NULL`,
             sql`${assistantRuns.createdAt} < CURRENT_TIMESTAMP - interval '15 seconds'`,
           ),

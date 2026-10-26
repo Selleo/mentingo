@@ -1,5 +1,5 @@
 import { WorkflowAgent, type ModelCallStreamPart } from "@ai-sdk/workflow";
-import { ASSISTANT_OUTCOME_KINDS } from "@repo/shared";
+import { ASSISTANT_OUTCOME_KINDS, ASSISTANT_RUN_ERROR_CODES } from "@repo/shared";
 import { jsonSchema, tool } from "ai";
 import { FatalError, getWritable } from "workflow";
 
@@ -14,7 +14,7 @@ import type { AssistantWorkflowInput } from "./assistant-workflow.types";
 export async function assistantWorkflow(input: AssistantWorkflowInput) {
   "use workflow";
 
-  let failureCode = "GENERATION_FAILED";
+  let failureCode: string = ASSISTANT_RUN_ERROR_CODES.GENERATION_FAILED;
   try {
     const context = await loadContext(input);
     const tools = Object.fromEntries(
@@ -90,12 +90,12 @@ export async function assistantWorkflow(input: AssistantWorkflowInput) {
       (call) => call.toolName === "respond" && isAcceptedAssistantOutcome(call.output),
     )?.output;
     if (!isAcceptedAssistantOutcome(response)) {
-      failureCode = "OUTCOME_VALIDATION_FAILED";
+      failureCode = ASSISTANT_RUN_ERROR_CODES.OUTCOME_VALIDATION_FAILED;
       throw new Error("Assistant did not produce an accepted outcome within its step budget");
     }
     const completion = await complete(input, response.outcome);
     if (!completion.accepted) {
-      failureCode = "OUTCOME_VALIDATION_FAILED";
+      failureCode = ASSISTANT_RUN_ERROR_CODES.OUTCOME_VALIDATION_FAILED;
       throw new Error("Assistant outcome no longer satisfies its evidence policy");
     }
   } catch {

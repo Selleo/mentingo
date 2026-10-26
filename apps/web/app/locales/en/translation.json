@@ -5765,7 +5765,8 @@
     "errors": {
       "generic": "Could not start support mode",
       "targetUserRequired": "Choose an active user from the selected organization",
-      "invalidSession": "Support session is invalid"
+      "invalidSession": "Support session is invalid",
+      "sessionExpired": "Your support session has expired. Start a new support session."
     }
   },
   "superAdminTenantsView": {
@@ -8323,6 +8324,19 @@
         "prompt": "Find resources about giving constructive feedback and explain the key ideas."
       }
     },
-    "latestMessage": "Go to latest message"
+    "latestMessage": "Go to latest message",
+    "errors": {
+      "unavailable": "The assistant is temporarily unavailable. Please try again later.",
+      "messageConflict": "This message conflicts with an earlier request. Edit it and try again.",
+      "responseInProgress": "A response is already being generated in this conversation.",
+      "responseInactive": "This response is no longer active.",
+      "invalidToolInput": "The assistant could not process this request. Please try again."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organization not found.",
+      "inactive": "This organization is inactive. Contact your administrator."
+    }
   }
 }

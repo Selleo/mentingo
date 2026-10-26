@@ -12,7 +12,14 @@ import { ASSISTANT_HANDLES } from "../../../../e2e/data/assistant/handles";
 
 const MAX_MESSAGE_LENGTH = 8000;
 const TRANSCRIPTION_TIMEOUT_MS = 15_000;
-type VoicePhase = "idle" | "starting" | "recording" | "transcribing" | "cancelling";
+const VOICE_PHASES = {
+  IDLE: "idle",
+  STARTING: "starting",
+  RECORDING: "recording",
+  TRANSCRIBING: "transcribing",
+  CANCELLING: "cancelling",
+} as const;
+type VoicePhase = (typeof VOICE_PHASES)[keyof typeof VOICE_PHASES];
 
 type AssistantComposerProps = {
   value: string;
@@ -44,10 +51,10 @@ export function AssistantComposer({
   const mounted = useRef(true);
   const operationRef = useRef(0);
   const acceptsTranscript = useRef(false);
-  const voicePhaseRef = useRef<VoicePhase>("idle");
+  const voicePhaseRef = useRef<VoicePhase>(VOICE_PHASES.IDLE);
   const pendingTranscript = useRef<{ received: boolean; stopped: boolean } | null>(null);
   const transcriptionTimer = useRef<ReturnType<typeof setTimeout>>();
-  const [voicePhase, setVoicePhase] = useState<VoicePhase>("idle");
+  const [voicePhase, setVoicePhase] = useState<VoicePhase>(VOICE_PHASES.IDLE);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const [voiceError, setVoiceError] = useState(false);
 
@@ -72,7 +79,7 @@ export function AssistantComposer({
     clearTimeout(transcriptionTimer.current);
     pendingTranscript.current = null;
     acceptsTranscript.current = false;
-    setPhase("idle");
+    setPhase(VOICE_PHASES.IDLE);
     if (mounted.current) setVoiceLevel(0);
   }, [setPhase]);
   const setTranscribedInput = useCallback(
@@ -100,7 +107,7 @@ export function AssistantComposer({
     acceptsTranscript.current = false;
     clearTimeout(transcriptionTimer.current);
     pendingTranscript.current = null;
-    setPhase("cancelling");
+    setPhase(VOICE_PHASES.CANCELLING);
     try {
       await cancelTranscription();
     } catch {
@@ -113,23 +120,23 @@ export function AssistantComposer({
   useEffect(() => {
     if (
       (disabled || running || submitting) &&
-      voicePhaseRef.current !== "idle" &&
-      voicePhaseRef.current !== "cancelling"
+      voicePhaseRef.current !== VOICE_PHASES.IDLE &&
+      voicePhaseRef.current !== VOICE_PHASES.CANCELLING
     ) {
       void cancelVoice();
     }
   }, [cancelVoice, disabled, running, submitting]);
 
   const startVoice = async () => {
-    if (disabled || running || submitting || voicePhaseRef.current !== "idle") return;
+    if (disabled || running || submitting || voicePhaseRef.current !== VOICE_PHASES.IDLE) return;
     const operation = ++operationRef.current;
     acceptsTranscript.current = true;
     setVoiceError(false);
-    setPhase("starting");
+    setPhase(VOICE_PHASES.STARTING);
     try {
       const started = await startRecording();
       if (!mounted.current || operation !== operationRef.current) return;
-      if (started) setPhase("recording");
+      if (started) setPhase(VOICE_PHASES.RECORDING);
       else {
         finishVoice();
         setVoiceError(true);
@@ -142,11 +149,11 @@ export function AssistantComposer({
   };
 
   const stopVoice = async () => {
-    if (voicePhaseRef.current !== "recording") return;
+    if (voicePhaseRef.current !== VOICE_PHASES.RECORDING) return;
     const operation = operationRef.current;
     const pending = { received: false, stopped: false };
     pendingTranscript.current = pending;
-    setPhase("transcribing");
+    setPhase(VOICE_PHASES.TRANSCRIBING);
     transcriptionTimer.current = setTimeout(() => {
       if (!mounted.current || pendingTranscript.current !== pending) return;
       setVoiceError(true);
@@ -164,16 +171,17 @@ export function AssistantComposer({
     }
   };
 
-  const voiceBusy = voicePhase !== "idle";
-  const recording = voicePhase === "recording";
-  const showVoicePanel = recording || voicePhase === "transcribing" || voicePhase === "cancelling";
+  const voiceBusy = voicePhase !== VOICE_PHASES.IDLE;
+  const recording = voicePhase === VOICE_PHASES.RECORDING;
+  const showVoicePanel =
+    recording || voicePhase === VOICE_PHASES.TRANSCRIBING || voicePhase === VOICE_PHASES.CANCELLING;
   const tooLong = value.length > MAX_MESSAGE_LENGTH;
   const canSend =
     Boolean(value.trim()) && !tooLong && !disabled && !submitting && !running && !voiceBusy;
   const submit = () => {
     if (
       canSend &&
-      voicePhaseRef.current === "idle" &&
+      voicePhaseRef.current === VOICE_PHASES.IDLE &&
       valueRef.current.length <= MAX_MESSAGE_LENGTH
     )
       onSend();
@@ -287,7 +295,7 @@ export function AssistantComposer({
               size="icon"
               className="size-8 shrink-0 rounded-lg"
               onClick={() => void cancelVoice()}
-              disabled={voicePhase === "cancelling"}
+              disabled={voicePhase === VOICE_PHASES.CANCELLING}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.closeVoiceMode")}
             >
               <X className="size-4" />
@@ -302,7 +310,7 @@ export function AssistantComposer({
               disabled={disabled || submitting || running || voiceBusy}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
             >
-              {voicePhase === "starting" ? (
+              {voicePhase === VOICE_PHASES.STARTING ? (
                 <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
               ) : (
                 <Mic className="size-4" />

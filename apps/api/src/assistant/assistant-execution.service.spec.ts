@@ -1,13 +1,17 @@
 import { ForbiddenException } from "@nestjs/common";
-import { ASSISTANT_RUN_ACTIVITIES, TENANT_STATUSES } from "@repo/shared";
-
-import { tenants, users } from "src/storage/schema";
+import {
+  ASSISTANT_RUN_ACTIVITIES,
+  ASSISTANT_RUN_STATUSES,
+  ASSISTANT_RUN_ERROR_CODES,
+  ASSISTANT_OUTCOME_KINDS,
+  ASSISTANT_OUTCOME_VALIDATION_CODES,
+  TENANT_STATUSES,
+} from "@repo/shared";
 
 import { AssistantExecutionService } from "./assistant-execution.service";
 
 import type { AssistantRepository } from "./assistant.repository";
 import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
-import type { DatabasePg } from "src/common";
 import type { McpHttpService } from "src/mcp/mcp-http.service";
 import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
@@ -18,13 +22,19 @@ describe("AssistantExecutionService", () => {
     tenantId: "tenant-1",
     threadId: "thread-1",
     userId: "user-1",
-    status: "running",
+    status: ASSISTANT_RUN_STATUSES.RUNNING,
     successfulToolCalls: 1,
     readableToolCalls: 1,
     origin: "https://tenant.example",
     sources: [{ title: "Verified", url: "https://tenant.example/course/real" }],
   };
-  let assistantRepository: { getRun: jest.Mock; updateRun: jest.Mock; getHistory: jest.Mock };
+  let assistantRepository: {
+    getRun: jest.Mock;
+    updateRun: jest.Mock;
+    getHistory: jest.Mock;
+    findTenantState: jest.Mock;
+    isAccountActive: jest.Mock;
+  };
   let activeAccount: jest.Mock;
   let currentTenant: { status: string } | undefined;
   let modelProvider: jest.Mock;
@@ -37,8 +47,10 @@ describe("AssistantExecutionService", () => {
       getRun: jest.fn().mockResolvedValue({ ...run }),
       updateRun: jest.fn().mockResolvedValue(run),
       getHistory: jest.fn().mockResolvedValue([]),
+      findTenantState: jest.fn(async () => currentTenant),
+      isAccountActive: jest.fn(async () => activeAccount()),
     };
-    activeAccount = jest.fn().mockResolvedValue([{ id: "user-1" }]);
+    activeAccount = jest.fn().mockResolvedValue(true);
     currentTenant = { status: TENANT_STATUSES.ACTIVE };
     modelProvider = jest.fn(async () => () => ({ fixture: true }));
     mcpHttpService = {
@@ -48,23 +60,11 @@ describe("AssistantExecutionService", () => {
       listNativeReadTools: jest.fn().mockResolvedValue([]),
     };
     tenantDbRunnerService = { runWithTenant: jest.fn((_tenantId, callback) => callback()) };
-    const select = jest.fn(() => ({
-      from: (table: unknown) => ({
-        where: () => ({
-          limit: async () => {
-            if (table === tenants) return currentTenant ? [currentTenant] : [];
-            if (table === users) return activeAccount();
-            throw new Error("Unexpected authorization query");
-          },
-        }),
-      }),
-    }));
     service = new AssistantExecutionService(
       assistantRepository as unknown as AssistantRepository,
       mcpHttpService as unknown as McpHttpService,
       tenantDbRunnerService as unknown as TenantDbRunnerService,
       { getAISdkOpenAI: modelProvider } as unknown as AiRuntimeService,
-      { select } as unknown as DatabasePg,
     );
   });
 
@@ -76,14 +76,14 @@ describe("AssistantExecutionService", () => {
     "complete",
     "validateOutcome",
     "setActivity",
-  ] as const;
+  ] satisfies (keyof AssistantExecutionService)[];
   const invoke = (operation: (typeof operations)[number]) => {
     if (operation === "executeTool") return service.executeTool(identity, "global_search", {});
     if (operation === "checkpoint") return service.checkpoint(identity, "Must not persist");
     if (operation === "complete") return service.complete(identity, "Must not persist");
     if (operation === "validateOutcome")
       return service.validateOutcome(identity, {
-        kind: "conversation",
+        kind: ASSISTANT_OUTCOME_KINDS.CONVERSATION,
         text: "Hello",
         requiresReadableContent: false,
       });
@@ -92,37 +92,40 @@ describe("AssistantExecutionService", () => {
     return service[operation](identity);
   };
 
-  describe.each(["pending", "running"])("tenant suspension during a %s run", (status) => {
-    it.each(operations)(
-      "blocks %s after active tenant becomes inactive, allowing only a terminal status write",
-      async (operation) => {
-        assistantRepository.getRun.mockResolvedValue({ ...run, status });
-        // The run was authorized while queued/running; the current DB tenant row then changes.
-        await expect(
-          service.validateOutcome(identity, {
-            kind: "conversation",
-            text: "Hello",
-            requiresReadableContent: false,
-          }),
-        ).resolves.toEqual(expect.objectContaining({ accepted: true }));
-        currentTenant = { status: TENANT_STATUSES.INACTIVE };
-        await expect(invoke(operation)).rejects.toBeInstanceOf(ForbiddenException);
-        expect(modelProvider).not.toHaveBeenCalled();
-        expect(mcpHttpService.executeNativeReadTool).not.toHaveBeenCalled();
-        expect(mcpHttpService.listNativeReadTools).not.toHaveBeenCalled();
-        expect(assistantRepository.getHistory).not.toHaveBeenCalled();
-        expect(assistantRepository.updateRun).toHaveBeenCalledTimes(1);
-        expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
-          status: "failed",
-          errorCode: "TENANT_INACTIVE",
-        });
-        expect(tenantDbRunnerService.runWithTenant).toHaveBeenCalledWith(
-          identity.tenantId,
-          expect.any(Function),
-        );
-      },
-    );
-  });
+  describe.each([ASSISTANT_RUN_STATUSES.PENDING, ASSISTANT_RUN_STATUSES.RUNNING])(
+    "tenant suspension during a %s run",
+    (status) => {
+      it.each(operations)(
+        "blocks %s after active tenant becomes inactive, allowing only a terminal status write",
+        async (operation) => {
+          assistantRepository.getRun.mockResolvedValue({ ...run, status });
+          // The run was authorized while queued/running; the current DB tenant row then changes.
+          await expect(
+            service.validateOutcome(identity, {
+              kind: ASSISTANT_OUTCOME_KINDS.CONVERSATION,
+              text: "Hello",
+              requiresReadableContent: false,
+            }),
+          ).resolves.toEqual(expect.objectContaining({ accepted: true }));
+          currentTenant = { status: TENANT_STATUSES.INACTIVE };
+          await expect(invoke(operation)).rejects.toBeInstanceOf(ForbiddenException);
+          expect(modelProvider).not.toHaveBeenCalled();
+          expect(mcpHttpService.executeNativeReadTool).not.toHaveBeenCalled();
+          expect(mcpHttpService.listNativeReadTools).not.toHaveBeenCalled();
+          expect(assistantRepository.getHistory).not.toHaveBeenCalled();
+          expect(assistantRepository.updateRun).toHaveBeenCalledTimes(1);
+          expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
+            status: ASSISTANT_RUN_STATUSES.FAILED,
+            errorCode: ASSISTANT_RUN_ERROR_CODES.TENANT_INACTIVE,
+          });
+          expect(tenantDbRunnerService.runWithTenant).toHaveBeenCalledWith(
+            identity.tenantId,
+            expect.any(Function),
+          );
+        },
+      );
+    },
+  );
 
   it("loads authorized context normally while the tenant remains active", async () => {
     await expect(service.loadContext(identity)).resolves.toMatchObject({
@@ -136,7 +139,9 @@ describe("AssistantExecutionService", () => {
       run.origin,
     );
     expect(assistantRepository.getHistory).toHaveBeenCalledWith(identity);
-    expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, { status: "running" });
+    expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
+      status: ASSISTANT_RUN_STATUSES.RUNNING,
+    });
     expect(modelProvider).not.toHaveBeenCalled();
   });
 
@@ -145,8 +150,8 @@ describe("AssistantExecutionService", () => {
     await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
     expect(modelProvider).not.toHaveBeenCalled();
     expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
-      status: "failed",
-      errorCode: "TENANT_NOT_FOUND",
+      status: ASSISTANT_RUN_STATUSES.FAILED,
+      errorCode: ASSISTANT_RUN_ERROR_CODES.TENANT_NOT_FOUND,
     });
   });
 
@@ -155,8 +160,8 @@ describe("AssistantExecutionService", () => {
     await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
     assistantRepository.getRun.mockResolvedValue({
       ...run,
-      status: "failed",
-      errorCode: "TENANT_INACTIVE",
+      status: ASSISTANT_RUN_STATUSES.FAILED,
+      errorCode: ASSISTANT_RUN_ERROR_CODES.TENANT_INACTIVE,
     });
     currentTenant = { status: TENANT_STATUSES.ACTIVE };
     await expect(service.getModel(identity)).rejects.toBeInstanceOf(ForbiddenException);
@@ -166,7 +171,7 @@ describe("AssistantExecutionService", () => {
 
   it("rechecks an active account before every tool call and denies a removed account", async () => {
     await service.executeTool(identity, "global_search", {});
-    activeAccount.mockResolvedValue([]);
+    activeAccount.mockResolvedValue(false);
     await expect(service.executeTool(identity, "global_search", {})).rejects.toBeInstanceOf(
       ForbiddenException,
     );
@@ -178,7 +183,10 @@ describe("AssistantExecutionService", () => {
   });
 
   it("refuses late checkpoints after cancellation", async () => {
-    assistantRepository.getRun.mockResolvedValue({ ...run, status: "cancelled" });
+    assistantRepository.getRun.mockResolvedValue({
+      ...run,
+      status: ASSISTANT_RUN_STATUSES.CANCELLED,
+    });
     await expect(service.checkpoint(identity, "late text")).rejects.toBeInstanceOf(
       ForbiddenException,
     );
@@ -192,7 +200,7 @@ describe("AssistantExecutionService", () => {
       [{ title: "Fake", url: "https://tenant.example/course/fake" }],
     );
     expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
-      status: "completed",
+      status: ASSISTANT_RUN_STATUSES.COMPLETED,
       text: "[real](https://tenant.example/course/real) fake",
       messageSources: run.sources,
     });
@@ -205,20 +213,23 @@ describe("AssistantExecutionService", () => {
       sources: [],
     });
     const outcome = {
-      kind: "answer" as const,
+      kind: ASSISTANT_OUTCOME_KINDS.ANSWER,
       text: "Invented course fact",
       requiresReadableContent: false,
     };
     await expect(service.validateOutcome(identity, outcome)).resolves.toEqual(
       expect.objectContaining({
         accepted: false,
-        code: "NO_VERIFIED_EVIDENCE",
+        code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_VERIFIED_EVIDENCE,
         feedback: expect.stringContaining("kind=conversation"),
       }),
     );
     await service.checkpoint(identity, outcome.text, [], outcome.kind);
     await expect(service.complete(identity, outcome.text, [], outcome.kind)).resolves.toEqual(
-      expect.objectContaining({ accepted: false, code: "NO_VERIFIED_EVIDENCE" }),
+      expect.objectContaining({
+        accepted: false,
+        code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_VERIFIED_EVIDENCE,
+      }),
     );
     expect(assistantRepository.updateRun).not.toHaveBeenCalled();
   });
@@ -231,10 +242,10 @@ describe("AssistantExecutionService", () => {
       sources: [],
     });
     await expect(
-      service.complete(identity, "Hej! Jak mogę pomóc?", [], "conversation"),
+      service.complete(identity, "Hej! Jak mogę pomóc?", [], ASSISTANT_OUTCOME_KINDS.CONVERSATION),
     ).resolves.toEqual(expect.objectContaining({ accepted: true }));
     expect(assistantRepository.updateRun).toHaveBeenLastCalledWith(identity, {
-      status: "completed",
+      status: ASSISTANT_RUN_STATUSES.COMPLETED,
       text: "Hej! Jak mogę pomóc?",
       messageSources: [],
     });
@@ -243,17 +254,34 @@ describe("AssistantExecutionService", () => {
   it("returns repair feedback for a summary when retrieval returned only metadata", async () => {
     assistantRepository.getRun.mockResolvedValue({ ...run, readableToolCalls: 0 });
     await expect(
-      service.complete(identity, "Invented lesson summary", [], "answer", true),
-    ).resolves.toEqual(expect.objectContaining({ accepted: false, code: "NO_READABLE_EVIDENCE" }));
-    await service.checkpoint(identity, "Invented lesson summary", [], "answer", true);
+      service.complete(
+        identity,
+        "Invented lesson summary",
+        [],
+        ASSISTANT_OUTCOME_KINDS.ANSWER,
+        true,
+      ),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        accepted: false,
+        code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_READABLE_EVIDENCE,
+      }),
+    );
+    await service.checkpoint(
+      identity,
+      "Invented lesson summary",
+      [],
+      ASSISTANT_OUTCOME_KINDS.ANSWER,
+      true,
+    );
     expect(assistantRepository.updateRun).not.toHaveBeenCalled();
   });
 
   it("rechecks actor access when validating an outcome", async () => {
-    activeAccount.mockResolvedValue([]);
+    activeAccount.mockResolvedValue(false);
     await expect(
       service.validateOutcome(identity, {
-        kind: "conversation",
+        kind: ASSISTANT_OUTCOME_KINDS.CONVERSATION,
         text: "Hello",
         requiresReadableContent: false,
       }),
@@ -298,14 +326,15 @@ describe("AssistantExecutionService", () => {
     await pending;
   });
 
-  it.each(["completed", "failed", "cancelled"])(
-    "rejects a late activity update for %s",
-    async (status) => {
-      assistantRepository.getRun.mockResolvedValue({ ...run, status });
-      await expect(
-        service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.WRITING),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(assistantRepository.updateRun).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    ASSISTANT_RUN_STATUSES.COMPLETED,
+    ASSISTANT_RUN_STATUSES.FAILED,
+    ASSISTANT_RUN_STATUSES.CANCELLED,
+  ])("rejects a late activity update for %s", async (status) => {
+    assistantRepository.getRun.mockResolvedValue({ ...run, status });
+    await expect(
+      service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.WRITING),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(assistantRepository.updateRun).not.toHaveBeenCalled();
+  });
 });

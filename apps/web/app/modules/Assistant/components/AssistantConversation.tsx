@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@remix-run/react";
-import { ASSISTANT_MESSAGE_ROLES } from "@repo/shared";
+import { ASSISTANT_MESSAGE_ROLES, ASSISTANT_MESSAGE_STATUSES } from "@repo/shared";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -92,7 +92,7 @@ export function AssistantConversation({
       threadId,
       role: ASSISTANT_MESSAGE_ROLES.USER,
       text: pendingDraft.text,
-      status: "complete",
+      status: ASSISTANT_MESSAGE_STATUSES.COMPLETE,
       sources: [],
       createdAt: pendingDraft.createdAt,
       clientMessageId: pendingDraft.clientMessageId,

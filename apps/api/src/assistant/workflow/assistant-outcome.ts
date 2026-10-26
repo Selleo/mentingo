@@ -1,4 +1,4 @@
-import { ASSISTANT_OUTCOME_KINDS } from "@repo/shared";
+import { ASSISTANT_OUTCOME_KINDS, ASSISTANT_OUTCOME_VALIDATION_CODES } from "@repo/shared";
 
 import type {
   AssistantOutcome,
@@ -14,14 +14,14 @@ export function validateAssistantOutcome(
   if (!outcome.text.trim()) {
     return {
       accepted: false,
-      code: "EMPTY_RESPONSE",
+      code: ASSISTANT_OUTCOME_VALIDATION_CODES.EMPTY_RESPONSE,
       feedback: "Provide a nonempty reply before calling respond again.",
     };
   }
   if (outcome.kind === ASSISTANT_OUTCOME_KINDS.ANSWER && !evidence.successfulToolCalls) {
     return {
       accepted: false,
-      code: "NO_VERIFIED_EVIDENCE",
+      code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_VERIFIED_EVIDENCE,
       feedback:
         "No authoritative read has completed. For greetings, general help or a clarifying question without product claims, call respond again with kind=conversation. For factual product answers, use the available read tools first, then propose an answer supported by their results. Do not reclassify factual claims as conversation.",
     };
@@ -29,7 +29,7 @@ export function validateAssistantOutcome(
   if (outcome.requiresReadableContent && !evidence.readableToolCalls) {
     return {
       accepted: false,
-      code: "NO_READABLE_EVIDENCE",
+      code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_READABLE_EVIDENCE,
       feedback:
         "Only metadata is available. Fetch the readable lesson, article, news or Q&A body before summarizing or explaining its content. Otherwise clearly report what is unavailable without inventing a summary, then propose an appropriately scoped reply.",
     };

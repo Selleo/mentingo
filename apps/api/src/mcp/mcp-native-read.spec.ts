@@ -16,6 +16,7 @@ describe("Native assistant read adapter", () => {
   let service: McpHttpService;
   let permissions: string[];
   let search: jest.Mock;
+  let findActiveAccount: jest.Mock;
 
   beforeEach(() => {
     permissions = [PERMISSIONS.COURSE_READ];
@@ -34,15 +35,11 @@ describe("Native assistant read adapter", () => {
       searchMode: "keyword",
       semanticStatus: "disabled",
     });
-    const dbQuery = {
-      from: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockResolvedValue([{ email: "learner@example.com" }]),
-    };
+    findActiveAccount = jest.fn().mockResolvedValue({ email: "learner@example.com" });
     service = Object.create(McpHttpService.prototype) as McpHttpService;
     Object.assign(service, {
       callContext: new AsyncLocalStorage<McpCallContext>(),
-      db: { select: jest.fn(() => dbQuery) },
+      mcpActorRepository: { findActiveAccount },
       tenantDbRunnerService: {
         runWithTenant: async (_tenantId: string, callback: () => unknown) => callback(),
       },
@@ -86,6 +83,20 @@ describe("Native assistant read adapter", () => {
     expect(tools).toStrictEqual(JSON.parse(JSON.stringify(tools)));
   });
 
+  it("rechecks the active tenant-bound account before native reads", async () => {
+    await service.listNativeReadTools(userId, tenantId, "https://tenant.example");
+    expect(findActiveAccount).toHaveBeenLastCalledWith({ userId, tenantId });
+    findActiveAccount.mockResolvedValue(undefined);
+    await expect(
+      service.executeNativeReadTool(userId, tenantId, "https://tenant.example", "global_search", {
+        searchQuery: "safety",
+        language: "en",
+      }),
+    ).rejects.toThrow("common.toast.noAccess");
+    expect(findActiveAccount).toHaveBeenCalledTimes(2);
+    expect(search).not.toHaveBeenCalled();
+  });
+
   it("denies writes even if an administrator requests one directly", async () => {
     permissions = Object.values(PERMISSIONS);
     await expect(
@@ -96,7 +107,17 @@ describe("Native assistant read adapter", () => {
         "create_course",
         {},
       ),
-    ).rejects.toThrow("not read-only");
+    ).rejects.toThrow("common.toast.noAccess");
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid native input before executing the authorized tool", async () => {
+    await expect(
+      service.executeNativeReadTool(userId, tenantId, "https://tenant.example", "global_search", {
+        searchQuery: [],
+        language: "en",
+      }),
+    ).rejects.toThrow("assistant.errors.invalidToolInput");
     expect(search).not.toHaveBeenCalled();
   });
 
@@ -129,7 +150,7 @@ describe("Native assistant read adapter", () => {
         "global_search",
         args,
       ),
-    ).rejects.toThrow("unavailable");
+    ).rejects.toThrow("assistant.errors.unavailable");
     expect(search).toHaveBeenCalledTimes(1);
   });
   it("starts read progress only after the runner's fresh permission check", async () => {
@@ -231,7 +252,7 @@ describe("Native assistant read adapter", () => {
     permissions = [];
     await expect(
       service.executeNativeReadTool(userId, tenantId, "https://tenant.example", "list_users", {}),
-    ).rejects.toThrow("unavailable");
+    ).rejects.toThrow("assistant.errors.unavailable");
     expect(getUsers).toHaveBeenCalledTimes(1);
   });
 

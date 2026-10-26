@@ -5953,7 +5953,8 @@
     "errors": {
       "generic": "Režim podpory se nepodařilo spustit",
       "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
-      "invalidSession": "Relace podpory je neplatná"
+      "invalidSession": "Relace podpory je neplatná",
+      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory."
     }
   },
   "superAdminTenantsView": {
@@ -8298,6 +8299,19 @@
         "prompt": "Najdi materiály o konstruktivní zpětné vazbě a vysvětli hlavní myšlenky."
       }
     },
-    "latestMessage": "Přejít na nejnovější zprávu"
+    "latestMessage": "Přejít na nejnovější zprávu",
+    "errors": {
+      "unavailable": "Asistent je dočasně nedostupný. Zkuste to znovu později.",
+      "messageConflict": "Tato zpráva je v konfliktu s dřívějším požadavkem. Upravte ji a zkuste to znovu.",
+      "responseInProgress": "V této konverzaci se již generuje odpověď.",
+      "responseInactive": "Tato odpověď již není aktivní.",
+      "invalidToolInput": "Asistent nemohl tento požadavek zpracovat. Zkuste to znovu."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organizace nebyla nalezena.",
+      "inactive": "Tato organizace je neaktivní. Kontaktujte svého správce."
+    }
   }
 }

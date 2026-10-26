@@ -1,3 +1,4 @@
+import { ASSISTANT_MESSAGE_ROLES, ASSISTANT_MESSAGE_STATUSES } from "@repo/shared";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
@@ -37,8 +38,9 @@ export function useAssistantMessages(threadId: string) {
       const page = query.state.data?.pages[0];
       const pendingMessage = page?.items.some(
         (message) =>
-          message.role === "assistant" &&
-          (message.status === "pending" || message.status === "running"),
+          message.role === ASSISTANT_MESSAGE_ROLES.ASSISTANT &&
+          (message.status === ASSISTANT_MESSAGE_STATUSES.PENDING ||
+            message.status === ASSISTANT_MESSAGE_STATUSES.RUNNING),
       );
       // A terminal run can arrive just before its final message snapshot.
       return isAssistantRunActive(page?.latestRun) || pendingMessage ? 1000 : false;

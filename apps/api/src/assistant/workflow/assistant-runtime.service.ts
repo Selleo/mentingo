@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { ASSISTANT_WORKFLOW_RUN_STATES } from "@repo/shared";
 import { loadEsm } from "load-esm";
 
 import { AssistantExecutionService } from "../assistant-execution.service";
@@ -25,7 +26,9 @@ type WorkflowApi = {
   ): Promise<{ runId: string }>;
   getRun(runId: string): {
     exists: Promise<boolean>;
-    status: Promise<Exclude<AssistantWorkflowRunState, "missing">>;
+    status: Promise<
+      Exclude<AssistantWorkflowRunState, typeof ASSISTANT_WORKFLOW_RUN_STATES.MISSING>
+    >;
     cancel(): Promise<void>;
   };
 };
@@ -106,7 +109,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
     const world = this.world;
     const workflowId = this.workflowId;
     if (!world || !workflowId)
-      throw new ServiceUnavailableException("Assistant runtime is not configured");
+      throw new ServiceUnavailableException("assistant.errors.unavailable");
     const { start, getRun } = await loadEsm<WorkflowApi>("workflow/api");
     const workflowRunId = assistantWorkflowRunId(input);
     if (await getRun(workflowRunId).exists) return { workflowRunId };
@@ -147,13 +150,12 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
   }
 
   async getRunState(workflowRunId: string): Promise<AssistantWorkflowRunState> {
-    if (!this.isAvailable())
-      throw new ServiceUnavailableException("Assistant runtime is not configured");
+    if (!this.isAvailable()) throw new ServiceUnavailableException("assistant.errors.unavailable");
     const { getRun } = await loadEsm<WorkflowApi>("workflow/api");
     const run = getRun(workflowRunId);
     // The SDK returns false only for WorkflowRunNotFoundError. Transport and
     // database errors must propagate, never masquerade as a missing run.
-    if (!(await run.exists)) return "missing";
+    if (!(await run.exists)) return ASSISTANT_WORKFLOW_RUN_STATES.MISSING;
     return run.status;
   }
 

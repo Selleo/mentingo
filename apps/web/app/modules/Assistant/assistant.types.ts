@@ -1,3 +1,5 @@
+import { ASSISTANT_RUN_STATUSES } from "@repo/shared";
+
 import type {
   AssistantRunActivity,
   AssistantSourceType,
@@ -41,4 +43,4 @@ export type AssistantRun = {
 };
 
 export const isAssistantRunActive = (run: AssistantRun | null | undefined) =>
-  run?.status === "pending" || run?.status === "running";
+  run?.status === ASSISTANT_RUN_STATUSES.PENDING || run?.status === ASSISTANT_RUN_STATUSES.RUNNING;

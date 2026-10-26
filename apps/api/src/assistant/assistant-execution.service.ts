@@ -1,19 +1,17 @@
-import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import {
   ASSISTANT_OUTCOME_KINDS,
   ASSISTANT_RUN_ACTIVITIES,
+  ASSISTANT_RUN_STATUSES,
+  ASSISTANT_RUN_ERROR_CODES,
   TENANT_STATUSES,
   type AssistantRunActivity,
 } from "@repo/shared";
-import { and, eq, sql } from "drizzle-orm";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
-import { DatabasePg } from "src/common";
 import { McpHttpService } from "src/mcp/mcp-http.service";
-import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { tenants, users } from "src/storage/schema";
 
 import {
   collectAssistantSources,
@@ -36,47 +34,39 @@ export class AssistantExecutionService {
     private readonly mcpHttpService: McpHttpService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly aiRuntimeService: AiRuntimeService,
-    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   private async requireActive(input: AssistantRunIdentity) {
     const run = await this.assistantRepository.getRun(input);
-    if (!["pending", "running"].includes(run.status))
-      throw new ForbiddenException("Assistant run is no longer active");
-    const [tenant] = await this.db
-      .select({ status: tenants.status })
-      .from(tenants)
-      .where(eq(tenants.id, input.tenantId))
-      .limit(1);
+    if (
+      run.status !== ASSISTANT_RUN_STATUSES.PENDING &&
+      run.status !== ASSISTANT_RUN_STATUSES.RUNNING
+    )
+      throw new ForbiddenException("assistant.errors.responseInactive");
+    const tenant = await this.assistantRepository.findTenantState(input.tenantId);
     if (tenant?.status !== TENANT_STATUSES.ACTIVE) {
       // Background steps bypass HTTP tenant resolution. Suspension is terminal for this run,
       // so reactivation cannot resume a previously authorized generation or overwrite its result.
       await this.assistantRepository.updateRun(input, {
-        status: "failed",
-        errorCode: tenant ? "TENANT_INACTIVE" : "TENANT_NOT_FOUND",
+        status: ASSISTANT_RUN_STATUSES.FAILED,
+        errorCode: tenant
+          ? ASSISTANT_RUN_ERROR_CODES.TENANT_INACTIVE
+          : ASSISTANT_RUN_ERROR_CODES.TENANT_NOT_FOUND,
       });
-      throw new ForbiddenException("Assistant tenant access revoked");
+      throw new ForbiddenException("common.toast.noAccess");
     }
-    const [account] = await this.db
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(
-          eq(users.id, run.userId),
-          eq(users.tenantId, input.tenantId),
-          eq(users.archived, false),
-          sql`${users.deletedAt} IS NULL`,
-        ),
-      )
-      .limit(1);
-    if (!account) throw new ForbiddenException("Assistant access revoked");
+    const account = await this.assistantRepository.isAccountActive({
+      tenantId: input.tenantId,
+      userId: run.userId,
+    });
+    if (!account) throw new ForbiddenException("common.toast.noAccess");
     return run;
   }
 
   async loadContext(input: AssistantRunIdentity) {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
       const run = await this.requireActive(input);
-      await this.assistantRepository.updateRun(input, { status: "running" });
+      await this.assistantRepository.updateRun(input, { status: ASSISTANT_RUN_STATUSES.RUNNING });
       const [history, tools] = await Promise.all([
         this.assistantRepository.getHistory(input),
         this.mcpHttpService.listNativeReadTools(run.userId, input.tenantId, run.origin),
@@ -158,7 +148,7 @@ export class AssistantExecutionService {
       if (!validateAssistantOutcome({ kind, text, requiresReadableContent }, run).accepted) return;
       const grounded = groundAssistantText(text, run.sources);
       await this.assistantRepository.updateRun(input, {
-        status: "running",
+        status: ASSISTANT_RUN_STATUSES.RUNNING,
         text: grounded,
         messageSources: selectAssistantSources(grounded, run.sources),
       });
@@ -178,7 +168,7 @@ export class AssistantExecutionService {
       if (!validation.accepted) return validation;
       const grounded = groundAssistantText(text, run.sources);
       await this.assistantRepository.updateRun(input, {
-        status: "completed",
+        status: ASSISTANT_RUN_STATUSES.COMPLETED,
         text: grounded,
         messageSources: selectAssistantSources(grounded, run.sources),
       });
@@ -189,8 +179,10 @@ export class AssistantExecutionService {
   async fail(input: AssistantRunIdentity, errorCode: string) {
     await this.tenantDbRunnerService.runWithTenant(input.tenantId, () =>
       this.assistantRepository.updateRun(input, {
-        status: "failed",
-        errorCode: /^[A-Z_]{1,80}$/.test(errorCode) ? errorCode : "GENERATION_FAILED",
+        status: ASSISTANT_RUN_STATUSES.FAILED,
+        errorCode: /^[A-Z_]{1,80}$/.test(errorCode)
+          ? errorCode
+          : ASSISTANT_RUN_ERROR_CODES.GENERATION_FAILED,
       }),
     );
   }

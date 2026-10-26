@@ -5940,7 +5940,8 @@
     "errors": {
       "generic": "Support-Modus konnte nicht gestartet werden",
       "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation",
-      "invalidSession": "Support-Sitzung ist ungültig"
+      "invalidSession": "Support-Sitzung ist ungültig",
+      "sessionExpired": "Deine Support-Sitzung ist abgelaufen. Starte eine neue Support-Sitzung."
     }
   },
   "superAdminTenantsView": {
@@ -8281,6 +8282,19 @@
         "prompt": "Finde Materialien zu konstruktivem Feedback und erkläre die wichtigsten Ideen."
       }
     },
-    "latestMessage": "Zur neuesten Nachricht"
+    "latestMessage": "Zur neuesten Nachricht",
+    "errors": {
+      "unavailable": "Der Assistent ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
+      "messageConflict": "Diese Nachricht steht im Konflikt mit einer früheren Anfrage. Bearbeite sie und versuche es erneut.",
+      "responseInProgress": "In dieser Unterhaltung wird bereits eine Antwort erstellt.",
+      "responseInactive": "Diese Antwort ist nicht mehr aktiv.",
+      "invalidToolInput": "Der Assistent konnte diese Anfrage nicht verarbeiten. Bitte versuche es erneut."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organisation nicht gefunden.",
+      "inactive": "Diese Organisation ist inaktiv. Wende dich an deinen Administrator."
+    }
   }
 }

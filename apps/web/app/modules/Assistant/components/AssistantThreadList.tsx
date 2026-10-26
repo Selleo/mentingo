@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { AI_THREAD_STATUSES } from "@repo/shared";
 import { MessageSquare, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -58,21 +59,21 @@ export function AssistantThreadList({
           />
         </div>
         <Tabs
-          value={archived ? "archived" : "active"}
-          onValueChange={(value) => onArchived(value === "archived")}
+          value={archived ? AI_THREAD_STATUSES.ARCHIVED : AI_THREAD_STATUSES.ACTIVE}
+          onValueChange={(value) => onArchived(value === AI_THREAD_STATUSES.ARCHIVED)}
         >
           <TabsList
             className="grid w-full grid-cols-2 dark:bg-neutral-950"
             aria-label={t("assistant.history")}
           >
             <TabsTrigger
-              value="active"
+              value={AI_THREAD_STATUSES.ACTIVE}
               className="dark:text-neutral-300 dark:data-[state=active]:text-primary-100"
             >
               {t("assistant.active")}
             </TabsTrigger>
             <TabsTrigger
-              value="archived"
+              value={AI_THREAD_STATUSES.ARCHIVED}
               className="dark:text-neutral-300 dark:data-[state=active]:text-primary-100"
             >
               {t("assistant.archived")}

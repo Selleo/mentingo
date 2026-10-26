@@ -5949,7 +5949,8 @@
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
-      "invalidSession": "Palaikymo sesija netinkama"
+      "invalidSession": "Palaikymo sesija netinkama",
+      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją."
     }
   },
   "superAdminTenantsView": {
@@ -8296,6 +8297,19 @@
         "prompt": "Rask medžiagą apie konstruktyvų grįžtamąjį ryšį ir paaiškink pagrindines idėjas."
       }
     },
-    "latestMessage": "Pereiti prie naujausios žinutės"
+    "latestMessage": "Pereiti prie naujausios žinutės",
+    "errors": {
+      "unavailable": "Asistentas laikinai nepasiekiamas. Bandykite dar kartą vėliau.",
+      "messageConflict": "Ši žinutė nesuderinama su ankstesne užklausa. Pakeiskite ją ir bandykite dar kartą.",
+      "responseInProgress": "Šiame pokalbyje jau generuojamas atsakymas.",
+      "responseInactive": "Šis atsakymas nebėra aktyvus.",
+      "invalidToolInput": "Asistentui nepavyko apdoroti šios užklausos. Bandykite dar kartą."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organizacija nerasta.",
+      "inactive": "Ši organizacija neaktyvi. Susisiekite su administratoriumi."
+    }
   }
 }

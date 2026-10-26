@@ -1,19 +1,19 @@
 import {
   ForbiddenException,
-  Inject,
   Injectable,
   Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from "@nestjs/common";
 import { Interval } from "@nestjs/schedule";
-import { and, eq, sql } from "drizzle-orm";
+import {
+  ASSISTANT_RUN_STATUSES,
+  ASSISTANT_WORKFLOW_RUN_STATES,
+  ASSISTANT_RUN_ERROR_CODES,
+} from "@repo/shared";
 import { match } from "ts-pattern";
 
-import { DatabasePg } from "src/common";
-import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { tenants, users } from "src/storage/schema";
 
 import { AssistantRepository } from "./assistant.repository";
 import { DEFAULT_ASSISTANT_LANGUAGE } from "./schemas/assistant.schema";
@@ -38,30 +38,20 @@ export class AssistantService {
     private readonly assistantRepository: AssistantRepository,
     private readonly assistantRuntimeService: AssistantRuntimeService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
-    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   private async requireActor(user: CurrentUserType) {
-    const [account] = await this.db
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(
-          eq(users.id, user.userId),
-          eq(users.tenantId, user.tenantId),
-          eq(users.archived, false),
-          sql`${users.deletedAt} IS NULL`,
-        ),
-      )
-      .limit(1);
-    if (!account) throw new ForbiddenException("Assistant access is unavailable");
+    const account = await this.assistantRepository.isAccountActive(user);
+    if (!account) throw new ForbiddenException("common.toast.noAccess");
   }
 
   async availability(user: CurrentUserType) {
     await this.requireActor(user);
     return {
       available: this.assistantRuntimeService.isAvailable(),
-      reason: this.assistantRuntimeService.isAvailable() ? null : "WORKFLOW_UNAVAILABLE",
+      reason: this.assistantRuntimeService.isAvailable()
+        ? null
+        : ASSISTANT_RUN_ERROR_CODES.WORKFLOW_UNAVAILABLE,
     };
   }
 
@@ -92,16 +82,12 @@ export class AssistantService {
   async sendMessage(user: CurrentUserType, threadId: string, body: SendAssistantMessage) {
     await this.requireActor(user);
     if (!this.assistantRuntimeService.isAvailable())
-      throw new ServiceUnavailableException("Assistant workflow runtime is unavailable");
-    const [tenant] = await this.db
-      .select({ host: tenants.host })
-      .from(tenants)
-      .where(eq(tenants.id, user.tenantId))
-      .limit(1);
-    if (!tenant?.host) throw new ServiceUnavailableException("Tenant origin is unavailable");
+      throw new ServiceUnavailableException("assistant.errors.unavailable");
+    const tenant = await this.assistantRepository.findTenantState(user.tenantId);
+    if (!tenant?.host) throw new ServiceUnavailableException("assistant.errors.unavailable");
     const origin = new URL(tenant.host).origin;
     const sent = await this.assistantRepository.createSend(user, threadId, body, origin);
-    if (sent.run.status === "pending" && !sent.run.workflowRunId) {
+    if (sent.run.status === ASSISTANT_RUN_STATUSES.PENDING && !sent.run.workflowRunId) {
       try {
         await this.start(sent.run);
       } catch {
@@ -136,12 +122,16 @@ export class AssistantService {
     await this.assistantRepository.getThread(user, threadId);
     const run = await this.assistantRepository.getRun({ tenantId: user.tenantId, runId });
     if (run.threadId !== threadId || run.userId !== user.userId)
-      throw new NotFoundException("Assistant run not found");
+      throw new NotFoundException("common.toast.notFound");
     const cancelled = await this.assistantRepository.updateRun(
       { tenantId: user.tenantId, runId },
-      { status: "cancelled" },
+      { status: ASSISTANT_RUN_STATUSES.CANCELLED },
     );
-    if (run.workflowRunId && ["pending", "running"].includes(run.status)) {
+    if (
+      run.workflowRunId &&
+      (run.status === ASSISTANT_RUN_STATUSES.PENDING ||
+        run.status === ASSISTANT_RUN_STATUSES.RUNNING)
+    ) {
       try {
         await this.assistantRuntimeService.cancel(run.workflowRunId);
       } catch {
@@ -162,12 +152,20 @@ export class AssistantService {
       try {
         const state = await this.assistantRuntimeService.getRunState(run.workflowRunId!);
         const update = match(state)
-          .with("cancelled", () => ({ status: "cancelled" as const }))
-          .with("failed", () => ({ status: "failed" as const, errorCode: "WORKFLOW_FAILED" }))
-          .with("missing", () => ({ status: "failed" as const, errorCode: "WORKFLOW_NOT_FOUND" }))
-          .with("completed", () => ({
-            status: "failed" as const,
-            errorCode: "WORKFLOW_COMPLETION_NOT_SAVED",
+          .with(ASSISTANT_WORKFLOW_RUN_STATES.CANCELLED, () => ({
+            status: ASSISTANT_RUN_STATUSES.CANCELLED,
+          }))
+          .with(ASSISTANT_WORKFLOW_RUN_STATES.FAILED, () => ({
+            status: ASSISTANT_RUN_STATUSES.FAILED,
+            errorCode: ASSISTANT_RUN_ERROR_CODES.WORKFLOW_FAILED,
+          }))
+          .with(ASSISTANT_WORKFLOW_RUN_STATES.MISSING, () => ({
+            status: ASSISTANT_RUN_STATUSES.FAILED,
+            errorCode: ASSISTANT_RUN_ERROR_CODES.WORKFLOW_NOT_FOUND,
+          }))
+          .with(ASSISTANT_WORKFLOW_RUN_STATES.COMPLETED, () => ({
+            status: ASSISTANT_RUN_STATUSES.FAILED,
+            errorCode: ASSISTANT_RUN_ERROR_CODES.WORKFLOW_COMPLETION_NOT_SAVED,
           }))
           .otherwise(() => null);
         if (update) {
