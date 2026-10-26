@@ -123,6 +123,8 @@ import {
 
 import type {
   McpCallContext,
+  McpNativeFeatureCapabilities,
+  McpReadFeatureCapability,
   McpIdempotencyRecord,
   McpRevisionEntity,
   McpToolActor,
@@ -339,7 +341,7 @@ export class McpHttpService {
       "get_my_capabilities",
       {
         description:
-          "Show the Mentingo content management capabilities currently available to your account.",
+          "Show current Mentingo capabilities. In native Assistant sessions, features distinguishes disabled modules from unavailable list/read access. Capability metadata does not establish factual content access.",
         inputSchema: asMcpInputSchema(McpToolSchemas.getMyCapabilitiesInputSchema),
         annotations: { readOnlyHint: true },
       },
@@ -366,6 +368,39 @@ export class McpHttpService {
                 (!feature || settings[FEATURE_SETTINGS_KEYS[feature]]),
             );
           };
+          const readFeature = (
+            enabled: boolean,
+            listTool: string,
+            readTool: string,
+          ): McpReadFeatureCapability => ({
+            enabled,
+            canList: enabled && available(listTool),
+            canRead: enabled && available(readTool),
+          });
+          const features: McpNativeFeatureCapabilities = {
+            articles: readFeature(
+              Boolean(settings[FEATURE_SETTINGS_KEYS[FEATURES.ARTICLES]]),
+              "list_articles",
+              "get_article",
+            ),
+            news: readFeature(
+              Boolean(settings[FEATURE_SETTINGS_KEYS[FEATURES.NEWS]]),
+              "list_news",
+              "get_news",
+            ),
+            qa: readFeature(
+              Boolean(settings[FEATURE_SETTINGS_KEYS[FEATURES.QA]]),
+              "list_qa_entries",
+              "get_qa_entry",
+            ),
+            developmentPaths: readFeature(
+              Boolean(settings.learningPathsEnabled),
+              "list_development_paths",
+              "get_development_path",
+            ),
+          };
+          const nativeReadAvailable = (feature: McpReadFeatureCapability) =>
+            "native" in actor && (feature.canList || feature.canRead);
           return {
             course: {
               canCreate: available("create_course"),
@@ -397,11 +432,23 @@ export class McpHttpService {
             },
             globalSearch: available("global_search"),
             categories: available("create_category") || available("list_categories"),
-            articles: available("create_article") || available("update_article"),
-            news: available("create_news") || available("update_news"),
-            qa: available("create_qa_entry") || available("update_qa_entry"),
+            articles:
+              available("create_article") ||
+              available("update_article") ||
+              nativeReadAvailable(features.articles),
+            news:
+              available("create_news") ||
+              available("update_news") ||
+              nativeReadAvailable(features.news),
+            qa:
+              available("create_qa_entry") ||
+              available("update_qa_entry") ||
+              nativeReadAvailable(features.qa),
             developmentPaths:
-              available("create_development_path") || available("update_development_path"),
+              available("create_development_path") ||
+              available("update_development_path") ||
+              nativeReadAvailable(features.developmentPaths),
+            ...("native" in actor ? { features } : {}),
           };
         }),
     );

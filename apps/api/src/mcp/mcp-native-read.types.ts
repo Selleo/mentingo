@@ -1,4 +1,4 @@
-import type { McpToolActor } from "./mcp.types";
+import type { McpToolActor, McpNativeFeatureCapabilities } from "./mcp.types";
 
 /** A native session is never represented as an OAuth grant. */
 export type NativeReadActor = {
@@ -70,3 +70,17 @@ export type NativeReadRegistration = {
   callback: (input: unknown) => Promise<import("@modelcontextprotocol/server").CallToolResult>;
   enabled: boolean;
 };
+
+/** Capability preflight must be complete boolean metadata before it can reach the model. */
+export function isMcpNativeFeatureCapabilities(
+  value: unknown,
+): value is McpNativeFeatureCapabilities {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const features = value as Record<string, unknown>;
+  return ["articles", "news", "qa", "developmentPaths"].every((name) => {
+    const feature = features[name];
+    if (!feature || typeof feature !== "object" || Array.isArray(feature)) return false;
+    const access = feature as Record<string, unknown>;
+    return ["enabled", "canList", "canRead"].every((field) => typeof access[field] === "boolean");
+  });
+}

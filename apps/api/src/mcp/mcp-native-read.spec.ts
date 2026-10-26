@@ -1,16 +1,20 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
-import { PERMISSIONS } from "@repo/shared";
+import { FEATURES, FEATURE_SETTINGS_KEYS, PERMISSIONS } from "@repo/shared";
 
 import { collectAssistantSources, groundAssistantText } from "src/assistant/assistant-links";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { McpHttpService } from "./mcp-http.service";
-import { NATIVE_READ_TOOL_NAMES, bindToolActor } from "./mcp-native-read.types";
+import {
+  NATIVE_READ_TOOL_NAMES,
+  bindToolActor,
+  isMcpNativeFeatureCapabilities,
+} from "./mcp-native-read.types";
 import { MCP_SCOPES } from "./mcp-tool-scope";
 
-import type { McpCallContext } from "./mcp.types";
+import type { McpCallContext, McpNativeFeatureCapabilities } from "./mcp.types";
 
 describe("Native assistant read adapter", () => {
   const tenantId = "aa22c376-2adf-4236-a9c0-6361b6aec3c0";
@@ -19,9 +23,11 @@ describe("Native assistant read adapter", () => {
   let permissions: string[];
   let search: jest.Mock;
   let findActiveAccount: jest.Mock;
+  let featureSettings: Record<string, boolean>;
 
   beforeEach(() => {
     permissions = [PERMISSIONS.COURSE_READ];
+    featureSettings = {};
     search = jest.fn().mockResolvedValue({
       allCourses: [],
       myCourses: [],
@@ -44,9 +50,140 @@ describe("Native assistant read adapter", () => {
       mcpActorRepository: { findActiveAccount },
       tenantDbRunnerService: new TenantDbRunnerService({} as never),
       permissionsService: { getUserAccess: jest.fn(async () => ({ permissions, roleSlugs: [] })) },
-      settingsService: { getGlobalSettings: jest.fn(async () => ({})) },
+      settingsService: { getGlobalSettings: jest.fn(async () => featureSettings) },
       globalSearchService: { search },
     });
+  });
+
+  const setModules = (enabled: boolean) => {
+    featureSettings = {
+      [FEATURE_SETTINGS_KEYS[FEATURES.ARTICLES]]: enabled,
+      [FEATURE_SETTINGS_KEYS[FEATURES.NEWS]]: enabled,
+      [FEATURE_SETTINGS_KEYS[FEATURES.QA]]: enabled,
+      learningPathsEnabled: enabled,
+    };
+  };
+  const capabilities = async () => {
+    const result = await service.executeNativeReadTool(
+      userId,
+      tenantId,
+      "https://tenant.example",
+      "get_my_capabilities",
+      {},
+    );
+    expect(result.isError).not.toBe(true);
+    expect(result.structuredContent).toStrictEqual(
+      JSON.parse(JSON.stringify(result.structuredContent)),
+    );
+    const data = result.structuredContent;
+    if (!data || typeof data !== "object" || Array.isArray(data))
+      throw new Error("Missing capability metadata");
+    const features = Reflect.get(data, "features");
+    if (!isMcpNativeFeatureCapabilities(features)) throw new Error("Malformed capability metadata");
+    return {
+      features,
+      articles: Reflect.get(data, "articles"),
+      news: Reflect.get(data, "news"),
+      qa: Reflect.get(data, "qa"),
+      developmentPaths: Reflect.get(data, "developmentPaths"),
+    };
+  };
+
+  describe.each([
+    { name: "administrator", management: true },
+    { name: "learner", management: false },
+  ])("native module capabilities for $name", ({ management }) => {
+    it.each([true, false])(
+      "matches the actual read catalog with modules enabled=%s",
+      async (enabled) => {
+        permissions = management
+          ? Object.values(PERMISSIONS)
+          : [
+              PERMISSIONS.ARTICLE_READ_PUBLIC,
+              PERMISSIONS.NEWS_READ_PUBLIC,
+              PERMISSIONS.QA_READ_PUBLIC,
+            ];
+        setModules(enabled);
+        const data = await capabilities();
+        const expectedRead = { enabled, canList: enabled, canRead: enabled };
+        const expectedPath = {
+          enabled,
+          canList: enabled && management,
+          canRead: enabled && management,
+        };
+        expect(data.features).toEqual({
+          articles: expectedRead,
+          news: expectedRead,
+          qa: expectedRead,
+          developmentPaths: expectedPath,
+        });
+        expect(data.articles).toBe(enabled);
+        expect(data.news).toBe(enabled);
+        expect(data.qa).toBe(enabled);
+        expect(data.developmentPaths).toBe(enabled && management);
+        const names = (
+          await service.listNativeReadTools(userId, tenantId, "https://tenant.example")
+        ).map((tool) => tool.name);
+        expect(names).toContain("get_my_capabilities");
+        const features = data.features;
+        for (const [feature, list, read] of [
+          [features.articles, "list_articles", "get_article"],
+          [features.news, "list_news", "get_news"],
+          [features.qa, "list_qa_entries", "get_qa_entry"],
+          [features.developmentPaths, "list_development_paths", "get_development_path"],
+        ] satisfies [McpNativeFeatureCapabilities["articles"], string, string][]) {
+          expect(names.includes(list)).toBe(feature.canList);
+          expect(names.includes(read)).toBe(feature.canRead);
+        }
+      },
+    );
+  });
+
+  it("distinguishes enabled modules without permitted readers from disabled modules", async () => {
+    permissions = [];
+    setModules(true);
+    const data = await capabilities();
+    expect(data.features).toEqual({
+      articles: { enabled: true, canList: false, canRead: false },
+      news: { enabled: true, canList: false, canRead: false },
+      qa: { enabled: true, canList: false, canRead: false },
+      developmentPaths: { enabled: true, canList: false, canRead: false },
+    });
+    expect(data.articles).toBe(false);
+    expect(
+      (await service.listNativeReadTools(userId, tenantId, "https://tenant.example")).map(
+        (tool) => tool.name,
+      ),
+    ).toContain("get_my_capabilities");
+  });
+
+  it("uses fresh permissions and settings when reporting capabilities after discovery", async () => {
+    permissions = Object.values(PERMISSIONS);
+    setModules(true);
+    expect((await capabilities()).articles).toBe(true);
+    permissions = [];
+    const getUserAccess = Reflect.get(service, "permissionsService").getUserAccess as jest.Mock;
+    getUserAccess
+      .mockResolvedValueOnce({ permissions: Object.values(PERMISSIONS), roleSlugs: [] })
+      .mockResolvedValueOnce({ permissions: [], roleSlugs: [] });
+    expect((await capabilities()).features).toEqual(
+      expect.objectContaining({ articles: { enabled: true, canList: false, canRead: false } }),
+    );
+    permissions = Object.values(PERMISSIONS);
+    const getGlobalSettings = Reflect.get(service, "settingsService")
+      .getGlobalSettings as jest.Mock;
+    const enabledSettings = featureSettings;
+    setModules(false);
+    getGlobalSettings.mockResolvedValueOnce(enabledSettings).mockResolvedValueOnce(featureSettings);
+    expect((await capabilities()).features).toEqual(
+      expect.objectContaining({ articles: { enabled: false, canList: false, canRead: false } }),
+    );
+    const names = (
+      await service.listNativeReadTools(userId, tenantId, "https://tenant.example")
+    ).map((tool) => tool.name);
+    expect(names).not.toContain("get_article");
+    expect(names).not.toContain("list_articles");
+    expect(names).toContain("get_my_capabilities");
   });
 
   it("uses a native identity with no OAuth grant or granted scopes", () => {
@@ -258,6 +395,59 @@ describe("Native assistant read adapter", () => {
       service.executeNativeReadTool(userId, tenantId, "https://tenant.example", "list_users", {}),
     ).rejects.toThrow("assistant.errors.unavailable");
     expect(getUsers).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves OAuth authoring capability booleans and response shape", async () => {
+    permissions = Object.values(PERMISSIONS);
+    setModules(true);
+    Object.assign(service, {
+      activityLogsService: { recordActivity: jest.fn().mockResolvedValue(undefined) },
+    });
+    const callbacks = new Map<
+      string,
+      (
+        input: unknown,
+      ) => Promise<{ structuredContent?: Record<string, unknown>; isError?: boolean }>
+    >();
+    const collector = {
+      registerTool: (
+        name: string,
+        _config: unknown,
+        callback: (
+          input: unknown,
+        ) => Promise<{ structuredContent?: Record<string, unknown>; isError?: boolean }>,
+      ) => {
+        callbacks.set(name, callback);
+        return { disable: () => undefined };
+      },
+    };
+    const actor = {
+      email: "fixture@example.com",
+      grant: {
+        userId,
+        tenantId,
+        clientId: "fixture-oauth",
+        resource: "https://tenant.example/api/mcp",
+        scopes: [MCP_SCOPES.AUTHORING],
+        expiresAt: Date.now() + 60000,
+      },
+    };
+    Reflect.apply(Reflect.get(service, "createServer"), service, [
+      actor,
+      permissions,
+      featureSettings,
+      collector,
+    ]);
+    const result = await (
+      Reflect.get(service, "callContext") as AsyncLocalStorage<McpCallContext>
+    ).run({ tool: "get_my_capabilities", requestId: "fixture-request", arguments: {} }, () =>
+      callbacks.get("get_my_capabilities")!({}),
+    );
+    expect(result.isError).not.toBe(true);
+    expect(result.structuredContent).toEqual(
+      expect.objectContaining({ articles: true, news: true, qa: true, developmentPaths: true }),
+    );
+    expect(result.structuredContent).not.toHaveProperty("features");
   });
 
   it("preserves the existing OAuth management course-list output", async () => {

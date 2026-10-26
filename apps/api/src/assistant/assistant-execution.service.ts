@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, ServiceUnavailableException } from "@nestjs/common";
 import {
   ASSISTANT_OUTCOME_KINDS,
   ASSISTANT_RUN_ACTIVITIES,
@@ -11,6 +11,7 @@ import {
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { McpHttpService } from "src/mcp/mcp-http.service";
+import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import {
@@ -67,6 +68,22 @@ export class AssistantExecutionService {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
       const run = await this.requireActive(input);
       await this.assistantRepository.updateRun(input, { status: ASSISTANT_RUN_STATUSES.RUNNING });
+      // Resolve module availability before the model can classify a reply as conversation.
+      // This metadata handshake is not evidence for factual content answers.
+      const capabilityResult = await this.mcpHttpService.executeNativeReadTool(
+        run.userId,
+        input.tenantId,
+        run.origin,
+        "get_my_capabilities",
+        {},
+      );
+      const capabilityPayload = capabilityResult.structuredContent;
+      const capabilities =
+        capabilityPayload && typeof capabilityPayload === "object"
+          ? Reflect.get(capabilityPayload, "features")
+          : undefined;
+      if (capabilityResult.isError || !isMcpNativeFeatureCapabilities(capabilities))
+        throw new ServiceUnavailableException("assistant.errors.unavailable");
       const [history, tools] = await Promise.all([
         this.assistantRepository.getHistory(input),
         this.mcpHttpService.listNativeReadTools(run.userId, input.tenantId, run.origin),
@@ -74,6 +91,7 @@ export class AssistantExecutionService {
       return {
         run,
         sources: run.sources,
+        capabilities,
         messages: history.map((message) => ({ role: message.role, content: message.text })),
         tools,
       };

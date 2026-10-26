@@ -42,6 +42,13 @@ describe("AssistantExecutionService", () => {
   let service: AssistantExecutionService;
   let tenantDbRunnerService: { runWithTenant: jest.Mock };
 
+  const capabilities = {
+    articles: { enabled: false, canList: false, canRead: false },
+    news: { enabled: true, canList: true, canRead: true },
+    qa: { enabled: true, canList: true, canRead: true },
+    developmentPaths: { enabled: true, canList: true, canRead: true },
+  };
+
   beforeEach(() => {
     assistantRepository = {
       getRun: jest.fn().mockResolvedValue({ ...run }),
@@ -56,7 +63,10 @@ describe("AssistantExecutionService", () => {
     mcpHttpService = {
       executeNativeReadTool: jest
         .fn()
-        .mockResolvedValue({ structuredContent: { items: run.sources } }),
+        .mockImplementation(async (_userId, _tenantId, _origin, name) => ({
+          structuredContent:
+            name === "get_my_capabilities" ? { features: capabilities } : { items: run.sources },
+        })),
       listNativeReadTools: jest.fn().mockResolvedValue([]),
     };
     tenantDbRunnerService = { runWithTenant: jest.fn((_tenantId, callback) => callback()) };
@@ -127,11 +137,41 @@ describe("AssistantExecutionService", () => {
     },
   );
 
+  it("checks capabilities before history/catalog without treating them as factual content evidence", async () => {
+    const context = await service.loadContext(identity);
+    expect(context.capabilities).toEqual(capabilities);
+    expect(mcpHttpService.executeNativeReadTool).toHaveBeenCalledWith(
+      run.userId,
+      identity.tenantId,
+      run.origin,
+      "get_my_capabilities",
+      {},
+    );
+    expect(mcpHttpService.executeNativeReadTool.mock.invocationCallOrder[0]).toBeLessThan(
+      assistantRepository.getHistory.mock.invocationCallOrder[0],
+    );
+    expect(assistantRepository.updateRun.mock.calls.every(([, patch]) => !patch.recordTool)).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    { isError: true },
+    { structuredContent: {} },
+    { structuredContent: { features: { articles: { enabled: false } } } },
+  ])("does not generate without a usable current capability snapshot (%j)", async (result) => {
+    mcpHttpService.executeNativeReadTool.mockResolvedValue(result);
+    await expect(service.loadContext(identity)).rejects.toThrow("assistant.errors.unavailable");
+    expect(assistantRepository.getHistory).not.toHaveBeenCalled();
+    expect(modelProvider).not.toHaveBeenCalled();
+  });
+
   it("loads authorized context normally while the tenant remains active", async () => {
     await expect(service.loadContext(identity)).resolves.toMatchObject({
       run,
       messages: [],
       tools: [],
+      capabilities,
     });
     expect(mcpHttpService.listNativeReadTools).toHaveBeenCalledWith(
       run.userId,

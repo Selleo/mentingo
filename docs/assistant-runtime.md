@@ -24,7 +24,7 @@ The runtime resolves model/provider credentials through Core's existing tenant-a
 
 ## Access and lifecycle
 
-The existing application login authenticates Assistant requests; users do not connect OAuth or Slack accounts. Every active authenticated user can access the feature, including custom roles; existing domain permissions determine each tool's readable content. Every thread operation checks tenant and owner. Tool execution rechecks account state and permissions, including after queue delays. The native read-tool allowlist reuses MCP authorization callbacks without creating an OAuth token.
+The existing application login authenticates Assistant requests; users do not connect OAuth or Slack accounts. Every active authenticated user can access the feature, including custom roles; existing domain permissions determine each tool's readable content. Every thread operation checks tenant and owner. Tool execution rechecks account state and permissions, including after queue delays. The native read-tool allowlist reuses MCP authorization callbacks without creating an OAuth token. Before each turn reaches the model, Core executes `get_my_capabilities` and validates the native module flags (`enabled`, `canList`, `canRead`) for articles, news, Q&A and development paths. These flags distinguish disabled modules from unavailable readers in this Assistant session. A failed or malformed check stops generation; the metadata handshake does not increment factual-content evidence counters. Current tool authorization still runs on each later read.
 
 Administrative AI Conversations uses the separate `ai_thread.read` permission. Personal thread ownership therefore does not imply that conversations are hidden from authorized administrators.
 

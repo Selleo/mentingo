@@ -1,6 +1,7 @@
 import type { AssistantOutcome, AssistantOutcomeValidation } from "./assistant-outcome.types";
 import type { LanguageModelV4 } from "@ai-sdk/provider";
 import type { AssistantRunActivity, AssistantMessageRole, AssistantRunStatus } from "@repo/shared";
+import type { McpNativeFeatureCapabilities } from "src/mcp/mcp.types";
 
 export type AssistantWorkflowInput = {
   runId: string;
@@ -29,6 +30,7 @@ export type AssistantWorkflowContext = {
     status: AssistantRunStatus;
   };
   messages: Array<{ role: AssistantMessageRole; content: string }>;
+  capabilities: McpNativeFeatureCapabilities;
   tools: Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>;
 };
 

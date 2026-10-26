@@ -28,6 +28,14 @@ export type McpRevisionEntity =
   | typeof ENTITY_TYPES.NEWS
   | typeof ENTITY_TYPES.ARTICLES;
 
+export type McpReadFeatureCapability = { enabled: boolean; canList: boolean; canRead: boolean };
+export type McpNativeFeatureCapabilities = {
+  articles: McpReadFeatureCapability;
+  news: McpReadFeatureCapability;
+  qa: McpReadFeatureCapability;
+  developmentPaths: McpReadFeatureCapability;
+};
+
 export type McpActorAccount = { email: string };
 
 export type McpCallContext = {
