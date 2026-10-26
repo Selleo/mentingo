@@ -3395,7 +3395,7 @@ export class McpHttpService {
     onAuthorizedTool?: () => Promise<void>,
   ) {
     return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      const account = await this.mcpActorRepository.findActiveAccount({ userId, tenantId });
+      const account = await this.mcpActorRepository.findActiveAccount(userId);
       if (!account) throw new ForbiddenException("common.toast.noAccess");
       const access = await this.permissionsService.getUserAccess(userId);
       const settings = await this.settingsService.getGlobalSettings();

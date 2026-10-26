@@ -28,7 +28,6 @@ export type McpRevisionEntity =
   | typeof ENTITY_TYPES.NEWS
   | typeof ENTITY_TYPES.ARTICLES;
 
-export type McpActorIdentity = { tenantId: UUIDType; userId: UUIDType };
 export type McpActorAccount = { email: string };
 
 export type McpCallContext = {

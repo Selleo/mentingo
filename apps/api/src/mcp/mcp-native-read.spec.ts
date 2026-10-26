@@ -3,6 +3,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { PERMISSIONS } from "@repo/shared";
 
 import { collectAssistantSources, groundAssistantText } from "src/assistant/assistant-links";
+import { dbAls } from "src/storage/db/db-als.store";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { McpHttpService } from "./mcp-http.service";
 import { NATIVE_READ_TOOL_NAMES, bindToolActor } from "./mcp-native-read.types";
@@ -40,9 +42,7 @@ describe("Native assistant read adapter", () => {
     Object.assign(service, {
       callContext: new AsyncLocalStorage<McpCallContext>(),
       mcpActorRepository: { findActiveAccount },
-      tenantDbRunnerService: {
-        runWithTenant: async (_tenantId: string, callback: () => unknown) => callback(),
-      },
+      tenantDbRunnerService: new TenantDbRunnerService({} as never),
       permissionsService: { getUserAccess: jest.fn(async () => ({ permissions, roleSlugs: [] })) },
       settingsService: { getGlobalSettings: jest.fn(async () => ({})) },
       globalSearchService: { search },
@@ -84,8 +84,12 @@ describe("Native assistant read adapter", () => {
   });
 
   it("rechecks the active tenant-bound account before native reads", async () => {
+    findActiveAccount.mockImplementation(async () => {
+      expect(dbAls.getStore()?.tenantId).toBe(tenantId);
+      return { email: "learner@example.com" };
+    });
     await service.listNativeReadTools(userId, tenantId, "https://tenant.example");
-    expect(findActiveAccount).toHaveBeenLastCalledWith({ userId, tenantId });
+    expect(findActiveAccount).toHaveBeenLastCalledWith(userId);
     findActiveAccount.mockResolvedValue(undefined);
     await expect(
       service.executeNativeReadTool(userId, tenantId, "https://tenant.example", "global_search", {
