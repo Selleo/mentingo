@@ -425,7 +425,7 @@ const ModernCoursesView = () => {
             ))
             .otherwise(() => null)}
 
-          {topCourses?.length && (
+          {Boolean(topCourses?.length) && (
             <section>
               <h2 className="h2 px-4 text-2xl leading-snug md:px-8 md:text-[32px] md:leading-relaxed">
                 {t("studentCoursesView.modernView.topCourses")}
