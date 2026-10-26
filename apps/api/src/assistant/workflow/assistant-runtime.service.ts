@@ -13,8 +13,9 @@ import { registerAssistantExecution } from "./assistant-workflow.bridge";
 
 import type { AssistantRuntimeInput, AssistantWorkflowRunState } from "./assistant-workflow.types";
 import type { OnApplicationBootstrap, OnApplicationShutdown } from "@nestjs/common";
+import type { createWorld } from "@workflow/world-postgres";
 
-type PostgresWorld = ReturnType<(typeof import("@workflow/world-postgres"))["createWorld"]>;
+type PostgresWorld = ReturnType<typeof createWorld>;
 type WorkflowApi = {
   start(
     metadata: { workflowId: string },
