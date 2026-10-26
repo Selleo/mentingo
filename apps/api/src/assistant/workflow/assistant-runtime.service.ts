@@ -21,7 +21,7 @@ type WorkflowApi = {
   start(
     metadata: { workflowId: string },
     args: unknown[],
-    options?: { world: PostgresWorld; namespace?: string },
+    options?: { world: PostgresWorld },
   ): Promise<{ runId: string }>;
   getRun(runId: string): {
     exists: Promise<boolean>;
@@ -98,9 +98,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
     );
     // Queue delivery stays inside this process. No unauthenticated workflow
     // HTTP routes are added to the Nest application or its reverse proxy.
-    const namespace = process.env.WORKFLOW_QUEUE_NAMESPACE;
-    const prefix = namespace ? `__${namespace}_wkf_workflow_` : "__wkf_workflow_";
-    this.world.registerHandler(prefix, (request) => flow.POST(request));
+    this.world.registerHandler("__wkf_workflow_", (request) => flow.POST(request));
     await this.world.start();
   }
 
@@ -135,7 +133,6 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
             ],
             {
               world: { ...this.world!, createRunId: () => workflowRunId.slice(5) },
-              namespace: process.env.WORKFLOW_QUEUE_NAMESPACE,
             },
           ),
       );

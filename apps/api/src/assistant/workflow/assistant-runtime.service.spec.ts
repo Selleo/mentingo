@@ -108,6 +108,7 @@ describe("Assistant runtime database configuration", () => {
       await service.onApplicationBootstrap();
       expect(createWorld).toHaveBeenCalledWith(expect.objectContaining({ connectionString }));
       expect(setWorld).toHaveBeenCalledWith(world);
+      expect(world.registerHandler).toHaveBeenCalledWith("__wkf_workflow_", expect.any(Function));
       expect(world.start).toHaveBeenCalledTimes(1);
       expect(service.isAvailable()).toBe(true);
       expect(process.env.WORKFLOW_TRACE_MODE).toBe(traceMode ?? "continuous");

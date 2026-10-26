@@ -155,22 +155,22 @@ async function smokeQueue(connectionString: string) {
       const { createWorld } = await import(${JSON.stringify(sdkEntry)});
       const world = createWorld({
         connectionString: process.env.WORKFLOW_POSTGRES_URL,
-        namespace: 'schema', queueConcurrency: 1, pollInterval: 50, applicationManagedShutdown: true
+        queueConcurrency: 1, pollInterval: 50, applicationManagedShutdown: true
       });
       let timer;
       try {
         const received = new Promise((resolve, reject) => {
           timer = setTimeout(() => reject(new Error('Queue delivery timed out')), 10000);
-          world.registerHandler('__schema_wkf_workflow_', async request => {
+          world.registerHandler('__wkf_workflow_', async request => {
             const body = await request.json();
             assert.equal(body.runId, 'schema-regression-run');
-            assert.equal(request.headers.get('x-vqs-queue-name'), '__schema_wkf_workflow_schema-regression');
+            assert.equal(request.headers.get('x-vqs-queue-name'), '__wkf_workflow_schema-regression');
             resolve(body);
             return new Response(null, { status: 200 });
           });
         });
         await world.start();
-        await world.queue('__schema_wkf_workflow_schema-regression', {
+        await world.queue('__wkf_workflow_schema-regression', {
           runId: 'schema-regression-run', workflowName: 'schema-regression', deploymentId: 'test'
         });
         await received;
@@ -180,14 +180,16 @@ async function smokeQueue(connectionString: string) {
       }
     })().catch(error => { console.error(error); process.exitCode = 1; });
   `;
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    WORKFLOW_POSTGRES_URL: connectionString,
+    PORT: "",
+    WORKFLOW_LOCAL_BASE_URL: "http://workflow.test",
+  };
+  delete env.WORKFLOW_QUEUE_NAMESPACE;
   await execute(process.execPath, ["-e", script], {
     cwd: tmpdir(),
-    env: {
-      ...process.env,
-      WORKFLOW_POSTGRES_URL: connectionString,
-      PORT: "",
-      WORKFLOW_LOCAL_BASE_URL: "http://workflow.test",
-    },
+    env,
     timeout: 20000,
   });
 }
