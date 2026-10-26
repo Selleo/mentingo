@@ -69,7 +69,7 @@ importers:
         version: 1.0.0(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(drizzle-orm@0.31.2(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(@types/react@18.3.12)(postgres@3.4.4)(react@18.3.1))(postgres@3.4.4)
       '@langchain/community':
         specifier: 0.3.56
-        version: 0.3.56(64e2ceddd384aeb714d934cf93a37ac1)
+        version: 0.3.56(698be411e74464a505b998db0da87e69)
       '@langchain/core':
         specifier: 0.3.72
         version: 0.3.72(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(openai@5.12.2(ws@8.18.3)(zod@4.6.5))
@@ -98,8 +98,8 @@ importers:
         specifier: 0.4.0
         version: 0.4.0
       '@mentingo/phishing-simulation-sdk':
-        specifier: link:../../../mentingo-plugins/packages/phishing
-        version: link:../../../mentingo-plugins/packages/phishing
+        specifier: 0.2.0
+        version: 0.2.0
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4520,6 +4520,10 @@ packages:
 
   '@mentingo/luma-sdk@0.4.0':
     resolution: {integrity: sha512-2icUB/SSp0MszfNptdSsNqtARg8vRIU7eDUXddX9Gzd41u2dA7fObGjSA2tl1yweYGx2FiOI3ymDWEoDcRXR3g==}
+
+  '@mentingo/phishing-simulation-sdk@0.2.0':
+    resolution: {integrity: sha512-/M+m1N9mLxzp0td7fx7rSEMzsf+McYgfkCiCB34PIrP5qJ/sgc7CFJpc6oMfmuVQSqWErpzkcqGMTh4hH9X9rQ==}
+    engines: {node: '>=22.15.0'}
 
   '@mentingo/voice@0.3.0':
     resolution: {integrity: sha512-2IjyA7Y4GYN1ZDALPbBIJL/sRdaRp7yp7whecNRcDpX1lMUiySpJTzZ1L4aYOb2OF1bjxCwN5RkUbUISbNkaiA==}
@@ -21980,7 +21984,7 @@ snapshots:
       postgres: 3.4.4
       tslib: 2.8.1
 
-  '@langchain/community@0.3.56(64e2ceddd384aeb714d934cf93a37ac1)':
+  '@langchain/community@0.3.56(698be411e74464a505b998db0da87e69)':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.49.0)(deepmerge@4.3.1)(dotenv@16.4.5)(openai@5.12.2(ws@8.18.3)(zod@4.6.5))(zod@4.6.5)
       '@ibm-cloud/watsonx-ai': 1.6.13
@@ -22013,6 +22017,7 @@ snapshots:
       jsonwebtoken: 9.0.2
       lodash: 4.17.21
       mammoth: 1.10.0
+      officeparser: 4.2.0
       pdf-parse: 1.1.1
       playwright: 1.49.0
       puppeteer: 24.16.1(typescript@5.4.5)
@@ -22187,13 +22192,15 @@ snapshots:
 
   '@mentingo/luma-sdk@0.4.0':
     dependencies:
-      axios: 1.20.0
+      axios: 1.20.0(debug@4.4.3)
       socket.io-client: 4.8.3
     transitivePeerDependencies:
       - bufferutil
       - debug
       - supports-color
       - utf-8-validate
+
+  '@mentingo/phishing-simulation-sdk@0.2.0': {}
 
   '@mentingo/voice@0.3.0(@emotion/is-prop-valid@1.2.2)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -29277,16 +29284,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.20.0:
-    dependencies:
-      follow-redirects: 1.16.0
-      form-data: 4.0.6
-      https-proxy-agent: 5.0.1
-      proxy-from-env: 2.1.0
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-
   axios@1.20.0(debug@4.4.3):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
@@ -31961,8 +31958,6 @@ snapshots:
   flatted@3.3.2: {}
 
   follow-redirects@1.15.9: {}
-
-  follow-redirects@1.16.0: {}
 
   follow-redirects@1.16.0(debug@4.4.3):
     optionalDependencies:
