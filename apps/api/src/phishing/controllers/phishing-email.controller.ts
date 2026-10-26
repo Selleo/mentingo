@@ -7,16 +7,17 @@ import { BaseResponse, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import { PhishingClientService } from "./phishing-client.service";
+import { PHISHING_WEBHOOK_MAX_BODY_BYTES } from "../constants/phishing.constants";
 import {
   phishingEmailRequestSchema,
   phishingEmailResponseSchema,
   PhishingEmailRequest,
-} from "./phishing-email.schema";
-import { PhishingEmailService } from "./phishing-email.service";
-import { verifyPhishingSignature } from "./phishing-webhook.utils";
+} from "../schemas/phishing-email.schema";
+import { PhishingClientService } from "../services/phishing-client.service";
+import { PhishingEmailService } from "../services/phishing-email.service";
+import { hasPhishingBodyWithinLimit } from "../utils/phishing-webhook.utils";
 
-import type { PhishingEmailResponse } from "./phishing-email.schema";
+import type { PhishingEmailResponse } from "../schemas/phishing-email.schema";
 import type { Request } from "express";
 
 @ApiExcludeController()
@@ -28,6 +29,7 @@ export class PhishingEmailController {
     private readonly phishingEmailService: PhishingEmailService,
   ) {}
 
+  /** Renders a campaign email for the phishing plugin with this tenant's templates and branding. */
   @Public()
   @Post("email")
   @Validate({
@@ -39,24 +41,13 @@ export class PhishingEmailController {
     @Req() request: RawBodyRequest<Request>,
   ): Promise<BaseResponse<PhishingEmailResponse>> {
     if (
-      !request.rawBody ||
-      request.rawBody.length > 4096 ||
+      !hasPhishingBodyWithinLimit(request, PHISHING_WEBHOOK_MAX_BODY_BYTES.EMAIL) ||
       !Value.Check(phishingEmailRequestSchema, input)
     )
       throw new UnauthorizedException("phishing.unavailable");
 
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
-      const secret = await this.phishingClientService.secret("PHISHING_WEBHOOK_SECRET");
-      if (
-        !secret ||
-        !verifyPhishingSignature(
-          request.rawBody!,
-          secret,
-          String(request.headers["x-phishing-timestamp"] ?? ""),
-          String(request.headers["x-phishing-signature"] ?? ""),
-        )
-      )
-        throw new UnauthorizedException("phishing.unavailable");
+      await this.phishingClientService.assertSignedByPhishingPlugin(request);
 
       return new BaseResponse(await this.phishingEmailService.renderCampaignEmail(input));
     });

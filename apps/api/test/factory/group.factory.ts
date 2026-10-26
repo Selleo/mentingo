@@ -4,7 +4,7 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
-import { groups, groupUsers } from "src/storage/schema";
+import { groupManagerGroups, groups, groupUsers } from "src/storage/schema";
 
 import type { DatabasePg } from "src/common";
 
@@ -19,18 +19,26 @@ type GroupFactoryGroup = {
   updatedAt: string;
 };
 
-type GroupWithMembers = GroupFactoryGroup & { members: string[] };
+type GroupWithMembers = GroupFactoryGroup & { members: string[]; managers?: string[] };
 
 class GroupFactory extends Factory<GroupWithMembers> {
   withMembers(userIds: string[]) {
     return this.associations({ members: userIds });
+  }
+
+  /** Assigns group managers, who then see this group's members in scoped reports. */
+  withManagers(managerUserIds: string[]) {
+    return this.associations({ managers: managerUserIds });
   }
 }
 
 export const createGroupFactory = (db: DatabasePg) => {
   return GroupFactory.define(({ onCreate, associations }) => {
     onCreate(async (g) => {
-      return await createGroupWithMembers(db, g, associations.members || []);
+      const group = await createGroupWithMembers(db, g, associations.members || []);
+      await assignGroupManagers(db, group, associations.managers || []);
+
+      return group;
     });
 
     return {
@@ -57,6 +65,22 @@ async function addUsersToGroup(db: DatabasePg, groupId: string, userIds: string[
   await db.insert(groupUsers).values(values);
 }
 
+async function assignGroupManagers(
+  db: DatabasePg,
+  group: GroupWithMembers,
+  managerUserIds: string[],
+) {
+  if (!managerUserIds.length) return;
+
+  await db.insert(groupManagerGroups).values(
+    managerUserIds.map((managerUserId) => ({
+      managerUserId,
+      groupId: group.id,
+      tenantId: group.tenantId,
+    })),
+  );
+}
+
 async function createGroupWithMembers(
   db: DatabasePg,
   group: GroupWithMembers,
@@ -64,6 +88,7 @@ async function createGroupWithMembers(
 ): Promise<GroupWithMembers> {
   const {
     members: _members,
+    managers: _managers,
     name,
     characteristic,
     baseLanguage,
