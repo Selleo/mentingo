@@ -14,9 +14,9 @@ import { registerAssistantExecution } from "./assistant-workflow.bridge";
 
 import type { AssistantRuntimeInput, AssistantWorkflowRunState } from "./assistant-workflow.types";
 import type { OnApplicationBootstrap, OnApplicationShutdown } from "@nestjs/common";
-import type { createWorld } from "@workflow/world-postgres";
+import type * as WorkflowPostgres from "@workflow/world-postgres";
 
-type PostgresWorld = ReturnType<typeof createWorld>;
+type PostgresWorld = ReturnType<typeof WorkflowPostgres.createWorld>;
 type WorkflowApi = {
   start(
     metadata: { workflowId: string },
@@ -81,7 +81,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
     if (!entry) throw new Error("Assistant workflow bundle is missing; run the API build");
     this.workflowId = entry.workflowId;
     const [{ createWorld }, { setWorld }] = await Promise.all([
-      loadEsm<typeof import("@workflow/world-postgres")>("@workflow/world-postgres"),
+      loadEsm<typeof WorkflowPostgres>("@workflow/world-postgres"),
       loadEsm<{ setWorld(world: PostgresWorld): void }>("workflow/runtime"),
     ]);
     this.world = createWorld({
