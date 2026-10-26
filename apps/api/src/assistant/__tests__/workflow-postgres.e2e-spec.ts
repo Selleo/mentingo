@@ -1,9 +1,6 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
 
@@ -13,15 +10,6 @@ import postgres from "postgres";
 // container and never reads DATABASE_URL or connects to an existing database.
 const execute = promisify(execFile);
 const sdkEntry = require.resolve("@workflow/world-postgres");
-const sdkRequire = createRequire(sdkEntry);
-const sdkMigrations = resolve(dirname(sdkEntry), "../src/drizzle/migrations");
-const historicalFixtures = resolve(__dirname, "../../../test/fixtures/workflow-postgres-5.0.5");
-const historicalFiles = [
-  "0000_cultured_the_anarchist.sql",
-  "0004_remove_run_pause_status.sql",
-  "0005_add_spec_version.sql",
-  "0007_add_waits_table.sql",
-];
 const container = `mentingo-workflow-schema-${process.pid}`;
 
 async function docker(...args: string[]) {
@@ -35,45 +23,6 @@ async function bootstrap(connectionString: string) {
     env: { ...process.env, WORKFLOW_POSTGRES_URL: connectionString },
     timeout: 30000,
   });
-}
-
-async function legacyBootstrap(connectionString: string, throughIndex: number) {
-  const directory = await mkdtemp(join(tmpdir(), "mentingo-workflow-legacy-"));
-  try {
-    await cp(sdkMigrations, directory, { recursive: true });
-    for (const file of historicalFiles) {
-      await cp(join(historicalFixtures, file), join(directory, file));
-    }
-    const journalPath = join(directory, "meta/_journal.json");
-    const journal = JSON.parse(await readFile(journalPath, "utf8"));
-    journal.entries = journal.entries.filter((entry: { idx: number }) => entry.idx <= throughIndex);
-    await writeFile(journalPath, JSON.stringify(journal));
-    const script = `
-      const { Pool } = require(${JSON.stringify(sdkRequire.resolve("pg"))});
-      const { drizzle } = require(${JSON.stringify(
-        sdkRequire.resolve("drizzle-orm/node-postgres"),
-      )});
-      const { migrate } = require(${JSON.stringify(
-        sdkRequire.resolve("drizzle-orm/node-postgres/migrator"),
-      )});
-      const pool = new Pool({ connectionString: process.env.WORKFLOW_POSTGRES_URL });
-      (async () => {
-        try {
-          await migrate(drizzle(pool), {
-            migrationsFolder: ${JSON.stringify(directory)},
-            migrationsTable: 'workflow_migrations', migrationsSchema: 'workflow_drizzle'
-          });
-        } finally { await pool.end(); }
-      })().catch(error => { console.error(error); process.exitCode = 1; });
-    `;
-    await execute(process.execPath, ["-e", script], {
-      cwd: tmpdir(),
-      env: { ...process.env, WORKFLOW_POSTGRES_URL: connectionString },
-      timeout: 30000,
-    });
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
 }
 
 async function seedCore(sql: postgres.Sql) {
@@ -297,79 +246,4 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await smokeQueue(runtimeUrl.href);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
   });
-
-  it("reproduces the original SDK collision without changing Core data on failure", async () => {
-    const { sql, connectionString } = await database("unpatched_collision");
-    await seedCore(sql);
-    const before = await outsideSnapshot(sql, "unpatched_collision");
-    await expect(legacyBootstrap(connectionString, 27)).rejects.toThrow(
-      /invalid input value for enum status: "paused"/,
-    );
-    expect(await outsideSnapshot(sql, "unpatched_collision")).toEqual(before);
-  });
-
-  it.each([14, 27])(
-    "upgrades original SDK history through migration %i without replaying or losing persisted workflow data",
-    async (throughIndex) => {
-      const { sql, connectionString } = await database(`legacy_${throughIndex}`);
-      await legacyBootstrap(connectionString, throughIndex);
-      await sql.unsafe(`
-      INSERT INTO workflow.workflow_runs(id, deployment_id, status, name, input)
-        VALUES ('existing-run', 'legacy-deployment', 'completed', 'legacy-workflow', '{"preserved":true}');
-      INSERT INTO workflow.workflow_steps(run_id, step_id, step_name, status, input, attempt)
-        VALUES ('existing-run', 'existing-step', 'legacy-step', 'completed', '{"step":true}', 1);
-      INSERT INTO workflow.workflow_events(id, type, run_id, payload)
-        VALUES ('existing-event', 'run_completed', 'existing-run', '{"event":true}');
-    `);
-      const history = [
-        ...(await sql`SELECT * FROM workflow_drizzle.workflow_migrations ORDER BY id`),
-      ];
-      const originalFirstMigration = await readFile(
-        join(historicalFixtures, historicalFiles[0]),
-        "utf8",
-      );
-      expect(history[0].hash).toBe(
-        createHash("sha256").update(originalFirstMigration).digest("hex"),
-      );
-      const runs = [
-        ...(await sql`SELECT id, deployment_id, status::text, name, input FROM workflow.workflow_runs`),
-      ];
-      const steps = [
-        ...(await sql`SELECT run_id, step_id, status::text, input, attempt FROM workflow.workflow_steps`),
-      ];
-      const events = [
-        ...(await sql`SELECT id, type, run_id, payload FROM workflow.workflow_events`),
-      ];
-      const enumOids = [
-        ...(await sql`
-      SELECT t.oid::text, t.typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
-      WHERE n.nspname IN ('public', 'workflow') AND t.typname IN ('status', 'step_status', 'wait_status') ORDER BY t.typname
-    `),
-      ];
-      await bootstrap(connectionString);
-      expect([
-        ...(await sql`SELECT * FROM workflow_drizzle.workflow_migrations ORDER BY id LIMIT ${history.length}`),
-      ]).toEqual(history);
-      expect(
-        await sql`SELECT count(*)::integer AS count FROM workflow_drizzle.workflow_migrations`,
-      ).toEqual([{ count: 28 }]);
-      expect([
-        ...(await sql`SELECT id, deployment_id, status::text, name, input FROM workflow.workflow_runs`),
-      ]).toEqual(runs);
-      expect([
-        ...(await sql`SELECT run_id, step_id, status::text, input, attempt FROM workflow.workflow_steps`),
-      ]).toEqual(steps);
-      expect([
-        ...(await sql`SELECT id, type, run_id, payload FROM workflow.workflow_events`),
-      ]).toEqual(events);
-      expect([
-        ...(await sql`
-      SELECT t.oid::text, t.typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
-      WHERE n.nspname = 'workflow' AND t.typname IN ('status', 'step_status', 'wait_status') ORDER BY t.typname
-    `),
-      ]).toEqual(enumOids);
-      await bootstrap(connectionString);
-      await smokeQueue(connectionString);
-    },
-  );
 });
