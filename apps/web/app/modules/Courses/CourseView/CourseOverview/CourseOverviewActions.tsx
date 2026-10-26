@@ -10,12 +10,12 @@ import {
   studentCoursesQueryOptions,
   useCurrentUser,
 } from "~/api/queries";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -41,7 +41,7 @@ export default function CourseOverviewActions({
   const location = useLocation();
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
-  const { data: globalSettings } = useGlobalSettings();
+  const isRegistrationEnabled = useIsRegistrationEnabled();
   const { mutateAsync: enrollCourse, isPending: isEnrolling } = useEnrollCourse();
   const { course, isAdminExperience, canEditCourse, isCourseStudentModeActive } =
     useCourseAccessProvider();
@@ -108,9 +108,7 @@ export default function CourseOverviewActions({
       if (isGroupManager) return null;
 
       if (!currentUser) {
-        const registerPath = globalSettings?.inviteOnlyRegistration
-          ? "/auth/login"
-          : "/auth/register";
+        const registerPath = isRegistrationEnabled ? "/auth/register" : "/auth/login";
 
         return (
           <Link
