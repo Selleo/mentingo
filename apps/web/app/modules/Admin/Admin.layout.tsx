@@ -5,7 +5,6 @@ import { match } from "ts-pattern";
 
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
 import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
-import { RouteGuard } from "~/Guards/RouteGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -77,9 +76,7 @@ const AdminLayout = () => {
       <Suspense fallback={<Loader />}>
         <RequireAuthenticatedUser>
           <AdminGuard>
-            <RouteGuard>
-              <Outlet />
-            </RouteGuard>
+            <Outlet />
           </AdminGuard>
         </RequireAuthenticatedUser>
       </Suspense>
