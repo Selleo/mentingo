@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -53,23 +53,6 @@ export class DatabaseMigrationService {
         this.logger.log("Core migrations completed; Workflow setup skipped for E2E");
         return;
       }
-      const appUrl = this.configService.getOrThrow<string>("database.urlApp");
-      const nonce = randomBytes(8);
-      const identityLock = [nonce.readInt32BE(0), nonce.readInt32BE(4)];
-      await admin`SELECT pg_advisory_lock(${identityLock[0]}, ${identityLock[1]})`;
-      const probe = postgres(appUrl, { max: 1, onnotice: () => undefined });
-      let role: string;
-      try {
-        role = await probe.begin(async (app) => {
-          const [identity] =
-            await app`SELECT current_user AS role, pg_try_advisory_lock(${identityLock[0]}, ${identityLock[1]}) AS different_database`;
-          if (identity.different_database)
-            throw new Error("App and migrator must use the same database");
-          return String(identity.role);
-        });
-      } finally {
-        await probe.end();
-      }
       await migrate(drizzle(admin), { migrationsFolder: join(__dirname, "../migrations") });
       await this.ensureWorkflow(admin, source);
       // Fresh Graphile installation requires database CREATE privileges. Use the migrator,
@@ -78,7 +61,16 @@ export class DatabaseMigrationService {
         connectionString: this.configService.getOrThrow<string>("database.urlAdmin"),
       });
       await workerUtils.release();
-      await this.configureRuntimeRole(admin, role);
+      const appUrl = new URL(this.configService.getOrThrow<string>("database.urlApp"));
+      const role = appUrl.searchParams.get("user") || decodeURIComponent(appUrl.username);
+      const [account] = await admin`SELECT rolname FROM pg_roles WHERE rolname = ${role}`;
+      if (account) {
+        await this.configureRuntimeRole(admin, role);
+      } else {
+        this.logger.warn(
+          "Application database role does not exist; rerun migrations after creating it to grant Workflow permissions",
+        );
+      }
       if (connectionLost) throw new Error("Migration lock connection was lost");
       this.logger.log("Database migrations completed");
     } catch (error) {

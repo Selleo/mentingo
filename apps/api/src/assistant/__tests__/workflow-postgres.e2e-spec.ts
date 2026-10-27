@@ -326,6 +326,24 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await bootstrap(connectionString, runtimeUrl.href);
   });
 
+  it("migrates before the app role exists and grants runtime access on a later run without authenticating as it", async () => {
+    const { sql, connectionString } = await database("unseeded_runtime");
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "unseeded_workflow_runtime";
+    runtimeUrl.password = "wrong-password";
+    await bootstrap(connectionString, runtimeUrl.href);
+    const [state] = await sql`
+      SELECT to_regclass('public.assistant_threads') IS NOT NULL AS core_ready,
+        to_regclass('workflow.workflow_runs') IS NOT NULL AS workflow_ready
+    `;
+    expect(state).toEqual({ core_ready: true, workflow_ready: true });
+    await sql.unsafe("CREATE ROLE unseeded_workflow_runtime LOGIN PASSWORD 'runtime_password'");
+    // Migration uses only the migrator credentials, even when app credentials are invalid.
+    await bootstrap(connectionString, runtimeUrl.href);
+    runtimeUrl.password = "runtime_password";
+    await smokeQueue(runtimeUrl.href);
+  });
+
   it("runs only Core migrations in browser E2E mode without connecting as the unseeded app role", async () => {
     const { sql, connectionString } = await database("playwright_core_only");
     const runtimeUrl = new URL(connectionString);
