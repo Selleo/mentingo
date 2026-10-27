@@ -601,14 +601,35 @@ describe("AssistantPage", () => {
     );
   });
 
+  it("offers retry after an availability request fails without claiming missing configuration", async () => {
+    vi.mocked(ApiClient.api.assistantControllerGetAvailability).mockRejectedValueOnce({
+      isAxiosError: true,
+      response: { status: 503 },
+    });
+    renderPage("/assistant");
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(translations.assistant.errors.unavailable);
+    expect(screen.queryByText(translations.assistant.unavailable)).not.toBeInTheDocument();
+    expect(screen.getByTestId(ASSISTANT_HANDLES.COMPOSER)).toBeDisabled();
+    fireEvent.click(within(alert).getByRole("button", { name: translations.assistant.retry }));
+    await waitFor(() => expect(screen.getByTestId(ASSISTANT_HANDLES.COMPOSER)).toBeEnabled());
+    expect(ApiClient.api.assistantControllerGetAvailability).toHaveBeenCalledTimes(2);
+  });
+
   it("disables sending when the runtime is unavailable", async () => {
     vi.mocked(ApiClient.api.assistantControllerGetAvailability).mockResolvedValue(
       response({ available: false, reason: "WORKFLOW_UNAVAILABLE" }),
     );
     renderPage("/assistant");
-    await screen.findByRole("alert");
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(translations.assistant.errors.unavailable);
     expect(screen.getByTestId(ASSISTANT_HANDLES.COMPOSER)).toBeDisabled();
     expect(ApiClient.api.assistantControllerCreateThread).not.toHaveBeenCalled();
+    vi.mocked(ApiClient.api.assistantControllerGetAvailability).mockResolvedValue(
+      response({ available: true, reason: null }),
+    );
+    fireEvent.click(within(alert).getByRole("button", { name: translations.assistant.retry }));
+    await waitFor(() => expect(screen.getByTestId(ASSISTANT_HANDLES.COMPOSER)).toBeEnabled());
   });
 });
 

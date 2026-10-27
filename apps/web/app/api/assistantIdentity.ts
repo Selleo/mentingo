@@ -68,6 +68,8 @@ useCurrentUserStore.subscribe((state, previous) => {
 });
 let lastIdentity = JSON.stringify(currentAssistantScope());
 queryClient.getQueryCache().subscribe((event) => {
+  // Observer notifications precede the success event and must not invalidate its epoch.
+  if (event.type !== "updated" && event.type !== "removed") return;
   if (event.query.queryKey.length !== 1 || event.query.queryKey[0] !== "currentUser") return;
   if (event.type === "updated") {
     if (event.action.type === "success") {

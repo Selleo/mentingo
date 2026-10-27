@@ -259,10 +259,23 @@ export function AssistantConversation({
           {t("assistant.archivedNotice")}
         </p>
       )}
-      {!availability.isPending && !available && (
-        <p role="alert" className="px-5 text-center text-xs text-neutral-600 dark:text-neutral-400">
-          {t("assistant.unavailable")}
-        </p>
+      {(availability.isError || (availability.isSuccess && !available)) && (
+        <div
+          role="alert"
+          className="px-5 text-center text-xs text-neutral-600 dark:text-neutral-400"
+        >
+          <p>{t("assistant.errors.unavailable")}</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={availability.isFetching}
+            onClick={() => {
+              void availability.refetch();
+            }}
+          >
+            {t("assistant.retry")}
+          </Button>
+        </div>
       )}
       {sendError && (
         <p role="alert" className="px-5 text-center text-xs text-error-700">
