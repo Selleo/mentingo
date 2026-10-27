@@ -4,8 +4,8 @@
         {
             "name": "learn-api",
             "image": "",
-            "cpu": 512,
-            "memory": 1024,
+            "cpu": 1024,
+            "memory": 2048,
             "portMappings": [
                 {
                     "name": "http",
@@ -29,6 +29,6 @@
     "executionRoleArn": "arn:aws:iam::368529195020:role/learn-api-811a5653-task-execution",
     "taskRoleArn": "arn:aws:iam::368529195020:role/learn-api-811a5653-task",
     "requiresCompatibilities": ["EC2"],
-    "cpu": "512",
-    "memory": "1024"
+    "cpu": "1024",
+    "memory": "2048"
 }
