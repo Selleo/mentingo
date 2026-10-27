@@ -18,6 +18,7 @@ const config: Config = {
   modulePaths: ["."],
   testTimeout: 30000,
   maxWorkers: 1,
+  workerIdleMemoryLimit: "1GB",
   forceExit: true,
 };
 

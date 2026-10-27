@@ -115,6 +115,11 @@ jobs:
       - name: Build the app
         run: pnpm run build
 
+      - name: Verify Workflow PostgreSQL migrations
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+        run: pnpm exec jest --config ./test/jest-workflow-postgres.json --runInBand
+
       - name: Apply database migrations
         run: pnpm db:migrate
 
