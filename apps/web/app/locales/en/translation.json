@@ -89,7 +89,12 @@
       "unsupportedVersion": "This Mentingo package version is not supported.",
       "missingAsset": "The Mentingo package is missing a required file.",
       "invalidArchive": "This ZIP is not a valid Mentingo package.",
-      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace."
+      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace.",
+      "pathNotFound": "The development path to export was not found.",
+      "accessDenied": "You do not have permission to export this content.",
+      "liveTrainingIncomplete": "A Live Training linked to this course is incomplete and cannot be exported.",
+      "courseNotFound": "The course to export was not found.",
+      "categoryNotFound": "The course category was not found."
     }
   },
   "aiConversations": {
@@ -691,7 +696,9 @@
       "somethingWentWrong": "Something went wrong...",
       "notFound": "Resource not found",
       "lessonAccessDenied": "You do not have permission to access this lesson.",
-      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds."
+      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds.",
+      "invalidRequest": "Invalid request.",
+      "courseAccessDenied": "You do not have access to this course."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -727,7 +734,9 @@
       "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
       "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
+      "threadNotFound": "The conversation was not found.",
+      "threadAccessDenied": "You do not have access to this conversation."
     },
     "loader": {
       "textSequence": {
@@ -760,7 +769,10 @@
     "continueWithSlack": "Continue with Slack",
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
-    "refreshPage": "Refresh page"
+    "refreshPage": "Refresh page",
+    "validation": {
+      "messageRequired": "Message is required."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
@@ -1251,7 +1263,8 @@
     },
     "errors": {
       "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseTitleRequired": "Course title is required to create the course calendar event.",
+      "courseDueDateCalendarSyncFailed": "Failed to sync the course due date with the calendar."
     }
   },
   "liveTrainingView": {
@@ -2084,7 +2097,8 @@
       "bulkStatusUpdateSuccessfully": "Course statuses updated successfully",
       "bulkStatusUpdateFailed": "Failed to update course statuses",
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
-      "noCoursesSelected": "Select at least one course."
+      "noCoursesSelected": "Select at least one course.",
+      "deleteCoursesFailed": "Failed to delete courses"
     }
   },
   "adminCategoriesView": {
@@ -2753,11 +2767,17 @@
         "course": "Course not found.",
         "category": "Category not found.",
         "chapter": "Chapter not found.",
-        "lesson": "Lesson not found."
+        "lesson": "Lesson not found.",
+        "author": "Course author not found."
       },
       "forbidden": {
         "updateCourse": "You do not have permission to update this course.",
-        "archivedCourseEnrollment": "This course has been archived and is no longer available for enrollment."
+        "archivedCourseEnrollment": "This course has been archived and is no longer available for enrollment.",
+        "deleteCourse": "You do not have permission to delete this course.",
+        "deleteCourses": "You do not have permission to delete these courses.",
+        "enrollOwnCourse": "You cannot enroll in your own course.",
+        "enrollGroups": "You do not have permission to enroll groups in this course.",
+        "changeStudentMode": "You do not have permission to change learning mode."
       },
       "media": {
         "imageUploadFailed": "Failed to upload the course image.",
@@ -2766,7 +2786,8 @@
       "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
-        "stripeProductFailed": "Failed to create course payment product."
+        "stripeProductFailed": "Failed to create course payment product.",
+        "chapterFailed": "Failed to create chapter."
       },
       "lesson": {
         "customTtsReferenceRequired": "Custom TTS reference is required for custom voice mode.",
@@ -2777,6 +2798,18 @@
         "optionInsertFailed": "Failed to add quiz option.",
         "embedCreateFailed": "Failed to create embed lesson.",
         "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
+      },
+      "update": {
+        "courseFailed": "Failed to update course."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "You are already enrolled in this course.",
+        "studentsRequired": "Select at least one learner to enroll.",
+        "onlyExistingUsers": "You can only enroll existing users.",
+        "studentsAlreadyEnrolled": "Some of the selected learners are already enrolled in this course.",
+        "groupsNotFound": "The selected groups were not found.",
+        "groupEnrollmentsNotFound": "The selected groups are not enrolled in this course.",
+        "enrollmentFailed": "Failed to enroll in the course."
       }
     },
     "thinking": {
@@ -4174,7 +4207,9 @@
       "lessonIdNotFound": "Lesson ID not found",
       "notAuthorizedTitle": "Not authorized",
       "notAuthorizedDescription": "You're not authorized to access this lesson.",
-      "goBackToCourse": "Go back to course"
+      "goBackToCourse": "Go back to course",
+      "quizNotCompleted": "Complete the quiz before finishing this lesson.",
+      "aiMentorDataRequired": "AI Mentor lesson results are required to complete this lesson."
     },
     "other": {
       "lesson": "Lesson",
@@ -5961,7 +5996,9 @@
       "sourceCategoryMissing": "The course to duplicate has no category",
       "targetCourseNotFound": "The duplicated course was not found",
       "tenantMissing": "The tenant for this course was not found",
-      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be duplicated"
+      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be duplicated",
+      "jobNotFound": "Course duplication job not found",
+      "createFailed": "Failed to create the duplicated course"
     }
   },
   "tenantSharing": {
@@ -6195,7 +6232,12 @@
       "liveKitRoomNotAvailable": "The LiveKit room for this session is not available.",
       "activeSessionUpdateForbidden": "This Live Training cannot be changed while a session is in progress.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
-      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached.",
+      "onlyScheduledCanBeStarted": "Only scheduled or ended Live Trainings can be started.",
+      "sessionAlreadyActive": "A session for this Live Training is already in progress.",
+      "onlineSessionRequired": "This action is available only for online Live Trainings.",
+      "userNotFound": "User was not found.",
+      "sessionAlreadyFinished": "This Live Training session has already finished."
     }
   },
   "modernCourseView": {
@@ -8240,6 +8282,24 @@
       "listingNotFound": "This marketplace course was not found.",
       "thumbnailNotFound": "This marketplace course has no thumbnail.",
       "serviceError": "The content marketplace could not complete the request. Try again later."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Translations can only be edited in a language other than the course base language.",
+      "criterionNotFound": "Completion criterion not found.",
+      "guidanceNotFound": "Evaluation guidance not found.",
+      "blockingErrorNotFound": "Blocking error not found.",
+      "configurationNotFound": "The completion conditions configuration was not found.",
+      "invalidLessonType": "Completion conditions are available only for AI Mentor lessons."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Translations can only be edited in a language other than the course base language.",
+      "configurationNotFound": "The AI Mentor configuration was not found.",
+      "invalidLessonType": "AI Mentor configuration is available only for AI Mentor lessons.",
+      "invalidGraph": "The AI Mentor configuration is invalid."
     }
   }
 }

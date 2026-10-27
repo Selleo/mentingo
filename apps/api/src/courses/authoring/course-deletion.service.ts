@@ -38,7 +38,7 @@ export class CourseDeletionService {
     }
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
-      throw new ForbiddenException("You don't have permission to delete this course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.deleteCourse");
     }
 
     if (PROTECTED_COURSE_DELETE_STATUSES.includes(course.status)) {
@@ -49,7 +49,7 @@ export class CourseDeletionService {
       this.deleteCoursesWithDependencies(
         [id],
         new Map([[course.id, course.courseTitle]]),
-        "Failed to delete course",
+        "adminCoursesView.toast.deleteCourseFailed",
         currentUser,
         trx,
       ),
@@ -60,11 +60,11 @@ export class CourseDeletionService {
 
   async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUserType) {
     if (!ids.length) {
-      throw new BadRequestException("No course ids provided");
+      throw new BadRequestException("adminCoursesView.toast.noCoursesSelected");
     }
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
-      throw new ForbiddenException("You don't have permission to delete these courses");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.deleteCourses");
     }
 
     const selectedCourses = await this.courseDeletionRepository.findCoursesWithTitle(ids);
@@ -79,7 +79,7 @@ export class CourseDeletionService {
       this.deleteCoursesWithDependencies(
         ids,
         new Map(selectedCourses.map((course) => [course.id, course.courseTitle])),
-        "Failed to delete courses",
+        "adminCoursesView.toast.deleteCoursesFailed",
         currentUser,
         trx,
       ),

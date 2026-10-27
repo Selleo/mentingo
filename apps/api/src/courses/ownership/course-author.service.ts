@@ -38,7 +38,7 @@ export class CourseAuthorService {
     const currentAuthor = await this.courseAuthorRepository.findAuthorContact(course.authorId);
 
     if (!currentAuthor) {
-      throw new NotFoundException("Course author not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.author");
     }
 
     const possibleCandidates = await this.courseAuthorRepository.findOwnershipCandidates(

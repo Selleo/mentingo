@@ -29,7 +29,7 @@ export class CourseStudentModeService {
     if (!courseExists) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) {
-      throw new ForbiddenException("You don't have permission to change student mode");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.changeStudentMode");
     }
 
     await this.courseStudentModeRepository.runInTransaction((trx) =>

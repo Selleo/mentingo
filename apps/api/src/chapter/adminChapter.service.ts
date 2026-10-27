@@ -89,7 +89,7 @@ export class AdminChapterService {
       return chapter;
     });
 
-    if (!chapter) throw new BadRequestException("Chapter creation failed");
+    if (!chapter) throw new BadRequestException("adminCourseView.errors.create.chapterFailed");
 
     const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id, language);
 
@@ -208,7 +208,7 @@ export class AdminChapterService {
     const previousSnapshot = await this.buildChapterActivitySnapshot(id, resolvedLanguage);
 
     if (!availableLocales.includes(body.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);

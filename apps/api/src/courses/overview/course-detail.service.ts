@@ -124,7 +124,7 @@ export class CourseDetailService {
       (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) &&
       !isEnrolled
     )
-      throw new ForbiddenException("You have no access to this course");
+      throw new ForbiddenException("common.toast.courseAccessDenied");
 
     if (currentUser && !isManagerPreview && isEnrolled) {
       await this.courseDetailRepository.runInTransaction((trx) =>

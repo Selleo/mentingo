@@ -89,7 +89,12 @@
       "unsupportedVersion": "Esta versión del paquete de Mentingo no es compatible.",
       "missingAsset": "Falta un archivo obligatorio en el paquete de Mentingo.",
       "invalidArchive": "Este ZIP no es un paquete de Mentingo válido.",
-      "courseNotSyncable": "Este curso se añadió como una copia editable y no se puede sincronizar. Elimínalo y vuelve a añadirlo desde el marketplace."
+      "courseNotSyncable": "Este curso se añadió como una copia editable y no se puede sincronizar. Elimínalo y vuelve a añadirlo desde el marketplace.",
+      "pathNotFound": "No se encontró la ruta de desarrollo que se va a exportar.",
+      "accessDenied": "No tienes permiso para exportar este contenido.",
+      "liveTrainingIncomplete": "Una formación en vivo vinculada a este curso está incompleta y no se puede exportar.",
+      "courseNotFound": "No se encontró el curso que se va a exportar.",
+      "categoryNotFound": "No se encontró la categoría del curso."
     }
   },
   "aiConversations": {
@@ -694,7 +699,9 @@
       "somethingWentWrong": "Algo salió mal...",
       "notFound": "Recurso no encontrado",
       "lessonAccessDenied": "No tienes permiso para acceder a esta lección.",
-      "tooManyRequests": "Demasiadas solicitudes. Inténtalo de nuevo en {{seconds}} segundos."
+      "tooManyRequests": "Demasiadas solicitudes. Inténtalo de nuevo en {{seconds}} segundos.",
+      "invalidRequest": "Solicitud no válida.",
+      "courseAccessDenied": "No tienes acceso a este curso."
     },
     "tooltip": {
       "soon": "Próximamente"
@@ -730,7 +737,9 @@
       "aiMentorConfigurationIncomplete": "La configuración de AI Mentor está incompleta.",
       "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
       "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión.",
+      "threadNotFound": "No se encontró la conversación.",
+      "threadAccessDenied": "No tienes acceso a esta conversación."
     },
     "loader": {
       "textSequence": {
@@ -763,7 +772,10 @@
     "continueWithSlack": "Continuar con Slack",
     "enterFullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa",
-    "refreshPage": "Actualizar página"
+    "refreshPage": "Actualizar página",
+    "validation": {
+      "messageRequired": "El mensaje es obligatorio."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Secuencia de lecciones actualizada correctamente",
@@ -1244,7 +1256,8 @@
     },
     "errors": {
       "courseDueDateRequired": "Se requiere una fecha de vencimiento para crear el evento del calendario del curso.",
-      "courseTitleRequired": "Se requiere el título del curso para crear el evento del calendario del curso."
+      "courseTitleRequired": "Se requiere el título del curso para crear el evento del calendario del curso.",
+      "courseDueDateCalendarSyncFailed": "No se pudo sincronizar la fecha límite del curso con el calendario."
     }
   },
   "liveTrainingView": {
@@ -2076,7 +2089,8 @@
       "bulkStatusUpdateSuccessfully": "Estados del curso actualizados exitosamente",
       "bulkStatusUpdateFailed": "No se pudieron actualizar los estados del curso",
       "bulkStatusUpdateForbidden": "No tienes permiso para actualizar uno o más cursos seleccionados.",
-      "noCoursesSelected": "Seleccione al menos un curso."
+      "noCoursesSelected": "Seleccione al menos un curso.",
+      "deleteCoursesFailed": "No se pudieron eliminar los cursos"
     }
   },
   "adminCategoriesView": {
@@ -2745,11 +2759,17 @@
         "course": "Curso no encontrado.",
         "category": "Categoría no encontrada.",
         "chapter": "Capítulo no encontrado.",
-        "lesson": "Lección no encontrada."
+        "lesson": "Lección no encontrada.",
+        "author": "No se encontró el autor del curso."
       },
       "forbidden": {
         "updateCourse": "No tienes permiso para actualizar este curso.",
-        "archivedCourseEnrollment": "Este curso se ha archivado y ya no está disponible para inscribirse."
+        "archivedCourseEnrollment": "Este curso se ha archivado y ya no está disponible para inscribirse.",
+        "deleteCourse": "No tienes permiso para eliminar este curso.",
+        "deleteCourses": "No tienes permiso para eliminar estos cursos.",
+        "enrollOwnCourse": "No puedes inscribirte en tu propio curso.",
+        "enrollGroups": "No tienes permiso para inscribir grupos en este curso.",
+        "changeStudentMode": "No tienes permiso para cambiar el modo de aprendizaje."
       },
       "media": {
         "imageUploadFailed": "No se pudo subir la imagen del curso.",
@@ -2758,7 +2778,8 @@
       "statisticsAccessForbidden": "No tienes permiso para ver las estadísticas de este curso.",
       "create": {
         "courseFailed": "No se pudo crear el curso.",
-        "stripeProductFailed": "No se pudo crear el producto de pago del curso."
+        "stripeProductFailed": "No se pudo crear el producto de pago del curso.",
+        "chapterFailed": "No se pudo crear el capítulo."
       },
       "lesson": {
         "customTtsReferenceRequired": "Se requiere una referencia TTS personalizada para el modo de voz personalizado.",
@@ -2769,6 +2790,18 @@
         "optionInsertFailed": "No se pudo agregar la opción de prueba.",
         "embedCreateFailed": "No se pudo crear la lección para insertar.",
         "signedUrlDownloadFailed": "No se pudo descargar el archivo desde la URL firmada."
+      },
+      "update": {
+        "courseFailed": "No se pudo actualizar el curso."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Ya estás inscrito en este curso.",
+        "studentsRequired": "Selecciona al menos un estudiante para inscribir.",
+        "onlyExistingUsers": "Solo puedes inscribir usuarios existentes.",
+        "studentsAlreadyEnrolled": "Algunos de los estudiantes seleccionados ya están inscritos en este curso.",
+        "groupsNotFound": "No se encontraron los grupos seleccionados.",
+        "groupEnrollmentsNotFound": "Los grupos seleccionados no están inscritos en este curso.",
+        "enrollmentFailed": "No se pudo completar la inscripción en el curso."
       }
     },
     "thinking": {
@@ -4118,7 +4151,9 @@
       "lessonIdNotFound": "ID de lección no encontrada",
       "notAuthorizedTitle": "No autorizado",
       "notAuthorizedDescription": "No estás autorizado a acceder a esta lección.",
-      "goBackToCourse": "Volver al curso"
+      "goBackToCourse": "Volver al curso",
+      "quizNotCompleted": "Completa el cuestionario antes de terminar esta lección.",
+      "aiMentorDataRequired": "Se requieren los resultados de la lección de AI Mentor para completar esta lección."
     },
     "other": {
       "lesson": "Lección",
@@ -5898,7 +5933,9 @@
       "sourceCategoryMissing": "El curso que se va a duplicar no tiene categoría",
       "targetCourseNotFound": "No se encontró el curso duplicado",
       "tenantMissing": "No se encontró el inquilino de este curso",
-      "foreignSourceAsset": "Este curso usa un archivo que pertenece a otra organización, por lo que no se puede duplicar"
+      "foreignSourceAsset": "Este curso usa un archivo que pertenece a otra organización, por lo que no se puede duplicar",
+      "jobNotFound": "No se encontró la tarea de duplicación del curso",
+      "createFailed": "No se pudo crear el curso duplicado"
     }
   },
   "tenantSharing": {
@@ -6132,7 +6169,12 @@
       "liveKitRoomNotAvailable": "La sala de LiveKit para esta sesión no está disponible.",
       "activeSessionUpdateForbidden": "Esta formación en directo no se puede modificar mientras haya una sesión en curso.",
       "maxParticipantsReached": "Se ha alcanzado el número máximo de participantes.",
-      "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
+      "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas.",
+      "onlyScheduledCanBeStarted": "Solo se pueden iniciar formaciones en vivo programadas o finalizadas.",
+      "sessionAlreadyActive": "Ya hay una sesión en curso para esta formación en vivo.",
+      "onlineSessionRequired": "Esta acción solo está disponible para formaciones en vivo en línea.",
+      "userNotFound": "No se encontró el usuario.",
+      "sessionAlreadyFinished": "Esta sesión de formación en vivo ya ha finalizado."
     }
   },
   "modernCourseView": {
@@ -8150,6 +8192,24 @@
       "listingNotFound": "No se encontró este curso del marketplace.",
       "thumbnailNotFound": "Este curso del marketplace no tiene miniatura.",
       "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Las traducciones solo se pueden editar en un idioma distinto del idioma base del curso.",
+      "criterionNotFound": "No se encontró el criterio de finalización.",
+      "guidanceNotFound": "No se encontró la guía de evaluación.",
+      "blockingErrorNotFound": "No se encontró el error bloqueante.",
+      "configurationNotFound": "No se encontró la configuración de las condiciones de finalización.",
+      "invalidLessonType": "Las condiciones de finalización solo están disponibles para lecciones de AI Mentor."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Las traducciones solo se pueden editar en un idioma distinto del idioma base del curso.",
+      "configurationNotFound": "No se encontró la configuración de AI Mentor.",
+      "invalidLessonType": "La configuración de AI Mentor solo está disponible para lecciones de AI Mentor.",
+      "invalidGraph": "La configuración de AI Mentor no es válida."
     }
   }
 }

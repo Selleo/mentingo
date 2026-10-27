@@ -57,7 +57,7 @@ export class CourseEnrollmentService {
     if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (course.userDeletedAt) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("adminUserView.error.userNotFound");
     }
 
     if (
@@ -65,10 +65,11 @@ export class CourseEnrollmentService {
       hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
       currentUser.userId === course.authorId
     ) {
-      throw new ForbiddenException("You don't have permission to enroll in your own course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.enrollOwnCourse");
     }
 
-    if (course.enrolled) throw new ConflictException("Course is already enrolled");
+    if (course.enrolled)
+      throw new ConflictException("adminCourseView.errors.enrollment.alreadyEnrolled");
     if (course.isArchived && !paymentId) {
       throw new ForbiddenException("adminCourseView.errors.forbidden.archivedCourseEnrollment");
     }
@@ -94,7 +95,8 @@ export class CourseEnrollmentService {
     const courseExists = await this.courseEnrollmentRepository.courseExists(courseId);
 
     if (!courseExists) throw new NotFoundException("adminCourseView.errors.notFound.course");
-    if (!studentIds.length) throw new BadRequestException("Student ids not found");
+    if (!studentIds.length)
+      throw new BadRequestException("adminCourseView.errors.enrollment.studentsRequired");
 
     const alreadyEnrolledStudentIds = await this.courseEnrollmentRepository.findEnrolledStudentIds(
       courseId,
@@ -103,14 +105,10 @@ export class CourseEnrollmentService {
     const activeStudentsCount = await this.courseEnrollmentRepository.countActiveUsers(studentIds);
 
     if (activeStudentsCount !== studentIds.length)
-      throw new BadRequestException("You can only enroll existing users");
+      throw new BadRequestException("adminCourseView.errors.enrollment.onlyExistingUsers");
 
     if (alreadyEnrolledStudentIds.length > 0) {
-      throw new ConflictException(
-        `Students ${alreadyEnrolledStudentIds.join(
-          ", ",
-        )} are already enrolled in course ${courseId}`,
-      );
+      throw new ConflictException("adminCourseView.errors.enrollment.studentsAlreadyEnrolled");
     }
 
     await this.courseEnrollmentRepository.runInTransaction(async (trx) => {
@@ -150,14 +148,15 @@ export class CourseEnrollmentService {
     if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const existingGroupIds = await this.courseEnrollmentRepository.findExistingGroupIds(groupIds);
-    if (!existingGroupIds.length) throw new NotFoundException("Groups not found");
+    if (!existingGroupIds.length)
+      throw new NotFoundException("adminCourseView.errors.enrollment.groupsNotFound");
 
     if (
       currentUser &&
       !hasPermission(currentUser.permissions, PERMISSIONS.COURSE_ENROLLMENT) &&
       !canUpdateCourseByAuthor(currentUser, course.authorId)
     ) {
-      throw new ForbiddenException("You don't have permission to enroll groups to this course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.enrollGroups");
     }
 
     const existingDueDateCalendarEvents =
@@ -235,7 +234,7 @@ export class CourseEnrollmentService {
     );
 
     if (!groupEnrollments.length)
-      throw new NotFoundException("No group enrollments found for the specified course and groups");
+      throw new NotFoundException("adminCourseView.errors.enrollment.groupEnrollmentsNotFound");
 
     const studentIdsToUnenroll = await this.courseEnrollmentRepository.findGroupEnrolledLearnerIds(
       courseId,
@@ -378,7 +377,8 @@ export class CourseEnrollmentService {
       db,
     );
 
-    if (!enrolledCourse) throw new ConflictException("Course not enrolled");
+    if (!enrolledCourse)
+      throw new ConflictException("adminCourseView.errors.enrollment.enrollmentFailed");
 
     return enrolledCourse;
   }

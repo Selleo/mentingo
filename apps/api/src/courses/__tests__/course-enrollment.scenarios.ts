@@ -24,7 +24,7 @@ export const SELF_ENROLLMENT_REJECTION_CASES = [
   {
     rejection: SELF_ENROLLMENT_REJECTIONS.OWN_COURSE,
     expectedStatus: 403,
-    expectedMessage: "You don't have permission to enroll in your own course",
+    expectedMessage: "adminCourseView.errors.forbidden.enrollOwnCourse",
   },
   {
     rejection: SELF_ENROLLMENT_REJECTIONS.ARCHIVED_COURSE,
@@ -34,7 +34,7 @@ export const SELF_ENROLLMENT_REJECTION_CASES = [
   {
     rejection: SELF_ENROLLMENT_REJECTIONS.ALREADY_ENROLLED,
     expectedStatus: 409,
-    expectedMessage: "Course is already enrolled",
+    expectedMessage: "adminCourseView.errors.enrollment.alreadyEnrolled",
   },
 ];
 
@@ -50,15 +50,15 @@ export type BulkEnrollmentRejection =
 export const BULK_ENROLLMENT_REJECTION_CASES = [
   {
     rejection: BULK_ENROLLMENT_REJECTIONS.NO_STUDENTS,
-    expectedMessage: "Student ids not found",
+    expectedMessage: "adminCourseView.errors.enrollment.studentsRequired",
   },
   {
     rejection: BULK_ENROLLMENT_REJECTIONS.UNKNOWN_STUDENT,
-    expectedMessage: "You can only enroll existing users",
+    expectedMessage: "adminCourseView.errors.enrollment.onlyExistingUsers",
   },
   {
     rejection: BULK_ENROLLMENT_REJECTIONS.DELETED_STUDENT,
-    expectedMessage: "You can only enroll existing users",
+    expectedMessage: "adminCourseView.errors.enrollment.onlyExistingUsers",
   },
 ];
 

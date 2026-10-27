@@ -269,7 +269,7 @@ export class CourseEditingService {
         );
 
         if (!updatedCourse) {
-          throw new ConflictException("Failed to update course");
+          throw new ConflictException("adminCourseView.errors.update.courseFailed");
         }
 
         if (updatedCourse.status !== COURSE_STATUSES.PUBLISHED) {
@@ -388,7 +388,7 @@ export class CourseEditingService {
     }
 
     if (!updatedCourse) {
-      throw new ConflictException("Failed to update course");
+      throw new ConflictException("adminCourseView.errors.update.courseFailed");
     }
 
     const updatedSnapshot = await this.courseActivitySnapshotService.buildCourseActivitySnapshot(
@@ -469,7 +469,7 @@ export class CourseEditingService {
     });
 
     if (!updatedCourse) {
-      throw new ConflictException("Failed to update course");
+      throw new ConflictException("adminCourseView.errors.update.courseFailed");
     }
 
     if (
