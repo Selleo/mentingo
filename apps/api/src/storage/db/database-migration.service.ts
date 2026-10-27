@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -9,8 +9,6 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { makeWorkerUtils } from "graphile-worker";
 import postgres from "postgres";
-
-import databaseConfiguration from "../../common/configuration/database";
 
 import { DATABASE_MIGRATION_LOCK } from "./db.constants";
 import { WORKFLOW_BASELINE } from "./workflow-baseline.constants";
@@ -53,23 +51,6 @@ export class DatabaseMigrationService {
         this.logger.log("Core migrations completed; Workflow setup skipped for E2E");
         return;
       }
-      const appUrl = this.configService.getOrThrow<string>("database.urlApp");
-      const nonce = randomBytes(8);
-      const identityLock = [nonce.readInt32BE(0), nonce.readInt32BE(4)];
-      await admin`SELECT pg_advisory_lock(${identityLock[0]}, ${identityLock[1]})`;
-      const probe = postgres(appUrl, { max: 1, onnotice: () => undefined });
-      let role: string;
-      try {
-        role = await probe.begin(async (app) => {
-          const [identity] =
-            await app`SELECT current_user AS role, pg_try_advisory_lock(${identityLock[0]}, ${identityLock[1]}) AS different_database`;
-          if (identity.different_database)
-            throw new Error("App and migrator must use the same database");
-          return String(identity.role);
-        });
-      } finally {
-        await probe.end();
-      }
       await migrate(drizzle(admin), { migrationsFolder: join(__dirname, "../migrations") });
       await this.ensureWorkflow(admin, source);
       // Fresh Graphile installation requires database CREATE privileges. Use the migrator,
@@ -78,7 +59,6 @@ export class DatabaseMigrationService {
         connectionString: this.configService.getOrThrow<string>("database.urlAdmin"),
       });
       await workerUtils.release();
-      await this.configureRuntimeRole(admin, role);
       if (connectionLost) throw new Error("Migration lock connection was lost");
       this.logger.log("Database migrations completed");
     } catch (error) {
@@ -173,36 +153,13 @@ export class DatabaseMigrationService {
         throw new Error("Workflow enum mismatch");
     }
   }
-
-  private async configureRuntimeRole(sql: postgres.Sql, role: string) {
-    const owner = `"${role.replace(/"/g, '""')}"`;
-    await sql.unsafe(
-      `GRANT USAGE ON SCHEMA workflow, workflow_drizzle TO ${owner}; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA workflow, workflow_drizzle TO ${owner}; GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA workflow, workflow_drizzle TO ${owner}; CREATE SCHEMA IF NOT EXISTS graphile_worker AUTHORIZATION ${owner}; ALTER SCHEMA graphile_worker OWNER TO ${owner}`,
-    );
-    // Only Graphile objects change owner: its private RLS tables require runtime ownership.
-    const changes = await sql`
-      SELECT format('ALTER %s graphile_worker.%I OWNER TO %I',
-        CASE c.relkind WHEN 'S' THEN 'SEQUENCE' WHEN 'v' THEN 'VIEW' WHEN 'm' THEN 'MATERIALIZED VIEW' ELSE 'TABLE' END,
-        c.relname, ${role}::text) AS statement, CASE WHEN c.relkind='S' THEN 1 ELSE 0 END AS ordering
-      FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-      WHERE n.nspname='graphile_worker' AND c.relkind IN ('r','p','S','v','m') AND pg_get_userbyid(c.relowner)<>${role}
-      UNION ALL
-      SELECT format('ALTER %s graphile_worker.%I(%s) OWNER TO %I', CASE p.prokind WHEN 'p' THEN 'PROCEDURE' ELSE 'FUNCTION' END,
-        p.proname, pg_get_function_identity_arguments(p.oid), ${role}::text), 2
-      FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-      WHERE n.nspname='graphile_worker' AND p.prokind IN ('f','p') AND pg_get_userbyid(p.proowner)<>${role}
-      UNION ALL
-      SELECT format('ALTER TYPE graphile_worker.%I OWNER TO %I', t.typname, ${role}::text), 3
-      FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace LEFT JOIN pg_class c ON c.oid=t.typrelid
-      WHERE n.nspname='graphile_worker' AND (t.typtype IN ('e','d') OR (t.typtype='c' AND c.relkind='c')) AND pg_get_userbyid(t.typowner)<>${role}
-      ORDER BY ordering`;
-    for (const change of changes) await sql.unsafe(String(change.statement));
-  }
 }
 
 /** Normal CLI and container migrations use the same service as startup maintenance. */
 export async function runDatabaseMigrations() {
   await new DatabaseMigrationService(
-    new ConfigService({ database: databaseConfiguration() }),
+    new ConfigService({
+      database: { urlAdmin: process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL },
+    }),
   ).runMigrations();
 }
