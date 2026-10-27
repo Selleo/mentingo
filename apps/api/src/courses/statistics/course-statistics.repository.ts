@@ -364,18 +364,20 @@ export class CourseStatisticsRepository {
   ) {
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
       this.buildStudentCourseStatisticsExpressions(filters);
+    const { sortOrder, sortColumn } = this.buildStatisticsSort(sort, filters);
 
-    return this.db
+    const quizResults = this.db
       .selectDistinct({
-        studentId: sql<UUIDType>`${users.id}`,
-        studentName: studentNameExpression,
-        studentEmail: users.email,
-        studentAvatarKey: users.avatarReference,
-        lessonId: sql<UUIDType>`${lessons.id}`,
-        quizName: quizNameExpression,
-        attempts: sql<number>`${studentLessonProgress.attempts}`,
-        quizScore: sql<number>`${studentLessonProgress.quizScore}`,
-        lastAttempt: lastAttemptExpression,
+        studentId: sql<UUIDType>`${users.id}`.as("student_id"),
+        studentName: studentNameExpression.as("student_name"),
+        studentEmail: sql<string>`${users.email}`.as("student_email"),
+        studentAvatarKey: sql<string | null>`${users.avatarReference}`.as("student_avatar_key"),
+        lessonId: sql<UUIDType>`${lessons.id}`.as("lesson_id"),
+        quizName: quizNameExpression.as("quiz_name"),
+        attempts: sql<number>`${studentLessonProgress.attempts}`.as("attempts"),
+        quizScore: sql<number>`${studentLessonProgress.quizScore}`.as("quiz_score"),
+        lastAttempt: lastAttemptExpression.as("last_attempt"),
+        sortValue: sql`${sortColumn}`.as("sort_value"),
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
@@ -391,7 +393,22 @@ export class CourseStatisticsRepository {
       .leftJoin(groupUsers, eq(groupUsers.userId, studentLessonProgress.studentId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...this.buildStudentsQuizResultsConditions(filters)))
-      .orderBy(this.buildStatisticsOrder(sort, filters))
+      .as("quiz_results");
+
+    return this.db
+      .select({
+        studentId: quizResults.studentId,
+        studentName: quizResults.studentName,
+        studentEmail: quizResults.studentEmail,
+        studentAvatarKey: quizResults.studentAvatarKey,
+        lessonId: quizResults.lessonId,
+        quizName: quizResults.quizName,
+        attempts: quizResults.attempts,
+        quizScore: quizResults.quizScore,
+        lastAttempt: quizResults.lastAttempt,
+      })
+      .from(quizResults)
+      .orderBy(sortOrder(quizResults.sortValue))
       .limit(perPage)
       .offset((page - 1) * perPage);
   }
@@ -419,22 +436,28 @@ export class CourseStatisticsRepository {
     return totalCount;
   }
 
+  /** Ordered over a distinct subquery for the same reason as `findStudentsQuizResults`. */
   async findStudentsAiMentorResults(
     filters: CourseStudentAiMentorResultsFilters,
     { page, perPage, sort }: CourseStatisticsPageOptions,
   ) {
     const { studentNameExpression } = this.buildStudentCourseStatisticsExpressions(filters);
+    const { sortOrder, sortColumn } = this.buildStatisticsSort(sort, filters);
 
-    return this.db
+    const aiMentorResults = this.db
       .selectDistinct({
-        studentId: sql<UUIDType>`${users.id}`,
-        studentName: studentNameExpression,
-        studentEmail: users.email,
-        studentAvatarKey: users.avatarReference,
-        lessonId: sql<UUIDType>`${lessons.id}`,
-        lessonName: this.buildLessonNameExpression(filters.language),
-        score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
-        lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+        studentId: sql<UUIDType>`${users.id}`.as("student_id"),
+        studentName: studentNameExpression.as("student_name"),
+        studentEmail: sql<string>`${users.email}`.as("student_email"),
+        studentAvatarKey: sql<string | null>`${users.avatarReference}`.as("student_avatar_key"),
+        lessonId: sql<UUIDType>`${lessons.id}`.as("lesson_id"),
+        lessonName: this.buildLessonNameExpression(filters.language).as("lesson_name"),
+        score: sql<number>`${aiMentorStudentLessonProgress.percentage}`.as("score"),
+        lastSession:
+          sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as(
+            "last_session",
+          ),
+        sortValue: sql`${sortColumn}`.as("sort_value"),
       })
       .from(studentCourses)
       .innerJoin(courses, eq(courses.id, studentCourses.courseId))
@@ -454,10 +477,24 @@ export class CourseStatisticsRepository {
       )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .orderBy(this.buildStatisticsOrder(sort, filters))
+      .where(and(...this.buildStudentsAiMentorResultsConditions(filters)))
+      .as("ai_mentor_results");
+
+    return this.db
+      .select({
+        studentId: aiMentorResults.studentId,
+        studentName: aiMentorResults.studentName,
+        studentEmail: aiMentorResults.studentEmail,
+        studentAvatarKey: aiMentorResults.studentAvatarKey,
+        lessonId: aiMentorResults.lessonId,
+        lessonName: aiMentorResults.lessonName,
+        score: aiMentorResults.score,
+        lastSession: aiMentorResults.lastSession,
+      })
+      .from(aiMentorResults)
+      .orderBy(sortOrder(aiMentorResults.sortValue))
       .limit(perPage)
-      .offset((page - 1) * perPage)
-      .where(and(...this.buildStudentsAiMentorResultsConditions(filters)));
+      .offset((page - 1) * perPage);
   }
 
   async countStudentsAiMentorResults(filters: CourseStudentAiMentorResultsFilters) {
@@ -566,11 +603,21 @@ export class CourseStatisticsRepository {
   }
 
   private buildStatisticsOrder(sort: string, expressionsParams: CourseStatisticsExpressionsParams) {
+    const { sortOrder, sortColumn } = this.buildStatisticsSort(sort, expressionsParams);
+
+    return sortOrder(sortColumn);
+  }
+
+  private buildStatisticsSort(sort: string, expressionsParams: CourseStatisticsExpressionsParams) {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    return sortOrder(
-      this.buildStatisticsSortColumn(sortedField as CourseStatisticsSortField, expressionsParams),
-    );
+    return {
+      sortOrder,
+      sortColumn: this.buildStatisticsSortColumn(
+        sortedField as CourseStatisticsSortField,
+        expressionsParams,
+      ),
+    };
   }
 
   private buildStatisticsSortColumn(
@@ -581,7 +628,7 @@ export class CourseStatisticsRepository {
       lastAttemptExpression,
       studentNameExpression,
       quizNameExpression,
-      groupNameExpression,
+      groupNamesSortExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
       lastCompletedLessonName,
@@ -589,7 +636,7 @@ export class CourseStatisticsRepository {
 
     return match<string, SQL | AnyPgColumn>(sort)
       .with(CourseStudentProgressionSortFields.studentName, () => studentNameExpression)
-      .with(CourseStudentProgressionSortFields.groupName, () => groupNameExpression)
+      .with(CourseStudentProgressionSortFields.groupName, () => groupNamesSortExpression)
       .with(CourseStudentProgressionSortFields.lastActivity, () => lastActivityExpression)
       .with(
         CourseStudentProgressionSortFields.completedLessonsCount,
@@ -671,6 +718,15 @@ export class CourseStatisticsRepository {
       .where(and(eq(groupUsers.userId, users.id), managedGroupCondition));
     const groupNameExpression = sql<LocalizedGroup[]>`(${groupNamesQuery})`;
 
+    const groupNamesSortQuery = this.db
+      .select({
+        names: sql<string>`string_agg(${localizedGroupName}, ', ' ORDER BY ${localizedGroupName})`,
+      })
+      .from(groups)
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
+      .where(and(eq(groupUsers.userId, users.id), managedGroupCondition));
+    const groupNamesSortExpression = sql<string | null>`(${groupNamesSortQuery})`;
+
     const lastAttemptExpression = sql<string>`(
           SELECT TO_CHAR(MAX(slp.updated_at), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
           FROM ${studentLessonProgress} slp
@@ -722,6 +778,7 @@ export class CourseStatisticsRepository {
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
+      groupNamesSortExpression,
       lastAttemptExpression,
       quizNameExpression,
       lastCompletedLessonName,

@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common";
 
-import { CourseAuthorService } from "./authors/course-author.service";
+import { CourseBulkEditingService } from "./authoring/course-bulk-editing.service";
+import { CourseDeletionService } from "./authoring/course-deletion.service";
+import { CourseEditingService } from "./authoring/course-editing.service";
 import { CourseCatalogService } from "./catalog/course-catalog.service";
-import { CourseDetailService } from "./detail/course-detail.service";
+import { CourseLearnerDashboardService } from "./dashboard/course-learner-dashboard.service";
 import { CourseDueDateNotificationService } from "./due-dates/course-due-date-notification.service";
-import { CourseBulkEditingService } from "./editing/course-bulk-editing.service";
-import { CourseDeletionService } from "./editing/course-deletion.service";
-import { CourseEditingService } from "./editing/course-editing.service";
 import { CourseEnrollmentService } from "./enrollment/course-enrollment.service";
-import { CourseLearnerDashboardService } from "./enrollment/course-learner-dashboard.service";
-import { CourseStudentModeService } from "./enrollment/course-student-mode.service";
+import { CourseTranslationService } from "./languages/course-translation.service";
+import { CourseStudentModeService } from "./learning-mode/course-student-mode.service";
+import { CourseDetailService } from "./overview/course-detail.service";
+import { CourseAuthorService } from "./ownership/course-author.service";
 import { CourseStatisticsService } from "./statistics/course-statistics.service";
-import { CourseTranslationService } from "./translations/course-translation.service";
 
 import type { CourseReadOptions } from "./course.types";
 import type { BulkArchiveCourseBody } from "./schemas/bulkArchiveCourse.schema";

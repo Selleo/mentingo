@@ -230,6 +230,9 @@ describe("Course editing (e2e)", () => {
           .patch(`/api/course/update-has-certificate/${courseId}`)
           .send({ hasCertificate: true }),
       )
+      .with(COURSE_EDIT_ENDPOINTS.UPDATE_SETTINGS, () =>
+        server.patch(`/api/course/settings/${courseId}`).send({ quizFeedbackEnabled: false }),
+      )
       .with(COURSE_EDIT_ENDPOINTS.DELETE_TRAILER, () =>
         server.delete(`/api/course/${courseId}/trailer`),
       )
@@ -1022,7 +1025,11 @@ describe("Course editing (e2e)", () => {
         db
           .update(courses)
           .set({
-            settings: sql`${courses.settings} || jsonb_build_object('certificateValidity', ${JSON.stringify(CERTIFICATE_VALIDITY_PERIOD)}::text::jsonb)`,
+            settings: sql`${
+              courses.settings
+            } || jsonb_build_object('certificateValidity', ${JSON.stringify(
+              CERTIFICATE_VALIDITY_PERIOD,
+            )}::text::jsonb)`,
           })
           .where(eq(courses.id, course.id)),
       );

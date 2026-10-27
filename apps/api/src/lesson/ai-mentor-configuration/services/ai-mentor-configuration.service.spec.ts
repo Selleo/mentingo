@@ -5,7 +5,7 @@ import { AiMentorConfigurationService } from "./ai-mentor-configuration.service"
 import type { AiMentorConfigurationGraphService } from "./ai-mentor-configuration-graph.service";
 import type { AiMentorConfigurationRepository } from "../repositories/ai-mentor-configuration.repository";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CourseFeaturePolicyService } from "src/courses/editing/course-feature-policy.service";
+import type { CourseFeaturePolicyService } from "src/courses/authoring/course-feature-policy.service";
 import type { MasterCourseService } from "src/courses/master-course/master-course.service";
 import type { AdminLessonService } from "src/lesson/services/adminLesson.service";
 

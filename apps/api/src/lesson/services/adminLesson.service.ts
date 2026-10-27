@@ -24,7 +24,7 @@ import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
-import { CourseFeaturePolicyService } from "src/courses/editing/course-feature-policy.service";
+import { CourseFeaturePolicyService } from "src/courses/authoring/course-feature-policy.service";
 import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";

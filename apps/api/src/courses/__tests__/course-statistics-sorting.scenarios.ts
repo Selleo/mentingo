@@ -22,15 +22,9 @@ export const STATISTICS_ENDPOINTS = {
   STUDENTS_AI_MENTOR_RESULTS: "students-ai-mentor-results",
 } as const;
 
-export const SORT_OUTCOMES = {
-  ORDERED: "ordered",
-  REJECTED_BY_DATABASE: "rejected by the database",
-} as const;
-
 export type StatisticsLearner = (typeof STATISTICS_LEARNERS)[keyof typeof STATISTICS_LEARNERS];
 export type StatisticsLesson = (typeof STATISTICS_LESSONS)[keyof typeof STATISTICS_LESSONS];
 export type StatisticsEndpoint = (typeof STATISTICS_ENDPOINTS)[keyof typeof STATISTICS_ENDPOINTS];
-export type SortOutcome = (typeof SORT_OUTCOMES)[keyof typeof SORT_OUTCOMES];
 
 export const LEARNER_FIXTURES: Record<
   StatisticsLearner,
@@ -168,7 +162,6 @@ export const LESSON_PROGRESS_FIXTURES: LessonProgressFixture[] = [
 export type StatisticsSortCase = {
   endpoint: StatisticsEndpoint;
   sort: string;
-  outcome: SortOutcome;
   expectedLearners: StatisticsLearner[];
 };
 
@@ -178,151 +171,141 @@ export const STATISTICS_SORT_CASES: StatisticsSortCase[] = [
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "studentName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "-studentName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [CARA, BEN, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "completedLessonsCount",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "-completedLessonsCount",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [CARA, BEN, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "lastActivity",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "-lastActivity",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [CARA, BEN, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "lastCompletedLessonName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "-lastCompletedLessonName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
     sort: "groupName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [BEN, CARA, ANNA],
+  },
+  {
+    endpoint: STATISTICS_ENDPOINTS.STUDENTS_PROGRESS,
+    sort: "-groupName",
+    expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "studentName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "quizName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "-quizName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "quizScore",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [CARA, ANNA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "-quizScore",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [BEN, ANNA, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "attempts",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "-attempts",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "lastAttempt",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_QUIZ_RESULTS,
     sort: "-lastAttempt",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "studentName",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "lessonName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "-lessonName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "score",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [ANNA, CARA, BEN],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "-score",
-    outcome: SORT_OUTCOMES.ORDERED,
     expectedLearners: [BEN, CARA, ANNA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "lastSession",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [CARA, BEN, ANNA],
+  },
+  {
+    endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
+    sort: "-lastSession",
+    expectedLearners: [ANNA, BEN, CARA],
   },
   {
     endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
     sort: "lastCompletedLessonName",
-    outcome: SORT_OUTCOMES.REJECTED_BY_DATABASE,
-    expectedLearners: [],
+    expectedLearners: [ANNA, CARA, BEN],
+  },
+  {
+    endpoint: STATISTICS_ENDPOINTS.STUDENTS_AI_MENTOR_RESULTS,
+    sort: "-lastCompletedLessonName",
+    expectedLearners: [BEN, CARA, ANNA],
   },
 ];

@@ -54,6 +54,7 @@ import {
 import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
 import { CourseDuplicationService } from "src/courses/duplication/course-duplication.service";
+import { CourseTranslationService } from "src/courses/languages/course-translation.service";
 import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import {
   bulkArchiveCourseResponseSchema,
@@ -122,7 +123,6 @@ import {
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
 import { CourseScormExportService } from "src/courses/scorm-export/course-scorm-export.service";
-import { CourseTranslationService } from "src/courses/translations/course-translation.service";
 import {
   allCoursesValidation,
   availableCourseCategoriesValidation,

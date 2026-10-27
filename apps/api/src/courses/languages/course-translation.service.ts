@@ -30,8 +30,8 @@ import {
 } from "src/storage/schema";
 
 import { QUIZ_TRANSLATION_TARGET_TYPES } from "../course.constants";
-import { CourseDetailService } from "../detail/course-detail.service";
 import { MasterCourseService } from "../master-course/master-course.service";
+import { CourseDetailService } from "../overview/course-detail.service";
 
 import { CourseTranslationRepository } from "./course-translation.repository";
 

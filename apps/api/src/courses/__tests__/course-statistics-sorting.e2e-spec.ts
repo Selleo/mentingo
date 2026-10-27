@@ -1,6 +1,5 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import request from "supertest";
-import { match } from "ts-pattern";
 
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -24,7 +23,6 @@ import {
   LEARNER_FIXTURES,
   LESSON_FIXTURES,
   LESSON_PROGRESS_FIXTURES,
-  SORT_OUTCOMES,
   STATISTICS_ENDPOINTS,
   STATISTICS_LEARNERS,
   STATISTICS_LESSONS,
@@ -219,18 +217,11 @@ describe("Course statistics sorting (e2e)", () => {
   };
 
   it.each(STATISTICS_SORT_CASES)(
-    "$endpoint sorted by $sort is $outcome",
-    async ({ endpoint, sort, outcome, expectedLearners }: StatisticsSortCase) => {
-      await match(outcome)
-        .with(SORT_OUTCOMES.ORDERED, async () => {
-          const response = await requestStatisticsSortedBy(endpoint, sort).expect(200);
+    "orders $endpoint by $sort",
+    async ({ endpoint, sort, expectedLearners }: StatisticsSortCase) => {
+      const response = await requestStatisticsSortedBy(endpoint, sort).expect(200);
 
-          expect(learnerKeysInOrder(response.body.data)).toEqual(expectedLearners);
-        })
-        .with(SORT_OUTCOMES.REJECTED_BY_DATABASE, async () => {
-          await requestStatisticsSortedBy(endpoint, sort).expect(500);
-        })
-        .exhaustive();
+      expect(learnerKeysInOrder(response.body.data)).toEqual(expectedLearners);
     },
   );
 

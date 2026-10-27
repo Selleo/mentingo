@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { CourseFeaturePolicyService } from "src/courses/editing/course-feature-policy.service";
+import { CourseFeaturePolicyService } from "src/courses/authoring/course-feature-policy.service";
 import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";

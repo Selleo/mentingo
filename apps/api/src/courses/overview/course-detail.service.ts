@@ -23,13 +23,13 @@ import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
 import { UserService } from "src/user/user.service";
 
-import { CourseMediaUrlService } from "../catalog/course-media-url.service";
+import { CourseSlugService } from "../authoring/course-slug.service";
 import { CourseDurationService } from "../duration/course-duration.service";
-import { CourseSlugService } from "../editing/course-slug.service";
-import { CourseStudentModeService } from "../enrollment/course-student-mode.service";
+import { CourseStudentModeService } from "../learning-mode/course-student-mode.service";
+import { CourseLessonMediaService } from "../media/course-lesson-media.service";
+import { CourseMediaUrlService } from "../media/course-media-url.service";
 
 import { CourseDetailRepository } from "./course-detail.repository";
-import { CourseLessonMediaService } from "./course-lesson-media.service";
 
 import type { CourseReadOptions } from "../course.types";
 import type { CourseLookupResponse } from "../schemas/courseLookupResponse.schema";

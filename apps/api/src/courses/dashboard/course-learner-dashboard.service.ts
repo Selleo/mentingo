@@ -7,8 +7,8 @@ import {
 import { addDays } from "date-fns";
 import { match } from "ts-pattern";
 
-import { CourseMediaUrlService } from "../catalog/course-media-url.service";
-import { CourseSlugService } from "../editing/course-slug.service";
+import { CourseSlugService } from "../authoring/course-slug.service";
+import { CourseMediaUrlService } from "../media/course-media-url.service";
 
 import { CourseLearnerDashboardRepository } from "./course-learner-dashboard.repository";
 

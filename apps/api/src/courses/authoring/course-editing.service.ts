@@ -34,13 +34,13 @@ import { StripeService } from "src/stripe/stripe.service";
 import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { CourseAuthorService } from "../authors/course-author.service";
 import {
   LESSON_SEQUENCE_ENABLED,
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
 } from "../constants";
 import { MasterCourseService } from "../master-course/master-course.service";
+import { CourseAuthorService } from "../ownership/course-author.service";
 
 import { CourseActivitySnapshotService } from "./course-activity-snapshot.service";
 import { CourseEditingRepository } from "./course-editing.repository";
@@ -430,6 +430,10 @@ export class CourseEditingService {
 
     if (!course) {
       throw new NotFoundException("adminCourseView.errors.notFound.course");
+    }
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     this.assertSettingsAllowedForCourseType(course, settings);

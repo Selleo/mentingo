@@ -30,6 +30,7 @@ export const COURSE_EDIT_ENDPOINTS = {
   UPDATE_COURSE: "PATCH /api/course/:id",
   UPDATE_HAS_CERTIFICATE: "PATCH /api/course/update-has-certificate/:id",
   DELETE_TRAILER: "DELETE /api/course/:id/trailer",
+  UPDATE_SETTINGS: "PATCH /api/course/settings/:courseId",
 } as const;
 
 export type CourseEditor = (typeof COURSE_EDITORS)[keyof typeof COURSE_EDITORS];

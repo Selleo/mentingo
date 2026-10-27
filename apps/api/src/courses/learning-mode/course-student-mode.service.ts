@@ -4,7 +4,8 @@ import { match } from "ts-pattern";
 
 import { hasPermission } from "src/common/permissions/permission.utils";
 
-import { CourseEnrollmentService } from "./course-enrollment.service";
+import { CourseEnrollmentService } from "../enrollment/course-enrollment.service";
+
 import { CourseStudentModeRepository } from "./course-student-mode.repository";
 
 import type { UUIDType, DatabasePg } from "src/common";

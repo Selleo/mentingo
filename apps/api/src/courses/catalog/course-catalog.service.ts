@@ -3,12 +3,12 @@ import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UserService } from "src/user/user.service";
 
+import { CourseSlugService } from "../authoring/course-slug.service";
 import { CourseDurationService } from "../duration/course-duration.service";
-import { CourseSlugService } from "../editing/course-slug.service";
+import { CourseMediaUrlService } from "../media/course-media-url.service";
 import { COURSE_ENROLLMENT_SCOPES, CourseSortFields } from "../schemas/courseQuery";
 
 import { CourseCatalogRepository } from "./course-catalog.repository";
-import { CourseMediaUrlService } from "./course-media-url.service";
 
 import type {
   AllCoursesForContentCreatorResponse,

@@ -88,8 +88,8 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 ### Course/Lesson Flow
 
 - Entry: `src/courses/course.controller.ts`, `src/lesson/lesson.controller.ts`.
-- Main logic: `src/courses/services/` (`src/courses/course.service.ts` is a facade that delegates to them), `src/lesson/services/`.
-- Persistence: `src/courses/repositories/`, `src/courses/master-course/master-course.repository.ts`, `src/lesson/repositories/`.
+- Main logic: feature folders under `src/courses/` (`authoring/`, `catalog/`, `overview/`, `enrollment/`, `statistics/`, ...); `src/courses/course.service.ts` is a facade that delegates to them. Lessons: `src/lesson/services/`.
+- Persistence: the `*.repository.ts` file in each course feature folder, `src/lesson/repositories/`.
 - Tests: `src/courses/__tests__/`, `src/lesson/__tests__/`.
 - Agent rule: preserve permission distinctions between assigned, manageable, own, and admin course access.
 
