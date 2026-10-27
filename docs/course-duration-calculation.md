@@ -101,7 +101,7 @@ Production Bunny tenants must configure `BUNNY_STREAM_READ_ONLY_API_KEY` with th
 ## Code and test pointers
 
 - Heuristic constants: `apps/api/src/courses/constants/duration-defaults.ts`.
-- Projection owner and language/lesson calculation: `apps/api/src/courses/course-duration.service.ts` and `apps/api/src/courses/types/duration.ts`.
+- Projection owner and language/lesson calculation: `apps/api/src/courses/duration/course-duration.service.ts` and `apps/api/src/courses/types/duration.ts`.
 - Detailed course duration mapping: `apps/api/src/courses/course.service.ts`.
 - Shared 15-minute formatting, chapter aggregation, and remaining-time grouping: `apps/web/app/modules/Courses/utils/formatDuration.ts`.
 - Detailed course surfaces: `apps/web/app/modules/Courses/CourseView/CourseOverview/CourseDescriptionModal.tsx`, `CourseCategoryEditor.tsx`, `TableOfContent/ChapterItem.tsx`, and `CourseStatBar/CourseStatBar.tsx`.

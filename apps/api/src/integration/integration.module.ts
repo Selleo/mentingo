@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
 
 import { ContentMarketplaceModule } from "src/content-marketplace/content-marketplace.module";
-import { CourseDurationModule } from "src/courses/course-duration.module";
 import { CourseModule } from "src/courses/course.module";
+import { CourseDurationModule } from "src/courses/duration/course-duration.module";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { LocalizationModule } from "src/localization/localization.module";

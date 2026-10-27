@@ -8,7 +8,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { COURSE_TRANSFER_STATUSES } from "src/course-transfer/course-transfer.constants";
 import { CourseTransferCoordinator } from "src/course-transfer/course-transfer.coordinator";
 import { CourseTransferBusyError } from "src/course-transfer/course-transfer.errors";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {

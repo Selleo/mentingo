@@ -4,8 +4,8 @@ import { eq, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseFeaturePolicyService } from "src/courses/authoring/course-feature-policy.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -89,7 +89,7 @@ export class AdminChapterService {
       return chapter;
     });
 
-    if (!chapter) throw new BadRequestException("Chapter creation failed");
+    if (!chapter) throw new BadRequestException("adminCourseView.errors.create.chapterFailed");
 
     const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id, language);
 
@@ -208,7 +208,7 @@ export class AdminChapterService {
     const previousSnapshot = await this.buildChapterActivitySnapshot(id, resolvedLanguage);
 
     if (!availableLocales.includes(body.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);

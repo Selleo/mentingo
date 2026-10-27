@@ -159,9 +159,9 @@ import type {
   CourseTransferKind,
   CourseTransferStatus,
 } from "src/course-transfer/course-transfer.types";
+import type { CourseDurationEstimatesByLanguage } from "src/courses/duration/course-duration.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
-import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {

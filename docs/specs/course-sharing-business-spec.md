@@ -41,7 +41,7 @@ When the source course or its curriculum changes, Mentingo queues synchronizatio
 
 - The source workflow is exposed in the admin course editor's Sharing tab and is limited in the UI to managing-tenant administrators outside support mode.
 - API export endpoints require `course.export` and the managing-tenant administrator guard; cross-tenant work runs through explicit tenant contexts.
-- `apps/api/src/courses/master-course.service.ts` creates recipient courses as drafts and synchronizes existing recipient courses without owning their status.
+- `apps/api/src/courses/master-course/master-course.service.ts` creates recipient courses as drafts and synchronizes existing recipient courses without owning their status.
 - Source update events persist transfer requests through awaited outbox reactions. The transfer coordinator dispatches BullMQ work from durable operations, renews worker claims, fences target commits, and recovers undispatched or interrupted work. Status survives queue job removal. Processing requires the outbox dispatcher to be enabled.
 - Trailer deletion and video replacement enforce centrally controlled content protection; certificate changes require local course ownership or broader course management permission.
 - Sharing status describes content-copy completion, not verified video playback readiness. Request generations order synchronization; they are not immutable content-version identifiers. Persisted asset identities, asset provenance, provider readiness, and path-wide dependent revisions remain follow-up work in `docs/plans/course-transfer-reliability`.
