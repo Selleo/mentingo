@@ -16,7 +16,11 @@ async function docker(...args: string[]) {
   return execute("docker", args, { timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
 }
 
-async function bootstrap(connectionString: string, appConnection = connectionString) {
+async function bootstrap(
+  connectionString: string,
+  appConnection = connectionString,
+  environment: NodeJS.ProcessEnv = {},
+) {
   await execute("pnpm", ["db:migrate"], {
     cwd: resolve(__dirname, "../../.."),
     env: {
@@ -24,6 +28,7 @@ async function bootstrap(connectionString: string, appConnection = connectionStr
       DATABASE_URL: connectionString,
       MIGRATOR_DATABASE_URL: connectionString,
       LMS_DATABASE_URL: appConnection,
+      ...environment,
     },
     timeout: 120000,
     maxBuffer: 4 * 1024 * 1024,
@@ -319,6 +324,31 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await bootstrap(connectionString, runtimeUrl.href);
     await smokeQueue(runtimeUrl.href);
     await bootstrap(connectionString, runtimeUrl.href);
+  });
+
+  it("runs only Core migrations in browser E2E mode without connecting as the unseeded app role", async () => {
+    const { sql, connectionString } = await database("playwright_core_only");
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "unseeded_playwright_role";
+    runtimeUrl.password = "not-created";
+    await bootstrap(connectionString, runtimeUrl.href, { E2E: "true" });
+    await execute("pnpm", ["db:migrate:prod"], {
+      cwd: resolve(__dirname, "../../.."),
+      env: {
+        ...process.env,
+        DATABASE_URL: connectionString,
+        MIGRATOR_DATABASE_URL: connectionString,
+        LMS_DATABASE_URL: runtimeUrl.href,
+        E2E: "true",
+      },
+      timeout: 60000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
+    const [state] = await sql`
+      SELECT to_regclass('public.assistant_threads') IS NOT NULL AS core_ready,
+        EXISTS (SELECT 1 FROM pg_namespace WHERE nspname IN ('workflow', 'workflow_drizzle', 'graphile_worker')) AS workflow_present
+    `;
+    expect(state).toEqual({ core_ready: true, workflow_present: false });
   });
 
   it("follows current SDK schema with explicitly checked historical SQL differences", async () => {

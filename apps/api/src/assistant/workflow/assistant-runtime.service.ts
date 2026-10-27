@@ -59,7 +59,7 @@ export class AssistantRuntimeService implements OnApplicationBootstrap, OnApplic
   }
 
   async onApplicationBootstrap() {
-    if (process.env.BUILD_VERIFICATION === "true") return;
+    if (process.env.BUILD_VERIFICATION === "true" || process.env.E2E === "true") return;
     const connectionString = this.configService.getOrThrow<string>("database.urlApp");
     // Keep one trace per run by default, while respecting an explicit SDK trace mode.
     process.env.WORKFLOW_TRACE_MODE ??= "continuous";

@@ -22,13 +22,17 @@ export class DatabaseMigrationService {
   constructor(private readonly configService: ConfigService) {}
 
   async runMigrations() {
-    this.logger.log("Running Core and Workflow database migrations");
+    const coreOnly = process.env.E2E === "true";
+    this.logger.log(
+      coreOnly
+        ? "Running Core database migrations"
+        : "Running Core and Workflow database migrations",
+    );
     let admin: postgres.Sql | undefined;
     let closing = false;
     let connectionLost = false;
     try {
-      const source = this.readWorkflowSource();
-      const appUrl = this.configService.getOrThrow<string>("database.urlApp");
+      const source = coreOnly ? undefined : this.readWorkflowSource();
       // Dedicated, nonrotating connection: Drizzle can use begin() while session locks
       // remain held. A lost connection terminates this client instead of reconnecting unlocked.
       admin = postgres(this.configService.getOrThrow<string>("database.urlAdmin"), {
@@ -44,6 +48,12 @@ export class DatabaseMigrationService {
         },
       });
       await admin`SELECT pg_advisory_lock(${DATABASE_MIGRATION_LOCK[0]}, ${DATABASE_MIGRATION_LOCK[1]})`;
+      if (!source) {
+        await migrate(drizzle(admin), { migrationsFolder: join(__dirname, "../migrations") });
+        this.logger.log("Core migrations completed; Workflow setup skipped for E2E");
+        return;
+      }
+      const appUrl = this.configService.getOrThrow<string>("database.urlApp");
       const nonce = randomBytes(8);
       const identityLock = [nonce.readInt32BE(0), nonce.readInt32BE(4)];
       await admin`SELECT pg_advisory_lock(${identityLock[0]}, ${identityLock[1]})`;
@@ -80,7 +90,7 @@ export class DatabaseMigrationService {
       throw new Error(message);
     } finally {
       closing = true;
-      // Closing the dedicated connection releases both advisory locks on every exit path.
+      // Closing the dedicated connection releases its advisory locks on every exit path.
       await admin?.end();
     }
   }

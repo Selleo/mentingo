@@ -59,12 +59,14 @@ describe("Assistant runtime database configuration", () => {
   const previousWorkflowUrl = process.env.WORKFLOW_POSTGRES_URL;
   const previousTraceMode = process.env.WORKFLOW_TRACE_MODE;
   const previousBuildVerification = process.env.BUILD_VERIFICATION;
+  const previousE2E = process.env.E2E;
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.NODE_ENV = "production";
     delete process.env.WORKFLOW_POSTGRES_URL;
     delete process.env.BUILD_VERIFICATION;
+    delete process.env.E2E;
     delete process.env.WORKFLOW_TRACE_MODE;
   });
 
@@ -74,6 +76,7 @@ describe("Assistant runtime database configuration", () => {
       WORKFLOW_POSTGRES_URL: previousWorkflowUrl,
       WORKFLOW_TRACE_MODE: previousTraceMode,
       BUILD_VERIFICATION: previousBuildVerification,
+      E2E: previousE2E,
     })) {
       if (value === undefined) delete process.env[key];
       else process.env[key] = value;
@@ -120,6 +123,14 @@ describe("Assistant runtime database configuration", () => {
 
   it("skips runtime side effects during the existing CI build verification mode", async () => {
     process.env.BUILD_VERIFICATION = "true";
+    const service = new AssistantRuntimeService({} as never, new ConfigService());
+    await service.onApplicationBootstrap();
+    expect(service.isAvailable()).toBe(false);
+    expect(loadEsm).not.toHaveBeenCalled();
+  });
+
+  it("skips Workflow runtime initialization in the existing browser E2E mode", async () => {
+    process.env.E2E = "true";
     const service = new AssistantRuntimeService({} as never, new ConfigService());
     await service.onApplicationBootstrap();
     expect(service.isAvailable()).toBe(false);
