@@ -20,8 +20,9 @@ async function bootstrap(
   connectionString: string,
   appConnection = connectionString,
   environment: NodeJS.ProcessEnv = {},
+  command = "db:migrate",
 ) {
-  await execute("pnpm", ["db:migrate"], {
+  await execute("pnpm", [command], {
     cwd: resolve(__dirname, "../../.."),
     env: {
       ...process.env,
@@ -33,6 +34,41 @@ async function bootstrap(
     timeout: 120000,
     maxBuffer: 4 * 1024 * 1024,
   });
+}
+
+async function provisionRuntimeRole(connectionString: string, role?: string) {
+  const setup = role
+    ? `const { grantWorkflowRuntimeRole } = require('./src/storage/db/workflow-runtime-role'); await grantWorkflowRuntimeRole(db, process.env.TEST_RUNTIME_ROLE);`
+    : `const { seedUserRoleGrantSql } = require('./src/seed/database-role'); await seedUserRoleGrantSql(db);`;
+  await execute(
+    "pnpm",
+    [
+      "exec",
+      "tsx",
+      "-e",
+      `
+    const postgres = require('postgres');
+    const { drizzle } = require('drizzle-orm/postgres-js');
+    (async () => {
+      const client = postgres(process.env.TEST_MIGRATOR_URL, { max: 1 });
+      try {
+        const db = drizzle(client);
+        ${setup}
+      } finally { await client.end(); }
+    })().catch(error => { console.error(error); process.exitCode = 1; });
+  `,
+    ],
+    {
+      cwd: resolve(__dirname, "../../.."),
+      env: {
+        ...process.env,
+        TEST_MIGRATOR_URL: connectionString,
+        TEST_RUNTIME_ROLE: role,
+        SEED_MANAGE_DB_ROLE: "true",
+      },
+      timeout: 30000,
+    },
+  );
 }
 
 async function referenceBootstrap(connectionString: string) {
@@ -306,6 +342,7 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await expect(
       runtimeSql.unsafe("ALTER TABLE public.core_records ADD COLUMN forbidden_runtime_write text"),
     ).rejects.toMatchObject({ code: "42501" });
+    await provisionRuntimeRole(connectionString, "workflow_runtime");
     await smokeQueue(runtimeUrl.href);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
   });
@@ -322,25 +359,37 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     `;
     expect(privileges.can_create).toBe(false);
     await bootstrap(connectionString, runtimeUrl.href);
+    await expect(runtimeSql`SELECT * FROM workflow.workflow_runs`).rejects.toMatchObject({
+      code: "42501",
+    });
+    await provisionRuntimeRole(connectionString, "fresh_workflow_runtime");
     await smokeQueue(runtimeUrl.href);
     await bootstrap(connectionString, runtimeUrl.href);
+    await smokeQueue(runtimeUrl.href);
   });
 
-  it("migrates before the app role exists and grants runtime access on a later run without authenticating as it", async () => {
+  it("migrates without an app URL or role, then provisions runtime access through the existing seed setup", async () => {
     const { sql, connectionString } = await database("unseeded_runtime");
-    const runtimeUrl = new URL(connectionString);
-    runtimeUrl.username = "unseeded_workflow_runtime";
-    runtimeUrl.password = "wrong-password";
-    await bootstrap(connectionString, runtimeUrl.href);
+    await bootstrap(connectionString, "invalid-unused-app-url");
+    await bootstrap(connectionString, "invalid-unused-app-url", {}, "db:migrate:prod");
     const [state] = await sql`
       SELECT to_regclass('public.assistant_threads') IS NOT NULL AS core_ready,
-        to_regclass('workflow.workflow_runs') IS NOT NULL AS workflow_ready
+        to_regclass('workflow.workflow_runs') IS NOT NULL AS workflow_ready,
+        EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lms_app_user') AS app_role_exists
     `;
-    expect(state).toEqual({ core_ready: true, workflow_ready: true });
-    await sql.unsafe("CREATE ROLE unseeded_workflow_runtime LOGIN PASSWORD 'runtime_password'");
-    // Migration uses only the migrator credentials, even when app credentials are invalid.
-    await bootstrap(connectionString, runtimeUrl.href);
-    runtimeUrl.password = "runtime_password";
+    expect(state).toEqual({ core_ready: true, workflow_ready: true, app_role_exists: false });
+    await provisionRuntimeRole(connectionString);
+    await provisionRuntimeRole(connectionString);
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "lms_app_user";
+    runtimeUrl.password = "replace_with_strong_password";
+    await smokeQueue(runtimeUrl.href);
+    const [owner] = await sql`
+      SELECT pg_get_userbyid(relowner) AS role FROM pg_class
+      WHERE oid = 'graphile_worker._private_jobs'::regclass
+    `;
+    expect(owner.role).toBe("lms_app_user");
+    await bootstrap(connectionString, "invalid-unused-app-url");
     await smokeQueue(runtimeUrl.href);
   });
 
@@ -367,6 +416,7 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
         EXISTS (SELECT 1 FROM pg_namespace WHERE nspname IN ('workflow', 'workflow_drizzle', 'graphile_worker')) AS workflow_present
     `;
     expect(state).toEqual({ core_ready: true, workflow_present: false });
+    await provisionRuntimeRole(connectionString);
   });
 
   it("follows current SDK schema with explicitly checked historical SQL differences", async () => {
