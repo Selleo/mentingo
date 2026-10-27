@@ -4585,8 +4585,9 @@ describe("CourseController (e2e)", () => {
               .set("Cookie", cookies);
 
             expect(result.status).toBe(409);
-            const messageIds = result.body.message.match(/[0-9a-f-]{36}/g);
-            expect(messageIds).toEqual(expect.arrayContaining([student1.id, student2.id]));
+            expect(result.body.message).toBe(
+              "adminCourseView.errors.enrollment.studentsAlreadyEnrolled",
+            );
           });
         });
 
