@@ -2081,6 +2081,7 @@ export interface GetPublishedCourseLookupResponse {
 
 export interface GetStudentCoursesResponse {
   data: {
+    repetitionCompletedChapterCount?: number | null;
     /** @format uuid */
     id: string;
     title: string;
@@ -2158,6 +2159,29 @@ export interface GetStudentDashboardSummaryResponse {
   };
 }
 
+export interface RepeatCourseBody {
+  /** @format uuid */
+  currentStateId: string;
+}
+
+export interface RepeatCourseResponse {
+  data: {
+    enabled: boolean;
+    current: {
+      /** @format uuid */
+      id: string;
+      completedAt: string | null;
+      finishedChapterCount: number;
+    } | null;
+    repetition: {
+      /** @format uuid */
+      id: string;
+      completedAt: string | null;
+      finishedChapterCount: number;
+    } | null;
+  };
+}
+
 export interface MarkCourseOpenedResponse {
   data: null;
 }
@@ -2188,6 +2212,7 @@ export interface GetStudentsWithEnrollmentDateResponse {
 
 export interface GetAvailableCoursesResponse {
   data: {
+    repetitionCompletedChapterCount?: number | null;
     /** @format uuid */
     id: string;
     title: string;
@@ -2249,6 +2274,7 @@ export interface GetAvailableCourseCategoriesResponse {
 
 export interface GetTopCoursesResponse {
   data: {
+    repetitionCompletedChapterCount?: number | null;
     /** @format uuid */
     id: string;
     title: string;
@@ -2287,6 +2313,7 @@ export interface GetTopCoursesResponse {
 
 export interface GetContentCreatorCoursesResponse {
   data: {
+    repetitionCompletedChapterCount?: number | null;
     /** @format uuid */
     id: string;
     title: string;
@@ -2325,6 +2352,21 @@ export interface GetContentCreatorCoursesResponse {
 
 export interface GetCourseResponse {
   data: {
+    learningState?: {
+      enabled: boolean;
+      current: {
+        /** @format uuid */
+        id: string;
+        completedAt: string | null;
+        finishedChapterCount: number;
+      } | null;
+      repetition: {
+        /** @format uuid */
+        id: string;
+        completedAt: string | null;
+        finishedChapterCount: number;
+      } | null;
+    };
     isArchived?: boolean;
     /** @format uuid */
     authorId?: string;
@@ -2683,6 +2725,7 @@ export interface UpdateHasCertificateResponse {
 }
 
 export interface UpdateCourseSettingsBody {
+  repetitionEnabled?: boolean;
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;
@@ -2716,6 +2759,8 @@ export interface UpdateCourseSettingsResponse {
 
 export interface GetCourseSettingsResponse {
   data: {
+    /** @default false */
+    repetitionEnabled?: boolean;
     /** @default false */
     lessonSequenceEnabled: boolean;
     /** @default true */
@@ -2878,6 +2923,8 @@ export interface GetAverageQuizScoresResponse {
 
 export interface GetCourseStudentsProgressResponse {
   data: {
+    completedAt?: string | null;
+    repetitionCompletedLessonsCount?: number | null;
     /** @format uuid */
     studentId: string;
     studentName: string;
@@ -3302,6 +3349,7 @@ export interface GetLessonsResponse {
 
 export interface GetLessonByIdResponse {
   data: {
+    learningStateId?: string | null;
     /** @format uuid */
     id: string;
     title: string;
@@ -32328,6 +32376,7 @@ export interface AttachScormLessonPackageResponse {
 
 export interface LaunchScormAttemptResponse {
   data: {
+    learningStateId?: string | null;
     /** @format uuid */
     attemptId: string;
     /** @format uuid */
@@ -34916,6 +34965,8 @@ export interface GetAuthoringCourseContextResponse {
       description: string;
       learningOutcomes: string[];
       settings: {
+        /** @default false */
+        repetitionEnabled?: boolean;
         /** @default false */
         lessonSequenceEnabled: boolean;
         /** @default true */
@@ -38007,6 +38058,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/dashboard-summary`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerRepeatCourse
+     * @request POST:/api/course/{courseId}/repeat
+     */
+    courseControllerRepeatCourse: (
+      courseId: string,
+      data: RepeatCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<RepeatCourseResponse, any>({
+        path: `/api/course/${courseId}/repeat`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

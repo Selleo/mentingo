@@ -9,6 +9,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
   CERTIFICATE_ARCHIVE_REASONS,
@@ -24,7 +25,7 @@ import {
   isSupportedLanguage,
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 import { match } from "ts-pattern";
@@ -51,7 +52,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { certificates, courses, studentCourses } from "src/storage/schema";
+import { certificates, courseLearningStates, courses, studentCourses } from "src/storage/schema";
 
 import { CertificateRepository } from "./certificate.repository";
 import {
@@ -240,6 +241,9 @@ export class CertificatesService implements OnModuleDestroy {
   async createCertificate(userId: UUIDType, courseId: UUIDType, trx?: DatabasePg) {
     try {
       const executeInTransaction = async (transactionInstance: DatabasePg) => {
+        await transactionInstance.execute(
+          sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${userId}:${courseId}`}, 0))`,
+        );
         const { existingUser, existingCourse, completionDate } =
           await this.validateCertificateCreationPreconditions(
             userId,
@@ -255,7 +259,21 @@ export class CertificatesService implements OnModuleDestroy {
           transactionInstance,
         );
 
-        if (existingCertificate) {
+        const [renewal] = await transactionInstance
+          .select({ id: courseLearningStates.id })
+          .from(courseLearningStates)
+          .where(
+            and(
+              eq(courseLearningStates.courseId, courseId),
+              eq(courseLearningStates.studentId, userId),
+              eq(courseLearningStates.kind, COURSE_LEARNING_STATE_KINDS.CURRENT),
+              isNotNull(courseLearningStates.previousStateId),
+            ),
+          );
+        if (
+          existingCertificate &&
+          (!renewal || new Date(existingCertificate.issuedAt).getTime() === issuedAt.getTime())
+        ) {
           return {
             ...existingCertificate,
             fullName: `${existingUser.firstName} ${existingUser.lastName}`,
@@ -278,6 +296,14 @@ export class CertificatesService implements OnModuleDestroy {
 
         if (!createdCertificate) {
           throw new ConflictException("studentCertificateView.informations.createFailed");
+        }
+
+        if (existingCertificate) {
+          await this.certificateRepository.archiveCertificates(
+            [existingCertificate.id],
+            CERTIFICATE_ARCHIVE_REASONS.REPLACED,
+            transactionInstance,
+          );
         }
 
         return {
@@ -373,14 +399,26 @@ export class CertificatesService implements OnModuleDestroy {
   ): Promise<ResetCourseCertificatesResponse> {
     await this.assertCanManageCourseCertificates(courseId, currentUser);
 
-    const certificatesToReset = await this.resolveCertificatesForReset(courseId, body);
-
-    await this.db.transaction(async (trx) => {
+    const certificatesToReset = await this.db.transaction(async (trx) => {
+      const initial = await this.resolveCertificatesForReset(courseId, body);
+      const targets = await this.certificateRepository.findProgressResetTargetsForCertificates(
+        initial.map((certificate) => certificate.id),
+        trx,
+      );
+      for (const target of targets) {
+        for (const userId of [...target.userIds].sort()) {
+          await trx.execute(
+            sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${userId}:${target.courseId}`}, 0))`,
+          );
+        }
+      }
+      const certificatesToReset = await this.resolveCertificatesForReset(courseId, body);
       await this.archiveAndResetCertificates(
         certificatesToReset,
         CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
         trx,
       );
+      return certificatesToReset;
     });
 
     if (body.sendEmail !== false) {
@@ -1154,15 +1192,17 @@ export class CertificatesService implements OnModuleDestroy {
 
     const certificateIds = certificatesToArchive.map((certificate) => certificate.id);
 
+    await this.certificateRepository.archiveCertificates(certificateIds, reason, trx);
+    if (reason === CERTIFICATE_ARCHIVE_REASONS.EXPIRED) return;
+
     const progressResetTargets =
       await this.certificateRepository.findProgressResetTargetsForCertificates(certificateIds, trx);
 
-    await this.certificateRepository.archiveCertificates(certificateIds, reason, trx);
-
     await processInBatches(
       progressResetTargets,
-      ({ courseId, userIds }) =>
-        this.certificateRepository.resetCourseProgress(courseId, userIds, trx),
+      async ({ courseId, userIds }) => {
+        await this.certificateRepository.resetCourseProgress(courseId, userIds, trx);
+      },
       { batchSize: CERTIFICATE_PROGRESS_RESET_BATCH_SIZE },
     );
   }

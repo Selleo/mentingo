@@ -1,5 +1,5 @@
 {
-  "id": "65601005-48b3-4ec5-b8dd-c4d282039db8",
+  "id": "fc326da9-9859-4b8f-a8b4-5fb6bc575a9a",
   "prevId": "88add7bd-74ba-452e-a324-b9a3b7b95509",
   "version": "7",
   "dialect": "postgresql",
@@ -2174,6 +2174,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -2304,6 +2310,19 @@
         }
       },
       "foreignKeys": {
+        "ai_mentor_threads_learning_state_id_course_learning_states_id_fk": {
+          "name": "ai_mentor_threads_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "ai_mentor_threads",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "ai_mentor_threads_user_id_users_id_fk": {
           "name": "ai_mentor_threads_user_id_users_id_fk",
           "tableFrom": "ai_mentor_threads",
@@ -6382,6 +6401,148 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.course_learning_states": {
+      "name": "course_learning_states",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "student_id": {
+          "name": "student_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'current'"
+        },
+        "previous_state_id": {
+          "name": "previous_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "finished_chapter_count": {
+          "name": "finished_chapter_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "course_learning_states_tenant_id_idx": {
+          "name": "course_learning_states_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "course_learning_states_tenant_id_tenants_id_fk": {
+          "name": "course_learning_states_tenant_id_tenants_id_fk",
+          "tableFrom": "course_learning_states",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "course_learning_states_course_id_courses_id_fk": {
+          "name": "course_learning_states_course_id_courses_id_fk",
+          "tableFrom": "course_learning_states",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "course_learning_states_student_id_users_id_fk": {
+          "name": "course_learning_states_student_id_users_id_fk",
+          "tableFrom": "course_learning_states",
+          "tableTo": "users",
+          "columnsFrom": [
+            "student_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "course_learning_states_learner_course_kind": {
+          "name": "course_learning_states_learner_course_kind",
+          "nullsNotDistinct": false,
+          "columns": [
+            "student_id",
+            "course_id",
+            "kind"
+          ]
+        }
+      }
+    },
     "public.course_slugs": {
       "name": "course_slugs",
       "schema": "",
@@ -7343,7 +7504,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"lessonSequenceEnabled\":false,\"quizFeedbackEnabled\":true,\"certificateSignature\":null,\"certificateFontColor\":\"#000000\",\"certificateValidity\":null,\"videoCompletionTrackingEnabled\":true}'::jsonb"
+          "default": "'{\"lessonSequenceEnabled\":false,\"quizFeedbackEnabled\":true,\"certificateSignature\":null,\"certificateFontColor\":\"#000000\",\"certificateValidity\":null,\"repetitionEnabled\":false,\"videoCompletionTrackingEnabled\":true}'::jsonb"
         },
         "base_language": {
           "name": "base_language",
@@ -10918,6 +11079,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -11060,6 +11227,19 @@
         }
       },
       "foreignKeys": {
+        "lesson_video_progress_learning_state_id_course_learning_states_id_fk": {
+          "name": "lesson_video_progress_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "lesson_video_progress",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "lesson_video_progress_student_id_users_id_fk": {
           "name": "lesson_video_progress_student_id_users_id_fk",
           "tableFrom": "lesson_video_progress",
@@ -11115,13 +11295,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "lesson_video_progress_student_id_lesson_id_resource_entity_id_unique": {
-          "name": "lesson_video_progress_student_id_lesson_id_resource_entity_id_unique",
-          "nullsNotDistinct": false,
+        "lesson_video_progress_student_id_lesson_id_resource_entity_id_learning_state_id_unique": {
+          "name": "lesson_video_progress_student_id_lesson_id_resource_entity_id_learning_state_id_unique",
+          "nullsNotDistinct": true,
           "columns": [
             "student_id",
             "lesson_id",
-            "resource_entity_id"
+            "resource_entity_id",
+            "learning_state_id"
           ]
         }
       }
@@ -15506,6 +15687,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -15650,42 +15837,22 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "scorm_attempts_student_package_sco_attempt_unique_idx": {
-          "name": "scorm_attempts_student_package_sco_attempt_unique_idx",
-          "columns": [
-            {
-              "expression": "student_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "package_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "sco_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "attempt_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
+        "scorm_attempts_learning_state_id_course_learning_states_id_fk": {
+          "name": "scorm_attempts_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "scorm_attempts",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "scorm_attempts_student_id_users_id_fk": {
           "name": "scorm_attempts_student_id_users_id_fk",
           "tableFrom": "scorm_attempts",
@@ -15766,7 +15933,19 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "scorm_attempts_student_package_sco_attempt_unique_idx": {
+          "name": "scorm_attempts_student_package_sco_attempt_unique_idx",
+          "nullsNotDistinct": true,
+          "columns": [
+            "student_id",
+            "package_id",
+            "sco_id",
+            "attempt_number",
+            "learning_state_id"
+          ]
+        }
+      }
     },
     "public.scorm_packages": {
       "name": "scorm_packages",
@@ -17132,6 +17311,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -17210,6 +17395,19 @@
         }
       },
       "foreignKeys": {
+        "student_chapter_progress_learning_state_id_course_learning_states_id_fk": {
+          "name": "student_chapter_progress_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "student_chapter_progress",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "student_chapter_progress_student_id_users_id_fk": {
           "name": "student_chapter_progress_student_id_users_id_fk",
           "tableFrom": "student_chapter_progress",
@@ -17265,13 +17463,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "student_chapter_progress_student_id_course_id_chapter_id_unique": {
-          "name": "student_chapter_progress_student_id_course_id_chapter_id_unique",
-          "nullsNotDistinct": false,
+        "student_chapter_progress_student_id_course_id_chapter_id_learning_state_id_unique": {
+          "name": "student_chapter_progress_student_id_course_id_chapter_id_learning_state_id_unique",
+          "nullsNotDistinct": true,
           "columns": [
             "student_id",
             "course_id",
-            "chapter_id"
+            "chapter_id",
+            "learning_state_id"
           ]
         }
       }
@@ -17963,6 +18162,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp(3) with time zone",
@@ -18121,6 +18326,19 @@
         }
       },
       "foreignKeys": {
+        "student_lesson_progress_learning_state_id_course_learning_states_id_fk": {
+          "name": "student_lesson_progress_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "student_lesson_progress",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "student_lesson_progress_student_id_users_id_fk": {
           "name": "student_lesson_progress_student_id_users_id_fk",
           "tableFrom": "student_lesson_progress",
@@ -18176,13 +18394,14 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "student_lesson_progress_student_id_lesson_id_chapter_id_unique": {
-          "name": "student_lesson_progress_student_id_lesson_id_chapter_id_unique",
-          "nullsNotDistinct": false,
+        "student_lesson_progress_student_id_lesson_id_chapter_id_learning_state_id_unique": {
+          "name": "student_lesson_progress_student_id_lesson_id_chapter_id_learning_state_id_unique",
+          "nullsNotDistinct": true,
           "columns": [
             "student_id",
             "lesson_id",
-            "chapter_id"
+            "chapter_id",
+            "learning_state_id"
           ]
         }
       }
@@ -20185,6 +20404,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "learning_state_id": {
+          "name": "learning_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "assessment_id": {
           "name": "assessment_id",
           "type": "uuid",
@@ -20294,39 +20519,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assessment_attempts_tenant_assessment_learner_number_idx": {
-          "name": "assessment_attempts_tenant_assessment_learner_number_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "assessment_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "learner_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "attempt_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -20454,6 +20646,19 @@
         }
       },
       "foreignKeys": {
+        "assessment_attempts_learning_state_id_course_learning_states_id_fk": {
+          "name": "assessment_attempts_learning_state_id_course_learning_states_id_fk",
+          "tableFrom": "assessment_attempts",
+          "tableTo": "course_learning_states",
+          "columnsFrom": [
+            "learning_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "assessment_attempts_assessment_id_assessments_id_fk": {
           "name": "assessment_attempts_assessment_id_assessments_id_fk",
           "tableFrom": "assessment_attempts",
@@ -20495,7 +20700,19 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "assessment_attempts_tenant_assessment_learner_number_idx": {
+          "name": "assessment_attempts_tenant_assessment_learner_number_idx",
+          "nullsNotDistinct": true,
+          "columns": [
+            "tenant_id",
+            "assessment_id",
+            "learner_id",
+            "attempt_number",
+            "learning_state_id"
+          ]
+        }
+      }
     },
     "public.assessment_question_blank_answer_sets": {
       "name": "assessment_question_blank_answer_sets",
@@ -21967,593 +22184,6 @@
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.assistant_messages": {
-      "name": "assistant_messages",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "thread_id": {
-          "name": "thread_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'complete'"
-        },
-        "sources": {
-          "name": "sources",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "client_message_id": {
-          "name": "client_message_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "assistant_messages_tenant_id_idx": {
-          "name": "assistant_messages_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_messages_thread_created_idx": {
-          "name": "assistant_messages_thread_created_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "thread_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_messages_client_id_unique": {
-          "name": "assistant_messages_client_id_unique",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "thread_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "client_message_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "assistant_messages_tenant_id_tenants_id_fk": {
-          "name": "assistant_messages_tenant_id_tenants_id_fk",
-          "tableFrom": "assistant_messages",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_messages_thread_id_assistant_threads_id_fk": {
-          "name": "assistant_messages_thread_id_assistant_threads_id_fk",
-          "tableFrom": "assistant_messages",
-          "tableTo": "assistant_threads",
-          "columnsFrom": [
-            "thread_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.assistant_runs": {
-      "name": "assistant_runs",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "thread_id": {
-          "name": "thread_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_message_id": {
-          "name": "user_message_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "assistant_message_id": {
-          "name": "assistant_message_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "origin": {
-          "name": "origin",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "activity": {
-          "name": "activity",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "workflow_run_id": {
-          "name": "workflow_run_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "error_code": {
-          "name": "error_code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "successful_tool_calls": {
-          "name": "successful_tool_calls",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "readable_tool_calls": {
-          "name": "readable_tool_calls",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "sources": {
-          "name": "sources",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        }
-      },
-      "indexes": {
-        "assistant_runs_tenant_id_idx": {
-          "name": "assistant_runs_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_runs_thread_created_idx": {
-          "name": "assistant_runs_thread_created_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "thread_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_runs_user_message_unique": {
-          "name": "assistant_runs_user_message_unique",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_message_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_runs_active_thread_unique": {
-          "name": "assistant_runs_active_thread_unique",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "thread_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"assistant_runs\".\"status\" in ('pending', 'running')",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "assistant_runs_tenant_id_tenants_id_fk": {
-          "name": "assistant_runs_tenant_id_tenants_id_fk",
-          "tableFrom": "assistant_runs",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_runs_thread_id_assistant_threads_id_fk": {
-          "name": "assistant_runs_thread_id_assistant_threads_id_fk",
-          "tableFrom": "assistant_runs",
-          "tableTo": "assistant_threads",
-          "columnsFrom": [
-            "thread_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_runs_user_id_users_id_fk": {
-          "name": "assistant_runs_user_id_users_id_fk",
-          "tableFrom": "assistant_runs",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_runs_user_message_id_assistant_messages_id_fk": {
-          "name": "assistant_runs_user_message_id_assistant_messages_id_fk",
-          "tableFrom": "assistant_runs",
-          "tableTo": "assistant_messages",
-          "columnsFrom": [
-            "user_message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_runs_assistant_message_id_assistant_messages_id_fk": {
-          "name": "assistant_runs_assistant_message_id_assistant_messages_id_fk",
-          "tableFrom": "assistant_runs",
-          "tableTo": "assistant_messages",
-          "columnsFrom": [
-            "assistant_message_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.assistant_threads": {
-      "name": "assistant_threads",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'New conversation'"
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        },
-        "archived": {
-          "name": "archived",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {
-        "assistant_threads_tenant_id_idx": {
-          "name": "assistant_threads_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "assistant_threads_owner_updated_idx": {
-          "name": "assistant_threads_owner_updated_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "assistant_threads_tenant_id_tenants_id_fk": {
-          "name": "assistant_threads_tenant_id_tenants_id_fk",
-          "tableFrom": "assistant_threads",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_threads_user_id_users_id_fk": {
-          "name": "assistant_threads_user_id_users_id_fk",
-          "tableFrom": "assistant_threads",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
           ],
           "columnsTo": [
             "id"

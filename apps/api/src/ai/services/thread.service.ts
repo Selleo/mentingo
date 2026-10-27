@@ -53,10 +53,14 @@ export class ThreadService {
   async findThread(
     threadId: UUIDType,
     currentUser: ThreadViewer,
+    includeCurrent = false,
   ): Promise<BaseResponse<ResponseThreadBody>> {
     const { userId } = currentUser;
 
-    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
+    const thread = await this.aiRepository.findThread(
+      [eq(aiMentorThreads.id, threadId)],
+      includeCurrent,
+    );
 
     if (!thread) throw new NotFoundException("common.toast.notFound");
 
@@ -87,7 +91,7 @@ export class ThreadService {
     threadId: UUIDType,
     currentUser: ThreadViewer,
   ): Promise<BaseResponse<ResponseThreadMessageBody[]>> {
-    await this.findThread(threadId, currentUser);
+    await this.findThread(threadId, currentUser, true);
 
     const messages = await this.aiRepository.findMessageHistory(threadId);
 

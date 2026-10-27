@@ -38,6 +38,7 @@ export const courseSchema = Type.Object({
 });
 
 export const studentCourseSchema = Type.Object({
+  repetitionCompletedChapterCount: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   ...courseSchema.properties,
   completedChapterCount: Type.Number(),
   enrolled: Type.Optional(Type.Boolean()),
@@ -93,6 +94,8 @@ export const courseAverageQuizScoresSchema = Type.Object({
 });
 
 export const studentCourseProgressionSchema = Type.Object({
+  completedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  repetitionCompletedLessonsCount: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   studentId: UUIDSchema,
   studentName: Type.String(),
   studentEmail: Type.Union([Type.String(), Type.Null()]),

@@ -11,6 +11,10 @@ import { and, asc, desc, eq, exists, gte, inArray, isNull, lt, or, sql } from "d
 
 import { DatabasePg } from "src/common";
 import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
+import {
+  activeLearningState,
+  currentLearningState,
+} from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
@@ -108,7 +112,12 @@ export class StatisticsRepository {
         assessmentAttemptQuestionAnswers,
         eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
       )
-      .where(eq(assessmentAttempts.learnerId, userId));
+      .where(
+        and(
+          eq(assessmentAttempts.learnerId, userId),
+          currentLearningState(assessmentAttempts.learningStateId),
+        ),
+      );
 
     return quizStatsResult;
   }
@@ -763,7 +772,9 @@ export class StatisticsRepository {
              FROM student_lesson_progress slp
                     JOIN chapters c ON slp.chapter_id = c.id
              WHERE slp.completed_at IS NOT NULL
-               AND slp.student_id = ${studentId}
+               AND ${activeLearningState(
+                 sql.raw("slp.learning_state_id"),
+               )} AND slp.student_id = ${studentId}
              ORDER BY slp.completed_at DESC
         LIMIT 1
         ),
@@ -776,7 +787,9 @@ export class StatisticsRepository {
         JOIN chapters c ON l.chapter_id = c.id
         JOIN last_completed_lesson lcl ON c.course_id = lcl.course_id
         LEFT JOIN student_lesson_progress slp ON slp.lesson_id = l.id
-        AND slp.student_id = ${studentId}
+        AND ${activeLearningState(
+          sql.raw("slp.learning_state_id"),
+        )} AND slp.student_id = ${studentId}
       WHERE (c.display_order > (SELECT c2.display_order FROM chapters c2 WHERE c2.id = lcl.chapter_id)
          OR (c.id = lcl.chapter_id AND l.display_order > (SELECT l2.display_order FROM lessons l2 WHERE l2.id = lcl.lesson_id)))
         AND slp.completed_at IS NULL
@@ -792,7 +805,9 @@ export class StatisticsRepository {
         JOIN chapters c ON l.chapter_id = c.id
         JOIN user_courses uc ON c.course_id = uc.course_id
         LEFT JOIN student_lesson_progress slp ON slp.lesson_id = l.id
-        AND slp.student_id = ${studentId}
+        AND ${activeLearningState(
+          sql.raw("slp.learning_state_id"),
+        )} AND slp.student_id = ${studentId}
       WHERE slp.completed_at IS NULL
         AND NOT EXISTS (SELECT 1 FROM last_completed_lesson lcl WHERE lcl.course_id = c.course_id)
       ORDER BY c.course_id, c.display_order, l.display_order
@@ -832,6 +847,7 @@ export class StatisticsRepository {
       JOIN student_courses sc ON sc.course_id = courses.id AND sc.student_id = ${studentId}
       LEFT JOIN student_chapter_progress scp ON chapters.id = scp.chapter_id
         AND scp.student_id = ${studentId}
+        AND ${activeLearningState(sql.raw("scp.learning_state_id"))}
       WHERE sc.status = ${COURSE_ENROLLMENT.ENROLLED};
     `)) as unknown as NextLesson[];
 

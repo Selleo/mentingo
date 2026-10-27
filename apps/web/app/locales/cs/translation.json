@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Opakování: {{completed}} z {{total}} lekcí",
+    "repeat": "Opakovat kurz",
+    "setting": "Povolit opakování kurzu",
+    "settingDescription": "Účastníci mohou dokončený kurz opakovat s novým postupem.",
+    "completedOn": "Dokončeno {{date}}",
+    "progress": "Opakování: {{completed}} z {{total}} kapitol",
+    "errors": {
+      "staleState": "Před pokračováním obnovte kurz.",
+      "unavailable": "Tento kurz nyní nelze opakovat.",
+      "accessDenied": "Nemáte přístup k opakování tohoto kurzu."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatizace a e-maily",
     "templates": "Šablony automatizací",
@@ -6258,6 +6271,8 @@
       "certificate": "Certifikát",
       "uponCompletion": "Po dokončení",
       "notIssuedYet": "Zatím nevydán",
+      "certificateDate": "Vydáno",
+      "certificateExpiry": "Platí do",
       "aboutAuthor": "O autorovi"
     },
     "certificate": {

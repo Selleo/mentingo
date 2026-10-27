@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Repeating: {{completed}} of {{total}} lessons",
+    "repeat": "Repeat course",
+    "setting": "Allow course repetition",
+    "settingDescription": "Learners can repeat a completed course with fresh progress.",
+    "completedOn": "Completed on {{date}}",
+    "progress": "Repeating: {{completed}} of {{total}} chapters",
+    "errors": {
+      "staleState": "Refresh the course before continuing.",
+      "unavailable": "This course cannot be repeated now.",
+      "accessDenied": "You do not have access to repeat this course."
+    }
+  },
   "automationWorkspace": {
     "title": "Automations & emails",
     "templates": "Automation templates",
@@ -6265,6 +6278,8 @@
       "certificate": "Certificate",
       "uponCompletion": "Upon completion",
       "notIssuedYet": "Not issued yet",
+      "certificateDate": "Issued",
+      "certificateExpiry": "Expires",
       "aboutAuthor": "About author"
     },
     "certificate": {

@@ -10,6 +10,7 @@ import { unionAll } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -109,7 +110,8 @@ export class AdminAiThreadsRepository {
       .leftJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
       .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(courses, eq(courses.id, chapters.courseId));
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
+      .where(activeLearningState(aiMentorThreads.learningStateId));
   }
 
   private buildAssistantThreadSummariesQuery() {

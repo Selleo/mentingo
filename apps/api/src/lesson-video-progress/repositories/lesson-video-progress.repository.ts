@@ -3,6 +3,8 @@ import { ENTITY_TYPES } from "@repo/shared";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
+import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
@@ -61,7 +63,10 @@ export class LessonVideoProgressRepository {
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, params.studentId),
+          and(
+            eq(studentLessonProgress.studentId, params.studentId),
+            activeLearningState(studentLessonProgress.learningStateId),
+          ),
         ),
       )
       .where(
@@ -84,6 +89,7 @@ export class LessonVideoProgressRepository {
     const [row] = await dbInstance
       .insert(lessonVideoProgress)
       .values({
+        learningStateId: await activeLearningStateId(dbInstance, params.studentId, params.lessonId),
         studentId: params.studentId,
         lessonId: params.lessonId,
         resourceEntityId: params.resourceEntityId,
@@ -95,6 +101,7 @@ export class LessonVideoProgressRepository {
           lessonVideoProgress.studentId,
           lessonVideoProgress.lessonId,
           lessonVideoProgress.resourceEntityId,
+          lessonVideoProgress.learningStateId,
         ],
         set: {
           durationSeconds: sql`GREATEST(${lessonVideoProgress.durationSeconds}, EXCLUDED.duration_seconds)`,
@@ -124,7 +131,10 @@ export class LessonVideoProgressRepository {
       })
       .where(
         and(
-          eq(lessonVideoProgress.studentId, params.studentId),
+          and(
+            eq(lessonVideoProgress.studentId, params.studentId),
+            activeLearningState(lessonVideoProgress.learningStateId),
+          ),
           eq(lessonVideoProgress.lessonId, params.lessonId),
           eq(lessonVideoProgress.resourceEntityId, params.resourceEntityId),
         ),
@@ -174,7 +184,10 @@ export class LessonVideoProgressRepository {
       })
       .where(
         and(
-          eq(lessonVideoProgress.studentId, params.studentId),
+          and(
+            eq(lessonVideoProgress.studentId, params.studentId),
+            activeLearningState(lessonVideoProgress.learningStateId),
+          ),
           eq(lessonVideoProgress.lessonId, params.lessonId),
           eq(lessonVideoProgress.resourceEntityId, params.resourceEntityId),
         ),
@@ -194,7 +207,10 @@ export class LessonVideoProgressRepository {
       })
       .where(
         and(
-          eq(lessonVideoProgress.studentId, params.studentId),
+          and(
+            eq(lessonVideoProgress.studentId, params.studentId),
+            activeLearningState(lessonVideoProgress.learningStateId),
+          ),
           eq(lessonVideoProgress.lessonId, params.lessonId),
           eq(lessonVideoProgress.resourceEntityId, params.resourceEntityId),
         ),
@@ -220,7 +236,10 @@ export class LessonVideoProgressRepository {
         and(
           eq(lessonVideoProgress.resourceEntityId, resourceEntity.id),
           eq(lessonVideoProgress.lessonId, params.lessonId),
-          eq(lessonVideoProgress.studentId, params.studentId),
+          and(
+            eq(lessonVideoProgress.studentId, params.studentId),
+            activeLearningState(lessonVideoProgress.learningStateId),
+          ),
         ),
       )
       .where(
@@ -251,7 +270,10 @@ export class LessonVideoProgressRepository {
       .where(
         and(
           eq(lessonVideoProgress.lessonId, params.lessonId),
-          eq(lessonVideoProgress.studentId, params.studentId),
+          and(
+            eq(lessonVideoProgress.studentId, params.studentId),
+            activeLearningState(lessonVideoProgress.learningStateId),
+          ),
           inArray(lessonVideoProgress.resourceEntityId, params.resourceEntityIds),
         ),
       );

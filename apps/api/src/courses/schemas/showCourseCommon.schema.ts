@@ -3,10 +3,12 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { chapterSchema, showChapterSchema } from "src/chapter/schemas/chapter.schema";
 import { UUIDSchema } from "src/common";
+import { courseRepetitionSchema } from "src/course-repetition/course-repetition.schema";
 
 import { coursesStatusOptions } from "./courseQuery";
 
 export const commonShowCourseSchema = Type.Object({
+  learningState: Type.Optional(courseRepetitionSchema),
   isArchived: Type.Optional(Type.Boolean()),
   authorId: Type.Optional(UUIDSchema),
   author: Type.Optional(

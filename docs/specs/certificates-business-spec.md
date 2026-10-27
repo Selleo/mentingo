@@ -44,6 +44,10 @@ Course certificate settings are managed from the admin course settings workflow 
 
 Certificate reset actions archive matching active certificates, reset the relevant learner progress, record certificate activity, and optionally send reset emails. Reset scope can target all certificate holders for the course, selected groups, or selected users with active certificates.
 
+Certificate validity and earned course completion are separate. Natural expiry, including expiry caused by applying a shorter validity period, archives the certificate without resetting learning. Earned completion remains earned whether repetition is enabled, disabled or has never been started. These changes do not award completion to learners who have not finished the course.
+
+For opted-in course repetition, starting again preserves the existing certificate until its deadline or successful replacement. Completing repetition issues a new certificate when the course qualifies and archives the previous active certificate as replaced. Failed issuance preserves the prior accepted result and certificate. Explicit administrative reset still clears course learning and removes the temporary repetition. See [Course Repetition](course-repetition-business-spec.md).
+
 ## Key Technical Context
 
 - Profile certificate UI lives under `apps/web/app/modules/Profile/Certificates`.

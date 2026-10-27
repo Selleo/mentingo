@@ -162,7 +162,19 @@ export function CourseStudentsProgressTable({
                 })}
                 value={progressValue}
               />
-              {row.original.completedLessonsCount}/{lessonCount}
+              <div>
+                <div>
+                  {row.original.completedLessonsCount}/{lessonCount}
+                </div>
+                {row.original.repetitionCompletedLessonsCount != null && (
+                  <p className="text-xs text-neutral-700">
+                    {t("courseRepetition.lessonProgress", {
+                      completed: row.original.repetitionCompletedLessonsCount,
+                      total: lessonCount,
+                    })}
+                  </p>
+                )}
+              </div>
             </div>
           );
         },

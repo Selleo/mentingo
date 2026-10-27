@@ -8,7 +8,6 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
-import puppeteer from "puppeteer";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -19,6 +18,7 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { mockCertificateCdn } from "../../../test/helpers/mock-certificate-cdn";
 import { assignSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { ACTIVITY_LOG_ACTION_TYPES } from "../../activity-logs/types";
@@ -64,25 +64,7 @@ describe("CertificatesController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const launch = puppeteer.launch.bind(puppeteer);
-    jest.spyOn(puppeteer, "launch").mockImplementation(async (options) => {
-      const browser = await launch(options);
-      const newPage = browser.newPage.bind(browser);
-      jest.spyOn(browser, "newPage").mockImplementation(async () => {
-        const page = await newPage();
-        await page.setRequestInterception(true);
-        page.on("request", (request) => {
-          // This suite checks real PDF/auth contracts, not Tailwind's external CDN availability.
-          const response =
-            request.url() === "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"
-              ? request.respond({ status: 200, contentType: "application/javascript", body: "" })
-              : request.continue();
-          void response.catch(() => {});
-        });
-        return page;
-      });
-      return browser;
-    });
+    mockCertificateCdn();
 
     const {
       app: testApp,

@@ -10,13 +10,20 @@ import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles
 
 import CourseOverviewActions from "./CourseOverviewActions";
 
+import type { GetCourseResponse } from "~/api/generated-api";
+
 const enrollCourse = vi.fn();
 let currentUser: { id: string; permissions: PermissionKey[] } | undefined;
 let inviteOnlyRegistration = false;
-let course: { enrolled: boolean; id: string; status: "draft" | "published" | "private" };
+let course: Pick<GetCourseResponse["data"], "enrolled" | "id" | "status" | "learningState">;
 let isAdminExperience = false;
 let canEditCourse = false;
 let isCourseStudentModeActive = false;
+let isEffectiveStudentExperience = false;
+
+vi.mock("../../components/CourseRepetition", () => ({
+  CourseRepetition: () => <div role="status">Repetition progress</div>,
+}));
 
 vi.mock("~/api/mutations", () => ({
   useEnrollCourse: () => ({
@@ -50,6 +57,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
     isAdminExperience,
     canEditCourse,
     isCourseStudentModeActive,
+    isEffectiveStudentExperience,
   }),
 }));
 
@@ -90,6 +98,7 @@ describe("CourseOverviewActions", () => {
     isAdminExperience = false;
     canEditCourse = false;
     isCourseStudentModeActive = false;
+    isEffectiveStudentExperience = false;
   });
 
   it("links unauthenticated users to registration when registration is open", () => {
@@ -163,6 +172,51 @@ describe("CourseOverviewActions", () => {
 
     expect(enrollCourse).toHaveBeenCalledWith({ id: "course-1" });
     expect(onEnrollmentCompleted).toHaveBeenCalledOnce();
+  });
+
+  it("hides continue learning after accepted completion", () => {
+    currentUser = { id: "user-1", permissions: [] };
+    course = {
+      enrolled: true,
+      id: "course-1",
+      status: "published",
+      learningState: {
+        enabled: true,
+        current: { id: "current", completedAt: "2026-10-19T12:00:00Z", finishedChapterCount: 4 },
+        repetition: null,
+      },
+    };
+
+    renderActions();
+
+    expect(
+      screen.queryByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
+  });
+
+  it("allows continuing an active repetition while retaining accepted completion", async () => {
+    const onContinueLearning = vi.fn();
+    currentUser = { id: "user-1", permissions: [] };
+    isEffectiveStudentExperience = true;
+    course = {
+      enrolled: true,
+      id: "course-1",
+      status: "published",
+      learningState: {
+        enabled: false,
+        current: { id: "current", completedAt: "2026-10-19T12:00:00Z", finishedChapterCount: 4 },
+        repetition: { id: "repetition", completedAt: null, finishedChapterCount: 1 },
+      },
+    };
+
+    renderActions({ onContinueLearning });
+    await userEvent
+      .setup()
+      .click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON));
+
+    expect(onContinueLearning).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("keeps course actions available on small screens", () => {

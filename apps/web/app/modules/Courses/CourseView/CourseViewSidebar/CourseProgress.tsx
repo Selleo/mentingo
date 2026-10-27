@@ -9,6 +9,7 @@ import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessP
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+import { CourseRepetition } from "../../components/CourseRepetition";
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
@@ -48,6 +49,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         />
       )}
       <div className="flex flex-col gap-y-2">
+        {isEffectiveStudentExperience && <CourseRepetition course={course} />}
         <CopyUrlButton className="gap-x-2" variant="outline">
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>

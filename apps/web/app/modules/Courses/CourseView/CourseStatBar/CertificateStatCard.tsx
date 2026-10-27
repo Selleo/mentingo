@@ -6,7 +6,8 @@ import { cn } from "~/lib/utils";
 import type { TFunction } from "i18next";
 
 type CertificateStatCardProps = {
-  availableLabel?: string;
+  completionDate?: string;
+  expiryDate?: string;
   hasCertificate: boolean;
   isAdminExperience: boolean;
   isCertificateAvailable?: boolean;
@@ -16,11 +17,8 @@ type CertificateStatCardProps = {
 const getCertificateStatusLabel = (
   isAdminExperience: boolean,
   hasCertificate: boolean,
-  isCertificateAvailable: boolean,
-  availableLabel: string | undefined,
   t: TFunction,
 ) => {
-  if (isCertificateAvailable && availableLabel) return availableLabel;
   if (!isAdminExperience) return t("modernCourseView.stats.notIssuedYet");
   return hasCertificate
     ? t("modernCourseView.common.enabled")
@@ -28,7 +26,8 @@ const getCertificateStatusLabel = (
 };
 
 export default function CertificateStatCard({
-  availableLabel,
+  completionDate,
+  expiryDate,
   hasCertificate,
   isAdminExperience,
   isCertificateAvailable = false,
@@ -56,19 +55,36 @@ export default function CertificateStatCard({
         <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
           <Award className="size-6 text-success-500" />
         </div>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
             {t("modernCourseView.stats.certificate")}
           </p>
-          <p className="text-xl font-bold text-neutral-950">
-            {getCertificateStatusLabel(
-              isAdminExperience,
-              hasCertificate,
-              isCertificateAvailable,
-              availableLabel,
-              t,
-            )}
-          </p>
+          {isCertificateAvailable && completionDate ? (
+            <dl className="flex flex-wrap gap-x-5 gap-y-1">
+              <div>
+                <dt className="text-xs text-neutral-800">
+                  {t("modernCourseView.stats.certificateDate")}
+                </dt>
+                <dd className="whitespace-nowrap text-lg font-bold text-neutral-950">
+                  {completionDate}
+                </dd>
+              </div>
+              {expiryDate && (
+                <div>
+                  <dt className="text-xs text-neutral-800">
+                    {t("modernCourseView.stats.certificateExpiry")}
+                  </dt>
+                  <dd className="whitespace-nowrap text-lg font-bold text-neutral-950">
+                    {expiryDate}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          ) : (
+            <p className="text-xl font-bold text-neutral-950">
+              {getCertificateStatusLabel(isAdminExperience, hasCertificate, t)}
+            </p>
+          )}
         </div>
       </div>
     </button>

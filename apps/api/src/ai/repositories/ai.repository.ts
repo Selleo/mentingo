@@ -20,6 +20,8 @@ import {
   type ThreadStatus,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
+import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -100,7 +102,7 @@ export class AiRepository {
     return voiceConfig;
   }
 
-  async findThread(conditions: SQL[]) {
+  async findThread(conditions: SQL[], includeCurrent = false) {
     const [thread] = await this.db
       .select({
         ...getTableColumns(aiMentorThreads),
@@ -108,7 +110,12 @@ export class AiRepository {
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       })
       .from(aiMentorThreads)
-      .where(and(...conditions));
+      .where(
+        and(
+          ...conditions,
+          includeCurrent ? undefined : activeLearningState(aiMentorThreads.learningStateId),
+        ),
+      );
 
     return thread;
   }
@@ -132,19 +139,33 @@ export class AiRepository {
 
   async findLessonIdByThreadId(threadId: UUIDType) {
     const [lessonId] = await this.db
-      .select({ lessonId: lessons.id })
+      .select({ lessonId: lessons.id, courseId: chapters.courseId })
       .from(aiMentorThreads)
       .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .where(eq(aiMentorThreads.id, threadId));
 
-    return lessonId ?? { lessonId: null };
+    return lessonId ?? { lessonId: null, courseId: null };
+  }
+
+  private async getThreadLearningStateId(aiMentorLessonId: string, userId: string, db: DatabasePg) {
+    const [lesson] = await db
+      .select({ id: aiMentorLessons.lessonId })
+      .from(aiMentorLessons)
+      .where(eq(aiMentorLessons.id, aiMentorLessonId));
+    return lesson ? activeLearningStateId(db, userId, lesson.id) : null;
   }
 
   async createThread(data: ThreadBody, dbInstance: DatabasePg = this.db) {
     const [thread] = await dbInstance
       .insert(aiMentorThreads)
-      .values(data)
+      .values({
+        ...data,
+        learningStateId: data.aiMentorLessonId
+          ? await this.getThreadLearningStateId(data.aiMentorLessonId, data.userId, dbInstance)
+          : null,
+      })
       .returning({
         ...getTableColumns(aiMentorThreads),
         userLanguage: sql<SupportedLanguages>`${aiMentorThreads.userLanguage}`,
@@ -162,7 +183,7 @@ export class AiRepository {
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
-      .where(and(...conditions));
+      .where(and(...conditions, activeLearningState(aiMentorThreads.learningStateId)));
   }
 
   async getTokenSumForThread(threadId: UUIDType, archived: boolean) {
@@ -790,13 +811,18 @@ export class AiRepository {
       .update(aiMentorThreads)
       .set({ status: THREAD_STATUS.ARCHIVED })
       .where(
-        inArray(
-          aiMentorThreads.aiMentorLessonId,
-          this.db
-            .select({ id: aiMentorLessons.id })
-            .from(aiMentorLessons)
-            .innerJoin(lessons, eq(aiMentorLessons.lessonId, lessons.id))
-            .where(and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId))),
+        and(
+          activeLearningState(aiMentorThreads.learningStateId),
+          inArray(
+            aiMentorThreads.aiMentorLessonId,
+            this.db
+              .select({ id: aiMentorLessons.id })
+              .from(aiMentorLessons)
+              .innerJoin(lessons, eq(aiMentorLessons.lessonId, lessons.id))
+              .where(
+                and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId)),
+              ),
+          ),
         ),
       );
   }
@@ -812,6 +838,7 @@ export class AiRepository {
         and(
           eq(studentLessonProgress.lessonId, lessonId),
           eq(studentLessonProgress.studentId, userId),
+          activeLearningState(studentLessonProgress.learningStateId),
         ),
       );
   }
@@ -831,6 +858,7 @@ export class AiRepository {
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
           eq(studentLessonProgress.studentId, userId),
+          activeLearningState(studentLessonProgress.learningStateId),
         ),
       )
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))

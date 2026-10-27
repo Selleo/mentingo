@@ -29,6 +29,7 @@ import {
   primaryKey,
   smallint,
   text,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -43,7 +44,7 @@ import {
   withTenantIdIndex,
 } from "./utils";
 
-import { lessons, users } from ".";
+import { courseLearningStates, lessons, users } from ".";
 
 export const assessments = pgTable(
   "assessments",
@@ -276,6 +277,9 @@ export const assessmentAttempts = pgTable(
   "assessment_attempts",
   {
     ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
     assessmentId: uuid("assessment_id")
       .references(() => assessments.id, { onDelete: "cascade" })
       .notNull(),
@@ -309,12 +313,15 @@ export const assessmentAttempts = pgTable(
   },
   (table) => ({
     ...withTenantIdIndex("assessment_attempts")(table),
-    attemptUniqueIdx: uniqueIndex("assessment_attempts_tenant_assessment_learner_number_idx").on(
-      table.tenantId,
-      table.assessmentId,
-      table.learnerId,
-      table.attemptNumber,
-    ),
+    attemptUniqueIdx: unique("assessment_attempts_tenant_assessment_learner_number_idx")
+      .on(
+        table.tenantId,
+        table.assessmentId,
+        table.learnerId,
+        table.attemptNumber,
+        table.learningStateId,
+      )
+      .nullsNotDistinct(),
     learnerAssessmentStartedIdx: index(
       "assessment_attempts_tenant_learner_assessment_started_idx",
     ).on(table.tenantId, table.learnerId, table.assessmentId, table.startedAt),

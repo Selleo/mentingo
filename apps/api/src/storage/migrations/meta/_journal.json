@@ -1573,15 +1573,29 @@
     {
       "idx": 224,
       "version": "7",
-      "when": 1793009260790,
-      "tag": "0224_core_assistant",
+      "when": 1793005794509,
+      "tag": "0224_course_repetition_states",
       "breakpoints": true
     },
     {
       "idx": 225,
       "version": "7",
-      "when": 1793009273622,
-      "tag": "0225_enable_assistant_tenant_rls",
+      "when": 1793005806808,
+      "tag": "0225_course_repetition_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1793091700114,
+      "tag": "0226_core_assistant",
+      "breakpoints": true
+    },
+    {
+      "idx": 227,
+      "version": "7",
+      "when": 1793091706496,
+      "tag": "0227_enable_assistant_tenant_rls",
       "breakpoints": true
     }
   ]

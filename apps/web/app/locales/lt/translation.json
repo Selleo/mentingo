@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Kartojimas: {{completed}} iš {{total}} pamokų",
+    "repeat": "Kartoti kursą",
+    "setting": "Leisti kartoti kursą",
+    "settingDescription": "Dalyviai gali kartoti baigtą kursą ir pradėti mokymosi pažangą iš naujo.",
+    "completedOn": "Baigta {{date}}",
+    "progress": "Kartojimas: {{completed}} iš {{total}} skyrių",
+    "errors": {
+      "staleState": "Prieš tęsdami atnaujinkite kursą.",
+      "unavailable": "Šiuo metu kurso kartoti negalima.",
+      "accessDenied": "Neturite teisės kartoti šio kurso."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatizacijos ir el. laiškai",
     "templates": "Automatizacijų šablonai",
@@ -6254,6 +6267,8 @@
       "certificate": "Sertifikatas",
       "uponCompletion": "Baigus kursą",
       "notIssuedYet": "Dar neišduotas",
+      "certificateDate": "Išduota",
+      "certificateExpiry": "Galioja iki",
       "aboutAuthor": "Apie autorių"
     },
     "certificate": {

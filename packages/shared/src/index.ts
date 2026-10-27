@@ -25,6 +25,7 @@ export * from "./constants/course";
 export * from "./constants/courseChat";
 export * from "./constants/courseDuplication";
 export * from "./constants/courseEnrollment";
+export * from "./constants/courseLearningState";
 export * from "./constants/dashboard";
 export * from "./constants/emailBranding";
 export * from "./constants/entityTypes";

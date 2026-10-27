@@ -38,7 +38,7 @@ export class JudgeService {
     private readonly promptService: PromptService,
   ) {}
 
-  async runJudge(data: ThreadOwnershipBody, viewer: JudgeViewer) {
+  async evaluate(data: ThreadOwnershipBody, viewer: JudgeViewer) {
     const thread = await this.threadService.findThread(data.threadId, {
       userId: viewer.userId,
       permissions: viewer.permissions,
@@ -124,9 +124,7 @@ export class JudgeService {
       rubric,
     );
 
-    await this.persistJudgement(data.threadId, thread.data.userLanguage, rubric, response);
-
-    return { data: { ...response, status: THREAD_STATUS.COMPLETED } };
+    return { data: response, rubric };
   }
 
   private async getRubric(
@@ -140,7 +138,7 @@ export class JudgeService {
     return { ...context, rubric: context.rubric };
   }
 
-  private async persistJudgement(
+  async persistJudgement(
     threadId: UUIDType,
     language: SupportedLanguages,
     rubric: AiJudgeRubric,

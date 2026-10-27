@@ -107,6 +107,7 @@ export const useVideoCoverageTracker = (
   const completionSyncRequestedRef = useRef(false);
   const {
     resourceEntityId,
+    learningStateId,
     initialCoveragePercent,
     initialDurationSeconds,
     initialIsWatched,
@@ -142,6 +143,7 @@ export const useVideoCoverageTracker = (
     isSeekingRef.current = false;
   }, [
     resourceEntityId,
+    learningStateId,
     initialCoveragePercent,
     initialDurationSeconds,
     initialIsWatched,
@@ -249,6 +251,7 @@ export const useVideoCoverageTracker = (
       try {
         const progress = await upsertVideoProgress({
           lessonId: currentOptions.lessonId,
+          learningStateId: currentOptions.learningStateId,
           resourceEntityId: currentOptions.resourceEntityId,
           durationSeconds: currentDuration,
           bucketSize: currentOptions.initialBucketSizeSeconds ?? DEFAULT_BUCKET_SIZE_SECONDS,
