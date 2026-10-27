@@ -7280,9 +7280,9 @@
       "in_progress": "Vykdomas",
       "completed": "Baigtas"
     },
-    "PHISHING_API_KEY": "PHISHING_API_KEY",
-    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_API_KEY": "Sukčiavimo simuliacijų API raktas",
+    "PHISHING_BASE_URL": "Sukčiavimo simuliacijų bazinis URL",
+    "PHISHING_WEBHOOK_SECRET": "Sukčiavimo simuliacijų webhook paslaptis"
   },
   "automations": {
     "success": {

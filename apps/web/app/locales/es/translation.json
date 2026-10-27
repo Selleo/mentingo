@@ -7225,9 +7225,9 @@
       "in_progress": "En curso",
       "completed": "Completado"
     },
-    "PHISHING_API_KEY": "PHISHING_API_KEY",
-    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_API_KEY": "Clave API de phishing",
+    "PHISHING_BASE_URL": "URL base de phishing",
+    "PHISHING_WEBHOOK_SECRET": "Secreto del webhook de phishing"
   },
   "reports": {
     "errors": {

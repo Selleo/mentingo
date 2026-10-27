@@ -52,8 +52,8 @@ describe("Environment page", () => {
     renderWith({ withQuery: true }).render(<RemixStub />);
     expect(screen.getByRole("heading", { name: "Competencies" })).toBeVisible();
 
-    const serviceUrl = screen.getByLabelText("Competencies service URL");
-    const apiKey = screen.getByLabelText("Competencies API key");
+    const serviceUrl = screen.getByLabelText("Competencies Service URL");
+    const apiKey = screen.getByLabelText("Competencies API Key");
     expect(serviceUrl).toBeDisabled();
     expect(apiKey).toBeDisabled();
     expect(api.saveSecrets).not.toHaveBeenCalled();

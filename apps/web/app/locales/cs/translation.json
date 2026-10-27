@@ -7285,9 +7285,9 @@
       "in_progress": "Probíhá",
       "completed": "Dokončen"
     },
-    "PHISHING_API_KEY": "PHISHING_API_KEY",
-    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_API_KEY": "API klíč phishingu",
+    "PHISHING_BASE_URL": "Základní URL phishingu",
+    "PHISHING_WEBHOOK_SECRET": "Tajný klíč webhooku phishingu"
   },
   "reports": {
     "errors": {

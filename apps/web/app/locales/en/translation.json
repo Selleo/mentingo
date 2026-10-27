@@ -2510,15 +2510,15 @@
   "adminEnvsView": {
     "groups": {
       "googleSignIn": {
-        "title": "Google sign-in",
+        "title": "Google Sign-In",
         "description": "Let users sign in with their Google account."
       },
       "microsoftSignIn": {
-        "title": "Microsoft sign-in",
+        "title": "Microsoft Sign-In",
         "description": "Let users sign in with their Microsoft account."
       },
       "slackSignIn": {
-        "title": "Slack sign-in",
+        "title": "Slack Sign-In",
         "description": "Let users sign in with their Slack account."
       },
       "microsoftCalendar": {
@@ -2530,15 +2530,15 @@
         "description": "Stripe keys for selling courses and verifying payment webhooks."
       },
       "videoStreaming": {
-        "title": "Video streaming",
+        "title": "Video Streaming",
         "description": "Bunny Stream library used to upload, encode, and play videos."
       },
       "artificialIntelligence": {
-        "title": "Artificial intelligence",
+        "title": "Artificial Intelligence",
         "description": "Keys for AI mentors, generation, and the Luma course assistant."
       },
       "liveTraining": {
-        "title": "Live training",
+        "title": "Live Training",
         "description": "LiveKit server used for live training sessions."
       },
       "competencies": {
@@ -2546,7 +2546,7 @@
         "description": "Connection to the competencies service."
       },
       "phishingSimulations": {
-        "title": "Phishing simulations",
+        "title": "Phishing Simulations",
         "description": "Connection to the phishing simulation service."
       }
     },
@@ -2555,10 +2555,10 @@
     "updateSuccessful": "Successfully updated secrets",
     "form": {
       "COMPETENCIES_BASE_URL": {
-        "label": "Competencies service URL"
+        "label": "Competencies Service URL"
       },
       "COMPETENCIES_API_KEY": {
-        "label": "Competencies API key"
+        "label": "Competencies API Key"
       },
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "MICROSOFT_CLIENT_ID": {
@@ -7288,9 +7288,9 @@
       "in_progress": "In progress",
       "completed": "Completed"
     },
-    "PHISHING_API_KEY": "PHISHING_API_KEY",
-    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_API_KEY": "Phishing API Key",
+    "PHISHING_BASE_URL": "Phishing Base URL",
+    "PHISHING_WEBHOOK_SECRET": "Phishing Webhook Secret"
   },
   "reports": {
     "errors": {

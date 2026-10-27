@@ -7267,9 +7267,9 @@
       "in_progress": "In Bearbeitung",
       "completed": "Abgeschlossen"
     },
-    "PHISHING_API_KEY": "PHISHING_API_KEY",
-    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_API_KEY": "Phishing-API-Schlüssel",
+    "PHISHING_BASE_URL": "Phishing-Basis-URL",
+    "PHISHING_WEBHOOK_SECRET": "Phishing-Webhook-Geheimnis"
   },
   "automations": {
     "success": {
