@@ -47,12 +47,14 @@ export function useAssistantScope() {
   return actor ? currentAssistantScope() : undefined;
 }
 
-useAuthStore.subscribe((state, previous) => {
+useAuthStore.subscribe((state) => {
   // Explicit logout also matters when the persisted flag was already false.
   if (!state.isLoggedIn) {
     revoked = true;
     advance();
-  } else if (state.isLoggedIn !== previous.isLoggedIn) advance();
+  }
+  // Synchronizing the UI login flag must not invalidate an in-flight cookie check.
+  // Only a validated current-user response can restore a revoked Assistant session.
 });
 useCurrentUserStore.subscribe((state, previous) => {
   if (
@@ -68,7 +70,6 @@ let lastIdentity = JSON.stringify(currentAssistantScope());
 queryClient.getQueryCache().subscribe((event) => {
   if (event.query.queryKey.length !== 1 || event.query.queryKey[0] !== "currentUser") return;
   if (event.type === "updated") {
-    if (event.action.type === "fetch") currentUserFetchGeneration = generation;
     if (event.action.type === "success") {
       const actor = (event.query.state.data as CurrentUserResponse | null)?.data;
       const validated =
@@ -86,6 +87,9 @@ queryClient.getQueryCache().subscribe((event) => {
     lastIdentity = identity;
     advance();
   }
+  // Reconcile any revoked identity before recording this request's epoch.
+  if (event.type === "updated" && event.action.type === "fetch")
+    currentUserFetchGeneration = generation;
 });
 
 export class AssistantSessionChangedError extends Error {

@@ -125,6 +125,33 @@ describe("Assistant private cache isolation", () => {
     expect(useAuthStore.getState().isLoggedIn).toBe(false);
   });
 
+  it.each([false, true])(
+    "restores a fresh cookie session without clearing cached identity (sync login flag: %s)",
+    async (syncLoginFlag) => {
+      act(() => useAuthStore.setState({ isLoggedIn: false }));
+      const held = deferred();
+      let refresh!: Promise<unknown>;
+      act(() => {
+        refresh = queryClient.fetchQuery({
+          queryKey: ["currentUser"],
+          queryFn: () => held.promise,
+          staleTime: 0,
+        });
+      });
+      render(
+        <Wrapper>
+          <HistoryAndTranscript />
+        </Wrapper>,
+      );
+      if (syncLoginFlag) act(() => useAuthStore.setState({ isLoggedIn: true }));
+      await act(async () => {
+        held.resolve({ data: userA } as never);
+        await refresh;
+      });
+      await waitFor(() => expect(ApiClient.api.assistantControllerListThreads).toHaveBeenCalled());
+    },
+  );
+
   it("hides cached content after logout even when the old current-user query remains cached", async () => {
     vi.mocked(ApiClient.api.assistantControllerListThreads).mockResolvedValue(
       response(page([{ id: "a", title: "A confidential title" }])),
