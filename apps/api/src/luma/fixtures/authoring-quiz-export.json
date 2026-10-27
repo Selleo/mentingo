@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "exportId": "00000000-0000-4000-8000-000000000003",
+  "sessionId": "00000000-0000-4000-8000-000000000002",
+  "courseId": "00000000-0000-4000-8000-000000000001",
+  "language": "en",
+  "exportHash": "d5a442a35044b17ce0173d832998926f97f7bacc0fe58d45bf213cd3049fee9c",
+  "proposalIds": ["00000000-0000-4000-8000-000000000004"],
+  "operations": [
+    {
+      "operationId": "00000000-0000-4000-8000-000000000005",
+      "targetId": "00000000-0000-4000-8000-000000000006",
+      "language": "en",
+      "baselineHash": null,
+      "dependencies": [],
+      "type": "lesson.create",
+      "chapterId": "00000000-0000-4000-8000-000000000007",
+      "payload": {
+        "lessonType": "quiz",
+        "title": "Safety quiz",
+        "description": "",
+        "thresholdScore": 70,
+        "attemptsLimit": null,
+        "quizCooldownInHours": null,
+        "questions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000008",
+            "questionType": "single_choice",
+            "displayOrder": 0,
+            "maximumPoints": "1",
+            "gradingMode": "automatic",
+            "prompt": "Choose the safe action",
+            "title": "Safe action",
+            "description": null,
+            "photoS3Key": null,
+            "options": [
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "displayOrder": 0,
+                "isCorrect": true,
+                "label": "Stop and check"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "displayOrder": 1,
+                "isCorrect": false,
+                "label": "Ignore the warning"
+              }
+            ],
+            "trueFalseStatements": [],
+            "scaleOptions": [],
+            "openTextSettings": null,
+            "blanks": [],
+            "dragAndDropOptions": []
+          }
+        ]
+      }
+    }
+  ],
+  "assets": [],
+  "createdAt": "2026-10-26T12:00:00Z"
+}
