@@ -125,6 +125,19 @@ describe("Assistant private cache isolation", () => {
     expect(useAuthStore.getState().isLoggedIn).toBe(false);
   });
 
+  it("accepts the first observed current-user response without invalidating itself", async () => {
+    queryClient.clear();
+    const held = deferred();
+    vi.mocked(ApiClient.api.authControllerCurrentUser).mockReturnValue(held.promise);
+    render(
+      <Wrapper>
+        <HistoryAndTranscript />
+      </Wrapper>,
+    );
+    await act(async () => held.resolve({ data: { data: userA } } as never));
+    await waitFor(() => expect(ApiClient.api.assistantControllerListThreads).toHaveBeenCalled());
+  });
+
   it.each([false, true])(
     "restores a fresh cookie session without clearing cached identity (sync login flag: %s)",
     async (syncLoginFlag) => {
