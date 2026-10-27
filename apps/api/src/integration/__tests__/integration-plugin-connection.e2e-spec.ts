@@ -1,4 +1,5 @@
 import { randomUUID, createHmac } from "node:crypto";
+import { lookup } from "node:dns/promises";
 import { createServer } from "node:http";
 
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
@@ -18,7 +19,12 @@ import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
+jest.mock("node:dns/promises", () => ({ lookup: jest.fn() }));
+
 describe("plugin connection (e2e)", () => {
+  beforeEach(() => {
+    jest.mocked(lookup).mockResolvedValue([{ address: "93.184.216.34", family: 4 }] as never);
+  });
   let app: INestApplication;
   let db: DatabasePg;
   let dbAdmin: DatabasePg;

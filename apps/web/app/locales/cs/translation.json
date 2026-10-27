@@ -6163,7 +6163,8 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id",
-      "invalidPluginOrigin": "Použijte HTTPS původ pluginu bez cesty (HTTP localhost je povolen při vývoji)"
+      "invalidPluginOrigin": "Použijte HTTPS původ pluginu bez cesty (HTTP localhost je povolen při vývoji)",
+      "pluginAddressUnavailable": "Nepodařilo se ověřit adresu pluginu. Zkuste to znovu."
     }
   },
   "luma": {

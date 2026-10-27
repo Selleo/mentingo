@@ -1,9 +1,13 @@
+import { lookup } from "node:dns/promises";
+
 import { CompetenciesApiError } from "@mentingo/competencies-sdk";
-import { NotFoundException, PayloadTooLargeException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException, PayloadTooLargeException } from "@nestjs/common";
 
 import { dbAls } from "src/storage/db/db-als.store";
 
 import { CompetenciesClientService } from "./competencies-client.service";
+
+jest.mock("node:dns/promises", () => ({ lookup: jest.fn() }));
 
 describe("CompetenciesClientService.isConfigured", () => {
   function setup(getEnv: jest.Mock) {
@@ -59,5 +63,37 @@ describe("CompetenciesClientService.isConfigured", () => {
         throw new CompetenciesApiError(413);
       }),
     ).rejects.toBeInstanceOf(PayloadTooLargeException);
+  });
+
+  it("rechecks a saved plugin hostname before each request when its DNS changes", async () => {
+    jest
+      .mocked(lookup)
+      .mockResolvedValueOnce([{ address: "93.184.216.34", family: 4 }] as never)
+      .mockResolvedValueOnce([{ address: "127.0.0.1", family: 4 }] as never);
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(Response.json({ capabilities: { competencies: { enabled: true } } }));
+    const service = setup(
+      jest.fn(async (name: string) => ({
+        value:
+          name === "COMPETENCIES_BASE_URL"
+            ? "https://plugins.example.test"
+            : "test-only-plugin-key",
+      })),
+    );
+
+    try {
+      await dbAls.run({ tenantId: "tenant" }, async () => {
+        await expect(service.run((client) => client.configuration())).resolves.toEqual({
+          capabilities: { competencies: { enabled: true } },
+        });
+        await expect(service.run((client) => client.configuration())).rejects.toBeInstanceOf(
+          ForbiddenException,
+        );
+      });
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      fetch.mockRestore();
+    }
   });
 });

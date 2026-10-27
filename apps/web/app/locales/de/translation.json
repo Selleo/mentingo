@@ -6150,7 +6150,8 @@
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header",
-      "invalidPluginOrigin": "Verwenden Sie einen HTTPS-Plugin-Ursprung ohne Pfad (HTTP localhost ist in der Entwicklung erlaubt)"
+      "invalidPluginOrigin": "Verwenden Sie einen HTTPS-Plugin-Ursprung ohne Pfad (HTTP localhost ist in der Entwicklung erlaubt)",
+      "pluginAddressUnavailable": "Die Plugin-Adresse konnte nicht überprüft werden. Versuchen Sie es erneut."
     }
   },
   "luma": {

@@ -5697,7 +5697,8 @@
       "ownerNotAdmin": "Le propriétaire de la clé API ne dispose plus des autorisations d'administrateur",
       "missingApiKeyHeader": "En-tête X-API-Key manquant",
       "missingTenantIdHeader": "En-tête X-Tenant-Id manquant",
-      "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)"
+      "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)",
+      "pluginAddressUnavailable": "Impossible de vérifier l'adresse du module. Réessayez."
     }
   },
   "courseDuplication": {

@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
-import { matchesRequirement } from "~/common/permissions/permission.utils";
 
 import { Navigation } from "./Navigation";
 import { useNavigationStore } from "./stores/navigationStore";

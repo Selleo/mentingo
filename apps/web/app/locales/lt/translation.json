@@ -6159,7 +6159,8 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės",
-      "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)"
+      "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)",
+      "pluginAddressUnavailable": "Nepavyko patikrinti papildinio adreso. Bandykite dar kartą."
     }
   },
   "luma": {

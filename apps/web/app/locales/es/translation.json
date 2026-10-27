@@ -5912,7 +5912,8 @@
       "ownerNotAdmin": "El propietario de la clave API ya no tiene permisos de administrador",
       "missingApiKeyHeader": "Falta el encabezado X-API-Key",
       "missingTenantIdHeader": "Falta el encabezado X-Tenant-Id",
-      "invalidPluginOrigin": "Usa un origen de plugin HTTPS sin ruta (HTTP localhost está permitido en desarrollo)"
+      "invalidPluginOrigin": "Usa un origen de plugin HTTPS sin ruta (HTTP localhost está permitido en desarrollo)",
+      "pluginAddressUnavailable": "No se pudo verificar la dirección del complemento. Inténtalo de nuevo."
     }
   },
   "courseDuplication": {

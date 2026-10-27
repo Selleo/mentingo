@@ -1,3 +1,5 @@
+import { lookup } from "node:dns/promises";
+
 import { NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PERMISSIONS } from "@repo/shared";
@@ -14,11 +16,16 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { EncryptedEnvBody } from "src/env/env.schema";
 import type { EnvRepository } from "src/env/repositories/env.repository";
 
+jest.mock("node:dns/promises", () => ({ lookup: jest.fn() }));
 jest.mock("src/permissions/permissions.service", () => ({ PermissionsService: class {} }));
 jest.mock("src/super-admin/tenants.service", () => ({ TenantsService: class {} }));
 jest.mock("./integration.repository", () => ({ IntegrationRepository: class {} }));
 
 describe("Integration tenant API key updates", () => {
+  beforeEach(() => {
+    jest.mocked(lookup).mockReset();
+    jest.mocked(lookup).mockResolvedValue([{ address: "93.184.216.34", family: 4 }] as never);
+  });
   const tenantId = "00000000-0000-4000-8000-000000000001";
   const managingTenantId = "00000000-0000-4000-8000-000000000002";
   const apiKey = "test-only-luma-key";
@@ -69,6 +76,45 @@ describe("Integration tenant API key updates", () => {
       runWithTenantTransaction,
     };
   }
+
+  it("rejects an invalid competency origin before opening a tenant transaction", async () => {
+    const { service, persisted, runWithTenantTransaction } = createService();
+    await expect(
+      service.updateTenantApiKeysForIntegration(
+        tenantId,
+        { name: "COMPETENCIES_BASE_URL", value: "http://plugins.lms.localhost" },
+        actor,
+        keyTenant,
+      ),
+    ).rejects.toThrow("integrationApiKey.errors.invalidPluginOrigin");
+    expect(runWithTenantTransaction).not.toHaveBeenCalled();
+    expect(persisted.size).toBe(0);
+  });
+
+  it("validates the admin environment save before persisting any secrets", async () => {
+    const { envService, bulkUpsertEnv, publish } = createService();
+    await expect(
+      envService.bulkUpsertEnv(
+        [
+          { name: "COMPETENCIES_API_KEY", value: "test-only-plugin-key" },
+          { name: "COMPETENCIES_BASE_URL", value: "http://plugins.lms.localhost" },
+        ],
+        actor,
+      ),
+    ).rejects.toThrow("integrationApiKey.errors.invalidPluginOrigin");
+    expect(bulkUpsertEnv).not.toHaveBeenCalled();
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it("preserves clearing the competency origin", async () => {
+    const { envService } = createService();
+    await envService.bulkUpsertEnv([{ name: "COMPETENCIES_BASE_URL", value: "" }]);
+    expect(lookup).not.toHaveBeenCalled();
+    await expect(envService.getEnv("COMPETENCIES_BASE_URL")).resolves.toEqual({
+      name: "COMPETENCIES_BASE_URL",
+      value: "",
+    });
+  });
 
   it("encrypts only the path tenant's key and returns no secret", async () => {
     const { service, envService, persisted, runWithTenantTransaction, publish } = createService();

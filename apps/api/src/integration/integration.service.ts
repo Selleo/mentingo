@@ -3,7 +3,6 @@ import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 import { createCompetenciesClient } from "@mentingo/competencies-sdk";
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import {
-  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -22,7 +21,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantsService } from "src/super-admin/tenants.service";
 
 import { IntegrationRepository } from "./integration.repository";
-import { toPluginOrigin } from "./utils/integration-plugin-origin.utils";
+import { isAllowedPluginOrigin, toPluginOrigin } from "./utils/integration-plugin-origin.utils";
 import { assertCanManageTenants } from "./utils/integration-tenant-access.utils";
 
 import type {
@@ -224,8 +223,11 @@ export class IntegrationService {
     const tenant = await this.integrationRepository.getTenantById(tenantId);
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
 
+    const values = await this.envService.prepareEnvValues([
+      { name: input.name, value: input.value },
+    ]);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
-      this.envService.bulkUpsertEnv([{ name: input.name, value: input.value }], {
+      this.envService.persistEnvValues(values, {
         ...actor,
         tenantId,
       }),
@@ -255,15 +257,13 @@ export class IntegrationService {
     const tenant = await this.integrationRepository.getTenantById(tenantId);
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
     const origin = await toPluginOrigin(input.baseUrl);
+    const values = await this.envService.prepareEnvValues([
+      { name: "PHISHING_BASE_URL", value: origin },
+      { name: "PHISHING_API_KEY", value: input.apiKey },
+      { name: "PHISHING_WEBHOOK_SECRET", value: input.webhookSecret },
+    ]);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
-      this.envService.bulkUpsertEnv(
-        [
-          { name: "PHISHING_BASE_URL", value: origin },
-          { name: "PHISHING_API_KEY", value: input.apiKey },
-          { name: "PHISHING_WEBHOOK_SECRET", value: input.webhookSecret },
-        ],
-        { ...actor, tenantId },
-      ),
+      this.envService.persistEnvValues(values, { ...actor, tenantId }),
     );
     return { tenantId };
   }
@@ -316,34 +316,12 @@ export class IntegrationService {
     assertCanManageTenants(actor, keyTenant);
     if (!(await this.integrationRepository.getTenantById(tenantId)))
       throw new NotFoundException("superAdminTenants.error.notFound");
-    let url: URL;
-    try {
-      url = new URL(input.baseUrl);
-    } catch {
-      throw new BadRequestException("Invalid plugin URL");
-    }
-    const local =
-      process.env.NODE_ENV !== "production" &&
-      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
-    if (
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== "/" ||
-      !(url.protocol === "https:" || (local && url.protocol === "http:"))
-    )
-      throw new BadRequestException(
-        "Use an HTTPS plugin origin (HTTP localhost is allowed in development)",
-      );
+    const values = await this.envService.prepareEnvValues([
+      { name: "COMPETENCIES_BASE_URL", value: input.baseUrl },
+      { name: "COMPETENCIES_API_KEY", value: input.apiKey },
+    ]);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
-      this.envService.bulkUpsertEnv(
-        [
-          { name: "COMPETENCIES_BASE_URL", value: url.origin },
-          { name: "COMPETENCIES_API_KEY", value: input.apiKey },
-        ],
-        { ...actor, tenantId },
-      ),
+      this.envService.persistEnvValues(values, { ...actor, tenantId }),
     );
     return { tenantId };
   }
@@ -363,6 +341,8 @@ export class IntegrationService {
             this.envService.getEnv(name),
           ),
         );
+        if (!(await isAllowedPluginOrigin(baseUrl.value)))
+          return { tenantId, reachable: false, enabled: false };
         const configuration = await createCompetenciesClient({
           tenantId,
           baseURL: baseUrl.value,

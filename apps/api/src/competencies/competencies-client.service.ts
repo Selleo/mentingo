@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 
 import { EnvService } from "src/env/services/env.service";
+import { isAllowedPluginOrigin } from "src/integration/utils/integration-plugin-origin.utils";
 import { dbAls } from "src/storage/db/db-als.store";
 
 @Injectable()
@@ -41,6 +42,8 @@ export class CompetenciesClientService {
       }),
     );
     if (!tenantId || !apiKey || !baseURL) throw new ForbiddenException("competencies.unavailable");
+    if (!(await isAllowedPluginOrigin(baseURL)))
+      throw new ForbiddenException("competencies.unavailable");
     return createCompetenciesClient({ tenantId, apiKey, baseURL });
   }
   async run<T>(

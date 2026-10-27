@@ -5975,7 +5975,8 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header",
-      "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)"
+      "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)",
+      "pluginAddressUnavailable": "Could not verify the plugin address. Try again."
     }
   },
   "courseDuplication": {

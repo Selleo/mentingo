@@ -6024,7 +6024,8 @@
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id",
-      "invalidPluginOrigin": "Użyj adresu wtyczki HTTPS bez ścieżki (HTTP localhost jest dozwolony w środowisku deweloperskim)"
+      "invalidPluginOrigin": "Użyj adresu wtyczki HTTPS bez ścieżki (HTTP localhost jest dozwolony w środowisku deweloperskim)",
+      "pluginAddressUnavailable": "Nie udało się sprawdzić adresu wtyczki. Spróbuj ponownie."
     }
   },
   "courseDuplication": {

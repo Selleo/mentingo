@@ -6,6 +6,10 @@ The core `/api/competencies/*` module is a server-side proxy for the connected c
 
 Connect the existing Mentingo tenant through Mission Control, or configure its encrypted `COMPETENCIES_BASE_URL` and `COMPETENCIES_API_KEY`. The URL is the platform origin without an API suffix. The key must belong to the same tenant and carry the independent `competencies` scope. The connection endpoints are `PUT/GET /api/integration/tenants/:tenantId/plugins/competencies`, protected by the existing managing-tenant integration-key rules. The status endpoint returns reachability and enabled state, never a key.
 
+Plugin origins follow the shared integration URL policy: HTTPS with public DNS addresses, or plain loopback hosts outside production (for example, `http://localhost:3100`). Named local hosts such as `http://plugins.lms.localhost` are not accepted as plugin origins. Saved origins are checked again before competency requests.
+
+The same validation applies to competency URLs saved through admin environment settings and integration endpoints. DNS validation has a five-second deadline; if it expires, retry the operation after checking connectivity.
+
 `competencies.use` permits entry within the actor's scope. `competencies.manage` permits catalog/profile administration and condition overrides. Core rebuilds actor context from current active account/role data and group-manager relationships. The SDK transmits it only between servers. Browser bodies cannot supply permissions or managed subjects. Ordinary evidence review and external-loss revocation require designated manual-condition verifiers; administrative condition overrides are a separate operation.
 
 Attachments pass through existing file validation before private plugin storage. The file limit is separate from the bounded multipart request limit, which includes trusted actor scope and metadata. Downloads recheck scope before delivery. Disabling the tenant's plugin entitlement preserves data and blocks protected actions and automatic processing.
