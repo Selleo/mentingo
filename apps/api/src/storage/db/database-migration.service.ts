@@ -62,10 +62,13 @@ export class DatabaseMigrationService {
       }
       await migrate(drizzle(admin), { migrationsFolder: join(__dirname, "../migrations") });
       await this.ensureWorkflow(admin, source);
-      await this.configureRuntimeRole(admin, role);
-      // Graphile installs/upgrades its schema during construction, using the existing app role.
-      const workerUtils = await makeWorkerUtils({ connectionString: appUrl });
+      // Fresh Graphile installation requires database CREATE privileges. Use the migrator,
+      // then transfer only its runtime objects to the restricted application role.
+      const workerUtils = await makeWorkerUtils({
+        connectionString: this.configService.getOrThrow<string>("database.urlAdmin"),
+      });
       await workerUtils.release();
+      await this.configureRuntimeRole(admin, role);
       if (connectionLost) throw new Error("Migration lock connection was lost");
       this.logger.log("Database migrations completed");
     } catch (error) {

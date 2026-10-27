@@ -304,6 +304,23 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await smokeQueue(runtimeUrl.href);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
   });
+  it("initializes a fresh queue for a restricted app role without database CREATE privileges", async () => {
+    const { sql, connectionString } = await database("restricted_first_boot");
+    await sql.unsafe("CREATE ROLE fresh_workflow_runtime LOGIN PASSWORD 'fresh_workflow_test'");
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "fresh_workflow_runtime";
+    runtimeUrl.password = "fresh_workflow_test";
+    const runtimeSql = postgres(runtimeUrl.href, { max: 1 });
+    connections.push(runtimeSql);
+    const [privileges] = await runtimeSql`
+      SELECT has_database_privilege(current_database(), 'CREATE') AS can_create
+    `;
+    expect(privileges.can_create).toBe(false);
+    await bootstrap(connectionString, runtimeUrl.href);
+    await smokeQueue(runtimeUrl.href);
+    await bootstrap(connectionString, runtimeUrl.href);
+  });
+
   it("follows current SDK schema with explicitly checked historical SQL differences", async () => {
     const baseline = await database("schema_baseline");
     const reference = await database("schema_reference");

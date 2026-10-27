@@ -454,6 +454,7 @@ async function createStudentChapterProgress(userId: UUIDType, tenantId: UUIDType
         studentChapterProgress.studentId,
         studentChapterProgress.courseId,
         studentChapterProgress.chapterId,
+        studentChapterProgress.learningStateId,
       ],
       set: {
         completedLessonCount: sql`excluded.completed_lesson_count`,
@@ -734,6 +735,7 @@ async function seed() {
     }
   } catch (error) {
     console.error("Seeding failed:", error);
+    throw error;
   } finally {
     console.log("Closing database connection");
     try {
