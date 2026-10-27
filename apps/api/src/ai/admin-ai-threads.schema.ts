@@ -1,7 +1,8 @@
 import {
   AI_THREAD_STATUSES,
   AI_THREAD_TYPES,
-  MESSAGE_ROLE,
+  ASSISTANT_MESSAGE_ROLES,
+  ASSISTANT_MESSAGE_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
@@ -11,10 +12,7 @@ import { UUIDSchema } from "src/common";
 
 const nullableString = Type.Union([Type.String(), Type.Null()]);
 const nullableId = Type.Union([UUIDSchema, Type.Null()]);
-export const adminAiThreadTypeSchema = Type.Union([
-  Type.Literal(AI_THREAD_TYPES.PRACTICE),
-  Type.Literal(AI_THREAD_TYPES.AI_MENTOR),
-]);
+export const adminAiThreadTypeSchema = Type.Enum(AI_THREAD_TYPES);
 export const adminAiThreadPaginationSchema = Type.Object({
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
   perPage: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
@@ -79,8 +77,9 @@ export const adminAiThreadDetailSchema = Type.Intersect([
 ]);
 export const adminAiThreadMessageSchema = Type.Object({
   id: UUIDSchema,
-  role: Type.Union([Type.Literal(MESSAGE_ROLE.USER), Type.Literal(MESSAGE_ROLE.MENTOR)]),
+  role: Type.Enum(ASSISTANT_MESSAGE_ROLES),
   content: Type.String(),
+  status: Type.Optional(Type.Enum(ASSISTANT_MESSAGE_STATUSES)),
   createdAt: Type.String(),
 });
 export type AdminAiThreadQuery = Static<typeof adminAiThreadQuerySchema>;

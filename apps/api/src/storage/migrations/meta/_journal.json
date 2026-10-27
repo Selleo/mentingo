@@ -1583,6 +1583,20 @@
       "when": 1793005806808,
       "tag": "0225_course_repetition_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1793091700114,
+      "tag": "0226_core_assistant",
+      "breakpoints": true
+    },
+    {
+      "idx": 227,
+      "version": "7",
+      "when": 1793091706496,
+      "tag": "0227_enable_assistant_tenant_rls",
+      "breakpoints": true
     }
   ]
 }

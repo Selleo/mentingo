@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { AI_THREAD_TYPES } from "@repo/shared";
+import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES } from "@repo/shared";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import { useAdminAiThreadMessages } from "~/api/queries/admin/useAdminAiThreadMe
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { AssistantMarkdown } from "~/modules/Assistant/components/AssistantMarkdown";
 import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
@@ -119,19 +120,36 @@ export function ConversationReader({
                 )}
                 {thread &&
                   rows.map((message) => (
-                    <ChatMessage
-                      key={message.id}
-                      id={message.id}
-                      role={message.role}
-                      content={message.content}
-                      userName={ownerName}
-                      previewUser={{
-                        displayName: ownerName,
-                        profilePictureUrl: thread.owner.profilePictureUrl,
-                      }}
-                      messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
-                      testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
-                    />
+                    <div key={message.id} className="flex flex-col gap-2">
+                      <ChatMessage
+                        id={message.id}
+                        role={message.role}
+                        aiName={
+                          thread.type === AI_THREAD_TYPES.ASSISTANT
+                            ? t("aiConversations.types.assistant")
+                            : undefined
+                        }
+                        content={message.content}
+                        contentNode={
+                          thread.type === AI_THREAD_TYPES.ASSISTANT &&
+                          message.role === ASSISTANT_MESSAGE_ROLES.ASSISTANT ? (
+                            <AssistantMarkdown text={message.content} />
+                          ) : undefined
+                        }
+                        userName={ownerName}
+                        previewUser={{
+                          displayName: ownerName,
+                          profilePictureUrl: thread.owner.profilePictureUrl,
+                        }}
+                        messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
+                        testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
+                      />
+                      {message.status && message.status !== "complete" && (
+                        <p className="body-sm text-neutral-600">
+                          {t(`aiConversations.messageStatuses.${message.status}`)}
+                        </p>
+                      )}
+                    </div>
                   ))}
                 {thread && !messages.isPending && !messages.isError && rows.length === 0 && (
                   <p className="text-sm text-neutral-500">{t("aiConversations.emptyTranscript")}</p>

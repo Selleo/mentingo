@@ -134,12 +134,19 @@
     "empty": "Aún no hay conversaciones.",
     "types": {
       "practice": "Sesión de práctica",
-      "ai-mentor": "Lección con mentor de IA"
+      "ai-mentor": "Lección con mentor de IA",
+      "assistant": "Asistente"
     },
     "statuses": {
       "active": "En curso",
       "completed": "Completada",
       "archived": "Archivada"
+    },
+    "messageStatuses": {
+      "pending": "Pendiente",
+      "running": "En curso",
+      "failed": "Interrumpido por un error",
+      "cancelled": "Detenido"
     }
   },
   "emailTemplates": {
@@ -1015,6 +1022,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "Asistente de IA",
     "settings": "Configuración",
     "logout": "Cerrar sesión",
     "panel": "Panel",
@@ -2321,6 +2330,7 @@
         "file_delete": "Eliminar archivos directamente del almacenamiento de la plataforma.",
         "resource_library_manage": "Gestionar recursos privados en la biblioteca de recursos.",
         "ai_use": "Utilice funciones de plataforma impulsadas por IA.",
+        "assistant_use": "Usar el asistente de solo lectura y gestionar las conversaciones propias.",
         "announcement_read": "Ver anuncios.",
         "announcement_create": "Crear anuncios.",
         "announcement_delete": "Eliminar anuncios.",
@@ -5705,7 +5715,8 @@
     "errors": {
       "generic": "No se pudo iniciar el modo de soporte",
       "targetUserRequired": "Elija un usuario activo de la organización seleccionada",
-      "invalidSession": "La sesión de soporte no es válida"
+      "invalidSession": "La sesión de soporte no es válida",
+      "sessionExpired": "Tu sesión de soporte ha caducado. Inicia una nueva sesión de soporte."
     }
   },
   "superAdminTenantsView": {
@@ -6014,14 +6025,13 @@
       "resource": "Recurso:"
     },
     "actions": {
-      "save_automation_draft": "Borrador de automatización guardado",
-      "simulate_automation": "Automatización simulada",
-      "apply_automation": "Automatización publicada / aplicada",
-      "enable_automation": "Automatización activada",
-      "disable_automation": "Automatización desactivada",
-      "duplicate_automation": "Automatización duplicada",
-      "archive_automation": "Automatización archivada",
-
+      "save_automation_draft": "Guardar borrador de automatización",
+      "simulate_automation": "Simular automatización",
+      "apply_automation": "Aplicar automatización",
+      "enable_automation": "Activar automatización",
+      "disable_automation": "Desactivar automatización",
+      "duplicate_automation": "Duplicar automatización",
+      "archive_automation": "Archivar automatización",
       "create": "Creado",
       "update": "Actualizado",
       "bulk_course_category_update": "Categoría de cursos masivos actualizada",
@@ -6052,14 +6062,7 @@
       "start_learning_path": "Ruta de aprendizaje iniciada",
       "complete_learning_path": "Ruta de aprendizaje completada",
       "play_scorm": "SCORM reproducido",
-      "complete_scorm": "SCORM completado",
-      "save_automation_draft": "Guardar borrador de automatización",
-      "simulate_automation": "Simular automatización",
-      "apply_automation": "Aplicar automatización",
-      "enable_automation": "Activar automatización",
-      "disable_automation": "Desactivar automatización",
-      "duplicate_automation": "Duplicar automatización",
-      "archive_automation": "Archivar automatización"
+      "complete_scorm": "SCORM completado"
     },
     "entity": {
       "automation": "Automatización",
@@ -8150,6 +8153,115 @@
       "listingNotFound": "No se encontró este curso del marketplace.",
       "thumbnailNotFound": "Este curso del marketplace no tiene miniatura.",
       "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Conversación con el asistente",
+      "open": "Abrir conversación con el asistente",
+      "fullScreen": "Abrir asistente completo",
+      "minimize": "Minimizar conversación",
+      "dismiss": "Ocultar burbuja del asistente",
+      "dragHint": "Arrastra para mover. Suelta sobre X para ocultar. Las flechas mueven; Supr oculta.",
+      "dropToDismiss": "Suelta para ocultar"
+    },
+    "openSource": "Abrir en Mentingo",
+    "sourceTypes": {
+      "course": "Curso",
+      "lesson": "Lección",
+      "user": "Persona",
+      "group": "Grupo",
+      "category": "Categoría",
+      "article": "Artículo",
+      "news": "Noticia",
+      "qa": "Pregunta y respuesta",
+      "development_path": "Ruta de aprendizaje",
+      "resource": "Recurso",
+      "reference": "Fuente"
+    },
+    "title": "Asistente",
+    "eyebrow": "El conocimiento de tu plataforma",
+    "welcome": "¿En qué puedo ayudarte?",
+    "intro": "Encuentra recursos de aprendizaje, haz preguntas y consulta las fuentes, siempre dentro de tus permisos.",
+    "newConversation": "Nueva conversación",
+    "untitled": "Nueva conversación",
+    "search": "Buscar conversaciones",
+    "recent": "Conversaciones recientes",
+    "history": "Historial de conversaciones",
+    "active": "Activas",
+    "archived": "Archivadas",
+    "archivedThreads": "Conversaciones archivadas",
+    "showArchived": "Mostrar archivo",
+    "showRecent": "Mostrar conversaciones recientes",
+    "noThreads": "Tus conversaciones aparecerán aquí.",
+    "noMatches": "Ninguna conversación coincide con tu búsqueda.",
+    "loading": "Cargando conversaciones…",
+    "loadError": "No pudimos cargar tus conversaciones.",
+    "retry": "Volver a intentar",
+    "loadMore": "Cargar más",
+    "composerLabel": "Mensaje al asistente",
+    "placeholder": "Pregunta sobre tu aprendizaje o los recursos de la plataforma…",
+    "composerHint": "Enter para enviar · Shift + Enter para una nueva línea",
+    "disclosure": "Las respuestas pueden contener errores. Consulta las fuentes. Los administradores autorizados pueden revisar estas conversaciones.",
+    "send": "Enviar mensaje",
+    "stop": "Detener respuesta",
+    "you": "Tú",
+    "working": "Procesando tu solicitud…",
+    "activity": {
+      "starting": "Iniciando…",
+      "thinking": "Procesando tu solicitud…",
+      "searching": "Buscando en tu espacio de trabajo…",
+      "reading": "Leyendo el contenido…",
+      "writing": "Escribiendo tu respuesta…"
+    },
+    "writing": "Escribiendo…",
+    "sources": "Fuentes",
+    "failed": "Un error interrumpió la respuesta. El texto anterior puede estar incompleto.",
+    "cancelled": "Respuesta detenida. El texto anterior puede estar incompleto.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "rename": "Renombrar conversación",
+    "archive": "Archivar conversación",
+    "restore": "Restaurar conversación",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "threadUnavailable": "Esta conversación no está disponible. Puede que ya no exista o que no tengas acceso.",
+    "sendError": "No se pudo enviar tu mensaje. Se ha conservado el borrador.",
+    "messageTooLong": "El mensaje no puede superar los 8000 caracteres. Acorta el borrador para enviarlo.",
+    "unavailable": "El asistente aún no está configurado. Contacta con tu administrador.",
+    "archivedNotice": "Esta conversación está archivada. Restáurala para continuar.",
+    "openHistory": "Abrir historial de conversaciones",
+    "hideHistory": "Ocultar historial de conversaciones",
+    "renameDescription": "Dale a esta conversación un nombre que puedas encontrar más tarde.",
+    "readOnly": "Asistente de solo lectura",
+    "loadEarlier": "Cargar mensajes anteriores",
+    "latestMessage": "Ir al último mensaje",
+    "starters": {
+      "find": {
+        "label": "Encontrar un recurso",
+        "prompt": "Encuentra cursos sobre incorporación a los que tenga acceso."
+      },
+      "learn": {
+        "label": "Explorar mi aprendizaje",
+        "prompt": "¿A qué recursos de aprendizaje tengo acceso?"
+      },
+      "understand": {
+        "label": "Comprender un tema",
+        "prompt": "Busca recursos sobre comentarios constructivos y explica las ideas principales."
+      }
+    },
+    "errors": {
+      "unavailable": "El asistente no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+      "messageConflict": "Este mensaje entra en conflicto con una solicitud anterior. Edítalo e inténtalo de nuevo.",
+      "responseInProgress": "Ya se está generando una respuesta en esta conversación.",
+      "responseInactive": "Esta respuesta ya no está activa.",
+      "invalidToolInput": "El asistente no pudo procesar esta solicitud. Inténtalo de nuevo."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organización no encontrada.",
+      "inactive": "Esta organización está inactiva. Contacta con tu administrador."
     }
   }
 }

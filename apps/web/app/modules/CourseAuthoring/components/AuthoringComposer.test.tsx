@@ -102,6 +102,7 @@ describe("AuthoringComposer", () => {
 
     const action = screen.getByTestId("course-authoring-brief-submit-button");
     expect(action).toHaveAccessibleName("Stop");
+    expect(screen.getByRole("button", { name: "Toggle voice input" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
     fireEvent.keyDown(screen.getByTestId("course-authoring-brief-input"), { key: "Enter" });
     expect(onSubmit).not.toHaveBeenCalled();
@@ -219,7 +220,87 @@ describe("AuthoringComposer", () => {
     expect(screen.getByRole("button", { name: "Stop voice recording" })).toBeDisabled();
 
     await act(async () => finish());
-    expect(await screen.findByTestId("course-authoring-brief-input")).toHaveValue("Typed draft");
+    expect(screen.getByTestId("course-authoring-brief-submit-button")).toBeDisabled();
+    expect(panel).toHaveAttribute("data-state", "transcribing");
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} final transcript`));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).not.toBeDisabled());
+    expect(screen.getByTestId("course-authoring-brief-input")).toHaveValue(
+      "Typed draft final transcript",
+    );
+  });
+
+  it("keeps sending blocked when the final transcript arrives before stop settles", async () => {
+    let finish!: () => void;
+    transcriptionMock.stopRecording.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    renderWith().render(<ComposerHarness onSubmit={onSubmit} />);
+    await user.click(screen.getByRole("button", { name: "Toggle voice input" }));
+    await user.click(screen.getByRole("button", { name: "Stop voice recording" }));
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} early transcript`));
+    const input = screen.getByTestId("course-authoring-brief-input");
+    expect(input).toHaveValue("Typed draft early transcript");
+    expect(screen.getByTestId("course-authoring-brief-submit-button")).toBeDisabled();
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.submit(input.closest("form")!);
+    expect(onSubmit).not.toHaveBeenCalled();
+    await act(async () => finish());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).not.toBeDisabled());
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("appends transcription to the latest controlled draft without submitting it", async () => {
+    const onInstructionChange = vi.fn();
+    const onSubmit = vi.fn();
+    const initial = { instruction: "Original draft", onInstructionChange, onSubmit };
+    const { rerender } = renderWith().render(<AuthoringComposer {...initial} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Toggle voice input" }));
+    rerender(<AuthoringComposer {...initial} instruction="Newer draft" />);
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} dictated words`));
+    expect(onInstructionChange).toHaveBeenLastCalledWith("Newer draft dictated words");
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("cancels pending microphone startup when generation starts and rejects late text", async () => {
+    let finish!: (started: boolean) => void;
+    transcriptionMock.startRecording.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const onInstructionChange = vi.fn();
+    const onSubmit = vi.fn();
+    const props = { instruction: "Typed draft", onInstructionChange, onSubmit };
+    const { rerender } = renderWith().render(<AuthoringComposer {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Toggle voice input" }));
+    expect(screen.getByRole("button", { name: "Toggle voice input" })).toBeDisabled();
+    rerender(<AuthoringComposer {...props} hasActiveGeneration />);
+    await waitFor(() => expect(transcriptionMock.cancelTranscription).toHaveBeenCalledOnce());
+    await act(async () => finish(true));
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} late words`));
+    expect(onInstructionChange).not.toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByTestId("course-authoring-brief-input")).toHaveValue("Typed draft");
+  });
+
+  it("lets the author cancel while waiting for final text and ignores its late delivery", async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    renderWith().render(<ComposerHarness onSubmit={onSubmit} />);
+    await user.click(screen.getByRole("button", { name: "Toggle voice input" }));
+    await user.click(screen.getByRole("button", { name: "Stop voice recording" }));
+    const close = screen.getByRole("button", { name: "Close voice mode" });
+    expect(close).not.toBeDisabled();
+    await user.click(close);
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} stale transcript`));
+    expect(screen.getByTestId("course-authoring-brief-input")).toHaveValue("Typed draft");
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).not.toBeDisabled());
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("shows a localized error when the microphone cannot start", async () => {
@@ -242,6 +323,7 @@ describe("AuthoringComposer", () => {
     await user.click(screen.getByRole("button", { name: "Close voice mode" }));
 
     expect(transcriptionMock.cancelTranscription).toHaveBeenCalledOnce();
+    act(() => transcriptionMock.inputSetter?.((current) => `${current} discarded words`));
     expect(await screen.findByTestId("course-authoring-brief-input")).toHaveValue("Typed draft");
     expect(onSubmit).not.toHaveBeenCalled();
   });
