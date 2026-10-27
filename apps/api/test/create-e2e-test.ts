@@ -7,6 +7,7 @@ import postgres from "postgres";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
+import { AssistantRuntimeService } from "src/assistant/workflow/assistant-runtime.service";
 import { AutomationEmailWorker } from "src/automation-execution/workers/automation-email.worker";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
@@ -136,6 +137,17 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
       persistActivityLog: async () => {},
     });
   }
+
+  // HTTP/domain E2E suites use deterministic runtime providers. Durable SDK
+  // startup and queue processing run separately in workflow-postgres.e2e-spec.ts.
+  // Explicit custom providers below may override this default.
+  testModuleBuilder = testModuleBuilder.overrideProvider(AssistantRuntimeService).useValue({
+    isAvailable: () => false,
+    start: async () => {
+      throw new Error("Provide a deterministic Assistant runtime for generation tests");
+    },
+    cancel: async () => {},
+  });
 
   for (const provider of customProviders) {
     if (typeof provider !== "object" || provider === null || !("provide" in provider)) {

@@ -45,6 +45,8 @@ const createRouteConfig = <T extends Record<string, PermissionRequirement>>(
 };
 
 const PUBLIC: PermissionRequirement = {};
+// UserDashboardLayout enforces session, MFA and password requirements for these routes.
+const AUTHENTICATED_USER_ACCESS: PermissionRequirement = {};
 const USER_MANAGEMENT_ACCESS: PermissionRequirement = {
   allOf: [PERMISSIONS.USER_MANAGE],
 };
@@ -100,6 +102,9 @@ export const routeAccessConfig = createRouteConfig({
   "auth/change-password": PUBLIC,
   "tenant-inactive": PUBLIC,
   "oauth/connect": PUBLIC,
+
+  assistant: AUTHENTICATED_USER_ACCESS,
+  "assistant/:threadId": AUTHENTICATED_USER_ACCESS,
 
   // Client part
   "": PUBLIC,

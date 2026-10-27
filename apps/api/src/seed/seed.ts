@@ -735,6 +735,7 @@ async function seed() {
     }
   } catch (error) {
     console.error("Seeding failed:", error);
+    throw error;
   } finally {
     console.log("Closing database connection");
     try {

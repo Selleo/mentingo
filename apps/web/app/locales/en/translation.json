@@ -139,12 +139,19 @@
     "empty": "No conversations yet.",
     "types": {
       "practice": "Practice session",
-      "ai-mentor": "AI Mentor lesson"
+      "ai-mentor": "AI Mentor lesson",
+      "assistant": "Assistant"
     },
     "statuses": {
       "active": "In progress",
       "completed": "Completed",
       "archived": "Archived"
+    },
+    "messageStatuses": {
+      "pending": "Pending",
+      "running": "In progress",
+      "failed": "Interrupted by an error",
+      "cancelled": "Stopped"
     }
   },
   "emailTemplates": {
@@ -1024,6 +1031,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "AI Assistant",
     "settings": "Settings",
     "logout": "Logout",
     "panel": "panel",
@@ -2343,6 +2352,7 @@
         "file_delete": "Delete files directly from platform storage.",
         "resource_library_manage": "Manage private assets in the Resource Library.",
         "ai_use": "Use AI-powered platform features.",
+        "assistant_use": "Use the read-only Assistant and manage your own conversations.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
         "announcement_delete": "Delete announcements.",
@@ -5803,7 +5813,8 @@
     "errors": {
       "generic": "Could not start support mode",
       "targetUserRequired": "Choose an active user from the selected organization",
-      "invalidSession": "Support session is invalid"
+      "invalidSession": "Support session is invalid",
+      "sessionExpired": "Your support session has expired. Start a new support session."
     }
   },
   "superAdminTenantsView": {
@@ -6114,14 +6125,13 @@
       "resource": "Resource:"
     },
     "actions": {
-      "save_automation_draft": "Automation draft saved",
-      "simulate_automation": "Automation simulated",
-      "apply_automation": "Automation published / applied",
-      "enable_automation": "Automation activated",
-      "disable_automation": "Automation deactivated",
-      "duplicate_automation": "Automation duplicated",
-      "archive_automation": "Automation archived",
-
+      "save_automation_draft": "Save automation draft",
+      "simulate_automation": "Simulate automation",
+      "apply_automation": "Apply automation",
+      "enable_automation": "Enable automation",
+      "disable_automation": "Disable automation",
+      "duplicate_automation": "Duplicate automation",
+      "archive_automation": "Archive automation",
       "create": "Created",
       "update": "Updated",
       "bulk_course_category_update": "Bulk course category updated",
@@ -6152,14 +6162,7 @@
       "start_learning_path": "Learning Path started",
       "complete_learning_path": "Learning Path completed",
       "play_scorm": "SCORM played",
-      "complete_scorm": "SCORM completed",
-      "save_automation_draft": "Save automation draft",
-      "simulate_automation": "Simulate automation",
-      "apply_automation": "Apply automation",
-      "enable_automation": "Enable automation",
-      "disable_automation": "Disable automation",
-      "duplicate_automation": "Duplicate automation",
-      "archive_automation": "Archive automation"
+      "complete_scorm": "SCORM completed"
     },
     "entity": {
       "automation": "Automation",
@@ -8300,6 +8303,115 @@
       "configurationNotFound": "The AI Mentor configuration was not found.",
       "invalidLessonType": "AI Mentor configuration is available only for AI Mentor lessons.",
       "invalidGraph": "The AI Mentor configuration is invalid."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Assistant conversation",
+      "open": "Open Assistant conversation",
+      "fullScreen": "Open full Assistant",
+      "minimize": "Minimize conversation",
+      "dismiss": "Hide Assistant bubble",
+      "dragHint": "Drag to move. Drop on X to hide. Arrow keys move; Delete hides.",
+      "dropToDismiss": "Drop to hide"
+    },
+    "openSource": "Open in Mentingo",
+    "sourceTypes": {
+      "course": "Course",
+      "lesson": "Lesson",
+      "user": "Person",
+      "group": "Group",
+      "category": "Category",
+      "article": "Article",
+      "news": "News",
+      "qa": "Question & answer",
+      "development_path": "Learning path",
+      "resource": "Resource",
+      "reference": "Reference"
+    },
+    "title": "Assistant",
+    "eyebrow": "Your workspace, connected",
+    "welcome": "How can I help you?",
+    "intro": "Find the right learning resources, ask a question, and follow the sources. All within your access.",
+    "newConversation": "New conversation",
+    "untitled": "New conversation",
+    "search": "Search conversations",
+    "recent": "Recent conversations",
+    "history": "Conversation history",
+    "active": "Active",
+    "archived": "Archived",
+    "archivedThreads": "Archived conversations",
+    "showArchived": "Show archived conversations",
+    "showRecent": "Show recent conversations",
+    "noThreads": "Your conversations will appear here.",
+    "noMatches": "No conversations match your search.",
+    "loading": "Loading conversations…",
+    "loadError": "We couldn’t load your conversations.",
+    "retry": "Try again",
+    "loadMore": "Load more",
+    "composerLabel": "Message the assistant",
+    "placeholder": "Ask about your learning or workspace…",
+    "composerHint": "Enter to send · Shift + Enter for a new line",
+    "disclosure": "Answers may be imperfect. Check the sources. Authorized administrators can review these conversations.",
+    "send": "Send message",
+    "stop": "Stop response",
+    "you": "You",
+    "working": "Working on your request…",
+    "activity": {
+      "starting": "Starting…",
+      "thinking": "Working on your request…",
+      "searching": "Searching your workspace…",
+      "reading": "Reading the content…",
+      "writing": "Writing your reply…"
+    },
+    "writing": "Writing…",
+    "sources": "Sources",
+    "failed": "This response was interrupted by an error. Any text above may be incomplete.",
+    "cancelled": "Response stopped. Any text above may be incomplete.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "rename": "Rename conversation",
+    "archive": "Archive conversation",
+    "restore": "Restore conversation",
+    "save": "Save",
+    "close": "Close",
+    "threadUnavailable": "This conversation is unavailable. It may no longer exist or you may not have access.",
+    "sendError": "Your message couldn’t be sent. Your draft has been kept.",
+    "messageTooLong": "Keep your message within 8,000 characters. Shorten the draft to send it.",
+    "unavailable": "The assistant is not configured yet. Please contact your administrator.",
+    "archivedNotice": "This conversation is archived. Restore it to continue.",
+    "openHistory": "Open conversation history",
+    "hideHistory": "Hide conversation history",
+    "renameDescription": "Give this conversation a name you can find later.",
+    "readOnly": "Read-only assistant",
+    "loadEarlier": "Load earlier messages",
+    "starters": {
+      "find": {
+        "label": "Find a learning resource",
+        "prompt": "Find courses I can access about onboarding."
+      },
+      "learn": {
+        "label": "Explore my learning",
+        "prompt": "What learning resources can I access?"
+      },
+      "understand": {
+        "label": "Understand a topic",
+        "prompt": "Find resources about giving constructive feedback and explain the key ideas."
+      }
+    },
+    "latestMessage": "Go to latest message",
+    "errors": {
+      "unavailable": "The assistant is temporarily unavailable. Please try again later.",
+      "messageConflict": "This message conflicts with an earlier request. Edit it and try again.",
+      "responseInProgress": "A response is already being generated in this conversation.",
+      "responseInactive": "This response is no longer active.",
+      "invalidToolInput": "The assistant could not process this request. Please try again."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organization not found.",
+      "inactive": "This organization is inactive. Contact your administrator."
     }
   }
 }

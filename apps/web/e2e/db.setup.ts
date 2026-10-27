@@ -14,6 +14,6 @@ setup("database reset", async () => {
     cwd: apiDir,
     stdio: "inherit",
     shell: true as unknown as string,
-    env: process.env,
+    env: { ...process.env, E2E: "true" },
   });
 });

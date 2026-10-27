@@ -1,4 +1,9 @@
-import { PERMISSIONS } from "@repo/shared";
+import {
+  matchesRequirement,
+  PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  type PermissionKey,
+} from "@repo/shared";
 
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
@@ -6,9 +11,18 @@ import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 import type { TFunction } from "i18next";
 
 describe("findMatchingRoute", () => {
+  it("does not require role permissions for authenticated Assistant routes", () => {
+    for (const path of ["assistant", "assistant/thread-id"]) {
+      expect(findMatchingRoute(path)).toEqual({});
+      expect(matchesRequirement([], findMatchingRoute(path))).toBe(true);
+    }
+  });
   it("protects both AI conversation routes", () => {
     for (const path of ["admin/ai-conversations", "admin/ai-conversations/thread-id"]) {
       expect(findMatchingRoute(path)).toEqual({ allOf: [PERMISSIONS.AI_THREAD_READ] });
+      expect(matchesRequirement([], findMatchingRoute(path))).toBe(false);
+      expect(matchesRequirement([PERMISSIONS.COURSE_READ], findMatchingRoute(path))).toBe(false);
+      expect(matchesRequirement([PERMISSIONS.AI_THREAD_READ], findMatchingRoute(path))).toBe(true);
     }
   });
   it("should find exact matches", () => {
@@ -184,6 +198,96 @@ describe("mapNavigationItems", () => {
 
 describe("getNavigationConfig", () => {
   const t = ((key: string) => key) as TFunction;
+  const forRoles = (roleSlugs: string[]) =>
+    getNavigationConfig(t, false, false, false, false, false, false, false, roleSlugs);
+
+  it("groups both AI destinations under one expandable section for admins", () => {
+    const groups = forRoles([SYSTEM_ROLE_SLUGS.ADMIN]);
+    const aiGroups = groups.filter((group) =>
+      group.items.some((item) => ["assistant", "admin/ai-conversations"].includes(item.path)),
+    );
+    expect(aiGroups).toHaveLength(1);
+    expect(aiGroups[0]).toMatchObject({
+      title: "navigationSideBar.ai",
+      icon: "AiMentor",
+      isExpandable: true,
+    });
+    expect(aiGroups[0].restrictedAccessRequirement).toBeUndefined();
+    expect(aiGroups[0].items.map(({ label, path }) => ({ label, path }))).toEqual([
+      { label: "navigationSideBar.aiAssistant", path: "assistant" },
+      { label: "aiConversations.title", path: "admin/ai-conversations" },
+    ]);
+  });
+
+  it.each<{ permissions: PermissionKey[]; visiblePaths: string[] }>([
+    { permissions: [], visiblePaths: ["assistant"] },
+    { permissions: [PERMISSIONS.COURSE_READ], visiblePaths: ["assistant"] },
+    { permissions: [PERMISSIONS.USER_MANAGE], visiblePaths: ["assistant"] },
+    {
+      permissions: [PERMISSIONS.AI_THREAD_READ],
+      visiblePaths: ["assistant", "admin/ai-conversations"],
+    },
+  ])(
+    "shows Assistant to every authenticated permission set while preserving history oversight: $visiblePaths",
+    ({ permissions, visiblePaths }) => {
+      const aiGroup = mapNavigationItems(forRoles([SYSTEM_ROLE_SLUGS.ADMIN])).find(
+        (group) => group.title === "navigationSideBar.ai",
+      )!;
+      const groupVisible = matchesRequirement(permissions, aiGroup.restrictedAccessRequirement);
+      expect(groupVisible).toBe(visiblePaths.length > 0);
+      const visibleItems = groupVisible
+        ? aiGroup.items.filter((item) => matchesRequirement(permissions, item.accessRequirement))
+        : [];
+      expect(visibleItems.map((item) => item.path)).toEqual(visiblePaths);
+    },
+  );
+
+  it.each([
+    [SYSTEM_ROLE_SLUGS.STUDENT],
+    [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
+    [SYSTEM_ROLE_SLUGS.TRAINER],
+    [SYSTEM_ROLE_SLUGS.GROUP_MANAGER],
+    ["custom-role"],
+    [],
+  ])("uses a standalone Assistant for non-admin roles %j", (...roleSlugs) => {
+    const groups = forRoles(roleSlugs);
+    expect(groups.some((group) => group.title === "navigationSideBar.ai")).toBe(false);
+    const assistant = groups.find((group) => group.items.some((item) => item.path === "assistant"));
+    expect(assistant).toMatchObject({
+      isExpandable: false,
+      items: [{ path: "assistant", accessRequirement: {} }],
+    });
+    expect(matchesRequirement([], assistant?.restrictedAccessRequirement)).toBe(true);
+    expect(matchesRequirement([], assistant?.items[0].accessRequirement)).toBe(true);
+  });
+
+  it("groups multi-role admins while keeping Conversations independently permission-gated", () => {
+    const group = forRoles([SYSTEM_ROLE_SLUGS.STUDENT, SYSTEM_ROLE_SLUGS.ADMIN]).find(
+      (item) => item.title === "navigationSideBar.ai",
+    )!;
+    expect(group.isExpandable).toBe(true);
+    expect(matchesRequirement([], group.items[0].accessRequirement)).toBe(true);
+    expect(matchesRequirement([], group.items[1].accessRequirement)).toBe(false);
+    expect(matchesRequirement([PERMISSIONS.AI_THREAD_READ], group.items[1].accessRequirement)).toBe(
+      true,
+    );
+  });
+
+  it("retains a permission-authorized standalone Conversations destination for custom non-admin roles", () => {
+    const groups = forRoles(["custom-reviewer"]);
+    const conversations = groups.find((group) =>
+      group.items.some((item) => item.path === "admin/ai-conversations"),
+    )!;
+    expect(conversations.isExpandable).toBe(false);
+    expect(conversations.items).toHaveLength(1);
+    expect(matchesRequirement([], conversations.restrictedAccessRequirement)).toBe(false);
+    expect(
+      matchesRequirement([PERMISSIONS.AI_THREAD_READ], conversations.restrictedAccessRequirement),
+    ).toBe(true);
+    expect(
+      matchesRequirement([PERMISSIONS.AI_THREAD_READ], conversations.items[0].accessRequirement),
+    ).toBe(true);
+  });
 
   it("does not include activity logs in the top-level navigation", () => {
     const groups = getNavigationConfig(t);

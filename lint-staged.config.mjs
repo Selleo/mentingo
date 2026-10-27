@@ -3,8 +3,12 @@ export default {
     "pnpm exec tsc-files --noEmit --project apps/web/tsconfig.json",
     "pnpm --filter=web exec eslint --cache",
   ],
-  "apps/api/**/*.{ts,tsx}": [
+  "apps/api/**/!(assistant.workflow|workflow-schema).{ts,tsx}": [
     "pnpm exec tsc-files --noEmit --project apps/api/tsconfig.json",
+    "pnpm --filter=api exec eslint --cache",
+  ],
+  "apps/api/src/{assistant/workflow/assistant.workflow,storage/workflow-schema}.ts": [
+    () => "pnpm --filter=api workflow:typecheck",
     "pnpm --filter=api exec eslint --cache",
   ],
   "*.{js,jsx,ts,tsx}": ["pnpm exec prettier --check"],

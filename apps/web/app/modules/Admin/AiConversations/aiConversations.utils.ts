@@ -29,7 +29,11 @@ export function readConversationFilters(params: URLSearchParams, language: Suppo
     language,
     search: params.get("search") || undefined,
     type:
-      type === AI_THREAD_TYPES.PRACTICE || type === AI_THREAD_TYPES.AI_MENTOR ? type : undefined,
+      type === AI_THREAD_TYPES.PRACTICE ||
+      type === AI_THREAD_TYPES.AI_MENTOR ||
+      type === AI_THREAD_TYPES.ASSISTANT
+        ? type
+        : undefined,
     status:
       status === AI_THREAD_STATUSES.ACTIVE ||
       status === AI_THREAD_STATUSES.COMPLETED ||

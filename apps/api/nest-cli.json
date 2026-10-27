@@ -8,6 +8,10 @@
       {
         "include": "storage/migrations/**/*",
         "outDir": "dist/src"
+      },
+      {
+        "include": "storage/workflow-migrations/**/*",
+        "outDir": "dist/src"
       }
     ]
   }

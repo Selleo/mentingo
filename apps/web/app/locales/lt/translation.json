@@ -139,12 +139,19 @@
     "empty": "Pokalbių dar nėra.",
     "types": {
       "practice": "Praktikos sesija",
-      "ai-mentor": "DI mentoriaus pamoka"
+      "ai-mentor": "DI mentoriaus pamoka",
+      "assistant": "Asistentas"
     },
     "statuses": {
       "active": "Vyksta",
       "completed": "Baigtas",
       "archived": "Archyvuotas"
+    },
+    "messageStatuses": {
+      "pending": "Laukiama",
+      "running": "Vykdoma",
+      "failed": "Nutraukta dėl klaidos",
+      "cancelled": "Sustabdyta"
     }
   },
   "emailTemplates": {
@@ -1024,6 +1031,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "AI asistentas",
     "settings": "Nustatymai",
     "logout": "Atsijungti",
     "panel": "skydelis",
@@ -2337,6 +2346,7 @@
         "file_delete": "Gali trinti failus tiesiai iš platformos saugyklos.",
         "resource_library_manage": "Gali tvarkyti privačius išteklius išteklių bibliotekoje.",
         "ai_use": "Gali naudoti AI pagrįstas platformos funkcijas.",
+        "assistant_use": "Gali naudotis tik skaitymui skirtu asistentu ir tvarkyti savo pokalbius.",
         "announcement_read": "Gali peržiūrėti pranešimus.",
         "announcement_create": "Gali kurti pranešimus.",
         "news_read_public": "Gali peržiūrėti prieinamas naujienas.",
@@ -5408,14 +5418,13 @@
       "resource": "Išteklius:"
     },
     "actions": {
-      "save_automation_draft": "Automatizavimo juodraštis išsaugotas",
-      "simulate_automation": "Automatizavimas simuliuotas",
-      "apply_automation": "Automatizavimas paskelbtas / pritaikytas",
-      "enable_automation": "Automatizavimas aktyvuotas",
-      "disable_automation": "Automatizavimas išjungtas",
-      "duplicate_automation": "Automatizavimas nukopijuotas",
-      "archive_automation": "Automatizavimas archyvuotas",
-
+      "save_automation_draft": "Išsaugoti automatizacijos juodraštį",
+      "simulate_automation": "Imituoti automatizaciją",
+      "apply_automation": "Taikyti automatizaciją",
+      "enable_automation": "Įjungti automatizaciją",
+      "disable_automation": "Išjungti automatizaciją",
+      "duplicate_automation": "Dubliuoti automatizaciją",
+      "archive_automation": "Archyvuoti automatizaciją",
       "create": "Sukurta",
       "update": "Atnaujinta",
       "bulk_course_category_update": "Masiniu būdu atnaujinta kursų kategorija",
@@ -5446,14 +5455,7 @@
       "start_learning_path": "Mokymosi kelias pradėtas",
       "complete_learning_path": "Mokymosi kelias užbaigtas",
       "play_scorm": "SCORM paleistas",
-      "complete_scorm": "SCORM užbaigtas",
-      "save_automation_draft": "Išsaugoti automatizacijos juodraštį",
-      "simulate_automation": "Imituoti automatizaciją",
-      "apply_automation": "Taikyti automatizaciją",
-      "enable_automation": "Įjungti automatizaciją",
-      "disable_automation": "Išjungti automatizaciją",
-      "duplicate_automation": "Dubliuoti automatizaciją",
-      "archive_automation": "Archyvuoti automatizaciją"
+      "complete_scorm": "SCORM užbaigtas"
     },
     "entity": {
       "automation": "Automatizavimas",
@@ -5997,7 +5999,8 @@
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
-      "invalidSession": "Palaikymo sesija netinkama"
+      "invalidSession": "Palaikymo sesija netinkama",
+      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją."
     }
   },
   "superAdminTenantsView": {
@@ -8273,6 +8276,115 @@
       "configurationNotFound": "AI Mentoriaus konfigūracija nerasta.",
       "invalidLessonType": "AI Mentoriaus konfigūracija galima tik AI Mentoriaus pamokoms.",
       "invalidGraph": "AI Mentoriaus konfigūracija neteisinga."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Pokalbis su asistentu",
+      "open": "Atidaryti pokalbį su asistentu",
+      "fullScreen": "Atidaryti visą asistentą",
+      "minimize": "Sumažinti pokalbį",
+      "dismiss": "Slėpti asistento burbulą",
+      "dragHint": "Vilkite norėdami perkelti. Numeskite ant X, kad paslėptumėte. Rodyklės perkelia, Delete paslepia.",
+      "dropToDismiss": "Numeskite norėdami paslėpti"
+    },
+    "openSource": "Atidaryti Mentingo",
+    "sourceTypes": {
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "user": "Naudotojas",
+      "group": "Grupė",
+      "category": "Kategorija",
+      "article": "Straipsnis",
+      "news": "Naujiena",
+      "qa": "Klausimas ir atsakymas",
+      "development_path": "Mokymosi kelias",
+      "resource": "Išteklius",
+      "reference": "Šaltinis"
+    },
+    "title": "Asistentas",
+    "eyebrow": "Jūsų platformos žinios",
+    "welcome": "Kuo galiu padėti?",
+    "intro": "Raskite mokymosi medžiagą, užduokite klausimus ir tikrinkite šaltinius pagal savo prieigos teises.",
+    "newConversation": "Naujas pokalbis",
+    "untitled": "Naujas pokalbis",
+    "search": "Ieškoti pokalbių",
+    "recent": "Naujausi pokalbiai",
+    "history": "Pokalbių istorija",
+    "active": "Aktyvūs",
+    "archived": "Archyvuoti",
+    "archivedThreads": "Archyvuoti pokalbiai",
+    "showArchived": "Rodyti archyvą",
+    "showRecent": "Rodyti naujausius pokalbius",
+    "noThreads": "Čia bus rodomi jūsų pokalbiai.",
+    "noMatches": "Paiešką atitinkančių pokalbių nėra.",
+    "loading": "Įkeliami pokalbiai…",
+    "loadError": "Nepavyko įkelti pokalbių.",
+    "retry": "Bandyti dar kartą",
+    "loadMore": "Įkelti daugiau",
+    "composerLabel": "Žinutė asistentui",
+    "placeholder": "Klauskite apie mokymąsi ar platformos turinį…",
+    "composerHint": "Enter siunčia · Shift + Enter pradeda naują eilutę",
+    "disclosure": "Atsakymuose gali būti klaidų. Tikrinkite šaltinius. Įgalioti administratoriai gali peržiūrėti šiuos pokalbius.",
+    "send": "Siųsti žinutę",
+    "stop": "Stabdyti atsakymą",
+    "you": "Jūs",
+    "working": "Apdorojama jūsų užklausa…",
+    "activity": {
+      "starting": "Pradedama…",
+      "thinking": "Vykdau jūsų užklausą…",
+      "searching": "Ieškau informacijos…",
+      "reading": "Skaitau turinį…",
+      "writing": "Rašau atsakymą…"
+    },
+    "writing": "Rašoma…",
+    "sources": "Šaltiniai",
+    "failed": "Atsakymą nutraukė klaida. Aukščiau pateiktas tekstas gali būti neišsamus.",
+    "cancelled": "Atsakymas sustabdytas. Aukščiau pateiktas tekstas gali būti neišsamus.",
+    "copy": "Kopijuoti",
+    "copied": "Nukopijuota",
+    "rename": "Pervadinti pokalbį",
+    "archive": "Archyvuoti pokalbį",
+    "restore": "Atkurti pokalbį",
+    "save": "Išsaugoti",
+    "close": "Uždaryti",
+    "threadUnavailable": "Šis pokalbis nepasiekiamas. Jo gali nebebūti arba neturite prieigos.",
+    "sendError": "Nepavyko išsiųsti žinutės. Juodraštis išsaugotas.",
+    "messageTooLong": "Žinutę gali sudaryti ne daugiau kaip 8 000 simbolių. Sutrumpinkite juodraštį, kad galėtumėte jį išsiųsti.",
+    "unavailable": "Asistentas dar nesukonfigūruotas. Kreipkitės į administratorių.",
+    "archivedNotice": "Šis pokalbis archyvuotas. Atkurkite jį, kad tęstumėte.",
+    "openHistory": "Atverti pokalbių istoriją",
+    "hideHistory": "Slėpti pokalbių istoriją",
+    "renameDescription": "Suteikite pokalbiui lengvai randamą pavadinimą.",
+    "readOnly": "Asistentas su skaitymo prieiga",
+    "loadEarlier": "Įkelti ankstesnes žinutes",
+    "starters": {
+      "find": {
+        "label": "Rasti mokymosi medžiagą",
+        "prompt": "Rask man prieinamus įvadinius kursus."
+      },
+      "learn": {
+        "label": "Atrasti mokymosi galimybes",
+        "prompt": "Kokią mokymosi medžiagą galiu pasiekti?"
+      },
+      "understand": {
+        "label": "Suprasti temą",
+        "prompt": "Rask medžiagą apie konstruktyvų grįžtamąjį ryšį ir paaiškink pagrindines idėjas."
+      }
+    },
+    "latestMessage": "Pereiti prie naujausios žinutės",
+    "errors": {
+      "unavailable": "Asistentas laikinai nepasiekiamas. Bandykite dar kartą vėliau.",
+      "messageConflict": "Ši žinutė nesuderinama su ankstesne užklausa. Pakeiskite ją ir bandykite dar kartą.",
+      "responseInProgress": "Šiame pokalbyje jau generuojamas atsakymas.",
+      "responseInactive": "Šis atsakymas nebėra aktyvus.",
+      "invalidToolInput": "Asistentui nepavyko apdoroti šios užklausos. Bandykite dar kartą."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organizacija nerasta.",
+      "inactive": "Ši organizacija neaktyvi. Susisiekite su administratoriumi."
     }
   }
 }

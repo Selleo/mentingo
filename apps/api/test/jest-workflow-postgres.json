@@ -1,0 +1,9 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testMatch": ["<rootDir>/src/assistant/__tests__/workflow-postgres.e2e-spec.ts"],
+  "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+  "testTimeout": 60000,
+  "maxWorkers": 1
+}

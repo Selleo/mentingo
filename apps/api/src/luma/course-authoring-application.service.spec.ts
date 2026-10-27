@@ -5,6 +5,7 @@ import { v5 as uuidv5, validate } from "uuid";
 
 import { CourseAuthoringApplicationService } from "./course-authoring-application.service";
 import { courseAuthoringExportHash } from "./course-authoring-export-hash";
+import producerQuizExport from "./fixtures/authoring-quiz-export.json";
 
 import type { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
 import type { CourseAuthoringApplyService } from "./course-authoring-apply.service";
@@ -16,6 +17,11 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
 import type { QueueService } from "src/queue";
 import type { S3Service } from "src/s3/s3.service";
+
+// Ingestion is injected below; this unit suite does not load document parsers.
+jest.mock("src/ingestion/services/ingestion-processing.service", () => ({
+  IngestionProcessingService: jest.fn(),
+}));
 
 const courseId = "00000000-0000-4000-8000-000000000001";
 const sessionId = "00000000-0000-4000-8000-000000000002";
@@ -174,6 +180,7 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     ["AUTHORING_DEPENDENCY_UNREADY", "missingDependency"],
     ["AUTHORING_ASSET_NOT_READY", "assetNotReady"],
     ["AUTHORING_PROPOSAL_NOT_ACCEPTED", "proposalNotReady"],
+    ["AUTHORING_PROPOSAL_NOT_READY", "proposalNotReady"],
     ["AUTHORING_OPERATION_CONFLICT", "invalidOperations"],
     ["AUTHORING_APPLICATION_PENDING", "applicationInProgress"],
     ["AUTHORING_EXPORT_PENDING", "applicationInProgress"],
@@ -375,6 +382,38 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     ).rejects.toThrow("courseAuthoring.errors.receiptSynchronizationPending");
     expect(test.recordFailureOnce).toHaveBeenCalled();
     expect(retry).not.toHaveBeenCalled();
+  });
+  it("applies a Python-produced quiz export with materialized defaults and matching hash", async () => {
+    const test = setup();
+    Object.assign(test.exported, producerQuizExport);
+    expect(courseAuthoringExportHash(test.exported)).toBe(producerQuizExport.exportHash);
+    await test.service.process({ courseId, sessionId, exportId, actor });
+    expect(test.applyPreparedExport).toHaveBeenCalled();
+    expect(test.client.authoring.recordReceipt).toHaveBeenCalled();
+  });
+  it("preserves the hash mismatch diagnosis when recording a terminal failure", async () => {
+    const test = setup();
+    await expect(
+      test.service.recordTerminalFailure(
+        { courseId, sessionId, exportId, actor },
+        "courseAuthoring.errors.exportHashMismatch",
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.exportHashMismatch");
+    expect(test.recordFailureOnce).not.toHaveBeenCalled();
+    expect(test.client.authoring.recordReceipt).not.toHaveBeenCalled();
+  });
+  it("rejects a mismatched export identity before recording a terminal failure", async () => {
+    const test = setup();
+    test.exported.sessionId = assetId;
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+    await expect(
+      test.service.recordTerminalFailure(
+        { courseId, sessionId, exportId, actor },
+        "courseAuthoring.errors.applicationFailed",
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.invalidServiceResponse");
+    expect(test.recordFailureOnce).not.toHaveBeenCalled();
+    expect(test.client.authoring.recordReceipt).not.toHaveBeenCalled();
   });
   it("rejects another frozen export before asset work or native writes", async () => {
     const test = setup();

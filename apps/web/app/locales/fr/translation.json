@@ -139,12 +139,19 @@
     "empty": "Aucune conversation pour le moment.",
     "types": {
       "practice": "Session de pratique",
-      "ai-mentor": "Leçon avec le mentor IA"
+      "ai-mentor": "Leçon avec le mentor IA",
+      "assistant": "Assistant"
     },
     "statuses": {
       "active": "En cours",
       "completed": "Terminée",
       "archived": "Archivée"
+    },
+    "messageStatuses": {
+      "pending": "En attente",
+      "running": "En cours",
+      "failed": "Interrompu par une erreur",
+      "cancelled": "Arrêté"
     }
   },
   "emailTemplates": {
@@ -1023,6 +1030,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "Assistant IA",
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "panel": "panneau",
@@ -2337,6 +2346,7 @@
         "file_delete": "Supprimer des fichiers directement du stockage de la plateforme.",
         "resource_library_manage": "Gérer les ressources privées dans la bibliothèque de ressources.",
         "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
+        "assistant_use": "Utiliser l’assistant en lecture seule et gérer ses propres conversations.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
         "announcement_delete": "Supprimer les annonces.",
@@ -5529,7 +5539,8 @@
     "errors": {
       "generic": "Impossible de démarrer le mode support",
       "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
-      "invalidSession": "La session d'assistance n'est pas valide"
+      "invalidSession": "La session d'assistance n'est pas valide",
+      "sessionExpired": "Votre session d’assistance a expiré. Démarrez une nouvelle session d’assistance."
     }
   },
   "superAdminTenantsView": {
@@ -5840,14 +5851,13 @@
       "resource": "Ressource :"
     },
     "actions": {
-      "save_automation_draft": "Brouillon d’automatisation enregistré",
-      "simulate_automation": "Automatisation simulée",
-      "apply_automation": "Automatisation publiée / appliquée",
-      "enable_automation": "Automatisation activée",
-      "disable_automation": "Automatisation désactivée",
-      "duplicate_automation": "Automatisation dupliquée",
-      "archive_automation": "Automatisation archivée",
-
+      "save_automation_draft": "Enregistrer le brouillon d’automatisation",
+      "simulate_automation": "Simuler l’automatisation",
+      "apply_automation": "Appliquer l’automatisation",
+      "enable_automation": "Activer l’automatisation",
+      "disable_automation": "Désactiver l’automatisation",
+      "duplicate_automation": "Dupliquer l’automatisation",
+      "archive_automation": "Archiver l’automatisation",
       "create": "Créé",
       "update": "Mis à jour",
       "bulk_course_category_update": "Catégorie de cours en masse mise à jour",
@@ -5878,14 +5888,7 @@
       "start_learning_path": "Parcours d'apprentissage commencé",
       "complete_learning_path": "Parcours d'apprentissage terminé",
       "play_scorm": "SCORM joué",
-      "complete_scorm": "SCORM terminé",
-      "save_automation_draft": "Enregistrer le brouillon d’automatisation",
-      "simulate_automation": "Simuler l’automatisation",
-      "apply_automation": "Appliquer l’automatisation",
-      "enable_automation": "Activer l’automatisation",
-      "disable_automation": "Désactiver l’automatisation",
-      "duplicate_automation": "Dupliquer l’automatisation",
-      "archive_automation": "Archiver l’automatisation"
+      "complete_scorm": "SCORM terminé"
     },
     "entity": {
       "automation": "Automatisation",
@@ -7788,6 +7791,115 @@
       "configurationNotFound": "La configuration de l'AI Mentor est introuvable.",
       "invalidLessonType": "La configuration de l'AI Mentor n'est disponible que pour les leçons AI Mentor.",
       "invalidGraph": "La configuration de l'AI Mentor est invalide."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Conversation avec l’assistant",
+      "open": "Ouvrir la conversation",
+      "fullScreen": "Ouvrir l’assistant complet",
+      "minimize": "Réduire la conversation",
+      "dismiss": "Masquer la bulle de l’assistant",
+      "dragHint": "Faites glisser pour déplacer. Déposez sur X pour masquer. Les flèches déplacent, Suppr masque.",
+      "dropToDismiss": "Déposez pour masquer"
+    },
+    "openSource": "Ouvrir dans Mentingo",
+    "sourceTypes": {
+      "course": "Cours",
+      "lesson": "Leçon",
+      "user": "Personne",
+      "group": "Groupe",
+      "category": "Catégorie",
+      "article": "Article",
+      "news": "Actualité",
+      "qa": "Question et réponse",
+      "development_path": "Parcours d’apprentissage",
+      "resource": "Ressource",
+      "reference": "Source"
+    },
+    "title": "Assistant",
+    "eyebrow": "Les connaissances de votre plateforme",
+    "welcome": "Comment puis-je vous aider ?",
+    "intro": "Trouvez des ressources, posez des questions et consultez les sources, dans les limites de vos droits d’accès.",
+    "newConversation": "Nouvelle conversation",
+    "untitled": "Nouvelle conversation",
+    "search": "Rechercher des conversations",
+    "recent": "Conversations récentes",
+    "history": "Historique des conversations",
+    "active": "Actives",
+    "archived": "Archivées",
+    "archivedThreads": "Conversations archivées",
+    "showArchived": "Afficher les archives",
+    "showRecent": "Afficher les conversations récentes",
+    "noThreads": "Vos conversations apparaîtront ici.",
+    "noMatches": "Aucune conversation ne correspond à votre recherche.",
+    "loading": "Chargement des conversations…",
+    "loadError": "Impossible de charger vos conversations.",
+    "retry": "Réessayer",
+    "loadMore": "Charger plus",
+    "composerLabel": "Message à l’assistant",
+    "placeholder": "Posez une question sur votre apprentissage ou les ressources de la plateforme…",
+    "composerHint": "Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne",
+    "disclosure": "Les réponses peuvent contenir des erreurs. Consultez les sources. Les administrateurs autorisés peuvent consulter ces conversations.",
+    "send": "Envoyer le message",
+    "stop": "Arrêter la réponse",
+    "you": "Vous",
+    "working": "Traitement de votre demande…",
+    "activity": {
+      "starting": "Démarrage…",
+      "thinking": "Je traite votre demande…",
+      "searching": "Je cherche dans votre espace de travail…",
+      "reading": "Je lis le contenu…",
+      "writing": "Je rédige votre réponse…"
+    },
+    "writing": "Rédaction…",
+    "sources": "Sources",
+    "failed": "Une erreur a interrompu la réponse. Le texte ci-dessus peut être incomplet.",
+    "cancelled": "Réponse arrêtée. Le texte ci-dessus peut être incomplet.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "rename": "Renommer la conversation",
+    "archive": "Archiver la conversation",
+    "restore": "Restaurer la conversation",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "threadUnavailable": "Cette conversation est indisponible. Elle n’existe peut-être plus ou vous n’y avez pas accès.",
+    "sendError": "Votre message n’a pas pu être envoyé. Votre brouillon a été conservé.",
+    "messageTooLong": "Votre message ne peut pas dépasser 8 000 caractères. Raccourcissez le brouillon pour l’envoyer.",
+    "unavailable": "L’assistant n’est pas encore configuré. Contactez votre administrateur.",
+    "archivedNotice": "Cette conversation est archivée. Restaurez-la pour continuer.",
+    "openHistory": "Ouvrir l’historique des conversations",
+    "hideHistory": "Masquer l’historique des conversations",
+    "renameDescription": "Donnez à cette conversation un nom facile à retrouver.",
+    "readOnly": "Assistant en lecture seule",
+    "loadEarlier": "Charger les messages précédents",
+    "latestMessage": "Aller au dernier message",
+    "starters": {
+      "find": {
+        "label": "Trouver une ressource",
+        "prompt": "Trouve des cours sur l’intégration auxquels j’ai accès."
+      },
+      "learn": {
+        "label": "Explorer mes possibilités d’apprentissage",
+        "prompt": "À quelles ressources pédagogiques ai-je accès ?"
+      },
+      "understand": {
+        "label": "Comprendre un sujet",
+        "prompt": "Trouve des ressources sur le feedback constructif et explique les idées principales."
+      }
+    },
+    "errors": {
+      "unavailable": "L’assistant est temporairement indisponible. Réessayez plus tard.",
+      "messageConflict": "Ce message entre en conflit avec une demande précédente. Modifiez-le et réessayez.",
+      "responseInProgress": "Une réponse est déjà en cours de génération dans cette conversation.",
+      "responseInactive": "Cette réponse n’est plus active.",
+      "invalidToolInput": "L’assistant n’a pas pu traiter cette demande. Réessayez."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organisation introuvable.",
+      "inactive": "Cette organisation est inactive. Contactez votre administrateur."
     }
   }
 }
