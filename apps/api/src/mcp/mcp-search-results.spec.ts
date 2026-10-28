@@ -190,7 +190,7 @@ describe("MCP search result presentation", () => {
     Object.assign(source.lessons[0], {
       matchedPassage:
         '<p>Useful lesson</p><script>hidden prompt</script><img src="https://secret.invalid">',
-      matchedAttachmentFileName: "secret.pdf",
+      matchedAttachmentFileName: "<b>matching-guide.pdf</b>",
       grading: "secret rubric",
       url: "https://attacker.invalid",
     });
@@ -206,17 +206,22 @@ describe("MCP search result presentation", () => {
         courseId: "my/id",
         title: "Lesson",
         matchedPassage: "Useful lesson",
+        matchedAttachmentFileName: "matching-guide.pdf",
         url: "https://tenant.example/course/my%2Fid/lesson/lesson%2Fid",
       },
     ]);
-    for (const field of [
-      "secret.pdf",
-      "secret rubric",
-      "hidden prompt",
-      "attacker",
-      "users",
-      "learningPaths",
-    ])
+    for (const field of ["secret rubric", "hidden prompt", "attacker", "users", "learningPaths"])
       expect(JSON.stringify(result)).not.toContain(field);
+  });
+  it("leaves body-only learner results without attachment evidence", () => {
+    const source = response();
+    source.lessons[0].matchedAttachmentFileName = null;
+    const result = shapeMcpSearchResults(source, {
+      ...context,
+      searchOnly: true,
+      studentOnly: true,
+      includeLearnerLessons: true,
+    }) as McpLearnerContentSearchResponse;
+    expect(result.lessons[0].matchedAttachmentFileName).toBeNull();
   });
 });
