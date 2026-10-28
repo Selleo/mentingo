@@ -21,6 +21,9 @@ vi.mock("./NavigationMenuItemLink", () => ({
 }));
 vi.mock("../UserProfile/UserAvatar", () => ({ UserAvatar: () => null }));
 vi.mock("~/components/Icon", () => ({ Icon: () => null }));
+vi.mock("~/modules/Helpdesk/HelpdeskContent", () => ({
+  default: () => <input aria-label="Help search" />,
+}));
 
 const renderFooter = () =>
   renderWith().render(
@@ -33,6 +36,24 @@ const renderFooter = () =>
   );
 
 describe("NavigationFooter profile dropdown", () => {
+  it("opens help from the dropdown and restores profile focus after closing it", async () => {
+    const user = userEvent.setup();
+    renderFooter();
+    const trigger = screen.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER);
+
+    await user.click(trigger);
+    await user.click(screen.getByRole("menuitem", { name: "Help & tutorials" }));
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    await screen.findByRole("textbox", { name: "Help search" });
+    expect(screen.getByRole("dialog")).toContainElement(document.activeElement);
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
+    expect(document.body.style.pointerEvents).not.toBe("none");
+  });
+
   it("stays open after a complete pointer click and closes on Escape", async () => {
     const user = userEvent.setup();
     renderFooter();

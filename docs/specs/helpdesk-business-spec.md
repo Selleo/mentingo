@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Mentingo users can find product tutorials while staying on their current page, or ask the existing assistant to find guidance for them. A floating question-mark button opens suggested tutorials and search. Matching results can open directly at the relevant chapter in a video.
+Mentingo users can find product tutorials while staying on their current page, or ask the existing assistant to find guidance for them. A question-mark entry in the user dropdown alongside Profile and Audit logs opens suggested tutorials and search. Matching results can open directly at the relevant chapter in a video.
 
 Core now retrieves published guidance from the separate Helpdesk service through its SDK. The former local examples and sample footage have been removed. The local service currently has an empty catalog; creating and publishing real Mentingo recordings is the next delivery slice.
 
@@ -21,7 +21,7 @@ These are subjects of public product guidance. Viewing a tutorial does not grant
 - Ask the existing assistant to search product help and return clickable tutorial or chapter references.
 - Preserve the current page while watching a tutorial in a dialog.
 - Show explicit empty, retry, language-fallback and keyword-fallback states.
-- Offer help outside the sidebar, including learner layouts, with translated interface text in all seven supported languages.
+- Open help from the user dropdown on desktop and the navigation menu on mobile, with translated interface text in all seven supported languages.
 
 ## End-User Value
 
@@ -29,7 +29,7 @@ Learners, authors and administrators can reach the relevant step of a product ex
 
 ## How It Works
 
-A signed-in user opens Help & tutorials, browses suggestions or enters a question, then selects a result. Topic labels describe results rather than filtering the list. Searches are debounced and include a symbolic page key so the service can prioritize relevant guidance without receiving resource IDs from the current URL. The dialog shows the returned tutorial, chapter timeline and related suggestions. A matched chapter opens at its exact timestamp after the player is ready; opening help alone does not start playback.
+A signed-in user selects Help & tutorials in the user dropdown (or mobile menu), browses suggestions or enters a question, then selects a result. Topic labels describe results rather than filtering the list. Searches are debounced and include a symbolic page key so the service can prioritize relevant guidance without receiving resource IDs from the current URL. The dialog shows the returned tutorial, chapter timeline and related suggestions. A matched chapter opens at its exact timestamp after the player is ready; opening help alone does not start playback.
 
 Ask the assistant closes the popover and opens Mentingo's existing assistant workspace without submitting a message. Its read-only `search_helpdesk` and `get_helpdesk_tutorial` tools use the same retrieval service as the UI. Returned references open an authenticated local tutorial page, optionally at a stable chapter ID. That page resolves current compatible metadata and validates the chapter before seeking. Product guidance cannot establish facts about a tenant's courses, learners or lesson content, and does not count as reading that content.
 

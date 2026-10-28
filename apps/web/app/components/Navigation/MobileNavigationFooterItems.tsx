@@ -1,3 +1,4 @@
+import { CircleHelp } from "lucide-react";
 import { startTransition } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +19,7 @@ interface MobileNavigationFooterItemsProps {
   showLabelsOn2xl?: boolean;
   hasConfigurationIssues?: boolean;
   canViewActivityLogs?: boolean;
+  onOpenHelp: (trigger: HTMLButtonElement) => void;
 }
 
 export const MobileNavigationFooterItems = ({
@@ -27,6 +29,7 @@ export const MobileNavigationFooterItems = ({
   showLabelsOn2xl,
   hasConfigurationIssues,
   canViewActivityLogs,
+  onOpenHelp,
 }: MobileNavigationFooterItemsProps) => {
   const { t } = useTranslation();
 
@@ -34,6 +37,17 @@ export const MobileNavigationFooterItems = ({
 
   return (
     <>
+      <li className="col-span-4 md:col-span-8 2xl:hidden">
+        <button
+          type="button"
+          onClick={(event) => onOpenHelp(event.currentTarget)}
+          className="flex w-full items-center gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 body-sm-md"
+        >
+          <CircleHelp className="size-6" aria-hidden />
+          <span>{t("helpdesk.title")}</span>
+        </button>
+      </li>
+
       {canViewActivityLogs && (
         <NavigationMenuItem
           className="col-span-4 md:col-span-8 2xl:hidden"

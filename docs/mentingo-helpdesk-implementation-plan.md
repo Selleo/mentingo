@@ -53,9 +53,9 @@ Core must not silently present tutorials for a newer incompatible UI. Custom/dev
 
 ## Mentingo UI and assistant integration
 
-Put one consistent floating question-mark launcher near the bottom-right corner in the shared application layout. Create a stable route-to-help-context registry covering normal pages, custom layouts and learner mode; never send resource IDs from a URL. Initial prioritized topics are development paths, course authoring and course learning; pages without tutorials still offer global search and the assistant.
+Put a question-mark Help & tutorials entry in the user dropdown alongside Profile and Audit logs, with a corresponding mobile menu action. Create a stable route-to-help-context registry covering normal pages, custom layouts and learner mode; never send resource IDs from a URL. Initial prioritized topics are development paths, course authoring and course learning; pages without tutorials still offer global search and the assistant.
 
-Reuse `apps/web/app/components/ui/popover.tsx` and existing dialog/sheet primitives. Popover shows “Ask assistant”, a debounced search field and suggested topics. Topic labels describe results and do not act as filters. Search results show title, chapter, duration, language fallback and version status. Opening a result uses a larger player dialog instead of squeezing video into the popover. Seek after the player reports readiness, show chapter controls/captions, and stop playback when closed. Preserve the user's page and unsaved form state; do not autoplay from opening help alone.
+Reuse `apps/web/app/components/ui/popover.tsx` and existing dialog/sheet primitives. A compact help panel shows “Ask assistant”, a debounced search field and suggested topics. Topic labels describe results and do not act as filters. Search results show title, chapter, duration, language fallback and version status. Opening a result uses a larger player dialog instead of squeezing video into the popover. Seek after the player reports readiness, show chapter controls/captions, and stop playback when closed. Preserve the user's page and unsaved form state; do not autoplay from opening help alone.
 
 Use the Mentingo backend as a thin query relay so existing generated client/auth patterns remain intact: browser -> Mentingo API -> Helpdesk. It derives supported app version and safe page context, forwards only explicit help text/filters, enforces bounded timeouts, and performs no indexing. Do not forward cookies or auth headers. The assistant backend calls the same Helpdesk retrieval API through its actual tool adapter. The new service does not replace Mentingo's assistant.
 
@@ -68,7 +68,7 @@ Use TanStack Query and regenerated Mentingo client contracts for relay APIs. No 
 - [ ] Tutorial registry mapping business specs and implementation paths to domains, tutorial IDs, audiences and page keys.
 - [ ] Tutorial recording mode and final-timeline export with stable chapter identities, including single-chapter tutorials.
 - [ ] Typed publishing client, trusted publication job, scoped API-key use, resumable uploads and operation polling.
-- [x] Typed retrieval relay using the locally installed Guide SDK, generated Core client, page-context registry and reusable help popover/results/player.
+- [x] Typed retrieval relay using the locally installed Guide SDK, generated Core client, page-context registry and reusable help panel/results/player.
 - [x] Existing assistant and MCP read-tool integration with validated video citations and authenticated local tutorial/chapter navigation.
 - [x] Business spec update via the Mentingo feature-overview workflow for the delivered retrieval slice.
 
@@ -90,7 +90,7 @@ Core references: `.github/workflows/release-film.yml`, `release-film-on-release.
 
 Architecture decision: keep the catalog, embeddings and publication lifecycle in the plugins service. Core adds a thin SDK adapter shared by REST and MCP, using existing authentication and generated-client patterns. This slice introduces no Core persistence, worker or permission model; this document records the boundary without adding a separate Core ADR.
 
-The Core branch is based on staging commit `fcbef011f`. The floating launcher outside the sidebar now uses real generated Core requests; local example results and sample footage have been removed. Search, related suggestions, chapter playback and authenticated `/helpdesk/tutorials/:key?chapter=...` links consume validated service metadata. Topic labels remain descriptive, without filter chips. All seven current locales are covered.
+The Core branch is based on staging commit `fcbef011f`. The Help & tutorials entry in the user dropdown and mobile menu uses real generated Core requests; local example results and sample footage have been removed. Search, related suggestions, chapter playback and authenticated `/helpdesk/tutorials/:key?chapter=...` links consume validated service metadata. Topic labels remain descriptive, without filter chips. All seven current locales are covered.
 
 `HelpdeskModule` provides authenticated search, tutorial lookup and domain metadata. `HelpdeskService` derives the release and enabled feature keys from server state, validates explicit help input and calls the read-only Guide SDK with a five-second timeout. It does not index content, accept publishing keys or forward tenant data. Both `search_helpdesk` and `get_helpdesk_tutorial` are registered for valid MCP actors and the existing native assistant. Their results remain product guidance rather than evidence about tenant content. Canonical citations open the authenticated chapter route.
 

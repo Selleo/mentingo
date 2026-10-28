@@ -1,6 +1,6 @@
 import { PERMISSIONS } from "@repo/shared";
-import { ChevronDown } from "lucide-react";
-import { type Dispatch, type SetStateAction, startTransition, useState } from "react";
+import { ChevronDown, CircleHelp } from "lucide-react";
+import { type Dispatch, type SetStateAction, startTransition, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLogoutUser } from "~/api/mutations";
@@ -9,6 +9,7 @@ import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
+import { HelpdeskLauncher } from "~/modules/Helpdesk/HelpdeskLauncher";
 import { NotificationsNavigationItem } from "~/modules/Notifications/components";
 
 import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
@@ -39,6 +40,9 @@ export function NavigationFooter({
   isSidebarCollapsed,
 }: NavigationFooterProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isHelpdeskOpen, setIsHelpdeskOpen] = useState(false);
+  const profileTriggerRef = useRef<HTMLButtonElement>(null);
+  const helpdeskReturnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const { mutate: logout } = useLogoutUser();
   const { data: user } = useCurrentUser();
@@ -53,138 +57,166 @@ export function NavigationFooter({
   const hideLabels = isSidebarCollapsed;
 
   return (
-    <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
-      {canViewAnnouncements && (
-        <NotificationsNavigationItem
-          className="col-span-4 md:col-span-8 2xl:block"
-          showLabel={showNavigationLabels}
-          showTooltip={shouldShowTooltips}
-          isSidebarCollapsed={isSidebarCollapsed}
-          onMobileNavigate={() => setIsMobileNavOpen(false)}
+    <>
+      <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
+        {canViewAnnouncements && (
+          <NotificationsNavigationItem
+            className="col-span-4 md:col-span-8 2xl:block"
+            showLabel={showNavigationLabels}
+            showTooltip={shouldShowTooltips}
+            isSidebarCollapsed={isSidebarCollapsed}
+            onMobileNavigate={() => setIsMobileNavOpen(false)}
+          />
+        )}
+
+        <li className="col-span-4 md:col-span-8 2xl:hidden">
+          <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
+        </li>
+
+        <MobileNavigationFooterItems
+          setIsMobileNavOpen={setIsMobileNavOpen}
+          userId={user?.id}
+          isSupportMode={Boolean(user?.isSupportMode)}
+          hasConfigurationIssues={hasConfigurationIssues}
+          canViewActivityLogs={canViewActivityLogs}
+          onOpenHelp={(trigger) => {
+            helpdeskReturnFocusRef.current = trigger;
+            setIsHelpdeskOpen(true);
+          }}
         />
-      )}
 
-      <li className="col-span-4 md:col-span-8 2xl:hidden">
-        <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
-      </li>
-
-      <MobileNavigationFooterItems
-        setIsMobileNavOpen={setIsMobileNavOpen}
-        userId={user?.id}
-        isSupportMode={Boolean(user?.isSupportMode)}
-        hasConfigurationIssues={hasConfigurationIssues}
-        canViewActivityLogs={canViewActivityLogs}
-      />
-
-      <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
-        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-          <DropdownMenuTrigger
-            data-testid={NAVIGATION_HANDLES.PROFILE_FOOTER}
-            className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
-              "justify-center": hideLabels,
-            })}
-          >
-            <UserAvatar
-              userName={`${user?.firstName} ${user?.lastName}`}
-              profilePictureUrl={user?.profilePictureUrl}
-              className="size-8"
-            />
-            <span
-              className={cn("block grow text-left body-sm-md", {
-                hidden: hideLabels,
+        <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+            <DropdownMenuTrigger
+              ref={profileTriggerRef}
+              data-testid={NAVIGATION_HANDLES.PROFILE_FOOTER}
+              className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
+                "justify-center": hideLabels,
               })}
-            >{`${user?.firstName} ${user?.lastName}`}</span>
-            <ChevronDown
-              className={cn(
-                "block size-6 shrink-0 rotate-180 text-neutral-500 group-data-[state=open]:rotate-180",
-                {
+            >
+              <UserAvatar
+                userName={`${user?.firstName} ${user?.lastName}`}
+                profilePictureUrl={user?.profilePictureUrl}
+                className="size-8"
+              />
+              <span
+                className={cn("block grow text-left body-sm-md", {
                   hidden: hideLabels,
-                },
-              )}
-            />
-            {hasConfigurationIssues && (
-              <span className="absolute top-2 left-2 size-2 rounded-full bg-error-500" />
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            side="right"
-            sideOffset={isSidebarCollapsed ? 12 : 24}
-            className="w-80 rounded-2xl border-neutral-200 bg-white p-1 shadow-xl"
-          >
-            <menu className="flex flex-col gap-2 p-1">
-              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
-                <NavigationMenuItemLink
-                  item={{
-                    iconName: "Info",
-                    label: t("navigationSideBar.providerInformation"),
-                    link: "/provider-information",
-                    testId: NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK,
-                  }}
-                />
-              </DropdownMenuItem>
-
-              {!user?.isSupportMode && (
-                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
-                  <NavigationMenuItemLink
-                    item={{
-                      iconName: "User",
-                      label: t("navigationSideBar.profile"),
-                      link: `/profile/${user?.id}`,
-                      testId: NAVIGATION_HANDLES.PROFILE_LINK,
-                    }}
-                  />
-                </DropdownMenuItem>
-              )}
-
-              {canViewActivityLogs && (
-                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
-                  <NavigationMenuItemLink
-                    item={{
-                      iconName: "Timeline",
-                      label: t("navigationSideBar.activityLogs"),
-                      link: "/admin/activity-logs",
-                      testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
-                    }}
-                  />
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)} className="relative">
-                <NavigationMenuItemLink
-                  item={{
-                    iconName: "Settings",
-                    label: t("navigationSideBar.settings"),
-                    link: `/settings`,
-                    testId: NAVIGATION_HANDLES.SETTINGS_LINK,
-                  }}
-                />
-                {hasConfigurationIssues && (
-                  <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
+                })}
+              >{`${user?.firstName} ${user?.lastName}`}</span>
+              <ChevronDown
+                className={cn(
+                  "block size-6 shrink-0 rotate-180 text-neutral-500 group-data-[state=open]:rotate-180",
+                  {
+                    hidden: hideLabels,
+                  },
                 )}
-              </DropdownMenuItem>
+              />
+              {hasConfigurationIssues && (
+                <span className="absolute top-2 left-2 size-2 rounded-full bg-error-500" />
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              side="right"
+              sideOffset={isSidebarCollapsed ? 12 : 24}
+              className="w-80 rounded-2xl border-neutral-200 bg-white p-1 shadow-xl"
+              onCloseAutoFocus={(event) => {
+                if (isHelpdeskOpen) event.preventDefault();
+              }}
+            >
+              <menu className="flex flex-col gap-2 p-1">
+                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                  <NavigationMenuItemLink
+                    item={{
+                      iconName: "Info",
+                      label: t("navigationSideBar.providerInformation"),
+                      link: "/provider-information",
+                      testId: NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK,
+                    }}
+                  />
+                </DropdownMenuItem>
 
-              <Separator className="my-1 bg-neutral-200" />
+                {!user?.isSupportMode && (
+                  <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                    <NavigationMenuItemLink
+                      item={{
+                        iconName: "User",
+                        label: t("navigationSideBar.profile"),
+                        link: `/profile/${user?.id}`,
+                        testId: NAVIGATION_HANDLES.PROFILE_LINK,
+                      }}
+                    />
+                  </DropdownMenuItem>
+                )}
 
-              <DropdownMenuItem
-                data-testid={NAVIGATION_HANDLES.LOGOUT}
-                onClick={() => {
-                  startTransition(() => {
-                    logout();
-                  });
-                }}
-              >
-                <div className="flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md">
-                  <Icon name="Logout" className="size-6" />
-                  <span className="line-clamp-1 truncate whitespace-nowrap">
-                    {t("navigationSideBar.logout")}
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            </menu>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </menu>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    helpdeskReturnFocusRef.current = profileTriggerRef.current;
+                    setIsDropdownOpen(false);
+                    setIsHelpdeskOpen(true);
+                  }}
+                  className="flex cursor-pointer items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 text-neutral-900 outline-none hover:border-primary-200 focus:bg-primary-50 2xl:p-2 body-sm-md"
+                >
+                  <CircleHelp className="size-6" aria-hidden />
+                  <span>{t("helpdesk.title")}</span>
+                </DropdownMenuItem>
+
+                {canViewActivityLogs && (
+                  <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                    <NavigationMenuItemLink
+                      item={{
+                        iconName: "Timeline",
+                        label: t("navigationSideBar.activityLogs"),
+                        link: "/admin/activity-logs",
+                        testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+                      }}
+                    />
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)} className="relative">
+                  <NavigationMenuItemLink
+                    item={{
+                      iconName: "Settings",
+                      label: t("navigationSideBar.settings"),
+                      link: `/settings`,
+                      testId: NAVIGATION_HANDLES.SETTINGS_LINK,
+                    }}
+                  />
+                  {hasConfigurationIssues && (
+                    <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
+                  )}
+                </DropdownMenuItem>
+
+                <Separator className="my-1 bg-neutral-200" />
+
+                <DropdownMenuItem
+                  data-testid={NAVIGATION_HANDLES.LOGOUT}
+                  onClick={() => {
+                    startTransition(() => {
+                      logout();
+                    });
+                  }}
+                >
+                  <div className="flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md">
+                    <Icon name="Logout" className="size-6" />
+                    <span className="line-clamp-1 truncate whitespace-nowrap">
+                      {t("navigationSideBar.logout")}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              </menu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </menu>
+      <HelpdeskLauncher
+        open={isHelpdeskOpen}
+        onOpenChange={setIsHelpdeskOpen}
+        onRestoreFocus={() => helpdeskReturnFocusRef.current?.focus()}
+        onAskAssistant={() => setIsMobileNavOpen(false)}
+      />
+    </>
   );
 }

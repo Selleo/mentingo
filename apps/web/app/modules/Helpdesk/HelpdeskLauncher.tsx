@@ -1,47 +1,41 @@
-import { CircleHelp } from "lucide-react";
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 
 import type { HelpdeskSelection } from "./helpdesk.types";
 
 const HelpdeskContent = lazy(() => import("./HelpdeskContent"));
 const HelpdeskVideoDialog = lazy(() => import("./HelpdeskVideoDialog"));
 
-export function HelpdeskLauncher() {
+type HelpdeskLauncherProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRestoreFocus: () => void;
+  onAskAssistant: () => void;
+};
+
+export function HelpdeskLauncher({
+  open,
+  onOpenChange,
+  onRestoreFocus,
+  onAskAssistant,
+}: HelpdeskLauncherProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const [selection, setSelection] = useState<HelpdeskSelection | null>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={triggerRef}
-            type="button"
-            variant="outline"
-            aria-label={t("helpdesk.title")}
-            title={t("helpdesk.title")}
-            className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-5 z-40 size-12 rounded-full border-neutral-200 bg-white p-0 text-primary-700 shadow-md hover:border-primary-300 hover:bg-primary-50 md:right-6"
-          >
-            <CircleHelp className="size-5 shrink-0" aria-hidden />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="end"
-          side="top"
-          sideOffset={12}
-          collisionPadding={12}
-          className="w-[min(440px,calc(100vw-24px))] overflow-hidden border-neutral-200 bg-white p-0 shadow-xl"
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          aria-describedby={undefined}
+          className="w-[min(440px,calc(100vw-24px))] gap-0 overflow-hidden rounded-xl border-neutral-200 bg-white p-0 shadow-xl"
           onCloseAutoFocus={(event) => {
-            if (selection) event.preventDefault();
+            event.preventDefault();
+            if (!selection) onRestoreFocus();
           }}
         >
+          <DialogTitle className="sr-only">{t("helpdesk.title")}</DialogTitle>
           <Suspense
             fallback={
               <div
@@ -51,15 +45,18 @@ export function HelpdeskLauncher() {
             }
           >
             <HelpdeskContent
-              onAskAssistant={() => setOpen(false)}
+              onAskAssistant={() => {
+                onOpenChange(false);
+                onAskAssistant();
+              }}
               onSelect={(next) => {
-                setOpen(false);
+                onOpenChange(false);
                 setSelection(next);
               }}
             />
           </Suspense>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
       {selection && (
         <Suspense
           fallback={
@@ -81,7 +78,7 @@ export function HelpdeskLauncher() {
             selection={selection}
             onSelect={setSelection}
             onClose={() => setSelection(null)}
-            onRestoreFocus={() => triggerRef.current?.focus()}
+            onRestoreFocus={onRestoreFocus}
           />
         </Suspense>
       )}

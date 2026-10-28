@@ -50,9 +50,11 @@ export default function HelpdeskContent({
   const waiting = isPending || query.trim() !== debouncedQuery;
 
   return (
-    <div className="flex max-h-[min(85dvh,calc(var(--radix-popover-content-available-height)_-_2px))] flex-col">
+    <div className="flex max-h-[85dvh] flex-col">
       <div className="shrink-0 border-b border-neutral-100 px-5 pb-4 pt-5">
-        <h2 className="mb-1 text-lg font-semibold text-neutral-950">{t("helpdesk.heading")}</h2>
+        <h2 className="mb-1 pr-7 text-lg font-semibold text-neutral-950">
+          {t("helpdesk.heading")}
+        </h2>
         <p className="body-sm text-neutral-600">{t("helpdesk.subtitle")}</p>
         <Link
           to="/assistant"

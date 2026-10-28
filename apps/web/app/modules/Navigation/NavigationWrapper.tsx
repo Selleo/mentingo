@@ -6,7 +6,6 @@ import { MFAGuard } from "~/Guards/MFAGuard";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { cn } from "~/lib/utils";
 import { AssistantDock } from "~/modules/Assistant/AssistantDock";
-import { HelpdeskLauncher } from "~/modules/Helpdesk/HelpdeskLauncher";
 import { SupportModeBanner } from "~/modules/SupportMode/SupportModeBanner";
 
 export default function NavigationWrapper() {
@@ -26,7 +25,6 @@ export default function NavigationWrapper() {
             <>
               <Outlet />
               {currentUser && <AssistantDock actor={currentUser} />}
-              {currentUser && <HelpdeskLauncher />}
             </>
           </RouteGuard>
         </MFAGuard>
