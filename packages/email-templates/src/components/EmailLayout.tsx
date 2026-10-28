@@ -25,9 +25,16 @@ export const EmailLayout = ({
   const sideCellStyle = { fontSize: "1px", lineHeight: "1px", padding: 0 };
 
   return (
-    <Html>
+    <Html style={{ colorScheme: "only light" }}>
       <Head>
-        <style>{`@media only screen and (max-width: 555px) { .email-card-column { width: 90% !important; } }`}</style>
+        {/* Respect the original branding in clients that support a light-only scheme.
+            Some clients (notably Gmail and Outlook) can still force their own colors. */}
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
+        <style>{`
+          :root { color-scheme: only light; supported-color-schemes: light; }
+          @media only screen and (max-width: 555px) { .email-card-column { width: 90% !important; } }
+        `}</style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="x-apple-disable-message-reformatting" />
         <Font
