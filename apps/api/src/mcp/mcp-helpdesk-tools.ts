@@ -54,7 +54,7 @@ export function registerMcpHelpdeskTools(
     MCP_HELPDESK_TOOL_NAMES.SEARCH,
     {
       description:
-        "Find Mentingo product help videos using hybrid semantic and keyword search in an explicit language. Use for how to use the app, not for facts about this tenant's courses, learners or authored lesson content. Returns verified public guidance, CDN video URLs, chapter timestamps and exact tenant Helpdesk links. Core supplies the installed version and enabled features; never infer tenant content or completion from a product guide.",
+        "Find Mentingo product help videos in an explicit language. Choose mode=keyword for exact topic lookups using FTS only, or mode=hybrid (the default) for semantic and keyword retrieval. Use for how to use the app, not for facts about this tenant's courses, learners or authored lesson content. Returns verified public guidance, CDN video URLs, chapter timestamps and exact tenant Helpdesk links. Core supplies the installed version and enabled features; never infer tenant content or completion from a product guide.",
       inputSchema: asMcpInputSchema(helpdeskSearchRequestSchema),
       annotations: { readOnlyHint: true, destructiveHint: false },
     },

@@ -59,7 +59,7 @@
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
     "@mentingo/content-marketplace-sdk": "0.1.0",
-    "@mentingo/guide-sdk": "file:../../vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz",
+    "@mentingo/guide-sdk": "file:../../vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz",
     "@mentingo/luma-sdk": "0.4.0",
     "@mentingo/phishing-simulation-sdk": "0.1.1",
     "@microsoft/microsoft-graph-client": "3.0.7",

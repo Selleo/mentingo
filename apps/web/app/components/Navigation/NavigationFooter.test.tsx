@@ -46,7 +46,7 @@ describe("NavigationFooter profile dropdown", () => {
 
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     await screen.findByRole("textbox", { name: "Help search" });
-    expect(screen.getByRole("dialog")).toContainElement(document.activeElement);
+    expect(screen.getByRole("dialog").contains(document.activeElement)).toBe(true);
 
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());

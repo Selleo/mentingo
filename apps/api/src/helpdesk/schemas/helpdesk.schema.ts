@@ -1,4 +1,4 @@
-import { SearchMode, TutorialDomain } from "@mentingo/guide-sdk";
+import { SearchMode, SearchQueryMode, TutorialDomain } from "@mentingo/guide-sdk";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
@@ -13,6 +13,11 @@ export const helpdeskSearchRequestSchema = Type.Object(
   {
     query: Type.String({ maxLength: 500, pattern: "^[^\\u0000]*$" }),
     language: Type.Enum(SUPPORTED_LANGUAGES),
+    mode: Type.Optional(
+      Type.Enum(SearchQueryMode, {
+        description: "Keyword uses FTS only; hybrid combines semantic and keyword retrieval.",
+      }),
+    ),
     pageKey: Type.Optional(Type.String({ pattern: "^[a-z0-9][a-z0-9._-]{0,127}$" })),
     domain: Type.Optional(helpdeskDomainSchema),
     limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 10 })),

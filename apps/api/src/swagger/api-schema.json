@@ -67890,6 +67890,19 @@
               }
             ]
           },
+          "mode": {
+            "description": "Keyword uses FTS only; hybrid combines semantic and keyword retrieval.",
+            "anyOf": [
+              {
+                "const": "keyword",
+                "type": "string"
+              },
+              {
+                "const": "hybrid",
+                "type": "string"
+              }
+            ]
+          },
           "pageKey": {
             "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
             "type": "string"
@@ -67930,6 +67943,10 @@
             "properties": {
               "mode": {
                 "anyOf": [
+                  {
+                    "const": "keyword",
+                    "type": "string"
+                  },
                   {
                     "const": "hybrid",
                     "type": "string"

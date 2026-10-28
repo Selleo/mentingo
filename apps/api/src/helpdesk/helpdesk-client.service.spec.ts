@@ -1,4 +1,10 @@
-import { createGuideClient, GuideApiError, SearchMode, TutorialDomain } from "@mentingo/guide-sdk";
+import {
+  createGuideClient,
+  GuideApiError,
+  SearchMode,
+  SearchQueryMode,
+  TutorialDomain,
+} from "@mentingo/guide-sdk";
 import { NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { CanceledError } from "axios";
 
@@ -111,6 +117,18 @@ describe("Helpdesk generated SDK adapter", () => {
       expect(request.timeout).toBe(5_000);
       expect(request.signal).toBeInstanceOf(AbortSignal);
     }
+  });
+
+  it("accepts explicit keyword results and sends the strategy through the real SDK", async () => {
+    const { service, requests } = adapterFixture([{ mode: SearchMode.Keyword, results: [] }]);
+    const result = await service.search({
+      query: "editor",
+      language: "en",
+      appVersion: "4.25.0",
+      mode: SearchQueryMode.Keyword,
+    });
+    expect(result).toEqual({ mode: "keyword", results: [] });
+    expect(JSON.parse(requests[0].data as string).mode).toBe("keyword");
   });
 
   it.each([

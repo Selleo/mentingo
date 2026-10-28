@@ -53,7 +53,7 @@ describe("Helpdesk public tutorial search", () => {
       startMs: 12_345,
     });
     expect(requests).toEqual([
-      { query: "", language: "en", pageKey: "admin.course.curriculum", limit: 8 },
+      { query: "", mode: "keyword", language: "en", pageKey: "admin.course.curriculum", limit: 8 },
     ]);
     expect(JSON.stringify(requests)).not.toContain("private-course-id");
     expect(screen.queryByText(/preview|example results/i)).not.toBeInTheDocument();
@@ -77,6 +77,7 @@ describe("Helpdesk public tutorial search", () => {
     await waitFor(() => expect(requests).toHaveLength(2));
     expect(requests[1]).toEqual({
       query: "publish",
+      mode: "keyword",
       language: "en",
       pageKey: "admin.course.curriculum",
       limit: 8,
@@ -103,8 +104,60 @@ describe("Helpdesk public tutorial search", () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByRole("button", { name: /Publish a course/ })).toBeInTheDocument();
     expect(
-      screen.getByText("Showing keyword matches while AI search is unavailable."),
+      screen.queryByText("Showing keyword matches while AI search is unavailable."),
+    ).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "publish" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search with AI:/ }));
+    expect(
+      await screen.findByText("Showing keyword matches while AI search is unavailable."),
     ).toBeInTheDocument();
+  });
+
+  it("uses keyword search while typing, runs hybrid only on request and returns to keywords on edits", async () => {
+    const requests: { query: string; mode: string }[] = [];
+    server.use(
+      http.post("*/api/helpdesk/search", async ({ request }) => {
+        const body = (await request.json()) as { query: string; mode: string };
+        requests.push(body);
+        return HttpResponse.json({ data: { mode: body.mode, results: [] } });
+      }),
+    );
+    setup();
+    await screen.findByText("No tutorials found");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "publish" } });
+    await waitFor(() => expect(requests).toHaveLength(2));
+    expect(requests[1]).toMatchObject({ query: "publish", mode: "keyword" });
+
+    fireEvent.click(screen.getByRole("button", { name: /Search with AI:/ }));
+    await waitFor(() => expect(requests).toHaveLength(3));
+    expect(requests[2]).toMatchObject({ query: "publish", mode: "hybrid" });
+    fireEvent.click(screen.getByRole("button", { name: "Back to keyword search" }));
+    expect(screen.getByRole("button", { name: /Search with AI:/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Search with AI:/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "development path" } });
+    await waitFor(() => expect(requests).toHaveLength(4));
+    expect(requests[3]).toMatchObject({ query: "development path", mode: "keyword" });
+    expect(
+      screen.queryByRole("button", { name: "Back to keyword search" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("submits the current AI query even before the keyword debounce completes", async () => {
+    const requests: { query: string; mode: string }[] = [];
+    server.use(
+      http.post("*/api/helpdesk/search", async ({ request }) => {
+        const body = (await request.json()) as { query: string; mode: string };
+        requests.push(body);
+        return HttpResponse.json({ data: { mode: body.mode, results: [] } });
+      }),
+    );
+    setup();
+    await screen.findByText("No tutorials found");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "how do I edit a course" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search with AI:/ }));
+    await waitFor(() => expect(requests).toHaveLength(2));
+    expect(requests[1]).toMatchObject({ query: "how do I edit a course", mode: "hybrid" });
   });
 
   it("opens the existing assistant workspace", async () => {

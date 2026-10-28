@@ -47,6 +47,7 @@ export class HelpdeskService {
     return this.helpdeskClientService.search({
       query: input.query,
       language: input.language,
+      ...(input.mode ? { mode: input.mode } : {}),
       ...(input.pageKey ? { pageKey: input.pageKey } : {}),
       ...(input.domain ? { domain: input.domain } : {}),
       ...(input.limit !== undefined ? { limit: input.limit } : {}),

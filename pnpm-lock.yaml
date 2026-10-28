@@ -104,8 +104,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0
       '@mentingo/guide-sdk':
-        specifier: file:../../vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz
-        version: file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz
+        specifier: file:../../vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz
+        version: file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz
       '@mentingo/luma-sdk':
         specifier: 0.4.0
         version: 0.4.0
@@ -4797,8 +4797,8 @@ packages:
     resolution: {integrity: sha512-E4ONXeomg7QojFSdyempCqtRkzGgX10moG/pHfGXODn6h/Lq5CSNKKbJcFbvM8jtEbt5IUV/yZQGrXPDICJLYA==}
     engines: {node: '>=22.15.0'}
 
-  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz':
-    resolution: {integrity: sha512-wnAqIVcM+VaWxVPZPp4YA/YztSrEEbTCYbuRi8rzzyqPIPrhSI6Hru4BmGS/gHiZhGRmlfZgy/hZw4VR5OtJUw==, tarball: file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz}
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz':
+    resolution: {integrity: sha512-nZJi/YiQVs42yNq5BAP90oHPPxYh/thxKafQCPyOn+IQESyqd+WYBcCEKyxAH5dY4g6f5j/61vSFfuXrVx2G4g==, tarball: file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz}
     version: 0.1.0
     engines: {node: '>=22.15.0'}
 
@@ -23713,7 +23713,7 @@ snapshots:
 
   '@mentingo/content-marketplace-sdk@0.1.0': {}
 
-  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz':
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz':
     dependencies:
       axios: 1.21.0(debug@4.4.3)
     transitivePeerDependencies:

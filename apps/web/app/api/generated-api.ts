@@ -8961,6 +8961,8 @@ export interface HelpdeskSearchRequest {
    */
   query: string;
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** Keyword uses FTS only; hybrid combines semantic and keyword retrieval. */
+  mode?: "keyword" | "hybrid";
   /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
   pageKey?: string;
   domain?: "development-paths" | "course-authoring" | "course-learning";
@@ -8973,7 +8975,7 @@ export interface HelpdeskSearchRequest {
 
 export interface HelpdeskSearchResponse {
   data: {
-    mode: "hybrid" | "keyword_fallback" | "browse";
+    mode: "keyword" | "hybrid" | "keyword_fallback" | "browse";
     /** @maxItems 10 */
     results: {
       tutorial: {

@@ -4,7 +4,7 @@
 
 Mentingo users can find product tutorials while staying on their current page, or ask the existing assistant to find guidance for them. A question-mark entry in the user dropdown alongside Profile and Audit logs opens suggested tutorials and search. Matching results can open directly at the relevant chapter in a video.
 
-Core now retrieves published guidance from the separate Helpdesk service through its SDK. The former local examples and sample footage have been removed. The local service currently has an empty catalog; creating and publishing real Mentingo recordings is the next delivery slice.
+Core now retrieves published guidance from the separate Helpdesk service through its SDK. The former local examples and sample footage have been removed. Local validation now uses two explicitly labelled demo clips with illustrative flow names and chapter timings. Creating and publishing real Mentingo recordings remains the next delivery slice.
 
 ## Who Uses It
 
@@ -16,7 +16,7 @@ These are subjects of public product guidance. Viewing a tutorial does not grant
 
 ## Feature Functions
 
-- Find suggested tutorials or search their titles, descriptions and chapter content through the shared Helpdesk catalog.
+- Find suggested tutorials and search their titles, descriptions and chapter content using keyword search, or explicitly choose Search with AI for hybrid retrieval.
 - Open a matching chapter directly, seek using chapter controls and a segmented timeline, and explore related tutorials.
 - Ask the existing assistant to search product help and return clickable tutorial or chapter references.
 - Preserve the current page while watching a tutorial in a dialog.
@@ -29,11 +29,11 @@ Learners, authors and administrators can reach the relevant step of a product ex
 
 ## How It Works
 
-A signed-in user selects Help & tutorials in the user dropdown (or mobile menu), browses suggestions or enters a question, then selects a result. Topic labels describe results rather than filtering the list. Searches are debounced and include a symbolic page key so the service can prioritize relevant guidance without receiving resource IDs from the current URL. The dialog shows the returned tutorial, chapter timeline and related suggestions. A matched chapter opens at its exact timestamp after the player is ready; opening help alone does not start playback.
+A signed-in user selects Help & tutorials in the user dropdown (or mobile menu), browses suggestions or enters a question, then selects a result. Topic labels describe results rather than filtering the list. Typing runs debounced keyword search. Search with AI explicitly starts hybrid retrieval; Back to keyword search returns to lexical results, and editing the text also resets to keyword mode. Searches include a symbolic page key so the service can prioritize relevant guidance without receiving resource IDs from the current URL. The dialog shows the returned tutorial, chapter timeline and related suggestions. A matched chapter opens at its exact timestamp after the player is ready; opening help alone does not start playback.
 
 Ask the assistant closes the popover and opens Mentingo's existing assistant workspace without submitting a message. Its read-only `search_helpdesk` and `get_helpdesk_tutorial` tools use the same retrieval service as the UI. Returned references open an authenticated local tutorial page, optionally at a stable chapter ID. That page resolves current compatible metadata and validates the chapter before seeking. Product guidance cannot establish facts about a tenant's courses, learners or lesson content, and does not count as reading that content.
 
-Core selects the installed release and enabled feature keys on the server. The Helpdesk service returns compatible published tutorials, with explicit language fallback when applicable. An unknown development version requires a configured base release. Empty catalogs or unavailable compatible content produce an honest empty state. Service failures show a retry action; a missing tutorial has its own error state. Search mode distinguishes browsing, hybrid retrieval and keyword fallback. The local service runs without an embedding provider, so nonempty searches currently report keyword fallback.
+Core selects the installed release and enabled feature keys on the server. The Helpdesk service returns compatible published tutorials, with explicit language fallback when applicable. An unknown development version requires a configured base release. Empty catalogs or unavailable compatible content produce an honest empty state. Service failures show a retry action; a missing tutorial has its own error state. Search mode distinguishes browsing, explicit keyword retrieval, hybrid retrieval and keyword fallback when the user requested hybrid but semantic retrieval could not run. Keyword mode never calls the embedding provider or vector index, even if a matching query embedding is cached.
 
 ## Key Technical Context
 
@@ -50,4 +50,4 @@ Focused backend tests cover server-derived compatibility, bounded requests, SDK 
 
 Frontend tests cover generated-client requests, debouncing, cancellation, loading/errors, honest empty states, exact millisecond chapter seeking, language fallback, authenticated deep links and related tutorials. Existing shared player tests cover readiness and keyboard behavior. Deterministic tutorial fixtures remain in tests only.
 
-An authenticated smoke check against the running isolated Core branch reached the local Rust service through the installed SDK: domain browsing returned all three domains, empty browsing returned an empty catalog, a nonempty search returned keyword fallback, a missing tutorial returned 404, and unsigned Core requests returned 401. This is real local integration evidence with an empty catalog. It does not establish live semantic retrieval, real Bunny playback, narration quality or a live model choosing the new tools. Video generation and provider validation remain separate work.
+Local provider validation uploaded both approved demo files directly to Bunny with SDK-issued grants. The Rust service verified the originals and encoding, indexed their labelled metadata with OpenAI, and explicitly published both revisions. Live keyword and hybrid queries returned matching chapters; Bunny HLS manifests and streams were readable with the Mentingo referer. The demo chapter labels are illustrative and are not evidence that the footage teaches those workflows. Earlier authenticated smoke checks also covered session enforcement and missing tutorial errors. No live model choosing the tools, browser playback or narration-quality claim follows from these checks. Automated video generation remains separate work.

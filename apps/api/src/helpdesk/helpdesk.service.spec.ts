@@ -1,3 +1,4 @@
+import { SearchQueryMode } from "@mentingo/guide-sdk";
 import { BadRequestException, ServiceUnavailableException } from "@nestjs/common";
 import { FEATURES, FEATURE_SETTINGS_KEYS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
@@ -56,6 +57,14 @@ describe("HelpdeskService compatibility and privacy", () => {
     expect(JSON.stringify(client.search.mock.calls)).not.toContain("Private");
   });
 
+  it.each([SearchQueryMode.Keyword, SearchQueryMode.Hybrid])(
+    "forwards the explicitly selected %s strategy to the SDK",
+    async (mode) => {
+      await service().search({ query: "edit course", language: SUPPORTED_LANGUAGES.EN, mode });
+      expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ mode }));
+    },
+  );
+
   it("derives feature flags on each call, including detail deep links", async () => {
     await service().getTutorial("edit-course", { language: SUPPORTED_LANGUAGES.EN });
     expect(client.getTutorial).toHaveBeenLastCalledWith("edit-course", {
@@ -88,6 +97,8 @@ describe("HelpdeskService compatibility and privacy", () => {
       { query: "", language: "en", features: ["news"] },
       { query: "", language: "en", pageKey: "https://tenant.invalid/private" },
       { query: "", language: "en", limit: 11 },
+      { query: "", language: "en", mode: "semantic" },
+      { query: "", language: "en", mode: null },
       { query: "😀".repeat(251), language: "en" },
       { query: "bad\0query", language: "en" },
     ];
