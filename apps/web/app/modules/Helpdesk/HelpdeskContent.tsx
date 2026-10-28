@@ -1,15 +1,6 @@
 import { Link, useLocation } from "@remix-run/react";
 import { GLOBAL_SEARCH_MODES } from "@repo/shared";
-import {
-  ArrowRight,
-  BookOpen,
-  ChevronRight,
-  Clock3,
-  Layers3,
-  Play,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { ArrowRight, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,16 +12,11 @@ import { Button } from "~/components/ui/button";
 import { useDebounce } from "~/hooks/useDebounce";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { HELPDESK_DOMAIN_LABELS, formatHelpdeskTime, getHelpdeskPageKey } from "./helpdesk.helpers";
+import { getHelpdeskPageKey, groupHelpdeskResults } from "./helpdesk.helpers";
 import { HelpdeskLoading, HelpdeskRequestError } from "./HelpdeskRequestState";
+import { HelpdeskSearchResult } from "./HelpdeskSearchResult";
 
 import type { HelpdeskSelection } from "./helpdesk.types";
-
-const DOMAIN_ICONS = {
-  "course-authoring": BookOpen,
-  "development-paths": Layers3,
-  "course-learning": Play,
-};
 
 export default function HelpdeskContent({
   onSelect,
@@ -159,48 +145,15 @@ export default function HelpdeskContent({
                 <p className="mt-1 body-sm text-neutral-500">{t("helpdesk.emptyHint")}</p>
               </div>
             )}
-            {data.results.map((hit) => {
-              const { tutorial } = hit;
-              const DomainIcon = DOMAIN_ICONS[tutorial.domain];
-              const chapter = tutorial.chapters.find((item) => item.id === hit.chapterId);
-              return (
-                <button
-                  type="button"
-                  key={`${tutorial.revisionId}:${hit.chapterId ?? "video"}`}
-                  onClick={() => onSelect({ tutorial, startMs: hit.startMs })}
-                  className="group flex w-full gap-3 rounded-lg p-2.5 text-start transition-colors hover:bg-neutral-50 focus-visible:bg-primary-50 focus-visible:outline focus-visible:outline-primary-400"
-                >
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-primary-600 group-hover:bg-white">
-                    <DomainIcon className="size-5" strokeWidth={1.6} aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block body-sm-md text-neutral-950">{tutorial.title}</span>
-                    <span className="mt-0.5 line-clamp-2 block details text-neutral-600">
-                      {hit.excerpt || tutorial.description}
-                    </span>
-                    <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                      <span>{t(HELPDESK_DOMAIN_LABELS[tutorial.domain])}</span>
-                      <span aria-hidden>·</span>
-                      <Clock3 className="size-3" aria-hidden />
-                      {formatHelpdeskTime(tutorial.durationMs / 1000)}
-                      <span aria-hidden>·</span>
-                      {t("helpdesk.chapterCount", { count: tutorial.chapters.length })}
-                    </span>
-                    {chapter && (
-                      <span className="mt-1 block text-xs text-primary-700">
-                        {formatHelpdeskTime(hit.startMs / 1000)} · {chapter.title}
-                      </span>
-                    )}
-                    {tutorial.languageFallback && (
-                      <span className="mt-1 block text-xs text-neutral-500">
-                        {t("helpdesk.languageFallback", { language: tutorial.language })}
-                      </span>
-                    )}
-                  </span>
-                  <ChevronRight className="mt-1 size-4 shrink-0 text-neutral-400" aria-hidden />
-                </button>
-              );
-            })}
+            <ul className="space-y-1">
+              {groupHelpdeskResults(data.results).map((group) => (
+                <HelpdeskSearchResult
+                  key={group.tutorial.revisionId}
+                  group={group}
+                  onSelect={onSelect}
+                />
+              ))}
+            </ul>
           </div>
         )}
       </div>

@@ -1,4 +1,43 @@
-import type { HelpdeskTutorial } from "./helpdesk.types";
+import type { HelpdeskSearchHit, HelpdeskTutorial } from "./helpdesk.types";
+
+const DEMO_TUTORIAL_KEY_PREFIX = "demo.";
+
+/** Present demo status separately from the task title; avoid punctuation-heavy labels. */
+export function helpdeskTutorialLabel(tutorial: HelpdeskTutorial) {
+  const isDemo = tutorial.key.startsWith(DEMO_TUTORIAL_KEY_PREFIX);
+  const title = isDemo
+    ? tutorial.title.replace(/^demo\b\s*[:\u2014\u2013-]?\s*/i, "")
+    : tutorial.title;
+  return { isDemo, title: title.replace(/\s*\u2014\s*/g, ": ") };
+}
+
+export type HelpdeskResultGroup = {
+  tutorial: HelpdeskTutorial;
+  startMs: number;
+  chapters: { chapter: HelpdeskTutorial["chapters"][number]; startMs: number }[];
+};
+
+/** Preserve ranked video/chapter order while merging repeated hits for the same revision. */
+export function groupHelpdeskResults(hits: HelpdeskSearchHit[]): HelpdeskResultGroup[] {
+  const groups = new Map<string, HelpdeskResultGroup>();
+  const seenChapters = new Set<string>();
+  for (const hit of hits) {
+    const { tutorial } = hit;
+    let group = groups.get(tutorial.revisionId);
+    if (!group) {
+      group = { tutorial, startMs: hit.startMs, chapters: [] };
+      groups.set(tutorial.revisionId, group);
+    }
+    const chapter = tutorial.chapters.find((item) => item.id === hit.chapterId);
+    if (!chapter) continue;
+    const chapterKey = `${tutorial.revisionId}:${chapter.id}`;
+    if (seenChapters.has(chapterKey)) continue;
+    seenChapters.add(chapterKey);
+    group.chapters.push({ chapter, startMs: hit.startMs });
+    if (group.chapters.length === 1) group.startMs = hit.startMs;
+  }
+  return [...groups.values()];
+}
 
 export const HELPDESK_DOMAIN_LABELS = {
   "course-authoring": "helpdesk.domains.authoring",

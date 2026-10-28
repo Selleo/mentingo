@@ -38,6 +38,47 @@ afterEach(() => {
 });
 
 describe("Helpdesk public tutorial search", () => {
+  it("groups a video's matches into compact chapter links without repeated excerpts", async () => {
+    const tutorial = {
+      ...helpdeskHitFixture.tutorial,
+      key: "demo.course-authoring.publish-a-course",
+      title: "DEMO — Publish a course",
+    };
+    const chapterHit = { ...helpdeskHitFixture, tutorial };
+    server.use(
+      http.post("*/api/helpdesk/search", () =>
+        HttpResponse.json({
+          data: {
+            mode: "keyword",
+            results: [
+              {
+                ...chapterHit,
+                chapterId: null,
+                startMs: 0,
+                excerpt: "Long repeated transcript text",
+              },
+              chapterHit,
+              chapterHit,
+              { ...chapterHit, chapterId: "overview", startMs: 0, endMs: 12_345 },
+            ],
+          },
+        }),
+      ),
+    );
+    const { onSelect } = setup();
+    await screen.findByRole("button", { name: /Publish a course/ });
+
+    expect(screen.getAllByText("Publish a course")).toHaveLength(1);
+    expect(screen.getByText("Demo")).toBeInTheDocument();
+    expect(screen.queryByText("DEMO — Publish a course")).not.toBeInTheDocument();
+    expect(screen.queryByText("Long repeated transcript text")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "0:12 Review publication" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "0:00 Prepare the course" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "0:12 Review publication" }));
+    expect(onSelect).toHaveBeenLastCalledWith({ tutorial, startMs: 12_345 });
+  });
+
   it("sends only symbolic page context and opens the returned chapter timestamp", async () => {
     const requests: unknown[] = [];
     server.use(

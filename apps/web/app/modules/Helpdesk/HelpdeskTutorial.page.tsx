@@ -7,7 +7,11 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { helpdeskTutorialPath, selectedHelpdeskChapter } from "./helpdesk.helpers";
+import {
+  helpdeskTutorialLabel,
+  helpdeskTutorialPath,
+  selectedHelpdeskChapter,
+} from "./helpdesk.helpers";
 import { HelpdeskRelatedTutorials } from "./HelpdeskRelatedTutorials";
 import { HelpdeskLoading, HelpdeskRequestError } from "./HelpdeskRequestState";
 import { HelpdeskTutorialPlayer } from "./HelpdeskTutorialPlayer";
@@ -44,7 +48,7 @@ export default function HelpdeskTutorialPage() {
           <>
             <header className="px-6 pb-4 pt-5">
               <h1 className="text-xl font-semibold leading-snug text-neutral-950">
-                {tutorial.title}
+                {helpdeskTutorialLabel(tutorial).title}
               </h1>
               <p className="mt-1.5 body-sm text-neutral-600">{tutorial.description}</p>
             </header>

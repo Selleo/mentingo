@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "~/components/ui/dialog";
 
+import { helpdeskTutorialLabel } from "./helpdesk.helpers";
 import { HelpdeskRelatedTutorials } from "./HelpdeskRelatedTutorials";
 import { HelpdeskTutorialPlayer } from "./HelpdeskTutorialPlayer";
 
@@ -34,7 +35,9 @@ export default function HelpdeskVideoDialog({
         }}
       >
         <div className="px-6 pb-4 pt-5 pr-12">
-          <DialogTitle className="text-xl leading-snug">{tutorial.title}</DialogTitle>
+          <DialogTitle className="text-xl leading-snug">
+            {helpdeskTutorialLabel(tutorial).title}
+          </DialogTitle>
           <DialogDescription className="mt-1.5 text-neutral-600">
             {tutorial.description}
           </DialogDescription>

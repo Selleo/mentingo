@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useHelpdeskSearch } from "~/api/queries/helpdesk/useHelpdeskSearch";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { HELPDESK_DOMAIN_LABELS } from "./helpdesk.helpers";
+import { HELPDESK_DOMAIN_LABELS, helpdeskTutorialLabel } from "./helpdesk.helpers";
 
 import type { HelpdeskSelection } from "./helpdesk.types";
 
@@ -35,7 +35,9 @@ export function HelpdeskRelatedTutorials({
               <Play className="size-4" aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block body-sm-md text-neutral-900">{tutorial.title}</span>
+              <span className="block body-sm-md text-neutral-900">
+                {helpdeskTutorialLabel(tutorial).title}
+              </span>
               <span className="mt-1 block text-xs text-neutral-500">
                 {t(HELPDESK_DOMAIN_LABELS[tutorial.domain])}
               </span>
