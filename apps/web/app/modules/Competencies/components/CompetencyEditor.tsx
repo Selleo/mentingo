@@ -1,95 +1,53 @@
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import { UserMultiSelect } from "~/modules/Admin/Users/components/UserMultiSelect";
+
+import { useCompetencyEditor } from "../hooks/useCompetencyEditor";
 
 import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetencyCategoryEditor } from "./CompetencyCategoryEditor";
+import { CompetencyDeleteConfirmation } from "./CompetencyDeleteConfirmation";
+import { CompetencyLevelFields } from "./CompetencyLevelFields";
+import { CompetencyLevelNavigation } from "./CompetencyLevelNavigation";
 
-import type {
-  Competency,
-  CompetencyCondition,
-  CompetencyLevel,
-  CompetenciesWorkspace,
-} from "../competencies.types";
+import type { CompetencyEditorOptions } from "../hooks/competencies-hooks.types";
 
-type DefinitionInput = Pick<Competency, "name" | "description" | "category" | "levels">;
+export type CompetencyEditorProps = CompetencyEditorOptions;
+
 export function CompetencyEditor({
   value,
-  workspace,
   onSave,
   onClose,
   pending,
-  onArchive,
-}: {
-  value?: DefinitionInput;
-  workspace: CompetenciesWorkspace;
-  onSave: (value: DefinitionInput) => Promise<unknown>;
-  onClose: () => void;
-  pending: boolean;
-  onArchive?: () => Promise<unknown>;
-}) {
-  const { t } = useTranslation();
-
-  const [selectedLevelId, setSelectedLevelId] = useState(value?.levels[0]?.id ?? "");
-  const [draft, setDraft] = useState<DefinitionInput>(
-    value
-      ? {
-          name: value.name,
-          description: value.description,
-          category: value.category,
-          levels: value.levels.map((level) => ({
-            ...level,
-            conditions: level.conditions.map((condition) => ({
-              ...condition,
-              verifierIds: ["observation", "document"].includes(condition.kind)
-                ? (condition.verifierIds ?? []).filter((id) =>
-                    workspace.people.some((person) => person.id === id && !person.archived),
-                  )
-                : [],
-            })),
-          })),
-        }
-      : { name: "", description: "", category: "", levels: [] },
-  );
-  const activeLevelId = draft.levels.some((level) => level.id === selectedLevelId)
-    ? selectedLevelId
-    : (draft.levels[0]?.id ?? "");
-  const updateLevel = (id: string, update: Partial<CompetencyLevel>) =>
-    setDraft((current) => ({
-      ...current,
-      levels: current.levels.map((level) => (level.id === id ? { ...level, ...update } : level)),
-    }));
-  const updateCondition = (
-    levelId: string,
-    conditionId: string,
-    update: Partial<CompetencyCondition>,
-  ) => {
-    const level = draft.levels.find((item) => item.id === levelId)!;
-    updateLevel(levelId, {
-      conditions: level.conditions.map((condition) =>
-        condition.id === conditionId ? { ...condition, ...update } : condition,
-      ),
-    });
-  };
-  const moveLevel = (index: number, delta: number) => {
-    const levels = [...draft.levels];
-    [levels[index], levels[index + delta]] = [levels[index + delta], levels[index]];
-    setDraft({ ...draft, levels });
-  };
+  onDelete,
+}: CompetencyEditorProps) {
+  const {
+    deleteConfirmationOpen,
+    categoryEditorOpen,
+    setCategoryEditorOpen,
+    selectCreatedCategory,
+    categoryOptions,
+    setDeleteConfirmationOpen,
+    deleteCompetency,
+    saveCompetencyDraft,
+    t,
+    options,
+    setSelectedLevelId,
+    draft,
+    setDraft,
+    activeLevelId,
+    updateLevel,
+    updateCondition,
+  } = useCompetencyEditor({ value, onSave, onClose, pending, onDelete });
   return (
     <Dialog
       open
@@ -97,7 +55,7 @@ export function CompetencyEditor({
         if (!open && !pending) onClose();
       }}
     >
-      <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+      <DialogContent className="flex max-h-[90vh] max-w-5xl flex-col gap-0 overflow-hidden p-0">
         <DialogHeader className="shrink-0 border-b border-neutral-200 px-6 py-5 text-left">
           <DialogTitle>
             {t(value ? "competencies.editCompetency" : "competencies.newCompetency")}
@@ -106,28 +64,7 @@ export function CompetencyEditor({
             {t("competencies.descriptionByView.catalog")}
           </DialogDescription>
         </DialogHeader>
-        <form
-          className="flex min-h-0 flex-col"
-          noValidate
-          onSubmit={async (event) => {
-            event.preventDefault();
-            const invalid = event.currentTarget.querySelector<
-              HTMLInputElement | HTMLTextAreaElement
-            >("input:invalid, textarea:invalid, select:invalid");
-            if (invalid) {
-              const levelId = invalid.closest("[data-level-id]")?.getAttribute("data-level-id");
-              if (levelId) setSelectedLevelId(levelId);
-              requestAnimationFrame(() => invalid.reportValidity());
-              return;
-            }
-            try {
-              await onSave(draft);
-              onClose();
-            } catch {
-              /* The mutation preserves the form and reports the error. */
-            }
-          }}
-        >
+        <form className="flex min-h-0 flex-col" noValidate onSubmit={saveCompetencyDraft}>
           <div className="min-h-0 overflow-y-auto px-6 py-5">
             <fieldset disabled={pending} className="flex min-w-0 flex-col gap-5">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -141,11 +78,18 @@ export function CompetencyEditor({
                   />
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <Label htmlFor="competency-category">{t("competencies.category")}</Label>
-                  <Input
-                    id="competency-category"
-                    value={draft.category}
-                    onChange={(event) => setDraft({ ...draft, category: event.target.value })}
+                  <CompetenciesSelect
+                    label={t("competencies.category")}
+                    value={draft.categoryId ?? ""}
+                    emptyLabel={t("competencies.categories.none")}
+                    options={categoryOptions}
+                    createAction={{
+                      label: t("competencies.categories.new"),
+                      onSelect: () => setCategoryEditorOpen(true),
+                    }}
+                    onChange={(categoryId) =>
+                      setDraft({ ...draft, categoryId: categoryId || null })
+                    }
                   />
                 </div>
               </div>
@@ -157,260 +101,51 @@ export function CompetencyEditor({
                   onChange={(event) => setDraft({ ...draft, description: event.target.value })}
                 />
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-5">
-                <h3 className="text-base font-semibold">{t("competencies.levels")}</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const id = crypto.randomUUID();
-                    setDraft({
-                      ...draft,
-                      levels: [...draft.levels, { id, name: "", conditions: [] }],
-                    });
-                    setSelectedLevelId(id);
-                  }}
-                >
-                  {t("competencies.addLevel")}
-                </Button>
-              </div>
-              <Tabs
-                value={activeLevelId}
-                onValueChange={setSelectedLevelId}
-                className="min-w-0 space-y-4"
-              >
-                {draft.levels.length > 0 && (
-                  <div className="overflow-x-auto">
-                    <TabsList aria-label={t("competencies.levels")} className="justify-start">
-                      {draft.levels.map((level, index) => (
-                        <TabsTrigger key={level.id} value={level.id}>
-                          {t("competencies.levelNumber", { number: index + 1 })}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+              <div className="flex flex-col gap-3 border-t border-neutral-200 pt-5">
+                <div className="space-y-0.5">
+                  <h3 className="body-base-md text-neutral-950">{t("competencies.levels")}</h3>
+                  <p className="details text-neutral-700">{t("competencies.editor.levelsHelp")}</p>
+                </div>
+                <div className="grid min-w-0 gap-4 md:grid-cols-[16rem_minmax(0,1fr)]">
+                  <CompetencyLevelNavigation
+                    setSelectedLevelId={setSelectedLevelId}
+                    draft={draft}
+                    setDraft={setDraft}
+                    activeLevelId={activeLevelId}
+                  />
+                  <div className="min-w-0">
+                    {draft.levels.length === 0 && (
+                      <p className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-10 text-center text-sm text-neutral-800">
+                        {t("competencies.editor.noLevels")}
+                      </p>
+                    )}
+                    {draft.levels.map((level, index) => (
+                      <CompetencyLevelFields
+                        key={level.id}
+                        options={options}
+                        activeLevelId={activeLevelId}
+                        updateLevel={updateLevel}
+                        updateCondition={updateCondition}
+                        pending={pending}
+                        level={level}
+                        index={index}
+                      />
+                    ))}
                   </div>
-                )}
-                {draft.levels.map((level, index) => (
-                  <TabsContent
-                    key={level.id}
-                    value={level.id}
-                    forceMount
-                    hidden={activeLevelId !== level.id}
-                    data-level-id={level.id}
-                    className="flex min-w-0 flex-col gap-4 data-[state=inactive]:hidden"
-                  >
-                    <div className="flex flex-wrap items-end gap-2">
-                      <div className="flex min-w-0 flex-1 flex-col gap-2">
-                        <Label htmlFor={level.id}>{t("competencies.levelName")}</Label>
-                        <Input
-                          id={level.id}
-                          required
-                          value={level.name}
-                          onChange={(event) => updateLevel(level.id, { name: event.target.value })}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        aria-label={t("competencies.moveLeft")}
-                        disabled={index === 0}
-                        onClick={() => moveLevel(index, -1)}
-                      >
-                        <ArrowLeft className="size-4" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        aria-label={t("competencies.moveRight")}
-                        disabled={index === draft.levels.length - 1}
-                        onClick={() => moveLevel(index, 1)}
-                      >
-                        <ArrowRight className="size-4" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={t("competencies.remove")}
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            levels: draft.levels.filter((item) => item.id !== level.id),
-                          })
-                        }
-                      >
-                        <Trash2 className="size-4" aria-hidden="true" />
-                      </Button>
-                    </div>
-                    {level.conditions.map((condition) => {
-                      const sources =
-                        condition.kind === "course"
-                          ? workspace.courses
-                          : workspace.learningResources.filter(
-                              (item) => item.kind === condition.kind,
-                            );
-                      const isDigital = ["course", "quiz", "ai-mentor"].includes(condition.kind);
-                      return (
-                        <div
-                          key={condition.id}
-                          className="grid min-w-0 gap-3 border-t pt-4 sm:grid-cols-2"
-                        >
-                          <CompetenciesSelect
-                            label={t("competencies.conditionKind")}
-                            value={condition.kind}
-                            onChange={(kind) =>
-                              updateCondition(level.id, condition.id, {
-                                kind: kind as CompetencyCondition["kind"],
-                                resourceId: undefined,
-                                minimumScore: undefined,
-                                verifierIds: [],
-                              })
-                            }
-                            options={["course", "quiz", "ai-mentor", "observation", "document"].map(
-                              (value) => ({ value, label: t(`competencies.kind.${value}`) }),
-                            )}
-                          />
-                          <div className="flex min-w-0 flex-col gap-2">
-                            <Label htmlFor={`${condition.id}-description`}>
-                              {t("competencies.conditionDescription")}
-                            </Label>
-                            <Input
-                              id={`${condition.id}-description`}
-                              required
-                              value={condition.description}
-                              onChange={(event) =>
-                                updateCondition(level.id, condition.id, {
-                                  description: event.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          {isDigital && (
-                            <CompetenciesSelect
-                              label={t("competencies.learningResource")}
-                              value={condition.resourceId ?? ""}
-                              emptyLabel={t("competencies.notConfigured")}
-                              onChange={(value) =>
-                                updateCondition(level.id, condition.id, {
-                                  resourceId: value || undefined,
-                                })
-                              }
-                              options={sources.map((item) => ({
-                                value: item.id,
-                                label: item.name,
-                              }))}
-                            />
-                          )}
-                          {condition.kind !== "course" && isDigital && (
-                            <div className="flex min-w-0 flex-col gap-2">
-                              <Label htmlFor={`${condition.id}-score`}>
-                                {t("competencies.minimumScore")}
-                              </Label>
-                              <Input
-                                id={`${condition.id}-score`}
-                                type="number"
-                                min={0}
-                                max={100}
-                                value={condition.minimumScore ?? ""}
-                                onChange={(event) =>
-                                  updateCondition(level.id, condition.id, {
-                                    minimumScore:
-                                      event.target.value === ""
-                                        ? undefined
-                                        : Number(event.target.value),
-                                  })
-                                }
-                              />
-                            </div>
-                          )}
-                          {!isDigital && (
-                            <div className="flex min-w-0 flex-col gap-2 sm:col-span-2">
-                              <Label>{t("competencies.verifiers")}</Label>
-                              <UserMultiSelect
-                                value={(condition.verifierIds ?? []).filter((id) =>
-                                  workspace.people.some((person) => person.id === id),
-                                )}
-                                onChange={(ids) => {
-                                  if (!pending)
-                                    updateCondition(level.id, condition.id, { verifierIds: ids });
-                                }}
-                                placeholder={t("competencies.verifiers")}
-                                options={workspace.people
-                                  .filter(
-                                    (person) =>
-                                      !person.archived ||
-                                      condition.verifierIds?.includes(person.id),
-                                  )
-                                  .map((person) => ({
-                                    value: person.id,
-                                    label: person.name,
-                                    disable: person.archived,
-                                  }))}
-                              />
-                            </div>
-                          )}
-                          <Button
-                            type="button"
-                            className="justify-self-start sm:col-span-2"
-                            variant="ghost"
-                            onClick={() =>
-                              updateLevel(level.id, {
-                                conditions: level.conditions.filter(
-                                  (item) => item.id !== condition.id,
-                                ),
-                              })
-                            }
-                          >
-                            {t("competencies.removeCondition")}
-                          </Button>
-                        </div>
-                      );
-                    })}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="self-start"
-                      onClick={() =>
-                        updateLevel(level.id, {
-                          conditions: [
-                            ...level.conditions,
-                            {
-                              id: crypto.randomUUID(),
-                              kind: "observation",
-                              description: "",
-                              verifierIds: [],
-                            },
-                          ],
-                        })
-                      }
-                    >
-                      {t("competencies.addCondition")}
-                    </Button>
-                  </TabsContent>
-                ))}
-              </Tabs>
+                </div>
+              </div>
             </fieldset>
           </div>
           <DialogFooter className="shrink-0 gap-2 border-t border-neutral-200 px-6 py-4 sm:gap-0">
-            {onArchive && (
+            {onDelete && (
               <Button
                 type="button"
                 variant="outline"
                 className="sm:mr-auto text-error-800"
                 disabled={pending}
-                onClick={async () => {
-                  try {
-                    await onArchive();
-                    onClose();
-                  } catch {
-                    /* Preserve the draft on failure. */
-                  }
-                }}
+                onClick={() => setDeleteConfirmationOpen(true)}
               >
-                {t("competencies.archive")}
+                {t("common.button.delete")}
               </Button>
             )}
             <Button type="button" variant="outline" disabled={pending} onClick={onClose}>
@@ -421,7 +156,22 @@ export function CompetencyEditor({
             </Button>
           </DialogFooter>
         </form>
+        {categoryEditorOpen && (
+          <CompetencyCategoryEditor
+            onClose={() => setCategoryEditorOpen(false)}
+            onSaved={selectCreatedCategory}
+          />
+        )}
+        <CompetencyDeleteConfirmation
+          open={deleteConfirmationOpen}
+          onOpenChange={setDeleteConfirmationOpen}
+          name={value?.name ?? ""}
+          pending={pending}
+          onDelete={deleteCompetency}
+        />
       </DialogContent>
     </Dialog>
   );
 }
+
+export { CompetencyConditionRow } from "./CompetencyConditionRow";

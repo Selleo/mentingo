@@ -16,7 +16,7 @@ export class CompetenciesCertificatesHandler implements OnModuleInit {
     this.outboxDirectHandlerService.registerReaction(
       CertificateArchivedEmailEvent.name,
       (payload, eventId) =>
-        this.handle(
+        this.enqueueArchivedCertificateFacts(
           materializeLegacyEvent(
             CertificateArchivedEmailEvent.name,
             payload,
@@ -25,8 +25,12 @@ export class CompetenciesCertificatesHandler implements OnModuleInit {
         ),
     );
   }
-  async handle(event: CertificateArchivedEmailEvent, eventId: string) {
+  async enqueueArchivedCertificateFacts(event: CertificateArchivedEmailEvent, eventId: string) {
     for (const person of event.certificateArchivedEmailData.certificates)
-      await this.competenciesSyncService.enqueueSubject(person.tenantId, person.userId, eventId);
+      await this.competenciesSyncService.enqueueSubjectLearningFacts(
+        person.tenantId,
+        person.userId,
+        eventId,
+      );
   }
 }

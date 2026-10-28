@@ -126,7 +126,7 @@ export const getNavigationConfig = (
               {
                 label: t("competencies.title"),
                 path: "competencies",
-                iconName: "Gem",
+                iconName: "Milestone",
                 accessRequirement: routeAccessConfig.competencies,
               },
             ] satisfies NavigationItem[])

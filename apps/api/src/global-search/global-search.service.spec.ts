@@ -187,16 +187,14 @@ describe("global search modes", () => {
       return [];
     });
     Object.assign(keyword, {
-      getLessons: jest
-        .fn()
-        .mockResolvedValue([
-          {
-            id: actor.userId,
-            title: "Lesson",
-            courseId: actor.tenantId,
-            matchedAttachmentFileName: "legacy.pdf",
-          },
-        ]),
+      getLessons: jest.fn().mockResolvedValue([
+        {
+          id: actor.userId,
+          title: "Lesson",
+          courseId: actor.tenantId,
+          matchedAttachmentFileName: "legacy.pdf",
+        },
+      ]),
       getArticles: jest.fn().mockResolvedValue([{ id: actor.tenantId, title: "Guide" }]),
     });
     const response = await service.search("policy", SUPPORTED_LANGUAGES.EN, {

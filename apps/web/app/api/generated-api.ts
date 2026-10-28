@@ -32538,14 +32538,13 @@ export interface GetIntegrationLearningFactsResponse {
       revision: number;
       /** @format uuid */
       subjectId: string;
-      kind: "course" | "quiz" | "ai-mentor";
+      kind: "course";
       /** @format uuid */
       resourceId: string;
       learningStateId: string | null;
       occurredAt: string;
       validUntil: string | null;
       outcome: "passed" | "failed" | "revoked";
-      score: number | null;
     }[];
   };
 }
@@ -35480,8 +35479,475 @@ export interface GetCompetenciesConfigurationResponse {
   };
 }
 
-export interface GetCompetenciesWorkspaceResponse {
+export interface GetCompetenciesSummaryResponse {
   data: {
+    warningDays: number | null;
+    isVerifier: boolean;
+    pendingReviewCount: number;
+    setup: {
+      competencies: number;
+      profiles: number;
+      assignments: number;
+    };
+  };
+}
+
+export interface GetCompetencyCategoriesResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      revision: number;
+      competencyCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyCatalogResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+      profileCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyProfilesResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+      assignedPeopleCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyPeopleResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      profileId: string | null;
+      profileName: string | null;
+      profilePictureUrl: string | null;
+      metCount: number;
+      requirementCount: number;
+      readiness: "no_profile" | "missing" | "expiring" | "met";
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    counts: {
+      all: number;
+      no_profile: number;
+      missing: number;
+      expiring: number;
+      met: number;
+    };
+  };
+}
+
+export interface GetCompetencyMatrixResponse {
+  data: {
+    data: {
+      person: {
+        /** @format uuid */
+        id: string;
+        name: string;
+      };
+      cells: {
+        /** @format uuid */
+        competencyId: string;
+        requiredLevelId: string;
+        currentLevelId: string | null;
+        met: boolean;
+        expiring: boolean;
+        metUntil: string | null;
+      }[];
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    profile: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+    };
+    competencies: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+    }[];
+  };
+}
+
+export interface GetCompetencyReviewsResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: object;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+      subjectName: string | null;
+      subjectProfilePictureUrl: string | null;
+      competencyName: string;
+      conditions: {
+        id: string;
+        kind: "course" | "document" | "observation";
+        description: string;
+        levelId: string;
+        levelName: string;
+        levelNumber: number;
+      }[];
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    counts: {
+      pending: number;
+      approved: number;
+      rejected: number;
+      revoked: number;
+    };
+  };
+}
+
+export interface GetCompetencyOptionsResponse {
+  data: {
+    courses: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+    people: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+export interface GetCompetencySubjectResponse {
+  data: {
+    asOf: string;
+    warningDays: number | null;
+    person: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      profilePictureUrl: string | null;
+    } | null;
+    profile: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+    } | null;
+    assessment: {
+      /** @format uuid */
+      subjectId: string;
+      profileId: string | null;
+      profileRevision: number | null;
+      asOf: string;
+      coverage: number | null;
+      metCount: number;
+      requirementCount: number;
+      readiness: "no_profile" | "missing" | "expiring" | "met";
+      requirements: {
+        requirement: {
+          /** @format uuid */
+          competencyId: string;
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          levelId: string;
+        };
+        met: boolean;
+        expiring: boolean;
+        standing: {
+          /** @format uuid */
+          competencyId: string;
+          attainedLevelId: string | null;
+          attainedLevelName: string | null;
+          currentLevelId: string | null;
+          effectiveFrom: string | null;
+          effectiveUntil: string | null;
+          expiring: boolean;
+          levels: {
+            levelId: string;
+            met: boolean;
+            metUntil: string | null;
+            conditions: {
+              conditionId: string;
+              met: boolean;
+              reason: ("missing" | "pending" | "expired" | "revoked" | "insufficient") | null;
+              evidenceIds: string[];
+              effectiveFrom: string | null;
+              effectiveUntil: string | null;
+            }[];
+          }[];
+        };
+      }[];
+    } | null;
+    competencies: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+    }[];
+    standings: {
+      /** @format uuid */
+      competencyId: string;
+      attainedLevelId: string | null;
+      attainedLevelName: string | null;
+      currentLevelId: string | null;
+      effectiveFrom: string | null;
+      effectiveUntil: string | null;
+      expiring: boolean;
+      levels: {
+        levelId: string;
+        met: boolean;
+        metUntil: string | null;
+        conditions: {
+          conditionId: string;
+          met: boolean;
+          reason: ("missing" | "pending" | "expired" | "revoked" | "insufficient") | null;
+          evidenceIds: string[];
+          effectiveFrom: string | null;
+          effectiveUntil: string | null;
+        }[];
+      }[];
+    }[];
+    evidence: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: object;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    overrides: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      competencyRevision: number;
+      conditionId: string;
+      conditionRevision: string;
+      status: "met" | "automatic";
+      comment: string;
+      createdAt: string;
+      /** @format uuid */
+      createdBy: string;
+      isCurrent: boolean;
+    }[];
     revocations: {
       /** @format uuid */
       id: string;
@@ -35495,348 +35961,18 @@ export interface GetCompetenciesWorkspaceResponse {
       /** @format uuid */
       revokedBy: string;
     }[];
-    catalog: {
-      /** @minLength 1 */
-      name: string;
-      description: string;
-      category: string;
-      levels: {
-        id: string;
-        name: string;
-        conditions: {
-          id: string;
-          kind: "course" | "quiz" | "ai-mentor" | "observation" | "document";
-          description: string;
-          /** @format uuid */
-          resourceId?: string;
-          /**
-           * @min 0
-           * @max 100
-           */
-          minimumScore?: number;
-          verifierIds?: string[];
-        }[];
-      }[];
-      /** @format uuid */
-      id: string;
-      revision: number;
-      archived: boolean;
-    }[];
-    profiles: {
-      /** @minLength 1 */
-      name: string;
-      description: string;
-      requirements: {
-        /** @format uuid */
-        competencyId: string;
-        levelId: string;
-      }[];
-      /** @format uuid */
-      id: string;
-      revision: number;
-      status: "published" | "archived";
-    }[];
-    publishedProfiles: {
-      /** @minLength 1 */
-      name: string;
-      description: string;
-      requirements: {
-        /** @format uuid */
-        competencyId: string;
-        levelId: string;
-      }[];
-      /** @format uuid */
-      id: string;
-      revision: number;
-      status: "published" | "archived";
-    }[];
-    subjects: {
-      /** @format uuid */
-      id: string;
-      profileId: string | null;
-    }[];
-    verifiers: Record<string, string[]>;
-    conditionOverrides: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      requestId: string;
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      conditionId: string;
-      conditionRevision: string;
-      isCurrent: boolean;
-      competencyRevision?: number;
-      status: "met" | "automatic";
-      comment: string;
-      createdAt: string;
-      /** @format uuid */
-      createdBy: string;
-    }[];
-    evidence: {
-      /** @format uuid */
-      requestId: string;
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      /** @minItems 1 */
-      conditionIds: string[];
-      kind: "observation" | "document" | "recognition";
-      /** @format date-time */
-      occurredAt: string;
-      validUntil: string | null;
-      /** @minLength 1 */
-      note: string;
-      /** @format uuid */
-      attachmentId?: string;
-      /** @format uuid */
-      actionId?: string;
-      /** @format uuid */
-      id: string;
-      version: number;
-      conditionRevisions: Record<string, string>;
-      status: "pending" | "approved" | "rejected" | "revoked";
-      /** @format uuid */
-      createdBy: string;
-      reviewedBy: string | null;
-      reviewedAt: string | null;
-      reason: string | null;
-    }[];
-    standings: {
-      /** @format uuid */
-      subjectId: string;
-      standing: {
-        /** @format uuid */
-        competencyId: string;
-        attainedLevelId: string | null;
-        currentLevelId: string | null;
-        effectiveFrom: string | null;
-        effectiveUntil: string | null;
-        attainedLevelName?: string | null;
-        expiring: boolean;
-        levels: {
-          levelId: string;
-          met: boolean;
-          conditions: {
-            conditionId: string;
-            met: boolean;
-            reason: string | null;
-            evidenceIds: string[];
-            effectiveFrom: string | null;
-            effectiveUntil: string | null;
-          }[];
-        }[];
-      };
-    }[];
-    assessments: {
-      /** @format uuid */
-      subjectId: string;
-      profileId: string | null;
-      profileRevision: number | null;
-      asOf: string;
-      coverage: number | null;
-      metCount: number;
-      requirementCount: number;
-      requirements: {
-        requirement: {
-          /** @format uuid */
-          competencyId: string;
-          levelId: string;
-        };
-        met: boolean;
-        standing: {
-          /** @format uuid */
-          competencyId: string;
-          attainedLevelId: string | null;
-          currentLevelId: string | null;
-          effectiveFrom: string | null;
-          effectiveUntil: string | null;
-          attainedLevelName?: string | null;
-          expiring: boolean;
-          levels: {
-            levelId: string;
-            met: boolean;
-            conditions: {
-              conditionId: string;
-              met: boolean;
-              reason: string | null;
-              evidenceIds: string[];
-              effectiveFrom: string | null;
-              effectiveUntil: string | null;
-            }[];
-          }[];
-        };
-      }[];
-    }[];
-    actions: {
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      levelId: string;
-      /** @minLength 1 */
-      objective: string;
-      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
-      /** @format uuid */
-      ownerId: string;
-      dueDate: string | null;
-      /** @format uuid */
-      courseId?: string;
-      /** @format uuid */
-      id: string;
-      version: number;
-      competencyRevision: number;
-      profileId: string | null;
-      profileRevision: number | null;
-      status: "planned" | "in_progress" | "completed" | "cancelled";
-      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
-      assignmentRequestId: string | null;
-      /** @format uuid */
-      createdBy: string;
-    }[];
-    actionHistory: {
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      levelId: string;
-      /** @minLength 1 */
-      objective: string;
-      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
-      /** @format uuid */
-      ownerId: string;
-      dueDate: string | null;
-      /** @format uuid */
-      courseId?: string;
-      /** @format uuid */
-      id: string;
-      version: number;
-      competencyRevision: number;
-      profileId: string | null;
-      profileRevision: number | null;
-      status: "planned" | "in_progress" | "completed" | "cancelled";
-      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
-      assignmentRequestId: string | null;
-      /** @format uuid */
-      createdBy: string;
-    }[];
-    warningDays: number | null;
-    asOf: string;
-    evidenceHistory: {
-      /** @format uuid */
-      requestId: string;
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      /** @minItems 1 */
-      conditionIds: string[];
-      kind: "observation" | "document" | "recognition";
-      /** @format date-time */
-      occurredAt: string;
-      validUntil: string | null;
-      /** @minLength 1 */
-      note: string;
-      /** @format uuid */
-      attachmentId?: string;
-      /** @format uuid */
-      actionId?: string;
-      /** @format uuid */
-      id: string;
-      version: number;
-      conditionRevisions: Record<string, string>;
-      status: "pending" | "approved" | "rejected" | "revoked";
-      /** @format uuid */
-      createdBy: string;
-      reviewedBy: string | null;
-      reviewedAt: string | null;
-      reason: string | null;
-    }[];
-    awardHistory: {
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      ruleRevision: number;
-      recordedAt: string;
-      standing: {
-        /** @format uuid */
-        competencyId: string;
-        attainedLevelId: string | null;
-        currentLevelId: string | null;
-        effectiveFrom: string | null;
-        effectiveUntil: string | null;
-        attainedLevelName?: string | null;
-        expiring: boolean;
-        levels: {
-          levelId: string;
-          met: boolean;
-          conditions: {
-            conditionId: string;
-            met: boolean;
-            reason: string | null;
-            evidenceIds: string[];
-            effectiveFrom: string | null;
-            effectiveUntil: string | null;
-          }[];
-        }[];
-      };
-    }[];
+    canPlan: boolean;
     people: {
       /** @format uuid */
       id: string;
       name: string;
-      archived: boolean;
-      canPlan: boolean;
-    }[];
-    courses: {
-      /** @format uuid */
-      id: string;
-      name: string;
-    }[];
-    learningResources: {
-      /** @format uuid */
-      id: string;
-      name: string;
-      kind: string;
-      /** @format uuid */
-      courseId: string;
     }[];
   };
 }
 
-export interface GetCompetencyRecordsResponse {
+export interface GetCompetencySubjectDocumentsResponse {
   data: {
-    actions: {
-      /** @format uuid */
-      subjectId: string;
-      /** @format uuid */
-      competencyId: string;
-      levelId: string;
-      /** @minLength 1 */
-      objective: string;
-      kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
-      /** @format uuid */
-      ownerId: string;
-      dueDate: string | null;
-      /** @format uuid */
-      courseId?: string;
-      /** @format uuid */
-      id: string;
-      version: number;
-      competencyRevision: number;
-      profileId: string | null;
-      profileRevision: number | null;
-      status: "planned" | "in_progress" | "completed" | "cancelled";
-      assignmentStatus: "not_requested" | "pending" | "confirmed" | "failed";
-      assignmentRequestId: string | null;
-      /** @format uuid */
-      createdBy: string;
-    }[];
-    evidence: {
+    data: {
       /** @format uuid */
       requestId: string;
       /** @format uuid */
@@ -35849,16 +35985,17 @@ export interface GetCompetencyRecordsResponse {
       /** @format date-time */
       occurredAt: string;
       validUntil: string | null;
-      /** @minLength 1 */
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
       note: string;
       /** @format uuid */
       attachmentId?: string;
       /** @format uuid */
-      actionId?: string;
-      /** @format uuid */
       id: string;
       version: number;
-      conditionRevisions: Record<string, string>;
+      conditionRevisions: object;
       status: "pending" | "approved" | "rejected" | "revoked";
       /** @format uuid */
       createdBy: string;
@@ -35866,66 +36003,108 @@ export interface GetCompetencyRecordsResponse {
       reviewedAt: string | null;
       reason: string | null;
     }[];
-    /** @min 0 */
-    total: number;
-    people: {
-      /** @format uuid */
-      id: string;
-      name: string;
-      archived: boolean;
-      canPlan: boolean;
-    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
   };
 }
 
 export type ExecuteCompetenciesCommandBody =
   | {
+      operation: "save_category";
+      /** @format uuid */
+      id?: string;
+      /** @min 1 */
+      revision?: number;
+      /**
+       * @minLength 1
+       * @maxLength 200
+       * @pattern \S
+       */
+      name: string;
+    }
+  | {
+      operation: "delete_category";
+      /** @format uuid */
+      id: string;
+      /** @min 1 */
+      revision: number;
+    }
+  | {
       operation: "save_competency";
       /** @format uuid */
       id?: string;
+      /** @min 1 */
       revision?: number;
       value: {
-        /** @minLength 1 */
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
         name: string;
+        /** @maxLength 10000 */
         description: string;
-        category: string;
+        categoryId: string | null;
         levels: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
           id: string;
+          /**
+           * @minLength 1
+           * @maxLength 200
+           */
           name: string;
           conditions: {
+            /**
+             * @minLength 1
+             * @maxLength 100
+             */
             id: string;
-            kind: "course" | "quiz" | "ai-mentor" | "observation" | "document";
+            kind: "course" | "document" | "observation";
+            /**
+             * @minLength 1
+             * @maxLength 2000
+             */
             description: string;
             /** @format uuid */
             resourceId?: string;
-            /**
-             * @min 0
-             * @max 100
-             */
-            minimumScore?: number;
             verifierIds?: string[];
           }[];
         }[];
       };
     }
   | {
-      operation: "archive_competency";
+      operation: "delete_competency";
       /** @format uuid */
       id: string;
+      /** @min 1 */
       revision: number;
     }
   | {
       operation: "save_profile";
       /** @format uuid */
       id?: string;
+      /** @min 1 */
       revision?: number;
       value: {
-        /** @minLength 1 */
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
         name: string;
+        /** @maxLength 10000 */
         description: string;
         requirements: {
           /** @format uuid */
           competencyId: string;
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
           levelId: string;
         }[];
       };
@@ -35958,13 +36137,32 @@ export type ExecuteCompetenciesCommandBody =
         /** @format date-time */
         occurredAt: string;
         validUntil: string | null;
-        /** @minLength 1 */
+        /**
+         * @minLength 1
+         * @maxLength 10000
+         */
         note: string;
         /** @format uuid */
         attachmentId?: string;
-        /** @format uuid */
-        actionId?: string;
       };
+    }
+  | {
+      operation: "review_evidence";
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @min 1 */
+      version: number;
+      decision: "approved" | "rejected" | "revoked";
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       * @pattern \S
+       */
+      reason: string;
+      /** @format uuid */
+      requestId: string;
     }
   | {
       operation: "revoke_confirmation";
@@ -35981,59 +36179,9 @@ export type ExecuteCompetenciesCommandBody =
       /**
        * @minLength 1
        * @maxLength 10000
+       * @pattern \S
        */
       reason: string;
-    }
-  | {
-      operation: "review_evidence";
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      subjectId: string;
-      version: number;
-      decision: "approved" | "rejected" | "revoked";
-      /** @minLength 1 */
-      reason: string;
-      /** @format uuid */
-      requestId: string;
-    }
-  | {
-      operation: "settings";
-      warningDays: number | null;
-    }
-  | {
-      operation: "create_action";
-      value: {
-        /** @format uuid */
-        subjectId: string;
-        /** @format uuid */
-        competencyId: string;
-        levelId: string;
-        /** @minLength 1 */
-        objective: string;
-        kind: "course" | "practice" | "instruction" | "mentoring" | "renewal";
-        /** @format uuid */
-        ownerId: string;
-        dueDate: string | null;
-        /** @format uuid */
-        courseId?: string;
-      };
-      /** @format uuid */
-      requestId: string;
-    }
-  | {
-      operation: "update_action";
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      subjectId: string;
-      version: number;
-      status: "planned" | "in_progress" | "completed" | "cancelled";
-      /** @minLength 1 */
-      objective: string;
-      /** @format uuid */
-      ownerId: string;
-      dueDate: string | null;
     }
   | {
       operation: "set_condition_override";
@@ -36043,32 +36191,23 @@ export type ExecuteCompetenciesCommandBody =
       subjectId: string;
       /** @format uuid */
       competencyId: string;
+      /** @min 1 */
       revision: number;
       conditionId: string;
       status: "met" | "automatic";
       /**
        * @minLength 1
+       * @maxLength 10000
        * @pattern \S
        */
       comment: string;
+    }
+  | {
+      operation: "settings";
+      warningDays: number | null;
     };
 
 export interface ExecuteCompetenciesCommandResponse {
-  data: {
-    id: string;
-  };
-}
-
-export interface AssignCompetenciesLearningBody {
-  /** @format uuid */
-  id: string;
-  /** @format uuid */
-  requestId: string;
-  /** @format uuid */
-  subjectId: string;
-}
-
-export interface AssignCompetenciesLearningResponse {
   data: {
     id: string;
   };
@@ -37855,9 +37994,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     statisticsControllerGetDashboardDeadlineRisks: (
       query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        type?: "overdue" | "dueSoon";
         /**
          * @min 1
          * @default 1
@@ -37869,6 +38005,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @default 20
          */
         perPage?: number;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "overdue" | "dueSoon";
       },
       params: RequestParams = {},
     ) =>
@@ -37920,11 +38059,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        sortBy?: "name" | "dueDate" | "urgency" | "studentCount";
-        sortDirection?: "asc" | "desc";
         urgency?: "overdue" | "dueSoon";
         /** @maxLength 200 */
         search?: string;
+        sortBy?: "name" | "dueDate" | "urgency" | "studentCount";
+        sortDirection?: "asc" | "desc";
         /** @min 1 */
         page?: number;
         /**
@@ -38629,9 +38768,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
+        isArchived?: "true" | "false" | "all";
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        isArchived?: "true" | "false" | "all";
       },
       params: RequestParams = {},
     ) =>
@@ -38787,11 +38926,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-email"
           | "-isEnrolledByGroup";
         groups?: string[];
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         perPage?: number;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -39966,10 +40105,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @format uuid */
         studentId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -41176,9 +41315,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         from?: string;
         /** @format date-time */
         to?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         type?: "practice" | "ai-mentor" | "assistant";
         status?: "active" | "completed" | "archived";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -41805,13 +41944,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        feed?: "all" | "admin_announcements" | "system";
-        status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        feed?: "all" | "admin_announcements" | "system";
+        status?: "scheduled" | "published";
       },
       params: RequestParams = {},
     ) =>
@@ -41868,11 +42007,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -47022,23 +47161,42 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CompetenciesControllerGetCompetenciesWorkspace
-     * @request GET:/api/competencies/workspace
+     * @name CompetenciesControllerGetCompetenciesSummary
+     * @request GET:/api/competencies/summary
      */
-    competenciesControllerGetCompetenciesWorkspace: (
+    competenciesControllerGetCompetenciesSummary: (params: RequestParams = {}) =>
+      this.request<GetCompetenciesSummaryResponse, any>({
+        path: `/api/competencies/summary`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyCategories
+     * @request GET:/api/competencies/categories
+     */
+    competenciesControllerGetCompetencyCategories: (
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        /** @format uuid */
-        subjectId?: string;
-        /** @format uuid */
-        profileId?: string;
-        teamOnly?: "true" | "false";
-        view?: "plans" | "documents" | "summary" | "review";
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetCompetenciesWorkspaceResponse, any>({
-        path: `/api/competencies/workspace`,
+      this.request<GetCompetencyCategoriesResponse, any>({
+        path: `/api/competencies/categories`,
         method: "GET",
         query: query,
         format: "json",
@@ -47048,30 +47206,238 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CompetenciesControllerGetCompetencyRecords
-     * @request GET:/api/competencies/records
+     * @name CompetenciesControllerGetCompetencyCatalog
+     * @request GET:/api/competencies/catalog
      */
-    competenciesControllerGetCompetencyRecords: (
+    competenciesControllerGetCompetencyCatalog: (
       query?: {
-        /** @pattern ^[1-9][0-9]{0,5}$ */
-        page?: string;
-        kind?:
-          | "actions"
-          | "documents"
-          | "action-history"
-          | "action-evidence"
-          | "review-pending"
-          | "review-history";
-        /** @format uuid */
-        subjectId?: string;
-        /** @format uuid */
-        actionId?: string;
-        pageSize?: "10" | "20" | "50" | "100";
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        categoryId?: string | "none";
+        archived?: "true" | "false";
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetCompetencyRecordsResponse, any>({
-        path: `/api/competencies/records`,
+      this.request<GetCompetencyCatalogResponse, any>({
+        path: `/api/competencies/catalog`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyProfiles
+     * @request GET:/api/competencies/profiles
+     */
+    competenciesControllerGetCompetencyProfiles: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        competencyId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyProfilesResponse, any>({
+        path: `/api/competencies/profiles`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyPeople
+     * @request GET:/api/competencies/people
+     */
+    competenciesControllerGetCompetencyPeople: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        profileId?: string;
+        readiness?: "no_profile" | "missing" | "expiring" | "met";
+        teamOnly?: "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyPeopleResponse, any>({
+        path: `/api/competencies/people`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyMatrix
+     * @request GET:/api/competencies/matrix
+     */
+    competenciesControllerGetCompetencyMatrix: (
+      query?: {
+        /** @format uuid */
+        profileId?: string;
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        teamOnly?: "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyMatrixResponse, any>({
+        path: `/api/competencies/matrix`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyReviews
+     * @request GET:/api/competencies/reviews
+     */
+    competenciesControllerGetCompetencyReviews: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        status?: "pending" | "approved" | "rejected" | "revoked";
+        /** @format uuid */
+        competencyId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyReviewsResponse, any>({
+        path: `/api/competencies/reviews`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyOptions
+     * @request GET:/api/competencies/options
+     */
+    competenciesControllerGetCompetencyOptions: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyOptionsResponse, any>({
+        path: `/api/competencies/options`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencySubject
+     * @request GET:/api/competencies/subjects/{subjectId}
+     */
+    competenciesControllerGetCompetencySubject: (
+      subjectId: string,
+      query?: {
+        /** @format uuid */
+        profileId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencySubjectResponse, any>({
+        path: `/api/competencies/subjects/${subjectId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencySubjectDocuments
+     * @request GET:/api/competencies/subjects/{subjectId}/documents
+     */
+    competenciesControllerGetCompetencySubjectDocuments: (
+      subjectId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencySubjectDocumentsResponse, any>({
+        path: `/api/competencies/subjects/${subjectId}/documents`,
         method: "GET",
         query: query,
         format: "json",
@@ -47090,25 +47456,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<ExecuteCompetenciesCommandResponse, any>({
         path: `/api/competencies/commands`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CompetenciesControllerAssignCompetenciesLearning
-     * @request POST:/api/competencies/assignments
-     */
-    competenciesControllerAssignCompetenciesLearning: (
-      data: AssignCompetenciesLearningBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<AssignCompetenciesLearningResponse, any>({
-        path: `/api/competencies/assignments`,
         method: "POST",
         body: data,
         type: ContentType.Json,

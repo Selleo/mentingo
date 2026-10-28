@@ -1,4 +1,5 @@
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
+import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 
 import type { ReactNode } from "react";
@@ -32,10 +33,20 @@ export function CompetenciesError({
   );
 }
 
-export function CompetenciesEmpty({ message }: { message: ReactNode }) {
+export function CompetenciesEmpty({
+  message,
+  title,
+  action,
+}: {
+  message: ReactNode;
+  title?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-dashed bg-neutral-50 px-5 py-12 text-center text-sm text-muted-foreground">
-      {message}
-    </div>
+    <Card className="flex flex-col items-center gap-3 border-dashed bg-neutral-50 px-6 py-12 text-center text-sm leading-relaxed text-muted-foreground shadow-none">
+      {title && <h3 className="body-base-md text-neutral-950">{title}</h3>}
+      <p className="max-w-md">{message}</p>
+      {action}
+    </Card>
   );
 }

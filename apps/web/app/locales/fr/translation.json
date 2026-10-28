@@ -7853,6 +7853,77 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Supprimer la compétence",
+    "deleteCompetencyConfirmation": "Supprimer « {{name}} » ? Cette action supprime définitivement la compétence de tous les profils de poste, ainsi que son historique de confirmation et les documents joints. Cette action est irréversible.",
+    "notifications": {
+      "categoryCreated": "Catégorie créée.",
+      "categoryUpdated": "Catégorie mise à jour.",
+      "categoryDeleted": "Catégorie supprimée.",
+      "competencyCreated": "Compétence créée.",
+      "competencyUpdated": "Compétence mise à jour.",
+      "competencyDeleted": "Compétence supprimée.",
+      "profileCreated": "Profil de poste créé.",
+      "profileUpdated": "Profil de poste mis à jour.",
+      "profileDeleted": "Profil de poste supprimé.",
+      "profileAssigned": "Profil de poste attribué.",
+      "profileRemoved": "Attribution du profil de poste supprimée.",
+      "documentSubmitted": "Document envoyé pour examen.",
+      "observationConfirmed": "Observation confirmée.",
+      "qualificationsRecognized": "Qualifications antérieures reconnues.",
+      "submissionApproved": "Soumission approuvée.",
+      "submissionRejected": "Soumission rejetée.",
+      "confirmationRevoked": "Confirmation révoquée.",
+      "manuallyConfirmed": "Exigence confirmée manuellement.",
+      "evidenceEvaluationRestored": "Confirmation basée sur les preuves rétablie.",
+      "expiryDisabled": "Rappels d’expiration désactivés.",
+      "expiryUpdated": "Rappels d’expiration mis à jour.",
+      "categorySaveFailed": "Impossible d’enregistrer la catégorie. Réessayez.",
+      "categoryDeleteFailed": "Impossible de supprimer la catégorie. Réessayez.",
+      "competencySaveFailed": "Impossible d’enregistrer la compétence. Réessayez.",
+      "competencyDeleteFailed": "Impossible de supprimer la compétence. Réessayez.",
+      "profileSaveFailed": "Impossible d’enregistrer le profil de poste. Réessayez.",
+      "profileDeleteFailed": "Impossible de supprimer le profil de poste. Réessayez.",
+      "profileAssignmentFailed": "Impossible de modifier l’attribution du profil de poste. Réessayez.",
+      "evidenceSubmitFailed": "Impossible d’envoyer la confirmation. Réessayez.",
+      "reviewFailed": "Impossible d’enregistrer la décision d’examen. Réessayez.",
+      "revocationFailed": "Impossible de révoquer la confirmation. Réessayez.",
+      "adjustmentFailed": "Impossible de modifier la confirmation de l’exigence. Réessayez.",
+      "settingsFailed": "Impossible de mettre à jour les rappels d’expiration. Réessayez.",
+      "attachmentUploadFailed": "Impossible de téléverser le document. Réessayez.",
+      "attachmentDownloadFailed": "Impossible de télécharger le document. Réessayez."
+    },
+    "detailGuide": {
+      "automaticCourse": "Achèvement du cours",
+      "automaticDocument": "Approbation du document",
+      "automaticObservation": "Confirmation de l’observation",
+      "noLevel": "Aucun niveau confirmé pour le moment",
+      "nextLevel": "Niveau suivant : {{level}}",
+      "allConfirmed": "Tous les niveaux sont confirmés",
+      "levelHelp": "Pour confirmer un niveau, remplissez ses exigences ainsi que celles de tous les niveaux précédents.",
+      "levels": "Niveaux et modalités de confirmation",
+      "requirementsProgress": "{{completed}}/{{total}} confirmées",
+      "confirmed": "Confirmé",
+      "toConfirm": "Pas encore confirmé",
+      "courseHelp": "Terminez le cours associé pour confirmer cette exigence.",
+      "documentHelp": "Soumettez un document à un vérificateur désigné pour examen.",
+      "observationHelp": "Un vérificateur désigné confirme cette compétence après l'avoir observée au travail.",
+      "noVerifier": "Un administrateur doit désigner un vérificateur dans Configuration > Compétences avant de pouvoir confirmer cette exigence.",
+      "adminAction": "Modifier la confirmation",
+      "history": "Historique des confirmations ({{count}})",
+      "emptyHistory": "Aucune confirmation ni aucun document soumis pour le moment.",
+      "confirmation": {
+        "course": "Achèvement du cours",
+        "document": "Examen du document",
+        "observation": "Confirmation par un vérificateur"
+      },
+      "useEvidence": "Selon les justificatifs",
+      "useEvidenceHelp": "Utiliser les résultats des cours et les évaluations approuvées.",
+      "confirmManually": "Confirmer manuellement",
+      "confirmManuallyHelp": "Considérer cette exigence comme remplie sans justificatif supplémentaire.",
+      "reason": "Motif de la modification",
+      "reasonPlaceholder": "Pourquoi cette modification est-elle nécessaire ?",
+      "saveChange": "Enregistrer la modification"
+    },
     "documents": "Documents",
     "requiredDocuments": "Documents à soumettre",
     "noRequiredDocuments": "Aucun document à soumettre pour les exigences actuelles de votre poste.",
@@ -8057,7 +8128,10 @@
       "people": "Consultez les employés et leurs compétences confirmées.",
       "catalog": "Un catalogue commun de compétences, de niveaux et de méthodes de validation.",
       "profiles": "Définissez ce dont une personne a besoin pour exercer son rôle en sécurité et en autonomie.",
-      "settings": "Configurez les alertes d'expiration."
+      "settings": "Configurez les alertes d'expiration.",
+      "overview": "Voyez qui répond aux exigences de son profil de poste et où une action est nécessaire.",
+      "setup": "Définissez les compétences, regroupez-les en profils de poste et configurez les rappels d'expiration.",
+      "ownWithoutProfile": "Suivez les compétences exigées par votre poste et soumettez les documents qui les confirment."
     },
     "setup": "Configuration des compétences",
     "levelComparison": "Votre niveau / requis",
@@ -8092,7 +8166,18 @@
       "statusMet": "Vous remplissez les exigences de votre poste actuel. Suivez les confirmations arrivant à expiration et votre plan de développement.",
       "statusGaps": "Certaines exigences doivent encore être confirmées. Consultez les écarts et votre plan de développement.",
       "count_one": "{{count}} compétence",
-      "count_other": "{{count}} compétences"
+      "count_other": "{{count}} compétences",
+      "noProfileTitle": "Aucun profil de poste attribué pour l'instant",
+      "noProfileSelf": "Dès qu'un administrateur vous attribuera un profil de poste, vous verrez les compétences requises et les prochaines étapes.",
+      "noProfileOther": "Attribuez un profil de poste dans l'onglet Vue d'ensemble pour voir les compétences dont cette personne a besoin.",
+      "requirementsTitle": "Compétences requises",
+      "filters": {
+        "all": "Toutes",
+        "missing": "Non confirmées",
+        "expiring": "Expirent bientôt",
+        "met": "Atteintes"
+      },
+      "noRequirementsInFilter": "Aucune compétence n'a ce statut."
     },
     "overrideCondition": "Remplacer l'évaluation",
     "overrideStatus": "Évaluation",
@@ -8110,6 +8195,231 @@
       "missing": "Écart de compétence",
       "expiring": "Confirmation bientôt expirée"
     },
-    "nextActionOther": "Prochaine étape"
+    "nextActionOther": "Prochaine étape",
+    "backTo": "Retour à {{tab}}",
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "team": "Mon équipe",
+      "approvals": "Validations",
+      "setup": "Configuration"
+    },
+    "readiness": {
+      "ready": "Répond aux exigences",
+      "expiring": "Expire bientôt",
+      "missing": "Compétences manquantes",
+      "noProfile": "Aucun profil de poste",
+      "missingCount_one": "{{count}} manquante",
+      "missingCount_other": "{{count}} manquantes",
+      "gaps": "Compétences manquantes"
+    },
+    "overview": {
+      "ofPeople_one": "sur {{count}} personne",
+      "ofPeople_other": "sur {{count}} personnes",
+      "missingNote": "Au moins une exigence n'est pas confirmée",
+      "expiringOff": "Les rappels d'expiration sont désactivés",
+      "expiringNote_one": "Une confirmation expire sous {{count}} jour",
+      "expiringNote_other": "Une confirmation expire sous {{count}} jours",
+      "noProfileNote": "Attribuez un profil de poste pour suivre la préparation",
+      "peopleTitle": "Personnes",
+      "peopleDescription": "Attribuez des profils de poste et vérifiez qui possède toutes les compétences requises.",
+      "teamDescription": "Vérifiez qui, dans votre équipe, possède toutes les compétences requises.",
+      "viewMode": "Affichage",
+      "views": {
+        "list": "Liste",
+        "matrix": "Matrice"
+      },
+      "allProfiles": "Tous les profils de poste",
+      "clearFilters": "Effacer les filtres",
+      "readiness": "Préparation",
+      "noMatches": "Aucune personne ne correspond aux filtres sélectionnés.",
+      "noMatrixPeople": "Personne n'est encore affecté à ce profil de poste.",
+      "allPeople": "Tous"
+    },
+    "gettingStarted": {
+      "title": "Configurer le suivi des compétences",
+      "description": "Suivez ces étapes pour voir quels employés possèdent les compétences exigées par leur poste.",
+      "progress": "{{completed}} sur {{total}} terminées",
+      "done": "Terminé",
+      "steps": {
+        "categories": {
+          "title": "Créer une catégorie",
+          "description": "Regroupez les compétences associées pour organiser votre catalogue.",
+          "action": "Ajouter une catégorie"
+        },
+        "competencies": {
+          "title": "Créer des compétences",
+          "description": "Décrivez une compétence, ses niveaux et la manière dont chaque niveau est confirmé : cours, document ou observation.",
+          "action": "Ajouter une compétence"
+        },
+        "profiles": {
+          "title": "Créer un profil de poste",
+          "description": "Choisissez les compétences et les niveaux qu'exige un poste.",
+          "action": "Créer un profil de poste"
+        },
+        "assignments": {
+          "title": "Affecter des personnes",
+          "description": "Attribuez un profil de poste à chaque employé pour commencer à suivre sa préparation.",
+          "action": "Attribuer des profils de poste"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Compétences",
+      "competenciesDescription": "Des compétences avec des niveaux. Chaque niveau indique ce qui le confirme : un cours terminé, un document validé ou une observation.",
+      "profilesTitle": "Profils de poste",
+      "profilesDescription": "Combinez les compétences et les niveaux requis pour un poste, puis attribuez le profil aux personnes dans l'onglet Vue d'ensemble.",
+      "settingsTitle": "Rappels d'expiration",
+      "settingsDescription": "Choisissez combien de temps à l'avance signaler les confirmations qui vont expirer.",
+      "emptyCompetenciesTitle": "Aucune compétence pour l'instant",
+      "emptyCompetencies": "Commencez par ajouter les compétences suivies par votre organisation. Vous pourrez ensuite les regrouper en profils de poste.",
+      "emptyProfilesTitle": "Aucun profil de poste pour l'instant",
+      "emptyProfiles": "Créez un profil de poste pour définir les compétences qu'exige un poste.",
+      "emptyProfilesNeedsCompetencies": "Ajoutez au moins une compétence avec un niveau avant de créer un profil de poste.",
+      "requiredCompetenciesCount": "Compétences requises",
+      "assignedPeople": "Personnes affectées",
+      "expiryOff": "Désactivé",
+      "expiryDays_one": "{{count}} jour",
+      "expiryDays_other": "{{count}} jours",
+      "progressTitle": "Progression de la configuration",
+      "competenciesNav_one": "{{count}} prête à l'emploi",
+      "competenciesNav_other": "{{count}} prêtes à l'emploi",
+      "profilesNav_one": "{{count}} personne affectée",
+      "profilesNav_other": "{{count}} personnes affectées",
+      "expiryNav_one": "Avertir {{count}} jour avant l'expiration",
+      "expiryNav_other": "Avertir {{count}} jours avant l'expiration",
+      "expiryNavOff": "Non configuré"
+    },
+    "compareWithAssigned": "Comparer avec : profil attribué",
+    "select": {
+      "search": "Rechercher…",
+      "noResults": "Aucun résultat."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} document, regroupé par compétence.",
+      "summary_other": "{{count}} documents, regroupés par compétence.",
+      "toSubmit_one": "{{count}} à soumettre",
+      "toSubmit_other": "{{count}} à soumettre",
+      "pending_one": "{{count}} en attente",
+      "pending_other": "{{count}} en attente",
+      "notSubmitted": "Non soumis"
+    },
+    "profileEditor": {
+      "addCompetency": "Ajouter une compétence…",
+      "requirementsHelp": "Ajoutez chaque compétence requise par le poste et choisissez le niveau attendu.",
+      "noRequirements": "Aucune compétence ajoutée. Utilisez « Ajouter une compétence » pour construire le profil."
+    },
+    "editor": {
+      "levelsHelp": "Les niveaux s'appuient les uns sur les autres. Sélectionnez un niveau pour définir ce qui le confirme.",
+      "untitledLevel": "Niveau sans nom",
+      "conditionCount_one": "{{count}} condition",
+      "conditionCount_other": "{{count}} conditions",
+      "noLevels": "Ajoutez le premier niveau pour définir comment cette compétence est confirmée.",
+      "levelNameNumbered": "Nom du niveau {{number}}",
+      "moveUp": "Monter le niveau",
+      "moveDown": "Descendre le niveau",
+      "metWhen": "Ce niveau est atteint lorsque toutes ces conditions sont remplies",
+      "noConditions": "Aucune condition. Ajoutez-en une pour définir ce qui confirme ce niveau.",
+      "reorder": "Faites glisser pour réorganiser"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Avertir avant l'expiration des confirmations",
+      "toggleHelp": "Les confirmations de compétences sur le point d'expirer sont signalées « Expire bientôt » aux employés, managers et administrateurs.",
+      "warnBefore": "Avertir ce nombre de jours avant l'expiration",
+      "custom": "Personnalisé",
+      "invalid": "Saisissez un nombre entier de jours, 0 ou plus.",
+      "preview_one": "Les confirmations expirant dans {{count}} jour seront marquées « Expire bientôt ».",
+      "preview_other": "Les confirmations expirant dans {{count}} jours seront marquées « Expire bientôt »."
+    },
+    "catalogTable": {
+      "allCategories": "Toutes les catégories",
+      "confirmedBy": "Confirmée par",
+      "levelCount_one": "{{count}} niveau",
+      "levelCount_other": "{{count}} niveaux"
+    },
+    "reviewCard": {
+      "confirms": "Confirme"
+    },
+    "reviewFilters": {
+      "pending": "En attente",
+      "approved": "Approuvées",
+      "rejected": "Rejetées",
+      "revoked": "Révoquées",
+      "empty": "Aucune preuve avec ce statut."
+    },
+    "planStatus": {
+      "needsPlan": "Plan nécessaire",
+      "active": "En cours",
+      "overdue": "En retard",
+      "completed": "Terminé"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} étapes",
+      "progress": "Progression",
+      "nextStep": "Prochaine étape",
+      "noDueDate": "Sans échéance",
+      "gapsCount_one": "{{count}} compétence sans plan",
+      "gapsCount_other": "{{count}} compétences sans plan",
+      "uncoveredTitle_one": "{{count}} compétence manquante n'a pas encore d'étape",
+      "uncoveredTitle_other": "{{count}} compétences manquantes n'ont pas encore d'étapes",
+      "planGaps": "Planifier ces compétences",
+      "emptyPlan": "Ce plan n'a pas encore d'étapes.",
+      "emptyTitle": "Aucun plan de développement pour l'instant",
+      "empty": "Les plans apparaissent ici pour les personnes dont le profil de poste comporte des compétences manquantes. Commencez par attribuer des profils dans l'onglet Vue d'ensemble."
+    },
+    "planBuilder": {
+      "title": "Ajouter des étapes au plan",
+      "description": "Choisissez une personne, puis ajoutez les étapes qui combleront ses écarts de compétences. Les compétences manquantes sont suggérées automatiquement.",
+      "targetDate": "Date cible (facultatif)",
+      "stepsTitle": "Étapes",
+      "stepsHelp": "Chaque étape vise un niveau de compétence manquant. Le responsable et la date cible s'appliquent à toutes les étapes.",
+      "choosePerson": "Choisissez une personne pour voir ses compétences manquantes.",
+      "noGaps": "Cette personne répond à toutes les exigences de son profil de poste.",
+      "addStep": "Ajouter une étape",
+      "submit_one": "Créer le plan avec {{count}} étape",
+      "submit_other": "Créer le plan avec {{count}} étapes",
+      "created_one": "Plan créé avec {{count}} étape.",
+      "created_other": "Plan créé avec {{count}} étapes.",
+      "submitAdd_one": "Ajouter {{count}} étape",
+      "submitAdd_other": "Ajouter {{count}} étapes"
+    },
+    "actionHistory": {
+      "created": "Créé",
+      "updated": "Mis à jour",
+      "version": "version {{number}}"
+    },
+    "stepEditor": {
+      "title": "Modifier l'étape"
+    },
+    "profilesTable": {
+      "allCompetencies": "Toutes les compétences"
+    },
+    "reviewTable": {
+      "submitted": "Soumis"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} à soumettre",
+      "toSubmit_other": "{{count}} à soumettre",
+      "submitted_one": "{{count}} soumis",
+      "submitted_other": "{{count}} soumis",
+      "reviewerReason": "Motif de l'évaluateur"
+    },
+    "categories": {
+      "title": "Catégories",
+      "nav_one": "{{count}} prête à l'emploi",
+      "nav_other": "{{count}} prêtes à l'emploi",
+      "description": "Regroupez les compétences pour les retrouver et les filtrer plus facilement.",
+      "none": "Sans catégorie",
+      "emptyTitle": "Aucune catégorie",
+      "empty": "Créez des catégories comme Sécurité ou Leadership, puis attribuez-les aux compétences.",
+      "search": "Rechercher des catégories",
+      "new": "Nouvelle catégorie",
+      "edit": "Modifier la catégorie",
+      "competencyCount": "Compétences",
+      "delete": "Supprimer la catégorie",
+      "deleteConfirmation": "Supprimer la catégorie « {{name}} » ?",
+      "inUse_one": "« {{name}} » est utilisée par {{count}} compétence. Déplacez-la vers une autre catégorie avant de la supprimer.",
+      "inUse_many": "« {{name}} » est utilisée par {{count}} compétences. Déplacez-les vers une autre catégorie avant de la supprimer.",
+      "inUse_other": "« {{name}} » est utilisée par {{count}} compétences. Déplacez-les vers une autre catégorie avant de la supprimer."
+    }
   }
 }

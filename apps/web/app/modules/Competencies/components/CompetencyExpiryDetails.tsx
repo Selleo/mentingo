@@ -2,26 +2,23 @@ import { useTranslation } from "react-i18next";
 
 import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
-import { getExpiringConditions } from "../competenciesExpiry.utils";
+import { getExpiringConditions } from "../utils/competenciesExpiry.utils";
 
-import type { CompetenciesWorkspace, Competency, CompetencyStanding } from "../competencies.types";
+import type { Competency, CompetencyStanding } from "../competencies.types";
 
 export function CompetencyExpiryDetails({
   definition,
   standing,
-  workspace,
+  asOf,
+  warningDays,
 }: {
   definition: Competency;
   standing: CompetencyStanding;
-  workspace: CompetenciesWorkspace;
+  asOf: string;
+  warningDays: number | null;
 }) {
   const { t, i18n } = useTranslation();
-  const conditions = getExpiringConditions(
-    definition,
-    standing,
-    workspace.asOf,
-    workspace.warningDays,
-  );
+  const conditions = getExpiringConditions(definition, standing, asOf, warningDays);
   if (!conditions.length) return null;
   return (
     <ul

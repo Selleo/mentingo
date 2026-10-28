@@ -2226,20 +2226,8 @@
                       "type": "string"
                     },
                     "kind": {
-                      "anyOf": [
-                        {
-                          "const": "course",
-                          "type": "string"
-                        },
-                        {
-                          "const": "quiz",
-                          "type": "string"
-                        },
-                        {
-                          "const": "ai-mentor",
-                          "type": "string"
-                        }
-                      ]
+                      "const": "course",
+                      "type": "string"
                     },
                     "resourceId": {
                       "format": "uuid",
@@ -2248,6 +2236,7 @@
                     "learningStateId": {
                       "anyOf": [
                         {
+                          "format": "uuid",
                           "type": "string"
                         },
                         {
@@ -2283,16 +2272,6 @@
                           "type": "string"
                         }
                       ]
-                    },
-                    "score": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
                     }
                   },
                   "required": [
@@ -2305,8 +2284,7 @@
                     "learningStateId",
                     "occurredAt",
                     "validUntil",
-                    "outcome",
-                    "score"
+                    "outcome"
                   ]
                 }
               }

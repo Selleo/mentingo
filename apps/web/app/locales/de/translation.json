@@ -8327,6 +8327,80 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Kompetenz löschen",
+    "deleteCompetencyConfirmation": "„{{name}}“ löschen? Dadurch wird die Kompetenz dauerhaft aus allen Stellenprofilen entfernt. Ihr Bestätigungsverlauf und die angehängten Dokumente werden ebenfalls gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "notifications": {
+      "categoryCreated": "Kategorie erstellt.",
+      "categoryUpdated": "Kategorie aktualisiert.",
+      "categoryDeleted": "Kategorie gelöscht.",
+      "competencyCreated": "Kompetenz erstellt.",
+      "competencyUpdated": "Kompetenz aktualisiert.",
+      "competencyDeleted": "Kompetenz gelöscht.",
+      "profileCreated": "Stellenprofil erstellt.",
+      "profileUpdated": "Stellenprofil aktualisiert.",
+      "profileDeleted": "Stellenprofil gelöscht.",
+      "profileAssigned": "Stellenprofil zugewiesen.",
+      "profileRemoved": "Zuweisung des Stellenprofils entfernt.",
+      "documentSubmitted": "Dokument zur Prüfung eingereicht.",
+      "observationConfirmed": "Beobachtung bestätigt.",
+      "qualificationsRecognized": "Vorhandene Qualifikationen anerkannt.",
+      "submissionApproved": "Einreichung genehmigt.",
+      "submissionRejected": "Einreichung abgelehnt.",
+      "confirmationRevoked": "Bestätigung widerrufen.",
+      "manuallyConfirmed": "Anforderung manuell bestätigt.",
+      "evidenceEvaluationRestored": "Nachweisbasierte Bestätigung wiederhergestellt.",
+      "expiryDisabled": "Ablauferinnerungen deaktiviert.",
+      "expiryUpdated": "Ablauferinnerungen aktualisiert.",
+      "categorySaveFailed": "Die Kategorie konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "categoryDeleteFailed": "Die Kategorie konnte nicht gelöscht werden. Bitte erneut versuchen.",
+      "competencySaveFailed": "Die Kompetenz konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "competencyDeleteFailed": "Die Kompetenz konnte nicht gelöscht werden. Bitte erneut versuchen.",
+      "profileSaveFailed": "Das Stellenprofil konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "profileDeleteFailed": "Das Stellenprofil konnte nicht gelöscht werden. Bitte erneut versuchen.",
+      "profileAssignmentFailed": "Die Stellenprofilzuweisung konnte nicht geändert werden. Bitte erneut versuchen.",
+      "evidenceSubmitFailed": "Die Bestätigung konnte nicht eingereicht werden. Bitte erneut versuchen.",
+      "reviewFailed": "Die Prüfentscheidung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "revocationFailed": "Die Bestätigung konnte nicht widerrufen werden. Bitte erneut versuchen.",
+      "adjustmentFailed": "Die Bestätigung der Anforderung konnte nicht angepasst werden. Bitte erneut versuchen.",
+      "settingsFailed": "Die Ablauferinnerungen konnten nicht aktualisiert werden. Bitte erneut versuchen.",
+      "attachmentUploadFailed": "Das Dokument konnte nicht hochgeladen werden. Bitte erneut versuchen.",
+      "attachmentDownloadFailed": "Das Dokument konnte nicht heruntergeladen werden. Bitte erneut versuchen."
+    },
+    "detailGuide": {
+      "automaticCourse": "Kursabschluss",
+      "automaticDocument": "Dokumentgenehmigung",
+      "automaticObservation": "Bestätigung einer Beobachtung",
+      "noLevel": "Noch keine Stufe bestätigt",
+      "nextLevel": "Nächste Stufe: {{level}}",
+      "allConfirmed": "Alle Stufen sind bestätigt",
+      "levelHelp": "Um eine Stufe zu bestätigen, erfüllen Sie ihre Anforderungen und die aller vorherigen Stufen.",
+      "levels": "Stufen und ihre Bestätigung",
+      "requirementsProgress": "{{completed}}/{{total}} bestätigt",
+      "confirmed": "Bestätigt",
+      "toConfirm": "Noch nicht bestätigt",
+      "courseHelp": "Schließen Sie den verknüpften Kurs ab, um diese Anforderung zu bestätigen.",
+      "documentHelp": "Reichen Sie ein Dokument zur Prüfung durch eine benannte prüfende Person ein.",
+      "observationHelp": "Eine benannte prüfende Person bestätigt diese Fähigkeit nach Beobachtung bei der Arbeit.",
+      "noVerifier": "Bevor diese Anforderung bestätigt werden kann, muss ein Administrator unter Einrichtung > Kompetenzen eine prüfende Person zuweisen.",
+      "adminAction": "Bestätigung ändern",
+      "history": "Bestätigungsverlauf ({{count}})",
+      "emptyHistory": "Noch keine Bestätigungen oder eingereichten Dokumente.",
+      "confirmation": {
+        "course": "Kursabschluss",
+        "document": "Dokumentenprüfung",
+        "observation": "Bestätigung durch eine prüfende Person"
+      },
+      "useEvidence": "Nach Nachweisen",
+      "useEvidenceHelp": "Kursergebnisse und genehmigte Bewertungen verwenden.",
+      "confirmManually": "Manuell bestätigen",
+      "confirmManuallyHelp": "Diese Anforderung ohne weitere Nachweise als erfüllt werten.",
+      "reason": "Begründung der Änderung",
+      "reasonPlaceholder": "Warum ist diese Änderung erforderlich?",
+      "saveChange": "Änderung speichern"
+    },
+    "searchCatalog": "Kompetenzen suchen…",
+    "searchProfiles": "Stellenprofile suchen…",
+    "noSearchResults": "Keine Treffer. Versuchen Sie einen anderen Suchbegriff.",
     "documents": "Dokumente",
     "requiredDocuments": "Einzureichende Dokumente",
     "noRequiredDocuments": "Für Ihre aktuellen Stellenanforderungen sind keine Dokumente einzureichen.",
@@ -8531,7 +8605,10 @@
       "people": "Mitarbeitende und ihre bestätigten Kompetenzen durchsuchen.",
       "catalog": "Ein gemeinsamer Katalog für Kompetenzen, Stufen und Bestätigungsverfahren.",
       "profiles": "Definieren Sie, was Mitarbeitende für eine sichere und selbstständige Ausübung der Rolle benötigen.",
-      "settings": "Konfigurieren Sie Ablaufwarnungen."
+      "settings": "Konfigurieren Sie Ablaufwarnungen.",
+      "overview": "Sehen Sie, wer die Anforderungen seines Stellenprofils erfüllt und wo Handlungsbedarf besteht.",
+      "setup": "Definieren Sie Kompetenzen, fassen Sie sie zu Stellenprofilen zusammen und konfigurieren Sie Ablauferinnerungen.",
+      "ownWithoutProfile": "Verfolgen Sie die für Ihre Rolle erforderlichen Kompetenzen und reichen Sie Nachweise ein."
     },
     "setup": "Kompetenzen einrichten",
     "levelComparison": "Ihr Stand / erforderlich",
@@ -8566,7 +8643,18 @@
       "statusMet": "Sie erfüllen die Anforderungen Ihrer aktuellen Position. Behalten Sie auslaufende Bestätigungen und Ihren Entwicklungsplan im Blick.",
       "statusGaps": "Einige Anforderungen müssen noch bestätigt werden. Prüfen Sie die Lücken und Ihren Entwicklungsplan.",
       "count_one": "{{count}} Kompetenz",
-      "count_other": "{{count}} Kompetenzen"
+      "count_other": "{{count}} Kompetenzen",
+      "noProfileTitle": "Noch kein Stellenprofil zugewiesen",
+      "noProfileSelf": "Sobald Ihnen ein Stellenprofil zugewiesen wird, sehen Sie die erforderlichen Kompetenzen und die nächsten Schritte.",
+      "noProfileOther": "Weisen Sie in der Übersicht ein Stellenprofil zu, um zu sehen, welche Kompetenzen diese Person benötigt.",
+      "requirementsTitle": "Erforderliche Kompetenzen",
+      "filters": {
+        "all": "Alle",
+        "missing": "Nicht bestätigt",
+        "expiring": "Läuft bald ab",
+        "met": "Erfüllt"
+      },
+      "noRequirementsInFilter": "Keine Kompetenzen mit diesem Status."
     },
     "overrideCondition": "Bedingung überschreiben",
     "overrideStatus": "Bewertung",
@@ -8584,6 +8672,230 @@
       "missing": "Kompetenzlücke",
       "expiring": "Bestätigung läuft ab"
     },
-    "nextActionOther": "Nächster Schritt"
+    "nextActionOther": "Nächster Schritt",
+    "backTo": "Zurück zu {{tab}}",
+    "tabs": {
+      "overview": "Übersicht",
+      "team": "Mein Team",
+      "approvals": "Freigaben",
+      "setup": "Einrichtung"
+    },
+    "readiness": {
+      "ready": "Erfüllt Anforderungen",
+      "expiring": "Läuft bald ab",
+      "missing": "Fehlende Kompetenzen",
+      "noProfile": "Kein Stellenprofil",
+      "missingCount_one": "{{count}} fehlt",
+      "missingCount_other": "{{count}} fehlen",
+      "gaps": "Fehlende Kompetenzen"
+    },
+    "overview": {
+      "ofPeople_one": "von {{count}} Person",
+      "ofPeople_other": "von {{count}} Personen",
+      "missingNote": "Mindestens eine Anforderung ist nicht bestätigt",
+      "expiringOff": "Ablauferinnerungen sind deaktiviert",
+      "expiringNote_one": "Eine Bestätigung läuft innerhalb von {{count}} Tag ab",
+      "expiringNote_other": "Eine Bestätigung läuft innerhalb von {{count}} Tagen ab",
+      "noProfileNote": "Weisen Sie ein Stellenprofil zu, um die Bereitschaft zu verfolgen",
+      "peopleTitle": "Personen",
+      "peopleDescription": "Weisen Sie Stellenprofile zu und prüfen Sie, wer alle benötigten Kompetenzen hat.",
+      "teamDescription": "Prüfen Sie, wer in Ihrem Team alle benötigten Kompetenzen hat.",
+      "viewMode": "Ansicht",
+      "views": {
+        "list": "Liste",
+        "matrix": "Matrix"
+      },
+      "allProfiles": "Alle Stellenprofile",
+      "clearFilters": "Filter zurücksetzen",
+      "readiness": "Bereitschaft",
+      "noMatches": "Keine Personen entsprechen den gewählten Filtern.",
+      "noMatrixPeople": "Diesem Stellenprofil ist noch niemand zugewiesen.",
+      "allPeople": "Alle"
+    },
+    "gettingStarted": {
+      "title": "Kompetenzverfolgung einrichten",
+      "description": "Folgen Sie diesen Schritten, um zu sehen, welche Mitarbeitenden die für ihre Rolle erforderlichen Kompetenzen haben.",
+      "progress": "{{completed}} von {{total}} erledigt",
+      "done": "Erledigt",
+      "steps": {
+        "categories": {
+          "title": "Kategorie erstellen",
+          "description": "Gruppieren Sie zusammengehörige Kompetenzen für einen übersichtlichen Katalog.",
+          "action": "Kategorie hinzufügen"
+        },
+        "competencies": {
+          "title": "Kompetenzen erstellen",
+          "description": "Beschreiben Sie eine Fähigkeit, ihre Stufen und wie jede Stufe bestätigt wird: Kurs, Dokument oder Beobachtung.",
+          "action": "Kompetenz hinzufügen"
+        },
+        "profiles": {
+          "title": "Stellenprofil erstellen",
+          "description": "Wählen Sie die Kompetenzen und Stufen, die eine Rolle erfordert.",
+          "action": "Stellenprofil erstellen"
+        },
+        "assignments": {
+          "title": "Personen zuweisen",
+          "description": "Weisen Sie jeder Person ein Stellenprofil zu, um ihre Bereitschaft zu verfolgen.",
+          "action": "Stellenprofile zuweisen"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Kompetenzen",
+      "competenciesDescription": "Fähigkeiten mit Stufen. Jede Stufe legt fest, was sie bestätigt: ein abgeschlossener Kurs, ein freigegebenes Dokument oder eine Beobachtung.",
+      "profilesTitle": "Stellenprofile",
+      "profilesDescription": "Kombinieren Sie Kompetenzen und erforderliche Stufen für eine Rolle und weisen Sie das Profil in der Übersicht Personen zu.",
+      "settingsTitle": "Ablauferinnerungen",
+      "settingsDescription": "Legen Sie fest, wie früh ablaufende Bestätigungen markiert werden.",
+      "emptyCompetenciesTitle": "Noch keine Kompetenzen",
+      "emptyCompetencies": "Fügen Sie zuerst die Fähigkeiten hinzu, die Ihre Organisation verfolgt. Danach fassen Sie sie zu Stellenprofilen zusammen.",
+      "emptyProfilesTitle": "Noch keine Stellenprofile",
+      "emptyProfiles": "Erstellen Sie ein Stellenprofil, um festzulegen, welche Kompetenzen eine Rolle erfordert.",
+      "emptyProfilesNeedsCompetencies": "Fügen Sie vor dem Erstellen eines Stellenprofils mindestens eine Kompetenz mit einer Stufe hinzu.",
+      "requiredCompetenciesCount": "Erforderliche Kompetenzen",
+      "assignedPeople": "Zugewiesene Personen",
+      "expiryOff": "Aus",
+      "expiryDays_one": "{{count}} Tag",
+      "expiryDays_other": "{{count}} Tage",
+      "progressTitle": "Einrichtungsfortschritt",
+      "competenciesNav_one": "{{count}} einsatzbereit",
+      "competenciesNav_other": "{{count}} einsatzbereit",
+      "profilesNav_one": "{{count}} Person zugewiesen",
+      "profilesNav_other": "{{count}} Personen zugewiesen",
+      "expiryNav_one": "{{count}} Tag vor Ablauf warnen",
+      "expiryNav_other": "{{count}} Tage vor Ablauf warnen",
+      "expiryNavOff": "Nicht konfiguriert"
+    },
+    "compareWithAssigned": "Vergleichen mit: zugewiesenes Profil",
+    "select": {
+      "search": "Suchen…",
+      "noResults": "Keine Ergebnisse."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} Dokument, nach Kompetenz gruppiert.",
+      "summary_other": "{{count}} Dokumente, nach Kompetenz gruppiert.",
+      "toSubmit_one": "{{count}} einzureichen",
+      "toSubmit_other": "{{count}} einzureichen",
+      "pending_one": "{{count}} ausstehend",
+      "pending_other": "{{count}} ausstehend",
+      "notSubmitted": "Nicht eingereicht"
+    },
+    "profileEditor": {
+      "addCompetency": "Kompetenz hinzufügen…",
+      "requirementsHelp": "Fügen Sie jede Kompetenz hinzu, die die Rolle erfordert, und wählen Sie die erforderliche Stufe.",
+      "noRequirements": "Noch keine Kompetenzen hinzugefügt. Nutzen Sie „Kompetenz hinzufügen“, um das Profil aufzubauen."
+    },
+    "editor": {
+      "levelsHelp": "Stufen bauen aufeinander auf. Wählen Sie eine Stufe, um festzulegen, was sie bestätigt.",
+      "untitledLevel": "Unbenannte Stufe",
+      "conditionCount_one": "{{count}} Bedingung",
+      "conditionCount_other": "{{count}} Bedingungen",
+      "noLevels": "Fügen Sie die erste Stufe hinzu, um festzulegen, wie diese Kompetenz bestätigt wird.",
+      "levelNameNumbered": "Name der Stufe {{number}}",
+      "moveUp": "Stufe nach oben",
+      "moveDown": "Stufe nach unten",
+      "metWhen": "Diese Stufe ist erreicht, wenn alle diese Bedingungen erfüllt sind",
+      "noConditions": "Noch keine Bedingungen. Fügen Sie eine hinzu, um festzulegen, was diese Stufe bestätigt.",
+      "reorder": "Zum Neuordnen ziehen"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Vor Ablauf von Bestätigungen warnen",
+      "toggleHelp": "Kompetenzbestätigungen, die bald ablaufen, werden für Mitarbeitende, Führungskräfte und Administratoren als „Läuft bald ab“ markiert.",
+      "warnBefore": "So viele Tage vor Ablauf warnen",
+      "custom": "Benutzerdefiniert",
+      "invalid": "Geben Sie eine ganze Zahl von Tagen ein, 0 oder mehr.",
+      "preview_one": "Bestätigungen, die innerhalb von {{count}} Tag ablaufen, werden als „Läuft bald ab“ markiert.",
+      "preview_other": "Bestätigungen, die innerhalb von {{count}} Tagen ablaufen, werden als „Läuft bald ab“ markiert."
+    },
+    "catalogTable": {
+      "allCategories": "Alle Kategorien",
+      "confirmedBy": "Bestätigt durch",
+      "levelCount_one": "{{count}} Stufe",
+      "levelCount_other": "{{count}} Stufen"
+    },
+    "reviewCard": {
+      "confirms": "Bestätigt"
+    },
+    "reviewFilters": {
+      "pending": "Ausstehend",
+      "approved": "Freigegeben",
+      "rejected": "Abgelehnt",
+      "revoked": "Widerrufen",
+      "empty": "Keine Nachweise mit diesem Status."
+    },
+    "planStatus": {
+      "needsPlan": "Plan erforderlich",
+      "active": "In Arbeit",
+      "overdue": "Überfällig",
+      "completed": "Abgeschlossen"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} Schritte",
+      "progress": "Fortschritt",
+      "nextStep": "Nächster Schritt",
+      "noDueDate": "Kein Fälligkeitsdatum",
+      "gapsCount_one": "{{count}} Kompetenz ohne Plan",
+      "gapsCount_other": "{{count}} Kompetenzen ohne Plan",
+      "uncoveredTitle_one": "{{count}} fehlende Kompetenz hat noch keinen Schritt",
+      "uncoveredTitle_other": "{{count}} fehlende Kompetenzen haben noch keine Schritte",
+      "planGaps": "Diese Kompetenzen planen",
+      "emptyPlan": "Dieser Plan hat noch keine Schritte.",
+      "emptyTitle": "Noch keine Entwicklungspläne",
+      "empty": "Pläne erscheinen hier für Personen, deren Stellenprofil fehlende Kompetenzen hat. Weisen Sie zuerst in der Übersicht Stellenprofile zu."
+    },
+    "planBuilder": {
+      "title": "Schritte zum Plan hinzufügen",
+      "description": "Wählen Sie eine Person und fügen Sie die Schritte hinzu, die ihre Kompetenzlücken schließen. Fehlende Kompetenzen werden automatisch vorgeschlagen.",
+      "targetDate": "Zieldatum (optional)",
+      "stepsTitle": "Schritte",
+      "stepsHelp": "Jeder Schritt zielt auf eine fehlende Kompetenzstufe. Planverantwortliche Person und Zieldatum gelten für alle Schritte.",
+      "choosePerson": "Wählen Sie eine Person, um ihre fehlenden Kompetenzen zu sehen.",
+      "noGaps": "Diese Person erfüllt alle Anforderungen ihres Stellenprofils.",
+      "addStep": "Schritt hinzufügen",
+      "submit_one": "Plan mit {{count}} Schritt erstellen",
+      "submit_other": "Plan mit {{count}} Schritten erstellen",
+      "created_one": "Plan mit {{count}} Schritt erstellt.",
+      "created_other": "Plan mit {{count}} Schritten erstellt.",
+      "submitAdd_one": "{{count}} Schritt hinzufügen",
+      "submitAdd_other": "{{count}} Schritte hinzufügen"
+    },
+    "actionHistory": {
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "version": "Version {{number}}"
+    },
+    "stepEditor": {
+      "title": "Schritt bearbeiten"
+    },
+    "profilesTable": {
+      "allCompetencies": "Alle Kompetenzen"
+    },
+    "reviewTable": {
+      "submitted": "Eingereicht"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} einzureichen",
+      "toSubmit_other": "{{count}} einzureichen",
+      "submitted_one": "{{count}} eingereicht",
+      "submitted_other": "{{count}} eingereicht",
+      "reviewerReason": "Begründung der prüfenden Person"
+    },
+    "categories": {
+      "title": "Kategorien",
+      "nav_one": "{{count}} einsatzbereit",
+      "nav_other": "{{count}} einsatzbereit",
+      "description": "Gruppieren Sie Kompetenzen, damit sie leichter zu finden und zu filtern sind.",
+      "none": "Keine Kategorie",
+      "emptyTitle": "Noch keine Kategorien",
+      "empty": "Legen Sie Kategorien wie Sicherheit oder Führung an und ordnen Sie sie Kompetenzen zu.",
+      "search": "Kategorien suchen",
+      "new": "Neue Kategorie",
+      "edit": "Kategorie bearbeiten",
+      "competencyCount": "Kompetenzen",
+      "delete": "Kategorie löschen",
+      "deleteConfirmation": "Kategorie „{{name}}“ löschen?",
+      "inUse_one": "„{{name}}“ wird von {{count}} Kompetenz verwendet. Verschieben Sie sie vor dem Löschen in eine andere Kategorie.",
+      "inUse_other": "„{{name}}“ wird von {{count}} Kompetenzen verwendet. Verschieben Sie sie vor dem Löschen in eine andere Kategorie."
+    }
   }
 }

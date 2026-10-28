@@ -1,13 +1,12 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
-import { CourseModule } from "src/courses/course.module";
 import { LearningFactsRepository } from "src/integration/repositories/learning-facts.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { UserModule } from "src/user/user.module";
 
-import { CompetenciesAssignmentService } from "./competencies-assignment.service";
 import { CompetenciesClientService } from "./competencies-client.service";
+import { CompetenciesPeopleSyncService } from "./competencies-people-sync.service";
 import { CompetenciesSyncService } from "./competencies-sync.service";
 import { CompetenciesController } from "./competencies.controller";
 import { CompetenciesService } from "./competencies.service";
@@ -17,7 +16,7 @@ import { CompetenciesLearningHandler } from "./handlers/competencies-learning.ha
 import { CompetenciesContextRepository } from "./repositories/competencies-context.repository";
 
 @Module({
-  imports: [CqrsModule, CourseModule, UserModule],
+  imports: [CqrsModule, UserModule],
   controllers: [CompetenciesController],
   providers: [
     CompetenciesClientService,
@@ -25,7 +24,7 @@ import { CompetenciesContextRepository } from "./repositories/competencies-conte
     CompetenciesContextRepository,
     LocalizationService,
     LearningFactsRepository,
-    CompetenciesAssignmentService,
+    CompetenciesPeopleSyncService,
     CompetenciesSyncService,
     CompetenciesWorker,
     CompetenciesLearningHandler,

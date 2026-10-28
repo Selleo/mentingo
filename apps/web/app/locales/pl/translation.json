@@ -8428,6 +8428,80 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Usuń kompetencję",
+    "deleteCompetencyConfirmation": "Usunąć „{{name}}”? Spowoduje to trwałe usunięcie kompetencji ze wszystkich profili stanowisk oraz usunięcie jej historii potwierdzeń i załączonych dokumentów. Tej operacji nie można cofnąć.",
+    "notifications": {
+      "categoryCreated": "Utworzono kategorię.",
+      "categoryUpdated": "Zaktualizowano kategorię.",
+      "categoryDeleted": "Usunięto kategorię.",
+      "competencyCreated": "Utworzono kompetencję.",
+      "competencyUpdated": "Zaktualizowano kompetencję.",
+      "competencyDeleted": "Usunięto kompetencję.",
+      "profileCreated": "Utworzono profil stanowiska.",
+      "profileUpdated": "Zaktualizowano profil stanowiska.",
+      "profileDeleted": "Usunięto profil stanowiska.",
+      "profileAssigned": "Przypisano profil stanowiska.",
+      "profileRemoved": "Usunięto przypisanie profilu stanowiska.",
+      "documentSubmitted": "Przesłano dokument do weryfikacji.",
+      "observationConfirmed": "Potwierdzono obserwację.",
+      "qualificationsRecognized": "Uznano wcześniejsze kwalifikacje.",
+      "submissionApproved": "Zaakceptowano zgłoszenie.",
+      "submissionRejected": "Odrzucono zgłoszenie.",
+      "confirmationRevoked": "Cofnięto potwierdzenie.",
+      "manuallyConfirmed": "Ręcznie potwierdzono spełnienie wymagania.",
+      "evidenceEvaluationRestored": "Przywrócono potwierdzanie na podstawie dowodów.",
+      "expiryDisabled": "Wyłączono przypomnienia o wygasaniu.",
+      "expiryUpdated": "Zaktualizowano przypomnienia o wygasaniu.",
+      "categorySaveFailed": "Nie udało się zapisać kategorii. Spróbuj ponownie.",
+      "categoryDeleteFailed": "Nie udało się usunąć kategorii. Spróbuj ponownie.",
+      "competencySaveFailed": "Nie udało się zapisać kompetencji. Spróbuj ponownie.",
+      "competencyDeleteFailed": "Nie udało się usunąć kompetencji. Spróbuj ponownie.",
+      "profileSaveFailed": "Nie udało się zapisać profilu stanowiska. Spróbuj ponownie.",
+      "profileDeleteFailed": "Nie udało się usunąć profilu stanowiska. Spróbuj ponownie.",
+      "profileAssignmentFailed": "Nie udało się zmienić przypisania profilu stanowiska. Spróbuj ponownie.",
+      "evidenceSubmitFailed": "Nie udało się przesłać potwierdzenia. Spróbuj ponownie.",
+      "reviewFailed": "Nie udało się zapisać decyzji weryfikacyjnej. Spróbuj ponownie.",
+      "revocationFailed": "Nie udało się cofnąć potwierdzenia. Spróbuj ponownie.",
+      "adjustmentFailed": "Nie udało się zmienić potwierdzenia wymagania. Spróbuj ponownie.",
+      "settingsFailed": "Nie udało się zaktualizować przypomnień o wygasaniu. Spróbuj ponownie.",
+      "attachmentUploadFailed": "Nie udało się przesłać dokumentu. Spróbuj ponownie.",
+      "attachmentDownloadFailed": "Nie udało się pobrać dokumentu. Spróbuj ponownie."
+    },
+    "detailGuide": {
+      "automaticCourse": "Ukończenie kursu",
+      "automaticDocument": "Zatwierdzenie dokumentu",
+      "automaticObservation": "Potwierdzenie obserwacji",
+      "noLevel": "Żaden poziom nie został jeszcze potwierdzony",
+      "nextLevel": "Kolejny poziom: {{level}}",
+      "allConfirmed": "Wszystkie poziomy są potwierdzone",
+      "levelHelp": "Aby potwierdzić poziom, spełnij jego wymagania oraz wymagania wszystkich wcześniejszych poziomów.",
+      "levels": "Poziomy i sposób ich potwierdzania",
+      "requirementsProgress": "Potwierdzone: {{completed}}/{{total}}",
+      "confirmed": "Potwierdzone",
+      "toConfirm": "Jeszcze niepotwierdzone",
+      "courseHelp": "Ukończ powiązany kurs, aby potwierdzić to wymaganie.",
+      "documentHelp": "Prześlij dokument do oceny wyznaczonej osoby weryfikującej.",
+      "observationHelp": "Wyznaczona osoba potwierdza tę umiejętność po zaobserwowaniu jej w pracy.",
+      "noVerifier": "Administrator musi wyznaczyć osobę weryfikującą w Konfiguracja > Kompetencje, zanim będzie można potwierdzić to wymaganie.",
+      "adminAction": "Zmień potwierdzenie",
+      "history": "Historia potwierdzeń ({{count}})",
+      "emptyHistory": "Nie ma jeszcze potwierdzeń ani przesłanych dokumentów.",
+      "confirmation": {
+        "course": "Ukończenie kursu",
+        "document": "Ocena dokumentu",
+        "observation": "Potwierdzenie przez osobę weryfikującą"
+      },
+      "useEvidence": "Na podstawie wyników",
+      "useEvidenceHelp": "Uwzględniaj wyniki kursów i zatwierdzone oceny.",
+      "confirmManually": "Potwierdź ręcznie",
+      "confirmManuallyHelp": "Uznaj wymaganie za spełnione bez dodatkowych dowodów.",
+      "reason": "Uzasadnienie zmiany",
+      "reasonPlaceholder": "Dlaczego ta zmiana jest potrzebna?",
+      "saveChange": "Zapisz zmianę"
+    },
+    "searchCatalog": "Szukaj kompetencji…",
+    "searchProfiles": "Szukaj profili stanowisk…",
+    "noSearchResults": "Brak wyników. Spróbuj wpisać inne hasło.",
     "documents": "Dokumenty",
     "requiredDocuments": "Dokumenty do zgłoszenia",
     "noRequiredDocuments": "Nie masz dokumentów do zgłoszenia w ramach aktualnych wymagań stanowiska.",
@@ -8632,7 +8706,10 @@
       "people": "Przeglądaj pracowników i potwierdzone kompetencje.",
       "catalog": "Wspólny słownik kompetencji, poziomów i sposobów potwierdzania.",
       "profiles": "Określ, czego pracownik potrzebuje, aby bezpiecznie i samodzielnie wykonywać rolę.",
-      "settings": "Skonfiguruj ostrzeżenia o wygaśnięciu."
+      "settings": "Skonfiguruj ostrzeżenia o wygaśnięciu.",
+      "overview": "Zobacz, kto spełnia wymagania swojego profilu stanowiska i gdzie potrzebne jest działanie.",
+      "setup": "Zdefiniuj kompetencje, połącz je w profile stanowisk i skonfiguruj przypomnienia o wygasaniu.",
+      "ownWithoutProfile": "Śledź kompetencje wymagane na Twoim stanowisku i przesyłaj potwierdzające je dokumenty."
     },
     "setup": "Konfiguracja kompetencji",
     "levelComparison": "Twój / wymagany",
@@ -8669,7 +8746,18 @@
       "count_one": "{{count}} kompetencja",
       "count_other": "{{count}} kompetencji",
       "count_few": "{{count}} kompetencje",
-      "count_many": "{{count}} kompetencji"
+      "count_many": "{{count}} kompetencji",
+      "noProfileTitle": "Nie przypisano jeszcze profilu stanowiska",
+      "noProfileSelf": "Gdy administrator przypisze Ci profil stanowiska, zobaczysz wymagane kompetencje i kolejne kroki.",
+      "noProfileOther": "Przypisz profil stanowiska w zakładce Przegląd, aby zobaczyć, jakich kompetencji potrzebuje ta osoba.",
+      "requirementsTitle": "Wymagane kompetencje",
+      "filters": {
+        "all": "Wszystkie",
+        "missing": "Niepotwierdzone",
+        "expiring": "Wkrótce wygasają",
+        "met": "Spełnione"
+      },
+      "noRequirementsInFilter": "Żadna kompetencja nie ma tego statusu."
     },
     "overrideCondition": "Zmień ocenę warunku",
     "overrideStatus": "Ocena",
@@ -8687,6 +8775,274 @@
       "missing": "Luka kompetencyjna",
       "expiring": "Ważność wygasa"
     },
-    "nextActionOther": "Następny krok"
+    "nextActionOther": "Następny krok",
+    "backTo": "Wróć do: {{tab}}",
+    "tabs": {
+      "overview": "Przegląd",
+      "team": "Mój zespół",
+      "approvals": "Do zatwierdzenia",
+      "setup": "Konfiguracja"
+    },
+    "readiness": {
+      "ready": "Spełnia wymagania",
+      "expiring": "Wkrótce wygasa",
+      "missing": "Brakujące kompetencje",
+      "noProfile": "Brak profilu stanowiska",
+      "missingCount_one": "Brakuje {{count}}",
+      "missingCount_few": "Brakuje {{count}}",
+      "missingCount_many": "Brakuje {{count}}",
+      "missingCount_other": "Brakuje {{count}}",
+      "gaps": "Brakujące kompetencje"
+    },
+    "overview": {
+      "ofPeople_one": "z {{count}} osoby",
+      "ofPeople_few": "z {{count}} osób",
+      "ofPeople_many": "z {{count}} osób",
+      "ofPeople_other": "z {{count}} osób",
+      "missingNote": "Co najmniej jedno wymaganie nie jest potwierdzone",
+      "expiringOff": "Przypomnienia o wygasaniu są wyłączone",
+      "expiringNote_one": "Potwierdzenie wygasa w ciągu {{count}} dnia",
+      "expiringNote_few": "Potwierdzenie wygasa w ciągu {{count}} dni",
+      "expiringNote_many": "Potwierdzenie wygasa w ciągu {{count}} dni",
+      "expiringNote_other": "Potwierdzenie wygasa w ciągu {{count}} dni",
+      "noProfileNote": "Przypisz profil stanowiska, aby śledzić gotowość",
+      "peopleTitle": "Osoby",
+      "peopleDescription": "Przypisuj profile stanowisk i sprawdzaj, kto ma wszystkie wymagane kompetencje.",
+      "teamDescription": "Sprawdź, kto w Twoim zespole ma wszystkie wymagane kompetencje.",
+      "viewMode": "Widok",
+      "views": {
+        "list": "Lista",
+        "matrix": "Macierz"
+      },
+      "allProfiles": "Wszystkie profile stanowisk",
+      "clearFilters": "Wyczyść filtry",
+      "readiness": "Gotowość",
+      "noMatches": "Żadna osoba nie pasuje do wybranych filtrów.",
+      "noMatrixPeople": "Nikt nie ma jeszcze przypisanego tego profilu stanowiska.",
+      "allPeople": "Wszyscy"
+    },
+    "gettingStarted": {
+      "title": "Skonfiguruj śledzenie kompetencji",
+      "description": "Wykonaj te kroki, aby zobaczyć, którzy pracownicy mają kompetencje wymagane na ich stanowisku.",
+      "progress": "Ukończono {{completed}} z {{total}}",
+      "done": "Ukończono",
+      "steps": {
+        "categories": {
+          "title": "Utwórz kategorię",
+          "description": "Pogrupuj powiązane kompetencje, aby uporządkować katalog.",
+          "action": "Dodaj kategorię"
+        },
+        "competencies": {
+          "title": "Utwórz kompetencje",
+          "description": "Opisz umiejętność, jej poziomy i sposób potwierdzenia każdego poziomu: kurs, dokument lub obserwację.",
+          "action": "Dodaj kompetencję"
+        },
+        "profiles": {
+          "title": "Zbuduj profil stanowiska",
+          "description": "Wybierz kompetencje i poziomy wymagane na stanowisku.",
+          "action": "Utwórz profil stanowiska"
+        },
+        "assignments": {
+          "title": "Przypisz osoby",
+          "description": "Przypisz profil stanowiska każdemu pracownikowi, aby zacząć śledzić jego gotowość.",
+          "action": "Przypisz profile stanowisk"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Kompetencje",
+      "competenciesDescription": "Umiejętności z poziomami. Każdy poziom określa, co go potwierdza: ukończenie kursu, zatwierdzony dokument lub obserwacja.",
+      "profilesTitle": "Profile stanowisk",
+      "profilesDescription": "Połącz kompetencje i wymagane poziomy dla stanowiska, a następnie przypisz profil osobom w zakładce Przegląd.",
+      "settingsTitle": "Przypomnienia o wygasaniu",
+      "settingsDescription": "Wybierz, z jakim wyprzedzeniem oznaczać wygasające potwierdzenia.",
+      "emptyCompetenciesTitle": "Brak kompetencji",
+      "emptyCompetencies": "Zacznij od dodania umiejętności, które śledzi Twoja organizacja. Następnie połączysz je w profile stanowisk.",
+      "emptyProfilesTitle": "Brak profili stanowisk",
+      "emptyProfiles": "Utwórz profil stanowiska, aby określić, jakich kompetencji wymaga dana rola.",
+      "emptyProfilesNeedsCompetencies": "Przed utworzeniem profilu stanowiska dodaj co najmniej jedną kompetencję z poziomem.",
+      "requiredCompetenciesCount": "Wymagane kompetencje",
+      "assignedPeople": "Przypisane osoby",
+      "expiryOff": "Wył.",
+      "expiryDays_one": "{{count}} dzień",
+      "expiryDays_few": "{{count}} dni",
+      "expiryDays_many": "{{count}} dni",
+      "expiryDays_other": "{{count}} dni",
+      "progressTitle": "Postęp konfiguracji",
+      "competenciesNav_one": "{{count}} gotowa do użycia",
+      "competenciesNav_few": "{{count}} gotowe do użycia",
+      "competenciesNav_many": "{{count}} gotowych do użycia",
+      "competenciesNav_other": "{{count}} gotowych do użycia",
+      "profilesNav_one": "{{count}} przypisana osoba",
+      "profilesNav_few": "{{count}} przypisane osoby",
+      "profilesNav_many": "{{count}} przypisanych osób",
+      "profilesNav_other": "{{count}} przypisanych osób",
+      "expiryNav_one": "Ostrzegaj {{count}} dzień przed wygaśnięciem",
+      "expiryNav_few": "Ostrzegaj {{count}} dni przed wygaśnięciem",
+      "expiryNav_many": "Ostrzegaj {{count}} dni przed wygaśnięciem",
+      "expiryNav_other": "Ostrzegaj {{count}} dni przed wygaśnięciem",
+      "expiryNavOff": "Nieskonfigurowane"
+    },
+    "compareWithAssigned": "Porównaj z: przypisany profil",
+    "select": {
+      "search": "Szukaj…",
+      "noResults": "Brak wyników."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} dokument, pogrupowany według kompetencji.",
+      "summary_few": "{{count}} dokumenty, pogrupowane według kompetencji.",
+      "summary_many": "{{count}} dokumentów, pogrupowanych według kompetencji.",
+      "summary_other": "{{count}} dokumentów, pogrupowanych według kompetencji.",
+      "toSubmit_one": "{{count}} do przesłania",
+      "toSubmit_few": "{{count}} do przesłania",
+      "toSubmit_many": "{{count}} do przesłania",
+      "toSubmit_other": "{{count}} do przesłania",
+      "pending_one": "{{count}} oczekuje",
+      "pending_few": "{{count}} oczekują",
+      "pending_many": "{{count}} oczekuje",
+      "pending_other": "{{count}} oczekuje",
+      "notSubmitted": "Nie przesłano"
+    },
+    "profileEditor": {
+      "addCompetency": "Dodaj kompetencję…",
+      "requirementsHelp": "Dodaj każdą kompetencję wymaganą na stanowisku i wybierz wymagany poziom.",
+      "noRequirements": "Nie dodano jeszcze kompetencji. Użyj „Dodaj kompetencję”, aby zbudować profil."
+    },
+    "editor": {
+      "levelsHelp": "Poziomy budują się na sobie. Wybierz poziom, aby określić, co go potwierdza.",
+      "untitledLevel": "Poziom bez nazwy",
+      "conditionCount_one": "{{count}} warunek",
+      "conditionCount_few": "{{count}} warunki",
+      "conditionCount_many": "{{count}} warunków",
+      "conditionCount_other": "{{count}} warunków",
+      "noLevels": "Dodaj pierwszy poziom, aby określić, jak potwierdzana jest ta kompetencja.",
+      "levelNameNumbered": "Nazwa poziomu {{number}}",
+      "moveUp": "Przesuń poziom w górę",
+      "moveDown": "Przesuń poziom w dół",
+      "metWhen": "Ten poziom jest spełniony, gdy spełnione są wszystkie poniższe warunki",
+      "noConditions": "Brak warunków. Dodaj warunek, aby określić, co potwierdza ten poziom.",
+      "reorder": "Przeciągnij, aby zmienić kolejność"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Ostrzegaj przed wygaśnięciem potwierdzeń",
+      "toggleHelp": "Potwierdzenia kompetencji, które wkrótce wygasną, są oznaczane jako „Wkrótce wygasa” dla pracowników, menedżerów i administratorów.",
+      "warnBefore": "Ostrzegaj tyle dni przed wygaśnięciem",
+      "custom": "Własna wartość",
+      "invalid": "Podaj całkowitą liczbę dni, 0 lub więcej.",
+      "preview_one": "Potwierdzenia wygasające w ciągu {{count}} dnia zostaną oznaczone jako „Wkrótce wygasa”.",
+      "preview_few": "Potwierdzenia wygasające w ciągu {{count}} dni zostaną oznaczone jako „Wkrótce wygasa”.",
+      "preview_many": "Potwierdzenia wygasające w ciągu {{count}} dni zostaną oznaczone jako „Wkrótce wygasa”.",
+      "preview_other": "Potwierdzenia wygasające w ciągu {{count}} dni zostaną oznaczone jako „Wkrótce wygasa”."
+    },
+    "catalogTable": {
+      "allCategories": "Wszystkie kategorie",
+      "confirmedBy": "Potwierdzane przez",
+      "levelCount_one": "{{count}} poziom",
+      "levelCount_few": "{{count}} poziomy",
+      "levelCount_many": "{{count}} poziomów",
+      "levelCount_other": "{{count}} poziomów"
+    },
+    "reviewCard": {
+      "confirms": "Potwierdza"
+    },
+    "reviewFilters": {
+      "pending": "Oczekujące",
+      "approved": "Zatwierdzone",
+      "rejected": "Odrzucone",
+      "revoked": "Cofnięte",
+      "empty": "Brak dowodów o tym statusie."
+    },
+    "planStatus": {
+      "needsPlan": "Wymaga planu",
+      "active": "W toku",
+      "overdue": "Po terminie",
+      "completed": "Ukończony"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} kroków",
+      "progress": "Postęp",
+      "nextStep": "Następny krok",
+      "noDueDate": "Bez terminu",
+      "gapsCount_one": "{{count}} kompetencja bez planu",
+      "gapsCount_few": "{{count}} kompetencje bez planu",
+      "gapsCount_many": "{{count}} kompetencji bez planu",
+      "gapsCount_other": "{{count}} kompetencji bez planu",
+      "uncoveredTitle_one": "{{count}} brakująca kompetencja nie ma jeszcze kroku",
+      "uncoveredTitle_few": "{{count}} brakujące kompetencje nie mają jeszcze kroków",
+      "uncoveredTitle_many": "{{count}} brakujących kompetencji nie ma jeszcze kroków",
+      "uncoveredTitle_other": "{{count}} brakujących kompetencji nie ma jeszcze kroków",
+      "planGaps": "Zaplanuj te kompetencje",
+      "emptyPlan": "Ten plan nie ma jeszcze kroków.",
+      "emptyTitle": "Brak planów rozwoju",
+      "empty": "Plany pojawią się tu dla osób, których profil stanowiska ma brakujące kompetencje. Zacznij od przypisania profili w zakładce Przegląd."
+    },
+    "planBuilder": {
+      "title": "Dodaj kroki do planu",
+      "description": "Wybierz osobę, a następnie dodaj kroki, które uzupełnią jej braki kompetencyjne. Brakujące kompetencje są podpowiadane automatycznie.",
+      "targetDate": "Termin docelowy (opcjonalnie)",
+      "stepsTitle": "Kroki",
+      "stepsHelp": "Każdy krok dotyczy jednego brakującego poziomu kompetencji. Właściciel planu i termin docelowy obowiązują dla wszystkich kroków.",
+      "choosePerson": "Wybierz osobę, aby zobaczyć jej brakujące kompetencje.",
+      "noGaps": "Ta osoba spełnia wszystkie wymagania swojego profilu stanowiska.",
+      "addStep": "Dodaj krok",
+      "submit_one": "Utwórz plan z {{count}} krokiem",
+      "submit_few": "Utwórz plan z {{count}} krokami",
+      "submit_many": "Utwórz plan z {{count}} krokami",
+      "submit_other": "Utwórz plan z {{count}} krokami",
+      "created_one": "Utworzono plan z {{count}} krokiem.",
+      "created_few": "Utworzono plan z {{count}} krokami.",
+      "created_many": "Utworzono plan z {{count}} krokami.",
+      "created_other": "Utworzono plan z {{count}} krokami.",
+      "submitAdd_one": "Dodaj {{count}} krok",
+      "submitAdd_few": "Dodaj {{count}} kroki",
+      "submitAdd_many": "Dodaj {{count}} kroków",
+      "submitAdd_other": "Dodaj {{count}} kroków"
+    },
+    "actionHistory": {
+      "created": "Utworzono",
+      "updated": "Zaktualizowano",
+      "version": "wersja {{number}}"
+    },
+    "stepEditor": {
+      "title": "Edytuj krok"
+    },
+    "profilesTable": {
+      "allCompetencies": "Wszystkie kompetencje"
+    },
+    "reviewTable": {
+      "submitted": "Przesłano"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} do przesłania",
+      "toSubmit_few": "{{count}} do przesłania",
+      "toSubmit_many": "{{count}} do przesłania",
+      "toSubmit_other": "{{count}} do przesłania",
+      "submitted_one": "{{count}} przesłany",
+      "submitted_few": "{{count}} przesłane",
+      "submitted_many": "{{count}} przesłanych",
+      "submitted_other": "{{count}} przesłanych",
+      "reviewerReason": "Uzasadnienie weryfikatora"
+    },
+    "categories": {
+      "title": "Kategorie",
+      "nav_one": "{{count}} gotowa do użycia",
+      "nav_few": "{{count}} gotowe do użycia",
+      "nav_many": "{{count}} gotowych do użycia",
+      "nav_other": "{{count}} gotowych do użycia",
+      "description": "Grupuj kompetencje, aby łatwiej je wyszukiwać i filtrować.",
+      "none": "Bez kategorii",
+      "emptyTitle": "Brak kategorii",
+      "empty": "Utwórz kategorie, np. Bezpieczeństwo lub Przywództwo, a następnie przypisz je do kompetencji.",
+      "search": "Szukaj kategorii",
+      "new": "Nowa kategoria",
+      "edit": "Edytuj kategorię",
+      "competencyCount": "Kompetencje",
+      "delete": "Usuń kategorię",
+      "deleteConfirmation": "Usunąć kategorię „{{name}}”?",
+      "inUse_one": "Kategoria „{{name}}” jest używana przez {{count}} kompetencję. Przenieś ją do innej kategorii przed usunięciem.",
+      "inUse_few": "Kategoria „{{name}}” jest używana przez {{count}} kompetencje. Przenieś je do innej kategorii przed usunięciem.",
+      "inUse_many": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem.",
+      "inUse_other": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem."
+    }
   }
 }

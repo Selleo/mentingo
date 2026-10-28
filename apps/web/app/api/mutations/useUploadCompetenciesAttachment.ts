@@ -16,7 +16,14 @@ export function useUploadCompetenciesAttachment() {
     onError: (error) =>
       toast({
         variant: "destructive",
-        description: getTranslatedApiErrorMessage(error, t, t("competencies.serviceError")),
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("competencies.notifications.attachmentUploadFailed"),
+          {
+            allowUntranslatedMessage: false,
+          },
+        ),
       }),
   });
 }

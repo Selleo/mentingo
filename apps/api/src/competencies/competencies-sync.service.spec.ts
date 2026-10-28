@@ -37,7 +37,8 @@ describe("Competency synchronization", () => {
     };
     const competenciesClientService = {
       isConfigured: jest.fn().mockResolvedValue(true),
-      run: async <T>(operation: (value: typeof client) => Promise<T>) => operation(client),
+      requestWithClient: async <T>(operation: (value: typeof client) => Promise<T>) =>
+        operation(client),
     };
     const service = new CompetenciesSyncService(
       repository as never,
@@ -65,7 +66,7 @@ describe("Competency synchronization", () => {
         nextCursor: null,
       });
 
-    await service.refreshSubjects(["learner"]);
+    await service.reconcileSubjectLearningFacts(["learner"]);
 
     expect(repository.sourcePairs).toHaveBeenCalledWith(["learner"]);
     expect(client.factScopes.mock.calls).toEqual([
@@ -89,7 +90,7 @@ describe("Competency synchronization", () => {
       })
       .mockRejectedValueOnce(new Error("Offline"));
 
-    await expect(service.refreshSubjects(["learner"])).rejects.toThrow("Offline");
+    await expect(service.reconcileSubjectLearningFacts(["learner"])).rejects.toThrow("Offline");
     expect(repository.snapshot).not.toHaveBeenCalled();
     expect(client.reconcileFacts).not.toHaveBeenCalled();
   });
@@ -98,7 +99,7 @@ describe("Competency synchronization", () => {
     const { service, client, repository } = setup();
     client.factScopes.mockResolvedValue({ pairs: [], nextCursor: "page-2" });
 
-    await expect(service.refreshSubjects(["learner"])).rejects.toThrow(
+    await expect(service.reconcileSubjectLearningFacts(["learner"])).rejects.toThrow(
       "Repeated learning scope cursor",
     );
     expect(repository.snapshot).not.toHaveBeenCalled();
@@ -120,7 +121,7 @@ describe("Competency synchronization", () => {
       nextCursor: null,
     }));
 
-    await service.refreshSubjects(subjects);
+    await service.reconcileSubjectLearningFacts(subjects);
 
     expect(client.factScopes.mock.calls.map((call) => call[1])).toEqual([
       subjects.slice(0, COMPETENCIES_MAX_SCOPE_SUBJECTS),
@@ -152,14 +153,16 @@ describe("Competency synchronization", () => {
       })
       .mockRejectedValueOnce(new Error("Second batch unavailable"));
 
-    await expect(service.refreshSubjects(subjects)).rejects.toThrow("Second batch unavailable");
+    await expect(service.reconcileSubjectLearningFacts(subjects)).rejects.toThrow(
+      "Second batch unavailable",
+    );
     expect(repository.snapshot).not.toHaveBeenCalled();
     expect(client.reconcileFacts).not.toHaveBeenCalled();
   });
 
   it("does no source or plugin work without authorized subjects", async () => {
     const { service, client, repository } = setup();
-    await service.refreshSubjects([]);
+    await service.reconcileSubjectLearningFacts([]);
     expect(client.factScopes).not.toHaveBeenCalled();
     expect(repository.sourcePairs).not.toHaveBeenCalled();
   });
@@ -180,7 +183,7 @@ describe("Competency synchronization", () => {
       running--;
     });
 
-    await service.refreshSubjects(["learner"]);
+    await service.reconcileSubjectLearningFacts(["learner"]);
 
     expect(maximum).toBeLessThanOrEqual(8);
     expect(client.reconcileFacts).toHaveBeenCalledTimes(25);
@@ -188,7 +191,7 @@ describe("Competency synchronization", () => {
 
   it("recovers an exhausted sync job when the affected source changes again", async () => {
     const { service, job, queueService } = setup();
-    await service.enqueue("tenant", "learner", "course");
+    await service.enqueueCourseLearningFacts("tenant", "learner", "course");
     expect(job.remove).toHaveBeenCalledTimes(1);
     expect(queueService.enqueue).toHaveBeenCalledWith(
       QUEUE_NAMES.COMPETENCIES,
@@ -202,13 +205,13 @@ describe("Competency synchronization", () => {
     const { service, queueService, competenciesClientService } = setup();
     // The integration is intentionally optional for tenants that have not configured it.
     competenciesClientService.isConfigured.mockResolvedValue(false);
-    await service.enqueue("tenant", "learner", "course");
+    await service.enqueueCourseLearningFacts("tenant", "learner", "course");
     expect(queueService.enqueue).not.toHaveBeenCalled();
   });
 
   it("queries only the affected subject after a certificate event", async () => {
     const { service, repository } = setup();
-    await service.enqueueSubject("tenant", "learner");
+    await service.enqueueSubjectLearningFacts("tenant", "learner");
     expect(repository.sourcePairs).toHaveBeenCalledWith(["learner"]);
   });
   it("keeps a later source event queued independently of an in-flight snapshot", async () => {
@@ -216,8 +219,8 @@ describe("Competency synchronization", () => {
     jest
       .spyOn(queueService, "getQueue")
       .mockReturnValue({ getJob: jest.fn().mockResolvedValue(undefined) });
-    await service.enqueue("tenant", "learner", "course", "event-1");
-    await service.enqueue("tenant", "learner", "course", "event-2");
+    await service.enqueueCourseLearningFacts("tenant", "learner", "course", "event-1");
+    await service.enqueueCourseLearningFacts("tenant", "learner", "course", "event-2");
     expect(queueService.enqueue.mock.calls.map((call) => call[3].jobId)).toEqual([
       "sync-tenant-learner-course-event-1",
       "sync-tenant-learner-course-event-2",

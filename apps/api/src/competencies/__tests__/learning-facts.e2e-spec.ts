@@ -6,7 +6,6 @@ import {
 } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
-import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { LearningFactsRepository } from "src/integration/repositories/learning-facts.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
@@ -16,7 +15,6 @@ import {
   certificates,
   courses,
   courseLearningStates,
-  aiMentorStudentLessonProgress,
   groupManagerGroups,
   users,
 } from "src/storage/schema";
@@ -70,7 +68,7 @@ describe("Competencies source snapshots (e2e)", () => {
         .update(users)
         .set({ firstName: "Renamed", lastName: "Person" })
         .where(eq(users.id, subject.id));
-      expect(await repository.people([subject.id])).toEqual([
+      expect(await repository.findPeople([subject.id])).toEqual([
         { id: subject.id, name: "Renamed Person", archived: false },
       ]);
       expect((await facts.snapshot(subject.id, course.id)).facts).toEqual(original);
@@ -80,8 +78,8 @@ describe("Competencies source snapshots (e2e)", () => {
       });
       expect((await facts.snapshot(sameName.id, course.id)).facts).toEqual([]);
       await db.update(users).set({ archived: true }).where(eq(users.id, subject.id));
-      expect(await repository.actorIdentity(subject.id)).toBeNull();
-      expect(await repository.people([subject.id])).toEqual([
+      expect(await repository.findActorIdentity(subject.id)).toBeNull();
+      expect(await repository.findPeople([subject.id])).toEqual([
         { id: subject.id, name: "Renamed Person", archived: true },
       ]);
       expect((await facts.snapshot(subject.id, course.id)).facts).toEqual(original);
@@ -89,8 +87,8 @@ describe("Competencies source snapshots (e2e)", () => {
         .update(users)
         .set({ deletedAt: new Date().toISOString() })
         .where(eq(users.id, subject.id));
-      expect(await repository.actorIdentity(subject.id)).toBeNull();
-      expect(await repository.people([subject.id])).toEqual([]);
+      expect(await repository.findActorIdentity(subject.id)).toBeNull();
+      expect(await repository.findPeople([subject.id])).toEqual([]);
       expect((await facts.snapshot(subject.id, course.id)).facts).toEqual(original);
     }));
   it("reads current manager membership after a transfer without relying on the previous scope", () =>
@@ -111,14 +109,16 @@ describe("Competencies source snapshots (e2e)", () => {
         roleSlugs: [],
         permissions: [PERMISSIONS.COMPETENCIES_USE, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
       });
-      expect(await repository.managedSubjects(actor(previous))).toContainEqual({ id: subject.id });
-      expect(await repository.managedSubjects(actor(next))).toEqual([]);
+      expect(await repository.findManagedSubjects(actor(previous))).toContainEqual({
+        id: subject.id,
+      });
+      expect(await repository.findManagedSubjects(actor(next))).toEqual([]);
       await db
         .update(groupManagerGroups)
         .set({ managerUserId: next.id })
         .where(eq(groupManagerGroups.id, assignment.id));
-      expect(await repository.managedSubjects(actor(previous))).toEqual([]);
-      expect(await repository.managedSubjects(actor(next))).toContainEqual({ id: subject.id });
+      expect(await repository.findManagedSubjects(actor(previous))).toEqual([]);
+      expect(await repository.findManagedSubjects(actor(next))).toContainEqual({ id: subject.id });
     }));
   it("preserves source completion and certificate dates across repeated reads and emits an empty snapshot after source removal", () =>
     inTenant(async () => {
@@ -156,9 +156,9 @@ describe("Competencies source snapshots (e2e)", () => {
         isQuizPassed: true,
         quizScore: 86,
       });
-      expect(
-        (await repository.snapshot(user.id, course.id)).facts.find((fact) => fact.kind === "quiz"),
-      ).toMatchObject({ score: 86, occurredAt: completedAt, outcome: "passed" });
+      expect((await repository.snapshot(user.id, course.id)).facts).toEqual([
+        expect.objectContaining({ kind: "course", resourceId: course.id }),
+      ]);
       const [certificate] = await db
         .insert(certificates)
         .values({
@@ -190,110 +190,16 @@ describe("Competencies source snapshots (e2e)", () => {
           (fact) => fact.kind === "course",
         ),
       ).toMatchObject({ outcome: "passed", validUntil: "2026-12-01T00:00:00.000Z" });
-      const resources = await new CompetenciesContextRepository(
-        db,
-        app.get(LocalizationService),
-      ).learningResources(
-        {
-          userId: user.id,
-          email: user.email,
-          tenantId: user.tenantId,
-          roleSlugs: [],
-          permissions: [PERMISSIONS.COMPETENCIES_MANAGE],
-        },
-        "en",
-      );
-      expect(resources).toEqual(
-        expect.arrayContaining([expect.objectContaining({ id: quiz.id, kind: "quiz" })]),
-      );
       await db.delete(studentLessonProgress).where(eq(studentLessonProgress.studentId, user.id));
       await db.delete(studentCourses).where(eq(studentCourses.studentId, user.id));
       const removed = await repository.snapshot(user.id, course.id);
       expect(removed.facts).toEqual([]);
       expect(removed.revision).toBeGreaterThan(first.revision);
     }));
-  it.each([LESSON_TYPES.QUIZ, LESSON_TYPES.AI_MENTOR])(
-    "keeps accepted %s results until repetition is promoted",
-    (type) =>
-      inTenant(async () => {
-        const subject = await createUserFactory(db).create();
-        const course = await createCourseFactory(db).create({ hasCertificate: false });
-        const chapter = await createChapterFactory(db).create({ courseId: course.id });
-        const lesson = await createLessonFactory(db).create({
-          chapterId: chapter.id,
-          type,
-          thresholdScore: type === LESSON_TYPES.QUIZ ? 70 : null,
-        });
-        const [current, repetition] = await db
-          .insert(courseLearningStates)
-          .values([
-            { studentId: subject.id, courseId: course.id, kind: "current" },
-            { studentId: subject.id, courseId: course.id, kind: "repetition" },
-          ])
-          .returning();
-        const [accepted, temporary] = await db
-          .insert(studentLessonProgress)
-          .values([
-            {
-              studentId: subject.id,
-              chapterId: chapter.id,
-              lessonId: lesson.id,
-              learningStateId: current.id,
-              completedAt: "2026-03-01T12:00:00.000Z",
-              quizScore: 40,
-              isQuizPassed: false,
-            },
-            {
-              studentId: subject.id,
-              chapterId: chapter.id,
-              lessonId: lesson.id,
-              learningStateId: repetition.id,
-              completedAt: "2026-04-01T12:00:00.000Z",
-              quizScore: 95,
-              isQuizPassed: true,
-            },
-          ])
-          .returning();
-        if (type === LESSON_TYPES.AI_MENTOR)
-          await db.insert(aiMentorStudentLessonProgress).values([
-            { studentLessonProgressId: accepted.id, percentage: 40, passed: false },
-            { studentLessonProgressId: temporary.id, percentage: 95, passed: true },
-          ]);
-        const repository = new LearningFactsRepository(db);
-        const before = await repository.snapshot(subject.id, course.id);
-        expect(before.facts).toEqual([
-          expect.objectContaining({
-            id: `lesson:${accepted.id}`,
-            learningStateId: current.id,
-            score: 40,
-            outcome: "failed",
-          }),
-        ]);
-
-        await db.transaction((trx) =>
-          app.get(CourseRepetitionService).complete(course.id, subject.id, 1, trx),
-        );
-
-        const after = await repository.snapshot(subject.id, course.id);
-        expect(after.facts).toEqual([
-          expect.objectContaining({
-            id: `lesson:${temporary.id}`,
-            learningStateId: repetition.id,
-            score: 95,
-            outcome: "passed",
-          }),
-        ]);
-      }),
-  );
-  it("distinguishes promoted repetition results and exposes only AI assessment facts", () =>
+  it("starts a new course fact when a repeated course completion becomes current", () =>
     inTenant(async () => {
       const user = await createUserFactory(db).create();
       const course = await createCourseFactory(db).create({ hasCertificate: false });
-      const chapter = await createChapterFactory(db).create({ courseId: course.id });
-      const lesson = await createLessonFactory(db).create({
-        chapterId: chapter.id,
-        type: LESSON_TYPES.AI_MENTOR,
-      });
       const completedAt = "2026-03-01T12:00:00.000Z";
       const [initial] = await db
         .insert(courseLearningStates)
@@ -302,23 +208,9 @@ describe("Competencies source snapshots (e2e)", () => {
       await db
         .insert(studentCourses)
         .values({ studentId: user.id, courseId: course.id, completedAt });
-      const [progress] = await db
-        .insert(studentLessonProgress)
-        .values({
-          studentId: user.id,
-          chapterId: chapter.id,
-          lessonId: lesson.id,
-          learningStateId: initial.id,
-          completedAt,
-        })
-        .returning();
-      await db
-        .insert(aiMentorStudentLessonProgress)
-        .values({ studentLessonProgressId: progress.id, percentage: 92, passed: true });
       const repository = new LearningFactsRepository(db);
       const before = await repository.snapshot(user.id, course.id);
-      expect(before.facts.find((fact) => fact.kind === "ai-mentor")).toMatchObject({
-        score: 92,
+      expect(before.facts.find((fact) => fact.kind === "course")).toMatchObject({
         outcome: "passed",
         learningStateId: initial.id,
         occurredAt: completedAt,
@@ -343,6 +235,5 @@ describe("Competencies source snapshots (e2e)", () => {
         occurredAt: "2026-04-01T12:00:00.000Z",
       });
       expect(after.facts[0].id).not.toBe(before.facts.find((fact) => fact.kind === "course")!.id);
-      expect(after.facts.some((fact) => fact.kind === "ai-mentor")).toBe(false);
     }));
 });

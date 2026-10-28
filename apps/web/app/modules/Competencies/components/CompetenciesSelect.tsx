@@ -1,13 +1,21 @@
-import { useId } from "react";
+import { Check, ChevronDown, Plus } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { Label } from "~/components/ui/label";
+import { Button } from "~/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import { Label } from "~/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+
+type CompetenciesSelectOption = { value: string; label: string; description?: string };
 
 export function CompetenciesSelect({
   label,
@@ -15,43 +23,125 @@ export function CompetenciesSelect({
   onChange,
   options,
   emptyLabel,
+  placeholder,
   disabled,
   hideLabel = false,
+  className,
+  createAction,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: CompetenciesSelectOption[];
   emptyLabel?: string;
+  placeholder?: string;
   disabled?: boolean;
   hideLabel?: boolean;
+  className?: string;
+  createAction?: { label: string; onSelect: () => void };
 }) {
+  const { t } = useTranslation();
   const id = useId();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const selected = options.find((option) => option.value === value);
+  const triggerLabel = selected?.label ?? (value ? undefined : emptyLabel);
+  const choose = (next: string) => {
+    onChange(next);
+    setOpen(false);
+  };
+
   return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <Label htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
+    <div className={cn("flex min-w-0 flex-col gap-2", className)}>
+      <Label htmlFor={id} className={cn(hideLabel && "sr-only")}>
         {label}
       </Label>
-      <Select
-        value={value || "__none__"}
-        onValueChange={(value) => onChange(value === "__none__" ? "" : value)}
-        disabled={disabled}
-      >
-        <SelectTrigger
-          id={id}
-          className="gap-2 text-left [&>span]:min-w-0 [&>span]:flex-1 [&>svg]:shrink-0"
+      <Popover open={open} onOpenChange={setOpen} modal>
+        <PopoverTrigger asChild>
+          <Button
+            ref={(node) => {
+              triggerRef.current = node;
+            }}
+            id={id}
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-label={hideLabel ? label : undefined}
+            disabled={disabled}
+            onClick={(event) => event.stopPropagation()}
+            className={cn(
+              "h-[42px] w-full justify-between gap-2 border-neutral-300 bg-white px-3 font-normal text-neutral-950 hover:border-primary-500 hover:text-neutral-950",
+              !triggerLabel && "text-neutral-600",
+            )}
+          >
+            <span className="min-w-0 flex-1 truncate text-left">
+              {triggerLabel ?? placeholder ?? label}
+            </span>
+            <ChevronDown className="size-4 shrink-0 text-neutral-700" aria-hidden="true" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          onClick={(event) => event.stopPropagation()}
+          onPointerDownOutside={(event) => {
+            if (triggerRef.current?.contains(event.target as Node)) event.preventDefault();
+          }}
+          align="start"
+          className="w-[var(--radix-popover-trigger-width)] min-w-64 p-0"
         >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {emptyLabel && <SelectItem value="__none__">{emptyLabel}</SelectItem>}
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Command className="[&_[cmdk-input]]:outline-none">
+            <CommandInput
+              placeholder={t("competencies.select.search")}
+              className="outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+            />
+            <CommandList>
+              <CommandEmpty>{t("competencies.select.noResults")}</CommandEmpty>
+              <CommandGroup>
+                {emptyLabel && (
+                  <CommandItem value={`__none__ ${emptyLabel}`} onSelect={() => choose("")}>
+                    <span className="min-w-0 flex-1 truncate">{emptyLabel}</span>
+                    {!value && <Check className="size-4 text-primary-700" aria-hidden="true" />}
+                  </CommandItem>
+                )}
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={`${option.label} ${option.value}`}
+                    onSelect={() => choose(option.value)}
+                  >
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate">{option.label}</span>
+                      {option.description && (
+                        <span className="details truncate text-neutral-700">
+                          {option.description}
+                        </span>
+                      )}
+                    </span>
+                    {option.value === value && (
+                      <Check className="size-4 text-primary-700" aria-hidden="true" />
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              {createAction && (
+                <CommandGroup forceMount className="shrink-0 border-t border-neutral-200">
+                  <CommandItem
+                    forceMount
+                    onSelect={() => {
+                      setOpen(false);
+                      requestAnimationFrame(createAction.onSelect);
+                    }}
+                    className="text-primary-700"
+                  >
+                    <Plus className="size-4" aria-hidden="true" />
+                    {createAction.label}
+                  </CommandItem>
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

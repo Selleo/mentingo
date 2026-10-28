@@ -8342,6 +8342,80 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Ištrinti kompetenciją",
+    "deleteCompetencyConfirmation": "Ištrinti „{{name}}“? Kompetencija bus visam laikui pašalinta iš visų pareigų profilių kartu su jos patvirtinimų istorija ir pridėtais dokumentais. Šio veiksmo negalima atšaukti.",
+    "notifications": {
+      "categoryCreated": "Kategorija sukurta.",
+      "categoryUpdated": "Kategorija atnaujinta.",
+      "categoryDeleted": "Kategorija ištrinta.",
+      "competencyCreated": "Kompetencija sukurta.",
+      "competencyUpdated": "Kompetencija atnaujinta.",
+      "competencyDeleted": "Kompetencija ištrinta.",
+      "profileCreated": "Pareigų profilis sukurtas.",
+      "profileUpdated": "Pareigų profilis atnaujintas.",
+      "profileDeleted": "Pareigų profilis ištrintas.",
+      "profileAssigned": "Pareigų profilis priskirtas.",
+      "profileRemoved": "Pareigų profilio priskyrimas pašalintas.",
+      "documentSubmitted": "Dokumentas pateiktas peržiūrai.",
+      "observationConfirmed": "Stebėjimas patvirtintas.",
+      "qualificationsRecognized": "Ankstesnės kvalifikacijos pripažintos.",
+      "submissionApproved": "Pateikta informacija patvirtinta.",
+      "submissionRejected": "Pateikta informacija atmesta.",
+      "confirmationRevoked": "Patvirtinimas atšauktas.",
+      "manuallyConfirmed": "Reikalavimas patvirtintas rankiniu būdu.",
+      "evidenceEvaluationRestored": "Įrodymais pagrįstas patvirtinimas atkurtas.",
+      "expiryDisabled": "Priminimai apie galiojimo pabaigą išjungti.",
+      "expiryUpdated": "Priminimai apie galiojimo pabaigą atnaujinti.",
+      "categorySaveFailed": "Nepavyko išsaugoti kategorijos. Bandykite dar kartą.",
+      "categoryDeleteFailed": "Nepavyko ištrinti kategorijos. Bandykite dar kartą.",
+      "competencySaveFailed": "Nepavyko išsaugoti kompetencijos. Bandykite dar kartą.",
+      "competencyDeleteFailed": "Nepavyko ištrinti kompetencijos. Bandykite dar kartą.",
+      "profileSaveFailed": "Nepavyko išsaugoti pareigų profilio. Bandykite dar kartą.",
+      "profileDeleteFailed": "Nepavyko ištrinti pareigų profilio. Bandykite dar kartą.",
+      "profileAssignmentFailed": "Nepavyko pakeisti pareigų profilio priskyrimo. Bandykite dar kartą.",
+      "evidenceSubmitFailed": "Nepavyko pateikti patvirtinimo. Bandykite dar kartą.",
+      "reviewFailed": "Nepavyko išsaugoti peržiūros sprendimo. Bandykite dar kartą.",
+      "revocationFailed": "Nepavyko atšaukti patvirtinimo. Bandykite dar kartą.",
+      "adjustmentFailed": "Nepavyko pakeisti reikalavimo patvirtinimo. Bandykite dar kartą.",
+      "settingsFailed": "Nepavyko atnaujinti priminimų apie galiojimo pabaigą. Bandykite dar kartą.",
+      "attachmentUploadFailed": "Nepavyko įkelti dokumento. Bandykite dar kartą.",
+      "attachmentDownloadFailed": "Nepavyko atsisiųsti dokumento. Bandykite dar kartą."
+    },
+    "detailGuide": {
+      "automaticCourse": "Kurso užbaigimas",
+      "automaticDocument": "Dokumento patvirtinimas",
+      "automaticObservation": "Stebėjimo patvirtinimas",
+      "noLevel": "Dar nepatvirtintas nė vienas lygis",
+      "nextLevel": "Kitas lygis: {{level}}",
+      "allConfirmed": "Visi lygiai patvirtinti",
+      "levelHelp": "Norėdami patvirtinti lygį, įvykdykite jo ir visų ankstesnių lygių reikalavimus.",
+      "levels": "Lygiai ir jų patvirtinimas",
+      "requirementsProgress": "Patvirtinta: {{completed}}/{{total}}",
+      "confirmed": "Patvirtinta",
+      "toConfirm": "Dar nepatvirtinta",
+      "courseHelp": "Baikite susietą kursą, kad patvirtintumėte šį reikalavimą.",
+      "documentHelp": "Pateikite dokumentą paskirtam tikrintojui peržiūrėti.",
+      "observationHelp": "Paskirtas tikrintojas patvirtina šį įgūdį, pastebėjęs jį darbe.",
+      "noVerifier": "Prieš patvirtinant šį reikalavimą, administratorius turi paskirti tikrintoją skiltyje Nustatymai > Kompetencijos.",
+      "adminAction": "Keisti patvirtinimą",
+      "history": "Patvirtinimų istorija ({{count}})",
+      "emptyHistory": "Dar nėra patvirtinimų ar pateiktų dokumentų.",
+      "confirmation": {
+        "course": "Kurso užbaigimas",
+        "document": "Dokumento peržiūra",
+        "observation": "Tikrintojo patvirtinimas"
+      },
+      "useEvidence": "Pagal rezultatus",
+      "useEvidenceHelp": "Naudoti kursų rezultatus ir patvirtintus vertinimus.",
+      "confirmManually": "Patvirtinti rankiniu būdu",
+      "confirmManuallyHelp": "Laikyti šį reikalavimą įvykdytu be papildomų įrodymų.",
+      "reason": "Pakeitimo priežastis",
+      "reasonPlaceholder": "Kodėl reikalingas šis pakeitimas?",
+      "saveChange": "Išsaugoti pakeitimą"
+    },
+    "searchCatalog": "Ieškoti kompetencijų…",
+    "searchProfiles": "Ieškoti pareigybių profilių…",
+    "noSearchResults": "Rezultatų nerasta. Pabandykite kitą paieškos frazę.",
     "documents": "Dokumentai",
     "requiredDocuments": "Pateiktini dokumentai",
     "noRequiredDocuments": "Pagal dabartinius pareigybės reikalavimus dokumentų pateikti nereikia.",
@@ -8546,7 +8620,10 @@
       "people": "Peržiūrėkite darbuotojus ir jų patvirtintas kompetencijas.",
       "catalog": "Bendras kompetencijų, lygių ir patvirtinimo būdų katalogas.",
       "profiles": "Nustatykite, ko darbuotojui reikia saugiai ir savarankiškai atlikti pareigas.",
-      "settings": "Nustatykite galiojimo pabaigos įspėjimus."
+      "settings": "Nustatykite galiojimo pabaigos įspėjimus.",
+      "overview": "Peržiūrėkite, kas atitinka savo pareigybės profilio reikalavimus ir kur reikia veiksmų.",
+      "setup": "Apibrėžkite kompetencijas, sujunkite jas į pareigybių profilius ir sukonfigūruokite galiojimo pabaigos priminimus.",
+      "ownWithoutProfile": "Stebėkite savo pareigoms reikalingas kompetencijas ir pateikite jas patvirtinančius dokumentus."
     },
     "setup": "Kompetencijų nustatymai",
     "levelComparison": "Jūsų / reikalaujamas",
@@ -8583,7 +8660,18 @@
       "count_one": "{{count}} kompetencija",
       "count_other": "{{count}} kompetencijų",
       "count_few": "{{count}} kompetencijos",
-      "count_many": "{{count}} kompetencijos"
+      "count_many": "{{count}} kompetencijos",
+      "noProfileTitle": "Pareigybės profilis dar nepriskirtas",
+      "noProfileSelf": "Kai administratorius priskirs jums pareigybės profilį, matysite reikalingas kompetencijas ir tolesnius veiksmus.",
+      "noProfileOther": "Priskirkite pareigybės profilį skirtuke Apžvalga, kad matytumėte, kokių kompetencijų reikia šiam asmeniui.",
+      "requirementsTitle": "Reikalingos kompetencijos",
+      "filters": {
+        "all": "Visos",
+        "missing": "Nepatvirtintos",
+        "expiring": "Netrukus baigsis",
+        "met": "Įvykdytos"
+      },
+      "noRequirementsInFilter": "Nėra kompetencijų su šia būsena."
     },
     "overrideCondition": "Pakeisti sąlygos įvertį",
     "overrideStatus": "Įvertis",
@@ -8601,6 +8689,274 @@
       "missing": "Kompetencijos spraga",
       "expiring": "Patvirtinimas baigia galioti"
     },
-    "nextActionOther": "Kitas žingsnis"
+    "nextActionOther": "Kitas žingsnis",
+    "backTo": "Grįžti į: {{tab}}",
+    "tabs": {
+      "overview": "Apžvalga",
+      "team": "Mano komanda",
+      "approvals": "Tvirtinimai",
+      "setup": "Nustatymai"
+    },
+    "readiness": {
+      "ready": "Atitinka reikalavimus",
+      "expiring": "Netrukus baigsis",
+      "missing": "Trūkstamos kompetencijos",
+      "noProfile": "Nėra pareigybės profilio",
+      "missingCount_one": "Trūksta {{count}}",
+      "missingCount_few": "Trūksta {{count}}",
+      "missingCount_many": "Trūksta {{count}}",
+      "missingCount_other": "Trūksta {{count}}",
+      "gaps": "Trūkstamos kompetencijos"
+    },
+    "overview": {
+      "ofPeople_one": "iš {{count}} asmens",
+      "ofPeople_few": "iš {{count}} asmenų",
+      "ofPeople_many": "iš {{count}} asmens",
+      "ofPeople_other": "iš {{count}} asmenų",
+      "missingNote": "Bent vienas reikalavimas nepatvirtintas",
+      "expiringOff": "Galiojimo pabaigos priminimai išjungti",
+      "expiringNote_one": "Patvirtinimas baigsis per {{count}} dieną",
+      "expiringNote_few": "Patvirtinimas baigsis per {{count}} dienas",
+      "expiringNote_many": "Patvirtinimas baigsis per {{count}} dienos",
+      "expiringNote_other": "Patvirtinimas baigsis per {{count}} dienų",
+      "noProfileNote": "Priskirkite pareigybės profilį, kad stebėtumėte pasirengimą",
+      "peopleTitle": "Žmonės",
+      "peopleDescription": "Priskirkite pareigybių profilius ir patikrinkite, kas turi visas reikiamas kompetencijas.",
+      "teamDescription": "Patikrinkite, kas jūsų komandoje turi visas reikiamas kompetencijas.",
+      "viewMode": "Rodinys",
+      "views": {
+        "list": "Sąrašas",
+        "matrix": "Matrica"
+      },
+      "allProfiles": "Visi pareigybių profiliai",
+      "clearFilters": "Išvalyti filtrus",
+      "readiness": "Pasirengimas",
+      "noMatches": "Pasirinktus filtrus atitinkančių žmonių nėra.",
+      "noMatrixPeople": "Šis pareigybės profilis dar niekam nepriskirtas.",
+      "allPeople": "Visi"
+    },
+    "gettingStarted": {
+      "title": "Nustatykite kompetencijų stebėjimą",
+      "description": "Atlikite šiuos veiksmus ir matysite, kurie darbuotojai turi jų pareigoms reikalingas kompetencijas.",
+      "progress": "Atlikta {{completed}} iš {{total}}",
+      "done": "Atlikta",
+      "steps": {
+        "categories": {
+          "title": "Sukurkite kategoriją",
+          "description": "Sugrupuokite susijusias kompetencijas, kad katalogas būtų tvarkingas.",
+          "action": "Pridėti kategoriją"
+        },
+        "competencies": {
+          "title": "Sukurkite kompetencijas",
+          "description": "Aprašykite įgūdį, jo lygius ir tai, kaip patvirtinamas kiekvienas lygis: kursas, dokumentas ar stebėjimas.",
+          "action": "Pridėti kompetenciją"
+        },
+        "profiles": {
+          "title": "Sukurkite pareigybės profilį",
+          "description": "Pasirinkite kompetencijas ir lygius, kurių reikalauja pareigybė.",
+          "action": "Sukurti pareigybės profilį"
+        },
+        "assignments": {
+          "title": "Priskirkite žmones",
+          "description": "Priskirkite kiekvienam darbuotojui pareigybės profilį, kad pradėtumėte stebėti jo pasirengimą.",
+          "action": "Priskirti pareigybių profilius"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Kompetencijos",
+      "competenciesDescription": "Įgūdžiai su lygiais. Kiekvienas lygis nurodo, kas jį patvirtina: baigtas kursas, patvirtintas dokumentas ar stebėjimas.",
+      "profilesTitle": "Pareigybių profiliai",
+      "profilesDescription": "Sujunkite pareigybei reikalingas kompetencijas ir lygius, tada priskirkite profilį žmonėms skirtuke Apžvalga.",
+      "settingsTitle": "Galiojimo pabaigos priminimai",
+      "settingsDescription": "Pasirinkite, kaip anksti žymėti baigiančius galioti patvirtinimus.",
+      "emptyCompetenciesTitle": "Kompetencijų dar nėra",
+      "emptyCompetencies": "Pradėkite pridėdami įgūdžius, kuriuos stebi jūsų organizacija. Vėliau sugrupuosite juos į pareigybių profilius.",
+      "emptyProfilesTitle": "Pareigybių profilių dar nėra",
+      "emptyProfiles": "Sukurkite pareigybės profilį ir nurodykite, kokių kompetencijų reikalauja pareigybė.",
+      "emptyProfilesNeedsCompetencies": "Prieš kurdami pareigybės profilį pridėkite bent vieną kompetenciją su lygiu.",
+      "requiredCompetenciesCount": "Reikalingos kompetencijos",
+      "assignedPeople": "Priskirti žmonės",
+      "expiryOff": "Išj.",
+      "expiryDays_one": "{{count}} diena",
+      "expiryDays_few": "{{count}} dienos",
+      "expiryDays_many": "{{count}} dienos",
+      "expiryDays_other": "{{count}} dienų",
+      "progressTitle": "Nustatymo eiga",
+      "competenciesNav_one": "{{count}} paruošta naudoti",
+      "competenciesNav_few": "{{count}} paruoštos naudoti",
+      "competenciesNav_many": "{{count}} paruoštos naudoti",
+      "competenciesNav_other": "{{count}} paruoštų naudoti",
+      "profilesNav_one": "{{count}} priskirtas asmuo",
+      "profilesNav_few": "{{count}} priskirti asmenys",
+      "profilesNav_many": "{{count}} priskirto asmens",
+      "profilesNav_other": "{{count}} priskirtų asmenų",
+      "expiryNav_one": "Įspėti likus {{count}} dienai",
+      "expiryNav_few": "Įspėti likus {{count}} dienoms",
+      "expiryNav_many": "Įspėti likus {{count}} dienos",
+      "expiryNav_other": "Įspėti likus {{count}} dienų",
+      "expiryNavOff": "Nesukonfigūruota"
+    },
+    "compareWithAssigned": "Palyginti su: priskirtu profiliu",
+    "select": {
+      "search": "Ieškoti…",
+      "noResults": "Nieko nerasta."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} dokumentas, sugrupuotas pagal kompetencijas.",
+      "summary_few": "{{count}} dokumentai, sugrupuoti pagal kompetencijas.",
+      "summary_many": "{{count}} dokumento, sugrupuota pagal kompetencijas.",
+      "summary_other": "{{count}} dokumentų, sugrupuotų pagal kompetencijas.",
+      "toSubmit_one": "{{count}} pateikti",
+      "toSubmit_few": "{{count}} pateikti",
+      "toSubmit_many": "{{count}} pateikti",
+      "toSubmit_other": "{{count}} pateikti",
+      "pending_one": "{{count}} laukia",
+      "pending_few": "{{count}} laukia",
+      "pending_many": "{{count}} laukia",
+      "pending_other": "{{count}} laukia",
+      "notSubmitted": "Nepateikta"
+    },
+    "profileEditor": {
+      "addCompetency": "Pridėti kompetenciją…",
+      "requirementsHelp": "Pridėkite kiekvieną pareigybei reikalingą kompetenciją ir pasirinkite reikiamą lygį.",
+      "noRequirements": "Kompetencijų dar nepridėta. Profilį sukursite naudodami „Pridėti kompetenciją“."
+    },
+    "editor": {
+      "levelsHelp": "Lygiai remiasi vienas kitu. Pasirinkite lygį ir nurodykite, kas jį patvirtina.",
+      "untitledLevel": "Lygis be pavadinimo",
+      "conditionCount_one": "{{count}} sąlyga",
+      "conditionCount_few": "{{count}} sąlygos",
+      "conditionCount_many": "{{count}} sąlygos",
+      "conditionCount_other": "{{count}} sąlygų",
+      "noLevels": "Pridėkite pirmąjį lygį ir nurodykite, kaip patvirtinama ši kompetencija.",
+      "levelNameNumbered": "{{number}} lygio pavadinimas",
+      "moveUp": "Perkelti lygį aukštyn",
+      "moveDown": "Perkelti lygį žemyn",
+      "metWhen": "Šis lygis pasiektas, kai įvykdytos visos šios sąlygos",
+      "noConditions": "Sąlygų dar nėra. Pridėkite sąlygą, kuri patvirtina šį lygį.",
+      "reorder": "Vilkite, kad pakeistumėte tvarką"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Įspėti prieš baigiantis patvirtinimams",
+      "toggleHelp": "Netrukus besibaigiantys kompetencijų patvirtinimai darbuotojams, vadovams ir administratoriams pažymimi „Netrukus baigsis“.",
+      "warnBefore": "Įspėti likus tiek dienų",
+      "custom": "Kita reikšmė",
+      "invalid": "Įveskite sveiką dienų skaičių, 0 arba daugiau.",
+      "preview_one": "Patvirtinimai, kurie baigsis per {{count}} dieną, bus pažymėti „Netrukus baigsis“.",
+      "preview_few": "Patvirtinimai, kurie baigsis per {{count}} dienas, bus pažymėti „Netrukus baigsis“.",
+      "preview_many": "Patvirtinimai, kurie baigsis per {{count}} dienos, bus pažymėti „Netrukus baigsis“.",
+      "preview_other": "Patvirtinimai, kurie baigsis per {{count}} dienų, bus pažymėti „Netrukus baigsis“."
+    },
+    "catalogTable": {
+      "allCategories": "Visos kategorijos",
+      "confirmedBy": "Patvirtinama",
+      "levelCount_one": "{{count}} lygis",
+      "levelCount_few": "{{count}} lygiai",
+      "levelCount_many": "{{count}} lygio",
+      "levelCount_other": "{{count}} lygių"
+    },
+    "reviewCard": {
+      "confirms": "Patvirtina"
+    },
+    "reviewFilters": {
+      "pending": "Laukiantys",
+      "approved": "Patvirtinti",
+      "rejected": "Atmesti",
+      "revoked": "Atšaukti",
+      "empty": "Nėra įrodymų su šia būsena."
+    },
+    "planStatus": {
+      "needsPlan": "Reikia plano",
+      "active": "Vykdomas",
+      "overdue": "Vėluoja",
+      "completed": "Baigtas"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} žingsnių",
+      "progress": "Eiga",
+      "nextStep": "Kitas žingsnis",
+      "noDueDate": "Be termino",
+      "gapsCount_one": "{{count}} kompetencija be plano",
+      "gapsCount_few": "{{count}} kompetencijos be plano",
+      "gapsCount_many": "{{count}} kompetencijos be plano",
+      "gapsCount_other": "{{count}} kompetencijų be plano",
+      "uncoveredTitle_one": "{{count}} trūkstama kompetencija dar neturi žingsnio",
+      "uncoveredTitle_few": "{{count}} trūkstamos kompetencijos dar neturi žingsnių",
+      "uncoveredTitle_many": "{{count}} trūkstamos kompetencijos dar neturi žingsnių",
+      "uncoveredTitle_other": "{{count}} trūkstamų kompetencijų dar neturi žingsnių",
+      "planGaps": "Suplanuoti šias kompetencijas",
+      "emptyPlan": "Šiame plane dar nėra žingsnių.",
+      "emptyTitle": "Ugdymo planų dar nėra",
+      "empty": "Planai čia atsiras žmonėms, kurių pareigybės profilyje trūksta kompetencijų. Pradėkite priskirdami profilius skirtuke Apžvalga."
+    },
+    "planBuilder": {
+      "title": "Pridėti žingsnių į planą",
+      "description": "Pasirinkite asmenį ir pridėkite žingsnius, kurie užpildys jo kompetencijų spragas. Trūkstamos kompetencijos pasiūlomos automatiškai.",
+      "targetDate": "Tikslinė data (neprivaloma)",
+      "stepsTitle": "Žingsniai",
+      "stepsHelp": "Kiekvienas žingsnis skirtas vienam trūkstamam kompetencijos lygiui. Plano atsakingas asmuo ir tikslinė data taikomi visiems žingsniams.",
+      "choosePerson": "Pasirinkite asmenį, kad matytumėte jo trūkstamas kompetencijas.",
+      "noGaps": "Šis asmuo atitinka visus savo pareigybės profilio reikalavimus.",
+      "addStep": "Pridėti žingsnį",
+      "submit_one": "Sukurti planą su {{count}} žingsniu",
+      "submit_few": "Sukurti planą su {{count}} žingsniais",
+      "submit_many": "Sukurti planą su {{count}} žingsnio",
+      "submit_other": "Sukurti planą su {{count}} žingsnių",
+      "created_one": "Sukurtas planas su {{count}} žingsniu.",
+      "created_few": "Sukurtas planas su {{count}} žingsniais.",
+      "created_many": "Sukurtas planas su {{count}} žingsnio.",
+      "created_other": "Sukurtas planas su {{count}} žingsnių.",
+      "submitAdd_one": "Pridėti {{count}} žingsnį",
+      "submitAdd_few": "Pridėti {{count}} žingsnius",
+      "submitAdd_many": "Pridėti {{count}} žingsnio",
+      "submitAdd_other": "Pridėti {{count}} žingsnių"
+    },
+    "actionHistory": {
+      "created": "Sukurta",
+      "updated": "Atnaujinta",
+      "version": "versija {{number}}"
+    },
+    "stepEditor": {
+      "title": "Redaguoti žingsnį"
+    },
+    "profilesTable": {
+      "allCompetencies": "Visos kompetencijos"
+    },
+    "reviewTable": {
+      "submitted": "Pateikta"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} pateikti",
+      "toSubmit_few": "{{count}} pateikti",
+      "toSubmit_many": "{{count}} pateikti",
+      "toSubmit_other": "{{count}} pateikti",
+      "submitted_one": "{{count}} pateiktas",
+      "submitted_few": "{{count}} pateikti",
+      "submitted_many": "{{count}} pateikto",
+      "submitted_other": "{{count}} pateiktų",
+      "reviewerReason": "Vertintojo paaiškinimas"
+    },
+    "categories": {
+      "title": "Kategorijos",
+      "nav_one": "{{count}} paruošta naudoti",
+      "nav_few": "{{count}} paruoštos naudoti",
+      "nav_many": "{{count}} paruoštos naudoti",
+      "nav_other": "{{count}} paruoštų naudoti",
+      "description": "Grupuokite kompetencijas, kad jas būtų lengviau rasti ir filtruoti.",
+      "none": "Be kategorijos",
+      "emptyTitle": "Kategorijų dar nėra",
+      "empty": "Sukurkite kategorijas, pvz., Sauga ar Lyderystė, ir priskirkite jas kompetencijoms.",
+      "search": "Ieškoti kategorijų",
+      "new": "Nauja kategorija",
+      "edit": "Redaguoti kategoriją",
+      "competencyCount": "Kompetencijos",
+      "delete": "Ištrinti kategoriją",
+      "deleteConfirmation": "Ištrinti kategoriją „{{name}}“?",
+      "inUse_one": "„{{name}}“ naudoja {{count}} kompetencija. Prieš ištrindami perkelkite ją į kitą kategoriją.",
+      "inUse_few": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
+      "inUse_many": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
+      "inUse_other": "„{{name}}“ naudoja {{count}} kompetencijų. Prieš ištrindami perkelkite jas į kitą kategoriją."
+    }
   }
 }

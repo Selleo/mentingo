@@ -1,264 +1,160 @@
-import { ClipboardCheck, Download } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import { useDownloadCompetenciesAttachment } from "~/api/mutations/useDownloadCompetenciesAttachment";
-import { useExecuteCompetenciesCommand } from "~/api/mutations/useExecuteCompetenciesCommand";
-import { useCompetencyRecords } from "~/api/queries/useCompetencyRecords";
 import { Pagination } from "~/components/Pagination/Pagination";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
+import { Card } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
 
-import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
 import { CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
-import { canVerifyConditions } from "../competenciesVerifiers.utils";
+import { useCompetenciesReview } from "../hooks/useCompetenciesReview";
+import { REVIEW_FILTERS, REVIEW_PAGE_SIZE } from "../utils/competenciesReview.utils";
 
-import type { CompetenciesWorkspace, CompetencyEvidence } from "../competencies.types";
+import { CompetenciesReviewDecision } from "./CompetenciesReviewDecision";
+import { CompetenciesReviewDetails } from "./CompetenciesReviewDetails";
+import { CompetenciesReviewTable } from "./CompetenciesReviewTable";
 
-export function CompetenciesReview({
-  workspace,
-  userId,
-  onSubject,
-}: {
-  workspace: CompetenciesWorkspace;
-  userId: string;
-  onSubject: (id: string) => void;
-}) {
-  const { t, i18n } = useTranslation();
-  const { mutateAsync: execute, isPending } = useExecuteCompetenciesCommand();
-  const { mutateAsync: download } = useDownloadCompetenciesAttachment();
-  const [decision, setDecision] = useState<{
-    evidence: CompetencyEvidence;
-    status: "approved" | "rejected" | "revoked";
-    requestId: string;
-  } | null>(null);
-  const [reason, setReason] = useState("");
-  const [pendingPage, setPendingPage] = useState(1);
-  const [historyPage, setHistoryPage] = useState(1);
-  const pending = useCompetencyRecords({
-    kind: "review-pending",
-    page: String(pendingPage),
-    pageSize: "10",
-  });
-  const history = useCompetencyRecords({
-    kind: "review-history",
-    page: String(historyPage),
-    pageSize: "10",
-  });
-  useEffect(() => {
-    if (pending.data && !pending.isPlaceholderData)
-      setPendingPage((page) => Math.min(page, Math.max(1, Math.ceil(pending.data.total / 10))));
-    if (history.data && !history.isPlaceholderData)
-      setHistoryPage((page) => Math.min(page, Math.max(1, Math.ceil(history.data.total / 10))));
-  }, [pending.data, pending.isPlaceholderData, history.data, history.isPlaceholderData]);
-  const canRead = (item: CompetencyEvidence) =>
-    item.subjectId !== userId &&
-    canVerifyConditions(workspace, item.competencyId, item.conditionIds, userId) &&
-    workspace.catalog.some(
-      (definition) => definition.id === item.competencyId && !definition.archived,
-    ) &&
-    ["pending", "approved", "rejected", "revoked"].includes(item.status);
-  const groups = [
-    { id: "pending", query: pending, page: pendingPage, onPageChange: setPendingPage },
-    { id: "history", query: history, page: historyPage, onPageChange: setHistoryPage },
-  ];
+import type { CompetenciesReviewOptions } from "../hooks/competencies-hooks.types";
+
+export type CompetenciesReviewProps = CompetenciesReviewOptions;
+
+export function CompetenciesReview({ onSubject }: CompetenciesReviewProps) {
+  const {
+    submitReviewDecision,
+    t,
+    isPending,
+    download,
+    decision,
+    setDecision,
+    reason,
+    setReason,
+    filter,
+    setFilter,
+    setSelectedId,
+    page,
+    setPage,
+    query,
+    totals,
+    subjectName,
+    conditionsFor,
+    statusVariant,
+    decisionsFor,
+    openDecision,
+    rows,
+    selected,
+    tableHeadClassName,
+  } = useCompetenciesReview({ onSubject });
   return (
     <div className="flex flex-col gap-4">
-      {groups.map(({ id, query, page, onPageChange }) => (
-        <section
-          key={id}
-          className="flex flex-col gap-4"
-          aria-label={t(id === "pending" ? "competencies.review" : "competencies.evidenceHistory")}
+      <Card className="min-w-0 overflow-hidden">
+        <div
+          role="radiogroup"
+          aria-label={t("competencies.review")}
+          className="flex flex-wrap gap-2 p-4"
         >
-          {id === "history" && (
-            <h2 className="text-base font-semibold text-neutral-950">
-              {t("competencies.evidenceHistory")}
-            </h2>
-          )}
-          {(query.isPending || query.isPlaceholderData) && (
-            <CompetenciesLoading label={t("competencies.loading")} />
-          )}
-          {query.isError && (
-            <CompetenciesError
-              title={t("competencies.serviceError")}
-              actionLabel={t("competencies.retry")}
-              onRetry={() => void query.refetch()}
-            />
-          )}
-          {!query.isPending && !query.isError && !query.data?.total && id === "pending" && (
-            <p className="rounded-lg border border-neutral-200 bg-white p-10 text-center text-sm text-neutral-800">
-              {t("competencies.noEvidence")}
-            </p>
-          )}
-          {!query.isPlaceholderData &&
-            query.data?.evidence.filter(canRead).map((item) => (
-              <article
-                key={item.id}
-                data-testid={COMPETENCIES_HANDLES.EVIDENCE(item.id)}
-                className="group rounded-lg border border-neutral-200 bg-white"
+          {Object.values(REVIEW_FILTERS).map((item) => {
+            const isActive = filter === item;
+            const isPendingWithItems = item === REVIEW_FILTERS.PENDING && Boolean(totals?.[item]);
+            return (
+              <button
+                key={item}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                onClick={() => {
+                  setFilter(item);
+                  setPage(1);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600",
+                  isActive && "border-primary-700 bg-primary-700 text-white",
+                  !isActive &&
+                    "border-neutral-200 bg-white text-neutral-900 hover:border-primary-300",
+                )}
               >
-                <header className="flex flex-wrap items-center gap-3 p-5">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-800">
-                    <ClipboardCheck className="size-5" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-neutral-950">
-                      {workspace.people.find((person) => person.id === item.subjectId)?.name ??
-                        t("competencies.archivedAccount")}
-                    </h3>
-                    <p className="mt-1 text-sm text-neutral-800">
-                      {workspace.catalog.find((value) => value.id === item.competencyId)?.name} -{" "}
-                      {formatLocalizedDate(i18n.language, item.occurredAt)}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={item.status === "pending" ? "inProgress" : "notStarted"}
-                    className="w-fit whitespace-nowrap rounded-full text-xs"
-                  >
-                    {t(`competencies.status.${item.status}`)}
-                  </Badge>
-                </header>
-                <div className="flex flex-col gap-4 border-t border-neutral-200 p-5">
-                  <p className="whitespace-pre-wrap break-words rounded-lg bg-neutral-50 p-4 text-sm leading-relaxed">
-                    {item.note}
-                  </p>
-                  <ul className="list-inside list-disc space-y-1 text-sm text-neutral-800">
-                    {workspace.catalog
-                      .find((value) => value.id === item.competencyId)
-                      ?.levels.flatMap((level) => level.conditions)
-                      .filter((condition) => item.conditionIds.includes(condition.id))
-                      .map((condition) => <li key={condition.id}>{condition.description}</li>)}
-                  </ul>
-                  {item.validUntil && (
-                    <p className="text-sm">
-                      {t("competencies.expiresOn", {
-                        date: formatLocalizedDate(i18n.language, item.validUntil),
-                      })}
-                    </p>
+                {t(`competencies.reviewFilters.${item}`)}
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 text-xs font-semibold",
+                    isPendingWithItems && "bg-warning-400 text-neutral-950",
+                    !isPendingWithItems && isActive && "bg-white/20 text-white",
+                    !isPendingWithItems && !isActive && "bg-neutral-100 text-neutral-800",
                   )}
-                  <div className="flex flex-wrap gap-2">
-                    {workspace.people.some(
-                      (person) => person.id === item.subjectId && !person.archived,
-                    ) && (
-                      <Button variant="outline" size="sm" onClick={() => onSubject(item.subjectId)}>
-                        {t("competencies.viewDetails")}
-                      </Button>
-                    )}
-                    {item.attachmentId && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => void download(item.attachmentId!).catch(() => undefined)}
-                      >
-                        <Download className="mr-2 size-4" aria-hidden="true" />
-                        {t("competencies.downloadEvidence")}
-                      </Button>
-                    )}
-                    {workspace.people.some(
-                      (person) => person.id === item.subjectId && !person.archived,
-                    ) &&
-                      (item.status === "pending" || item.status === "approved") &&
-                      (item.status === "pending"
-                        ? (["approved", "rejected"] as const)
-                        : (["revoked"] as const)
-                      ).map((status) => (
-                        <Button
-                          key={status}
-                          variant={status === "approved" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setReason("");
-                            setDecision({ evidence: item, status, requestId: crypto.randomUUID() });
-                          }}
-                        >
-                          {t(`competencies.decision.${status}`)}
-                        </Button>
-                      ))}
-                  </div>
-                </div>
-              </article>
-            ))}
-          {query.data && query.data.total > 10 && (
+                >
+                  {totals?.[item] ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {(query.isPending || query.isPlaceholderData) && (
+          <div className="border-t border-neutral-200 p-4">
+            <CompetenciesLoading label={t("competencies.loading")} />
+          </div>
+        )}
+        {query.isError && (
+          <CompetenciesError
+            title={t("competencies.serviceError")}
+            actionLabel={t("competencies.retry")}
+            onRetry={() => void query.refetch()}
+          />
+        )}
+        {!query.isPending && !query.isError && !query.data?.pagination.totalItems && (
+          <p className="body-sm border-t border-neutral-200 px-6 py-10 text-center text-neutral-800">
+            {t(
+              filter === REVIEW_FILTERS.PENDING
+                ? "competencies.noEvidence"
+                : "competencies.reviewFilters.empty",
+            )}
+          </p>
+        )}
+        {rows.length > 0 && (
+          <div className="overflow-x-auto">
+            <CompetenciesReviewTable
+              filter={filter}
+              setSelectedId={setSelectedId}
+              subjectName={subjectName}
+              conditionsFor={conditionsFor}
+              statusVariant={statusVariant}
+              decisionsFor={decisionsFor}
+              openDecision={openDecision}
+              rows={rows}
+              tableHeadClassName={tableHeadClassName}
+            />
+          </div>
+        )}
+        {query.data && query.data.pagination.totalItems > REVIEW_PAGE_SIZE && (
+          <div className="border-t border-neutral-200 px-4 py-3">
             <Pagination
               currentPage={page}
-              totalItems={query.data.total}
-              itemsPerPage={10}
+              totalItems={query.data.pagination.totalItems}
+              itemsPerPage={REVIEW_PAGE_SIZE}
               canChangeItemsPerPage={false}
-              onPageChange={onPageChange}
+              onPageChange={setPage}
             />
-          )}
-        </section>
-      ))}
-      {decision &&
-        workspace.people.some(
-          (person) => person.id === decision.evidence.subjectId && !person.archived,
-        ) && (
-          <Dialog
-            open
-            onOpenChange={(open) => {
-              if (!open && !isPending) setDecision(null);
-            }}
-          >
-            <DialogContent aria-describedby={undefined}>
-              <DialogHeader>
-                <DialogTitle>{t(`competencies.decision.${decision.status}`)}</DialogTitle>
-              </DialogHeader>
-              <form
-                className="space-y-4"
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  try {
-                    await execute({
-                      operation: "review_evidence",
-                      id: decision.evidence.id,
-                      subjectId: decision.evidence.subjectId,
-                      version: decision.evidence.version,
-                      decision: decision.status,
-                      reason,
-                      requestId: decision.requestId,
-                    });
-                    setDecision(null);
-                  } catch {
-                    /* Keep the reason for review. */
-                  }
-                }}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="review-reason">{t("competencies.reasonLabel")}</Label>
-                  <Textarea
-                    id="review-reason"
-                    required
-                    value={reason}
-                    onChange={(event) => setReason(event.target.value)}
-                  />
-                </div>
-                <DialogFooter className="gap-2 border-t border-neutral-200 pt-4 sm:gap-0">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => setDecision(null)}
-                  >
-                    {t("competencies.cancel")}
-                  </Button>
-                  <Button type="submit" disabled={isPending || !reason.trim()}>
-                    {t(`competencies.decision.${decision.status}`)}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          </div>
         )}
+      </Card>
+      <CompetenciesReviewDetails
+        download={download}
+        decision={decision}
+        setSelectedId={setSelectedId}
+        subjectName={subjectName}
+        conditionsFor={conditionsFor}
+        statusVariant={statusVariant}
+        decisionsFor={decisionsFor}
+        openDecision={openDecision}
+        selected={selected}
+        onSubject={onSubject}
+      />
+      {decision && (
+        <CompetenciesReviewDecision
+          submitReviewDecision={submitReviewDecision}
+          isPending={isPending}
+          decision={decision}
+          setDecision={setDecision}
+          reason={reason}
+          setReason={setReason}
+          subjectName={subjectName}
+        />
+      )}
     </div>
   );
 }

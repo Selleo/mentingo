@@ -1,16 +1,13 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useExecuteCompetenciesCommand } from "~/api/mutations/useExecuteCompetenciesCommand";
-import { useUploadCompetenciesAttachment } from "~/api/mutations/useUploadCompetenciesAttachment";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -18,42 +15,40 @@ import { Textarea } from "~/components/ui/textarea";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
 
+import { useCompetencyEvidenceForm } from "../hooks/useCompetencyEvidenceForm";
+
 import { CompetenciesSelect } from "./CompetenciesSelect";
 
-import type { Competency, CompetencyCondition } from "../competencies.types";
+import type { CompetencyEvidenceFormOptions } from "../hooks/competencies-hooks.types";
+
+export type CompetencyEvidenceFormProps = CompetencyEvidenceFormOptions;
 
 export function CompetencyEvidenceForm({
   competency,
   subjectId,
   recognition = false,
   condition,
-  actionId,
   onClose,
-}: {
-  competency: Competency;
-  subjectId: string;
-  recognition?: boolean;
-  condition?: CompetencyCondition;
-  actionId?: string;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const { mutateAsync: execute, isPending: saving } = useExecuteCompetenciesCommand();
-  const { mutateAsync: upload, isPending: uploading } = useUploadCompetenciesAttachment();
-  const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(null);
-  const kind = condition?.kind === "observation" ? "observation" : "document";
-  const [targetLevel, setTargetLevel] = useState(competency.levels[0]?.id ?? "");
-  const [note, setNote] = useState("");
-  const [occurredAt, setOccurredAt] = useState("");
-  const [validUntil, setValidUntil] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [attachmentId, setAttachmentId] = useState<string>();
-  const [requestId] = useState(() => crypto.randomUUID());
-  const [defaultOccurrence] = useState(() => new Date().toISOString());
-  const pending = saving || uploading;
-  const covered = competency.levels
-    .slice(0, competency.levels.findIndex((level) => level.id === targetLevel) + 1)
-    .flatMap((level) => level.conditions.map((condition) => condition.id));
+}: CompetencyEvidenceFormProps) {
+  const {
+    submitCompetencyEvidence,
+    t,
+    dialogContainer,
+    setDialogContainer,
+    kind,
+    targetLevel,
+    setTargetLevel,
+    note,
+    setNote,
+    occurredAt,
+    setOccurredAt,
+    validUntil,
+    setValidUntil,
+    setFile,
+    setAttachmentId,
+    pending,
+    covered,
+  } = useCompetencyEvidenceForm({ competency, subjectId, recognition, condition, onClose });
   return (
     <TooltipProvider>
       <Dialog
@@ -70,40 +65,7 @@ export function CompetencyEvidenceForm({
               </DialogTitle>
               <DialogDescription>{competency.name}</DialogDescription>
             </DialogHeader>
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                if (!recognition && !condition) return;
-                try {
-                  let id = attachmentId;
-                  if (file && !id) {
-                    id = (await upload({ file, subjectId, competencyId: competency.id })).id;
-                    setAttachmentId(id);
-                  }
-                  await execute({
-                    operation: "submit_evidence",
-                    value: {
-                      requestId,
-                      subjectId,
-                      competencyId: competency.id,
-                      conditionIds: recognition ? covered : [condition!.id],
-                      kind: recognition ? "recognition" : kind,
-                      occurredAt: occurredAt
-                        ? new Date(occurredAt).toISOString()
-                        : defaultOccurrence,
-                      validUntil: validUntil ? new Date(validUntil).toISOString() : null,
-                      note,
-                      ...(id ? { attachmentId: id } : {}),
-                      ...(actionId ? { actionId } : {}),
-                    },
-                  });
-                  onClose();
-                } catch {
-                  /* Preserve input and the uploaded attachment for a safe retry. */
-                }
-              }}
-            >
+            <form className="flex flex-col gap-4" onSubmit={submitCompetencyEvidence}>
               <fieldset disabled={pending} className="flex flex-col gap-4">
                 {recognition ? (
                   <CompetenciesSelect

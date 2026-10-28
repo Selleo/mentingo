@@ -1,91 +1,141 @@
-import { useTranslation } from "react-i18next";
+import { Plus } from "lucide-react";
 
-import { useExecuteCompetenciesCommand } from "~/api/mutations/useExecuteCompetenciesCommand";
+import { Pagination } from "~/components/Pagination/Pagination";
+import { SearchInput } from "~/components/SearchInput/SearchInput";
 import { Button } from "~/components/ui/button";
 
 import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
+import { CompetenciesEmpty, CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
+import { useCompetenciesCatalog } from "../hooks/useCompetenciesCatalog";
+import { UNCATEGORIZED_FILTER } from "../utils/competenciesCatalog.utils";
 
-import { CompetencyEditor } from "./CompetencyEditor";
+import { CompetenciesCatalogTable } from "./CompetenciesCatalogTable";
+import { CompetenciesSelect } from "./CompetenciesSelect";
 
-import type { Competency, CompetenciesWorkspace } from "../competencies.types";
+import type { CompetenciesCatalogOptions } from "../hooks/competencies-hooks.types";
 
-export function CompetenciesCatalog({
-  workspace,
-  onEdit,
-}: {
-  workspace: CompetenciesWorkspace;
-  onEdit: (value: Competency) => void;
-}) {
-  const { t } = useTranslation();
+export type CompetenciesCatalogProps = CompetenciesCatalogOptions;
+
+export function CompetenciesCatalog({ onEdit, onCreate }: CompetenciesCatalogProps) {
+  const {
+    t,
+    search,
+    setSearch,
+    categoryId,
+    setCategoryId,
+    page,
+    setPage,
+    perPage,
+    setPerPage,
+    categories,
+    query,
+    competencies,
+    totalItems,
+    hasFilters,
+  } = useCompetenciesCatalog();
+  if (query.isPending)
+    return (
+      <div className="p-6">
+        <CompetenciesLoading label={t("competencies.loading")} />
+      </div>
+    );
+  if (query.isError)
+    return (
+      <div className="p-6">
+        <CompetenciesError
+          title={t("competencies.serviceError")}
+          actionLabel={t("competencies.retry")}
+          onRetry={() => void query.refetch()}
+        />
+      </div>
+    );
+  if (!totalItems && !hasFilters)
+    return (
+      <div className="p-6">
+        <CompetenciesEmpty
+          title={t("competencies.setupSection.emptyCompetenciesTitle")}
+          message={t("competencies.setupSection.emptyCompetencies")}
+          action={
+            <Button onClick={onCreate}>
+              <Plus className="mr-2 size-4" aria-hidden="true" />
+              {t("competencies.newCompetency")}
+            </Button>
+          }
+        />
+      </div>
+    );
+
   return (
-    <div aria-label={t("competencies.catalog")} className="grid gap-3 lg:grid-cols-2">
-      {workspace.catalog
-        .filter((value) => !value.archived)
-        .map((value) => (
-          <Button
-            key={value.id}
-            variant="outline"
-            aria-label={value.name}
-            data-testid={COMPETENCIES_HANDLES.CATALOG_CARD(value.id)}
-            className="h-full min-w-0 flex-col items-start justify-start gap-3 whitespace-normal p-5 text-left text-neutral-950 hover:bg-primary-50"
-            onClick={() => onEdit(value)}
-          >
-            <h3 className="font-semibold">{value.name}</h3>
-            <p className="text-sm font-normal text-neutral-800">
-              {[
-                ...new Set(
-                  value.levels.flatMap((level) =>
-                    level.conditions.map((condition) => condition.kind),
-                  ),
-                ),
-              ]
-                .map((kind) => t(`competencies.kind.${kind}`))
-                .join(" + ") || value.description}
-            </p>
-            <span className="mt-auto flex w-full flex-wrap justify-between gap-2 text-xs font-normal text-neutral-800">
-              <span>{value.category}</span>
-              <span>
-                {value.levels.length
-                  ? t("competencies.maximumLevel", { number: value.levels.length })
-                  : t("competencies.notConfigured")}
-              </span>
-            </span>
-          </Button>
-        ))}
+    <div aria-label={t("competencies.catalog")} className="min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-3 px-6 pb-6 pt-4 sm:flex-row sm:items-center">
+        <SearchInput
+          aria-label={t("competencies.searchCatalog")}
+          placeholder={t("competencies.searchCatalog")}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+          }}
+          wrapperClassName="w-full sm:max-w-xs"
+          className="max-w-none"
+        />
+        {categories.length > 0 && (
+          <CompetenciesSelect
+            label={t("competencies.category")}
+            hideLabel
+            className="w-full sm:w-56"
+            value={categoryId}
+            emptyLabel={t("competencies.catalogTable.allCategories")}
+            options={[
+              { value: UNCATEGORIZED_FILTER, label: t("competencies.categories.none") },
+              ...categories.map((category) => ({ value: category.id, label: category.name })),
+            ]}
+            onChange={(value) => {
+              setCategoryId(value);
+              setPage(1);
+            }}
+          />
+        )}
+        <Button
+          className="sm:ml-auto"
+          data-testid={COMPETENCIES_HANDLES.ADD_COMPETENCY}
+          onClick={onCreate}
+        >
+          <Plus className="mr-2 size-4" aria-hidden="true" />
+          {t("competencies.newCompetency")}
+        </Button>
+      </div>
+      {competencies.length === 0 ? (
+        <p className="body-sm border-t border-neutral-200 px-6 py-10 text-center text-neutral-800">
+          {t("competencies.noSearchResults")}
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <CompetenciesCatalogTable competencies={competencies} onEdit={onEdit} />
+        </div>
+      )}
+      {totalItems > 0 && (
+        <Pagination
+          className="border-t border-neutral-200 px-6 py-3"
+          totalItems={totalItems}
+          itemsPerPage={perPage}
+          currentPage={page}
+          onPageChange={setPage}
+          onItemsPerPageChange={(value) => {
+            setPerPage(value);
+            setPage(1);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-export function CompetenciesCatalogEditor({
-  workspace,
-  value,
-  onClose,
-}: {
-  workspace: CompetenciesWorkspace;
-  value?: Competency;
-  onClose: () => void;
-}) {
-  const { mutateAsync: execute, isPending } = useExecuteCompetenciesCommand();
-  return (
-    <CompetencyEditor
-      value={value}
-      workspace={workspace}
-      pending={isPending}
-      onClose={onClose}
-      onSave={(draft) =>
-        execute({
-          operation: "save_competency",
-          id: value?.id,
-          revision: value?.revision,
-          value: draft,
-        })
-      }
-      onArchive={
-        value && !value.archived
-          ? () =>
-              execute({ operation: "archive_competency", id: value.id, revision: value.revision })
-          : undefined
-      }
-    />
-  );
-}
+export { CompetenciesCatalogEditor } from "./CompetenciesCatalogEditor";
+
+export {
+  CATEGORY_OPTIONS_PAGE,
+  CONDITION_KIND_ICONS,
+  UNCATEGORIZED_FILTER,
+  tableHeadClassName,
+} from "../utils/competenciesCatalog.utils";

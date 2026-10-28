@@ -8369,6 +8369,80 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Delete competency",
+    "deleteCompetencyConfirmation": "Delete “{{name}}”? This permanently removes it from all job profiles and deletes its confirmation history and attached documents. This cannot be undone.",
+    "notifications": {
+      "categoryCreated": "Category created.",
+      "categoryUpdated": "Category updated.",
+      "categoryDeleted": "Category deleted.",
+      "competencyCreated": "Competency created.",
+      "competencyUpdated": "Competency updated.",
+      "competencyDeleted": "Competency deleted.",
+      "profileCreated": "Job profile created.",
+      "profileUpdated": "Job profile updated.",
+      "profileDeleted": "Job profile deleted.",
+      "profileAssigned": "Job profile assigned.",
+      "profileRemoved": "Job profile assignment removed.",
+      "documentSubmitted": "Document submitted for review.",
+      "observationConfirmed": "Observation confirmed.",
+      "qualificationsRecognized": "Prior qualifications recognized.",
+      "submissionApproved": "Submission approved.",
+      "submissionRejected": "Submission rejected.",
+      "confirmationRevoked": "Confirmation revoked.",
+      "manuallyConfirmed": "Requirement confirmed manually.",
+      "evidenceEvaluationRestored": "Evidence-based confirmation restored.",
+      "expiryDisabled": "Expiry reminders disabled.",
+      "expiryUpdated": "Expiry reminders updated.",
+      "categorySaveFailed": "Could not save the category. Try again.",
+      "categoryDeleteFailed": "Could not delete the category. Try again.",
+      "competencySaveFailed": "Could not save the competency. Try again.",
+      "competencyDeleteFailed": "Could not delete the competency. Try again.",
+      "profileSaveFailed": "Could not save the job profile. Try again.",
+      "profileDeleteFailed": "Could not delete the job profile. Try again.",
+      "profileAssignmentFailed": "Could not change the job profile assignment. Try again.",
+      "evidenceSubmitFailed": "Could not submit the confirmation. Try again.",
+      "reviewFailed": "Could not save the review decision. Try again.",
+      "revocationFailed": "Could not revoke the confirmation. Try again.",
+      "adjustmentFailed": "Could not adjust the requirement confirmation. Try again.",
+      "settingsFailed": "Could not update expiry reminders. Try again.",
+      "attachmentUploadFailed": "Could not upload the document. Try again.",
+      "attachmentDownloadFailed": "Could not download the document. Try again."
+    },
+    "detailGuide": {
+      "automaticCourse": "Course completion",
+      "automaticDocument": "Document approval",
+      "automaticObservation": "Observation confirmation",
+      "noLevel": "No level confirmed yet",
+      "nextLevel": "Next level: {{level}}",
+      "allConfirmed": "All levels are confirmed",
+      "levelHelp": "To confirm a level, complete its requirements and those of all earlier levels.",
+      "levels": "Levels and how to confirm them",
+      "requirementsProgress": "{{completed}}/{{total}} confirmed",
+      "confirmed": "Confirmed",
+      "toConfirm": "Not yet confirmed",
+      "courseHelp": "Complete the linked course to confirm this requirement.",
+      "documentHelp": "Submit a document for review by a designated verifier.",
+      "observationHelp": "A designated verifier confirms this skill after observing it at work.",
+      "noVerifier": "An administrator needs to assign a verifier in Setup > Competencies before this requirement can be confirmed.",
+      "adminAction": "Adjust confirmation",
+      "history": "Confirmation history ({{count}})",
+      "emptyHistory": "No confirmations or submitted documents yet.",
+      "confirmation": {
+        "course": "Course completion",
+        "document": "Document review",
+        "observation": "Confirmation by a verifier"
+      },
+      "useEvidence": "Follow evidence",
+      "useEvidenceHelp": "Use course results and approved reviews.",
+      "confirmManually": "Confirm manually",
+      "confirmManuallyHelp": "Count this requirement as met without additional evidence.",
+      "reason": "Reason for change",
+      "reasonPlaceholder": "Why is this adjustment needed?",
+      "saveChange": "Save change"
+    },
+    "searchCatalog": "Search competencies…",
+    "searchProfiles": "Search job profiles…",
+    "noSearchResults": "No matches found. Try a different search.",
     "documents": "Documents",
     "requiredDocuments": "Documents to submit",
     "noRequiredDocuments": "No documents to submit for your current job requirements.",
@@ -8573,7 +8647,10 @@
       "people": "Browse employees and their confirmed competencies.",
       "catalog": "A shared catalog of competencies, levels and validation methods.",
       "profiles": "Define what an employee needs to perform the role safely and independently.",
-      "settings": "Configure expiry warnings."
+      "settings": "Configure expiry warnings.",
+      "overview": "See who meets the requirements of their job profile and where action is needed.",
+      "setup": "Define competencies, combine them into job profiles and configure expiry reminders.",
+      "ownWithoutProfile": "Track the competencies your role requires and submit documents that confirm them."
     },
     "setup": "Competency Setup",
     "levelComparison": "Your / Required",
@@ -8608,7 +8685,18 @@
       "statusMet": "You meet the requirements for your current role. Keep track of expiring confirmations and your development plan.",
       "statusGaps": "Some requirements still need confirmation. Review the gaps and your development plan.",
       "count_one": "{{count}} competency",
-      "count_other": "{{count}} competencies"
+      "count_other": "{{count}} competencies",
+      "noProfileTitle": "No job profile assigned yet",
+      "noProfileSelf": "Once an administrator assigns you a job profile, you will see the competencies it requires and what to do next.",
+      "noProfileOther": "Assign a job profile on the Overview tab to see which competencies this person needs.",
+      "requirementsTitle": "Required competencies",
+      "filters": {
+        "all": "All",
+        "missing": "Not confirmed",
+        "expiring": "Expiring soon",
+        "met": "Met"
+      },
+      "noRequirementsInFilter": "No competencies match this status."
     },
     "overrideCondition": "Override condition",
     "overrideStatus": "Evaluation",
@@ -8626,6 +8714,230 @@
       "missing": "Competency gap",
       "expiring": "Confirmation expiring"
     },
-    "nextActionOther": "Next step"
+    "nextActionOther": "Next step",
+    "backTo": "Back to {{tab}}",
+    "tabs": {
+      "overview": "Overview",
+      "team": "My team",
+      "approvals": "Approvals",
+      "setup": "Setup"
+    },
+    "readiness": {
+      "ready": "Meets requirements",
+      "expiring": "Expiring soon",
+      "missing": "Missing competencies",
+      "noProfile": "No job profile",
+      "missingCount_one": "{{count}} missing",
+      "missingCount_other": "{{count}} missing",
+      "gaps": "Missing competencies"
+    },
+    "overview": {
+      "ofPeople_one": "of {{count}} person",
+      "ofPeople_other": "of {{count}} people",
+      "missingNote": "At least one requirement is not confirmed",
+      "expiringOff": "Expiry reminders are turned off",
+      "expiringNote_one": "A confirmation expires within {{count}} day",
+      "expiringNote_other": "A confirmation expires within {{count}} days",
+      "noProfileNote": "Assign a job profile to track readiness",
+      "peopleTitle": "People",
+      "peopleDescription": "Assign job profiles and check who has every competency they need.",
+      "teamDescription": "Check who in your team has every competency they need.",
+      "viewMode": "View",
+      "views": {
+        "list": "List",
+        "matrix": "Matrix"
+      },
+      "allProfiles": "All job profiles",
+      "clearFilters": "Clear filters",
+      "readiness": "Readiness",
+      "noMatches": "No people match the selected filters.",
+      "noMatrixPeople": "Nobody is assigned to this job profile yet.",
+      "allPeople": "All"
+    },
+    "gettingStarted": {
+      "title": "Set up competency tracking",
+      "description": "Follow these steps to see which employees have the competencies their role requires.",
+      "progress": "{{completed}} of {{total}} completed",
+      "done": "Completed",
+      "steps": {
+        "categories": {
+          "title": "Create a category",
+          "description": "Group related competencies to keep your catalog organized.",
+          "action": "Add category"
+        },
+        "competencies": {
+          "title": "Create competencies",
+          "description": "Describe a skill, its levels and how each level is confirmed: a course, a document or an observation.",
+          "action": "Add competency"
+        },
+        "profiles": {
+          "title": "Build a job profile",
+          "description": "Choose the competencies and levels a role requires.",
+          "action": "Create job profile"
+        },
+        "assignments": {
+          "title": "Assign people",
+          "description": "Assign a job profile to each employee to start tracking their readiness.",
+          "action": "Assign job profiles"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Competencies",
+      "competenciesDescription": "Skills with levels. Each level lists what confirms it: completing a course, an approved document or an observation.",
+      "profilesTitle": "Job profiles",
+      "profilesDescription": "Combine competencies and required levels for a role, then assign the profile to people on the Overview tab.",
+      "settingsTitle": "Expiry reminders",
+      "settingsDescription": "Choose how early confirmations that are about to expire are flagged.",
+      "emptyCompetenciesTitle": "No competencies yet",
+      "emptyCompetencies": "Start by adding the skills your organization tracks. You can then group them into job profiles.",
+      "emptyProfilesTitle": "No job profiles yet",
+      "emptyProfiles": "Create a job profile to define which competencies a role requires.",
+      "emptyProfilesNeedsCompetencies": "Add at least one competency with a level before creating a job profile.",
+      "requiredCompetenciesCount": "Required competencies",
+      "assignedPeople": "Assigned people",
+      "expiryOff": "Off",
+      "expiryDays_one": "{{count}} day",
+      "expiryDays_other": "{{count}} days",
+      "progressTitle": "Setup progress",
+      "competenciesNav_one": "{{count}} ready to use",
+      "competenciesNav_other": "{{count}} ready to use",
+      "profilesNav_one": "{{count}} person assigned",
+      "profilesNav_other": "{{count}} people assigned",
+      "expiryNav_one": "Warn {{count}} day before expiry",
+      "expiryNav_other": "Warn {{count}} days before expiry",
+      "expiryNavOff": "Not configured"
+    },
+    "compareWithAssigned": "Compare with: assigned profile",
+    "select": {
+      "search": "Search…",
+      "noResults": "No results found."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} document, grouped by competency.",
+      "summary_other": "{{count}} documents, grouped by competency.",
+      "toSubmit_one": "{{count}} to submit",
+      "toSubmit_other": "{{count}} to submit",
+      "pending_one": "{{count}} pending",
+      "pending_other": "{{count}} pending",
+      "notSubmitted": "Not submitted"
+    },
+    "profileEditor": {
+      "addCompetency": "Add competency…",
+      "requirementsHelp": "Add each competency the role needs and choose the level required.",
+      "noRequirements": "No competencies added yet. Use “Add competency” to build the profile."
+    },
+    "editor": {
+      "levelsHelp": "Levels build on each other. Select a level to define what confirms it.",
+      "untitledLevel": "Untitled level",
+      "conditionCount_one": "{{count}} condition",
+      "conditionCount_other": "{{count}} conditions",
+      "noLevels": "Add the first level to define how this competency is confirmed.",
+      "levelNameNumbered": "Level {{number}} name",
+      "moveUp": "Move level up",
+      "moveDown": "Move level down",
+      "metWhen": "This level is met when all of these conditions are met",
+      "noConditions": "No conditions yet. Add one to define what confirms this level.",
+      "reorder": "Drag to reorder"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Warn before confirmations expire",
+      "toggleHelp": "Competency confirmations that are about to expire are flagged as “Expiring soon” for employees, managers and administrators.",
+      "warnBefore": "Warn this many days before expiry",
+      "custom": "Custom",
+      "invalid": "Enter a whole number of days, 0 or more.",
+      "preview_one": "Confirmations expiring within {{count}} day will be marked “Expiring soon”.",
+      "preview_other": "Confirmations expiring within {{count}} days will be marked “Expiring soon”."
+    },
+    "catalogTable": {
+      "allCategories": "All categories",
+      "confirmedBy": "Confirmed by",
+      "levelCount_one": "{{count}} level",
+      "levelCount_other": "{{count}} levels"
+    },
+    "reviewCard": {
+      "confirms": "Confirms"
+    },
+    "reviewFilters": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "revoked": "Revoked",
+      "empty": "No evidence with this status."
+    },
+    "planStatus": {
+      "needsPlan": "Needs a plan",
+      "active": "In progress",
+      "overdue": "Overdue",
+      "completed": "Completed"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} steps",
+      "progress": "Progress",
+      "nextStep": "Next step",
+      "noDueDate": "No due date",
+      "gapsCount_one": "{{count}} competency without a plan",
+      "gapsCount_other": "{{count}} competencies without a plan",
+      "uncoveredTitle_one": "{{count}} missing competency has no step yet",
+      "uncoveredTitle_other": "{{count}} missing competencies have no step yet",
+      "planGaps": "Plan these competencies",
+      "emptyPlan": "No steps in this plan yet.",
+      "emptyTitle": "No development plans yet",
+      "empty": "Plans appear here for people whose job profile has missing competencies. Assign job profiles on the Overview tab to get started."
+    },
+    "planBuilder": {
+      "title": "Add steps to the plan",
+      "description": "Choose a person, then add the steps that will close their competency gaps. Missing competencies are suggested automatically.",
+      "targetDate": "Target date (optional)",
+      "stepsTitle": "Steps",
+      "stepsHelp": "Each step targets one missing competency level. The plan owner and target date apply to every step.",
+      "choosePerson": "Choose a person to see their missing competencies.",
+      "noGaps": "This person meets all requirements of their job profile.",
+      "addStep": "Add step",
+      "submit_one": "Create plan with {{count}} step",
+      "submit_other": "Create plan with {{count}} steps",
+      "created_one": "Plan created with {{count}} step.",
+      "created_other": "Plan created with {{count}} steps.",
+      "submitAdd_one": "Add {{count}} step",
+      "submitAdd_other": "Add {{count}} steps"
+    },
+    "actionHistory": {
+      "created": "Created",
+      "updated": "Updated",
+      "version": "v{{number}}"
+    },
+    "stepEditor": {
+      "title": "Edit step"
+    },
+    "profilesTable": {
+      "allCompetencies": "All competencies"
+    },
+    "reviewTable": {
+      "submitted": "Submitted"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} to submit",
+      "toSubmit_other": "{{count}} to submit",
+      "submitted_one": "{{count}} submitted",
+      "submitted_other": "{{count}} submitted",
+      "reviewerReason": "Reviewer's reason"
+    },
+    "categories": {
+      "title": "Categories",
+      "nav_one": "{{count}} ready to use",
+      "nav_other": "{{count}} ready to use",
+      "description": "Group competencies so they are easier to find and filter.",
+      "none": "No category",
+      "emptyTitle": "No categories yet",
+      "empty": "Create categories such as Safety or Leadership, then assign them to competencies.",
+      "search": "Search categories",
+      "new": "New category",
+      "edit": "Edit category",
+      "competencyCount": "Competencies",
+      "delete": "Delete category",
+      "deleteConfirmation": "Delete the category \"{{name}}\"?",
+      "inUse_one": "\"{{name}}\" is used by {{count}} competency. Move it to another category before deleting.",
+      "inUse_other": "\"{{name}}\" is used by {{count}} competencies. Move them to another category before deleting."
+    }
   }
 }

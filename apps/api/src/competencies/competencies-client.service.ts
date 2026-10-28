@@ -1,67 +1,61 @@
-import { CompetenciesApiError, createCompetenciesClient } from "@mentingo/competencies-sdk";
-import {
-  BadGatewayException,
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  PayloadTooLargeException,
-} from "@nestjs/common";
+import { createCompetenciesClient } from "@mentingo/competencies-sdk";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 
+import { COMPETENCIES_SECRETS } from "src/env/env.config";
 import { EnvService } from "src/env/services/env.service";
 import { isAllowedPluginOrigin } from "src/integration/utils/integration-plugin-origin.utils";
 import { dbAls } from "src/storage/db/db-als.store";
 
+import { translateCompetenciesClientError } from "./utils/competencies-client-error.utils";
+
+import type { CompetenciesClient, CompetenciesConnectionSettings } from "./competencies.types";
+
 @Injectable()
 export class CompetenciesClientService {
   constructor(private readonly envService: EnvService) {}
-  async isConfigured() {
+
+  async isConfigured(): Promise<boolean> {
     if (!dbAls.getStore()?.tenantId) return false;
-    const values = await Promise.all(
-      ["COMPETENCIES_API_KEY", "COMPETENCIES_BASE_URL"].map(async (name) => {
-        try {
-          return (await this.envService.getEnv(name)).value;
-        } catch (error) {
-          if (!(error instanceof NotFoundException)) throw error;
-          return undefined;
-        }
-      }),
-    );
-    return values.every((value) => Boolean(value?.trim()));
+    const { apiKey, baseURL } = await this.readConnectionSettings();
+    return Boolean(apiKey?.trim() && baseURL?.trim());
   }
-  async client() {
+
+  async createTenantClient(): Promise<CompetenciesClient> {
     const tenantId = dbAls.getStore()?.tenantId;
-    const [apiKey, baseURL] = await Promise.all(
-      ["COMPETENCIES_API_KEY", "COMPETENCIES_BASE_URL"].map(async (name) => {
-        try {
-          return (await this.envService.getEnv(name)).value;
-        } catch {
-          return undefined;
-        }
-      }),
-    );
-    if (!tenantId || !apiKey || !baseURL) throw new ForbiddenException("competencies.unavailable");
-    if (!(await isAllowedPluginOrigin(baseURL)))
+    if (!tenantId) throw new ForbiddenException("competencies.unavailable");
+
+    const { apiKey, baseURL } = await this.readConnectionSettings().catch(() => {
       throw new ForbiddenException("competencies.unavailable");
+    });
+
+    if (!apiKey || !baseURL || !(await isAllowedPluginOrigin(baseURL)))
+      throw new ForbiddenException("competencies.unavailable");
+
     return createCompetenciesClient({ tenantId, apiKey, baseURL });
   }
-  async run<T>(
-    operation: (client: ReturnType<typeof createCompetenciesClient>) => Promise<T>,
-  ): Promise<T> {
+
+  async requestWithClient<T>(request: (client: CompetenciesClient) => Promise<T>): Promise<T> {
     try {
-      return await operation(await this.client());
+      return await request(await this.createTenantClient());
     } catch (error) {
-      if (error instanceof ForbiddenException) throw error;
-      if (error instanceof CompetenciesApiError) {
-        if (error.status === 400) throw new BadRequestException("competencies.invalidRequest");
-        if (error.status === 413) throw new PayloadTooLargeException("competencies.invalidRequest");
-        if (error.status === 404) throw new NotFoundException("competencies.notFound");
-        if (error.status === 409) throw new ConflictException("competencies.conflict");
-        if (error.status === 401 || error.status === 403)
-          throw new ForbiddenException("competencies.unavailable");
-      }
-      throw new BadGatewayException("competencies.serviceError");
+      throw translateCompetenciesClientError(error);
+    }
+  }
+
+  private async readConnectionSettings(): Promise<CompetenciesConnectionSettings> {
+    const [apiKey, baseURL] = await Promise.all([
+      this.readOptionalSecret(COMPETENCIES_SECRETS.API_KEY),
+      this.readOptionalSecret(COMPETENCIES_SECRETS.BASE_URL),
+    ]);
+    return { apiKey, baseURL };
+  }
+
+  private async readOptionalSecret(name: string): Promise<string | undefined> {
+    try {
+      return (await this.envService.getEnv(name)).value;
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) throw error;
+      return undefined;
     }
   }
 }

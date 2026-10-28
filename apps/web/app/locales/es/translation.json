@@ -8279,6 +8279,77 @@
     }
   },
   "competencies": {
+    "deleteCompetency": "Eliminar competencia",
+    "deleteCompetencyConfirmation": "¿Eliminar «{{name}}»? Se eliminará permanentemente de todos los perfiles de puesto junto con su historial de confirmación y los documentos adjuntos. Esta acción no se puede deshacer.",
+    "notifications": {
+      "categoryCreated": "Categoría creada.",
+      "categoryUpdated": "Categoría actualizada.",
+      "categoryDeleted": "Categoría eliminada.",
+      "competencyCreated": "Competencia creada.",
+      "competencyUpdated": "Competencia actualizada.",
+      "competencyDeleted": "Competencia eliminada.",
+      "profileCreated": "Perfil de puesto creado.",
+      "profileUpdated": "Perfil de puesto actualizado.",
+      "profileDeleted": "Perfil de puesto eliminado.",
+      "profileAssigned": "Perfil de puesto asignado.",
+      "profileRemoved": "Asignación del perfil de puesto eliminada.",
+      "documentSubmitted": "Documento enviado para revisión.",
+      "observationConfirmed": "Observación confirmada.",
+      "qualificationsRecognized": "Cualificaciones previas reconocidas.",
+      "submissionApproved": "Solicitud aprobada.",
+      "submissionRejected": "Solicitud rechazada.",
+      "confirmationRevoked": "Confirmación revocada.",
+      "manuallyConfirmed": "Requisito confirmado manualmente.",
+      "evidenceEvaluationRestored": "Confirmación basada en evidencias restablecida.",
+      "expiryDisabled": "Recordatorios de caducidad desactivados.",
+      "expiryUpdated": "Recordatorios de caducidad actualizados.",
+      "categorySaveFailed": "No se pudo guardar la categoría. Inténtalo de nuevo.",
+      "categoryDeleteFailed": "No se pudo eliminar la categoría. Inténtalo de nuevo.",
+      "competencySaveFailed": "No se pudo guardar la competencia. Inténtalo de nuevo.",
+      "competencyDeleteFailed": "No se pudo eliminar la competencia. Inténtalo de nuevo.",
+      "profileSaveFailed": "No se pudo guardar el perfil de puesto. Inténtalo de nuevo.",
+      "profileDeleteFailed": "No se pudo eliminar el perfil de puesto. Inténtalo de nuevo.",
+      "profileAssignmentFailed": "No se pudo cambiar la asignación del perfil de puesto. Inténtalo de nuevo.",
+      "evidenceSubmitFailed": "No se pudo enviar la confirmación. Inténtalo de nuevo.",
+      "reviewFailed": "No se pudo guardar la decisión de revisión. Inténtalo de nuevo.",
+      "revocationFailed": "No se pudo revocar la confirmación. Inténtalo de nuevo.",
+      "adjustmentFailed": "No se pudo ajustar la confirmación del requisito. Inténtalo de nuevo.",
+      "settingsFailed": "No se pudieron actualizar los recordatorios de caducidad. Inténtalo de nuevo.",
+      "attachmentUploadFailed": "No se pudo subir el documento. Inténtalo de nuevo.",
+      "attachmentDownloadFailed": "No se pudo descargar el documento. Inténtalo de nuevo."
+    },
+    "detailGuide": {
+      "automaticCourse": "Finalización del curso",
+      "automaticDocument": "Aprobación del documento",
+      "automaticObservation": "Confirmación de la observación",
+      "noLevel": "Todavía no se ha confirmado ningún nivel",
+      "nextLevel": "Siguiente nivel: {{level}}",
+      "allConfirmed": "Todos los niveles están confirmados",
+      "levelHelp": "Para confirmar un nivel, cumple sus requisitos y los de todos los niveles anteriores.",
+      "levels": "Niveles y cómo confirmarlos",
+      "requirementsProgress": "{{completed}}/{{total}} confirmados",
+      "confirmed": "Confirmado",
+      "toConfirm": "Todavía sin confirmar",
+      "courseHelp": "Completa el curso vinculado para confirmar este requisito.",
+      "documentHelp": "Envía un documento para que lo revise una persona verificadora designada.",
+      "observationHelp": "Una persona verificadora designada confirma esta habilidad tras observarla en el trabajo.",
+      "noVerifier": "Un administrador debe asignar una persona verificadora en Configuración > Competencias antes de poder confirmar este requisito.",
+      "adminAction": "Cambiar confirmación",
+      "history": "Historial de confirmaciones ({{count}})",
+      "emptyHistory": "Todavía no hay confirmaciones ni documentos enviados.",
+      "confirmation": {
+        "course": "Finalización del curso",
+        "document": "Revisión del documento",
+        "observation": "Confirmación por una persona verificadora"
+      },
+      "useEvidence": "Según los resultados",
+      "useEvidenceHelp": "Usar los resultados de cursos y las revisiones aprobadas.",
+      "confirmManually": "Confirmar manualmente",
+      "confirmManuallyHelp": "Considerar este requisito cumplido sin pruebas adicionales.",
+      "reason": "Motivo del cambio",
+      "reasonPlaceholder": "¿Por qué es necesario este cambio?",
+      "saveChange": "Guardar cambio"
+    },
     "documents": "Documentos",
     "requiredDocuments": "Documentos por presentar",
     "noRequiredDocuments": "No hay documentos por presentar para los requisitos actuales de su puesto.",
@@ -8483,7 +8554,10 @@
       "people": "Consulta a los empleados y sus competencias confirmadas.",
       "catalog": "Un catálogo compartido de competencias, niveles y métodos de validación.",
       "profiles": "Define qué necesita cada persona para desempeñar su función con seguridad y autonomía.",
-      "settings": "Configura los avisos de vencimiento."
+      "settings": "Configura los avisos de vencimiento.",
+      "overview": "Consulta quién cumple los requisitos de su perfil de puesto y dónde hace falta actuar.",
+      "setup": "Define competencias, agrúpalas en perfiles de puesto y configura los recordatorios de caducidad.",
+      "ownWithoutProfile": "Sigue las competencias que exige tu puesto y envía los documentos que las confirman."
     },
     "setup": "Configuración de competencias",
     "levelComparison": "Tu nivel / requerido",
@@ -8518,7 +8592,18 @@
       "statusMet": "Cumples los requisitos de tu puesto actual. Revisa las confirmaciones próximas a caducar y tu plan de desarrollo.",
       "statusGaps": "Algunos requisitos todavía necesitan confirmación. Revisa las brechas y tu plan de desarrollo.",
       "count_one": "{{count}} competencia",
-      "count_other": "{{count}} competencias"
+      "count_other": "{{count}} competencias",
+      "noProfileTitle": "Aún no tienes un perfil de puesto asignado",
+      "noProfileSelf": "Cuando un administrador te asigne un perfil de puesto, verás las competencias requeridas y los siguientes pasos.",
+      "noProfileOther": "Asigna un perfil de puesto en la pestaña Resumen para ver qué competencias necesita esta persona.",
+      "requirementsTitle": "Competencias requeridas",
+      "filters": {
+        "all": "Todas",
+        "missing": "Sin confirmar",
+        "expiring": "Caducan pronto",
+        "met": "Cumplidas"
+      },
+      "noRequirementsInFilter": "Ninguna competencia tiene este estado."
     },
     "overrideCondition": "Sobrescribir condición",
     "overrideStatus": "Evaluación",
@@ -8536,6 +8621,231 @@
       "missing": "Brecha de competencia",
       "expiring": "Confirmación próxima a vencer"
     },
-    "nextActionOther": "Siguiente paso"
+    "nextActionOther": "Siguiente paso",
+    "backTo": "Volver a {{tab}}",
+    "tabs": {
+      "overview": "Resumen",
+      "team": "Mi equipo",
+      "approvals": "Aprobaciones",
+      "setup": "Configuración"
+    },
+    "readiness": {
+      "ready": "Cumple los requisitos",
+      "expiring": "Caduca pronto",
+      "missing": "Competencias pendientes",
+      "noProfile": "Sin perfil de puesto",
+      "missingCount_one": "Falta {{count}}",
+      "missingCount_other": "Faltan {{count}}",
+      "gaps": "Competencias pendientes"
+    },
+    "overview": {
+      "ofPeople_one": "de {{count}} persona",
+      "ofPeople_other": "de {{count}} personas",
+      "missingNote": "Al menos un requisito no está confirmado",
+      "expiringOff": "Los recordatorios de caducidad están desactivados",
+      "expiringNote_one": "Una confirmación caduca en {{count}} día",
+      "expiringNote_other": "Una confirmación caduca en {{count}} días",
+      "noProfileNote": "Asigna un perfil de puesto para seguir la preparación",
+      "peopleTitle": "Personas",
+      "peopleDescription": "Asigna perfiles de puesto y comprueba quién tiene todas las competencias necesarias.",
+      "teamDescription": "Comprueba quién de tu equipo tiene todas las competencias necesarias.",
+      "viewMode": "Vista",
+      "views": {
+        "list": "Lista",
+        "matrix": "Matriz"
+      },
+      "allProfiles": "Todos los perfiles de puesto",
+      "clearFilters": "Borrar filtros",
+      "readiness": "Preparación",
+      "noMatches": "Ninguna persona coincide con los filtros seleccionados.",
+      "noMatrixPeople": "Todavía nadie tiene asignado este perfil de puesto.",
+      "allPeople": "Todas"
+    },
+    "gettingStarted": {
+      "title": "Configura el seguimiento de competencias",
+      "description": "Sigue estos pasos para ver qué empleados tienen las competencias que exige su puesto.",
+      "progress": "{{completed}} de {{total}} completados",
+      "done": "Completado",
+      "steps": {
+        "categories": {
+          "title": "Crear una categoría",
+          "description": "Agrupa las competencias relacionadas para mantener el catálogo organizado.",
+          "action": "Añadir categoría"
+        },
+        "competencies": {
+          "title": "Crea competencias",
+          "description": "Describe una habilidad, sus niveles y cómo se confirma cada nivel: un curso, un documento o una observación.",
+          "action": "Añadir competencia"
+        },
+        "profiles": {
+          "title": "Crea un perfil de puesto",
+          "description": "Elige las competencias y los niveles que requiere un puesto.",
+          "action": "Crear perfil de puesto"
+        },
+        "assignments": {
+          "title": "Asigna personas",
+          "description": "Asigna un perfil de puesto a cada empleado para empezar a seguir su preparación.",
+          "action": "Asignar perfiles de puesto"
+        }
+      }
+    },
+    "setupSection": {
+      "competenciesTitle": "Competencias",
+      "competenciesDescription": "Habilidades con niveles. Cada nivel indica qué lo confirma: completar un curso, un documento aprobado o una observación.",
+      "profilesTitle": "Perfiles de puesto",
+      "profilesDescription": "Combina competencias y niveles requeridos para un puesto y asigna el perfil a las personas en la pestaña Resumen.",
+      "settingsTitle": "Recordatorios de caducidad",
+      "settingsDescription": "Elige con cuánta antelación se marcan las confirmaciones a punto de caducar.",
+      "emptyCompetenciesTitle": "Aún no hay competencias",
+      "emptyCompetencies": "Empieza añadiendo las habilidades que sigue tu organización. Después podrás agruparlas en perfiles de puesto.",
+      "emptyProfilesTitle": "Aún no hay perfiles de puesto",
+      "emptyProfiles": "Crea un perfil de puesto para definir qué competencias requiere un puesto.",
+      "emptyProfilesNeedsCompetencies": "Añade al menos una competencia con un nivel antes de crear un perfil de puesto.",
+      "requiredCompetenciesCount": "Competencias requeridas",
+      "assignedPeople": "Personas asignadas",
+      "expiryOff": "Desactivado",
+      "expiryDays_one": "{{count}} día",
+      "expiryDays_other": "{{count}} días",
+      "progressTitle": "Progreso de configuración",
+      "competenciesNav_one": "{{count}} lista para usar",
+      "competenciesNav_other": "{{count}} listas para usar",
+      "profilesNav_one": "{{count}} persona asignada",
+      "profilesNav_other": "{{count}} personas asignadas",
+      "expiryNav_one": "Avisar {{count}} día antes de caducar",
+      "expiryNav_other": "Avisar {{count}} días antes de caducar",
+      "expiryNavOff": "Sin configurar"
+    },
+    "compareWithAssigned": "Comparar con: perfil asignado",
+    "select": {
+      "search": "Buscar…",
+      "noResults": "Sin resultados."
+    },
+    "documentsGroup": {
+      "summary_one": "{{count}} documento, agrupado por competencia.",
+      "summary_other": "{{count}} documentos, agrupados por competencia.",
+      "toSubmit_one": "{{count}} por enviar",
+      "toSubmit_other": "{{count}} por enviar",
+      "pending_one": "{{count}} pendiente",
+      "pending_other": "{{count}} pendientes",
+      "notSubmitted": "No enviado"
+    },
+    "profileEditor": {
+      "addCompetency": "Añadir competencia…",
+      "requirementsHelp": "Añade cada competencia que requiere el puesto y elige el nivel necesario.",
+      "noRequirements": "Aún no se han añadido competencias. Usa «Añadir competencia» para crear el perfil."
+    },
+    "editor": {
+      "levelsHelp": "Los niveles se construyen unos sobre otros. Selecciona un nivel para definir qué lo confirma.",
+      "untitledLevel": "Nivel sin nombre",
+      "conditionCount_one": "{{count}} condición",
+      "conditionCount_other": "{{count}} condiciones",
+      "noLevels": "Añade el primer nivel para definir cómo se confirma esta competencia.",
+      "levelNameNumbered": "Nombre del nivel {{number}}",
+      "moveUp": "Subir nivel",
+      "moveDown": "Bajar nivel",
+      "metWhen": "Este nivel se cumple cuando se cumplen todas estas condiciones",
+      "noConditions": "Aún no hay condiciones. Añade una para definir qué confirma este nivel.",
+      "reorder": "Arrastra para reordenar"
+    },
+    "expirySettingsForm": {
+      "toggleLabel": "Avisar antes de que caduquen las confirmaciones",
+      "toggleHelp": "Las confirmaciones de competencias a punto de caducar se marcan como «Caduca pronto» para empleados, responsables y administradores.",
+      "warnBefore": "Avisar con estos días de antelación",
+      "custom": "Personalizado",
+      "invalid": "Introduce un número entero de días, 0 o más.",
+      "preview_one": "Las confirmaciones que caduquen en {{count}} día se marcarán como «Caduca pronto».",
+      "preview_other": "Las confirmaciones que caduquen en {{count}} días se marcarán como «Caduca pronto»."
+    },
+    "catalogTable": {
+      "allCategories": "Todas las categorías",
+      "confirmedBy": "Se confirma con",
+      "levelCount_one": "{{count}} nivel",
+      "levelCount_other": "{{count}} niveles"
+    },
+    "reviewCard": {
+      "confirms": "Confirma"
+    },
+    "reviewFilters": {
+      "pending": "Pendientes",
+      "approved": "Aprobadas",
+      "rejected": "Rechazadas",
+      "revoked": "Revocadas",
+      "empty": "No hay evidencias con este estado."
+    },
+    "planStatus": {
+      "needsPlan": "Necesita un plan",
+      "active": "En curso",
+      "overdue": "Atrasado",
+      "completed": "Completado"
+    },
+    "teamPlans": {
+      "stepsDone": "{{completed}}/{{total}} pasos",
+      "progress": "Progreso",
+      "nextStep": "Siguiente paso",
+      "noDueDate": "Sin fecha límite",
+      "gapsCount_one": "{{count}} competencia sin plan",
+      "gapsCount_other": "{{count}} competencias sin plan",
+      "uncoveredTitle_one": "{{count}} competencia pendiente aún no tiene pasos",
+      "uncoveredTitle_other": "{{count}} competencias pendientes aún no tienen pasos",
+      "planGaps": "Planificar estas competencias",
+      "emptyPlan": "Este plan aún no tiene pasos.",
+      "emptyTitle": "Aún no hay planes de desarrollo",
+      "empty": "Los planes aparecen aquí para las personas cuyo perfil de puesto tiene competencias pendientes. Empieza asignando perfiles en la pestaña Resumen."
+    },
+    "planBuilder": {
+      "title": "Añadir pasos al plan",
+      "description": "Elige una persona y añade los pasos que cubrirán sus carencias de competencias. Las competencias pendientes se sugieren automáticamente.",
+      "targetDate": "Fecha objetivo (opcional)",
+      "stepsTitle": "Pasos",
+      "stepsHelp": "Cada paso apunta a un nivel de competencia pendiente. El responsable y la fecha objetivo se aplican a todos los pasos.",
+      "choosePerson": "Elige una persona para ver sus competencias pendientes.",
+      "noGaps": "Esta persona cumple todos los requisitos de su perfil de puesto.",
+      "addStep": "Añadir paso",
+      "submit_one": "Crear plan con {{count}} paso",
+      "submit_other": "Crear plan con {{count}} pasos",
+      "created_one": "Plan creado con {{count}} paso.",
+      "created_other": "Plan creado con {{count}} pasos.",
+      "submitAdd_one": "Añadir {{count}} paso",
+      "submitAdd_other": "Añadir {{count}} pasos"
+    },
+    "actionHistory": {
+      "created": "Creado",
+      "updated": "Actualizado",
+      "version": "versión {{number}}"
+    },
+    "stepEditor": {
+      "title": "Editar paso"
+    },
+    "profilesTable": {
+      "allCompetencies": "Todas las competencias"
+    },
+    "reviewTable": {
+      "submitted": "Enviado"
+    },
+    "documentsSection": {
+      "toSubmit_one": "{{count}} por enviar",
+      "toSubmit_other": "{{count}} por enviar",
+      "submitted_one": "{{count}} enviado",
+      "submitted_other": "{{count}} enviados",
+      "reviewerReason": "Motivo del revisor"
+    },
+    "categories": {
+      "title": "Categorías",
+      "nav_one": "{{count}} lista para usar",
+      "nav_other": "{{count}} listas para usar",
+      "description": "Agrupa las competencias para encontrarlas y filtrarlas más fácilmente.",
+      "none": "Sin categoría",
+      "emptyTitle": "Aún no hay categorías",
+      "empty": "Crea categorías como Seguridad o Liderazgo y asígnalas a las competencias.",
+      "search": "Buscar categorías",
+      "new": "Nueva categoría",
+      "edit": "Editar categoría",
+      "competencyCount": "Competencias",
+      "delete": "Eliminar categoría",
+      "deleteConfirmation": "¿Eliminar la categoría «{{name}}»?",
+      "inUse_one": "«{{name}}» la usa {{count}} competencia. Muévela a otra categoría antes de eliminarla.",
+      "inUse_many": "«{{name}}» la usan {{count}} competencias. Muévelas a otra categoría antes de eliminarla.",
+      "inUse_other": "«{{name}}» la usan {{count}} competencias. Muévelas a otra categoría antes de eliminarla."
+    }
   }
 }

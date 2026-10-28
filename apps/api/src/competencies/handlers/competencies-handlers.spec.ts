@@ -16,8 +16,13 @@ describe("Competency learning outbox reactions", () => {
     LearningSourceWithdrawnEvent,
   ])("awaits %p enqueueing so an intake failure can retry through the outbox", async (Event) => {
     const outbox = new OutboxDirectHandlerService();
-    const enqueueCurrent = jest.fn().mockRejectedValueOnce(new Error("Redis unavailable"));
-    const handler = new CompetenciesLearningHandler({ enqueueCurrent } as never, outbox);
+    const enqueueCourseLearningFactsForCurrentTenant = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Redis unavailable"));
+    const handler = new CompetenciesLearningHandler(
+      { enqueueCourseLearningFactsForCurrentTenant } as never,
+      outbox,
+    );
     handler.onModuleInit();
     const event = new Event({
       userId: "learner",
@@ -32,13 +37,23 @@ describe("Competency learning outbox reactions", () => {
     );
     await outbox.dispatchReactions(Event.name, payload, "event");
 
-    expect(enqueueCurrent).toHaveBeenLastCalledWith("learner", "course", "tenant", "event");
-    expect(enqueueCurrent).toHaveBeenCalledTimes(2);
+    expect(enqueueCourseLearningFactsForCurrentTenant).toHaveBeenLastCalledWith(
+      "learner",
+      "course",
+      "tenant",
+      "event",
+    );
+    expect(enqueueCourseLearningFactsForCurrentTenant).toHaveBeenCalledTimes(2);
   });
   it("awaits certificate synchronization for the recipient's tenant", async () => {
     const outbox = new OutboxDirectHandlerService();
-    const enqueueSubject = jest.fn().mockRejectedValueOnce(new Error("Redis unavailable"));
-    new CompetenciesCertificatesHandler({ enqueueSubject } as never, outbox).onModuleInit();
+    const enqueueSubjectLearningFacts = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Redis unavailable"));
+    new CompetenciesCertificatesHandler(
+      { enqueueSubjectLearningFacts } as never,
+      outbox,
+    ).onModuleInit();
     const event = new CertificateArchivedEmailEvent({
       certificates: [{ tenantId: "tenant", userId: "learner" }],
     } as never);
@@ -49,6 +64,6 @@ describe("Competency learning outbox reactions", () => {
         "event",
       ),
     ).rejects.toThrow("Redis unavailable");
-    expect(enqueueSubject).toHaveBeenCalledWith("tenant", "learner", "event");
+    expect(enqueueSubjectLearningFacts).toHaveBeenCalledWith("tenant", "learner", "event");
   });
 });

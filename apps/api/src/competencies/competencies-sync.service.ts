@@ -7,8 +7,23 @@ import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { CompetenciesClientService } from "./competencies-client.service";
+import {
+  COMPETENCIES_SYNC_JOB_OPTIONS,
+  COMPETENCIES_SYNC_JOB_STATES,
+  COMPETENCIES_JOB_OPERATIONS,
+  COMPETENCIES_FACT_RECONCILE_CONCURRENCY,
+} from "./competencies.constants";
+import {
+  deduplicateLearningScopes,
+  getLearningFactsJobId,
+} from "./utils/competencies-learning-scope.utils";
 
-import type { CompetenciesJobData } from "./competencies.types";
+import type {
+  CompetenciesClient,
+  CompetenciesJobData,
+  CompetenciesLearningScope,
+} from "./competencies.types";
+import type { Job } from "bullmq";
 
 @Injectable()
 export class CompetenciesSyncService {
@@ -18,84 +33,49 @@ export class CompetenciesSyncService {
     private readonly queueService: QueueService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
-  async enqueue(tenantId: string, subjectId: string, courseId: string, eventId?: string) {
+
+  async enqueueCourseLearningFacts(
+    tenantId: string,
+    subjectId: string,
+    courseId: string,
+    eventId?: string,
+  ) {
     if (!(await this.competenciesClientService.isConfigured())) return;
-    const jobId = `sync-${tenantId}-${subjectId}-${courseId}${eventId ? `-${eventId}` : ""}`;
-    const existing = await this.queueService.getQueue(QUEUE_NAMES.COMPETENCIES).getJob(jobId);
-    if (existing && (await existing.getState()) === "failed") {
-      try {
-        await existing.remove();
-      } catch {
-        if ((await existing.getState()) === "active") return existing;
-        throw new Error("Failed competency job could not be replaced safely");
-      }
-      return this.queueService.enqueue<CompetenciesJobData>(
-        QUEUE_NAMES.COMPETENCIES,
-        existing.name,
-        existing.data,
-        { ...existing.opts, jobId: existing.id, attempts: 8 },
-      );
-    }
+    const jobId = getLearningFactsJobId(tenantId, subjectId, courseId, eventId);
+    const existingJob = await this.queueService.getQueue(QUEUE_NAMES.COMPETENCIES).getJob(jobId);
+    if (existingJob && (await existingJob.getState()) === COMPETENCIES_SYNC_JOB_STATES.FAILED)
+      return this.replaceFailedSyncJob(existingJob);
+
     return this.queueService.enqueue<CompetenciesJobData>(
       QUEUE_NAMES.COMPETENCIES,
-      "sync",
-      { operation: "sync", tenantId, subjectId, courseId },
-      {
-        jobId,
-        priority: 10,
-        attempts: 8,
-        backoff: { type: "exponential", delay: 1000 },
-        removeOnComplete: true,
-        removeOnFail: 100,
-      },
+      COMPETENCIES_JOB_OPERATIONS.SYNC,
+      { operation: COMPETENCIES_JOB_OPERATIONS.SYNC, tenantId, subjectId, courseId },
+      { ...COMPETENCIES_SYNC_JOB_OPTIONS, jobId },
     );
   }
-  async synchronize(subjectId: string, courseId: string) {
+
+  async reconcileCourseLearningFacts(subjectId: string, courseId: string) {
     if (!(await this.competenciesClientService.isConfigured())) return;
-    return this.competenciesClientService.run(async (client) => {
+    return this.competenciesClientService.requestWithClient(async (client) => {
       if (!(await client.configuration()).capabilities.competencies.enabled) return;
       const snapshot = await this.learningFactsRepository.snapshot(subjectId, courseId);
       return client.reconcileFacts(snapshot);
     });
   }
-  async refreshSubjects(subjectIds: string[]) {
+
+  async reconcileSubjectLearningFacts(subjectIds: string[]) {
     if (!subjectIds.length) return;
-    const subjects = [...new Set(subjectIds)];
-    await this.competenciesClientService.run(async (client) => {
-      const known: { subjectId: string; courseId: string }[] = [];
-      for (let offset = 0; offset < subjects.length; offset += COMPETENCIES_MAX_SCOPE_SUBJECTS) {
-        const batch = subjects.slice(offset, offset + COMPETENCIES_MAX_SCOPE_SUBJECTS);
-        let cursor: string | undefined;
-        const seen = new Set<string>();
-        do {
-          const page = await client.factScopes(cursor, batch);
-          known.push(...page.pairs.filter((pair) => batch.includes(pair.subjectId)));
-          cursor = page.nextCursor ?? undefined;
-          if (cursor && seen.has(cursor)) throw new Error("Repeated learning scope cursor");
-          if (cursor) seen.add(cursor);
-        } while (cursor);
-      }
-      const pairs = [
-        ...new Map(
-          [...known, ...(await this.learningFactsRepository.sourcePairs(subjectIds))].map(
-            (pair) => [`${pair.subjectId}:${pair.courseId}`, pair],
-          ),
-        ).values(),
-      ];
-      for (let offset = 0; offset < pairs.length; offset += 8) {
-        await Promise.all(
-          pairs
-            .slice(offset, offset + 8)
-            .map(async (pair) =>
-              client.reconcileFacts(
-                await this.learningFactsRepository.snapshot(pair.subjectId, pair.courseId),
-              ),
-            ),
-        );
-      }
+    const uniqueSubjectIds = [...new Set(subjectIds)];
+    await this.competenciesClientService.requestWithClient(async (client) => {
+      const knownScopes = await this.getKnownLearningScopes(client, uniqueSubjectIds);
+      const sourceScopes = await this.learningFactsRepository.sourcePairs(uniqueSubjectIds);
+      const scopes = deduplicateLearningScopes([...knownScopes, ...sourceScopes]);
+
+      await this.reconcileLearningScopes(client, scopes);
     });
   }
-  async enqueueCurrent(
+
+  async enqueueCourseLearningFactsForCurrentTenant(
     subjectId: string,
     courseId: string,
     tenantId = dbAls.getStore()?.tenantId,
@@ -103,13 +83,84 @@ export class CompetenciesSyncService {
   ) {
     if (!tenantId) return;
     await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      await this.enqueue(tenantId, subjectId, courseId, eventId);
+      await this.enqueueCourseLearningFacts(tenantId, subjectId, courseId, eventId);
     });
   }
-  async enqueueSubject(tenantId: string, subjectId: string, eventId?: string) {
+
+  async enqueueSubjectLearningFacts(tenantId: string, subjectId: string, eventId?: string) {
     await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       for (const pair of await this.learningFactsRepository.sourcePairs([subjectId]))
-        await this.enqueue(tenantId, subjectId, pair.courseId, eventId);
+        await this.enqueueCourseLearningFacts(tenantId, subjectId, pair.courseId, eventId);
     });
+  }
+
+  private async replaceFailedSyncJob(job: Job<CompetenciesJobData>) {
+    try {
+      await job.remove();
+    } catch {
+      if ((await job.getState()) === COMPETENCIES_SYNC_JOB_STATES.ACTIVE) return job;
+      throw new Error("Failed competency job could not be replaced safely");
+    }
+
+    return this.queueService.enqueue<CompetenciesJobData>(
+      QUEUE_NAMES.COMPETENCIES,
+      job.name,
+      job.data,
+      { ...job.opts, jobId: job.id, attempts: COMPETENCIES_SYNC_JOB_OPTIONS.attempts },
+    );
+  }
+
+  private async getKnownLearningScopes(
+    client: CompetenciesClient,
+    subjectIds: string[],
+  ): Promise<CompetenciesLearningScope[]> {
+    const scopes: CompetenciesLearningScope[] = [];
+
+    for (let offset = 0; offset < subjectIds.length; offset += COMPETENCIES_MAX_SCOPE_SUBJECTS) {
+      const subjectBatch = subjectIds.slice(offset, offset + COMPETENCIES_MAX_SCOPE_SUBJECTS);
+      const batchScopes = await this.getLearningScopePages(client, subjectBatch);
+      scopes.push(...batchScopes);
+    }
+
+    return scopes;
+  }
+
+  private async getLearningScopePages(
+    client: CompetenciesClient,
+    subjectIds: string[],
+  ): Promise<CompetenciesLearningScope[]> {
+    const scopes: CompetenciesLearningScope[] = [];
+    const requestedSubjectIds = new Set(subjectIds);
+    const visitedCursors = new Set<string>();
+    let cursor: string | undefined;
+
+    do {
+      const page = await client.factScopes(cursor, subjectIds);
+      scopes.push(...page.pairs.filter((scope) => requestedSubjectIds.has(scope.subjectId)));
+      cursor = page.nextCursor ?? undefined;
+      if (cursor && visitedCursors.has(cursor)) throw new Error("Repeated learning scope cursor");
+      if (cursor) visitedCursors.add(cursor);
+    } while (cursor);
+
+    return scopes;
+  }
+
+  private async reconcileLearningScopes(
+    client: CompetenciesClient,
+    scopes: CompetenciesLearningScope[],
+  ): Promise<void> {
+    for (
+      let offset = 0;
+      offset < scopes.length;
+      offset += COMPETENCIES_FACT_RECONCILE_CONCURRENCY
+    ) {
+      const scopeBatch = scopes.slice(offset, offset + COMPETENCIES_FACT_RECONCILE_CONCURRENCY);
+      await Promise.all(
+        scopeBatch.map(async ({ subjectId, courseId }) => {
+          const snapshot = await this.learningFactsRepository.snapshot(subjectId, courseId);
+          return client.reconcileFacts(snapshot);
+        }),
+      );
+    }
   }
 }

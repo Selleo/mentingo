@@ -8,6 +8,9 @@ import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.ser
 import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
 
 import { CompetenciesSyncService } from "../competencies-sync.service";
+import { getLearningEventData } from "../utils/competencies-learning-event.utils";
+
+import type { CompetenciesLearningEvent } from "../competencies.types";
 
 @Injectable()
 export class CompetenciesLearningHandler implements OnModuleInit {
@@ -23,30 +26,15 @@ export class CompetenciesLearningHandler implements OnModuleInit {
       LearningSourceWithdrawnEvent,
     ])
       this.outboxDirectHandlerService.registerReaction(event.name, (payload, eventId) =>
-        this.handle(
-          materializeLegacyEvent(event.name, payload) as
-            | LessonCompletedEvent
-            | LessonProgressChangedEvent
-            | UserCourseFinishedEvent
-            | LearningSourceWithdrawnEvent,
+        this.enqueueLearningEventFacts(
+          materializeLegacyEvent(event.name, payload) as CompetenciesLearningEvent,
           eventId,
         ),
       );
   }
-  async handle(
-    event:
-      | LessonCompletedEvent
-      | LessonProgressChangedEvent
-      | UserCourseFinishedEvent
-      | LearningSourceWithdrawnEvent,
-    eventId: string,
-  ) {
-    let data: Pick<LessonProgressChangedEvent["data"], "userId" | "courseId" | "actor">;
-    if (event instanceof LessonCompletedEvent) data = event.lessonCompletionData;
-    else if (event instanceof LessonProgressChangedEvent) data = event.data;
-    else if (event instanceof UserCourseFinishedEvent) data = event.courseFinishedData;
-    else data = event.data;
-    await this.competenciesSyncService.enqueueCurrent(
+  async enqueueLearningEventFacts(event: CompetenciesLearningEvent, eventId: string) {
+    const data = getLearningEventData(event);
+    await this.competenciesSyncService.enqueueCourseLearningFactsForCurrentTenant(
       data.userId,
       data.courseId,
       data.actor?.tenantId,

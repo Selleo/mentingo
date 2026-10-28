@@ -57,9 +57,9 @@ describe("CompetenciesClientService.isConfigured", () => {
 
   it("preserves an oversized attachment request as HTTP 413", async () => {
     const service = setup(jest.fn());
-    jest.spyOn(service, "client").mockResolvedValue({} as never);
+    jest.spyOn(service, "createTenantClient").mockResolvedValue({} as never);
     await expect(
-      service.run(async () => {
+      service.requestWithClient(async () => {
         throw new CompetenciesApiError(413);
       }),
     ).rejects.toBeInstanceOf(PayloadTooLargeException);
@@ -84,12 +84,14 @@ describe("CompetenciesClientService.isConfigured", () => {
 
     try {
       await dbAls.run({ tenantId: "tenant" }, async () => {
-        await expect(service.run((client) => client.configuration())).resolves.toEqual({
+        await expect(
+          service.requestWithClient((client) => client.configuration()),
+        ).resolves.toEqual({
           capabilities: { competencies: { enabled: true } },
         });
-        await expect(service.run((client) => client.configuration())).rejects.toBeInstanceOf(
-          ForbiddenException,
-        );
+        await expect(
+          service.requestWithClient((client) => client.configuration()),
+        ).rejects.toBeInstanceOf(ForbiddenException);
       });
       expect(fetch).toHaveBeenCalledTimes(1);
     } finally {
