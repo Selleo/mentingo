@@ -12217,6 +12217,126 @@
         }
       }
     },
+    "/api/helpdesk/search": {
+      "post": {
+        "operationId": "searchHelpdesk",
+        "summary": "",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelpdeskSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskSearchResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
+    "/api/helpdesk/tutorials/{key}": {
+      "get": {
+        "operationId": "getHelpdeskTutorial",
+        "summary": "",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskTutorialResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
+    "/api/helpdesk/domains": {
+      "get": {
+        "operationId": "getHelpdeskDomains",
+        "summary": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskDomainsResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
     "/api/email-templates/events": {
       "get": {
         "operationId": "EmailTemplateManagementController_listEmailTemplateEvents",
@@ -67723,6 +67843,438 @@
               "restrictions",
               "timesRedeemed"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskSearchRequest": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "query": {
+            "maxLength": 500,
+            "pattern": "^[^\\u0000]*$",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "pageKey": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+            "type": "string"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "const": "development-paths",
+                "type": "string"
+              },
+              {
+                "const": "course-authoring",
+                "type": "string"
+              },
+              {
+                "const": "course-learning",
+                "type": "string"
+              }
+            ]
+          },
+          "limit": {
+            "minimum": 1,
+            "maximum": 10,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "language"
+        ]
+      },
+      "HelpdeskSearchResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "const": "hybrid",
+                    "type": "string"
+                  },
+                  {
+                    "const": "keyword_fallback",
+                    "type": "string"
+                  },
+                  {
+                    "const": "browse",
+                    "type": "string"
+                  }
+                ]
+              },
+              "results": {
+                "maxItems": 10,
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "tutorial": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                          "type": "string"
+                        },
+                        "revisionId": {
+                          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                          "type": "string"
+                        },
+                        "domain": {
+                          "anyOf": [
+                            {
+                              "const": "development-paths",
+                              "type": "string"
+                            },
+                            {
+                              "const": "course-authoring",
+                              "type": "string"
+                            },
+                            {
+                              "const": "course-learning",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "title": {
+                          "minLength": 1,
+                          "maxLength": 200,
+                          "type": "string"
+                        },
+                        "description": {
+                          "minLength": 1,
+                          "maxLength": 8000,
+                          "type": "string"
+                        },
+                        "language": {
+                          "minLength": 2,
+                          "maxLength": 35,
+                          "pattern": "^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$",
+                          "type": "string"
+                        },
+                        "languageFallback": {
+                          "type": "boolean"
+                        },
+                        "durationMs": {
+                          "minimum": 1,
+                          "maximum": 86400000,
+                          "type": "integer"
+                        },
+                        "videoUrl": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "posterUrl": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "chapters": {
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                                "type": "string"
+                              },
+                              "title": {
+                                "minLength": 1,
+                                "maxLength": 200,
+                                "type": "string"
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "maxLength": 4000,
+                                "type": "string"
+                              },
+                              "startMs": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "endMs": {
+                                "minimum": 0,
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "description",
+                              "startMs",
+                              "endMs"
+                            ]
+                          }
+                        },
+                        "pageKeys": {
+                          "maxItems": 64,
+                          "type": "array",
+                          "items": {
+                            "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "revisionId",
+                        "domain",
+                        "title",
+                        "description",
+                        "language",
+                        "languageFallback",
+                        "durationMs",
+                        "videoUrl",
+                        "posterUrl",
+                        "chapters",
+                        "pageKeys"
+                      ]
+                    },
+                    "chapterId": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "excerpt": {
+                      "maxLength": 10000,
+                      "type": "string"
+                    },
+                    "startMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "endMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "rankScore": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "tutorial",
+                    "excerpt",
+                    "startMs",
+                    "endMs",
+                    "rankScore"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "mode",
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskTutorialResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "key": {
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                "type": "string"
+              },
+              "revisionId": {
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "type": "string"
+              },
+              "domain": {
+                "anyOf": [
+                  {
+                    "const": "development-paths",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course-authoring",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course-learning",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "minLength": 1,
+                "maxLength": 200,
+                "type": "string"
+              },
+              "description": {
+                "minLength": 1,
+                "maxLength": 8000,
+                "type": "string"
+              },
+              "language": {
+                "minLength": 2,
+                "maxLength": 35,
+                "pattern": "^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$",
+                "type": "string"
+              },
+              "languageFallback": {
+                "type": "boolean"
+              },
+              "durationMs": {
+                "minimum": 1,
+                "maximum": 86400000,
+                "type": "integer"
+              },
+              "videoUrl": {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              "posterUrl": {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              "chapters": {
+                "minItems": 1,
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                      "type": "string"
+                    },
+                    "title": {
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "description": {
+                      "minLength": 1,
+                      "maxLength": 4000,
+                      "type": "string"
+                    },
+                    "startMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "endMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "startMs",
+                    "endMs"
+                  ]
+                }
+              },
+              "pageKeys": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "key",
+              "revisionId",
+              "domain",
+              "title",
+              "description",
+              "language",
+              "languageFallback",
+              "durationMs",
+              "videoUrl",
+              "posterUrl",
+              "chapters",
+              "pageKeys"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskDomainsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "const": "development-paths",
+                  "type": "string"
+                },
+                {
+                  "const": "course-authoring",
+                  "type": "string"
+                },
+                {
+                  "const": "course-learning",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         "required": [
@@ -162315,6 +162867,10 @@
                               {
                                 "const": "resource",
                                 "type": "string"
+                              },
+                              {
+                                "const": "helpdesk",
+                                "type": "string"
                               }
                             ]
                           },
@@ -162654,6 +163210,10 @@
                             {
                               "const": "resource",
                               "type": "string"
+                            },
+                            {
+                              "const": "helpdesk",
+                              "type": "string"
                             }
                           ]
                         },
@@ -162798,6 +163358,10 @@
                             },
                             {
                               "const": "resource",
+                              "type": "string"
+                            },
+                            {
+                              "const": "helpdesk",
                               "type": "string"
                             }
                           ]

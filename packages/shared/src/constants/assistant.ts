@@ -32,6 +32,7 @@ export const ASSISTANT_SOURCE_TYPES = {
   QA: "qa",
   DEVELOPMENT_PATH: "development_path",
   RESOURCE: "resource",
+  HELPDESK: "helpdesk",
 } as const;
 export type AssistantSourceType =
   (typeof ASSISTANT_SOURCE_TYPES)[keyof typeof ASSISTANT_SOURCE_TYPES];

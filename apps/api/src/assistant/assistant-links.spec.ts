@@ -104,3 +104,66 @@ describe("Assistant grounding", () => {
     expect(groundAssistantText("[fake](https://tenant.example/news/fake)", [])).toBe("fake");
   });
 });
+
+describe("Product guidance source boundary", () => {
+  const origin = "https://tenant.example";
+  const guidance = {
+    tutorialKey: "course-authoring.edit",
+    chapterId: "add-lesson",
+    entityType: "helpdesk",
+    guidanceKind: "product_guidance",
+    title: "Add a lesson",
+    description: "Product guidance only.",
+    url: `${origin}/helpdesk/tutorials/course-authoring.edit?chapter=add-lesson`,
+  };
+  it("grounds exact help links without treating product guidance as tenant lesson evidence", () => {
+    const sources = collectAssistantSources(guidance, origin, "get_helpdesk_tutorial");
+    expect(sources).toEqual([
+      {
+        title: guidance.title,
+        description: guidance.description,
+        entityType: "helpdesk",
+        url: guidance.url,
+      },
+    ]);
+    expect(groundAssistantText(`See [Add a lesson](${guidance.url})`, sources)).toContain(
+      `](${guidance.url})`,
+    );
+    expect(
+      hasAssistantReadableContent("get_helpdesk_tutorial", {
+        tutorial: { ...guidance, description: "Full product tutorial" },
+      }),
+    ).toBe(false);
+    expect(
+      hasAssistantReadableContent("get_lesson", { lesson: { content: "Tenant lesson text" } }),
+    ).toBe(true);
+  });
+  it.each([
+    { guidanceKind: "lesson_content" },
+    { tutorialKey: "another-key" },
+    { chapterId: "another-chapter" },
+    { url: `${guidance.url}&chapter=add-lesson` },
+    { url: `${guidance.url}&target=admin` },
+    { url: `${guidance.url}#invented` },
+    { url: "https://other.example/helpdesk/tutorials/course-authoring.edit?chapter=add-lesson" },
+    { url: "https://vz-public.b-cdn.net/video/playlist.m3u8" },
+  ])(
+    "rejects arbitrary help, duplicate/query-mutated, external and media references %#",
+    (change) => {
+      expect(
+        collectAssistantSources({ ...guidance, ...change }, origin, "search_helpdesk"),
+      ).toEqual([]);
+    },
+  );
+  it("does not promote product-looking data from an unrelated or unspecified tool", () => {
+    expect(collectAssistantSources(guidance, origin)).toEqual([]);
+    expect(collectAssistantSources(guidance, origin, "get_lesson")).toEqual([]);
+    expect(collectAssistantSources(guidance, origin, "invented_helpdesk_tool")).toEqual([]);
+  });
+  it("does not infer a verified help source from its URL alone", () => {
+    expect(collectAssistantSources({ title: guidance.title, url: guidance.url }, origin)).toEqual(
+      [],
+    );
+    expect(groundAssistantText(`[Invented](${guidance.url})`, [])).toBe("Invented");
+  });
+});

@@ -48,6 +48,7 @@ import { CourseTranslationService } from "src/courses/languages/course-translati
 import { FileService } from "src/file/file.service";
 import { GlobalSearchService } from "src/global-search/global-search.service";
 import { GroupService } from "src/group/group.service";
+import { HelpdeskService } from "src/helpdesk/helpdesk.service";
 import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { AiJudgeConfigurationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration.service";
 import { AiMentorConfigurationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration.service";
@@ -81,6 +82,12 @@ import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
 import { registerMcpCustomizationTools } from "./mcp-customization-tools";
 import { registerMcpGenericUploadTool } from "./mcp-generic-upload-tools";
+import { registerMcpHelpdeskTools } from "./mcp-helpdesk-tools";
+import {
+  isMcpHelpdeskTool,
+  MCP_HELPDESK_GUIDANCE_KIND,
+  MCP_HELPDESK_TOOL_NAMES,
+} from "./mcp-helpdesk.constants";
 import { linkNativeReadResult } from "./mcp-native-links";
 import {
   bindToolActor,
@@ -174,6 +181,7 @@ export class McpHttpService {
     private readonly groupService: GroupService,
     private readonly mcpStudentLessonRepository: McpStudentLessonRepository,
     private readonly mcpActorRepository: McpActorRepository,
+    private readonly helpdeskService: HelpdeskService,
   ) {}
 
   async handle(req: Request, res: Response, actor: McpToolActor): Promise<void> {
@@ -313,6 +321,8 @@ export class McpHttpService {
             hasAnyPermission(discoveryUser.permissions, studentPermissions) &&
             (!studentFeature || settings[FEATURE_SETTINGS_KEYS[studentFeature]]),
         );
+      } else if (isMcpHelpdeskTool(name)) {
+        permissionsAllow = true;
       } else if (studentOnly || (name === "global_search" && learnerSearch)) {
         permissionsAllow =
           name === "global_search" &&
@@ -431,6 +441,11 @@ export class McpHttpService {
               canDelete: false,
             },
             globalSearch: available("global_search"),
+            helpdesk: {
+              canSearch: available(MCP_HELPDESK_TOOL_NAMES.SEARCH),
+              canRead: available(MCP_HELPDESK_TOOL_NAMES.TUTORIAL),
+              guidanceKind: MCP_HELPDESK_GUIDANCE_KIND,
+            },
             categories: available("create_category") || available("list_categories"),
             articles:
               available("create_article") ||
@@ -3370,6 +3385,12 @@ export class McpHttpService {
       this.settingsService,
       this.uploadGrantService,
     );
+    registerMcpHelpdeskTools(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      this.helpdeskService,
+      binding.resource,
+    );
     registerMcpSearchTools(
       server,
       (permissions, operation) =>
@@ -3393,6 +3414,7 @@ export class McpHttpService {
 
   private actorAllowsTool(actor: BoundToolActor, name: string) {
     if ("native" in actor) return NATIVE_READ_TOOL_NAMES.has(name);
+    if (actor.grant.expiresAt <= Date.now()) return false;
     return canUseMcpToolWithScopes(name, actor.grant.scopes);
   }
 

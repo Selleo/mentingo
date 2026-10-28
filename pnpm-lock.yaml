@@ -103,6 +103,9 @@ importers:
       '@mentingo/content-marketplace-sdk':
         specifier: 0.1.0
         version: 0.1.0
+      '@mentingo/guide-sdk':
+        specifier: file:../../vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz
+        version: file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz
       '@mentingo/luma-sdk':
         specifier: 0.4.0
         version: 0.4.0
@@ -4792,6 +4795,11 @@ packages:
 
   '@mentingo/content-marketplace-sdk@0.1.0':
     resolution: {integrity: sha512-E4ONXeomg7QojFSdyempCqtRkzGgX10moG/pHfGXODn6h/Lq5CSNKKbJcFbvM8jtEbt5IUV/yZQGrXPDICJLYA==}
+    engines: {node: '>=22.15.0'}
+
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz':
+    resolution: {integrity: sha512-wnAqIVcM+VaWxVPZPp4YA/YztSrEEbTCYbuRi8rzzyqPIPrhSI6Hru4BmGS/gHiZhGRmlfZgy/hZw4VR5OtJUw==, tarball: file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz}
+    version: 0.1.0
     engines: {node: '>=22.15.0'}
 
   '@mentingo/luma-sdk@0.4.0':
@@ -11019,6 +11027,9 @@ packages:
 
   axios@1.20.0:
     resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
+
+  axios@1.21.0:
+    resolution: {integrity: sha512-YCzXMB53Q9PZBsh7yN7wtapit4WepwcHS2fP8QhGsBxSz5YtgYobV7GGlWlAJi+RxfU77GQTQi2DSLUma42EYA==}
 
   axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
@@ -23702,6 +23713,13 @@ snapshots:
 
   '@mentingo/content-marketplace-sdk@0.1.0': {}
 
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz':
+    dependencies:
+      axios: 1.21.0(debug@4.4.3)
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
   '@mentingo/luma-sdk@0.4.0':
     dependencies:
       axios: 1.20.0(debug@4.4.3)
@@ -31513,6 +31531,16 @@ snapshots:
       - debug
 
   axios@1.20.0(debug@4.4.3):
+    dependencies:
+      follow-redirects: 1.16.0(debug@4.4.3)
+      form-data: 4.0.6
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  axios@1.21.0(debug@4.4.3):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6

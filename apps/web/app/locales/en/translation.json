@@ -8327,7 +8327,8 @@
       "qa": "Question & answer",
       "development_path": "Learning path",
       "resource": "Resource",
-      "reference": "Reference"
+      "reference": "Reference",
+      "helpdesk": "Help tutorial"
     },
     "title": "Assistant",
     "eyebrow": "Your workspace, connected",
@@ -8412,6 +8413,42 @@
     "error": {
       "notFound": "Organization not found.",
       "inactive": "This organization is inactive. Contact your administrator."
+    }
+  },
+  "helpdesk": {
+    "title": "Help & tutorials",
+    "heading": "How can we help?",
+    "subtitle": "Find your next step in Mentingo.",
+    "loading": "Loading help",
+    "askAssistant": "Ask the assistant",
+    "assistantHint": "Describe what you want to do.",
+    "search": "Search topics or ask a question…",
+    "clear": "Clear search",
+    "results": "Tutorials",
+    "suggested": "Suggested for you",
+    "empty": "No tutorials found",
+    "emptyHint": "Try a shorter phrase or another topic.",
+    "chapterCount": "{{count}} chapters",
+    "timeline": "Video timeline",
+    "jumpHint": "Select a chapter to jump to a step",
+    "chapters": "In this video",
+    "related": "Explore more features",
+    "domains": {
+      "authoring": "Course editing",
+      "paths": "Development paths",
+      "learning": "Learning"
+    },
+    "keywordFallback": "Showing keyword matches while AI search is unavailable.",
+    "languageFallback": "Video available in {{language}}",
+    "retry": "Try again",
+    "back": "Back to Mentingo",
+    "chapterUnavailable": "This chapter is no longer available. Showing the video from the beginning.",
+    "errors": {
+      "unavailable": "Tutorials are temporarily unavailable. Please try again.",
+      "versionUnavailable": "Help is not available for this version of Mentingo yet.",
+      "disabled": "Help tutorials are not enabled on this installation.",
+      "notFound": "This tutorial is not available for your version of Mentingo.",
+      "invalidRequest": "Choose a valid tutorial or search phrase and try again."
     }
   }
 }

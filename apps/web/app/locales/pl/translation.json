@@ -8386,7 +8386,8 @@
       "qa": "Pytanie i odpowiedź",
       "development_path": "Ścieżka rozwoju",
       "resource": "Materiał",
-      "reference": "Źródło"
+      "reference": "Źródło",
+      "helpdesk": "Samouczek pomocy"
     },
     "title": "Asystent",
     "eyebrow": "Wiedza z Twojej platformy",
@@ -8471,6 +8472,42 @@
     "error": {
       "notFound": "Nie znaleziono organizacji.",
       "inactive": "Ta organizacja jest nieaktywna. Skontaktuj się z administratorem."
+    }
+  },
+  "helpdesk": {
+    "title": "Pomoc i poradniki",
+    "heading": "W czym możemy pomóc?",
+    "subtitle": "Znajdź swój kolejny krok w Mentingo.",
+    "loading": "Wczytywanie pomocy",
+    "askAssistant": "Zapytaj asystenta",
+    "assistantHint": "Opisz, co chcesz zrobić.",
+    "search": "Wyszukaj temat lub zadaj pytanie…",
+    "clear": "Wyczyść wyszukiwanie",
+    "results": "Poradniki",
+    "suggested": "Proponowane dla Ciebie",
+    "empty": "Nie znaleziono poradników",
+    "emptyHint": "Spróbuj krótszej frazy lub innego tematu.",
+    "chapterCount": "{{count}} rozdziałów",
+    "timeline": "Oś czasu filmu",
+    "jumpHint": "Wybierz rozdział, aby przejść do danego kroku",
+    "chapters": "W tym filmie",
+    "related": "Poznaj więcej funkcji",
+    "domains": {
+      "authoring": "Edycja kursów",
+      "paths": "Ścieżki rozwoju",
+      "learning": "Nauka"
+    },
+    "keywordFallback": "Wyświetlamy wyniki słów kluczowych, ponieważ wyszukiwanie AI jest niedostępne.",
+    "languageFallback": "Film dostępny w języku {{language}}",
+    "retry": "Spróbuj ponownie",
+    "back": "Wróć do Mentingo",
+    "chapterUnavailable": "Ten rozdział nie jest już dostępny. Pokazujemy film od początku.",
+    "errors": {
+      "unavailable": "Samouczki są chwilowo niedostępne. Spróbuj ponownie.",
+      "versionUnavailable": "Pomoc nie jest jeszcze dostępna dla tej wersji Mentingo.",
+      "disabled": "Samouczki pomocy nie są włączone w tej instalacji.",
+      "notFound": "Ten samouczek nie jest dostępny dla Twojej wersji Mentingo.",
+      "invalidRequest": "Wybierz dostępny samouczek lub popraw wyszukiwanie i spróbuj ponownie."
     }
   }
 }

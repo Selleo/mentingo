@@ -8,6 +8,7 @@ import {
 
 import { MCP_ADMIN_TOOL_PERMISSIONS } from "./mcp-admin-tools";
 import { MCP_CUSTOMIZATION_TOOL_NAMES } from "./mcp-customization-tools";
+import { isMcpHelpdeskTool } from "./mcp-helpdesk.constants";
 import { MCP_GLOBAL_SEARCH_PERMISSIONS } from "./mcp-search-tools";
 
 import type { SettingsService } from "src/settings/settings.service";
@@ -16,6 +17,7 @@ type Settings = Awaited<ReturnType<SettingsService["getGlobalSettings"]>>;
 
 export const MCP_CAPABILITIES = {
   SELF: "self",
+  HELPDESK: "helpdesk",
   GLOBAL_SEARCH: "global_search",
   ADMINISTRATION: "administration",
   PLATFORM_CUSTOMIZATION: "platform_customization",
@@ -45,6 +47,7 @@ export function capabilityForMcpTool(name: string): McpCapability | null {
     return MCP_CAPABILITIES.ADMINISTRATION;
   if (MCP_CUSTOMIZATION_TOOL_NAMES.some((tool) => tool === name))
     return MCP_CAPABILITIES.PLATFORM_CUSTOMIZATION;
+  if (isMcpHelpdeskTool(name)) return MCP_CAPABILITIES.HELPDESK;
   switch (name) {
     case "global_search":
       return MCP_CAPABILITIES.GLOBAL_SEARCH;
@@ -187,6 +190,7 @@ export function canListMcpTool(
     case MCP_CAPABILITIES.GLOBAL_SEARCH:
       return hasAnyPermission(permissions, MCP_GLOBAL_SEARCH_PERMISSIONS);
     case MCP_CAPABILITIES.SELF:
+    case MCP_CAPABILITIES.HELPDESK:
       return true;
     case MCP_CAPABILITIES.COURSE_READ:
       return permissions.includes(PERMISSIONS.COURSE_READ_MANAGEABLE);

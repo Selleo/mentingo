@@ -1,3 +1,5 @@
+import { MCP_HELPDESK_TOOL_NAMES } from "./mcp-helpdesk.constants";
+
 import type { McpToolActor, McpNativeFeatureCapabilities } from "./mcp.types";
 
 /** A native session is never represented as an OAuth grant. */
@@ -18,6 +20,7 @@ export type NativeReadTool = {
 };
 export const NATIVE_READ_TOOL_NAMES = new Set([
   "get_my_capabilities",
+  ...Object.values(MCP_HELPDESK_TOOL_NAMES),
   "global_search",
   "list_courses",
   "get_course",

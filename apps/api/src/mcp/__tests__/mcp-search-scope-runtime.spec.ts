@@ -12,6 +12,7 @@ import {
 import express from "express";
 import request from "supertest";
 
+import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-helpdesk.constants";
 import { McpHttpService } from "../mcp-http.service";
 import { MCP_GLOBAL_SEARCH_PERMISSIONS } from "../mcp-search-tools";
 import { MCP_SCOPES } from "../mcp-tool-scope";
@@ -52,6 +53,7 @@ describe("MCP search scope runtime enforcement", () => {
       settingsService: {
         getGlobalSettings: jest.fn().mockResolvedValue(enabledSettings),
       },
+      helpdeskService: { search: jest.fn().mockResolvedValue({ mode: "hybrid", results: [] }) },
       auditCall: jest.fn().mockResolvedValue(undefined),
       executeIdempotent: jest.fn((_actor, _context, operation) => operation()),
     }) as McpHttpService;
@@ -99,11 +101,46 @@ describe("MCP search scope runtime enforcement", () => {
     return { rpc, service, getUserAccess };
   }
 
-  it("exposes only global_search through the real SDK even for an administrator", async () => {
+  it.each([
+    MCP_SCOPES.STUDENT_READ,
+    MCP_SCOPES.SEARCH,
+    MCP_SCOPES.SEARCH_READ,
+    MCP_SCOPES.ACCOUNT_ACCESS,
+  ])(
+    "executes public guidance through the real SDK with %s and no tenant content permission",
+    async (scope) => {
+      const { rpc, service } = await catalog([scope], []);
+      const names = (await rpc("tools/list")).result.tools.map(
+        (tool: { name: string }) => tool.name,
+      );
+      expect(names).toEqual(expect.arrayContaining(Object.values(MCP_HELPDESK_TOOL_NAMES)));
+      expect(names).not.toContain("get_lesson");
+      expect(names).not.toContain("create_course");
+      const args = { query: "edit curriculum", language: "en", pageKey: "admin.course.curriculum" };
+      const result = await rpc("tools/call", {
+        name: MCP_HELPDESK_TOOL_NAMES.SEARCH,
+        arguments: args,
+      });
+      expect(result.result.isError).not.toBe(true);
+      expect(result.result.structuredContent).toEqual(
+        expect.objectContaining({ mode: "hybrid", guidanceKind: "product_guidance", results: [] }),
+      );
+      const search = Reflect.get(service, "helpdeskService").search as jest.Mock;
+      expect(search).toHaveBeenCalledWith(args);
+      const invalid = await rpc("tools/call", {
+        name: MCP_HELPDESK_TOOL_NAMES.SEARCH,
+        arguments: { ...args, appVersion: "99.0.0" },
+      });
+      expect(Boolean(invalid.error || invalid.result?.isError)).toBe(true);
+      expect(search).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("exposes global_search and public product guidance through the real SDK without authoring", async () => {
     const { rpc } = await catalog([MCP_SCOPES.SEARCH]);
     expect(
       (await rpc("tools/list")).result.tools.map((tool: { name: string }) => tool.name),
-    ).toEqual(["global_search"]);
+    ).toEqual(expect.arrayContaining(["global_search", ...Object.values(MCP_HELPDESK_TOOL_NAMES)]));
     for (const name of ["create_course", "list_users", "get_lesson"]) {
       const result = await rpc("tools/call", { name, arguments: {} });
       expect(Boolean(result.error || result.result?.isError)).toBe(true);
@@ -115,6 +152,7 @@ describe("MCP search scope runtime enforcement", () => {
     const names = (await rpc("tools/list")).result.tools.map((tool: { name: string }) => tool.name);
     expect(names.sort()).toEqual(
       [
+        ...Object.values(MCP_HELPDESK_TOOL_NAMES),
         "global_search",
         "list_courses",
         "get_course",
@@ -370,7 +408,11 @@ describe("MCP search scope runtime enforcement", () => {
     );
     for (const permissions of [[], [PERMISSIONS.USER_MANAGE]]) {
       const noContentAccess = await catalog([MCP_SCOPES.SEARCH], permissions);
-      expect((await noContentAccess.rpc("tools/list")).result.tools).toEqual([]);
+      expect(
+        (await noContentAccess.rpc("tools/list")).result.tools
+          .map((tool: { name: string }) => tool.name)
+          .sort(),
+      ).toEqual(Object.values(MCP_HELPDESK_TOOL_NAMES).sort());
     }
   });
 

@@ -8285,7 +8285,8 @@
       "qa": "Frage und Antwort",
       "development_path": "Lernpfad",
       "resource": "Ressource",
-      "reference": "Quelle"
+      "reference": "Quelle",
+      "helpdesk": "Hilfeanleitung"
     },
     "title": "Assistent",
     "eyebrow": "Wissen aus Ihrem Arbeitsbereich",
@@ -8370,6 +8371,42 @@
     "error": {
       "notFound": "Organisation nicht gefunden.",
       "inactive": "Diese Organisation ist inaktiv. Wende dich an deinen Administrator."
+    }
+  },
+  "helpdesk": {
+    "title": "Hilfe und Anleitungen",
+    "heading": "Wie können wir helfen?",
+    "subtitle": "Finde deinen nächsten Schritt in Mentingo.",
+    "loading": "Hilfe wird geladen",
+    "askAssistant": "Assistenten fragen",
+    "assistantHint": "Beschreibe, was du tun möchtest.",
+    "search": "Thema suchen oder Frage stellen…",
+    "clear": "Suche löschen",
+    "results": "Anleitungen",
+    "suggested": "Für dich empfohlen",
+    "empty": "Keine Anleitungen gefunden",
+    "emptyHint": "Versuche einen kürzeren Begriff oder ein anderes Thema.",
+    "chapterCount": "{{count}} Kapitel",
+    "timeline": "Video-Zeitleiste",
+    "jumpHint": "Wähle ein Kapitel, um zum Schritt zu springen",
+    "chapters": "In diesem Video",
+    "related": "Weitere Funktionen entdecken",
+    "domains": {
+      "authoring": "Kursbearbeitung",
+      "paths": "Entwicklungspfade",
+      "learning": "Lernen"
+    },
+    "keywordFallback": "Die KI-Suche ist nicht verfügbar. Es werden Stichworttreffer angezeigt.",
+    "languageFallback": "Video auf {{language}} verfügbar",
+    "retry": "Erneut versuchen",
+    "back": "Zurück zu Mentingo",
+    "chapterUnavailable": "Dieses Kapitel ist nicht mehr verfügbar. Das Video beginnt von vorn.",
+    "errors": {
+      "unavailable": "Anleitungen sind vorübergehend nicht verfügbar. Bitte versuche es erneut.",
+      "versionUnavailable": "Für diese Version von Mentingo ist noch keine Hilfe verfügbar.",
+      "disabled": "Hilfeanleitungen sind in dieser Installation nicht aktiviert.",
+      "notFound": "Diese Anleitung ist für deine Version von Mentingo nicht verfügbar.",
+      "invalidRequest": "Wähle eine verfügbare Anleitung oder ändere den Suchbegriff und versuche es erneut."
     }
   }
 }

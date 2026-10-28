@@ -8237,7 +8237,8 @@
       "qa": "Pregunta y respuesta",
       "development_path": "Ruta de aprendizaje",
       "resource": "Recurso",
-      "reference": "Fuente"
+      "reference": "Fuente",
+      "helpdesk": "Tutorial de ayuda"
     },
     "title": "Asistente",
     "eyebrow": "El conocimiento de tu plataforma",
@@ -8322,6 +8323,42 @@
     "error": {
       "notFound": "Organización no encontrada.",
       "inactive": "Esta organización está inactiva. Contacta con tu administrador."
+    }
+  },
+  "helpdesk": {
+    "title": "Ayuda y tutoriales",
+    "heading": "¿Cómo podemos ayudarte?",
+    "subtitle": "Encuentra tu próximo paso en Mentingo.",
+    "loading": "Cargando ayuda",
+    "askAssistant": "Preguntar al asistente",
+    "assistantHint": "Describe lo que quieres hacer.",
+    "search": "Busca un tema o haz una pregunta…",
+    "clear": "Borrar búsqueda",
+    "results": "Tutoriales",
+    "suggested": "Sugerencias para ti",
+    "empty": "No se encontraron tutoriales",
+    "emptyHint": "Prueba una frase más corta u otro tema.",
+    "chapterCount": "{{count}} capítulos",
+    "timeline": "Línea de tiempo del vídeo",
+    "jumpHint": "Selecciona un capítulo para ir a ese paso",
+    "chapters": "En este vídeo",
+    "related": "Descubre más funciones",
+    "domains": {
+      "authoring": "Edición de cursos",
+      "paths": "Itinerarios de desarrollo",
+      "learning": "Aprendizaje"
+    },
+    "keywordFallback": "La búsqueda con IA no está disponible. Se muestran coincidencias de palabras clave.",
+    "languageFallback": "Vídeo disponible en {{language}}",
+    "retry": "Volver a intentar",
+    "back": "Volver a Mentingo",
+    "chapterUnavailable": "Este capítulo ya no está disponible. El vídeo comienza desde el principio.",
+    "errors": {
+      "unavailable": "Los tutoriales no están disponibles temporalmente. Vuelve a intentarlo.",
+      "versionUnavailable": "La ayuda aún no está disponible para esta versión de Mentingo.",
+      "disabled": "Los tutoriales de ayuda no están activados en esta instalación.",
+      "notFound": "Este tutorial no está disponible para tu versión de Mentingo.",
+      "invalidRequest": "Elige un tutorial disponible o cambia la búsqueda y vuelve a intentarlo."
     }
   }
 }

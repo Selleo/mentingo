@@ -61,6 +61,7 @@ import { FileModule } from "./file/files.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
+import { HelpdeskModule } from "./helpdesk/helpdesk.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
@@ -150,6 +151,7 @@ import type { RedisClient } from "src/redis";
     }),
     AuthModule,
     HealthModule,
+    HelpdeskModule,
     UserModule,
     EmailModule,
     EmailTemplateModule,

@@ -1,5 +1,5 @@
 import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -60,6 +60,10 @@ class FakeVideoJsPlayer {
     };
 
     return this.on(eventName, wrappedListener);
+  }
+
+  emit(eventName: string) {
+    this.listeners.get(eventName)?.forEach((listener) => listener());
   }
 
   currentTime(value?: number) {
@@ -273,5 +277,33 @@ describe("VideoPlayer keyboard shortcuts", () => {
 
     expect(player.play).not.toHaveBeenCalled();
     expect(player.pause).not.toHaveBeenCalled();
+  });
+});
+
+describe("VideoPlayer chapter controls", () => {
+  beforeEach(() => {
+    player = new FakeVideoJsPlayer();
+  });
+
+  it("waits for metadata before seeking and allows revisiting the same timestamp", async () => {
+    player.readyState.mockReturnValue(0);
+    const props = {
+      provider: VIDEO_EMBED_PROVIDERS.SELF,
+      url: "https://example.com/video.mp4",
+      seekTo: 12,
+    };
+    const view = renderWith({ withQuery: true }).render(
+      <VideoPlayer {...props} seekRequestId={0} />,
+    );
+    expect(player.currentTime()).toBe(20);
+    player.readyState.mockReturnValue(1);
+    act(() => player.emit("loadedmetadata"));
+    expect(player.currentTime()).toBe(12);
+    view.rerender(<VideoPlayer {...props} seekRequestId={1} />);
+    await waitFor(() => expect(player.currentTime()).toBe(12));
+    player.currentTime(40);
+    view.rerender(<VideoPlayer {...props} seekRequestId={2} />);
+    await waitFor(() => expect(player.currentTime()).toBe(12));
+    expect(player.play).not.toHaveBeenCalled();
   });
 });

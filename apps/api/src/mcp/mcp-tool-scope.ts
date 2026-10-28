@@ -1,5 +1,7 @@
 import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES } from "@repo/shared";
 
+import { isMcpHelpdeskTool } from "./mcp-helpdesk.constants";
+
 export { MCP_REQUESTABLE_SCOPES, MCP_SCOPES };
 
 export type McpScope = (typeof MCP_SCOPES)[keyof typeof MCP_SCOPES];
@@ -212,6 +214,8 @@ export function areMcpScopeSetsEqual(left: unknown, right: unknown): boolean {
 
 export function canUseMcpToolWithScopes(name: string, scopes: unknown): boolean {
   if (!isMcpScopeSet(scopes)) return false;
+  // Existing valid grants may read public product guidance without gaining tenant data access.
+  if (isMcpHelpdeskTool(name)) return true;
   if (scopes.includes(MCP_SCOPES.STUDENT_READ)) return studentTools.has(name);
   if (scopes[0] === MCP_SCOPES.SEARCH) return name === "global_search";
   // New learner tools are available to normal account/domain reads, not frozen legacy authoring.

@@ -7815,7 +7815,8 @@
       "qa": "Question et réponse",
       "development_path": "Parcours d’apprentissage",
       "resource": "Ressource",
-      "reference": "Source"
+      "reference": "Source",
+      "helpdesk": "Tutoriel d’aide"
     },
     "title": "Assistant",
     "eyebrow": "Les connaissances de votre plateforme",
@@ -7900,6 +7901,42 @@
     "error": {
       "notFound": "Organisation introuvable.",
       "inactive": "Cette organisation est inactive. Contactez votre administrateur."
+    }
+  },
+  "helpdesk": {
+    "title": "Aide et tutoriels",
+    "heading": "Comment pouvons-nous vous aider ?",
+    "subtitle": "Trouvez votre prochaine étape dans Mentingo.",
+    "loading": "Chargement de l’aide",
+    "askAssistant": "Demander à l’assistant",
+    "assistantHint": "Décrivez ce que vous souhaitez faire.",
+    "search": "Recherchez un sujet ou posez une question…",
+    "clear": "Effacer la recherche",
+    "results": "Tutoriels",
+    "suggested": "Suggestions pour vous",
+    "empty": "Aucun tutoriel trouvé",
+    "emptyHint": "Essayez une expression plus courte ou un autre sujet.",
+    "chapterCount": "{{count}} chapitres",
+    "timeline": "Chronologie de la vidéo",
+    "jumpHint": "Sélectionnez un chapitre pour accéder à une étape",
+    "chapters": "Dans cette vidéo",
+    "related": "Découvrez d’autres fonctionnalités",
+    "domains": {
+      "authoring": "Édition de cours",
+      "paths": "Parcours de développement",
+      "learning": "Apprentissage"
+    },
+    "keywordFallback": "La recherche IA est indisponible. Les correspondances par mots-clés sont affichées.",
+    "languageFallback": "Vidéo disponible en {{language}}",
+    "retry": "Réessayer",
+    "back": "Retour à Mentingo",
+    "chapterUnavailable": "Ce chapitre n’est plus disponible. La vidéo commence au début.",
+    "errors": {
+      "unavailable": "Les tutoriels sont temporairement indisponibles. Veuillez réessayer.",
+      "versionUnavailable": "L’aide n’est pas encore disponible pour cette version de Mentingo.",
+      "disabled": "Les tutoriels d’aide ne sont pas activés sur cette installation.",
+      "notFound": "Ce tutoriel n’est pas disponible pour votre version de Mentingo.",
+      "invalidRequest": "Choisissez un tutoriel disponible ou modifiez votre recherche et réessayez."
     }
   }
 }

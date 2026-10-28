@@ -9,7 +9,7 @@ import {
 
 describe("MCP integration scope policy", () => {
   it.each([MCP_SCOPES.SEARCH, MCP_SCOPES.SEARCH_READ])(
-    "allows only global search with %s",
+    "allows content search while excluding tenant reads/writes with %s",
     (scope) => {
       expect(canUseMcpToolWithScopes("global_search", [scope])).toBe(true);
       expect(canUseMcpToolWithScopes("get_course", [scope])).toBe(false);

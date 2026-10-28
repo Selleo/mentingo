@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Layers,
   Link2,
+  CircleHelp,
   MessageCircleQuestion,
   Newspaper,
   Tag,
@@ -33,6 +34,7 @@ const sourceIcons = {
   qa: MessageCircleQuestion,
   development_path: Layers,
   resource: FolderOpen,
+  helpdesk: CircleHelp,
 };
 
 /** Uses only metadata already returned by an authorized Assistant read. */

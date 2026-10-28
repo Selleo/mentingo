@@ -8300,7 +8300,8 @@
       "qa": "Klausimas ir atsakymas",
       "development_path": "Mokymosi kelias",
       "resource": "Išteklius",
-      "reference": "Šaltinis"
+      "reference": "Šaltinis",
+      "helpdesk": "Pagalbos pamoka"
     },
     "title": "Asistentas",
     "eyebrow": "Jūsų platformos žinios",
@@ -8385,6 +8386,42 @@
     "error": {
       "notFound": "Organizacija nerasta.",
       "inactive": "Ši organizacija neaktyvi. Susisiekite su administratoriumi."
+    }
+  },
+  "helpdesk": {
+    "title": "Pagalba ir pamokos",
+    "heading": "Kaip galime padėti?",
+    "subtitle": "Rask kitą žingsnį Mentingo.",
+    "loading": "Įkeliama pagalba",
+    "askAssistant": "Klausti asistento",
+    "assistantHint": "Aprašyk, ką nori padaryti.",
+    "search": "Ieškok temos arba užduok klausimą…",
+    "clear": "Išvalyti paiešką",
+    "results": "Pamokos",
+    "suggested": "Siūloma tau",
+    "empty": "Pamokų nerasta",
+    "emptyHint": "Išbandyk trumpesnę frazę arba kitą temą.",
+    "chapterCount": "{{count}} skyriai",
+    "timeline": "Vaizdo laiko juosta",
+    "jumpHint": "Pasirink skyrių ir pereik į norimą žingsnį",
+    "chapters": "Šiame vaizdo įraše",
+    "related": "Atrask daugiau funkcijų",
+    "domains": {
+      "authoring": "Kursų redagavimas",
+      "paths": "Tobulėjimo keliai",
+      "learning": "Mokymasis"
+    },
+    "keywordFallback": "DI paieška nepasiekiama. Rodomi raktažodžių atitikmenys.",
+    "languageFallback": "Vaizdo įrašas prieinamas {{language}} kalba",
+    "retry": "Bandyti dar kartą",
+    "back": "Grįžti į Mentingo",
+    "chapterUnavailable": "Šis skyrius nebepasiekiamas. Vaizdo įrašas rodomas nuo pradžių.",
+    "errors": {
+      "unavailable": "Pamokos laikinai nepasiekiamos. Bandykite dar kartą.",
+      "versionUnavailable": "Šiai Mentingo versijai pagalba dar nepasiekiama.",
+      "disabled": "Šioje sistemoje pagalbos pamokos neįjungtos.",
+      "notFound": "Ši pamoka nepasiekiama jūsų Mentingo versijai.",
+      "invalidRequest": "Pasirinkite pasiekiamą pamoką arba pakeiskite paieškos frazę ir bandykite dar kartą."
     }
   }
 }

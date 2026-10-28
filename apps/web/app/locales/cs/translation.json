@@ -8302,7 +8302,8 @@
       "qa": "Otázka a odpověď",
       "development_path": "Vzdělávací cesta",
       "resource": "Materiál",
-      "reference": "Zdroj"
+      "reference": "Zdroj",
+      "helpdesk": "Návod nápovědy"
     },
     "title": "Asistent",
     "eyebrow": "Znalosti z vaší platformy",
@@ -8387,6 +8388,42 @@
     "error": {
       "notFound": "Organizace nebyla nalezena.",
       "inactive": "Tato organizace je neaktivní. Kontaktujte svého správce."
+    }
+  },
+  "helpdesk": {
+    "title": "Nápověda a návody",
+    "heading": "Jak vám můžeme pomoci?",
+    "subtitle": "Najděte další krok v Mentingo.",
+    "loading": "Načítání nápovědy",
+    "askAssistant": "Zeptat se asistenta",
+    "assistantHint": "Popište, co chcete udělat.",
+    "search": "Vyhledejte téma nebo položte otázku…",
+    "clear": "Vymazat hledání",
+    "results": "Návody",
+    "suggested": "Doporučeno pro vás",
+    "empty": "Žádné návody nenalezeny",
+    "emptyHint": "Zkuste kratší frázi nebo jiné téma.",
+    "chapterCount": "{{count}} kapitol",
+    "timeline": "Časová osa videa",
+    "jumpHint": "Vyberte kapitolu a přejděte na daný krok",
+    "chapters": "V tomto videu",
+    "related": "Objevte další funkce",
+    "domains": {
+      "authoring": "Úprava kurzů",
+      "paths": "Rozvojové cesty",
+      "learning": "Učení"
+    },
+    "keywordFallback": "Vyhledávání AI není dostupné. Zobrazují se shody klíčových slov.",
+    "languageFallback": "Video je dostupné v jazyce {{language}}",
+    "retry": "Zkusit znovu",
+    "back": "Zpět do Mentingo",
+    "chapterUnavailable": "Tato kapitola již není dostupná. Video se přehrává od začátku.",
+    "errors": {
+      "unavailable": "Návody jsou dočasně nedostupné. Zkuste to znovu.",
+      "versionUnavailable": "Pro tuto verzi Mentingo zatím není nápověda dostupná.",
+      "disabled": "Návody nápovědy nejsou v této instalaci zapnuté.",
+      "notFound": "Tento návod není pro vaši verzi Mentingo dostupný.",
+      "invalidRequest": "Vyberte dostupný návod nebo upravte vyhledávání a zkuste to znovu."
     }
   }
 }

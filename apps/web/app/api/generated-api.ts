@@ -8954,6 +8954,161 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface HelpdeskSearchRequest {
+  /**
+   * @maxLength 500
+   * @pattern ^[^\u0000]*$
+   */
+  query: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  pageKey?: string;
+  domain?: "development-paths" | "course-authoring" | "course-learning";
+  /**
+   * @min 1
+   * @max 10
+   */
+  limit?: number;
+}
+
+export interface HelpdeskSearchResponse {
+  data: {
+    mode: "hybrid" | "keyword_fallback" | "browse";
+    /** @maxItems 10 */
+    results: {
+      tutorial: {
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        key: string;
+        /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+        revisionId: string;
+        domain: "development-paths" | "course-authoring" | "course-learning";
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        title: string;
+        /**
+         * @minLength 1
+         * @maxLength 8000
+         */
+        description: string;
+        /**
+         * @minLength 2
+         * @maxLength 35
+         * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+         */
+        language: string;
+        languageFallback: boolean;
+        /**
+         * @min 1
+         * @max 86400000
+         */
+        durationMs: number;
+        /** @maxLength 2048 */
+        videoUrl: string;
+        /** @maxLength 2048 */
+        posterUrl: string;
+        /**
+         * @maxItems 100
+         * @minItems 1
+         */
+        chapters: {
+          /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+          id: string;
+          /**
+           * @minLength 1
+           * @maxLength 200
+           */
+          title: string;
+          /**
+           * @minLength 1
+           * @maxLength 4000
+           */
+          description: string;
+          /** @min 0 */
+          startMs: number;
+          /** @min 0 */
+          endMs: number;
+        }[];
+        /** @maxItems 64 */
+        pageKeys: string[];
+      };
+      chapterId?: string | null;
+      /** @maxLength 10000 */
+      excerpt: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+      rankScore: number;
+    }[];
+  };
+}
+
+export interface HelpdeskTutorialResponse {
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+    revisionId: string;
+    domain: "development-paths" | "course-authoring" | "course-learning";
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 8000
+     */
+    description: string;
+    /**
+     * @minLength 2
+     * @maxLength 35
+     * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+     */
+    language: string;
+    languageFallback: boolean;
+    /**
+     * @min 1
+     * @max 86400000
+     */
+    durationMs: number;
+    /** @maxLength 2048 */
+    videoUrl: string;
+    /** @maxLength 2048 */
+    posterUrl: string;
+    /**
+     * @maxItems 100
+     * @minItems 1
+     */
+    chapters: {
+      /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+      id: string;
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      title: string;
+      /**
+       * @minLength 1
+       * @maxLength 4000
+       */
+      description: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+    }[];
+    /** @maxItems 64 */
+    pageKeys: string[];
+  };
+}
+
+export interface HelpdeskDomainsResponse {
+  data: ("development-paths" | "course-authoring" | "course-learning")[];
+}
+
 export interface ListEmailTemplateEventsResponse {
   data: {
     kind:
@@ -31500,7 +31655,8 @@ export interface ListMessagesResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31562,7 +31718,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31591,7 +31748,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -40484,6 +40642,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor" | "assistant";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name IngestionControllerIngest
      * @request POST:/api/ingestion/ingest
      */
@@ -41544,6 +41793,60 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         }
       >({
         path: `/api/healthcheck`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name SearchHelpdesk
+     * @request POST:/api/helpdesk/search
+     */
+    searchHelpdesk: (data: HelpdeskSearchRequest, params: RequestParams = {}) =>
+      this.request<HelpdeskSearchResponse, any>({
+        path: `/api/helpdesk/search`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskTutorial
+     * @request GET:/api/helpdesk/tutorials/{key}
+     */
+    getHelpdeskTutorial: (
+      key: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HelpdeskTutorialResponse, any>({
+        path: `/api/helpdesk/tutorials/${key}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskDomains
+     * @request GET:/api/helpdesk/domains
+     */
+    getHelpdeskDomains: (params: RequestParams = {}) =>
+      this.request<HelpdeskDomainsResponse, any>({
+        path: `/api/helpdesk/domains`,
         method: "GET",
         format: "json",
         ...params,
@@ -43596,6 +43899,166 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/report/summary`,
         method: "GET",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetAvailability
+     * @request GET:/api/assistant/availability
+     */
+    assistantControllerGetAvailability: (params: RequestParams = {}) =>
+      this.request<GetAvailabilityResponse, any>({
+        path: `/api/assistant/availability`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListThreads
+     * @request GET:/api/assistant/threads
+     */
+    assistantControllerListThreads: (
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        archived?: boolean;
+        /** @maxLength 200 */
+        query?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListThreadsResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCreateThread
+     * @request POST:/api/assistant/threads
+     */
+    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetThread
+     * @request GET:/api/assistant/threads/{threadId}
+     */
+    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerUpdateThread
+     * @request PATCH:/api/assistant/threads/{threadId}
+     */
+    assistantControllerUpdateThread: (
+      threadId: string,
+      data: UpdateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListMessages
+     * @request GET:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerListMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMessagesResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerSendMessage
+     * @request POST:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerSendMessage: (
+      threadId: string,
+      data: SendMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendMessageResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCancelRun
+     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
+     */
+    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
+      this.request<CancelRunResponse, any>({
+        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
+        method: "POST",
+        format: "json",
         ...params,
       }),
 
@@ -46310,257 +46773,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetAvailability
-     * @request GET:/api/assistant/availability
-     */
-    assistantControllerGetAvailability: (params: RequestParams = {}) =>
-      this.request<GetAvailabilityResponse, any>({
-        path: `/api/assistant/availability`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListThreads
-     * @request GET:/api/assistant/threads
-     */
-    assistantControllerListThreads: (
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        archived?: boolean;
-        /** @maxLength 200 */
-        query?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListThreadsResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCreateThread
-     * @request POST:/api/assistant/threads
-     */
-    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetThread
-     * @request GET:/api/assistant/threads/{threadId}
-     */
-    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
-      this.request<GetThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerUpdateThread
-     * @request PATCH:/api/assistant/threads/{threadId}
-     */
-    assistantControllerUpdateThread: (
-      threadId: string,
-      data: UpdateThreadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListMessages
-     * @request GET:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerListMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListMessagesResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerSendMessage
-     * @request POST:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerSendMessage: (
-      threadId: string,
-      data: SendMessageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SendMessageResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCancelRun
-     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
-     */
-    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
-      this.request<CancelRunResponse, any>({
-        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
-     * @request GET:/api/admin/ai-threads
-     */
-    adminAiThreadsControllerGetAdminAiThreadSummaries: (
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        /** @format uuid */
-        userId?: string;
-        /** @maxLength 200 */
-        search?: string;
-        /** @format date-time */
-        from?: string;
-        /** @format date-time */
-        to?: string;
-        type?: "practice" | "ai-mentor" | "assistant";
-        status?: "active" | "completed" | "archived";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadSummariesResponse, any>({
-        path: `/api/admin/ai-threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
-     * @request GET:/api/admin/ai-threads/{threadId}
-     */
-    adminAiThreadsControllerGetAdminAiThreadDetails: (
-      threadId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadDetailsResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
-     * @request GET:/api/admin/ai-threads/{threadId}/messages
-     */
-    adminAiThreadsControllerGetAdminAiThreadMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadMessagesResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

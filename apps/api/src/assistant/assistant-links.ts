@@ -4,6 +4,8 @@ import {
   type AssistantSourceType,
 } from "@repo/shared";
 
+import { isMcpHelpdeskTool, MCP_HELPDESK_GUIDANCE_KIND } from "src/mcp/mcp-helpdesk.constants";
+
 import type { AssistantSource } from "./assistant.types";
 
 const previewText = (value: string, maxLength: number) =>
@@ -14,7 +16,31 @@ const previewText = (value: string, maxLength: number) =>
     .slice(0, maxLength);
 
 /** Validate the returned identity against an actual web destination; never promote file or arbitrary URLs. */
-function sourceType(row: Record<string, unknown>, url: URL): AssistantSourceType | undefined {
+function sourceType(
+  row: Record<string, unknown>,
+  url: URL,
+  allowHelpdesk: boolean,
+): AssistantSourceType | undefined {
+  if (row.entityType === ASSISTANT_SOURCE_TYPES.HELPDESK) {
+    if (!allowHelpdesk || row.guidanceKind !== MCP_HELPDESK_GUIDANCE_KIND || url.hash) return;
+    if (
+      typeof row.tutorialKey !== "string" ||
+      !/^[a-z0-9][a-z0-9._-]{0,127}$/.test(row.tutorialKey)
+    )
+      return;
+    if (url.pathname !== `/helpdesk/tutorials/${encodeURIComponent(row.tutorialKey)}`) return;
+    const parameters = [...url.searchParams.entries()];
+    if (typeof row.chapterId === "string") {
+      if (!/^[a-z0-9][a-z0-9._-]{0,127}$/.test(row.chapterId)) return;
+      if (
+        parameters.length !== 1 ||
+        parameters[0][0] !== "chapter" ||
+        parameters[0][1] !== row.chapterId
+      )
+        return;
+    } else if (parameters.length) return;
+    return ASSISTANT_SOURCE_TYPES.HELPDESK;
+  }
   const id = typeof row.id === "string" ? encodeURIComponent(row.id) : undefined;
   if (!id || url.hash) return;
   if (url.search && !["/qa", "/development-paths"].includes(url.pathname)) return;
@@ -63,8 +89,14 @@ function sourceType(row: Record<string, unknown>, url: URL): AssistantSourceType
   }
 }
 
-/** Only metadata already returned by authorized tools is saved for previews. */
-export function collectAssistantSources(result: unknown, origin: string): AssistantSource[] {
+/** Only authorized tool metadata is saved for previews. Product guidance additionally
+ * requires a registered Helpdesk tool origin; a marked URL in other data is insufficient. */
+export function collectAssistantSources(
+  result: unknown,
+  origin: string,
+  toolName?: string,
+): AssistantSource[] {
+  const allowHelpdesk = typeof toolName === "string" && isMcpHelpdeskTool(toolName);
   const sources = new Map<string, AssistantSource>();
   const visit = (value: unknown, depth: number) => {
     if (depth > 12 || !value || typeof value !== "object") return;
@@ -76,7 +108,7 @@ export function collectAssistantSources(result: unknown, origin: string): Assist
     if (typeof row.url === "string") {
       try {
         const url = new URL(row.url);
-        const entityType = sourceType(row, url);
+        const entityType = sourceType(row, url, allowHelpdesk);
         if (entityType && url.origin === new URL(origin).origin && !url.username && !url.password) {
           let title = [row.firstName, row.lastName]
             .filter((part) => typeof part === "string")

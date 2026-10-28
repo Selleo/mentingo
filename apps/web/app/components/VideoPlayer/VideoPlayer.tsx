@@ -47,6 +47,11 @@ interface VideoPlayerProps {
   coverageTracking?: VideoCoverageTrackingOptions;
   pauseRequestId?: number;
   resumeRequestId?: number;
+  /** Seek after metadata is ready; increment request ID to revisit the same timestamp. */
+  seekTo?: number;
+  seekRequestId?: number;
+  onTimeUpdate?: (seconds: number) => void;
+  poster?: string;
 }
 
 type VideoJSType = ReturnType<typeof videojs>;
@@ -182,6 +187,10 @@ export const VideoPlayer = ({
   coverageTracking,
   pauseRequestId,
   resumeRequestId,
+  seekTo,
+  seekRequestId,
+  onTimeUpdate,
+  poster,
 }: VideoPlayerProps) => {
   const [controlsVisible, setControlsVisible] = useState(true);
   const [player, setPlayer] = useState<VideoJSType | null>(null);
@@ -568,6 +577,43 @@ export const VideoPlayer = ({
     url,
     type,
   ]);
+
+  useEffect(() => {
+    if (player && poster) player.poster(poster);
+  }, [player, poster]);
+
+  useEffect(() => {
+    if (!player || seekTo === undefined || !Number.isFinite(seekTo)) return;
+
+    const applySeek = () => {
+      if (player.isDisposed()) return;
+      const duration = player.duration();
+      const target =
+        typeof duration === "number" && Number.isFinite(duration) && duration > 0
+          ? Math.min(Math.max(0, seekTo), Math.max(0, duration - 0.1))
+          : Math.max(0, seekTo);
+      player.currentTime(target);
+    };
+
+    if (player.readyState() >= 1) applySeek();
+    else player.on("loadedmetadata", applySeek);
+
+    return () => {
+      player.off("loadedmetadata", applySeek);
+    };
+  }, [player, seekTo, seekRequestId, url]);
+
+  useEffect(() => {
+    if (!player || !onTimeUpdate) return;
+    const reportTime = () => {
+      const seconds = player.currentTime();
+      if (typeof seconds === "number" && Number.isFinite(seconds)) onTimeUpdate(seconds);
+    };
+    player.on("timeupdate", reportTime);
+    return () => {
+      player.off("timeupdate", reportTime);
+    };
+  }, [player, onTimeUpdate]);
 
   useEffect(() => {
     const sourceKey = lastSourceRef.current;

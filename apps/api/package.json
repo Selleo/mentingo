@@ -36,7 +36,8 @@
     "content-marketplace:mock": "tsx ./scripts/contentMarketplaceMock.ts",
     "workflow:build": "node --input-type=module -e \"import { resolve } from 'node:path'; import { NestLocalBuilder } from '@workflow/nest/builder'; await new NestLocalBuilder({ workingDir: process.cwd(), dirs: ['src/assistant/workflow'], outDir: resolve('dist/workflow'), moduleType: 'commonjs', distDir: 'dist/src/assistant/workflow', sourcemap: false }).build();\"",
     "workflow:typecheck": "tsc --project tsconfig.workflow.json",
-    "db:migrate:prod": "node -r dotenv/config -e \"require('./dist/src/storage/db/database-migration.service').runDatabaseMigrations().catch(() => process.exitCode = 1)\""
+    "db:migrate:prod": "node -r dotenv/config -e \"require('./dist/src/storage/db/database-migration.service').runDatabaseMigrations().catch(() => process.exitCode = 1)\"",
+    "helpdesk:generate-schema": "node -r ts-node/register/transpile-only -r tsconfig-paths/register scripts/generate-helpdesk-schema.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.8",
@@ -58,6 +59,7 @@
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
     "@mentingo/content-marketplace-sdk": "0.1.0",
+    "@mentingo/guide-sdk": "file:../../vendor/mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz",
     "@mentingo/luma-sdk": "0.4.0",
     "@mentingo/phishing-simulation-sdk": "0.1.1",
     "@microsoft/microsoft-graph-client": "3.0.7",

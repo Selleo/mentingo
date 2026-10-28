@@ -1,0 +1,9 @@
+{
+  "name": "@mentingo/guide-sdk",
+  "version": "0.1.0",
+  "sourceRepository": "Selleo/mentingo-plugins",
+  "sourceCommit": "ae57e24b8904a32fa7e576ed983d2bab3c01ec85",
+  "sha256": "d9a3905f60316613aaeca29056e06a680cf83b30bf955b2420421b7f56b49974",
+  "artifact": "mentingo-guide-sdk-0.1.0-d9a3905f6031.tgz",
+  "scope": "Generated public client only; no private Helpdesk service implementation"
+}
