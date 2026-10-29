@@ -85,7 +85,7 @@ def collect(run, cache, out):
 
     def export(path, root, scope, *, failure=False):
         suffix = path.suffix.lower()
-        timeline = path.name == 'timeline.json' and not failure
+        timeline = path.name in ('timeline.json', 'claim-review.json') and not failure
         text = suffix in TEXT or timeline or failure and path.name == 'error-context.md'
         if suffix not in MEDIA and not text:
             return

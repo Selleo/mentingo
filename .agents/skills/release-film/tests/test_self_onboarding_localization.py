@@ -23,6 +23,45 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def review_fixture(self, answers):
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {'actions_text': ['Open editor', 'Save']})
+        story = {'chapters': [copy.deepcopy(self.chapter)], 'keys': {'F1': str(folder)}}
+        self.patch(recording.review, 'sheets', return_value=['review/chapter-1.jpg'])
+        self.patch(recording.llm, 'capabilities', return_value={'review': True})
+        model = self.patch(recording.llm, 'visual', side_effect=[(json.dumps(v), {}) for v in answers])
+        return story, model
+
+    def test_tutorial_wording_is_repaired_and_rechecked_without_losing_action_pins(self):
+        claim = {'sentence': 1, 'problem': 'Hidden behavior is not visible', 'fix': 'Open the visible path editor.'}
+        story, model = self.review_fixture([
+            {'complete': True, 'missing': [], 'claims': [claim]},
+            {'complete': True, 'missing': [], 'claims': []}])
+        pins = [s['action'] for s in story['chapters'][0]['sentences']]
+        recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(story['chapters'][0]['sentences'][0]['text'], claim['fix'])
+        self.assertEqual([s['action'] for s in story['chapters'][0]['sentences']], pins)
+        self.assertEqual(model.call_count, 2)
+        self.assertIn('not a release recap', model.call_args.args[0])
+        self.assertEqual(len(core.load(self.root/'run/review/claim-review.json')['reviews']), 2)
+
+    def test_missing_required_action_blocks_instead_of_rewriting_it_away(self):
+        story, model = self.review_fixture([{'complete': False, 'missing': ['Save was never shown'], 'claims': []}])
+        before = copy.deepcopy(story)
+        with self.assertRaisesRegex(RuntimeError, 'Save was never shown'):
+            recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(story, before)
+        model.assert_called_once()
+
+    def test_persistent_unsupported_claims_stop_after_two_corrections_with_findings_saved(self):
+        result = {'complete': True, 'missing': [], 'claims': [
+            {'sentence': 1, 'problem': 'Outcome not visible', 'fix': 'Open the editor.'}]}
+        story, model = self.review_fixture([result] * 3)
+        with self.assertRaisesRegex(RuntimeError, 'after two wording corrections.*Outcome not visible'):
+            recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(model.call_count, 3)
+        self.assertEqual(len(core.load(self.root/'run/review/claim-review.json')['reviews']), 3)
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)

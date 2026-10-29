@@ -89,6 +89,9 @@ may have only diagnostics and screenshots because recording has not begun.
 This preserves reviewable footage without publishing an incomplete guide.
 Browser sessions, traces, private build checkpoints and checkout source are excluded.
 The artifact is for inspection; test retries still start with fresh build state.
+`run/review/claim-review.json` records tutorial review findings and up to two
+wording-correction attempts. Each correction is rechecked against the footage;
+missing required actions and persistent unsupported claims still block generation.
 
 ## Required configuration
 
