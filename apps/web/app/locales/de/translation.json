@@ -2518,6 +2518,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Schlüssel anzeigen",
+      "hide": "Schlüssel verbergen",
+      "saveError": "Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "platformSettings": "Plattformeinstellungen",
+      "description": "Verbinden Sie die Plattform mit externen Diensten. Wählen Sie eine Integration, um ihre Schlüssel hinzuzufügen oder zu ersetzen.",
+      "filters": "Integrationen filtern",
+      "status": {
+        "all": "Alle",
+        "configured": "Konfiguriert",
+        "attention": "Handlungsbedarf",
+        "notConfigured": "Nicht konfiguriert",
+        "unknown": "Status nicht verfügbar"
+      },
+      "attention": "{{count}} Integrationen erfordern Aufmerksamkeit:",
+      "showIssues": "Probleme anzeigen",
+      "missingKeys": "Fehlende Konfiguration: {{keys}}",
+      "close": "Editor schließen",
+      "cancel": "Abbrechen",
+      "saveChanges": "Änderungen speichern",
+      "empty": "Keine Integrationen entsprechen diesem Filter.",
+      "statusError": "Der Konfigurationsstatus konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "secretError": "Der Schlüssel konnte nicht geladen werden. Versuchen Sie erneut, ihn anzuzeigen.",
+      "legend": "Grün: alle Schlüssel konfiguriert. Orange: einige Schlüssel fehlen. Grau gestrichelt: keine Schlüssel konfiguriert. Der Status zeigt die Vollständigkeit der Konfiguration, nicht den Verbindungszustand.",
+      "categories": {
+        "signIn": "Anmeldung",
+        "calendar": "Kalender",
+        "payments": "Zahlungen",
+        "video": "Video",
+        "ai": "KI",
+        "liveTraining": "Live-Schulung",
+        "security": "Sicherheit"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Anmeldung mit Google",

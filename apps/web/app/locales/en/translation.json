@@ -2519,6 +2519,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Show secret",
+      "hide": "Hide secret",
+      "saveError": "Could not save changes. Please try again.",
+      "platformSettings": "Platform settings",
+      "description": "Connect the platform to external services. Select an integration to add or replace its keys.",
+      "filters": "Filter integrations",
+      "status": {
+        "all": "All",
+        "configured": "Configured",
+        "attention": "Needs attention",
+        "notConfigured": "Not configured",
+        "unknown": "Status unavailable"
+      },
+      "attention": "{{count}} integrations need attention:",
+      "showIssues": "Show issues",
+      "missingKeys": "Missing configuration: {{keys}}",
+      "close": "Close editor",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "empty": "No integrations match this filter.",
+      "statusError": "Configuration status could not be loaded.",
+      "retry": "Try again",
+      "secretError": "The secret could not be loaded. Try revealing it again.",
+      "legend": "Green: all keys are configured. Orange: some keys are missing. Dashed grey: no keys are configured. Status reflects configuration completeness, not connection health.",
+      "categories": {
+        "signIn": "Sign-in",
+        "calendar": "Calendar",
+        "payments": "Payments",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Live training",
+        "security": "Security"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Google sign-in",

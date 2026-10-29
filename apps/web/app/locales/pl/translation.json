@@ -2771,6 +2771,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Pokaż klucz",
+      "hide": "Ukryj klucz",
+      "saveError": "Nie udało się zapisać zmian. Spróbuj ponownie.",
+      "platformSettings": "Ustawienia platformy",
+      "description": "Połącz platformę z zewnętrznymi usługami. Kliknij kafelek, aby uzupełnić lub podmienić klucze danej integracji.",
+      "filters": "Filtruj integracje",
+      "status": {
+        "all": "Wszystkie",
+        "configured": "Skonfigurowane",
+        "attention": "Wymaga uwagi",
+        "notConfigured": "Nie skonfigurowano",
+        "unknown": "Status niedostępny"
+      },
+      "attention": "Integracje wymagające uwagi: {{count}}.",
+      "showIssues": "Pokaż problemy",
+      "missingKeys": "Brakujące klucze: {{keys}}",
+      "close": "Zamknij edytor",
+      "cancel": "Anuluj",
+      "saveChanges": "Zapisz zmiany",
+      "empty": "Brak integracji pasujących do tego filtra.",
+      "statusError": "Nie udało się wczytać stanu konfiguracji.",
+      "retry": "Spróbuj ponownie",
+      "secretError": "Nie udało się wczytać klucza. Spróbuj ponownie go wyświetlić.",
+      "legend": "Zielona ramka: wszystkie klucze są skonfigurowane. Pomarańczowa: brakuje części kluczy. Przerywana szara: brak skonfigurowanych kluczy. Status określa kompletność konfiguracji, nie stan połączenia.",
+      "categories": {
+        "signIn": "Logowanie",
+        "calendar": "Kalendarz",
+        "payments": "Płatności",
+        "video": "Wideo",
+        "ai": "AI",
+        "liveTraining": "Szkolenia na żywo",
+        "security": "Bezpieczeństwo"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Logowanie przez Google",
