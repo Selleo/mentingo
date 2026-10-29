@@ -1,4 +1,5 @@
 /** Provides the compact course-authoring composer and controlled optional configuration surfaces. */
+import { COURSE_AUTHORING_EXECUTION_MODES, type CourseAuthoringExecutionMode } from "@repo/shared";
 import { FileText, LoaderCircle, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -154,7 +155,9 @@ export const AuthoringBriefPanel = ({
   const [instruction, setInstruction] = useState("");
   const [reasoningEffort, setReasoningEffort] =
     useState<AuthoringRequest["reasoningEffort"]>("medium");
-  const [executionMode, setExecutionMode] = useState<"review" | "autonomous">("review");
+  const [executionMode, setExecutionMode] = useState<CourseAuthoringExecutionMode>(
+    COURSE_AUTHORING_EXECUTION_MODES.REVIEW,
+  );
   const [policy, setPolicy] = useState<SourcePolicy>(
     initialSourcePolicy === null ? freshSessionPolicy : (initialSourcePolicy ?? emptyPolicy),
   );
@@ -212,7 +215,7 @@ export const AuthoringBriefPanel = ({
     const sessionChanged = previousSessionId !== sessionId;
     if (sessionChanged) {
       sessionIdRef.current = sessionId;
-      if (previousSessionId) setExecutionMode("review");
+      if (previousSessionId) setExecutionMode(COURSE_AUTHORING_EXECUTION_MODES.REVIEW);
       pendingPolicySelectionsRef.current = [];
       incomingPolicySequenceRef.current = null;
       setStrictSourceMode(false);
@@ -480,8 +483,14 @@ export const AuthoringBriefPanel = ({
             course={course}
             policy={policy}
             strictSourceMode={strictSourceMode}
-            autopilot={executionMode === "autonomous"}
-            onAutopilotChange={(enabled) => setExecutionMode(enabled ? "autonomous" : "review")}
+            autopilot={executionMode === COURSE_AUTHORING_EXECUTION_MODES.AUTONOMOUS}
+            onAutopilotChange={(enabled) =>
+              setExecutionMode(
+                enabled
+                  ? COURSE_AUTHORING_EXECUTION_MODES.AUTONOMOUS
+                  : COURSE_AUTHORING_EXECUTION_MODES.REVIEW,
+              )
+            }
             executionModeDisabled={disabled || isSubmitting || hasActiveGeneration}
             disabled={disabled}
             open={toolsOpen}

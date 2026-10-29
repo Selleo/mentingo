@@ -23,7 +23,7 @@ import type {
   PROPOSAL_DECISION,
 } from "./review/curriculumReview.constants";
 import type { ReviewProposal } from "./review/curriculumReview.types";
-import type { SupportedLanguages } from "@repo/shared";
+import type { CourseAuthoringExecutionMode, SupportedLanguages } from "@repo/shared";
 
 export type AuthoringSessionStatus =
   (typeof AUTHORING_SESSION_STATUS)[keyof typeof AUTHORING_SESSION_STATUS];
@@ -228,7 +228,7 @@ export type TargetRef = {
 export type AuthoringRequest = {
   instruction: string;
   reasoningEffort: "low" | "medium" | "high";
-  executionMode?: "review" | "autonomous";
+  executionMode?: CourseAuthoringExecutionMode;
   targets: TargetRef[];
   sourcePolicy: SourcePolicy;
   attachedSourceVersionIds?: string[];

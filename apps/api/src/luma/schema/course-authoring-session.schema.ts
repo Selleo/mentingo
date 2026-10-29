@@ -6,7 +6,7 @@ import {
   TurnPartStatus,
   TurnStatus,
 } from "@mentingo/luma-sdk";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_AUTHORING_EXECUTION_MODES, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema, paginatedResponse } from "src/common";
@@ -99,7 +99,7 @@ const request = Type.Object(
   {
     instruction: Type.String({ minLength: 1, maxLength: 20000 }),
     reasoningEffort: Type.Optional(Type.Enum(ReasoningEffort)),
-    executionMode: Type.Optional(Type.Union([Type.Literal("review"), Type.Literal("autonomous")])),
+    executionMode: Type.Optional(Type.Enum(COURSE_AUTHORING_EXECUTION_MODES)),
     targets: Type.Array(target),
     sourcePolicy,
     attachedSourceVersionIds: Type.Optional(Type.Array(UUIDSchema)),
