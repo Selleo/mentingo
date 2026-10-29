@@ -1,0 +1,234 @@
+name: Helpdesk feature videos
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact version tag to demonstrate (no GitHub Release required)
+        required: true
+        type: string
+      domains:
+        description: Comma-separated domains; empty means all reviewed registry domains
+        default: ''
+        type: string
+      languages:
+        description: Comma-separated recorded languages (en,pl)
+        default: en
+        type: string
+      force:
+        description: Explicitly regenerate all flows in the selected domains
+        default: false
+        type: boolean
+      dry_run:
+        description: Analyze coverage and flow changes without recording or publishing
+        default: false
+        type: boolean
+      publish:
+        description: Publish the reviewed feature videos to Helpdesk
+        default: true
+        type: boolean
+      resume_publication:
+        description: Resume the saved pending bundle without analysis or recording
+        default: false
+        type: boolean
+      retry_failed:
+        description: Explicitly retry recoverable failed media/indexing operations while resuming
+        default: false
+        type: boolean
+permissions: {}
+concurrency:
+  # This also serializes the private build-state writer across recording/publication.
+  group: helpdesk-feature-videos
+  cancel-in-progress: false
+  queue: max
+jobs:
+  generate:
+    name: Analyze flows and build affected feature videos
+    if: github.ref_name == github.event.repository.default_branch
+    environment: release-film
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    env:
+      RELEASE_FILM_HOME: /mnt/helpdesk-film
+      RELEASE_FILM_CI: '1'
+      RELEASE_FILM_CI_WORKERS: '1'
+      S: .agents/skills/release-film/scripts
+      CACHE: ${{ runner.temp }}/helpdesk-build
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Resolve version and validate configuration
+        env:
+          VERSION_TAG: ${{ inputs.version }}
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
+          git rev-parse --verify "refs/tags/$VERSION_TAG^{commit}" >/dev/null
+          test -n "$STORE"
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME/projects"
+          cp .agents/skills/release-film/projects/selleo__mentingo.json "$RELEASE_FILM_HOME/projects/selleo__mentingo.json"
+      - name: Restore private reusable flow segments and publication progress
+        id: restore
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/helpdesk_store.py" pull --uri "$STORE" --cache "$CACHE"
+      - name: Install recorder tools
+        if: ${{ !inputs.resume_publication }}
+        run: bash .agents/skills/release-film/ci/install-tools.sh
+      - name: Analyze business-spec coverage and actual flow changes
+        if: ${{ !inputs.resume_publication }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          VERSION_TAG: ${{ inputs.version }}
+          DOMAINS: ${{ inputs.domains }}
+          LANGUAGES: ${{ inputs.languages }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(plan --target "$VERSION_TAG" --cache "$CACHE" --out "$RUNNER_TEMP/helpdesk-plan.json" \
+            --domains "$DOMAINS" --languages "$LANGUAGES")
+          if [ "$FORCE" = true ]; then args+=(--force); fi
+          python3 "$S/helpdesk.py" "${args[@]}"
+      - name: Record changed flows and assemble complete videos
+        if: ${{ !inputs.dry_run && !inputs.resume_publication }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID_EN: ${{ vars.ELEVENLABS_VOICE_ID_EN }}
+          ELEVENLABS_VOICE_ID_PL: ${{ vars.ELEVENLABS_VOICE_ID_PL }}
+          ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2' }}
+        run: |
+          python3 "$S/helpdesk.py" generate --plan "$RUNNER_TEMP/helpdesk-plan.json" --cache "$CACHE" \
+            --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/helpdesk-$GITHUB_RUN_ID" \
+            --out "$CACHE/bundles/$GITHUB_RUN_ID" --workflow-run-id "$GITHUB_RUN_ID"
+      - name: Validate a resumed bundle belongs to the requested version
+        if: ${{ inputs.resume_publication && !inputs.dry_run }}
+        env:
+          VERSION_TAG: ${{ inputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          cache = pathlib.Path(os.environ['CACHE']).resolve()
+          state = json.loads((cache/'state.json').read_text())
+          bundle = (cache/state['pendingBundle']).resolve()
+          assert bundle.is_relative_to(cache)
+          manifest = json.loads((bundle/'manifest.json').read_text())
+          commit = subprocess.check_output(['git','rev-parse','refs/tags/'+os.environ['VERSION_TAG']+'^{commit}'], text=True).strip()
+          assert manifest['commit'] == commit, 'Pending bundle records another version'
+          assert manifest['version'] == os.environ['VERSION_TAG'].removeprefix('v'), 'Pending bundle has another version tag'
+          PY
+      - name: Redact recording text before saving build files
+        id: redact
+        if: ${{ always() && steps.restore.outcome == 'success' && !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 .agents/skills/release-film/ci/redact.py "$RELEASE_FILM_HOME/runs" "$CACHE"
+      - name: Checkpoint private segments even after an interrupted later flow
+        if: ${{ always() && steps.restore.outcome == 'success' && steps.redact.outcome == 'success' && !inputs.dry_run }}
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/helpdesk_store.py" push --uri "$STORE" --cache "$CACHE"
+      - name: Report semantic decisions
+        if: ${{ always() && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['RUNNER_TEMP'])/'helpdesk-plan.json'
+          if path.exists():
+              for report in json.loads(path.read_text())['reports']:
+                  print(f"### {report['version']} / {report['language']}")
+                  for domain in report['domains']:
+                      print(f"- {domain['title']}: coverage {domain.get('coverage',{}).get('decision','blocked')}")
+                      for flow in domain['flows']:
+                          print(f"  - {flow['id']}: {flow['action']} ({flow['reason']})")
+                      if domain.get('error'): print('- Blocked: '+domain['error'])
+          PY
+  publish:
+    name: Upload directly to Bunny and publish indexed revisions
+    needs: generate
+    if: ${{ inputs.publish && !inputs.dry_run }}
+    environment: helpdesk-publishing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    permissions:
+      contents: read
+    env:
+      CACHE: ${{ runner.temp }}/helpdesk-build
+      S: .agents/skills/release-film/scripts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Install the pinned Guide SDK and existing TUS client
+        run: corepack pnpm install --frozen-lockfile
+      - name: Restore the private publication bundle
+        id: restore
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/helpdesk_store.py" pull --uri "$STORE" --cache "$CACHE"
+      - name: Publish the verified bundle through the Guide SDK
+        env:
+          GUIDE_API_URL: ${{ vars.GUIDE_API_URL }}
+          GUIDE_PUBLISH_API_KEY: ${{ secrets.GUIDE_PUBLISH_API_KEY }}
+          RETRY_FAILED: ${{ inputs.retry_failed }}
+        run: |
+          bundle=$(python3 - <<'PY'
+          import json, os, pathlib
+          cache = pathlib.Path(os.environ['CACHE']).resolve()
+          state = json.loads((cache/'state.json').read_text())
+          pending = state.get('pendingBundle')
+          if pending:
+              path = (cache/pending).resolve()
+              assert path.is_relative_to(cache)
+              print(path)
+          PY
+          )
+          if [ -n "$bundle" ]; then
+            args=(--bundle "$bundle" --state "$CACHE/state.json" --output "$RUNNER_TEMP/helpdesk-publication.json")
+            if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
+            node scripts/helpdesk-publish/publisher.mjs "${args[@]}"
+            python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['CACHE'])/'state.json'
+          state = json.loads(path.read_text())
+          manifest = json.loads((path.parent/state['pendingBundle']/'manifest.json').read_text())
+          for entry in manifest['domains']:
+              state['languages'][entry['language']]['domains'][entry['key']]['needsPublication'] = False
+          state.pop('pendingBundle', None)
+          path.write_text(json.dumps(state))
+          PY
+          fi
+      - name: Preserve resumable upload and finalization progress
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/helpdesk_store.py" push --uri "$STORE" --cache "$CACHE"

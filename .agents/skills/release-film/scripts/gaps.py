@@ -397,13 +397,14 @@ def stop_workers(run):
     return stopped
 
 
-def wait_for_workers(run, grace=30, on_done=None, on_stopped=None):
+def wait_for_workers(run, grace=30, on_done=None, on_stopped=None, only=None):
     """Wait until every scene worker has ended, each at most until its limit (plus ``grace``): one still running then
-    is killed with everything it started, and its queued try dropped. ``on_done(scene id)`` is called once for each
+    is killed with everything it started, and its queued try dropped. ``only`` limits waiting/quorum to the selected tutorial flow, ignoring earlier workers.
+    ``on_done(scene id)`` is called once for each
     worker that ended with its scene filmed and narrated, ``on_stopped(scene id)`` for each one killed (its scene may
     be filmed but not narrated). {scene id: its last words} (the CLI's answer)."""
     run = Path(run)
-    folders = [p.parent for p in (run / 'gaps').glob('*/worker.json')]
+    folders = [p.parent for p in (run / 'gaps').glob('*/worker.json') if only is None or p.parent.name in only]
     workers = {f: core.load(f / 'worker.json') or {} for f in folders}
     def kill_at(folder, worker):  # a filmed scene still being narrated gets a little longer: its narration is quick
         limit = deadlines(run, worker.get('started', 0), folder.name)[1] + grace

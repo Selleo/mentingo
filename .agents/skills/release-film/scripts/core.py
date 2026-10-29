@@ -267,7 +267,9 @@ PROJECT_ENV = frozenset(('HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'LANG', 'LA
 # CI credentials besides the seat's token, which only the film's own steps use (GitHub's API): a scene worker and the
 # scene code it runs get none of them (gaps.worker_environ); ci/redact.py hides any that reached a run's files
 CI_SECRETS = ('GH_TOKEN', 'GITHUB_TOKEN', 'ACTIONS_RUNTIME_TOKEN', 'ACTIONS_RUNTIME_URL', 'ACTIONS_CACHE_URL',
-              'ACTIONS_RESULTS_URL', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'ACTIONS_ID_TOKEN_REQUEST_URL')
+              'ACTIONS_RESULTS_URL', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'ACTIONS_ID_TOKEN_REQUEST_URL',
+              'ELEVENLABS_API_KEY', 'GUIDE_PUBLISH_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
+              'AWS_SESSION_TOKEN')
 
 
 def project_environ():

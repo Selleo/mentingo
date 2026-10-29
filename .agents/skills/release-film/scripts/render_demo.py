@@ -149,7 +149,10 @@ def load_plan(path, enforce_duration=True, strict=True):
     path = Path(path).resolve()
     warnings = []
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
+    mode = data.get('mode', 'release')
+    if mode not in ('release', 'tutorial'):
+        raise ValueError('Unknown film mode')
     colors = colors_of(data.get('colors'))
     def asset(name):
         if not isinstance(name, str) or not name:
@@ -168,12 +171,15 @@ def load_plan(path, enforce_duration=True, strict=True):
         raise ValueError('Expected 1–20 chapters')
     segments, captions, steps, chapters, cursor, held = [], [], [], [], 0.0, 0.0
     for chapter in data['chapters']:
-        fields(chapter, ['title', 'prs', 'audio', 'audio_offset', 'clips', 'captions', 'review_points', 'steps'], ['title', 'prs', 'audio', 'clips', 'captions'])
+        fields(chapter, ['title', 'prs', 'audio', 'audio_offset', 'clips', 'captions', 'review_points', 'steps', 'id'], ['title', 'prs', 'audio', 'clips', 'captions'])
         title = chapter['title']
         if not isinstance(title, str) or not title.strip() or '\n' in title or len(title) > 85:
             raise ValueError('Chapter title must be one nonempty line, at most 85 characters')
-        if not isinstance(chapter['prs'], list) or not chapter['prs'] or any(not isinstance(p, str) or not p.startswith('https://github.com/') or '/pull/' not in p for p in chapter['prs']):
-            raise ValueError('Each chapter needs real GitHub PR URLs')
+        source_kind = '/blob/' if mode == 'tutorial' else '/pull/'
+        if not isinstance(chapter['prs'], list) or not chapter['prs'] or any(not isinstance(p, str) or not p.startswith('https://github.com/') or source_kind not in p for p in chapter['prs']):
+            raise ValueError('Each chapter needs real GitHub source URLs' if mode == 'tutorial' else 'Each chapter needs real GitHub PR URLs')
+        if mode == 'tutorial' and not re.fullmatch(r'[a-z0-9][a-z0-9._-]{0,127}', chapter.get('id', '')):
+            raise ValueError('Tutorial chapters need stable IDs')
         audio = asset(chapter['audio'])
         audio_info = input_probe(audio)
         if not any(s['codec_type'] == 'audio' for s in audio_info['streams']):
@@ -242,7 +248,8 @@ def load_plan(path, enforce_duration=True, strict=True):
         fields(points, ['action', 'result'], [])
         for label, value in points.items():
             number(value, f'review {label}', 2, chapter_duration - 1/30)
-        chapters.append(dict(review_points=points, title=title, prs=chapter['prs'], start=start, duration=chapter_duration, audio=audio, audio_offset=offset, audio_duration=audio_duration))
+        chapters.append(dict(review_points=points, title=title, prs=chapter['prs'], start=start, duration=chapter_duration, audio=audio, audio_offset=offset, audio_duration=audio_duration,
+                             **({'id': chapter['id']} if mode == 'tutorial' else {})))
     if held > cursor * .2:
         if strict:
             raise ValueError('Result images exceed 20% of film')
@@ -642,7 +649,8 @@ def render(plan, out, jobs=2, cache=None, plan_fingerprint=None):
     run(['ffmpeg', '-v', 'error', '-ss', min(3, plan['duration'] / 2), '-i', target, '-frames:v', '1', '-update', '1', out / 'poster.jpg'])
     card_starts = [t['start'] for t in timeline if t['kind'] == 'card']
     boundaries = card_starts + [sum(t['duration'] for t in timeline)]
-    result['chapters'] = [dict(title=c['title'], prs=c['prs'], start=boundaries[i], duration=boundaries[i+1]-boundaries[i]) for i, c in enumerate(plan['chapters'])]
+    result['chapters'] = [dict(title=c['title'], prs=c['prs'], start=boundaries[i], duration=boundaries[i+1]-boundaries[i],
+                               **({'id': c['id']} if 'id' in c else {})) for i, c in enumerate(plan['chapters'])]
     result['artifact_sha256'] = {name: file_digest(out / name, {}) for name in ('demo.mp4', 'poster.jpg', f"captions-{plan['language']}.srt",
                                                                            f"captions-{plan['language']}.vtt")}
     result['plan_fingerprint'] = plan_fingerprint or fingerprint(plan)
@@ -667,15 +675,17 @@ def prepare(path, out, enforce_duration=True, strict=True):
     started = time.monotonic()
     path, out = Path(path).resolve(), Path(out).resolve()
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
     if not isinstance(data['chapters'], list) or not data['chapters']:
         raise ValueError('Expected authored chapters')
     result = dict(font=str((path.parent / data['font']).resolve()), chapters=[], language=data.get('language') or 'pl')
+    if 'mode' in data:
+        result['mode'] = data['mode']
     if data.get('colors') is not None:
         result['colors'] = data['colors']
     caption_timing = []
     for chapter in data['chapters']:
-        fields(chapter, ['title', 'prs', 'audio', 'srt', 'audio_offset', 'clips', 'review_points', 'caption_limits', 'steps'],
+        fields(chapter, ['title', 'prs', 'audio', 'srt', 'audio_offset', 'clips', 'review_points', 'caption_limits', 'steps', 'id'],
                ['title', 'prs', 'audio', 'srt', 'clips'])
         copied = dict(chapter)
         limits = copied.pop('caption_limits', None)  # where the picture leaves each sentence (montage.caption_limits)

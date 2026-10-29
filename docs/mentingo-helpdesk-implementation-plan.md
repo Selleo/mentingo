@@ -1,6 +1,6 @@
 # Mentingo Helpdesk Core integration plan
 
-Status: SDK retrieval, Core UI and MCP/assistant integration implemented, 2026-10-28. Tutorial generation and its trusted publishing workflow are the next slice. This document covers changes in Mentingo Core only.
+Status: SDK retrieval, Core UI and MCP/assistant integration implemented, 2026-10-28. Version-triggered flow generation, ElevenLabs narration and the trusted publishing workflow are implemented; provider-backed production validation remains pending. This document covers changes in Mentingo Core only.
 
 ## Ownership
 
@@ -20,24 +20,24 @@ Domain means a Mentingo product area, not a hostname or language. Language is an
 
 Add a version-controlled tutorial registry in Mentingo. Each entry declares a stable tutorial key, domain, audience, stable page keys, source specs and headings, watched code paths, tasks demonstrated, relevant feature flags, and desired language variants. Use existing Mentingo supported-language values; only advertise languages with actual recordings. Start with English recordings, matching the existing recorder; add Polish as an explicit next content batch.
 
-Examples: `course-authoring.create-course`, `course-authoring.edit-curriculum`, `development-paths.create-path`, `course-learning.resume-course`. One video covers one coherent task or closely related task group; do not produce a single growing video for an entire domain. Chapters represent searchable subtopics within it.
+One video per feature area and language contains its complete set of explicit flows. Stable video keys are `development-paths.guide`, `course-authoring.guide` and `course-learning.guide`. Flows such as create, edit, delete, assignment and import/export are independently reusable segments and searchable chapters. The reviewed registry currently contains 58 flows derived from business specs.
 
 Generation reads the business specs at the exact target release commit, then verifies the described behavior against the application and deterministic demo data. Specs describe intended behavior but do not prove a recorded interaction succeeded. Record synthetic users/courses only. Do not publish internal specs, prompts, logs, or customer data as public tutorial text.
 
-Release workflow finds changed specs AND watched implementation paths. A code change can invalidate a tutorial even if its spec was not updated. Include shared navigation dependencies. Unknown mappings produce a coverage warning; do not silently declare coverage complete. Manual dispatch supports domains, tutorial keys, languages, release tag, base tag, dry-run, and forced regeneration. An unchanged tutorial is reused.
+Version-tag pushes queue the trusted workflow without requiring a GitHub Release. Changed specs, watched implementation paths and shared navigation select candidates for semantic flow comparison, not automatic rerecording. The last checked commit of each flow is the baseline. Evidence-backed unchanged decisions reuse clips; newly documented flows and explicitly retired flows are applied as source-bounded data contracts and rechecked for complete coverage. Uncertainty blocks generation with a decision report. Manual dispatch selects domains, languages, version, dry-run, forced regeneration and publication resume.
 
-Keep the release-summary film intact. Add tutorial mode that teaches the complete current task, not “what changed in this release.” Reuse the recorder, narration, visual checks, captions, and rendering machinery. Remove release-film-only constraints such as a minimum of three chapters from tutorial mode. One-topic tutorials must be valid.
+Keep the release-summary film intact. Tutorial mode teaches complete current flows, with no recap framing or chapter-dropping to meet a word/duration budget. Reuse the camera, visual checks, captions and renderer. ElevenLabs narration uses the repository secret `ELEVENLABS_API_KEY` and configured voice IDs/model. Retain immutable segments and narration in private S3-compatible storage so only changed flows are recorded/voiced again; assemble/upload a successor feature video when its contents change.
 
 Carry stable chapter IDs through the story and rendering pipeline. Export actual starts/ends from the final rendered timeline, never planned timings or chapter-array positions. Chapter removal/reordering during review must retain the correct ID mapping. Validate narration/caption alignment and duration after rendering.
 
 ## Publishing workflow integration
 
 1. Generate a tutorial artifact containing the video, public title/description, chapters/transcript/captions, stable tutorial and chapter IDs, domain, language, page keys, release compatibility and source provenance.
-2. A dedicated trusted publishing job validates artifact origin and checksums, then authenticates to Helpdesk with the GitHub environment secret `HELP_PUBLISH_TOKEN`. Keep this credential out of AI recording jobs and untrusted PR execution.
-3. Create a draft revision through the Helpdesk API using an idempotency key and expected predecessor. Poll the returned operation until upload authorization is ready.
+2. A dedicated trusted publishing job validates artifact origin and checksums, then authenticates to Helpdesk with the GitHub environment secret `GUIDE_PUBLISH_API_KEY`. Keep this credential out of AI recording jobs and untrusted PR execution.
+3. Create a draft revision through the Guide SDK using an idempotency key and expected predecessor, prepare its media and poll that operation before requesting upload authorization.
 4. Upload bytes to the returned Bunny TUS endpoint using the short-lived grant. Resume interrupted uploads against the same asset; refresh expired authorization through Helpdesk. Core never holds the Bunny library API key.
-5. Finalize the revision and poll its operation until published or failed. Emit the public tutorial link only after publication. Surface structured failure/retry state in the workflow summary.
-6. For modifications, create a successor revision; metadata-only changes may reuse the media asset according to the API contract. Do not overwrite a published file or assume upload completion means publication.
+5. Finalize the revision and poll verification/indexing. Explicitly publish only after finalization succeeds. Emit the public tutorial link only after publication. Surface structured failure/retry state in the workflow summary.
+6. For modifications, create a successor revision and upload its assembled video; the current API does not promise cross-revision media reuse. Do not overwrite a published file or assume upload completion means publication.
 
 Keep the existing release-film workflow available. Add filtered tutorial generation and publishing as its own mode/workflow. Reuse existing artifact provenance checks. Exact service endpoint schemas and generated client fixtures are maintained by the Helpdesk app; pin the client to a compatible contract version.
 
@@ -59,15 +59,15 @@ Reuse `apps/web/app/components/ui/popover.tsx` and existing dialog/sheet primiti
 
 Use the Mentingo backend as a thin query relay so existing generated client/auth patterns remain intact: browser -> Mentingo API -> Helpdesk. It derives supported app version and safe page context, forwards only explicit help text/filters, enforces bounded timeouts, and performs no indexing. Do not forward cookies or auth headers. The assistant backend calls the same Helpdesk retrieval API through its actual tool adapter. The new service does not replace Mentingo's assistant.
 
-Add a typed help-video source/reference to assistant results with tutorial/revision/chapter IDs. Clicking resolves and validates the reference before playback. Never execute arbitrary deep links or use arbitrary URLs produced by the model. If suggesting “open this page,” resolve a known page key locally and apply normal access checks. If the assistant is unavailable, video search remains usable.
+Add a typed help-video source/reference to assistant results with tutorial/revision/chapter IDs. Clicking resolves and validates the reference before opening the shared video popup at the matching chapter, without navigating away from the conversation. The popup omits the extra segmented bar below the video and uses its chapter list for seeking. Never execute arbitrary deep links or use arbitrary URLs produced by the model. If suggesting “open this page,” resolve a known page key locally and apply normal access checks. If the assistant is unavailable, video search remains usable.
 
 Use TanStack Query and regenerated Mentingo client contracts for relay APIs. No per-installation secrets or search database are introduced. On Helpdesk outage show retry and cached recent topics where available; the rest of Mentingo stays functional. Existing query cache supports transient outages; persistent offline catalogs are out of scope for v1.
 
 ## Core implementation slices
 
-- [ ] Tutorial registry mapping business specs and implementation paths to domains, tutorial IDs, audiences and page keys.
-- [ ] Tutorial recording mode and final-timeline export with stable chapter identities, including single-chapter tutorials.
-- [ ] Typed publishing client, trusted publication job, scoped API-key use, resumable uploads and operation polling.
+- [x] Tutorial registry mapping business specs and implementation paths to domains, tutorial IDs, audiences and page keys.
+- [x] Tutorial recording mode and final-timeline export with stable chapter identities, including single-chapter tutorials.
+- [x] Typed publishing client, trusted publication job, scoped API-key use, resumable uploads and operation polling.
 - [x] Typed retrieval relay using the locally installed Guide SDK, generated Core client, page-context registry and reusable help panel/results/player.
 - [x] Existing assistant and MCP read-tool integration with validated video citations and authenticated local tutorial/chapter navigation.
 - [x] Business spec update via the Mentingo feature-overview workflow for the delivered retrieval slice.
@@ -90,12 +90,16 @@ Core references: `.github/workflows/release-film.yml`, `release-film-on-release.
 
 Architecture decision: keep the catalog, embeddings and publication lifecycle in the plugins service. Core adds a thin SDK adapter shared by REST and MCP, using existing authentication and generated-client patterns. This slice introduces no Core persistence, worker or permission model; this document records the boundary without adding a separate Core ADR.
 
-The Core branch is based on staging commit `fcbef011f`. The Help & tutorials entry in the user dropdown and mobile menu uses real generated Core requests; local example results and sample footage have been removed. Search, related suggestions, chapter playback and authenticated `/helpdesk/tutorials/:key?chapter=...` links consume validated service metadata. Topic labels remain descriptive, without filter chips. All seven current locales are covered.
+The Core branch is based on staging commit `fcbef011f`. The Help & tutorials entry in the user dropdown and mobile menu uses real generated Core requests; local example results and sample footage have been removed. Search, related suggestions, chapter playback and assistant video popups consume validated service metadata. Authenticated `/helpdesk/tutorials/:key?chapter=...` links remain available as direct destinations. Topic labels remain descriptive, without filter chips. All seven current locales are covered.
 
-`HelpdeskModule` provides authenticated search, tutorial lookup and domain metadata. `HelpdeskService` derives the release and enabled feature keys from server state, validates explicit help input and calls the read-only Guide SDK with a five-second timeout. It does not index content, accept publishing keys or forward tenant data. Both `search_helpdesk` and `get_helpdesk_tutorial` are registered for valid MCP actors and the existing native assistant. Their results remain product guidance rather than evidence about tenant content. Canonical citations open the authenticated chapter route.
+`HelpdeskModule` provides authenticated search, tutorial lookup and domain metadata. `HelpdeskService` derives the release and enabled feature keys from server state, validates explicit help input and calls the read-only Guide SDK with a five-second timeout. It does not index content, accept publishing keys or forward tenant data. Both `search_helpdesk` and `get_helpdesk_tutorial` are registered for valid MCP actors and the existing native assistant. Their results remain product guidance rather than evidence about tenant content. Canonical citations open the shared video popup inside the assistant, using current compatible metadata and validated chapter IDs. Direct tutorial URLs continue to resolve through the authenticated route.
 
 The plugins repository owns `@mentingo/guide-sdk`, including generated Axios contracts and typed publishing operations. Core currently installs its client-only tarball as a relative `file:` dependency; `vendor/mentingo-guide-sdk.json` pins its source commit and SHA256. See `vendor/README.md` for reproducible replacement steps. Publishing operations are available in the SDK but intentionally excluded from Core's injected client. The generation workflow must use the SDK's explicit prepare-upload, finalize, operation-poll and publish sequence when implemented; finalization success alone does not publish.
 
 Configure the API with `HELPDESK_ENABLED`, `HELPDESK_API_URL` and optional `HELPDESK_APP_VERSION`. Released builds use `apps/api/version.json`; custom/dev builds with `0.0.0` require a known base release override. Local validation uses the separate service on `http://127.0.0.1:3110` and base release `4.25.0` from the worktree's nearest release tag. The local service now loads its ignored `apps/helpdesk/.env`, with a matching ignored copy in the plugins main worktree. Two approved, clearly labelled demo clips have been uploaded through SDK grants, verified/indexed and published. Their chapter labels are illustrative; real tutorial generation remains pending.
 
 Focused backend/MCP/assistant and frontend tests cover this slice. The UI defaults to keyword search and restores the shared Search with AI row for explicit hybrid requests; editing resets to keywords. The selected strategy is validated and forwarded through REST, MCP and the SDK. Rust keyword mode bypasses all embedding and vector work. Live OpenAI indexing/retrieval and Bunny HLS delivery have been checked using the two approved demos. Earlier authenticated smoke checks also cover domains, missing tutorials and session enforcement. Actual model tool selection, browser playback and automated video production remain unverified. See `docs/specs/helpdesk-business-spec.md` for the current workflow and evidence boundaries.
+
+## Version-driven workflow delivery
+
+The implemented commands, secrets, private storage, retry behavior and validation boundaries are documented in `scripts/helpdesk-publish/WORKFLOW.md`. Automatic batches check all reviewed domains; manual domain selection permits a smaller first production run. Production configuration, real complete-flow recordings and hosted playback are pending. Typed chapter-level prerequisite filtering and fully localized feature metadata are not part of this workflow slice.

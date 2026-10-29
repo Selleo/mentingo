@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 """Narration with word timings: audio.mp3 plus a word-level SRT in the written words. Every voice is told the same
 text (pronunciation.speakable, in the film's language: in Polish numbers, units, dates and abbreviations in words);
-captions keep the written text. Two voices:
+captions keep the written text. Three providers:
 - edge: edge-tts, Microsoft's free neural voices (pl-PL-MarekNeural, en-US-GuyNeural), whose service times each word;
   the voice in CI;
 - voxcpm: VoxCPM2 (OpenBMB, Apache-2.0) on this machine's GPU, where `film.py voice-setup` installed it: one sentence at
   a time in the narrator's voice (its reference recording in the film's language), each word timed by its share of the
-  sentence's syllables.
+  sentence's syllables;
+- elevenlabs: the configured voice/model through the fixed API's with-timestamps endpoint. Character timing evidence
+  becomes word captions; failures do not fall back to another voice or automatically repeat a paid request.
 
 Run with the Python that has the engine: voice.py <jobs.json>, jobs = [{"text", "sentences", "out", "engine",
 "language", "voice", "lexicon"}]; voice.py --narrator <narrator.json>: the narrator's reference recordings.
 """
 import asyncio
+import base64
+import binascii
 import json
+import math
 import os
 from pathlib import Path
 import re
 import sys
+import urllib.error
+import urllib.request
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.dont_write_bytecode = True
@@ -29,6 +36,149 @@ REFERENCE = 12  # seconds of a given recording the narrator's voice is cloned fr
 # chapters ranged from -25.9 to -30 LUFS; its peaks stay under the ceiling
 LOUDNESS = -19.5
 CEILING = 10 ** (-1.5 / 20)
+ELEVENLABS_MODEL = 'eleven_multilingual_v2'
+ELEVENLABS_OUTPUT = 'mp3_44100_128'
+ELEVENLABS_RESPONSE_LIMIT = 24 * 1024 * 1024
+ELEVENLABS_TIMEOUT = 120
+ELEVENLABS_TEXT_LIMIT = 6_000
+
+
+def elevenlabs_config(addon, code):
+    """Nonsecret, cacheable narrator identity. Voice IDs may be configured per language or supplied by CI."""
+    config = addon.get('elevenlabs') or {}
+    if not isinstance(config, dict):
+        raise ValueError('elevenlabs must be a configuration object')
+    voices = config.get('voice_ids') or {}
+    if not isinstance(voices, dict):
+        raise ValueError('elevenlabs.voice_ids must map language codes to voice IDs')
+    voice = os.environ.get(f'ELEVENLABS_VOICE_ID_{code.upper()}') or os.environ.get('ELEVENLABS_VOICE_ID') \
+        or voices.get(code) or config.get('voice_id')
+    model = os.environ.get('ELEVENLABS_MODEL_ID') or config.get('model_id') or ELEVENLABS_MODEL
+    if not isinstance(voice, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', voice):
+        raise ValueError(f'Configure ELEVENLABS_VOICE_ID_{code.upper()} or elevenlabs.voice_ids.{code}')
+    if not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', model):
+        raise ValueError('Invalid ElevenLabs model_id')
+    settings = config.get('voice_settings') or {}
+    if not isinstance(settings, dict) or set(settings) - {'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'}:
+        raise ValueError('Invalid ElevenLabs voice_settings')
+    for name, value in settings.items():
+        if name == 'use_speaker_boost':
+            if not isinstance(value, bool):
+                raise ValueError('ElevenLabs use_speaker_boost must be boolean')
+        elif type(value) not in (int, float) or not math.isfinite(value) \
+                or not ((0.7 <= value <= 1.2) if name == 'speed' else (0 <= value <= 1)):
+            raise ValueError(f'Invalid ElevenLabs {name} setting')
+    return {'voice': voice, 'model_id': model, 'voice_settings': dict(settings),
+            'output_format': ELEVENLABS_OUTPUT, 'apply_text_normalization': 'off'}
+
+
+class NoVoiceRedirects(urllib.request.HTTPRedirectHandler):
+    """Never forward the provider key, including to a redirect on another origin."""
+
+    def redirect_request(self, request, fp, code, message, headers, new_url):
+        return None
+
+
+def elevenlabs_request(voice, payload, api_key):
+    """A bounded, single paid request to the fixed provider origin; failures never echo bodies or credentials."""
+    url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={ELEVENLABS_OUTPUT}'
+    request = urllib.request.Request(url, json.dumps(payload).encode('utf-8'),
+                                     headers={'Content-Type': 'application/json', 'xi-api-key': api_key}, method='POST')
+    try:
+        opener = urllib.request.build_opener(NoVoiceRedirects())
+        with opener.open(request, timeout=ELEVENLABS_TIMEOUT) as response:
+            raw = response.read(ELEVENLABS_RESPONSE_LIMIT + 1)
+    except urllib.error.HTTPError as error:
+        raise ValueError(f'ElevenLabs speech request failed (HTTP {error.code}); no automatic paid retry') from None
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError):
+        raise ValueError('ElevenLabs speech request failed or timed out; no automatic paid retry') from None
+    if len(raw) > ELEVENLABS_RESPONSE_LIMIT:
+        raise ValueError('ElevenLabs response exceeds the size limit')
+    try:
+        result = json.loads(raw)
+    except (UnicodeError, json.JSONDecodeError):
+        raise ValueError('ElevenLabs returned invalid JSON') from None
+    if not isinstance(result, dict):
+        raise ValueError('ElevenLabs returned an invalid response')
+    return result
+
+
+def aligned_words(alignment, spoken):
+    """Validate character timing evidence and fold it into the word events used by captions and montage."""
+    if not isinstance(alignment, dict):
+        raise ValueError('ElevenLabs returned no character alignment')
+    chars = alignment.get('characters')
+    starts = alignment.get('character_start_times_seconds')
+    ends = alignment.get('character_end_times_seconds')
+    if not isinstance(chars, list) or not isinstance(starts, list) or not isinstance(ends, list) \
+            or not chars or len(chars) != len(starts) or len(chars) != len(ends) \
+            or any(not isinstance(char, str) or len(char) != 1 for char in chars):
+        raise ValueError('ElevenLabs returned malformed character alignment')
+    text = ''.join(chars)
+    if text != spoken:
+        raise ValueError('ElevenLabs alignment does not match the requested narration')
+    previous_start = previous_end = 0.0
+    for start, end in zip(starts, ends):
+        if type(start) not in (int, float) or type(end) not in (int, float) \
+                or not math.isfinite(start) or not math.isfinite(end) \
+                or start < previous_start or end < previous_end or start < 0 or end < start or end > 3_600:
+            raise ValueError('ElevenLabs returned invalid character timestamps')
+        previous_start, previous_end = start, end
+    events = []
+    for match in re.finditer(r'\S+', text):
+        if not any(char.isalnum() for char in match.group()):
+            continue
+        start, end = starts[match.start()], ends[match.end() - 1]
+        if end <= start or (events and start < (events[-1]['offset'] + events[-1]['duration']) / 1e7):
+            raise ValueError('ElevenLabs returned overlapping or empty word timestamps')
+        events.append({'type': 'WordBoundary', 'offset': round(start * 1e7), 'duration': round((end - start) * 1e7),
+                       'text': match.group()})
+    if not events:
+        raise ValueError('ElevenLabs returned no word timings')
+    return events
+
+
+def elevenlabs(jobs):
+    """One request per chapter, preserving written captions; the key is read only here and never serialized."""
+    results = []
+    for job in jobs:
+        try:
+            api_key = os.environ.get('ELEVENLABS_API_KEY')
+            if not api_key:
+                raise ValueError('ELEVENLABS_API_KEY is required for ElevenLabs narration')
+            config = elevenlabs_config({'elevenlabs': {'voice_id': job.get('voice'), 'model_id': job.get('model_id'),
+                                                       'voice_settings': job.get('voice_settings')}}, job.get('language') or 'en')
+            spoken, units = pronunciation.speakable(job['text'], job.get('lexicon') or {}, job.get('language') or 'en')
+            if not spoken.strip() or len(spoken) > ELEVENLABS_TEXT_LIMIT:
+                raise ValueError(f'ElevenLabs narration must contain 1-{ELEVENLABS_TEXT_LIMIT} characters per flow')
+            payload = {'text': spoken, 'model_id': config['model_id'], 'voice_settings': config['voice_settings'],
+                       'apply_text_normalization': 'off'}
+            # Multilingual v2 does not accept language_code. The written/spoken text already has its language.
+            if config['model_id'] != 'eleven_multilingual_v2':
+                payload['language_code'] = job.get('language') or 'en'
+            answer = elevenlabs_request(config['voice'], payload, api_key)
+            events = aligned_words(answer.get('alignment') or answer.get('normalized_alignment'), spoken)
+            audio_base64 = answer.get('audio_base64')
+            if not isinstance(audio_base64, str):
+                raise ValueError('ElevenLabs returned no audio')
+            try:
+                audio = base64.b64decode(audio_base64, validate=True)
+            except (ValueError, binascii.Error):
+                raise ValueError('ElevenLabs returned invalid audio encoding') from None
+            if not audio:
+                raise ValueError('ElevenLabs returned empty audio')
+            differently = []
+            captions = srt(pronunciation.written_events(units, events, differently))
+            out = Path(job['out'])
+            out.mkdir(parents=True, exist_ok=True)
+            (out / 'audio.mp3').write_bytes(audio)
+            (out / 'subtitles.srt').write_text(captions, encoding='utf-8')
+            results.append({'out': str(out), 'terms': pronunciation.used_terms(units), 'read_differently': differently})
+        except (KeyError, TypeError, ValueError) as error:
+            # Only our own validation/provider errors are returned, never an arbitrary transport response or secret.
+            message = str(error) if isinstance(error, ValueError) else 'Invalid ElevenLabs narration job'
+            results.append({'out': str(job.get('out') or ''), 'error': message})
+    return results
 
 
 async def speak(job):
@@ -229,7 +379,14 @@ def main():
         return
     jobs = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
     engines = {job.get('engine') or 'edge' for job in jobs}
-    results = voxcpm(jobs) if engines == {'voxcpm'} else asyncio.run(edge(jobs))
+    if engines == {'voxcpm'}:
+        results = voxcpm(jobs)
+    elif engines == {'elevenlabs'}:
+        results = elevenlabs(jobs)
+    elif engines == {'edge'}:
+        results = asyncio.run(edge(jobs))
+    else:
+        raise SystemExit('Voice jobs must use one supported engine: edge, voxcpm or elevenlabs')
     print(json.dumps(results, ensure_ascii=False))
 
 

@@ -22,6 +22,7 @@ import metrics
 import montage
 import pronunciation
 import takes
+import voice as voice_provider
 
 POLISH = 'ąćęłńóśźżĄĆĘŁŃÓŚŹŻ„”–'
 CHAPTER_TAIL = 1.5  # seconds of the test kept after a chapter's last narrated action
@@ -146,20 +147,56 @@ def voice_ready():
 
 
 def engine():
-    """The narrator: RELEASE_FILM_VOICE when set (edge or voxcpm); else edge-tts, Microsoft's free voices, locally as
+    """The narrator: RELEASE_FILM_VOICE when set; else edge-tts, Microsoft's free voices, locally as
     in CI. VoxCPM2 clones every sentence anew, and its tone changed from chapter to chapter; it speaks only when asked."""
     chosen = os.environ.get('RELEASE_FILM_VOICE')
-    if chosen and chosen not in ('edge', 'voxcpm'):
-        raise SystemExit(f'RELEASE_FILM_VOICE must be edge or voxcpm, not {chosen!r}')
+    if chosen and chosen not in ('edge', 'voxcpm', 'elevenlabs'):
+        raise SystemExit(f'RELEASE_FILM_VOICE must be edge, voxcpm or elevenlabs, not {chosen!r}')
     return chosen or 'edge'
 
 
-def spoken(run, story):
-    """Whether the run's voice (voice/c<n>) speaks the story's sentences as they are now."""
-    cached = core.load(Path(run) / 'voice' / 'done.json') or {}
-    texts = [' '.join(s['text'].strip() for s in chapter['sentences']) for chapter in story['chapters']]
-    return [j.get('text') for j in cached.get('jobs') or []] == texts and all(
-        (Path(run) / 'voice' / f'c{n}' / name).is_file() for n in range(1, len(texts) + 1) for name in ('audio.mp3', 'subtitles.srt'))
+def spoken(run, story, addon=None):
+    """Whether cached narration matches the text and current provider, voice, language and pronunciation settings."""
+    run = Path(run)
+    cached = core.load(run / 'voice' / 'done.json') or {}
+    addon = addon if addon is not None else (core.load(run / 'meta.json') or {}).get('addon') or {}
+    try:
+        expected = narration_jobs(run, story, addon, run / 'voice')
+    except ValueError:
+        return False
+    before = cached.get('jobs') or []
+    # Older recuts carried only text. They remain readable with the unconfigured default edge voice.
+    legacy = engine() == 'edge' and not addon.get('voice') and not addon.get('pronunciation') \
+        and all(set(job) == {'text'} for job in before)
+    same = before == expected
+    if legacy:
+        same = [job['text'] for job in before] == [job['text'] for job in expected]
+    return same and all((run / 'voice' / f'c{n}' / name).is_file()
+                        for n in range(1, len(expected) + 1) for name in ('audio.mp3', 'subtitles.srt'))
+
+
+def narration_jobs(run, story, addon, root):
+    """Build the complete nonsecret cache identity for each chapter's speech and word captions."""
+    said = language.texts(core.load(Path(run) / 'sources.json') or {})
+    words, selected = lexicon(addon, said['code']), engine()
+    reference = VOXCPM / f"narrator-{said['code']}.wav"
+    provider = {}
+    if selected == 'elevenlabs':
+        provider = voice_provider.elevenlabs_config(addon, said['code'])
+        narrator = provider.pop('voice')
+    elif selected == 'voxcpm':
+        narrator = str(reference)
+    else:
+        narrator = addon.get('voice') or said['edge_voice']
+    jobs = []
+    for index, chapter in enumerate(story['chapters']):
+        sentences = [sentence['text'].strip() for sentence in chapter['sentences']]
+        text = ' '.join(sentences)
+        used = pronunciation.used_terms(pronunciation.speakable(text, words, said['code'])[1])
+        jobs.append({'text': text, 'sentences': sentences, 'out': str(root / f'c{index + 1}'), 'engine': selected,
+                     'language': said['code'], 'lexicon': {term: words[term] for term in used},
+                     'voice': narrator, 'pause': PAUSE, **provider})
+    return jobs
 
 
 def narrate(run, story, addon, root=None):
@@ -169,19 +206,11 @@ def narrate(run, story, addon, root=None):
     run = Path(run)
     root = Path(root) if root else run / 'voice'
     said = language.texts(core.load(run / 'sources.json') or {})
-    words, voice = lexicon(addon, said['code']), engine()
+    voice = engine()
     reference = VOXCPM / f"narrator-{said['code']}.wav"
     if voice == 'voxcpm' and not (voice_ready() and reference.is_file()):
         raise SystemExit(f"VoxCPM2 speaks, but its {said['name']} narrator is not set up here: film.py voice-setup")
-    jobs = []
-    for index, chapter in enumerate(story['chapters']):
-        sentences = [s['text'].strip() for s in chapter['sentences']]
-        text = ' '.join(sentences)
-        used = pronunciation.used_terms(pronunciation.speakable(text, words, said['code'])[1])  # a term elsewhere changes no job
-        jobs.append({'text': text, 'sentences': sentences, 'out': str(root / f'c{index + 1}'), 'engine': voice,
-                     'language': said['code'], 'lexicon': {term: words[term] for term in used},
-                     'voice': str(reference) if voice == 'voxcpm' else addon.get('voice') or said['edge_voice'],
-                     'pause': PAUSE})
+    jobs = narration_jobs(run, story, addon, root)
     done = root / 'done.json'
     cached = core.load(done) or {}
     before = {job['out']: (job, result) for job, result in zip(cached.get('jobs') or [], cached.get('results') or [])}
@@ -190,7 +219,12 @@ def narrate(run, story, addon, root=None):
     if todo:
         core.save(root / 'jobs.json', todo)
         core.mark(root.parent, 'voice', 'start', f'{voice}: {len(todo)} of {len(jobs)} chapters')
-        python = str(VOXCPM / 'venv' / 'bin' / 'python') if voice == 'voxcpm' else core.ensure_tts()
+        if voice == 'voxcpm':
+            python = str(VOXCPM / 'venv' / 'bin' / 'python')
+        elif voice == 'elevenlabs':
+            python = sys.executable  # provider transport uses only the standard library
+        else:
+            python = core.ensure_tts()
         out = core.sh([python, str(core.SKILL / 'scripts' / 'voice.py'), str(root / 'jobs.json')],
                       timeout=3600 if voice == 'voxcpm' else 600).stdout
         core.mark(root.parent, 'voice', 'end')
@@ -472,7 +506,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
     return entry, stats
 
 
-def recut_inputs(run, story, out):
+def recut_inputs(run, story, out, addon=None):
     """Validate a recut before any write: fresh output, existing takes and unchanged cached narration."""
     run, out = Path(run).resolve(), Path(out).resolve()
     folders = {Path(story['keys'][c['film']]).resolve() for c in story['chapters']}
@@ -481,7 +515,7 @@ def recut_inputs(run, story, out):
             raise SystemExit(f'recut output overlaps a source folder: {source}; choose a separate fresh --out folder')
     if out.exists() and (not out.is_dir() or any(out.iterdir())):
         raise SystemExit(f'recut output is not empty: {out}; choose a separate fresh --out folder')
-    if not story['chapters'] or not spoken(run, story):
+    if not story['chapters'] or not spoken(run, story, addon):
         raise SystemExit(f'recut requires cached narration matching every chapter in {run / "voice"}; '
                          'restore the matching cache or prepare a separate copy first (recut never calls TTS)')
     for n in range(1, len(story['chapters']) + 1):
@@ -519,7 +553,7 @@ def make(run, story, sources, addon, jobs=8, out=None):
     import render_demo
     run = Path(run).resolve()
     recutting = out is not None
-    out = recut_inputs(run, story, out) if recutting else run
+    out = recut_inputs(run, story, out, addon) if recutting else run
     voice = run / 'voice'
     out.mkdir(parents=True, exist_ok=True)
     ffmpeg = core.tool('ffmpeg')

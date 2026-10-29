@@ -1,0 +1,2128 @@
+{
+  "schemaVersion": 1,
+  "sharedWatchPaths": [
+    "apps/web/app/components/Navigation/**",
+    "apps/web/app/routes.ts",
+    "apps/web/app/config/routeAccessConfig.ts",
+    "packages/shared/src/constants/permissions.ts",
+    "packages/shared/src/constants/features.ts"
+  ],
+  "domains": [
+    {
+      "key": "development-paths.guide",
+      "domain": "development-paths",
+      "title": "Development Paths",
+      "description": "Create, maintain, assign and complete development paths.",
+      "specPaths": [
+        "docs/specs/learning-paths-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Admin/LearningPaths/**",
+        "apps/web/app/modules/LearningPaths/**",
+        "apps/api/src/learning-path/**",
+        "apps/api/src/learning-path-enrollment/**",
+        "apps/api/src/native-archive/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-paths",
+          "title": "Browse and search development paths",
+          "description": "Browse and search development paths in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Browse and search development paths.",
+          "preconditions": [
+            "Learning paths are enabled and the account has path read access."
+          ],
+          "actions": [
+            "Open Development Paths through application navigation.",
+            "Search for a path and inspect its available courses and selected language."
+          ],
+          "outcomes": [
+            "Only paths available to this learner appear."
+          ]
+        },
+        {
+          "id": "create-path",
+          "title": "Create a development path",
+          "description": "Create a development path in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Create a development path.",
+          "preconditions": [
+            "The account can create learning paths."
+          ],
+          "actions": [
+            "Open development-path management.",
+            "Create a path with its title, description and other required metadata.",
+            "Save the new path."
+          ],
+          "outcomes": [
+            "The new path appears and can be opened for editing."
+          ]
+        },
+        {
+          "id": "edit-path",
+          "title": "Edit development-path details",
+          "description": "Edit development-path details in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Edit development-path details.",
+          "preconditions": [
+            "The account can manage this path."
+          ],
+          "actions": [
+            "Open the path editor from management.",
+            "Update its title, description or thumbnail.",
+            "Save the changes and reopen the path."
+          ],
+          "outcomes": [
+            "Updated path details remain saved."
+          ]
+        },
+        {
+          "id": "delete-path",
+          "title": "Delete a development path",
+          "description": "Delete a development path in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Delete a development path.",
+          "preconditions": [
+            "A disposable synthetic path exists and the account may delete it."
+          ],
+          "actions": [
+            "Open the management actions for the disposable path.",
+            "Choose delete and complete the displayed confirmation."
+          ],
+          "outcomes": [
+            "The deleted path is no longer listed."
+          ]
+        },
+        {
+          "id": "localize-path",
+          "title": "Add and edit path language versions",
+          "description": "Add and edit path language versions in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Add and edit path language versions.",
+          "preconditions": [
+            "The account can manage this path and its languages."
+          ],
+          "actions": [
+            "Open path editing and select a supported content language.",
+            "Enter the translated title and description.",
+            "Save and inspect the corresponding language view."
+          ],
+          "outcomes": [
+            "The selected language displays its saved path metadata."
+          ]
+        },
+        {
+          "id": "add-courses",
+          "title": "Add courses to a development path",
+          "description": "Add courses to a development path in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Add courses to a development path.",
+          "preconditions": [
+            "The account can update this path and eligible demo courses exist."
+          ],
+          "actions": [
+            "Open the path course-management area.",
+            "Select existing eligible courses and add them to the path.",
+            "Save and inspect the path course list."
+          ],
+          "outcomes": [
+            "The selected courses belong to the path."
+          ]
+        },
+        {
+          "id": "reorder-courses",
+          "title": "Reorder courses in a development path",
+          "description": "Reorder courses in a development path in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Reorder courses in a development path.",
+          "preconditions": [
+            "The editable path contains multiple courses."
+          ],
+          "actions": [
+            "Open path course management.",
+            "Move a course to another position using the provided ordering control.",
+            "Save and inspect the saved order."
+          ],
+          "outcomes": [
+            "The path shows the new course order."
+          ]
+        },
+        {
+          "id": "remove-courses",
+          "title": "Remove a course from a development path",
+          "description": "Remove a course from a development path in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Remove a course from a development path.",
+          "preconditions": [
+            "The editable demo path contains a removable course."
+          ],
+          "actions": [
+            "Open path course management.",
+            "Remove the selected course and save.",
+            "Review the remaining course list."
+          ],
+          "outcomes": [
+            "The course is no longer a member of the path."
+          ]
+        },
+        {
+          "id": "publish-path",
+          "title": "Set draft, private and published path status",
+          "description": "Set draft, private and published path status in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Set draft, private and published path status.",
+          "preconditions": [
+            "The account can update this path."
+          ],
+          "actions": [
+            "Open the path publication controls.",
+            "Choose each supported visibility state for the synthetic path and save.",
+            "Inspect its status and the appropriate learner visibility."
+          ],
+          "outcomes": [
+            "The selected publication state controls path availability."
+          ]
+        },
+        {
+          "id": "configure-sequence",
+          "title": "Require courses to be completed in order",
+          "description": "Require courses to be completed in order in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Require courses to be completed in order.",
+          "preconditions": [
+            "The editable path contains multiple courses."
+          ],
+          "actions": [
+            "Open path settings and enable sequence mode.",
+            "Save and open the path as an enrolled demo learner.",
+            "Inspect the first available course and the next locked course."
+          ],
+          "outcomes": [
+            "Course access follows the configured sequence."
+          ]
+        },
+        {
+          "id": "assign-learners",
+          "title": "Enroll individual learners in a path",
+          "description": "Enroll individual learners in a path in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Enroll individual learners in a path.",
+          "preconditions": [
+            "The account has path-enrollment access and demo learners exist."
+          ],
+          "actions": [
+            "Open path enrollment management.",
+            "Select individual learners and enroll them.",
+            "Review their enrollment and path access."
+          ],
+          "outcomes": [
+            "Selected learners are enrolled and can access eligible path courses."
+          ]
+        },
+        {
+          "id": "assign-groups",
+          "title": "Enroll a group in a path",
+          "description": "Enroll a group in a path in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Enroll a group in a path.",
+          "preconditions": [
+            "The account can enroll paths and read the available demo groups."
+          ],
+          "actions": [
+            "Open path group enrollment.",
+            "Select and enroll a demo group.",
+            "Review the group assignment and a member learner view."
+          ],
+          "outcomes": [
+            "Eligible group members receive path access."
+          ]
+        },
+        {
+          "id": "remove-enrollment",
+          "title": "Remove direct and group path enrollment",
+          "description": "Remove direct and group path enrollment in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Remove direct and group path enrollment.",
+          "preconditions": [
+            "The account can manage enrollment on the demo path."
+          ],
+          "actions": [
+            "Inspect direct and group enrollment for the path.",
+            "Remove the selected direct learner assignment or group enrollment.",
+            "Review the remaining enrollment paths."
+          ],
+          "outcomes": [
+            "Only access no longer justified by another valid enrollment is removed."
+          ]
+        },
+        {
+          "id": "self-enroll",
+          "title": "Self-enroll in an available path",
+          "description": "Self-enroll in an available path in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Self-enroll in an available path.",
+          "preconditions": [
+            "A published path is available for learner self-enrollment."
+          ],
+          "actions": [
+            "Open an eligible path as an unenrolled demo learner.",
+            "Choose the displayed enrollment action.",
+            "Open the first eligible course."
+          ],
+          "outcomes": [
+            "The learner is enrolled in the path and can start its courses."
+          ]
+        },
+        {
+          "id": "continue-path",
+          "title": "Continue a path and inspect learning progress",
+          "description": "Continue a path and inspect learning progress in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**"
+          ],
+          "goal": "Continue a path and inspect learning progress.",
+          "preconditions": [
+            "The demo learner is enrolled in a path with recorded course progress."
+          ],
+          "actions": [
+            "Open the enrolled path.",
+            "Inspect progress and continue an eligible course.",
+            "Complete the necessary demo course activity and return to the path."
+          ],
+          "outcomes": [
+            "Path progress reflects completed courses and sequence access updates."
+          ]
+        },
+        {
+          "id": "path-certificates",
+          "title": "View and download a development-path certificate",
+          "description": "View and download a development-path certificate in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md",
+            "docs/specs/certificates-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**",
+            "apps/web/app/modules/Profile/Certificates/**",
+            "apps/api/src/certificates/**"
+          ],
+          "goal": "View and download a development-path certificate.",
+          "preconditions": [
+            "The demo learner completed a certificate-enabled path."
+          ],
+          "actions": [
+            "Open the earned path certificate.",
+            "Inspect its localized preview and download its PDF.",
+            "Use supported certificate sharing controls with synthetic data."
+          ],
+          "outcomes": [
+            "The learner can access completion evidence for the path."
+          ]
+        },
+        {
+          "id": "share-path",
+          "title": "Share a path with active recipient organizations",
+          "description": "Share a path with active recipient organizations in Mentingo.",
+          "audiences": [
+            "managing-tenant-administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**",
+            "apps/api/src/native-archive/**",
+            "apps/api/src/courses/master-course/**"
+          ],
+          "goal": "Share a path with active recipient organizations.",
+          "preconditions": [
+            "The account can export this path and an active synthetic recipient organization exists."
+          ],
+          "actions": [
+            "Open path sharing.",
+            "Select an active recipient organization and start the transfer.",
+            "Inspect queued, processing and copied status; retry a recoverable failed transfer when displayed."
+          ],
+          "outcomes": [
+            "The destination receives the shared path and linked courses; retries reuse the recipient path."
+          ]
+        },
+        {
+          "id": "export-package",
+          "title": "Download a Mentingo development-path package",
+          "description": "Download a Mentingo development-path package in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**",
+            "apps/api/src/native-archive/**"
+          ],
+          "goal": "Download a Mentingo development-path package.",
+          "preconditions": [
+            "The account may manage this path and its synthetic course set."
+          ],
+          "actions": [
+            "Open the path management actions.",
+            "Choose the Mentingo package download.",
+            "Wait for the supported export to produce its ZIP."
+          ],
+          "outcomes": [
+            "A portable package contains the ordered path and managed course assets without learner progress."
+          ]
+        },
+        {
+          "id": "import-package",
+          "title": "Import a Mentingo development-path package",
+          "description": "Import a Mentingo development-path package in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/**",
+            "apps/web/app/modules/LearningPaths/**",
+            "apps/api/src/learning-path/**",
+            "apps/api/src/learning-path-enrollment/**",
+            "apps/api/src/native-archive/**"
+          ],
+          "goal": "Import a Mentingo development-path package.",
+          "preconditions": [
+            "The account may create paths and courses, and a synthetic path package exists."
+          ],
+          "actions": [
+            "Open the package import dialog from Development Paths.",
+            "Choose the valid ZIP and start the import.",
+            "Wait for processing and open the imported draft path."
+          ],
+          "outcomes": [
+            "The dialog completes and the destination owns draft copies with the preserved course order."
+          ]
+        }
+      ]
+    },
+    {
+      "key": "course-authoring.guide",
+      "domain": "course-authoring",
+      "title": "Course Authoring",
+      "description": "Create and maintain courses, curriculum, publication, assignments and reusable packages.",
+      "specPaths": [
+        "docs/specs/course-authoring-management-business-spec.md",
+        "docs/specs/course-overview-management-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Admin/AddCourse/**",
+        "apps/web/app/modules/Admin/Courses/**",
+        "apps/web/app/modules/Admin/EditCourse/**",
+        "apps/web/app/modules/Courses/CourseView/**",
+        "apps/api/src/courses/**",
+        "apps/api/src/chapter/**",
+        "apps/api/src/lesson/**",
+        "apps/api/src/native-archive/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-courses",
+          "title": "Find and filter manageable courses",
+          "description": "Find and filter manageable courses in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Find and filter manageable courses.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the course list.",
+            "Search, sort and filter by the available category and status controls.",
+            "Open a manageable course."
+          ],
+          "outcomes": [
+            "The selected course is available for authorized management."
+          ]
+        },
+        {
+          "id": "create-course",
+          "title": "Create a draft course",
+          "description": "Create a draft course in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Create a draft course.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open new-course creation.",
+            "Choose a supported native course type and provide the required metadata.",
+            "Create the course and open its overview."
+          ],
+          "outcomes": [
+            "A new draft belongs to the creator."
+          ]
+        },
+        {
+          "id": "edit-overview",
+          "title": "Edit course metadata and learning outcomes",
+          "description": "Edit course metadata and learning outcomes in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Edit course metadata and learning outcomes.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the course overview.",
+            "Edit its title, description, category and up to five learning outcomes in place.",
+            "Save and inspect the displayed details."
+          ],
+          "outcomes": [
+            "The overview shows the saved course metadata."
+          ]
+        },
+        {
+          "id": "course-media",
+          "title": "Set the course cover image and trailer",
+          "description": "Set the course cover image and trailer in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Set the course cover image and trailer.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open overview media editing.",
+            "Upload and reposition a synthetic cover image.",
+            "Add or replace the synthetic trailer and inspect the result."
+          ],
+          "outcomes": [
+            "The selected cover and trailer appear in the course overview."
+          ]
+        },
+        {
+          "id": "localize-course",
+          "title": "Manage course language versions",
+          "description": "Manage course language versions in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Manage course language versions.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Select the course content language in the overview.",
+            "Add or update translated metadata and learning outcomes.",
+            "Inspect missing-translation warnings and switch back to the base language."
+          ],
+          "outcomes": [
+            "Language-specific edits remain independent and translation gaps are visible."
+          ]
+        },
+        {
+          "id": "manage-chapters",
+          "title": "Create, reorder, edit and remove curriculum chapters",
+          "description": "Create, reorder, edit and remove curriculum chapters in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Create, reorder, edit and remove curriculum chapters.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open curriculum editing from the course overview.",
+            "Add and rename chapters, then change their order.",
+            "Remove a disposable chapter using the displayed confirmation."
+          ],
+          "outcomes": [
+            "The curriculum reflects the saved chapter structure."
+          ]
+        },
+        {
+          "id": "content-lessons",
+          "title": "Create and maintain content lessons",
+          "description": "Create and maintain content lessons in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Create and maintain content lessons.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open a curriculum chapter and add a content lesson.",
+            "Edit rich text and attach synthetic media or resources.",
+            "Save, reopen and reorder the lesson; remove a separate disposable lesson."
+          ],
+          "outcomes": [
+            "The saved curriculum contains the authored lesson and resources."
+          ]
+        },
+        {
+          "id": "quiz-lessons",
+          "title": "Author quizzes and assessment rules",
+          "description": "Author quizzes and assessment rules in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/web/app/modules/Admin/Quiz/**",
+            "apps/api/src/quiz/**"
+          ],
+          "goal": "Author quizzes and assessment rules.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Add a quiz lesson and supported question types.",
+            "Set passing score, attempts, cooldown and feedback options.",
+            "Edit question order and a language version, observing base-language structural restrictions.",
+            "Save and preview the quiz."
+          ],
+          "outcomes": [
+            "The quiz contains its authored questions and completion rules."
+          ]
+        },
+        {
+          "id": "scorm-course-lessons",
+          "title": "Import a SCORM course or lesson",
+          "description": "Import a SCORM course or lesson in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/scorm-support-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/web/app/modules/Admin/Scorm/**",
+            "apps/api/src/scorm/**"
+          ],
+          "goal": "Import a SCORM course or lesson.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Choose SCORM course creation or add a SCORM lesson to a chapter.",
+            "Upload a valid synthetic SCORM ZIP and the required metadata.",
+            "Complete import and inspect the generated course or lesson, including a translated package when needed."
+          ],
+          "outcomes": [
+            "The imported SCORM content is available in the draft curriculum."
+          ]
+        },
+        {
+          "id": "other-lesson-types",
+          "title": "Add supported embed, AI mentor and live-training lessons",
+          "description": "Add supported embed, AI mentor and live-training lessons in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/ai-mentor-lessons-business-spec.md",
+            "docs/specs/live-training-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/ai-mentor/**",
+            "apps/api/src/live-training/**"
+          ],
+          "goal": "Add supported embed, AI mentor and live-training lessons.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the chapter lesson picker.",
+            "Choose the supported lesson type and supply its required configuration using synthetic data.",
+            "Save and inspect the authored lesson; clearly show any service prerequisite."
+          ],
+          "outcomes": [
+            "The selected lesson type is configured and available for preview."
+          ]
+        },
+        {
+          "id": "publish-course",
+          "title": "Publish a course or return it to private or draft",
+          "description": "Publish a course or return it to private or draft in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Publish a course or return it to private or draft.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open course settings.",
+            "Choose published, private or draft status and save each demonstrated state.",
+            "Inspect the status and learner availability."
+          ],
+          "outcomes": [
+            "Course visibility follows the saved publication state."
+          ]
+        },
+        {
+          "id": "archive-restore-delete",
+          "title": "Archive, restore and delete eligible draft courses",
+          "description": "Archive, restore and delete eligible draft courses in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Archive, restore and delete eligible draft courses.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Archive a synthetic course and inspect its removal from discovery.",
+            "Restore it and confirm enrolled learners retain their progress.",
+            "Return a disposable course to draft and complete its deletion confirmation."
+          ],
+          "outcomes": [
+            "Archive preserves enrolled access; eligible draft deletion removes the disposable course."
+          ]
+        },
+        {
+          "id": "bulk-course-actions",
+          "title": "Apply supported actions to multiple courses",
+          "description": "Apply supported actions to multiple courses in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Apply supported actions to multiple courses.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Select multiple manageable demo courses in the list.",
+            "Apply a shared category or publication status change.",
+            "Demonstrate archive or eligible draft deletion with appropriate synthetic records."
+          ],
+          "outcomes": [
+            "The selected courses reflect the requested bulk changes."
+          ]
+        },
+        {
+          "id": "course-settings",
+          "title": "Configure sequencing and course behavior",
+          "description": "Configure sequencing and course behavior in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/course-repetition-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Configure sequencing and course behavior.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the course behavior settings.",
+            "Configure lesson order, video completion and available repeat-learning options.",
+            "Save and inspect the corresponding learner experience."
+          ],
+          "outcomes": [
+            "The course follows the saved completion and sequencing rules."
+          ]
+        },
+        {
+          "id": "course-certificates",
+          "title": "Configure certificate issuance, appearance and validity",
+          "description": "Configure certificate issuance, appearance and validity in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/certificates-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/certificates/**"
+          ],
+          "goal": "Configure certificate issuance, appearance and validity.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open certificate settings and preview the certificate.",
+            "Enable issuance, choose font color and upload or remove a synthetic signature.",
+            "Configure validity and inspect the impact confirmation before applying it."
+          ],
+          "outcomes": [
+            "The certificate configuration and applicable validity policy are saved."
+          ]
+        },
+        {
+          "id": "reset-certificates",
+          "title": "Reset selected course certificates",
+          "description": "Reset selected course certificates in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/certificates-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/certificates/**"
+          ],
+          "goal": "Reset selected course certificates.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open certificate reset controls for the synthetic course.",
+            "Select all holders, groups or individual holders and choose whether to notify them.",
+            "Confirm the reset and inspect its displayed result."
+          ],
+          "outcomes": [
+            "Selected certificates are archived and affected progress follows the reset rules."
+          ]
+        },
+        {
+          "id": "course-pricing",
+          "title": "Configure pricing when available",
+          "description": "Configure pricing when available in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Configure pricing when available.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the pricing settings for an eligible course.",
+            "Set the available price and purchase options.",
+            "Save and inspect the learner-facing price without making a real payment."
+          ],
+          "outcomes": [
+            "The course displays the saved pricing configuration."
+          ]
+        },
+        {
+          "id": "enroll-users",
+          "title": "Enroll and unenroll individual course learners",
+          "description": "Enroll and unenroll individual course learners in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/course-enrollment-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Enroll and unenroll individual course learners.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open enrolled-user management.",
+            "Search, filter and select demo users, then assign the course.",
+            "Remove a direct assignment and inspect remaining valid group access."
+          ],
+          "outcomes": [
+            "Direct learner assignment follows the selected enrollment changes."
+          ]
+        },
+        {
+          "id": "enroll-groups",
+          "title": "Manage group course enrollment and deadlines",
+          "description": "Manage group course enrollment and deadlines in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/course-enrollment-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Manage group course enrollment and deadlines.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open course group enrollment.",
+            "Select a demo group, mandatory or optional assignment, and its available due date.",
+            "Change a deadline without changing mandatory status, then demonstrate group removal."
+          ],
+          "outcomes": [
+            "Group assignments and deadlines are saved while other valid enrollment is retained."
+          ]
+        },
+        {
+          "id": "course-ownership",
+          "title": "Transfer course ownership",
+          "description": "Transfer course ownership in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Transfer course ownership.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open course ownership management as an authorized administrator.",
+            "Choose the new synthetic author and confirm.",
+            "Inspect the saved owner."
+          ],
+          "outcomes": [
+            "Responsibility is transferred to the selected account."
+          ]
+        },
+        {
+          "id": "course-statistics",
+          "title": "Review course completion and assessment statistics",
+          "description": "Review course completion and assessment statistics in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Review course completion and assessment statistics.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open Statistics for a course the account may manage.",
+            "Inspect progress, completion, learning time, quiz results and available AI Mentor outcomes.",
+            "Show how switching to Learning Mode returns to the learner table of contents."
+          ],
+          "outcomes": [
+            "Authorized managers can review outcomes without learner-mode access to administration."
+          ]
+        },
+        {
+          "id": "share-course",
+          "title": "Share and synchronize a master course",
+          "description": "Share and synchronize a master course in Mentingo.",
+          "audiences": [
+            "managing-tenant-administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/courses/master-course/**"
+          ],
+          "goal": "Share and synchronize a master course.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open sharing for an eligible master course.",
+            "Select a managed synthetic tenant and start the transfer.",
+            "Inspect the copied read-only course and a supported source update synchronization."
+          ],
+          "outcomes": [
+            "The recipient receives its own managed copy and supported updates."
+          ]
+        },
+        {
+          "id": "export-import-package",
+          "title": "Export and import an editable Mentingo course package",
+          "description": "Export and import an editable Mentingo course package in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/native-archive/**"
+          ],
+          "goal": "Export and import an editable Mentingo course package.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Download a Mentingo package from the course sharing area.",
+            "Choose package import in new-course creation and upload the synthetic ZIP.",
+            "Inspect the imported free draft and repeat-import notice."
+          ],
+          "outcomes": [
+            "The destination receives its own editable draft without learner enrollments or progress."
+          ]
+        },
+        {
+          "id": "export-scorm",
+          "title": "Export supported course content as SCORM",
+          "description": "Export supported course content as SCORM in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/course-authoring-management-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md",
+            "docs/specs/scorm-support-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/AddCourse/**",
+            "apps/web/app/modules/Admin/Courses/**",
+            "apps/web/app/modules/Admin/EditCourse/**",
+            "apps/web/app/modules/Courses/CourseView/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/chapter/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/courses/scorm-export/**"
+          ],
+          "goal": "Export supported course content as SCORM.",
+          "preconditions": [
+            "The synthetic course is manageable by this account; required course-type services are configured."
+          ],
+          "actions": [
+            "Open the supported SCORM export action.",
+            "Review any warning about unsupported lesson types and confirm the intended export.",
+            "Download the resulting package."
+          ],
+          "outcomes": [
+            "The SCORM ZIP contains the supported course content."
+          ]
+        }
+      ]
+    },
+    {
+      "key": "course-learning.guide",
+      "domain": "course-learning",
+      "title": "Learning in Courses",
+      "description": "Enroll, learn, resume lessons, complete assessments and access completion evidence.",
+      "specPaths": [
+        "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+        "docs/specs/course-enrollment-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Courses/**",
+        "apps/api/src/studentLessonProgress/**",
+        "apps/api/src/courses/**",
+        "apps/api/src/lesson/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-enroll",
+          "title": "Inspect a course and self-enroll",
+          "description": "Inspect a course and self-enroll in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/course-enrollment-business-spec.md",
+            "docs/specs/course-overview-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Inspect a course and self-enroll.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a course from the catalog and inspect its overview and curriculum.",
+            "Choose enrollment on an eligible free published course.",
+            "Continue to the first lesson after enrollment."
+          ],
+          "outcomes": [
+            "The learner is enrolled and learning progress is initialized."
+          ]
+        },
+        {
+          "id": "start-resume",
+          "title": "Start and continue learning",
+          "description": "Start and continue learning in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Start and continue learning.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open an enrolled course.",
+            "Choose Start or Continue and inspect the opened lesson.",
+            "Leave and return to verify the course resumes its eligible learning state."
+          ],
+          "outcomes": [
+            "The appropriate accessible lesson opens."
+          ]
+        },
+        {
+          "id": "lesson-navigation",
+          "title": "Navigate lessons and understand sequence locks",
+          "description": "Navigate lessons and understand sequence locks in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Navigate lessons and understand sequence locks.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Use previous, next and sidebar lesson navigation.",
+            "Inspect an accessible out-of-order course and a sequence-enabled course.",
+            "Complete an earlier requirement and inspect the next unlocked lesson."
+          ],
+          "outcomes": [
+            "Lesson access and navigation follow course sequencing rules."
+          ]
+        },
+        {
+          "id": "content-resources",
+          "title": "Read content and use lesson resources",
+          "description": "Read content and use lesson resources in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Read content and use lesson resources.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a content lesson.",
+            "Read its authored material and open the attached synthetic resources.",
+            "Inspect the lesson completion and chapter progress state."
+          ],
+          "outcomes": [
+            "The learner can use the lesson material and see progress."
+          ]
+        },
+        {
+          "id": "video-controls",
+          "title": "Control lesson video playback",
+          "description": "Control lesson video playback in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Control lesson video playback.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a lesson video and focus its player.",
+            "Use supported play, seek, volume, mute, restart and fullscreen shortcuts.",
+            "Return to the lesson without applying shortcuts to other controls."
+          ],
+          "outcomes": [
+            "The focused player responds to the supported playback controls."
+          ]
+        },
+        {
+          "id": "required-video-resume",
+          "title": "Complete required videos and resume missed content",
+          "description": "Complete required videos and resume missed content in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Complete required videos and resume missed content.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Watch part of a required-video lesson and inspect watched and missed chunks.",
+            "Attempt in-app navigation and choose Continue watching.",
+            "Inspect resume at an incomplete video, pause and then complete the required coverage."
+          ],
+          "outcomes": [
+            "Saved video coverage, leave warnings and resume state stay aligned."
+          ]
+        },
+        {
+          "id": "quiz-submit-retake",
+          "title": "Submit a quiz, review feedback and retake when eligible",
+          "description": "Submit a quiz, review feedback and retake when eligible in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/quiz/**"
+          ],
+          "goal": "Submit a quiz, review feedback and retake when eligible.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Answer every required quiz question and submit.",
+            "Inspect score and the available correct-answer feedback.",
+            "Use a permitted retake and inspect attempt limits or cooldown messaging."
+          ],
+          "outcomes": [
+            "Quiz completion and access follow the configured passing and retake rules."
+          ]
+        },
+        {
+          "id": "embed-lesson",
+          "title": "Complete an embedded-content lesson",
+          "description": "Complete an embedded-content lesson in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Complete an embedded-content lesson.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open an accessible embed lesson.",
+            "Use the embedded synthetic training content.",
+            "Inspect the lesson-specific completion and next-lesson action."
+          ],
+          "outcomes": [
+            "Embedded content participates in the course completion flow."
+          ]
+        },
+        {
+          "id": "scorm-lesson",
+          "title": "Launch, resume and complete SCORM learning",
+          "description": "Launch, resume and complete SCORM learning in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/scorm-support-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/scorm/**"
+          ],
+          "goal": "Launch, resume and complete SCORM learning.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a synthetic SCORM lesson.",
+            "Navigate its sections, save progress and return to resume.",
+            "Complete the required SCOs and inspect Mentingo progress."
+          ],
+          "outcomes": [
+            "Runtime state resumes and completion follows the package rules."
+          ]
+        },
+        {
+          "id": "ai-mentor-lesson",
+          "title": "Use an available AI mentor lesson",
+          "description": "Use an available AI mentor lesson in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/ai-mentor-lessons-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/ai-mentor/**"
+          ],
+          "goal": "Use an available AI mentor lesson.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a configured AI mentor lesson.",
+            "Follow its displayed conversation task using synthetic prompts.",
+            "Inspect the provided lesson outcome and completion state."
+          ],
+          "outcomes": [
+            "The learner can follow the configured AI mentor lesson."
+          ]
+        },
+        {
+          "id": "live-training",
+          "title": "Access live-training schedule and materials",
+          "description": "Access live-training schedule and materials in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "live_training"
+          ],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/live-training-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/live-training/**"
+          ],
+          "goal": "Access live-training schedule and materials.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open an available live-training lesson.",
+            "Inspect its schedule, join details and synthetic materials.",
+            "Inspect the provided attendance or completion state."
+          ],
+          "outcomes": [
+            "The learner can find the live-training information and its recorded outcome."
+          ]
+        },
+        {
+          "id": "course-completion",
+          "title": "Inspect course and chapter completion",
+          "description": "Inspect course and chapter completion in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Inspect course and chapter completion.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Complete the final eligible demo lesson.",
+            "Return to the course overview.",
+            "Inspect completed chapter counts, course completion and the available next actions."
+          ],
+          "outcomes": [
+            "The course displays the learner's accepted completion."
+          ]
+        },
+        {
+          "id": "learner-certificates",
+          "title": "Preview, download and share an earned certificate",
+          "description": "Preview, download and share an earned certificate in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/certificates-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/web/app/modules/Profile/Certificates/**",
+            "apps/api/src/certificates/**"
+          ],
+          "goal": "Preview, download and share an earned certificate.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open an issued course certificate from the course, dashboard or profile.",
+            "Select a supported preview language and download its PDF.",
+            "Inspect supported public or LinkedIn sharing using synthetic certificate data."
+          ],
+          "outcomes": [
+            "The learner can access localized proof of completion."
+          ]
+        },
+        {
+          "id": "repeat-course",
+          "title": "Repeat completed training without losing accepted completion",
+          "description": "Repeat completed training without losing accepted completion in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/course-repetition-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**"
+          ],
+          "goal": "Repeat completed training without losing accepted completion.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open a completed enrolled course with repetition enabled.",
+            "Choose Repeat course and complete part of its fresh learning state.",
+            "Leave and resume the same repetition, then finish its required activity."
+          ],
+          "outcomes": [
+            "Accepted completion is retained until the repetition replaces it; qualifying certificate replacement follows issuance."
+          ]
+        },
+        {
+          "id": "course-discussion",
+          "title": "Participate in an enrolled-course discussion",
+          "description": "Participate in an enrolled-course discussion in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "course_discussions"
+          ],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+            "docs/specs/course-discussions-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/**",
+            "apps/api/src/studentLessonProgress/**",
+            "apps/api/src/courses/**",
+            "apps/api/src/lesson/**",
+            "apps/api/src/course-chat/**"
+          ],
+          "goal": "Participate in an enrolled-course discussion.",
+          "preconditions": [
+            "The synthetic learner has the required course access and the demonstrated lesson type is configured."
+          ],
+          "actions": [
+            "Open the course Chat tab.",
+            "Create a synthetic thread, reply, mention an enrolled learner and react.",
+            "Delete the account's own disposable message using the provided action."
+          ],
+          "outcomes": [
+            "Enrolled participants can discuss training with permission-scoped actions."
+          ]
+        }
+      ]
+    }
+  ]
+}

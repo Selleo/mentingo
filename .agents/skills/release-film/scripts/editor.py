@@ -699,7 +699,7 @@ def unlabel(story, said=None):
     return changed
 
 
-def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=None):
+def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=None, max_sentences=10):
     """Problems of one chapter: its film, title, pull requests and proofs, and (``sentences_too``) its sentences."""
     said = said or language.texts()
     problems = []
@@ -718,8 +718,9 @@ def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=Non
     written = [s for s in sentences if not s.get('added')]  # the film's opening and closing lines adopt adds count apart
     pinned = [s.get('action') for s in sentences if s.get('action') is not None]
     if sentences_too:
-        if len(sentences) < 2 or len(written) > 10:
-            problems.append(f'{where}: {len(written)} sentences (2–10)')
+        if len(sentences) < 2 or (max_sentences is not None and len(written) > max_sentences):
+            limit = f'2–{max_sentences}' if max_sentences is not None else 'at least 2'
+            problems.append(f'{where}: {len(written)} sentences ({limit})')
         if len(pinned) < min(3, len(capture['steps'])):
             problems.append(f'{where}: pin at least 3 sentences to actions (pick a test with more actions if this one has too few)')
         unpinned = sum(1 for s in written if s.get('action') is None)

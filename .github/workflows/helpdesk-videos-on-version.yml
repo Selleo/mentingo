@@ -1,0 +1,21 @@
+name: Queue Helpdesk videos for a version
+on:
+  push:
+    tags: ['v[0-9]*']
+permissions: {}
+jobs:
+  queue:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+      - name: Queue the exact version on the trusted default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_TAG: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
+          gh workflow run helpdesk-videos.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH" \
+            -f "version=$VERSION_TAG" -f domains= -f languages=en -F publish=true

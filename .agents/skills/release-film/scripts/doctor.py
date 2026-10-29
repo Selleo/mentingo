@@ -176,8 +176,8 @@ def judge(found):
     if found['disk_free_gb'] < FREE_DISK_GB:
         need('disk space', 'test images, the checkout, the takes and the film take about %d GB' % FREE_DISK_GB,
              required=False, detail='%s GB free' % found['disk_free_gb'], manual='Free some disk space')
-    if found.get('voice') not in (None, 'edge', 'voxcpm'):
-        need('voice', 'RELEASE_FILM_VOICE chooses the narrator: edge or voxcpm', detail=found['voice'])
+    if found.get('voice') not in (None, 'edge', 'voxcpm', 'elevenlabs'):
+        need('voice', 'RELEASE_FILM_VOICE chooses the narrator: edge, voxcpm or elevenlabs', detail=found['voice'])
     elif found.get('voice') == 'voxcpm' and not found.get('voice_ready'):
         need('voxcpm', 'RELEASE_FILM_VOICE=voxcpm asks for the VoxCPM2 narrator', command=VOICE_SETUP)
     return missing, advised

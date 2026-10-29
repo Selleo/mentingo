@@ -70,6 +70,7 @@ class RenderTest(unittest.TestCase):
         pcm = subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', '2.2', '-i', str(out/'demo.mp4'), '-t', '0.3', '-map', '0:a', '-f', 's16le', '-'])
         self.assertGreater(len(pcm), 1000)
         self.assertTrue(any(pcm))
+
         self.assertAlmostEqual(result['duration'], 4, delta=.08)
         self.assertIn('00:00:02,900 --> 00:00:03,900', (out/'captions-pl.srt').read_text())  # the player's subtitles
         self.assertIn('00:00:02.900 --> 00:00:03.900', (out/'captions-pl.vtt').read_text())
@@ -93,6 +94,19 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(set(result['artifact_sha256']), expected_artifacts)
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
+
+    def test_tutorial_mode_preserves_stable_ids_and_spec_provenance(self):
+        data = copy.deepcopy(self.data)
+        data['mode'] = 'tutorial'
+        chapter = data['chapters'][0]
+        chapter['id'] = 'create-path'
+        chapter['prs'] = ['https://github.com/Selleo/mentingo/blob/' + 'a' * 40 + '/docs/specs/learning-paths-business-spec.md']
+        prepared = load_plan(self.plan(data, 'tutorial-input.json'), enforce_duration=False)
+        self.assertEqual(prepared['chapters'][0]['id'], 'create-path')
+        # Tutorial provenance is explicit; a release plan still requires real PR URLs.
+        del data['mode']
+        with self.assertRaisesRegex(ValueError, 'real GitHub PR URLs'):
+            load_plan(self.plan(data, 'release-input.json'), enforce_duration=False)
 
     def test_footage_plays_its_pieces_and_holds_between_them(self):
         plan = load_plan(self.plan(), enforce_duration=False)
