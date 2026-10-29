@@ -14,7 +14,7 @@ import { match } from "ts-pattern";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { COURSE_TRANSFER_KINDS } from "src/course-transfer/course-transfer.constants";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { HostedVideoCopyService } from "src/file/hosted-video-copy.service";
 import { HostedVideoStatusService } from "src/file/hosted-video-status.service";
 import { HOSTED_VIDEO_STATUSES } from "src/file/hosted-video.constants";

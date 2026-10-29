@@ -36,6 +36,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  courseLearningStates,
   certificates,
   users,
   courses,
@@ -475,10 +476,10 @@ export class CertificateRepository {
   }
 
   async findCertificateByIdForRender(
-    userId: string | null,
+    userId: string,
     certificateId: string,
     language: SupportedLanguages,
-    learnerScope?: SQL,
+    additionalAccessScope?: SQL,
   ) {
     const [certificate] = await this.db
       .select({
@@ -506,10 +507,9 @@ export class CertificateRepository {
       .where(
         and(
           eq(certificates.id, certificateId),
-          userId ? eq(certificates.userId, userId) : undefined,
+          or(eq(certificates.userId, userId), additionalAccessScope),
           eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
           isNull(users.deletedAt),
-          learnerScope,
         ),
       );
 
@@ -1044,6 +1044,15 @@ export class CertificateRepository {
     if (!userIds.length) return;
 
     const dbInstance = trx || this.db;
+
+    await dbInstance
+      .delete(courseLearningStates)
+      .where(
+        and(
+          eq(courseLearningStates.courseId, courseId),
+          inArray(courseLearningStates.studentId, userIds),
+        ),
+      );
 
     const courseChapterIds = dbInstance
       .select({ id: chapters.id })

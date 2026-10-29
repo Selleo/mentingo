@@ -19,6 +19,7 @@ import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 import { ScormPlayer } from "./ScormPlayer";
 
 type ScormLessonProps = {
+  learningStateId?: string | null;
   lessonId: string;
 };
 
@@ -69,7 +70,7 @@ function ScormNavigation({
   );
 }
 
-export function ScormLesson({ lessonId }: ScormLessonProps) {
+export function ScormLesson({ lessonId, learningStateId }: ScormLessonProps) {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
   const [selectedScoId, setSelectedScoId] = useState<string | null>(null);
@@ -81,6 +82,7 @@ export function ScormLesson({ lessonId }: ScormLessonProps) {
     refetch,
   } = useScormLaunch({
     lessonId,
+    learningStateId,
     scoId: selectedScoId,
     language,
   });

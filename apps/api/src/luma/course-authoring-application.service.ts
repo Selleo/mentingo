@@ -155,6 +155,7 @@ export class CourseAuthoringApplicationService {
             AUTHORING_APPLICATION_PENDING: "courseAuthoring.errors.applicationInProgress",
             AUTHORING_EXPORT_PENDING: "courseAuthoring.errors.applicationInProgress",
             AUTHORING_PROPOSAL_NOT_ACCEPTED: "courseAuthoring.errors.proposalNotReady",
+            AUTHORING_PROPOSAL_NOT_READY: "courseAuthoring.errors.proposalNotReady",
             AUTHORING_ASSET_NOT_READY: "courseAuthoring.errors.assetNotReady",
             AUTHORING_DEPENDENCY_UNREADY: "courseAuthoring.errors.missingDependency",
             AUTHORING_CHAPTER_DEPENDENCY_UNREADY: "courseAuthoring.errors.missingDependency",
@@ -289,10 +290,11 @@ export class CourseAuthoringApplicationService {
       !Value.Check(frozenAuthoringExportSchema, exported) ||
       exported.courseId !== data.courseId ||
       exported.sessionId !== data.sessionId ||
-      exported.exportId !== data.exportId ||
-      courseAuthoringExportHash(exported) !== exported.exportHash
+      exported.exportId !== data.exportId
     )
       throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    if (courseAuthoringExportHash(exported) !== exported.exportHash)
+      throw new BadGatewayException("courseAuthoring.errors.exportHashMismatch");
     const safeReason =
       reason.startsWith("courseAuthoring.errors.") ||
       reason.startsWith("aiJudgeConfiguration.errors.") ||

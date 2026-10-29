@@ -5,7 +5,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import { RouteGuard } from "~/Guards/RouteGuard";
+import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
 import AllArticlesTOC from "~/modules/Articles/AllArticlesTOC";
@@ -89,6 +89,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const is2xl = useMediaQuery({ minWidth: 1440 });
 
   const { data: globalSettings } = useGlobalSettings();
+  const showSignUp = useIsRegistrationEnabled();
 
   const enabledForPublic = (featureEnabled?: boolean, publicAccessible?: boolean) =>
     Boolean(featureEnabled && publicAccessible);
@@ -109,7 +110,6 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   );
 
   const coursesAccessible = Boolean(globalSettings?.unregisteredUserCoursesAccessibility);
-  const showSignUp = !globalSettings?.inviteOnlyRegistration;
   const isArticlesRoute = pathname.startsWith("/articles");
 
   if (!isAuthenticated) {
@@ -167,9 +167,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
         </div>
         {!is2xl && <AllArticlesTOC isMobile={true} />}
         <main className="relative flex-1 overflow-y-auto bg-primary-50">
-          <RouteGuard>
-            <Outlet />
-          </RouteGuard>
+          <Outlet />
         </main>
       </div>
     );
@@ -177,9 +175,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
   return (
     <main className="relative flex-1 overflow-y-auto bg-primary-50">
-      <RouteGuard>
-        <Outlet />
-      </RouteGuard>
+      <Outlet />
     </main>
   );
 };

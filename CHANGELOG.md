@@ -1,3 +1,35 @@
+<a name="v4.25.0"></a>
+
+## [v4.25.0] - 23.10.2026
+
+### Features:
+
+- group global search results by course and clarify AI search ([#2069](https://github.com/Selleo/mentingo/issues/2069))
+
+- allow organizations to configure their preferred login methods ([#2041](https://github.com/Selleo/mentingo/issues/2041))
+
+- find relevant content across courses and uploaded documents ([#2068](https://github.com/Selleo/mentingo/issues/2068))
+
+- show AI course progress and background notifications ([#2058](https://github.com/Selleo/mentingo/issues/2058))
+
+- load the course picker with infinite scroll ([#2065](https://github.com/Selleo/mentingo/issues/2065))
+
+- inline admin editing on the modern courses page ([#2059](https://github.com/Selleo/mentingo/issues/2059))
+
+### Bug Fixes:
+
+- keep voice mentor delivery consistent across sentences ([#2066](https://github.com/Selleo/mentingo/issues/2066))
+
+- move activity logs to the user dropdown ([#2067](https://github.com/Selleo/mentingo/issues/2067))
+
+- prevent duplicate avatars from appearing before text responses in AI mentor ([#2063](https://github.com/Selleo/mentingo/issues/2063))
+
+- help MCP agents read lessons without guessing chapter IDs ([#2061](https://github.com/Selleo/mentingo/issues/2061))
+
+### Chores:
+
+- improve the learning paths view for more user-friendly experience ([#2071](https://github.com/Selleo/mentingo/issues/2071))
+
 <a name="v4.24.0"></a>
 
 ## [v4.24.0] - 21.10.2026
@@ -21,6 +53,10 @@
 - allow demos to pause background search indexing ([#2060](https://github.com/Selleo/mentingo/issues/2060))
 
 - disable tracing for global-search embeddings ([#2051](https://github.com/Selleo/mentingo/issues/2051))
+
+### Documentation:
+
+- update changelog for version v4.24.0
 
 <a name="v4.23.0"></a>
 
@@ -3500,7 +3536,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.24.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.25.0...HEAD
+[v4.25.0]: https://github.com/Selleo/mentingo/compare/v4.24.0...v4.25.0
 [v4.24.0]: https://github.com/Selleo/mentingo/compare/v4.23.0...v4.24.0
 [v4.23.0]: https://github.com/Selleo/mentingo/compare/v4.22.0...v4.23.0
 [v4.22.0]: https://github.com/Selleo/mentingo/compare/v4.21.0...v4.22.0

@@ -28,6 +28,7 @@ import {
   LEARNING_MODE_REQUIRED_ERROR_KEY,
   shouldRequireLearningModeForProgress,
 } from "src/common/utils/lessonLearningAccess";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -165,6 +166,9 @@ export class LessonService {
       (await this.lessonRepository.getHasLessonAccess(id, effectiveUserId, isStudent));
 
     if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
+    const learningContext = courseLearningContext.getStore();
+    if (learningContext?.readOnly) isManagerPreview = true;
+    if (isManagerPreview && learningContext) learningContext.readOnly = true;
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -206,7 +210,7 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && !isManagerPreview) {
-      const { data: thread } = await this.aiService.getThreadWithSetup({
+      const { data: thread } = await this.aiService.getOrCreateLessonThread({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
         userLanguage: actualLanguage,

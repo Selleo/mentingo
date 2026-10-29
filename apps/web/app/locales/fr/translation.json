@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Reprise : {{completed}} sur {{total}} leçons",
+    "repeat": "Reprendre le cours",
+    "setting": "Autoriser la reprise du cours",
+    "settingDescription": "Les participants peuvent reprendre un cours terminé avec une nouvelle progression.",
+    "completedOn": "Terminé le {{date}}",
+    "progress": "Reprise : {{completed}} sur {{total}} chapitres",
+    "errors": {
+      "staleState": "Actualisez le cours avant de continuer.",
+      "unavailable": "Ce cours ne peut pas être repris maintenant.",
+      "accessDenied": "Vous ne pouvez pas reprendre ce cours."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatisations et e-mails",
     "templates": "Modèles d’automatisation",
@@ -76,7 +89,12 @@
       "unsupportedVersion": "Cette version du package Mentingo n’est pas prise en charge.",
       "missingAsset": "Un fichier requis manque dans le package Mentingo.",
       "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide.",
-      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace."
+      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace.",
+      "pathNotFound": "Le parcours de développement à exporter est introuvable.",
+      "accessDenied": "Vous n'avez pas l'autorisation d'exporter ce contenu.",
+      "liveTrainingIncomplete": "Une formation en direct liée à ce cours est incomplète et ne peut pas être exportée.",
+      "courseNotFound": "Le cours à exporter est introuvable.",
+      "categoryNotFound": "La catégorie du cours est introuvable."
     }
   },
   "aiConversations": {
@@ -121,12 +139,19 @@
     "empty": "Aucune conversation pour le moment.",
     "types": {
       "practice": "Session de pratique",
-      "ai-mentor": "Leçon avec le mentor IA"
+      "ai-mentor": "Leçon avec le mentor IA",
+      "assistant": "Assistant"
     },
     "statuses": {
       "active": "En cours",
       "completed": "Terminée",
       "archived": "Archivée"
+    },
+    "messageStatuses": {
+      "pending": "En attente",
+      "running": "En cours",
+      "failed": "Interrompu par une erreur",
+      "cancelled": "Arrêté"
     }
   },
   "emailTemplates": {
@@ -679,7 +704,9 @@
       "somethingWentWrong": "Une erreur est survenue...",
       "notFound": "Ressource introuvable",
       "lessonAccessDenied": "Vous n'avez pas la permission d'accéder à cette leçon.",
-      "tooManyRequests": "Trop de requêtes. Réessayez dans {{seconds}} secondes."
+      "tooManyRequests": "Trop de requêtes. Réessayez dans {{seconds}} secondes.",
+      "invalidRequest": "Requête invalide.",
+      "courseAccessDenied": "Vous n'avez pas accès à ce cours."
     },
     "tooltip": {
       "soon": "Bientôt disponible"
@@ -713,7 +740,9 @@
       "somethingWentWrong": "Oups ! Quelque chose s'est mal passé.",
       "threadMustBeActive": "Le fil de discussion doit être actif.",
       "aiJudgeConfigurationMissing": "La configuration des conditions d’achèvement est manquante.",
-      "aiJudgeGenerationNotAwaitingRevision": "Cette génération n’attend pas une décision de révision."
+      "aiJudgeGenerationNotAwaitingRevision": "Cette génération n’attend pas une décision de révision.",
+      "threadNotFound": "La conversation est introuvable.",
+      "threadAccessDenied": "Vous n'avez pas accès à cette conversation."
     },
     "loader": {
       "textSequence": {
@@ -746,7 +775,10 @@
     "continueWithSlack": "Continuer avec Slack",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
-    "refreshPage": "Actualiser la page"
+    "refreshPage": "Actualiser la page",
+    "validation": {
+      "messageRequired": "Le message est obligatoire."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "L'ordre des leçons a bien été mis à jour",
@@ -998,6 +1030,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "Assistant IA",
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "panel": "panneau",
@@ -1237,7 +1271,8 @@
     },
     "errors": {
       "courseDueDateRequired": "La date d'échéance est requise pour créer l'événement du calendrier du cours.",
-      "courseTitleRequired": "Le titre du cours est requis pour créer l’événement du calendrier du cours."
+      "courseTitleRequired": "Le titre du cours est requis pour créer l’événement du calendrier du cours.",
+      "courseDueDateCalendarSyncFailed": "Échec de la synchronisation de l'échéance du cours avec le calendrier."
     }
   },
   "liveTrainingView": {
@@ -2065,7 +2100,8 @@
       "bulkStatusUpdateSuccessfully": "Statuts des cours mis à jour avec succès",
       "bulkStatusUpdateFailed": "Échec de la mise à jour des statuts des cours",
       "bulkStatusUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
-      "noCoursesSelected": "Sélectionnez au moins un cours."
+      "noCoursesSelected": "Sélectionnez au moins un cours.",
+      "deleteCoursesFailed": "Échec de la suppression des cours"
     }
   },
   "adminCategoriesView": {
@@ -2310,6 +2346,7 @@
         "file_delete": "Supprimer des fichiers directement du stockage de la plateforme.",
         "resource_library_manage": "Gérer les ressources privées dans la bibliothèque de ressources.",
         "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
+        "assistant_use": "Utiliser l’assistant en lecture seule et gérer ses propres conversations.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
         "announcement_delete": "Supprimer les annonces.",
@@ -2476,6 +2513,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Afficher la clé",
+      "hide": "Masquer la clé",
+      "saveError": "Impossible d’enregistrer les modifications. Veuillez réessayer.",
+      "platformSettings": "Paramètres de la plateforme",
+      "description": "Connectez la plateforme à des services externes. Sélectionnez une intégration pour ajouter ou remplacer ses clés.",
+      "filters": "Filtrer les intégrations",
+      "status": {
+        "all": "Toutes",
+        "configured": "Configurée",
+        "attention": "À vérifier",
+        "notConfigured": "Non configurée",
+        "unknown": "Statut indisponible"
+      },
+      "attention": "{{count}} intégrations nécessitent votre attention :",
+      "showIssues": "Voir les problèmes",
+      "missingKeys": "Configuration manquante : {{keys}}",
+      "close": "Fermer l’éditeur",
+      "cancel": "Annuler",
+      "saveChanges": "Enregistrer les modifications",
+      "empty": "Aucune intégration ne correspond à ce filtre.",
+      "statusError": "Impossible de charger l’état de la configuration.",
+      "retry": "Réessayer",
+      "secretError": "Impossible de charger la clé. Essayez de l’afficher à nouveau.",
+      "legend": "Vert : toutes les clés sont configurées. Orange : certaines clés manquent. Gris pointillé : aucune clé configurée. Le statut indique si la configuration est complète, pas l’état de la connexion.",
+      "categories": {
+        "signIn": "Connexion",
+        "calendar": "Calendrier",
+        "payments": "Paiements",
+        "video": "Vidéo",
+        "ai": "IA",
+        "liveTraining": "Formation en direct",
+        "security": "Sécurité"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Connexion avec Google",
@@ -2733,16 +2805,23 @@
         "course": "Cours introuvable.",
         "category": "Catégorie introuvable.",
         "chapter": "Chapitre introuvable.",
-        "lesson": "Leçon introuvable."
+        "lesson": "Leçon introuvable.",
+        "author": "Auteur du cours introuvable."
       },
       "forbidden": {
         "updateCourse": "Vous n'êtes pas autorisé à modifier ce cours.",
-        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
+        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles.",
+        "deleteCourse": "Vous n'avez pas l'autorisation de supprimer ce cours.",
+        "deleteCourses": "Vous n'avez pas l'autorisation de supprimer ces cours.",
+        "enrollOwnCourse": "Vous ne pouvez pas vous inscrire à votre propre cours.",
+        "enrollGroups": "Vous n'avez pas l'autorisation d'inscrire des groupes à ce cours.",
+        "changeStudentMode": "Vous n'avez pas l'autorisation de modifier le mode d'apprentissage."
       },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
       "create": {
         "courseFailed": "Échec de la création du cours.",
-        "stripeProductFailed": "Échec de la création du produit de paiement du cours."
+        "stripeProductFailed": "Échec de la création du produit de paiement du cours.",
+        "chapterFailed": "Échec de la création du chapitre."
       },
       "lesson": {
         "customTtsReferenceRequired": "Une référence TTS personnalisée est requise pour le mode vocal personnalisé.",
@@ -2753,6 +2832,22 @@
         "optionInsertFailed": "Échec de l'ajout de l'option de quiz.",
         "embedCreateFailed": "Échec de la création de la leçon d'intégration.",
         "signedUrlDownloadFailed": "Échec du téléchargement du fichier à partir de l'URL signée."
+      },
+      "media": {
+        "imageUploadFailed": "Échec du téléversement de l'image du cours.",
+        "updateFailed": "Échec de la mise à jour des médias du cours."
+      },
+      "update": {
+        "courseFailed": "Échec de la mise à jour du cours."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Vous êtes déjà inscrit à ce cours.",
+        "studentsRequired": "Sélectionnez au moins un apprenant à inscrire.",
+        "onlyExistingUsers": "Vous ne pouvez inscrire que des utilisateurs existants.",
+        "studentsAlreadyEnrolled": "Certains des apprenants sélectionnés sont déjà inscrits à ce cours.",
+        "groupsNotFound": "Les groupes sélectionnés sont introuvables.",
+        "groupEnrollmentsNotFound": "Les groupes sélectionnés ne sont pas inscrits à ce cours.",
+        "enrollmentFailed": "Échec de l'inscription au cours."
       }
     },
     "thinking": {
@@ -3909,7 +4004,9 @@
       "lessonIdNotFound": "ID de leçon introuvable",
       "notAuthorizedTitle": "Non autorisé",
       "notAuthorizedDescription": "Vous n'êtes pas autorisé à accéder à cette leçon.",
-      "goBackToCourse": "Revenir au cours"
+      "goBackToCourse": "Revenir au cours",
+      "quizNotCompleted": "Terminez le quiz avant de terminer cette leçon.",
+      "aiMentorDataRequired": "Les résultats de la leçon AI Mentor sont requis pour terminer cette leçon."
     },
     "other": {
       "lesson": "Leçon",
@@ -4297,6 +4394,7 @@
       "coursesVisibilityDescription": "Autoriser les visiteurs à consulter la liste des cours et à accéder aux leçons gratuites sans se connecter",
       "modernCourseList": "Utiliser la vue moderne de la liste des cours",
       "modernCourseListDescription": "Activez la nouvelle conception de la liste de cours avec les sections héros et meilleurs cours",
+      "courseListLayoutRecommended": "Recommandé",
       "courseDiscussions": "Activer les discussions sur les cours",
       "courseDiscussionsDescription": "Autoriser les utilisateurs inscrits à consulter et à participer aux fils de discussion du cours",
       "calendar": "Activer le calendrier",
@@ -4972,6 +5070,13 @@
     "adminLearningPathEditor": "Éditeur de parcours de développement"
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Commencer le parcours",
+      "continue": "Continuer le parcours",
+      "review": "Revoir le parcours",
+      "coursesCount_one": "{{count}} cours",
+      "coursesCount_other": "{{count}} cours"
+    },
     "title": "Parcours de développement",
     "description": "Consultez les parcours de développement qui vous sont attribués et reprenez votre progression.",
     "searchPlaceholder": "Rechercher des parcours de développement",
@@ -5083,6 +5188,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Général",
+      "certificate": "Certificat",
+      "export": "Export"
+    },
     "title": "Parcours de développement",
     "importPackage": {
       "title": "Importer un parcours de développement"
@@ -5164,6 +5274,14 @@
       "tooltip": "La langue de base de ce parcours de développement est {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Ajouter des cours au parcours",
+      "addDialogDescription": "Sélectionnez un ou plusieurs cours. Ils seront ajoutés à la fin du parcours.",
+      "searchPlaceholder": "Rechercher des cours",
+      "noSearchResults": "Aucun cours ne correspond à votre recherche.",
+      "noAvailableCourses": "Tous les cours disponibles sont déjà dans ce parcours.",
+      "selectedCount_one": "{{count}} cours sélectionné",
+      "selectedCount_other": "{{count}} cours sélectionnés",
+      "addSelected": "Ajouter la sélection ({{count}})",
       "select": "Sélectionnez un cours",
       "add": "Ajouter un cours",
       "drag": "Faites glisser pour réorganiser le cours",
@@ -5456,7 +5574,8 @@
     "errors": {
       "generic": "Impossible de démarrer le mode support",
       "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
-      "invalidSession": "La session d'assistance n'est pas valide"
+      "invalidSession": "La session d'assistance n'est pas valide",
+      "sessionExpired": "Votre session d’assistance a expiré. Démarrez une nouvelle session d’assistance."
     }
   },
   "superAdminTenantsView": {
@@ -5649,7 +5768,9 @@
       "sourceCategoryMissing": "Le cours à dupliquer n'a pas de catégorie",
       "targetCourseNotFound": "Le cours dupliqué est introuvable",
       "tenantMissing": "Le locataire de ce cours est introuvable",
-      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué"
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué",
+      "jobNotFound": "Tâche de duplication du cours introuvable",
+      "createFailed": "Échec de la création du cours dupliqué"
     }
   },
   "tenantSharing": {
@@ -5765,14 +5886,13 @@
       "resource": "Ressource :"
     },
     "actions": {
-      "save_automation_draft": "Brouillon d’automatisation enregistré",
-      "simulate_automation": "Automatisation simulée",
-      "apply_automation": "Automatisation publiée / appliquée",
-      "enable_automation": "Automatisation activée",
-      "disable_automation": "Automatisation désactivée",
-      "duplicate_automation": "Automatisation dupliquée",
-      "archive_automation": "Automatisation archivée",
-
+      "save_automation_draft": "Enregistrer le brouillon d’automatisation",
+      "simulate_automation": "Simuler l’automatisation",
+      "apply_automation": "Appliquer l’automatisation",
+      "enable_automation": "Activer l’automatisation",
+      "disable_automation": "Désactiver l’automatisation",
+      "duplicate_automation": "Dupliquer l’automatisation",
+      "archive_automation": "Archiver l’automatisation",
       "create": "Créé",
       "update": "Mis à jour",
       "bulk_course_category_update": "Catégorie de cours en masse mise à jour",
@@ -5803,14 +5923,7 @@
       "start_learning_path": "Parcours d'apprentissage commencé",
       "complete_learning_path": "Parcours d'apprentissage terminé",
       "play_scorm": "SCORM joué",
-      "complete_scorm": "SCORM terminé",
-      "save_automation_draft": "Enregistrer le brouillon d’automatisation",
-      "simulate_automation": "Simuler l’automatisation",
-      "apply_automation": "Appliquer l’automatisation",
-      "enable_automation": "Activer l’automatisation",
-      "disable_automation": "Désactiver l’automatisation",
-      "duplicate_automation": "Dupliquer l’automatisation",
-      "archive_automation": "Archiver l’automatisation"
+      "complete_scorm": "SCORM terminé"
     },
     "entity": {
       "automation": "Automatisation",
@@ -5883,7 +5996,12 @@
       "liveKitRoomNotAvailable": "La salle LiveKit de cette session n'est pas disponible.",
       "activeSessionUpdateForbidden": "Cette formation en direct ne peut pas être modifiée pendant une session en cours.",
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
-      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
+      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint.",
+      "onlyScheduledCanBeStarted": "Seules les formations en direct planifiées ou terminées peuvent être démarrées.",
+      "sessionAlreadyActive": "Une session de cette formation en direct est déjà en cours.",
+      "onlineSessionRequired": "Cette action n'est disponible que pour les formations en direct en ligne.",
+      "userNotFound": "Utilisateur introuvable.",
+      "sessionAlreadyFinished": "Cette session de formation en direct est déjà terminée."
     }
   },
   "modernCourseView": {
@@ -5963,6 +6081,8 @@
       "certificate": "Certificat",
       "uponCompletion": "À la fin du cours",
       "notIssuedYet": "Pas encore délivré",
+      "certificateDate": "Délivré",
+      "certificateExpiry": "Expire le",
       "aboutAuthor": "À propos de l'auteur"
     },
     "certificate": {
@@ -7713,6 +7833,133 @@
       "listingNotFound": "Ce cours de la place de marché est introuvable.",
       "thumbnailNotFound": "Ce cours de la place de marché n'a pas de miniature.",
       "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Les traductions ne peuvent être modifiées que dans une langue différente de la langue de base du cours.",
+      "criterionNotFound": "Critère d’achèvement introuvable.",
+      "guidanceNotFound": "Consigne d'évaluation introuvable.",
+      "blockingErrorNotFound": "Erreur bloquante introuvable.",
+      "configurationNotFound": "La configuration des conditions d’achèvement est introuvable.",
+      "invalidLessonType": "Les conditions d’achèvement ne sont disponibles que pour les leçons AI Mentor."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Les traductions ne peuvent être modifiées que dans une langue différente de la langue de base du cours.",
+      "configurationNotFound": "La configuration de l'AI Mentor est introuvable.",
+      "invalidLessonType": "La configuration de l'AI Mentor n'est disponible que pour les leçons AI Mentor.",
+      "invalidGraph": "La configuration de l'AI Mentor est invalide."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Conversation avec l’assistant",
+      "open": "Ouvrir la conversation",
+      "fullScreen": "Ouvrir l’assistant complet",
+      "minimize": "Réduire la conversation",
+      "dismiss": "Masquer la bulle de l’assistant",
+      "dragHint": "Faites glisser pour déplacer. Déposez sur X pour masquer. Les flèches déplacent, Suppr masque.",
+      "dropToDismiss": "Déposez pour masquer"
+    },
+    "openSource": "Ouvrir dans Mentingo",
+    "sourceTypes": {
+      "course": "Cours",
+      "lesson": "Leçon",
+      "user": "Personne",
+      "group": "Groupe",
+      "category": "Catégorie",
+      "article": "Article",
+      "news": "Actualité",
+      "qa": "Question et réponse",
+      "development_path": "Parcours d’apprentissage",
+      "resource": "Ressource",
+      "reference": "Source"
+    },
+    "title": "Assistant",
+    "eyebrow": "Les connaissances de votre plateforme",
+    "welcome": "Comment puis-je vous aider ?",
+    "intro": "Trouvez des ressources, posez des questions et consultez les sources, dans les limites de vos droits d’accès.",
+    "newConversation": "Nouvelle conversation",
+    "untitled": "Nouvelle conversation",
+    "search": "Rechercher des conversations",
+    "recent": "Conversations récentes",
+    "history": "Historique des conversations",
+    "active": "Actives",
+    "archived": "Archivées",
+    "archivedThreads": "Conversations archivées",
+    "showArchived": "Afficher les archives",
+    "showRecent": "Afficher les conversations récentes",
+    "noThreads": "Vos conversations apparaîtront ici.",
+    "noMatches": "Aucune conversation ne correspond à votre recherche.",
+    "loading": "Chargement des conversations…",
+    "loadError": "Impossible de charger vos conversations.",
+    "retry": "Réessayer",
+    "loadMore": "Charger plus",
+    "composerLabel": "Message à l’assistant",
+    "placeholder": "Posez une question sur votre apprentissage ou les ressources de la plateforme…",
+    "composerHint": "Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne",
+    "disclosure": "Les réponses peuvent contenir des erreurs. Consultez les sources. Les administrateurs autorisés peuvent consulter ces conversations.",
+    "send": "Envoyer le message",
+    "stop": "Arrêter la réponse",
+    "you": "Vous",
+    "working": "Traitement de votre demande…",
+    "activity": {
+      "starting": "Démarrage…",
+      "thinking": "Je traite votre demande…",
+      "searching": "Je cherche dans votre espace de travail…",
+      "reading": "Je lis le contenu…",
+      "writing": "Je rédige votre réponse…"
+    },
+    "writing": "Rédaction…",
+    "sources": "Sources",
+    "failed": "Une erreur a interrompu la réponse. Le texte ci-dessus peut être incomplet.",
+    "cancelled": "Réponse arrêtée. Le texte ci-dessus peut être incomplet.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "rename": "Renommer la conversation",
+    "archive": "Archiver la conversation",
+    "restore": "Restaurer la conversation",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "threadUnavailable": "Cette conversation est indisponible. Elle n’existe peut-être plus ou vous n’y avez pas accès.",
+    "sendError": "Votre message n’a pas pu être envoyé. Votre brouillon a été conservé.",
+    "messageTooLong": "Votre message ne peut pas dépasser 8 000 caractères. Raccourcissez le brouillon pour l’envoyer.",
+    "unavailable": "L’assistant n’est pas encore configuré. Contactez votre administrateur.",
+    "archivedNotice": "Cette conversation est archivée. Restaurez-la pour continuer.",
+    "openHistory": "Ouvrir l’historique des conversations",
+    "hideHistory": "Masquer l’historique des conversations",
+    "renameDescription": "Donnez à cette conversation un nom facile à retrouver.",
+    "readOnly": "Assistant en lecture seule",
+    "loadEarlier": "Charger les messages précédents",
+    "latestMessage": "Aller au dernier message",
+    "starters": {
+      "find": {
+        "label": "Trouver une ressource",
+        "prompt": "Trouve des cours sur l’intégration auxquels j’ai accès."
+      },
+      "learn": {
+        "label": "Explorer mes possibilités d’apprentissage",
+        "prompt": "À quelles ressources pédagogiques ai-je accès ?"
+      },
+      "understand": {
+        "label": "Comprendre un sujet",
+        "prompt": "Trouve des ressources sur le feedback constructif et explique les idées principales."
+      }
+    },
+    "errors": {
+      "unavailable": "L’assistant est temporairement indisponible. Réessayez plus tard.",
+      "messageConflict": "Ce message entre en conflit avec une demande précédente. Modifiez-le et réessayez.",
+      "responseInProgress": "Une réponse est déjà en cours de génération dans cette conversation.",
+      "responseInactive": "Cette réponse n’est plus active.",
+      "invalidToolInput": "L’assistant n’a pas pu traiter cette demande. Réessayez."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organisation introuvable.",
+      "inactive": "Cette organisation est inactive. Contactez votre administrateur."
     }
   }
 }

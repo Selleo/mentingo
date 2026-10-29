@@ -1,4 +1,16 @@
 import { OAUTH_LOGIN_METHODS } from "@repo/shared";
+import {
+  BrainCircuit,
+  CalendarSync,
+  Clapperboard,
+  Presentation,
+  ShieldCheck,
+  WalletCards,
+} from "lucide-react";
+
+import Google from "~/assets/svgs/google.svg?react";
+import Microsoft from "~/assets/svgs/microsoft.svg?react";
+import Slack from "~/assets/svgs/slack.svg?react";
 
 import type { OAuthLoginMethod } from "@repo/shared";
 
@@ -124,18 +136,6 @@ export const ENV_GROUPS = [
     secretNames: ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"],
   },
   {
-    id: "microsoftCalendar",
-    titleKey: "adminEnvsView.groups.microsoftCalendar.title",
-    descriptionKey: "adminEnvsView.groups.microsoftCalendar.description",
-    secretNames: ["MICROSOFT_CALENDAR_CLIENT_ID", "MICROSOFT_CALENDAR_CLIENT_SECRET"],
-  },
-  {
-    id: "payments",
-    titleKey: "adminEnvsView.groups.payments.title",
-    descriptionKey: "adminEnvsView.groups.payments.description",
-    secretNames: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "VITE_STRIPE_PUBLISHABLE_KEY"],
-  },
-  {
     id: "videoStreaming",
     titleKey: "adminEnvsView.groups.videoStreaming.title",
     descriptionKey: "adminEnvsView.groups.videoStreaming.description",
@@ -152,6 +152,18 @@ export const ENV_GROUPS = [
     titleKey: "adminEnvsView.groups.artificialIntelligence.title",
     descriptionKey: "adminEnvsView.groups.artificialIntelligence.description",
     secretNames: ["OPENAI_API_KEY", "LUMA_API_KEY"],
+  },
+  {
+    id: "payments",
+    titleKey: "adminEnvsView.groups.payments.title",
+    descriptionKey: "adminEnvsView.groups.payments.description",
+    secretNames: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "VITE_STRIPE_PUBLISHABLE_KEY"],
+  },
+  {
+    id: "microsoftCalendar",
+    titleKey: "adminEnvsView.groups.microsoftCalendar.title",
+    descriptionKey: "adminEnvsView.groups.microsoftCalendar.description",
+    secretNames: ["MICROSOFT_CALENDAR_CLIENT_ID", "MICROSOFT_CALENDAR_CLIENT_SECRET"],
   },
   {
     id: "liveTraining",
@@ -179,3 +191,23 @@ export const OAUTH_LOGIN_METHOD_ENV_GROUP_IDS = {
   [OAUTH_LOGIN_METHODS.MICROSOFT]: "microsoftSignIn",
   [OAUTH_LOGIN_METHODS.SLACK]: "slackSignIn",
 } as const satisfies Record<OAuthLoginMethod, EnvGroupId>;
+
+export const ENV_STATUS = {
+  ALL: "all",
+  CONFIGURED: "configured",
+  ATTENTION: "attention",
+  NOT_CONFIGURED: "notConfigured",
+  UNKNOWN: "unknown",
+} as const;
+
+export const ENV_GROUP_PRESENTATION = {
+  googleSignIn: { icon: Google, category: "signIn", services: ["google_authorization"] },
+  microsoftSignIn: { icon: Microsoft, category: "signIn", services: ["microsoft_authorization"] },
+  slackSignIn: { icon: Slack, category: "signIn", services: ["slack_authorization"] },
+  microsoftCalendar: { icon: CalendarSync, category: "calendar", services: ["microsoft_calendar"] },
+  payments: { icon: WalletCards, category: "payments", services: ["stripe"] },
+  videoStreaming: { icon: Clapperboard, category: "video", services: ["bunny"] },
+  artificialIntelligence: { icon: BrainCircuit, category: "ai", services: ["openAI", "luma"] },
+  liveTraining: { icon: Presentation, category: "liveTraining", services: ["livekit"] },
+  phishingSimulations: { icon: ShieldCheck, category: "security", services: ["phishing"] },
+} as const;

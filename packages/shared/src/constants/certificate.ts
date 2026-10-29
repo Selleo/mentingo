@@ -17,6 +17,7 @@ export const COURSE_CERTIFICATE_STATUSES = {
 export const CERTIFICATE_ARCHIVE_REASONS = {
   EXPIRED: "expired",
   MANUAL_RESET: "manual_reset",
+  REPLACED: "replaced",
 } as const;
 
 export const CERTIFICATE_VALIDITY_TYPES = {

@@ -1,5 +1,11 @@
 import { Test } from "@nestjs/testing";
-import { AUTOMATION_STATUSES } from "@repo/shared";
+import {
+  AUTOMATION_STATUSES,
+  AUTOMATION_DEFINITION_KINDS,
+  AUTOMATION_NODE_KINDS,
+  AUTOMATION_STEP_TYPES,
+  AUTOMATION_EVENT_KINDS,
+} from "@repo/shared";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AutomationActivityHandler } from "src/activity-logs/handlers/automation-activity.handler";
@@ -11,6 +17,7 @@ import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import { AUTOMATION_RUNTIME, AUTOMATION_LIFECYCLE_ACTIVITY_TYPES } from "../automation.constants";
+import { assembleAutomationRecordFromRows } from "../mappers/automation-persistence.mapper";
 import { AutomationRecipientOptionsRepository } from "../repositories/automation-recipient-options.repository";
 
 import { AutomationDefinitionStorageService } from "./automation-definition-storage.service";
@@ -18,6 +25,7 @@ import { AutomationManagementService } from "./automation-management.service";
 import { AutomationValidationAndSimulationService } from "./automation-validation-and-simulation.service";
 
 import type { AutomationRecord } from "../automation.types";
+import type { automationSteps } from "src/storage/schema";
 
 const actor = {
   userId: "00000000-0000-4000-8000-000000000001",
@@ -118,6 +126,54 @@ describe("Automation activity lifecycle", () => {
     expect(getActivityLogMetadataResourceName(log, "automation")).toBeTruthy();
     return log;
   }
+
+  it("compares draft and applied steps independently of database row order", async () => {
+    const triggerId = "00000000-0000-4000-8000-000000000004";
+    const actionId = "00000000-0000-4000-8000-000000000005";
+    const trigger = {
+      id: triggerId,
+      automationId: current.id,
+      tenantId: actor.tenantId,
+      createdAt: current.createdAt,
+      updatedAt: current.updatedAt,
+      parentId: null,
+      position: 0,
+      definitionKind: AUTOMATION_DEFINITION_KINDS.DRAFT,
+      nodeKind: AUTOMATION_NODE_KINDS.TRIGGER,
+      configuration: { name: AUTOMATION_EVENT_KINDS.WELCOME },
+    } satisfies typeof automationSteps.$inferSelect;
+    const action = {
+      ...trigger,
+      id: actionId,
+      parentId: triggerId,
+      nodeKind: AUTOMATION_NODE_KINDS.ACTION,
+      configuration: {
+        name: AUTOMATION_STEP_TYPES.SEND_EMAIL,
+        template: { type: "builtin", key: "welcome" },
+        mappings: {},
+      },
+    } satisfies typeof automationSteps.$inferSelect;
+    current = assembleAutomationRecordFromRows(
+      {
+        ...current,
+        draftRootStepId: triggerId,
+        appliedRootStepId: triggerId,
+        appliedName: { en: current.name },
+        localizedAppliedName: current.name,
+        localizedAppliedDescription: current.description,
+      },
+      [
+        trigger,
+        action,
+        { ...action, definitionKind: AUTOMATION_DEFINITION_KINDS.APPLIED },
+        { ...trigger, definitionKind: AUTOMATION_DEFINITION_KINDS.APPLIED },
+      ],
+    );
+
+    expect((await service.getAutomation(current.id)).hasUnappliedChanges).toBe(false);
+    current.draftDefinition.name = "Edited draft";
+    expect((await service.getAutomation(current.id)).hasUnappliedChanges).toBe(true);
+  });
 
   it("records creation in the same transaction as the new draft", async () => {
     const result = await service.createAutomation(definition, actor, "pl");

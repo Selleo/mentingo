@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Kartojimas: {{completed}} iš {{total}} pamokų",
+    "repeat": "Kartoti kursą",
+    "setting": "Leisti kartoti kursą",
+    "settingDescription": "Dalyviai gali kartoti baigtą kursą ir pradėti mokymosi pažangą iš naujo.",
+    "completedOn": "Baigta {{date}}",
+    "progress": "Kartojimas: {{completed}} iš {{total}} skyrių",
+    "errors": {
+      "staleState": "Prieš tęsdami atnaujinkite kursą.",
+      "unavailable": "Šiuo metu kurso kartoti negalima.",
+      "accessDenied": "Neturite teisės kartoti šio kurso."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatizacijos ir el. laiškai",
     "templates": "Automatizacijų šablonai",
@@ -76,7 +89,12 @@
       "unsupportedVersion": "Ši Mentingo paketo versija nepalaikoma.",
       "missingAsset": "Mentingo pakete trūksta būtino failo.",
       "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas.",
-      "courseNotSyncable": "Šis kursas buvo pridėtas kaip redaguojama kopija, todėl jo negalima sinchronizuoti. Ištrinkite jį ir pridėkite iš naujo iš prekyvietės."
+      "courseNotSyncable": "Šis kursas buvo pridėtas kaip redaguojama kopija, todėl jo negalima sinchronizuoti. Ištrinkite jį ir pridėkite iš naujo iš prekyvietės.",
+      "pathNotFound": "Eksportuojamas tobulėjimo kelias nerastas.",
+      "accessDenied": "Neturite leidimo eksportuoti šio turinio.",
+      "liveTrainingIncomplete": "Su šiuo kursu susieti tiesioginiai mokymai yra neišsamūs ir negali būti eksportuoti.",
+      "courseNotFound": "Eksportuojamas kursas nerastas.",
+      "categoryNotFound": "Kurso kategorija nerasta."
     }
   },
   "aiConversations": {
@@ -121,12 +139,19 @@
     "empty": "Pokalbių dar nėra.",
     "types": {
       "practice": "Praktikos sesija",
-      "ai-mentor": "DI mentoriaus pamoka"
+      "ai-mentor": "DI mentoriaus pamoka",
+      "assistant": "Asistentas"
     },
     "statuses": {
       "active": "Vyksta",
       "completed": "Baigtas",
       "archived": "Archyvuotas"
+    },
+    "messageStatuses": {
+      "pending": "Laukiama",
+      "running": "Vykdoma",
+      "failed": "Nutraukta dėl klaidos",
+      "cancelled": "Sustabdyta"
     }
   },
   "emailTemplates": {
@@ -678,7 +703,9 @@
       "somethingWentWrong": "Kažkas ne taip...",
       "notFound": "Išteklius nerastas",
       "lessonAccessDenied": "Neturite leidimo pasiekti šios pamokos.",
-      "tooManyRequests": "Per daug prašymų. Bandykite dar kartą po {{seconds}} sekundžių."
+      "tooManyRequests": "Per daug prašymų. Bandykite dar kartą po {{seconds}} sekundžių.",
+      "invalidRequest": "Neteisinga užklausa.",
+      "courseAccessDenied": "Neturite prieigos prie šio kurso."
     },
     "tooltip": {
       "soon": "Netrukus"
@@ -714,7 +741,9 @@
       "aiMentorConfigurationIncomplete": "AI mentoriaus konfigūracija yra neužbaigta.",
       "aiJudgeConfigurationMissing": "Trūksta baigimo sąlygų konfigūracijos.",
       "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo.",
+      "threadNotFound": "Pokalbis nerastas.",
+      "threadAccessDenied": "Neturite prieigos prie šio pokalbio."
     },
     "loader": {
       "textSequence": {
@@ -747,7 +776,10 @@
     "continueWithSlack": "Tęskite su Slack",
     "enterFullscreen": "Visas ekranas",
     "exitFullscreen": "Išeikite per visą ekraną",
-    "refreshPage": "Atnaujinti puslapį"
+    "refreshPage": "Atnaujinti puslapį",
+    "validation": {
+      "messageRequired": "Žinutė yra privaloma."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Pamokų seka sėkmingai atnaujinta",
@@ -999,6 +1031,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "AI asistentas",
     "settings": "Nustatymai",
     "logout": "Atsijungti",
     "panel": "skydelis",
@@ -1236,8 +1270,9 @@
       }
     },
     "errors": {
-      "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseDueDateRequired": "Norint sukurti kurso kalendoriaus įvykį, būtina nurodyti terminą.",
+      "courseTitleRequired": "Norint sukurti kurso kalendoriaus įvykį, būtinas kurso pavadinimas.",
+      "courseDueDateCalendarSyncFailed": "Nepavyko sinchronizuoti kurso termino su kalendoriumi."
     }
   },
   "liveTrainingView": {
@@ -2070,7 +2105,8 @@
       "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
       "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
-      "noCoursesSelected": "Pasirinkite bent vieną kursą."
+      "noCoursesSelected": "Pasirinkite bent vieną kursą.",
+      "deleteCoursesFailed": "Nepavyko ištrinti kursų"
     }
   },
   "adminCategoriesView": {
@@ -2310,6 +2346,7 @@
         "file_delete": "Gali trinti failus tiesiai iš platformos saugyklos.",
         "resource_library_manage": "Gali tvarkyti privačius išteklius išteklių bibliotekoje.",
         "ai_use": "Gali naudoti AI pagrįstas platformos funkcijas.",
+        "assistant_use": "Gali naudotis tik skaitymui skirtu asistentu ir tvarkyti savo pokalbius.",
         "announcement_read": "Gali peržiūrėti pranešimus.",
         "announcement_create": "Gali kurti pranešimus.",
         "news_read_public": "Gali peržiūrėti prieinamas naujienas.",
@@ -2481,6 +2518,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Rodyti raktą",
+      "hide": "Slėpti raktą",
+      "saveError": "Nepavyko išsaugoti pakeitimų. Bandykite dar kartą.",
+      "platformSettings": "Platformos nustatymai",
+      "description": "Prijunkite platformą prie išorinių paslaugų. Pasirinkite integraciją ir pridėkite arba pakeiskite jos raktus.",
+      "filters": "Filtruoti integracijas",
+      "status": {
+        "all": "Visos",
+        "configured": "Sukonfigūruota",
+        "attention": "Reikia dėmesio",
+        "notConfigured": "Nesukonfigūruota",
+        "unknown": "Būsena nepasiekiama"
+      },
+      "attention": "{{count}} integracijoms reikia dėmesio:",
+      "showIssues": "Rodyti problemas",
+      "missingKeys": "Trūkstama konfigūracija: {{keys}}",
+      "close": "Uždaryti redaktorių",
+      "cancel": "Atšaukti",
+      "saveChanges": "Išsaugoti pakeitimus",
+      "empty": "Nė viena integracija neatitinka šio filtro.",
+      "statusError": "Nepavyko įkelti konfigūracijos būsenos.",
+      "retry": "Bandyti dar kartą",
+      "secretError": "Nepavyko įkelti rakto. Pabandykite jį parodyti dar kartą.",
+      "legend": "Žalia: visi raktai sukonfigūruoti. Oranžinė: trūksta kai kurių raktų. Pilka punktyrinė: nėra sukonfigūruotų raktų. Būsena rodo konfigūracijos išsamumą, o ne ryšio veikimą.",
+      "categories": {
+        "signIn": "Prisijungimas",
+        "calendar": "Kalendorius",
+        "payments": "Mokėjimai",
+        "video": "Vaizdo įrašai",
+        "ai": "DI",
+        "liveTraining": "Tiesioginiai mokymai",
+        "security": "Saugumas"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Prisijungimas per Google",
@@ -2739,11 +2811,17 @@
         "course": "Kursas nerastas.",
         "category": "Kategorija nerasta.",
         "chapter": "Skyrius nerastas.",
-        "lesson": "Pamoka nerasta."
+        "lesson": "Pamoka nerasta.",
+        "author": "Kurso autorius nerastas."
       },
       "forbidden": {
         "updateCourse": "Neturite leidimo atnaujinti šio kurso.",
-        "archivedCourseEnrollment": "Šis kursas buvo archyvuotas ir į jį nebegalima užsiregistruoti."
+        "archivedCourseEnrollment": "Šis kursas buvo archyvuotas ir į jį nebegalima užsiregistruoti.",
+        "deleteCourse": "Neturite leidimo ištrinti šio kurso.",
+        "deleteCourses": "Neturite leidimo ištrinti šių kursų.",
+        "enrollOwnCourse": "Negalite užsiregistruoti į savo kursą.",
+        "enrollGroups": "Neturite leidimo registruoti grupių į šį kursą.",
+        "changeStudentMode": "Neturite leidimo keisti mokymosi režimo."
       },
       "media": {
         "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
@@ -2752,7 +2830,8 @@
       "statisticsAccessForbidden": "Neturite teisės peržiūrėti šio kurso statistikos.",
       "create": {
         "courseFailed": "Nepavyko sukurti kurso.",
-        "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
+        "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto.",
+        "chapterFailed": "Nepavyko sukurti skyriaus."
       },
       "lesson": {
         "customTtsReferenceRequired": "Pasirinktiniame režime būtina nurodyti tinkintą TTS nuorodą.",
@@ -2763,6 +2842,18 @@
         "optionInsertFailed": "Nepavyko pridėti testo parinkties.",
         "embedCreateFailed": "Nepavyko sukurti įdėjimo pamokos.",
         "signedUrlDownloadFailed": "Nepavyko atsisiųsti failo iš pasirašyto URL."
+      },
+      "update": {
+        "courseFailed": "Nepavyko atnaujinti kurso."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Jūs jau užsiregistravote į šį kursą.",
+        "studentsRequired": "Pasirinkite bent vieną besimokantįjį registracijai.",
+        "onlyExistingUsers": "Galite registruoti tik esamus naudotojus.",
+        "studentsAlreadyEnrolled": "Kai kurie pasirinkti besimokantieji jau užregistruoti į šį kursą.",
+        "groupsNotFound": "Pasirinktos grupės nerastos.",
+        "groupEnrollmentsNotFound": "Pasirinktos grupės nėra užregistruotos į šį kursą.",
+        "enrollmentFailed": "Nepavyko užsiregistruoti į kursą."
       }
     },
     "thinking": {
@@ -4162,7 +4253,9 @@
       "lessonIdNotFound": "Pamokos ID nerastas",
       "notAuthorizedTitle": "Neįgaliotas",
       "notAuthorizedDescription": "Jūs neturite teisės pasiekti šios pamokos.",
-      "goBackToCourse": "Grįžkite į kursą"
+      "goBackToCourse": "Grįžkite į kursą",
+      "quizNotCompleted": "Prieš baigdami šią pamoką užbaikite testą.",
+      "aiMentorDataRequired": "Norint užbaigti šią pamoką, reikalingi AI Mentoriaus pamokos rezultatai."
     },
     "other": {
       "lesson": "Pamoka",
@@ -4572,7 +4665,8 @@
       "courseListLayoutClassic": "Klasikinis",
       "courseListLayoutModern": "Modernus",
       "courseListLayoutClassicDescription": "Tradicinis kursų tinklelio išdėstymas",
-      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais",
+      "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais ir daugiau informacijos, pavyzdžiui, numatomu mokymosi laiku",
+      "courseListLayoutRecommended": "Rekomenduojama",
       "courseListLayoutPreview": {
         "continueLearning": "Tęsti mokymąsi",
         "topCourses": "5 populiariausi kursai",
@@ -5241,7 +5335,9 @@
       "sourceCategoryMissing": "Dubliuojamas kursas neturi kategorijos",
       "targetCourseNotFound": "Dubliuotas kursas nerastas",
       "tenantMissing": "Šio kurso tenantas nerastas",
-      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima dubliuoti"
+      "foreignSourceAsset": "Šiame kurse naudojamas kitai organizacijai priklausantis failas, todėl jo negalima dubliuoti",
+      "jobNotFound": "Kurso dubliavimo užduotis nerasta",
+      "createFailed": "Nepavyko sukurti dubliuoto kurso"
     }
   },
   "tenantSharing": {
@@ -5357,14 +5453,13 @@
       "resource": "Išteklius:"
     },
     "actions": {
-      "save_automation_draft": "Automatizavimo juodraštis išsaugotas",
-      "simulate_automation": "Automatizavimas simuliuotas",
-      "apply_automation": "Automatizavimas paskelbtas / pritaikytas",
-      "enable_automation": "Automatizavimas aktyvuotas",
-      "disable_automation": "Automatizavimas išjungtas",
-      "duplicate_automation": "Automatizavimas nukopijuotas",
-      "archive_automation": "Automatizavimas archyvuotas",
-
+      "save_automation_draft": "Išsaugoti automatizacijos juodraštį",
+      "simulate_automation": "Imituoti automatizaciją",
+      "apply_automation": "Taikyti automatizaciją",
+      "enable_automation": "Įjungti automatizaciją",
+      "disable_automation": "Išjungti automatizaciją",
+      "duplicate_automation": "Dubliuoti automatizaciją",
+      "archive_automation": "Archyvuoti automatizaciją",
       "create": "Sukurta",
       "update": "Atnaujinta",
       "bulk_course_category_update": "Masiniu būdu atnaujinta kursų kategorija",
@@ -5395,14 +5490,7 @@
       "start_learning_path": "Mokymosi kelias pradėtas",
       "complete_learning_path": "Mokymosi kelias užbaigtas",
       "play_scorm": "SCORM paleistas",
-      "complete_scorm": "SCORM užbaigtas",
-      "save_automation_draft": "Išsaugoti automatizacijos juodraštį",
-      "simulate_automation": "Imituoti automatizaciją",
-      "apply_automation": "Taikyti automatizaciją",
-      "enable_automation": "Įjungti automatizaciją",
-      "disable_automation": "Išjungti automatizaciją",
-      "duplicate_automation": "Dubliuoti automatizaciją",
-      "archive_automation": "Archyvuoti automatizaciją"
+      "complete_scorm": "SCORM užbaigtas"
     },
     "entity": {
       "automation": "Automatizavimas",
@@ -5440,6 +5528,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Pradėti kelią",
+      "continue": "Tęsti kelią",
+      "review": "Peržiūrėti kelią",
+      "coursesCount_one": "{{count}} kursas",
+      "coursesCount_few": "{{count}} kursai",
+      "coursesCount_many": "{{count}} kurso",
+      "coursesCount_other": "{{count}} kursų"
+    },
     "title": "Tobulėjimo keliai",
     "description": "Naršykite priskirtus tobulėjimo kelius ir tęskite sutvarkytas kursų sekas.",
     "searchPlaceholder": "Ieškoti tobulėjimo kelių",
@@ -5551,6 +5648,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Bendra",
+      "certificate": "Sertifikatas",
+      "export": "Eksportas"
+    },
     "title": "Tobulėjimo keliai",
     "importPackage": {
       "title": "Importuoti tobulėjimo kelią"
@@ -5632,6 +5734,16 @@
       "tooltip": "Šio tobulėjimo kelio pagrindinė kalba yra {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Pridėti kursų į kelią",
+      "addDialogDescription": "Pasirinkite vieną ar daugiau kursų. Jie bus pridėti kelio pabaigoje.",
+      "searchPlaceholder": "Ieškoti kursų",
+      "noSearchResults": "Paieškos neatitinka joks kursas.",
+      "noAvailableCourses": "Visi galimi kursai jau yra šiame kelyje.",
+      "selectedCount_one": "Pasirinktas {{count}} kursas",
+      "selectedCount_few": "Pasirinkti {{count}} kursai",
+      "selectedCount_many": "Pasirinkta {{count}} kurso",
+      "selectedCount_other": "Pasirinkta {{count}} kursų",
+      "addSelected": "Pridėti pasirinktus ({{count}})",
       "select": "Pasirinkite kursą",
       "add": "Pridėti kursą",
       "drag": "Tempkite, kad pakeistumėte kurso tvarką",
@@ -5922,7 +6034,8 @@
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
-      "invalidSession": "Palaikymo sesija netinkama"
+      "invalidSession": "Palaikymo sesija netinkama",
+      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją."
     }
   },
   "superAdminTenantsView": {
@@ -6144,7 +6257,12 @@
       "liveKitRoomNotAvailable": "Šiai sesijai skirtas LiveKit kambarys nepasiekiamas.",
       "activeSessionUpdateForbidden": "Šio tiesioginio mokymo negalima keisti, kol vyksta sesija.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
-      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
+      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius.",
+      "onlyScheduledCanBeStarted": "Pradėti galima tik suplanuotus arba pasibaigusius tiesioginius mokymus.",
+      "sessionAlreadyActive": "Šių tiesioginių mokymų sesija jau vyksta.",
+      "onlineSessionRequired": "Šis veiksmas galimas tik internetiniams tiesioginiams mokymams.",
+      "userNotFound": "Naudotojas nerastas.",
+      "sessionAlreadyFinished": "Ši tiesioginių mokymų sesija jau baigėsi."
     }
   },
   "modernCourseView": {
@@ -6226,6 +6344,8 @@
       "certificate": "Sertifikatas",
       "uponCompletion": "Baigus kursą",
       "notIssuedYet": "Dar neišduotas",
+      "certificateDate": "Išduota",
+      "certificateExpiry": "Galioja iki",
       "aboutAuthor": "Apie autorių"
     },
     "certificate": {
@@ -8200,6 +8320,133 @@
       "listingNotFound": "Šis prekyvietės kursas nerastas.",
       "thumbnailNotFound": "Šis prekyvietės kursas neturi miniatiūros.",
       "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Vertimus galima redaguoti tik ne pagrindine kurso kalba.",
+      "criterionNotFound": "Baigimo kriterijus nerastas.",
+      "guidanceNotFound": "Vertinimo gairė nerasta.",
+      "blockingErrorNotFound": "Blokuojanti klaida nerasta.",
+      "configurationNotFound": "Baigimo sąlygų konfigūracija nerasta.",
+      "invalidLessonType": "Baigimo sąlygos galimos tik AI Mentoriaus pamokoms."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Vertimus galima redaguoti tik ne pagrindine kurso kalba.",
+      "configurationNotFound": "AI Mentoriaus konfigūracija nerasta.",
+      "invalidLessonType": "AI Mentoriaus konfigūracija galima tik AI Mentoriaus pamokoms.",
+      "invalidGraph": "AI Mentoriaus konfigūracija neteisinga."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Pokalbis su asistentu",
+      "open": "Atidaryti pokalbį su asistentu",
+      "fullScreen": "Atidaryti visą asistentą",
+      "minimize": "Sumažinti pokalbį",
+      "dismiss": "Slėpti asistento burbulą",
+      "dragHint": "Vilkite norėdami perkelti. Numeskite ant X, kad paslėptumėte. Rodyklės perkelia, Delete paslepia.",
+      "dropToDismiss": "Numeskite norėdami paslėpti"
+    },
+    "openSource": "Atidaryti Mentingo",
+    "sourceTypes": {
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "user": "Naudotojas",
+      "group": "Grupė",
+      "category": "Kategorija",
+      "article": "Straipsnis",
+      "news": "Naujiena",
+      "qa": "Klausimas ir atsakymas",
+      "development_path": "Mokymosi kelias",
+      "resource": "Išteklius",
+      "reference": "Šaltinis"
+    },
+    "title": "Asistentas",
+    "eyebrow": "Jūsų platformos žinios",
+    "welcome": "Kuo galiu padėti?",
+    "intro": "Raskite mokymosi medžiagą, užduokite klausimus ir tikrinkite šaltinius pagal savo prieigos teises.",
+    "newConversation": "Naujas pokalbis",
+    "untitled": "Naujas pokalbis",
+    "search": "Ieškoti pokalbių",
+    "recent": "Naujausi pokalbiai",
+    "history": "Pokalbių istorija",
+    "active": "Aktyvūs",
+    "archived": "Archyvuoti",
+    "archivedThreads": "Archyvuoti pokalbiai",
+    "showArchived": "Rodyti archyvą",
+    "showRecent": "Rodyti naujausius pokalbius",
+    "noThreads": "Čia bus rodomi jūsų pokalbiai.",
+    "noMatches": "Paiešką atitinkančių pokalbių nėra.",
+    "loading": "Įkeliami pokalbiai…",
+    "loadError": "Nepavyko įkelti pokalbių.",
+    "retry": "Bandyti dar kartą",
+    "loadMore": "Įkelti daugiau",
+    "composerLabel": "Žinutė asistentui",
+    "placeholder": "Klauskite apie mokymąsi ar platformos turinį…",
+    "composerHint": "Enter siunčia · Shift + Enter pradeda naują eilutę",
+    "disclosure": "Atsakymuose gali būti klaidų. Tikrinkite šaltinius. Įgalioti administratoriai gali peržiūrėti šiuos pokalbius.",
+    "send": "Siųsti žinutę",
+    "stop": "Stabdyti atsakymą",
+    "you": "Jūs",
+    "working": "Apdorojama jūsų užklausa…",
+    "activity": {
+      "starting": "Pradedama…",
+      "thinking": "Vykdau jūsų užklausą…",
+      "searching": "Ieškau informacijos…",
+      "reading": "Skaitau turinį…",
+      "writing": "Rašau atsakymą…"
+    },
+    "writing": "Rašoma…",
+    "sources": "Šaltiniai",
+    "failed": "Atsakymą nutraukė klaida. Aukščiau pateiktas tekstas gali būti neišsamus.",
+    "cancelled": "Atsakymas sustabdytas. Aukščiau pateiktas tekstas gali būti neišsamus.",
+    "copy": "Kopijuoti",
+    "copied": "Nukopijuota",
+    "rename": "Pervadinti pokalbį",
+    "archive": "Archyvuoti pokalbį",
+    "restore": "Atkurti pokalbį",
+    "save": "Išsaugoti",
+    "close": "Uždaryti",
+    "threadUnavailable": "Šis pokalbis nepasiekiamas. Jo gali nebebūti arba neturite prieigos.",
+    "sendError": "Nepavyko išsiųsti žinutės. Juodraštis išsaugotas.",
+    "messageTooLong": "Žinutę gali sudaryti ne daugiau kaip 8 000 simbolių. Sutrumpinkite juodraštį, kad galėtumėte jį išsiųsti.",
+    "unavailable": "Asistentas dar nesukonfigūruotas. Kreipkitės į administratorių.",
+    "archivedNotice": "Šis pokalbis archyvuotas. Atkurkite jį, kad tęstumėte.",
+    "openHistory": "Atverti pokalbių istoriją",
+    "hideHistory": "Slėpti pokalbių istoriją",
+    "renameDescription": "Suteikite pokalbiui lengvai randamą pavadinimą.",
+    "readOnly": "Asistentas su skaitymo prieiga",
+    "loadEarlier": "Įkelti ankstesnes žinutes",
+    "starters": {
+      "find": {
+        "label": "Rasti mokymosi medžiagą",
+        "prompt": "Rask man prieinamus įvadinius kursus."
+      },
+      "learn": {
+        "label": "Atrasti mokymosi galimybes",
+        "prompt": "Kokią mokymosi medžiagą galiu pasiekti?"
+      },
+      "understand": {
+        "label": "Suprasti temą",
+        "prompt": "Rask medžiagą apie konstruktyvų grįžtamąjį ryšį ir paaiškink pagrindines idėjas."
+      }
+    },
+    "latestMessage": "Pereiti prie naujausios žinutės",
+    "errors": {
+      "unavailable": "Asistentas laikinai nepasiekiamas. Bandykite dar kartą vėliau.",
+      "messageConflict": "Ši žinutė nesuderinama su ankstesne užklausa. Pakeiskite ją ir bandykite dar kartą.",
+      "responseInProgress": "Šiame pokalbyje jau generuojamas atsakymas.",
+      "responseInactive": "Šis atsakymas nebėra aktyvus.",
+      "invalidToolInput": "Asistentui nepavyko apdoroti šios užklausos. Bandykite dar kartą."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organizacija nerasta.",
+      "inactive": "Ši organizacija neaktyvi. Susisiekite su administratoriumi."
     }
   }
 }

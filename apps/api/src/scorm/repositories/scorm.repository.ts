@@ -20,6 +20,8 @@ import {
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
+import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
   chapters,
@@ -295,7 +297,10 @@ export class ScormRepository {
       .from(scormAttempts)
       .where(
         and(
-          eq(scormAttempts.studentId, params.studentId),
+          and(
+            eq(scormAttempts.studentId, params.studentId),
+            activeLearningState(scormAttempts.learningStateId),
+          ),
           eq(scormAttempts.packageId, params.packageId),
           eq(scormAttempts.scoId, params.scoId),
         ),
@@ -313,6 +318,7 @@ export class ScormRepository {
     const [createdAttempt] = await this.db
       .insert(scormAttempts)
       .values({
+        learningStateId: await activeLearningStateId(this.db, params.studentId, params.lessonId),
         studentId: params.studentId,
         courseId: params.courseId,
         lessonId: params.lessonId,
@@ -352,7 +358,9 @@ export class ScormRepository {
       .from(scormAttempts)
       .innerJoin(scormPackages, eq(scormPackages.id, scormAttempts.packageId))
       .innerJoin(scormScos, eq(scormScos.id, scormAttempts.scoId))
-      .where(eq(scormAttempts.id, attemptId))
+      .where(
+        and(eq(scormAttempts.id, attemptId), activeLearningState(scormAttempts.learningStateId)),
+      )
       .limit(1);
 
     return attempt;
@@ -378,7 +386,9 @@ export class ScormRepository {
     await this.db
       .update(scormAttempts)
       .set({ completedAt: sql`now()` })
-      .where(eq(scormAttempts.id, attemptId));
+      .where(
+        and(eq(scormAttempts.id, attemptId), activeLearningState(scormAttempts.learningStateId)),
+      );
   }
 
   async areAllLessonScosCompleted(params: {
@@ -406,7 +416,13 @@ export class ScormRepository {
       .from(scormScos)
       .leftJoin(
         scormAttempts,
-        and(eq(scormAttempts.scoId, scormScos.id), eq(scormAttempts.studentId, params.studentId)),
+        and(
+          eq(scormAttempts.scoId, scormScos.id),
+          and(
+            eq(scormAttempts.studentId, params.studentId),
+            activeLearningState(scormAttempts.learningStateId),
+          ),
+        ),
       )
       .leftJoin(scormRuntimeState, eq(scormRuntimeState.attemptId, scormAttempts.id))
       .where(
@@ -440,7 +456,13 @@ export class ScormRepository {
       .from(scormScos)
       .leftJoin(
         scormAttempts,
-        and(eq(scormAttempts.scoId, scormScos.id), eq(scormAttempts.studentId, params.studentId)),
+        and(
+          eq(scormAttempts.scoId, scormScos.id),
+          and(
+            eq(scormAttempts.studentId, params.studentId),
+            activeLearningState(scormAttempts.learningStateId),
+          ),
+        ),
       )
       .leftJoin(scormRuntimeState, eq(scormRuntimeState.attemptId, scormAttempts.id))
       .where(eq(scormScos.packageId, params.packageId));

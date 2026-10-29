@@ -20,6 +20,7 @@ import { ScormModule } from "src/scorm/scorm.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 
+import { McpActorRepository } from "./mcp-actor.repository";
 import { McpAuthGuard } from "./mcp-auth.guard";
 import { McpConsentController } from "./mcp-consent.controller";
 import { McpHttpService } from "./mcp-http.service";
@@ -56,6 +57,7 @@ import { McpController } from "./mcp.controller";
   providers: [
     McpHttpService,
     McpStudentLessonRepository,
+    McpActorRepository,
     McpAuthGuard,
     McpTokenService,
     McpUploadGrantService,

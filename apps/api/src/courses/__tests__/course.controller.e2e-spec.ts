@@ -21,8 +21,8 @@ import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { CourseDurationService } from "src/courses/course-duration.service";
 import { CourseService } from "src/courses/course.service";
+import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import { EnvService } from "src/env/services/env.service";
 import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -4585,8 +4585,9 @@ describe("CourseController (e2e)", () => {
               .set("Cookie", cookies);
 
             expect(result.status).toBe(409);
-            const messageIds = result.body.message.match(/[0-9a-f-]{36}/g);
-            expect(messageIds).toEqual(expect.arrayContaining([student1.id, student2.id]));
+            expect(result.body.message).toBe(
+              "adminCourseView.errors.enrollment.studentsAlreadyEnrolled",
+            );
           });
         });
 

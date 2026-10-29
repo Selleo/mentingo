@@ -1,4 +1,10 @@
-import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
@@ -26,7 +32,10 @@ export class TenantResolverService {
     private readonly tenantState: TenantStateService,
   ) {}
 
-  async resolveTenantId(req: Request): Promise<string | null> {
+  async resolveTenantId(
+    req: Request,
+    allowInactive = this.isInactiveAllowed(req),
+  ): Promise<string | null> {
     const tenantIdFromState = await this.resolveFromState(req);
     if (tenantIdFromState) return tenantIdFromState;
 
@@ -41,7 +50,6 @@ export class TenantResolverService {
     }
 
     const origin = this.getRequestOrigin(req);
-    const allowInactive = this.isInactiveAllowed(req);
 
     if (user?.tenantId) {
       const [tenant] = await this.dbBase
@@ -50,7 +58,9 @@ export class TenantResolverService {
         .where(eq(tenants.id, user.tenantId))
         .limit(1);
 
-      if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+      if (!tenant) throw new NotFoundException("tenant.error.notFound");
+
+      if (tenant.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
         throw new ForbiddenException("tenant.error.inactive");
       }
 
@@ -65,11 +75,13 @@ export class TenantResolverService {
       .where(eq(tenants.host, origin))
       .limit(1);
 
-    if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+    if (!tenant) throw new NotFoundException("tenant.error.notFound");
+
+    if (tenant.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
       throw new ForbiddenException("tenant.error.inactive");
     }
 
-    return tenant?.id ?? null;
+    return tenant.id;
   }
 
   async resolveTenantHost(req: Request): Promise<string | null> {
@@ -102,7 +114,7 @@ export class TenantResolverService {
       .where(eq(tenants.id, tenantId))
       .limit(1);
 
-    if (!tenant) throw new UnauthorizedException("Invalid tenant state");
+    if (!tenant) throw new NotFoundException("tenant.error.notFound");
 
     return tenant.id;
   }

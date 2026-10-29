@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Opakování: {{completed}} z {{total}} lekcí",
+    "repeat": "Opakovat kurz",
+    "setting": "Povolit opakování kurzu",
+    "settingDescription": "Účastníci mohou dokončený kurz opakovat s novým postupem.",
+    "completedOn": "Dokončeno {{date}}",
+    "progress": "Opakování: {{completed}} z {{total}} kapitol",
+    "errors": {
+      "staleState": "Před pokračováním obnovte kurz.",
+      "unavailable": "Tento kurz nyní nelze opakovat.",
+      "accessDenied": "Nemáte přístup k opakování tohoto kurzu."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatizace a e-maily",
     "templates": "Šablony automatizací",
@@ -76,7 +89,12 @@
       "unsupportedVersion": "Tato verze balíčku Mentingo není podporována.",
       "missingAsset": "V balíčku Mentingo chybí požadovaný soubor.",
       "invalidArchive": "Tento ZIP není platným balíčkem Mentingo.",
-      "courseNotSyncable": "Tento kurz byl přidán jako upravitelná kopie a nelze jej synchronizovat. Smažte jej a přidejte znovu z tržiště."
+      "courseNotSyncable": "Tento kurz byl přidán jako upravitelná kopie a nelze jej synchronizovat. Smažte jej a přidejte znovu z tržiště.",
+      "pathNotFound": "Rozvojová cesta k exportu nebyla nalezena.",
+      "accessDenied": "Nemáte oprávnění exportovat tento obsah.",
+      "liveTrainingIncomplete": "Živé školení propojené s tímto kurzem je neúplné a nelze jej exportovat.",
+      "courseNotFound": "Kurz k exportu nebyl nalezen.",
+      "categoryNotFound": "Kategorie kurzu nebyla nalezena."
     }
   },
   "aiConversations": {
@@ -121,12 +139,19 @@
     "empty": "Zatím žádné konverzace.",
     "types": {
       "practice": "Cvičná relace",
-      "ai-mentor": "Lekce s AI mentorem"
+      "ai-mentor": "Lekce s AI mentorem",
+      "assistant": "Asistent"
     },
     "statuses": {
       "active": "Probíhá",
       "completed": "Dokončená",
       "archived": "Archivovaná"
+    },
+    "messageStatuses": {
+      "pending": "Čeká",
+      "running": "Probíhá",
+      "failed": "Přerušeno chybou",
+      "cancelled": "Zastaveno"
     }
   },
   "emailTemplates": {
@@ -684,7 +709,9 @@
       "somethingWentWrong": "Něco se pokazilo...",
       "notFound": "Zdroj nenalezen",
       "lessonAccessDenied": "Nemáte oprávnění k přístupu k této lekci.",
-      "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund."
+      "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund.",
+      "invalidRequest": "Neplatný požadavek.",
+      "courseAccessDenied": "K tomuto kurzu nemáte přístup."
     },
     "tooltip": {
       "soon": "Již brzy"
@@ -720,7 +747,9 @@
       "aiMentorConfigurationIncomplete": "Konfigurace AI mentora není úplná.",
       "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
       "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
+      "threadNotFound": "Konverzace nebyla nalezena.",
+      "threadAccessDenied": "K této konverzaci nemáte přístup."
     },
     "loader": {
       "textSequence": {
@@ -753,7 +782,10 @@
     "continueWithSlack": "Pokračujte se Slackem",
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku",
-    "refreshPage": "Obnovit stránku"
+    "refreshPage": "Obnovit stránku",
+    "validation": {
+      "messageRequired": "Zpráva je povinná."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Pořadí lekcí bylo úspěšně aktualizováno",
@@ -1005,6 +1037,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "AI asistent",
     "settings": "Nastavení",
     "logout": "Odhlášení",
     "panel": "panel",
@@ -1242,8 +1276,9 @@
       }
     },
     "errors": {
-      "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseDueDateRequired": "K vytvoření události kurzu v kalendáři je vyžadován termín.",
+      "courseTitleRequired": "K vytvoření události kurzu v kalendáři je vyžadován název kurzu.",
+      "courseDueDateCalendarSyncFailed": "Termín kurzu se nepodařilo synchronizovat s kalendářem."
     }
   },
   "liveTrainingView": {
@@ -2076,7 +2111,8 @@
       "bulkStatusUpdateSuccessfully": "Stavy kurzů byly úspěšně aktualizovány",
       "bulkStatusUpdateFailed": "Nepodařilo se aktualizovat stavy kurzů",
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
-      "noCoursesSelected": "Vyberte alespoň jeden kurz."
+      "noCoursesSelected": "Vyberte alespoň jeden kurz.",
+      "deleteCoursesFailed": "Kurzy se nepodařilo smazat"
     }
   },
   "adminCategoriesView": {
@@ -2316,6 +2352,7 @@
         "file_delete": "Může mazat soubory přímo z úložiště platformy.",
         "resource_library_manage": "Může spravovat soukromé zdroje v knihovně zdrojů.",
         "ai_use": "Může používat funkce platformy využívající AI.",
+        "assistant_use": "Může používat asistenta pouze pro čtení a spravovat vlastní konverzace.",
         "announcement_read": "Může zobrazit oznámení.",
         "announcement_create": "Může vytvářet oznámení.",
         "news_read_public": "Může zobrazit dostupné novinky.",
@@ -2487,6 +2524,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Zobrazit klíč",
+      "hide": "Skrýt klíč",
+      "saveError": "Změny se nepodařilo uložit. Zkuste to znovu.",
+      "platformSettings": "Nastavení platformy",
+      "description": "Propojte platformu s externími službami. Vyberte integraci a doplňte nebo nahraďte její klíče.",
+      "filters": "Filtrovat integrace",
+      "status": {
+        "all": "Všechny",
+        "configured": "Nakonfigurováno",
+        "attention": "Vyžaduje pozornost",
+        "notConfigured": "Nenakonfigurováno",
+        "unknown": "Stav není dostupný"
+      },
+      "attention": "{{count}} integrací vyžaduje pozornost:",
+      "showIssues": "Zobrazit problémy",
+      "missingKeys": "Chybějící konfigurace: {{keys}}",
+      "close": "Zavřít editor",
+      "cancel": "Zrušit",
+      "saveChanges": "Uložit změny",
+      "empty": "Tomuto filtru neodpovídají žádné integrace.",
+      "statusError": "Stav konfigurace se nepodařilo načíst.",
+      "retry": "Zkusit znovu",
+      "secretError": "Klíč se nepodařilo načíst. Zkuste jej znovu zobrazit.",
+      "legend": "Zelená: všechny klíče jsou nastaveny. Oranžová: některé klíče chybí. Přerušovaná šedá: žádné nastavené klíče. Stav vyjadřuje úplnost konfigurace, nikoli funkčnost připojení.",
+      "categories": {
+        "signIn": "Přihlášení",
+        "calendar": "Kalendář",
+        "payments": "Platby",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Živá školení",
+        "security": "Zabezpečení"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Přihlášení přes Google",
@@ -2745,11 +2817,17 @@
         "course": "Kurz nenalezen.",
         "category": "Kategorie nenalezena.",
         "chapter": "Kapitola nenalezena.",
-        "lesson": "Lekce nenalezena."
+        "lesson": "Lekce nenalezena.",
+        "author": "Autor kurzu nebyl nalezen."
       },
       "forbidden": {
         "updateCourse": "Nemáte oprávnění aktualizovat tento kurz.",
-        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat."
+        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat.",
+        "deleteCourse": "Nemáte oprávnění tento kurz smazat.",
+        "deleteCourses": "Nemáte oprávnění tyto kurzy smazat.",
+        "enrollOwnCourse": "Do vlastního kurzu se nemůžete zapsat.",
+        "enrollGroups": "Nemáte oprávnění zapisovat skupiny do tohoto kurzu.",
+        "changeStudentMode": "Nemáte oprávnění změnit režim učení."
       },
       "media": {
         "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
@@ -2758,7 +2836,8 @@
       "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
-        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
+        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit.",
+        "chapterFailed": "Kapitolu se nepodařilo vytvořit."
       },
       "lesson": {
         "customTtsReferenceRequired": "Vlastní reference TTS je v vlastním režimu povinná.",
@@ -2769,6 +2848,18 @@
         "optionInsertFailed": "Možnost kvízu se nepodařilo přidat.",
         "embedCreateFailed": "Vloženou lekci se nepodařilo vytvořit.",
         "signedUrlDownloadFailed": "Soubor se nepodařilo stáhnout z podepsané adresy URL."
+      },
+      "update": {
+        "courseFailed": "Kurz se nepodařilo aktualizovat."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Do tohoto kurzu jste již zapsáni.",
+        "studentsRequired": "Vyberte alespoň jednoho studenta k zápisu.",
+        "onlyExistingUsers": "Zapsat můžete pouze existující uživatele.",
+        "studentsAlreadyEnrolled": "Někteří z vybraných studentů jsou do tohoto kurzu již zapsáni.",
+        "groupsNotFound": "Vybrané skupiny nebyly nalezeny.",
+        "groupEnrollmentsNotFound": "Vybrané skupiny nejsou do tohoto kurzu zapsány.",
+        "enrollmentFailed": "Zápis do kurzu se nezdařil."
       }
     },
     "thinking": {
@@ -4167,7 +4258,9 @@
       "lessonIdNotFound": "ID lekce nebylo nalezeno",
       "notAuthorizedTitle": "Neoprávněný",
       "notAuthorizedDescription": "Nemáte oprávnění k přístupu k této lekci.",
-      "goBackToCourse": "Vraťte se do kurzu"
+      "goBackToCourse": "Vraťte se do kurzu",
+      "quizNotCompleted": "Před dokončením této lekce dokončete kvíz.",
+      "aiMentorDataRequired": "K dokončení této lekce jsou vyžadovány výsledky lekce s AI Mentorem."
     },
     "other": {
       "lesson": "Lekce",
@@ -4577,7 +4670,8 @@
       "courseListLayoutClassic": "Klasické",
       "courseListLayoutModern": "Moderní",
       "courseListLayoutClassicDescription": "Tradiční rozvržení mřížky kurzů",
-      "courseListLayoutModernDescription": "Sekce hrdiny s doporučenými kurzy",
+      "courseListLayoutModernDescription": "Sekce hrdiny s doporučenými kurzy a dalšími podrobnostmi, například odhadovanou dobou studia",
+      "courseListLayoutRecommended": "Doporučeno",
       "courseListLayoutPreview": {
         "continueLearning": "Pokračovat ve studiu",
         "topCourses": "Top 5 kurzů",
@@ -5245,7 +5339,9 @@
       "sourceCategoryMissing": "Kurz k duplikování nemá kategorii",
       "targetCourseNotFound": "Duplikovaný kurz nebyl nalezen",
       "tenantMissing": "Tenant tohoto kurzu nebyl nalezen",
-      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat"
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat",
+      "jobNotFound": "Úloha duplikace kurzu nebyla nalezena",
+      "createFailed": "Duplikovaný kurz se nepodařilo vytvořit"
     }
   },
   "tenantSharing": {
@@ -5361,14 +5457,13 @@
       "resource": "Zdroj:"
     },
     "actions": {
-      "save_automation_draft": "Koncept automatizace uložen",
-      "simulate_automation": "Automatizace simulována",
-      "apply_automation": "Automatizace publikována / použita",
-      "enable_automation": "Automatizace aktivována",
-      "disable_automation": "Automatizace deaktivována",
-      "duplicate_automation": "Automatizace duplikována",
-      "archive_automation": "Automatizace archivována",
-
+      "save_automation_draft": "Uložit koncept automatizace",
+      "simulate_automation": "Simulovat automatizaci",
+      "apply_automation": "Použít automatizaci",
+      "enable_automation": "Povolit automatizaci",
+      "disable_automation": "Zakázat automatizaci",
+      "duplicate_automation": "Duplikovat automatizaci",
+      "archive_automation": "Archivovat automatizaci",
       "create": "Vytvořeno",
       "update": "Aktualizováno",
       "bulk_course_category_update": "Hromadně aktualizována kategorie kurzů",
@@ -5399,14 +5494,7 @@
       "start_learning_path": "Vzdělávací cesta zahájena",
       "complete_learning_path": "Vzdělávací cesta dokončena",
       "play_scorm": "SCORM spuštěn",
-      "complete_scorm": "SCORM dokončen",
-      "save_automation_draft": "Uložit koncept automatizace",
-      "simulate_automation": "Simulovat automatizaci",
-      "apply_automation": "Použít automatizaci",
-      "enable_automation": "Povolit automatizaci",
-      "disable_automation": "Zakázat automatizaci",
-      "duplicate_automation": "Duplikovat automatizaci",
-      "archive_automation": "Archivovat automatizaci"
+      "complete_scorm": "SCORM dokončen"
     },
     "entity": {
       "automation": "Automatizace",
@@ -5444,6 +5532,15 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Zahájit cestu",
+      "continue": "Pokračovat v cestě",
+      "review": "Zopakovat cestu",
+      "coursesCount_one": "{{count}} kurz",
+      "coursesCount_few": "{{count}} kurzy",
+      "coursesCount_many": "{{count}} kurzu",
+      "coursesCount_other": "{{count}} kurzů"
+    },
     "title": "Rozvojové cesty",
     "description": "Procházejte přiřazené rozvojové cesty a pokračujte v uspořádaných sekvencích kurzů.",
     "searchPlaceholder": "Hledat rozvojové cesty",
@@ -5555,6 +5652,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Obecné",
+      "certificate": "Certifikát",
+      "export": "Export"
+    },
     "title": "Rozvojové cesty",
     "importPackage": {
       "title": "Importovat rozvojovou cestu"
@@ -5636,6 +5738,16 @@
       "tooltip": "Základní jazyk této cesty je {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Přidat kurzy do cesty",
+      "addDialogDescription": "Vyberte jeden nebo více kurzů. Budou přidány na konec cesty.",
+      "searchPlaceholder": "Hledat kurzy",
+      "noSearchResults": "Hledání neodpovídá žádný kurz.",
+      "noAvailableCourses": "Všechny dostupné kurzy už jsou v této cestě.",
+      "selectedCount_one": "Vybrán {{count}} kurz",
+      "selectedCount_few": "Vybrány {{count}} kurzy",
+      "selectedCount_many": "Vybráno {{count}} kurzu",
+      "selectedCount_other": "Vybráno {{count}} kurzů",
+      "addSelected": "Přidat vybrané ({{count}})",
       "select": "Vyberte kurz",
       "add": "Přidat kurz",
       "drag": "Přetáhněte pro změnu pořadí kurzu",
@@ -5926,7 +6038,8 @@
     "errors": {
       "generic": "Režim podpory se nepodařilo spustit",
       "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
-      "invalidSession": "Relace podpory je neplatná"
+      "invalidSession": "Relace podpory je neplatná",
+      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory."
     }
   },
   "superAdminTenantsView": {
@@ -6148,7 +6261,12 @@
       "liveKitRoomNotAvailable": "Místnost LiveKit pro tuto relaci není dostupná.",
       "activeSessionUpdateForbidden": "Toto živé školení nelze během probíhající relace měnit.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
-      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení.",
+      "onlyScheduledCanBeStarted": "Spustit lze pouze naplánovaná nebo ukončená živá školení.",
+      "sessionAlreadyActive": "Relace tohoto živého školení již probíhá.",
+      "onlineSessionRequired": "Tato akce je dostupná pouze pro online živá školení.",
+      "userNotFound": "Uživatel nebyl nalezen.",
+      "sessionAlreadyFinished": "Tato relace živého školení již skončila."
     }
   },
   "modernCourseView": {
@@ -6230,6 +6348,8 @@
       "certificate": "Certifikát",
       "uponCompletion": "Po dokončení",
       "notIssuedYet": "Zatím nevydán",
+      "certificateDate": "Vydáno",
+      "certificateExpiry": "Platí do",
       "aboutAuthor": "O autorovi"
     },
     "certificate": {
@@ -8202,6 +8322,133 @@
       "listingNotFound": "Tento kurz z tržiště nebyl nalezen.",
       "thumbnailNotFound": "Tento kurz z tržiště nemá náhled.",
       "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Překlady lze upravovat pouze v jiném jazyce, než je základní jazyk kurzu.",
+      "criterionNotFound": "Kritérium dokončení nebylo nalezeno.",
+      "guidanceNotFound": "Pokyn k hodnocení nebyl nalezen.",
+      "blockingErrorNotFound": "Blokující chyba nebyla nalezena.",
+      "configurationNotFound": "Konfigurace podmínek dokončení nebyla nalezena.",
+      "invalidLessonType": "Podmínky dokončení jsou dostupné pouze pro lekce s AI Mentorem."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Překlady lze upravovat pouze v jiném jazyce, než je základní jazyk kurzu.",
+      "configurationNotFound": "Konfigurace AI Mentora nebyla nalezena.",
+      "invalidLessonType": "Konfigurace AI Mentora je dostupná pouze pro lekce s AI Mentorem.",
+      "invalidGraph": "Konfigurace AI Mentora je neplatná."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Konverzace s asistentem",
+      "open": "Otevřít konverzaci s asistentem",
+      "fullScreen": "Otevřít celého asistenta",
+      "minimize": "Minimalizovat konverzaci",
+      "dismiss": "Skrýt bublinu asistenta",
+      "dragHint": "Přetažením přesunete. Puštěním na X skryjete. Šipky přesouvají, Delete skryje.",
+      "dropToDismiss": "Pusťte pro skrytí"
+    },
+    "openSource": "Otevřít v Mentingo",
+    "sourceTypes": {
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "user": "Uživatel",
+      "group": "Skupina",
+      "category": "Kategorie",
+      "article": "Článek",
+      "news": "Novinka",
+      "qa": "Otázka a odpověď",
+      "development_path": "Vzdělávací cesta",
+      "resource": "Materiál",
+      "reference": "Zdroj"
+    },
+    "title": "Asistent",
+    "eyebrow": "Znalosti z vaší platformy",
+    "welcome": "Jak vám mohu pomoci?",
+    "intro": "Najděte vzdělávací materiály, ptejte se a ověřujte zdroje. V rámci vašich přístupových práv.",
+    "newConversation": "Nová konverzace",
+    "untitled": "Nová konverzace",
+    "search": "Hledat konverzace",
+    "recent": "Nedávné konverzace",
+    "history": "Historie konverzací",
+    "active": "Aktivní",
+    "archived": "Archivované",
+    "archivedThreads": "Archivované konverzace",
+    "showArchived": "Zobrazit archiv",
+    "showRecent": "Zobrazit nedávné konverzace",
+    "noThreads": "Zde se zobrazí vaše konverzace.",
+    "noMatches": "Žádné konverzace neodpovídají hledání.",
+    "loading": "Načítání konverzací…",
+    "loadError": "Konverzace se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "loadMore": "Načíst další",
+    "composerLabel": "Zpráva asistentovi",
+    "placeholder": "Zeptejte se na studium nebo obsah platformy…",
+    "composerHint": "Enter odešle · Shift + Enter vloží nový řádek",
+    "disclosure": "Odpovědi mohou obsahovat chyby. Ověřujte zdroje. Oprávnění správci mohou tyto konverzace prohlížet.",
+    "send": "Odeslat zprávu",
+    "stop": "Zastavit odpověď",
+    "you": "Vy",
+    "working": "Zpracovávám váš požadavek…",
+    "activity": {
+      "starting": "Spouštím…",
+      "thinking": "Zpracovávám váš požadavek…",
+      "searching": "Hledám informace…",
+      "reading": "Čtu obsah…",
+      "writing": "Píšu odpověď…"
+    },
+    "writing": "Píšu…",
+    "sources": "Zdroje",
+    "failed": "Odpověď přerušila chyba. Výše uvedený text může být neúplný.",
+    "cancelled": "Odpověď zastavena. Výše uvedený text může být neúplný.",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "rename": "Přejmenovat konverzaci",
+    "archive": "Archivovat konverzaci",
+    "restore": "Obnovit konverzaci",
+    "save": "Uložit",
+    "close": "Zavřít",
+    "threadUnavailable": "Tato konverzace není dostupná. Možná již neexistuje nebo k ní nemáte přístup.",
+    "sendError": "Zprávu se nepodařilo odeslat. Koncept byl zachován.",
+    "messageTooLong": "Zpráva může mít nejvýše 8 000 znaků. Před odesláním koncept zkraťte.",
+    "unavailable": "Asistent ještě není nakonfigurován. Obraťte se na správce.",
+    "archivedNotice": "Tato konverzace je archivována. Pro pokračování ji obnovte.",
+    "openHistory": "Otevřít historii konverzací",
+    "hideHistory": "Skrýt historii konverzací",
+    "renameDescription": "Pojmenujte konverzaci tak, abyste ji později snadno našli.",
+    "readOnly": "Asistent s přístupem pro čtení",
+    "loadEarlier": "Načíst starší zprávy",
+    "starters": {
+      "find": {
+        "label": "Najít vzdělávací materiál",
+        "prompt": "Najdi pro mě dostupné kurzy o onboardingu."
+      },
+      "learn": {
+        "label": "Prozkoumat možnosti studia",
+        "prompt": "K jakým vzdělávacím materiálům mám přístup?"
+      },
+      "understand": {
+        "label": "Porozumět tématu",
+        "prompt": "Najdi materiály o konstruktivní zpětné vazbě a vysvětli hlavní myšlenky."
+      }
+    },
+    "latestMessage": "Přejít na nejnovější zprávu",
+    "errors": {
+      "unavailable": "Asistent je dočasně nedostupný. Zkuste to znovu později.",
+      "messageConflict": "Tato zpráva je v konfliktu s dřívějším požadavkem. Upravte ji a zkuste to znovu.",
+      "responseInProgress": "V této konverzaci se již generuje odpověď.",
+      "responseInactive": "Tato odpověď již není aktivní.",
+      "invalidToolInput": "Asistent nemohl tento požadavek zpracovat. Zkuste to znovu."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organizace nebyla nalezena.",
+      "inactive": "Tato organizace je neaktivní. Kontaktujte svého správce."
     }
   }
 }

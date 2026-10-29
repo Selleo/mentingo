@@ -8,6 +8,8 @@ For HR and L&D teams, this is where assigned training becomes evidence of learni
 
 The main workflow starts when a learner opens a course and chooses to start or continue learning. Mentingo opens the right lesson, renders the correct lesson type, tracks active learning time, completes lessons when the rules are satisfied, and moves the learner through the course.
 
+For courses with optional repetition enabled, a learner can explicitly start again after completing the course. Fresh learning progress is kept separately from the accepted completion until the repetition finishes and replaces it. Returning to the course resumes that same repetition. Existing content and resume rules continue to apply. See [Course Repetition](course-repetition-business-spec.md).
+
 ## Who Uses It
 
 - Learners take course lessons, answer quizzes, complete embedded or SCORM content, and continue training.

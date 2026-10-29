@@ -1,3 +1,5 @@
+import { NotFoundException } from "@nestjs/common";
+
 import { tenants } from "src/storage/schema";
 import { deleteCacheKey, getCachedJson, setCachedJson } from "src/utils/redis-cache";
 
@@ -58,7 +60,7 @@ export const createCorsOriginOption = (
         if (allowedOrigins.length === 0) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
 
-        return callback(new Error("Not allowed by CORS"), false);
+        return callback(new NotFoundException("tenant.error.notFound"), false);
       })
       .catch((error) => callback(error as Error, false));
   };

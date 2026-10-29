@@ -138,6 +138,7 @@ export const COURSE_SETTINGS_HANDLES = {
   LESSON_SEQUENCE_SWITCH: "course-settings-lesson-sequence-switch",
   QUIZ_FEEDBACK_SWITCH: "course-settings-quiz-feedback-switch",
   VIDEO_COMPLETION_TRACKING_SWITCH: "course-settings-video-completion-tracking-switch",
+  REPETITION_SWITCH: "course-repetition-switch",
   CERTIFICATE_SWITCH: "course-settings-certificate-switch",
 } as const;
 
@@ -192,6 +193,8 @@ export const COURSE_OVERVIEW_HANDLES = {
   LOGIN_ENROLL_LINK: "course-overview-login-enroll-link",
   ACTIONS: "course-overview-actions",
   START_LEARNING_BUTTON: "course-overview-start-learning-button",
+  REPEAT_BUTTON: "course-repeat-button",
+  REPETITION_PROGRESS: "course-repetition-progress",
   DETAILS_BUTTON: "course-overview-details-button",
   LEARNING_OUTCOMES: "course-overview-learning-outcomes",
 } as const;

@@ -242,13 +242,7 @@ export class AuthService {
       throw new UnauthorizedException("user.error.archived");
     }
 
-    const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
-
-    const { accessToken, refreshToken } = await this.getTokens(user);
-
-    if (isRevoked) {
-      await this.sessionRevocationService.clearUserRevocation(user.id);
-    }
+    const { accessToken, refreshToken } = await this.issueSessionTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl =
@@ -402,11 +396,7 @@ export class AuthService {
 
       const user = await this.userService.getUserById(payload.userId);
 
-      const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
-
-      const tokens = await this.getTokens(user);
-
-      if (isRevoked) await this.sessionRevocationService.clearUserRevocation(user.id);
+      const tokens = await this.issueSessionTokens(user);
 
       const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
@@ -471,17 +461,26 @@ export class AuthService {
     return user;
   }
 
-  private async getTokens(user: TokenUser) {
+  /**
+   * Signs tokens with the user's current permissions. A new session supersedes any earlier
+   * revocation (for example after a role change), so the revocation is cleared for every login
+   * method; otherwise the guard would reject the tokens that were just issued.
+   */
+  private async issueSessionTokens(user: TokenUser) {
     const { id: userId, email, tenantId } = user;
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(userId);
 
-    return this.signTokens({
+    const tokens = await this.signTokens({
       userId,
       email,
       tenantId,
       roleSlugs,
       permissions,
     });
+
+    await this.sessionRevocationService.clearUserRevocation(userId);
+
+    return tokens;
   }
 
   async getSupportTokensForSession(session: SupportSession) {
@@ -722,7 +721,7 @@ export class AuthService {
       );
     }
 
-    const tokens = await this.getTokens(user);
+    const tokens = await this.issueSessionTokens(user);
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
@@ -793,7 +792,7 @@ export class AuthService {
       throw new BadRequestException("Invalid MFA token");
     }
 
-    const { refreshToken, accessToken } = await this.getTokens(user);
+    const { refreshToken, accessToken } = await this.issueSessionTokens(user);
 
     this.tokenService.clearTokenCookies(response);
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
@@ -892,7 +891,7 @@ export class AuthService {
 
       await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
 
-      const { refreshToken, accessToken } = await this.getTokens(user);
+      const { refreshToken, accessToken } = await this.issueSessionTokens(user);
 
       return { user, accessToken, refreshToken };
     });

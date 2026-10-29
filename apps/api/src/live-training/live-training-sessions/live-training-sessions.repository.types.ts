@@ -77,6 +77,8 @@ export const liveTrainingUserDisplayRowSchema = Type.Object({
 });
 
 export const liveTrainingLessonCompletionRowSchema = Type.Object({
+  learningStateId: Type.Union([UUIDSchema, Type.Null()]),
+  courseId: UUIDSchema,
   lessonId: UUIDSchema,
   studentId: UUIDSchema,
   language: Type.Enum(SUPPORTED_LANGUAGES),

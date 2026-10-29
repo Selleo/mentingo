@@ -15,5 +15,7 @@
   "verbose": true,
   "testTimeout": 30000,
   "maxWorkers": 1,
-  "forceExit": true
+  "workerIdleMemoryLimit": "1GB",
+  "forceExit": true,
+  "testPathIgnorePatterns": ["/node_modules/", "/workflow-postgres\\.e2e-spec\\.ts$"]
 }

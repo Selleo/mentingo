@@ -1,0 +1,20 @@
+import type { AssistantOutcomeKind, AssistantOutcomeValidationCode } from "@repo/shared";
+
+export type AssistantOutcome = {
+  kind: AssistantOutcomeKind;
+  text: string;
+  requiresReadableContent: boolean;
+};
+
+export type AssistantOutcomeEvidence = {
+  successfulToolCalls: number;
+  readableToolCalls: number;
+};
+
+export type AssistantOutcomeValidation =
+  | { accepted: true; outcome: AssistantOutcome }
+  | {
+      accepted: false;
+      code: AssistantOutcomeValidationCode;
+      feedback: string;
+    };

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  COURSE_LEARNING_STATE_KINDS,
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
@@ -9,10 +10,11 @@ import {
   type LiveTrainingParticipantRole,
   type PermissionKey,
 } from "@repo/shared";
-import { and, count, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, exists, inArray, isNull, lt, notExists, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
+import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   liveTrainingAttendance,
@@ -29,6 +31,7 @@ import {
   permissionRuleSetPermissions,
   permissionUserRoles,
   studentCourses,
+  courseLearningStates,
   users,
 } from "src/storage/schema";
 
@@ -643,11 +646,14 @@ export class LiveTrainingSessionsRepository {
   async getOnlineLiveLessonCompletionRows(
     liveTrainingId: UUIDType,
   ): Promise<LiveTrainingLessonCompletionRow[]> {
+    const repetitionState = alias(courseLearningStates, "repetition_state");
     return this.db
       .selectDistinct({
         lessonId: liveLessons.lessonId,
         studentId: liveTrainingSessionParticipants.userId,
         language: liveLessons.language,
+        courseId: studentCourses.courseId,
+        learningStateId: courseLearningStates.id,
       })
       .from(liveLessons)
       .innerJoin(
@@ -670,10 +676,31 @@ export class LiveTrainingSessionsRepository {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          activeLearningState(courseLearningStates.id),
+        ),
+      )
       .where(
         and(
           eq(liveLessons.liveTrainingId, liveTrainingId),
           sql`${liveTrainingSessionParticipants.joinCount} > 0`,
+          notExists(
+            this.db
+              .select({ id: repetitionState.id })
+              .from(repetitionState)
+              .where(
+                and(
+                  eq(repetitionState.courseId, studentCourses.courseId),
+                  eq(repetitionState.studentId, studentCourses.studentId),
+                  eq(repetitionState.kind, COURSE_LEARNING_STATE_KINDS.REPETITION),
+                  lt(liveTrainingSessionParticipants.lastLeftAt, repetitionState.createdAt),
+                ),
+              ),
+          ),
         ),
       );
   }
@@ -686,6 +713,8 @@ export class LiveTrainingSessionsRepository {
         lessonId: liveLessons.lessonId,
         studentId: studentCourses.studentId,
         language: liveLessons.language,
+        courseId: studentCourses.courseId,
+        learningStateId: courseLearningStates.id,
       })
       .from(liveLessons)
       .innerJoin(
@@ -701,6 +730,14 @@ export class LiveTrainingSessionsRepository {
         and(
           eq(studentCourses.courseId, liveTrainingLinks.entityId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .leftJoin(
+        courseLearningStates,
+        and(
+          eq(courseLearningStates.courseId, studentCourses.courseId),
+          eq(courseLearningStates.studentId, studentCourses.studentId),
+          activeLearningState(courseLearningStates.id),
         ),
       )
       .where(eq(liveLessons.liveTrainingId, liveTrainingId));

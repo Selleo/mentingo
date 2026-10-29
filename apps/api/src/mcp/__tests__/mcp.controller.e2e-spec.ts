@@ -623,8 +623,16 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
               );
             const hit = found.lessons.find((row: ToolResult) => row.id === visible.lesson.id);
             expect(Object.keys(hit).sort()).toEqual(
-              ["id", "title", "courseId", "matchedPassage", "url"].sort(),
+              [
+                "id",
+                "title",
+                "courseId",
+                "matchedPassage",
+                "matchedAttachmentFileName",
+                "url",
+              ].sort(),
             );
+            expect(hit.matchedAttachmentFileName).toBeNull();
             const detail = await call(
               "get_lesson",
               { courseId: hit.courseId, lessonId: hit.id, language: "en" },

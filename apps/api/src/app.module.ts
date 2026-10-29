@@ -10,6 +10,7 @@ import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
 import { AutomationExecutionModule } from "src/automation-execution/automation-execution.module";
 import { AutomationModule } from "src/automations/automation.module";
+import { CourseRepetitionModule } from "src/course-repetition/course-repetition.module";
 import { EnvModule } from "src/env/env.module";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
@@ -24,6 +25,7 @@ import { AiModule } from "./ai/ai.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { ArticlesModule } from "./articles/articles.module";
+import { AssistantModule } from "./assistant/assistant.module";
 import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
@@ -158,6 +160,7 @@ import type { RedisClient } from "src/redis";
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
+    CourseRepetitionModule,
     NativeArchiveModule,
     CourseChatModule,
     LearningPathModule,
@@ -180,6 +183,7 @@ import type { RedisClient } from "src/redis";
     QueueModule,
     WebSocketModule,
     AiModule,
+    AssistantModule,
     SettingsModule,
     ScormModule,
     CertificatesModule,

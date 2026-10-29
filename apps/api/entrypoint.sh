@@ -8,7 +8,7 @@ if [ $COMMAND = "server" ]; then
   npm run start:prod
 elif [ $COMMAND = "migrate" ]; then
   echo "Running migrations..."
-  npm run db:migrate
+  npm run db:migrate:prod
 elif [ $COMMAND = "seed" ]; then
   echo "Running seeds..."
   npm run db:seed-staging

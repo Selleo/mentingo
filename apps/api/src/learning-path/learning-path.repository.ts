@@ -13,9 +13,9 @@ import {
 } from "@repo/shared";
 import {
   and,
+  asc,
   count,
   countDistinct,
-  desc,
   eq,
   exists,
   getTableColumns,
@@ -276,7 +276,7 @@ export class LearningPathRepository {
         ),
       )
       .where(whereCondition)
-      .orderBy(desc(learningPaths.createdAt))
+      .orderBy(asc(learningPaths.createdAt))
       .limit(perPage)
       .offset((page - 1) * perPage);
 

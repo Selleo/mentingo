@@ -1,4 +1,17 @@
 {
+  "courseRepetition": {
+    "lessonProgress": "Wiederholung: {{completed}} von {{total}} Lektionen",
+    "repeat": "Kurs wiederholen",
+    "setting": "Kurswiederholung erlauben",
+    "settingDescription": "Lernende können einen abgeschlossenen Kurs mit neuem Fortschritt wiederholen.",
+    "completedOn": "Abgeschlossen am {{date}}",
+    "progress": "Wiederholung: {{completed}} von {{total}} Kapiteln",
+    "errors": {
+      "staleState": "Aktualisieren Sie den Kurs, bevor Sie fortfahren.",
+      "unavailable": "Dieser Kurs kann derzeit nicht wiederholt werden.",
+      "accessDenied": "Sie haben keinen Zugriff auf die Kurswiederholung."
+    }
+  },
   "automationWorkspace": {
     "title": "Automatisierungen & E-Mails",
     "templates": "Automatisierungsvorlagen",
@@ -76,7 +89,12 @@
       "unsupportedVersion": "Diese Mentingo-Paketversion wird nicht unterstützt.",
       "missingAsset": "Im Mentingo-Paket fehlt eine erforderliche Datei.",
       "invalidArchive": "Diese ZIP-Datei ist kein gültiges Mentingo-Paket.",
-      "courseNotSyncable": "Dieser Kurs wurde als bearbeitbare Kopie hinzugefügt und kann nicht synchronisiert werden. Löschen Sie ihn und fügen Sie ihn erneut aus dem Marktplatz hinzu."
+      "courseNotSyncable": "Dieser Kurs wurde als bearbeitbare Kopie hinzugefügt und kann nicht synchronisiert werden. Löschen Sie ihn und fügen Sie ihn erneut aus dem Marktplatz hinzu.",
+      "pathNotFound": "Der zu exportierende Entwicklungspfad wurde nicht gefunden.",
+      "accessDenied": "Sie haben keine Berechtigung, diesen Inhalt zu exportieren.",
+      "liveTrainingIncomplete": "Eine mit diesem Kurs verknüpfte Live-Schulung ist unvollständig und kann nicht exportiert werden.",
+      "courseNotFound": "Der zu exportierende Kurs wurde nicht gefunden.",
+      "categoryNotFound": "Die Kurskategorie wurde nicht gefunden."
     }
   },
   "aiConversations": {
@@ -121,12 +139,19 @@
     "empty": "Noch keine Gespräche.",
     "types": {
       "practice": "Übungssitzung",
-      "ai-mentor": "KI-Mentor-Lektion"
+      "ai-mentor": "KI-Mentor-Lektion",
+      "assistant": "Assistent"
     },
     "statuses": {
       "active": "In Bearbeitung",
       "completed": "Abgeschlossen",
       "archived": "Archiviert"
+    },
+    "messageStatuses": {
+      "pending": "Ausstehend",
+      "running": "In Bearbeitung",
+      "failed": "Durch Fehler unterbrochen",
+      "cancelled": "Gestoppt"
     }
   },
   "emailTemplates": {
@@ -678,7 +703,9 @@
       "somethingWentWrong": "Etwas ist schiefgelaufen...",
       "notFound": "Ressource nicht gefunden",
       "lessonAccessDenied": "Sie haben keine Berechtigung, auf diese Lektion zuzugreifen.",
-      "tooManyRequests": "Zu viele Anfragen. Versuchen Sie es in {{seconds}} Sekunden erneut."
+      "tooManyRequests": "Zu viele Anfragen. Versuchen Sie es in {{seconds}} Sekunden erneut.",
+      "invalidRequest": "Ungültige Anfrage.",
+      "courseAccessDenied": "Sie haben keinen Zugriff auf diesen Kurs."
     },
     "tooltip": {
       "soon": "Kommt bald"
@@ -714,7 +741,9 @@
       "aiMentorConfigurationIncomplete": "Die Konfiguration des KI-Mentors ist unvollständig.",
       "aiJudgeConfigurationMissing": "Die Konfiguration der Abschlussbedingungen fehlt.",
       "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung.",
+      "threadNotFound": "Die Unterhaltung wurde nicht gefunden.",
+      "threadAccessDenied": "Sie haben keinen Zugriff auf diese Unterhaltung."
     },
     "loader": {
       "textSequence": {
@@ -747,7 +776,10 @@
     "continueWithSlack": "Fahren Sie mit Slack fort",
     "enterFullscreen": "Vollbild",
     "exitFullscreen": "Beenden Sie den Vollbildmodus",
-    "refreshPage": "Seite neu laden"
+    "refreshPage": "Seite neu laden",
+    "validation": {
+      "messageRequired": "Eine Nachricht ist erforderlich."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lektionssequenz erfolgreich aktualisiert",
@@ -999,6 +1031,8 @@
     }
   },
   "navigationSideBar": {
+    "ai": "AI",
+    "aiAssistant": "KI-Assistent",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "panel": "Panel",
@@ -1236,8 +1270,9 @@
       }
     },
     "errors": {
-      "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseDueDateRequired": "Zum Erstellen des Kurs-Kalenderereignisses ist ein Fälligkeitsdatum erforderlich.",
+      "courseTitleRequired": "Zum Erstellen des Kurs-Kalenderereignisses ist ein Kurstitel erforderlich.",
+      "courseDueDateCalendarSyncFailed": "Das Kursfälligkeitsdatum konnte nicht mit dem Kalender synchronisiert werden."
     }
   },
   "liveTrainingView": {
@@ -2070,7 +2105,8 @@
       "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
       "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
-      "noCoursesSelected": "Wählen Sie mindestens einen Kurs aus."
+      "noCoursesSelected": "Wählen Sie mindestens einen Kurs aus.",
+      "deleteCoursesFailed": "Die Kurse konnten nicht gelöscht werden"
     }
   },
   "adminCategoriesView": {
@@ -2310,6 +2346,7 @@
         "file_delete": "Dateien direkt aus dem Plattformspeicher löschen.",
         "resource_library_manage": "Private Ressourcen in der Ressourcenbibliothek verwalten.",
         "ai_use": "KI-gestützte Plattformfunktionen verwenden.",
+        "assistant_use": "Den schreibgeschützten Assistenten nutzen und eigene Unterhaltungen verwalten.",
         "announcement_read": "Ankündigungen anzeigen.",
         "announcement_create": "Ankündigungen erstellen.",
         "news_read_public": "Verfügbare News-Beiträge anzeigen.",
@@ -2481,6 +2518,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Schlüssel anzeigen",
+      "hide": "Schlüssel verbergen",
+      "saveError": "Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "platformSettings": "Plattformeinstellungen",
+      "description": "Verbinden Sie die Plattform mit externen Diensten. Wählen Sie eine Integration, um ihre Schlüssel hinzuzufügen oder zu ersetzen.",
+      "filters": "Integrationen filtern",
+      "status": {
+        "all": "Alle",
+        "configured": "Konfiguriert",
+        "attention": "Handlungsbedarf",
+        "notConfigured": "Nicht konfiguriert",
+        "unknown": "Status nicht verfügbar"
+      },
+      "attention": "{{count}} Integrationen erfordern Aufmerksamkeit:",
+      "showIssues": "Probleme anzeigen",
+      "missingKeys": "Fehlende Konfiguration: {{keys}}",
+      "close": "Editor schließen",
+      "cancel": "Abbrechen",
+      "saveChanges": "Änderungen speichern",
+      "empty": "Keine Integrationen entsprechen diesem Filter.",
+      "statusError": "Der Konfigurationsstatus konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "secretError": "Der Schlüssel konnte nicht geladen werden. Versuchen Sie erneut, ihn anzuzeigen.",
+      "legend": "Grün: alle Schlüssel konfiguriert. Orange: einige Schlüssel fehlen. Grau gestrichelt: keine Schlüssel konfiguriert. Der Status zeigt die Vollständigkeit der Konfiguration, nicht den Verbindungszustand.",
+      "categories": {
+        "signIn": "Anmeldung",
+        "calendar": "Kalender",
+        "payments": "Zahlungen",
+        "video": "Video",
+        "ai": "KI",
+        "liveTraining": "Live-Schulung",
+        "security": "Sicherheit"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Anmeldung mit Google",
@@ -2739,11 +2811,17 @@
         "course": "Kurs nicht gefunden.",
         "category": "Kategorie nicht gefunden.",
         "chapter": "Kapitel nicht gefunden.",
-        "lesson": "Lektion nicht gefunden."
+        "lesson": "Lektion nicht gefunden.",
+        "author": "Kursautor nicht gefunden."
       },
       "forbidden": {
         "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren.",
-        "archivedCourseEnrollment": "Dieser Kurs wurde archiviert und ist nicht mehr für die Anmeldung verfügbar."
+        "archivedCourseEnrollment": "Dieser Kurs wurde archiviert und ist nicht mehr für die Anmeldung verfügbar.",
+        "deleteCourse": "Sie haben keine Berechtigung, diesen Kurs zu löschen.",
+        "deleteCourses": "Sie haben keine Berechtigung, diese Kurse zu löschen.",
+        "enrollOwnCourse": "Sie können sich nicht in Ihren eigenen Kurs einschreiben.",
+        "enrollGroups": "Sie haben keine Berechtigung, Gruppen in diesen Kurs einzuschreiben.",
+        "changeStudentMode": "Sie haben keine Berechtigung, den Lernmodus zu ändern."
       },
       "media": {
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
@@ -2752,7 +2830,8 @@
       "statisticsAccessForbidden": "Sie haben keine Berechtigung, die Statistiken für diesen Kurs anzuzeigen.",
       "create": {
         "courseFailed": "Kurs konnte nicht erstellt werden.",
-        "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
+        "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden.",
+        "chapterFailed": "Das Kapitel konnte nicht erstellt werden."
       },
       "lesson": {
         "customTtsReferenceRequired": "Eine eigene TTS-Referenz ist im benutzerdefinierten Modus erforderlich.",
@@ -2763,6 +2842,18 @@
         "optionInsertFailed": "Quizoption konnte nicht hinzugefügt werden.",
         "embedCreateFailed": "Einbettungslektion konnte nicht erstellt werden.",
         "signedUrlDownloadFailed": "Die Datei konnte nicht von der signierten URL heruntergeladen werden."
+      },
+      "update": {
+        "courseFailed": "Der Kurs konnte nicht aktualisiert werden."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Sie sind bereits in diesen Kurs eingeschrieben.",
+        "studentsRequired": "Wählen Sie mindestens einen Lernenden zum Einschreiben aus.",
+        "onlyExistingUsers": "Sie können nur vorhandene Benutzer einschreiben.",
+        "studentsAlreadyEnrolled": "Einige der ausgewählten Lernenden sind bereits in diesen Kurs eingeschrieben.",
+        "groupsNotFound": "Die ausgewählten Gruppen wurden nicht gefunden.",
+        "groupEnrollmentsNotFound": "Die ausgewählten Gruppen sind nicht in diesen Kurs eingeschrieben.",
+        "enrollmentFailed": "Die Einschreibung in den Kurs ist fehlgeschlagen."
       }
     },
     "thinking": {
@@ -4160,7 +4251,9 @@
       "lessonIdNotFound": "Lektions-ID nicht gefunden",
       "notAuthorizedTitle": "Nicht autorisiert",
       "notAuthorizedDescription": "Sie sind nicht berechtigt, auf diese Lektion zuzugreifen.",
-      "goBackToCourse": "Gehen Sie zurück zum Kurs"
+      "goBackToCourse": "Gehen Sie zurück zum Kurs",
+      "quizNotCompleted": "Schließen Sie das Quiz ab, bevor Sie diese Lektion beenden.",
+      "aiMentorDataRequired": "Zum Abschließen dieser Lektion sind die Ergebnisse der KI-Mentor-Lektion erforderlich."
     },
     "other": {
       "lesson": "Lektion",
@@ -4568,7 +4661,8 @@
       "courseListLayoutClassic": "Klassisch",
       "courseListLayoutModern": "Modern",
       "courseListLayoutClassicDescription": "Traditionelles Kursraster-Layout",
-      "courseListLayoutModernDescription": "Hero-Bereich mit hervorgehobenen Kursen",
+      "courseListLayoutModernDescription": "Hero-Bereich mit hervorgehobenen Kursen und mehr Details, z. B. der geschätzten Lernzeit",
+      "courseListLayoutRecommended": "Empfohlen",
       "courseListLayoutPreview": {
         "continueLearning": "Weiterlernen",
         "topCourses": "Top 5 Kurse",
@@ -5236,7 +5330,9 @@
       "sourceCategoryMissing": "Der zu duplizierende Kurs hat keine Kategorie",
       "targetCourseNotFound": "Der duplizierte Kurs wurde nicht gefunden",
       "tenantMissing": "Der Tenant dieses Kurses wurde nicht gefunden",
-      "foreignSourceAsset": "Dieser Kurs verwendet eine Datei einer anderen Organisation und kann daher nicht dupliziert werden"
+      "foreignSourceAsset": "Dieser Kurs verwendet eine Datei einer anderen Organisation und kann daher nicht dupliziert werden",
+      "jobNotFound": "Kursduplizierungsauftrag nicht gefunden",
+      "createFailed": "Der duplizierte Kurs konnte nicht erstellt werden"
     }
   },
   "tenantSharing": {
@@ -5352,14 +5448,13 @@
       "resource": "Ressource:"
     },
     "actions": {
-      "save_automation_draft": "Automatisierungsentwurf gespeichert",
-      "simulate_automation": "Automatisierung simuliert",
-      "apply_automation": "Automatisierung veröffentlicht / angewendet",
-      "enable_automation": "Automatisierung aktiviert",
-      "disable_automation": "Automatisierung deaktiviert",
-      "duplicate_automation": "Automatisierung dupliziert",
-      "archive_automation": "Automatisierung archiviert",
-
+      "save_automation_draft": "Automatisierungsentwurf speichern",
+      "simulate_automation": "Automatisierung simulieren",
+      "apply_automation": "Automatisierung anwenden",
+      "enable_automation": "Automatisierung aktivieren",
+      "disable_automation": "Automatisierung deaktivieren",
+      "duplicate_automation": "Automatisierung duplizieren",
+      "archive_automation": "Automatisierung archivieren",
       "create": "Erstellt",
       "update": "Aktualisiert",
       "bulk_course_category_update": "Kurskategorie gesammelt aktualisiert",
@@ -5390,14 +5485,7 @@
       "start_learning_path": "Lernpfad gestartet",
       "complete_learning_path": "Lernpfad abgeschlossen",
       "play_scorm": "SCORM gestartet",
-      "complete_scorm": "SCORM abgeschlossen",
-      "save_automation_draft": "Automatisierungsentwurf speichern",
-      "simulate_automation": "Automatisierung simulieren",
-      "apply_automation": "Automatisierung anwenden",
-      "enable_automation": "Automatisierung aktivieren",
-      "disable_automation": "Automatisierung deaktivieren",
-      "duplicate_automation": "Automatisierung duplizieren",
-      "archive_automation": "Automatisierung archivieren"
+      "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
       "automation": "Automatisierung",
@@ -5435,6 +5523,13 @@
     }
   },
   "learningPathsView": {
+    "hero": {
+      "start": "Pfad starten",
+      "continue": "Pfad fortsetzen",
+      "review": "Pfad wiederholen",
+      "coursesCount_one": "{{count}} Kurs",
+      "coursesCount_other": "{{count}} Kurse"
+    },
     "title": "Entwicklungspfade",
     "description": "Durchsuchen Sie zugewiesene Entwicklungspfade und setzen Sie geordnete Kurssequenzen fort.",
     "searchPlaceholder": "Entwicklungspfade suchen",
@@ -5546,6 +5641,11 @@
     }
   },
   "adminLearningPathsView": {
+    "settingsTabs": {
+      "general": "Allgemein",
+      "certificate": "Zertifikat",
+      "export": "Export"
+    },
     "title": "Entwicklungspfade",
     "importPackage": {
       "title": "Entwicklungspfad importieren"
@@ -5627,6 +5727,14 @@
       "tooltip": "Basissprache dieses Entwicklungspfads ist {{baseLanguage}}."
     },
     "courses": {
+      "addDialogTitle": "Kurse zum Pfad hinzufügen",
+      "addDialogDescription": "Wähle einen oder mehrere Kurse aus. Sie werden am Ende des Pfads hinzugefügt.",
+      "searchPlaceholder": "Kurse suchen",
+      "noSearchResults": "Keine Kurse entsprechen deiner Suche.",
+      "noAvailableCourses": "Alle verfügbaren Kurse sind bereits in diesem Pfad.",
+      "selectedCount_one": "{{count}} Kurs ausgewählt",
+      "selectedCount_other": "{{count}} Kurse ausgewählt",
+      "addSelected": "Ausgewählte hinzufügen ({{count}})",
       "select": "Kurs auswählen",
       "add": "Kurs hinzufügen",
       "drag": "Zum Verschieben ziehen",
@@ -5917,7 +6025,8 @@
     "errors": {
       "generic": "Support-Modus konnte nicht gestartet werden",
       "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation",
-      "invalidSession": "Support-Sitzung ist ungültig"
+      "invalidSession": "Support-Sitzung ist ungültig",
+      "sessionExpired": "Deine Support-Sitzung ist abgelaufen. Starte eine neue Support-Sitzung."
     }
   },
   "superAdminTenantsView": {
@@ -6139,7 +6248,12 @@
       "liveKitRoomNotAvailable": "Der LiveKit-Raum für diese Sitzung ist nicht verfügbar.",
       "activeSessionUpdateForbidden": "Dieses Live-Training kann während einer laufenden Sitzung nicht geändert werden.",
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
-      "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
+      "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht.",
+      "onlyScheduledCanBeStarted": "Nur geplante oder beendete Live-Schulungen können gestartet werden.",
+      "sessionAlreadyActive": "Für diese Live-Schulung läuft bereits eine Sitzung.",
+      "onlineSessionRequired": "Diese Aktion ist nur für Online-Live-Schulungen verfügbar.",
+      "userNotFound": "Benutzer wurde nicht gefunden.",
+      "sessionAlreadyFinished": "Diese Live-Schulung-Sitzung ist bereits beendet."
     }
   },
   "modernCourseView": {
@@ -6219,6 +6333,8 @@
       "certificate": "Zertifikat",
       "uponCompletion": "Nach Abschluss",
       "notIssuedYet": "Noch nicht ausgestellt",
+      "certificateDate": "Ausgestellt",
+      "certificateExpiry": "Läuft ab",
       "aboutAuthor": "Über den Autor"
     },
     "certificate": {
@@ -8187,6 +8303,133 @@
       "listingNotFound": "Dieser Marktplatz-Kurs wurde nicht gefunden.",
       "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
       "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Übersetzungen können nur in einer anderen Sprache als der Basissprache des Kurses bearbeitet werden.",
+      "criterionNotFound": "Abschlusskriterium nicht gefunden.",
+      "guidanceNotFound": "Bewertungshinweis nicht gefunden.",
+      "blockingErrorNotFound": "Blockierender Fehler nicht gefunden.",
+      "configurationNotFound": "Die Konfiguration der Abschlussbedingungen wurde nicht gefunden.",
+      "invalidLessonType": "Abschlussbedingungen sind nur für KI-Mentor-Lektionen verfügbar."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Übersetzungen können nur in einer anderen Sprache als der Basissprache des Kurses bearbeitet werden.",
+      "configurationNotFound": "Die Konfiguration des KI-Mentors wurde nicht gefunden.",
+      "invalidLessonType": "Die KI-Mentor-Konfiguration ist nur für KI-Mentor-Lektionen verfügbar.",
+      "invalidGraph": "Die Konfiguration des KI-Mentors ist ungültig."
+    }
+  },
+  "assistant": {
+    "floating": {
+      "chat": "Assistentenunterhaltung",
+      "open": "Assistentenunterhaltung öffnen",
+      "fullScreen": "Assistent vollständig öffnen",
+      "minimize": "Unterhaltung minimieren",
+      "dismiss": "Assistentenblase ausblenden",
+      "dragHint": "Zum Verschieben ziehen. Zum Ausblenden auf X ablegen. Pfeiltasten bewegen, Entf blendet aus.",
+      "dropToDismiss": "Zum Ausblenden ablegen"
+    },
+    "openSource": "In Mentingo öffnen",
+    "sourceTypes": {
+      "course": "Kurs",
+      "lesson": "Lektion",
+      "user": "Person",
+      "group": "Gruppe",
+      "category": "Kategorie",
+      "article": "Artikel",
+      "news": "Neuigkeit",
+      "qa": "Frage und Antwort",
+      "development_path": "Lernpfad",
+      "resource": "Ressource",
+      "reference": "Quelle"
+    },
+    "title": "Assistent",
+    "eyebrow": "Wissen aus Ihrem Arbeitsbereich",
+    "welcome": "Wie kann ich dir helfen?",
+    "intro": "Finden Sie Lernmaterialien, stellen Sie Fragen und prüfen Sie die Quellen. Im Rahmen Ihrer Zugriffsrechte.",
+    "newConversation": "Neue Unterhaltung",
+    "untitled": "Neue Unterhaltung",
+    "search": "Unterhaltungen suchen",
+    "recent": "Letzte Unterhaltungen",
+    "history": "Unterhaltungsverlauf",
+    "active": "Aktiv",
+    "archived": "Archiviert",
+    "archivedThreads": "Archivierte Unterhaltungen",
+    "showArchived": "Archiv anzeigen",
+    "showRecent": "Letzte Unterhaltungen anzeigen",
+    "noThreads": "Ihre Unterhaltungen erscheinen hier.",
+    "noMatches": "Keine passenden Unterhaltungen gefunden.",
+    "loading": "Unterhaltungen werden geladen…",
+    "loadError": "Die Unterhaltungen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loadMore": "Mehr laden",
+    "composerLabel": "Nachricht an den Assistenten",
+    "placeholder": "Fragen Sie zu Ihren Lerninhalten oder Ihrem Arbeitsbereich…",
+    "composerHint": "Enter zum Senden · Shift + Enter für eine neue Zeile",
+    "disclosure": "Antworten können Fehler enthalten. Prüfen Sie die Quellen. Berechtigte Administratoren können diese Unterhaltungen einsehen.",
+    "send": "Nachricht senden",
+    "stop": "Antwort stoppen",
+    "you": "Sie",
+    "working": "Ihre Anfrage wird bearbeitet…",
+    "activity": {
+      "starting": "Wird gestartet…",
+      "thinking": "Ich bearbeite deine Anfrage…",
+      "searching": "Ich suche in deinem Arbeitsbereich…",
+      "reading": "Ich lese die Inhalte…",
+      "writing": "Ich schreibe deine Antwort…"
+    },
+    "writing": "Antwort wird geschrieben…",
+    "sources": "Quellen",
+    "failed": "Ein Fehler hat die Antwort unterbrochen. Der obige Text ist möglicherweise unvollständig.",
+    "cancelled": "Antwort gestoppt. Der obige Text ist möglicherweise unvollständig.",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "rename": "Unterhaltung umbenennen",
+    "archive": "Unterhaltung archivieren",
+    "restore": "Unterhaltung wiederherstellen",
+    "save": "Speichern",
+    "close": "Schließen",
+    "threadUnavailable": "Diese Unterhaltung ist nicht verfügbar. Sie existiert möglicherweise nicht mehr oder Sie haben keinen Zugriff.",
+    "sendError": "Ihre Nachricht konnte nicht gesendet werden. Ihr Entwurf wurde behalten.",
+    "messageTooLong": "Deine Nachricht darf höchstens 8.000 Zeichen enthalten. Kürze den Entwurf, um ihn zu senden.",
+    "unavailable": "Der Assistent ist noch nicht konfiguriert. Wenden Sie sich an Ihren Administrator.",
+    "archivedNotice": "Diese Unterhaltung ist archiviert. Stellen Sie sie wieder her, um fortzufahren.",
+    "openHistory": "Unterhaltungsverlauf öffnen",
+    "hideHistory": "Unterhaltungsverlauf ausblenden",
+    "renameDescription": "Geben Sie der Unterhaltung einen leicht auffindbaren Namen.",
+    "readOnly": "Assistent mit Lesezugriff",
+    "loadEarlier": "Frühere Nachrichten laden",
+    "starters": {
+      "find": {
+        "label": "Lernmaterial finden",
+        "prompt": "Finde für mich zugängliche Kurse zum Onboarding."
+      },
+      "learn": {
+        "label": "Lernmöglichkeiten entdecken",
+        "prompt": "Auf welche Lernmaterialien kann ich zugreifen?"
+      },
+      "understand": {
+        "label": "Ein Thema verstehen",
+        "prompt": "Finde Materialien zu konstruktivem Feedback und erkläre die wichtigsten Ideen."
+      }
+    },
+    "latestMessage": "Zur neuesten Nachricht",
+    "errors": {
+      "unavailable": "Der Assistent ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
+      "messageConflict": "Diese Nachricht steht im Konflikt mit einer früheren Anfrage. Bearbeite sie und versuche es erneut.",
+      "responseInProgress": "In dieser Unterhaltung wird bereits eine Antwort erstellt.",
+      "responseInactive": "Diese Antwort ist nicht mehr aktiv.",
+      "invalidToolInput": "Der Assistent konnte diese Anfrage nicht verarbeiten. Bitte versuche es erneut."
+    }
+  },
+  "tenant": {
+    "error": {
+      "notFound": "Organisation nicht gefunden.",
+      "inactive": "Diese Organisation ist inaktiv. Wende dich an deinen Administrator."
     }
   }
 }

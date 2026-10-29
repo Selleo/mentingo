@@ -102,7 +102,8 @@ export class PromptService implements OnModuleInit {
       const { voiceTtsProvider } = await this.envService.getLumaConfigured();
       const voicePromptId =
         voiceTtsProvider === "elevenlabs" ? "voiceMentorElevenLabsAddon" : "voiceMentorAddon";
-      const voiceMentorAddon = await this.loadPrompt(voicePromptId, {
+      // All voice turns use bundled transport guidance; other prompts stay managed.
+      const voiceMentorAddon = this.loadBundledPrompt(voicePromptId, {
         language: thread.userLanguage,
       });
       metaMessages.push({
@@ -286,6 +287,14 @@ export class PromptService implements OnModuleInit {
       return langfusePrompt.compile(vars as Record<string, string>);
     }
 
+    return this.loadBundledPrompt(id, vars);
+  }
+
+  /** Render validated local guidance without reading or changing managed prompt versions. */
+  private loadBundledPrompt<K extends keyof typeof PROMPT_MAP>(
+    id: K,
+    vars: Static<(typeof PROMPT_MAP)[K]>,
+  ) {
     const prompt = this.prompts.get(id);
     if (!prompt) {
       throw new Error(`Prompt ${id} not found`);

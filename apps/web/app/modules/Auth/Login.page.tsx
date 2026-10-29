@@ -63,17 +63,17 @@ export default function LoginPage() {
 
   const hasTriggeredMagicLink = useRef(false);
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (error) {
       toast({
         variant: "destructive",
-        description: error,
+        description: t(error),
       });
       setSearchParams({});
     }
-  }, [error, setSearchParams]);
-
-  const { t } = useTranslation();
+  }, [error, setSearchParams, t]);
 
   const { data: loginMethods } = useLoginMethods();
 

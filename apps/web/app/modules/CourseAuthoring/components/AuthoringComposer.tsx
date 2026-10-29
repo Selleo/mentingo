@@ -3,7 +3,6 @@ import { VoiceLevelBars } from "@mentingo/voice";
 import { ArrowUp, LoaderCircle, Mic, Square, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -18,7 +17,8 @@ import { match } from "ts-pattern";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
-import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
+import { DICTATION_PHASES } from "~/modules/Voice/dictation.constants";
+import { useTextDictation } from "~/modules/Voice/hooks/useTextDictation";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../../e2e/data/curriculum/handles";
 
@@ -110,11 +110,23 @@ export const AuthoringComposer = ({
   const canStopGeneration = Boolean(hasActiveGeneration && onStopGeneration);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const [voiceBusy, setVoiceBusy] = useState(false);
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [voiceLevel, setVoiceLevel] = useState(0);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
-  const instructionRef = useRef(instruction);
+  const {
+    phase,
+    voiceLevel,
+    isIdle,
+    error: voiceError,
+    isBusy,
+    isRecording,
+    showVoicePanel: isVoiceMode,
+    start: startVoiceMode,
+    stop: stopVoiceMode,
+    cancel: cancelVoiceMode,
+  } = useTextDictation({
+    value: instruction,
+    onChange: onInstructionChange,
+    blocked: disabled || isSubmitting || hasActiveGeneration,
+  });
+  const voiceBusy = isBusy && !isRecording;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
@@ -126,21 +138,6 @@ export const AuthoringComposer = ({
     textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
     textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
   }, [instruction, isVoiceMode]);
-  useEffect(() => {
-    instructionRef.current = instruction;
-  }, [instruction]);
-  const setTranscribedInput = useCallback(
-    (next: string | ((current: string) => string)) => {
-      const value = typeof next === "function" ? next(instructionRef.current) : next;
-      instructionRef.current = value;
-      onInstructionChange(value);
-    },
-    [onInstructionChange],
-  );
-  const { startRecording, stopRecording, cancelTranscription } = useTranscription({
-    setInput: setTranscribedInput,
-    onLevelChange: setVoiceLevel,
-  });
   const placeholders = useMemo(
     () => [
       t("courseAuthoring.composer.exampleOne"),
@@ -159,47 +156,6 @@ export const AuthoringComposer = ({
     return () => window.clearInterval(interval);
   }, [instruction, isFocused, placeholders.length]);
 
-  /** Starts transcription without changing or submitting the typed author draft. */
-  const startVoiceMode = async () => {
-    setVoiceError(null);
-    setVoiceBusy(true);
-    const started = await startRecording();
-    setVoiceBusy(false);
-    if (started) {
-      setIsVoiceMode(true);
-      return;
-    }
-    setVoiceError(t("courseAuthoring.composer.voiceUnavailable"));
-  };
-
-  /** Stops transcription so its final transcript can be appended to the draft. */
-  const stopVoiceMode = async () => {
-    setVoiceBusy(true);
-    try {
-      await stopRecording();
-    } catch {
-      setVoiceError(t("courseAuthoring.composer.voiceUnavailable"));
-    } finally {
-      setVoiceBusy(false);
-      setIsVoiceMode(false);
-      setVoiceLevel(0);
-    }
-  };
-
-  /** Cancels transcription and discards the in-progress utterance. */
-  const cancelVoiceMode = async () => {
-    setVoiceBusy(true);
-    try {
-      await cancelTranscription();
-    } catch {
-      setVoiceError(t("courseAuthoring.composer.voiceUnavailable"));
-    } finally {
-      setVoiceBusy(false);
-      setIsVoiceMode(false);
-      setVoiceLevel(0);
-    }
-  };
-
   const showReasoningControl = Boolean(reasoningControl) && !isVoiceMode;
   const canSend =
     !disabled &&
@@ -210,7 +166,7 @@ export const AuthoringComposer = ({
     !hasActiveGeneration &&
     instruction.trim().length > 0;
   const submit = () => {
-    if (canSend) onSubmit();
+    if (canSend && isIdle()) onSubmit();
   };
   const primaryAction = match({ isVoiceMode, canStopGeneration })
     .with({ isVoiceMode: true }, () => ({
@@ -222,7 +178,7 @@ export const AuthoringComposer = ({
       label: t("courseAuthoring.conversation.stop"),
     }))
     .otherwise(() => ({ onClick: submit, label: t("courseAuthoring.composer.send") }));
-  const voicePhase = voiceBusy ? VOICE_PHASE.TRANSCRIBING : VOICE_PHASE.LISTENING;
+  const voicePhase = isRecording ? VOICE_PHASE.LISTENING : VOICE_PHASE.TRANSCRIBING;
   const modeTransition = {
     initial: shouldReduceMotion ? false : { opacity: 0, y: 6 },
     animate: { opacity: 1, y: 0 },
@@ -249,7 +205,7 @@ export const AuthoringComposer = ({
               type="button"
               variant="ghost"
               className="size-8 rounded-lg p-0 text-neutral-700"
-              disabled={voiceBusy}
+              disabled={phase === DICTATION_PHASES.CANCELLING}
               onClick={() => void cancelVoiceMode()}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.closeVoiceMode")}
             >
@@ -292,15 +248,10 @@ export const AuthoringComposer = ({
                   event.key === "Enter" &&
                   !event.shiftKey &&
                   !event.nativeEvent.isComposing &&
-                  !disabled &&
-                  !isSubmitting &&
-                  !sendBlocked &&
-                  !voiceBusy &&
-                  !hasActiveGeneration &&
-                  instruction.trim()
+                  canSend
                 ) {
                   event.preventDefault();
-                  onSubmit();
+                  submit();
                 }
               }}
             />
@@ -366,7 +317,7 @@ export const AuthoringComposer = ({
               type="button"
               variant="ghost"
               className="size-8 rounded-lg p-0 text-neutral-700 hover:bg-primary-50 hover:text-primary-700"
-              disabled={disabled || isSubmitting || voiceBusy}
+              disabled={disabled || isSubmitting || hasActiveGeneration || voiceBusy}
               onClick={() => void startVoiceMode()}
               aria-label={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
             >
@@ -404,7 +355,7 @@ export const AuthoringComposer = ({
       </div>
       {voiceError && (
         <p role="alert" className="mt-2 text-xs text-destructive">
-          {voiceError}
+          {t("courseAuthoring.composer.voiceUnavailable")}
         </p>
       )}
     </form>

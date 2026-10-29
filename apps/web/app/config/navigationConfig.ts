@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { NAVIGATION_HANDLES } from "../../e2e/data/navigation/handles";
 
@@ -48,8 +48,43 @@ export const getNavigationConfig = (
   isLearningPathsEnabled = false,
   shouldShowLearningPaths = false,
   isPhishingEnabled = false,
+  roleSlugs: readonly string[] = [],
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
+
+  const assistantItem: NavigationItem = {
+    label: t("navigationSideBar.aiAssistant"),
+    path: "assistant",
+    iconName: "Bot",
+    accessRequirement: routeAccessConfig.assistant,
+  };
+  const conversationsItem: NavigationItem = {
+    label: t("aiConversations.title"),
+    path: "admin/ai-conversations",
+    iconName: "MessagesSquare",
+    testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
+    accessRequirement: { allOf: [PERMISSIONS.AI_THREAD_READ] },
+  };
+  // Role selects presentation only; route and item permissions still authorize access.
+  const aiGroups: NavigationGroups[] = roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN)
+    ? [
+        {
+          title: t("navigationSideBar.ai"),
+          icon: "AiMentor",
+          isExpandable: true,
+          items: [assistantItem, conversationsItem],
+        },
+      ]
+    : [
+        { title: assistantItem.label, icon: "Bot", isExpandable: false, items: [assistantItem] },
+        {
+          title: conversationsItem.label,
+          icon: "MessagesSquare",
+          isExpandable: false,
+          restrictedAccessRequirement: conversationsItem.accessRequirement,
+          items: [conversationsItem],
+        },
+      ];
 
   return [
     {
@@ -93,6 +128,7 @@ export const getNavigationConfig = (
         },
       ],
     },
+    ...aiGroups,
     ...(isAnyContentFeatureEnabled
       ? ([
           {
@@ -216,22 +252,6 @@ export const getNavigationConfig = (
           path: "super-admin/tenants",
           iconName: "Building",
           testId: NAVIGATION_HANDLES.TENANTS_LINK,
-        },
-      ],
-    },
-    {
-      title: t("aiConversations.title"),
-      icon: "AiMentor",
-      isExpandable: false,
-      testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
-      restrictedAccessRequirement: { allOf: [PERMISSIONS.AI_THREAD_READ] },
-      restrictedManagingTenantAdmin: false,
-      items: [
-        {
-          label: t("aiConversations.title"),
-          path: "admin/ai-conversations",
-          iconName: "AiMentor",
-          testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
         },
       ],
     },

@@ -9,7 +9,6 @@ import {
   studentCoursesQueryOptions,
   useCurrentUser,
 } from "~/api/queries";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
@@ -17,6 +16,7 @@ import { hasPermission } from "~/common/permissions/permission.utils";
 import { CopyUrlButton } from "~/components/CopyUrlButton/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
@@ -36,7 +36,7 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
 
   const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { data: currentUser } = useCurrentUser();
-  const { data: globalSettings } = useGlobalSettings();
+  const isRegistrationEnabled = useIsRegistrationEnabled();
 
   const isGroupManager = hasPermission(
     currentUser?.permissions ?? [],
@@ -55,9 +55,7 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
 
   const renderEnrollButton = () => {
     if (!currentUser) {
-      const registerPath = globalSettings?.inviteOnlyRegistration
-        ? "/auth/login"
-        : "/auth/register";
+      const registerPath = isRegistrationEnabled ? "/auth/register" : "/auth/login";
 
       return (
         <Link

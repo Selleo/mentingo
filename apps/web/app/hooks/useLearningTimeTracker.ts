@@ -5,6 +5,7 @@ import { acquireSocket, releaseSocket } from "~/api/socket";
 import type { Socket } from "socket.io-client";
 
 interface UseLearningTimeTrackerOptions {
+  learningStateId?: string | null;
   lessonId: string;
   courseId: string;
   enabled?: boolean;
@@ -15,6 +16,7 @@ const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export function useLearningTimeTracker({
   lessonId,
+  learningStateId,
   courseId,
   enabled = true,
 }: UseLearningTimeTrackerOptions) {
@@ -45,11 +47,12 @@ export function useLearningTimeTracker({
 
     socketRef.current.emit("heartbeat", {
       lessonId,
+      learningStateId,
       courseId,
       timestamp: Date.now(),
       isActive: isActiveRef.current,
     });
-  }, [lessonId, courseId, isTabVisible]);
+  }, [lessonId, courseId, learningStateId, isTabVisible]);
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
@@ -58,7 +61,7 @@ export function useLearningTimeTracker({
     socketRef.current = socket;
 
     const startTracking = () => {
-      socket.emit("join:lesson", { lessonId, courseId });
+      socket.emit("join:lesson", { lessonId, courseId, learningStateId });
 
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
@@ -114,7 +117,7 @@ export function useLearningTimeTracker({
 
     const handleBeforeUnload = () => {
       if (socket?.connected) {
-        socket.emit("leave:lesson", { lessonId });
+        socket.emit("leave:lesson", { lessonId, learningStateId });
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -123,7 +126,7 @@ export function useLearningTimeTracker({
 
     return () => {
       if (socket?.connected) {
-        socket.emit("leave:lesson", { lessonId });
+        socket.emit("leave:lesson", { lessonId, learningStateId });
       }
 
       if (heartbeatIntervalRef.current) {
@@ -147,7 +150,7 @@ export function useLearningTimeTracker({
       socketRef.current = null;
       releaseSocket();
     };
-  }, [enabled, lessonId, courseId, sendHeartbeat, resetIdleTimer]);
+  }, [enabled, lessonId, courseId, learningStateId, sendHeartbeat, resetIdleTimer]);
 
   return {
     isConnected: isConnectedRef.current,

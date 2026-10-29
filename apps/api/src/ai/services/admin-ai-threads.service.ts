@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { AI_THREAD_TYPES } from "@repo/shared";
 
 import { AdminAiThreadsRepository } from "src/ai/repositories/admin-ai-threads.repository";
 import { processInBatches } from "src/common/utils/processInBatches";
@@ -77,7 +78,10 @@ export class AdminAiThreadsService {
           ? await this.fileService.getFileUrl(threadOwner.avatarReference)
           : null,
       },
-      evaluation: await this.buildThreadEvaluation(threadId),
+      evaluation:
+        threadSummary.type === AI_THREAD_TYPES.ASSISTANT
+          ? null
+          : await this.buildThreadEvaluation(threadId),
     };
   }
 
@@ -88,6 +92,7 @@ export class AdminAiThreadsService {
       threadId,
       adminAiThreadPagination.page,
       adminAiThreadPagination.perPage,
+      threadSummary.type,
     );
   }
 

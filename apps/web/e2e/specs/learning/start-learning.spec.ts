@@ -64,10 +64,8 @@ test("student can start learning and continue to the next content lesson", async
       });
 
       await openCourseOverviewFlow(page, courseId);
-      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
-      await startLearningFlow(page);
-
-      await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
+      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
+      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toHaveCount(0);
     },
     { root: true },
   );

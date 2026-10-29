@@ -3,6 +3,7 @@ import { type Static, Type } from "@sinclair/typebox";
 import { certificateValiditySchema } from "../types/settings";
 
 export const updateCourseSettingsSchema = Type.Object({
+  repetitionEnabled: Type.Optional(Type.Boolean()),
   lessonSequenceEnabled: Type.Optional(Type.Boolean()),
   quizFeedbackEnabled: Type.Optional(Type.Boolean()),
   videoCompletionTrackingEnabled: Type.Optional(Type.Boolean()),

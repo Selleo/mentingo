@@ -4,6 +4,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../../e2e/data/learning-paths/handles";
 
+import { AdminLearningPathsCreatePanel } from "./AdminLearningPathsCreatePanel";
 import { AdminLearningPathsHeader } from "./AdminLearningPathsHeader";
 import { AdminLearningPathsList } from "./AdminLearningPathsList";
 
@@ -12,6 +13,7 @@ export function AdminLearningPathsPageContent() {
 
   return (
     <PageWrapper
+      className="mb-8"
       breadcrumbs={[
         {
           title: t("adminLearningPathsView.breadcrumbs.learningPaths"),
@@ -25,6 +27,7 @@ export function AdminLearningPathsPageContent() {
       >
         <AdminLearningPathsHeader />
         <AdminLearningPathsList />
+        <AdminLearningPathsCreatePanel />
       </section>
     </PageWrapper>
   );

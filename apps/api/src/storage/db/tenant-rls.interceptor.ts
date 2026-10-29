@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { defer, from, lastValueFrom } from "rxjs";
 
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
@@ -47,7 +47,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     return defer(() =>
       from(
         this.tenantResolver.resolveTenantId(req).then((tenantId) => {
-          if (!tenantId) throw new UnauthorizedException("Missing tenantId");
+          if (!tenantId) throw new NotFoundException("tenant.error.notFound");
 
           return this.runner.runWithTenantContext(tenantId, () => lastValueFrom(next.handle()));
         }),

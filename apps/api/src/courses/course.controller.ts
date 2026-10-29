@@ -46,10 +46,16 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
-import { CourseDuplicationService } from "src/courses/course-duplication.service";
-import { CourseScormExportService } from "src/courses/course-scorm-export.service";
+import {
+  courseRepetitionSchema,
+  repeatCourseBodySchema,
+  RepeatCourseBody,
+} from "src/course-repetition/course-repetition.schema";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseDuplicationService } from "src/courses/duplication/course-duplication.service";
+import { CourseTranslationService } from "src/courses/languages/course-translation.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import {
   bulkArchiveCourseResponseSchema,
   bulkArchiveCourseSchema,
@@ -116,7 +122,7 @@ import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
-import { CourseTranslationService } from "src/courses/services/course-translation.service";
+import { CourseScormExportService } from "src/courses/scorm-export/course-scorm-export.service";
 import {
   allCoursesValidation,
   availableCourseCategoriesValidation,
@@ -170,6 +176,7 @@ import {
 import type { GetCourseSettings } from "./schemas/coursesSettings.schema";
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type { AllCategoriesResponse } from "src/category/schemas/category.schema";
+import type { CourseRepetitionResponse } from "src/course-repetition/course-repetition.schema";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -195,6 +202,7 @@ import type {
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
+    private readonly courseRepetitionService: CourseRepetitionService,
     private readonly courseTranslationService: CourseTranslationService,
     private readonly courseScormExportService: CourseScormExportService,
     private readonly learningTimeService: LearningTimeService,
@@ -325,6 +333,25 @@ export class CourseController {
   ) {
     return new BaseResponse(
       await this.courseService.getStudentDashboardSummary(currentUserId, language),
+    );
+  }
+
+  @Post(":courseId/repeat")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: repeatCourseBodySchema },
+    ],
+    response: baseResponse(courseRepetitionSchema),
+  })
+  async repeatCourse(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: RepeatCourseBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CourseRepetitionResponse>> {
+    return new BaseResponse(
+      await this.courseRepetitionService.repeat(courseId, currentUser.userId, body.currentStateId),
     );
   }
 

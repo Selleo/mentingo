@@ -14,6 +14,7 @@ import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 import type { CertificateValiditySetting } from "@repo/shared";
 
 type UpdateCourseSettingsBody = {
+  repetitionEnabled?: boolean;
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;

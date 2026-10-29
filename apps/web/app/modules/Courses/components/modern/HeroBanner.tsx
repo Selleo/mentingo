@@ -26,6 +26,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { COURSES_INLINE_EDIT_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
+import { CourseRepetition } from "../CourseRepetition";
 
 import { HeroTrailerVideo } from "./HeroTrailerVideo";
 import { formatDuration } from "./utils";
@@ -241,6 +242,9 @@ const HeroBanner = ({
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(primaryActionLabel)}
             </Button>
+            {heroCourseData && !isPreviewMode && !isGroupManager && (
+              <CourseRepetition course={heroCourseData} />
+            )}
             <Button asChild variant="outline">
               <Link to={`/course/${id}`}>
                 <Info className="mr-2 h-4 w-4" />

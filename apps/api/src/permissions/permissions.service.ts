@@ -1,4 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { and, eq, notExists } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -98,7 +99,11 @@ export class PermissionsService {
     const roleSlugs = Array.from(new Set(roleRows.map((row) => row.roleSlug)));
 
     const permissions = Array.from(
-      new Set(permissionRows.map((row) => row.permission as PermissionKey)),
+      new Set(
+        permissionRows
+          .map((row) => row.permission as PermissionKey)
+          .filter((permission) => Object.values(PERMISSIONS).includes(permission)),
+      ),
     );
 
     return { roleSlugs, permissions };

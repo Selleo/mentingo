@@ -1,6 +1,7 @@
 import { observe, propagateAttributes, updateActiveObservation } from "@langfuse/tracing";
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -15,6 +16,7 @@ import _ from "lodash";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AI_MENTOR_REASONING_EFFORT, MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { voiceDeliverySentenceSchema } from "src/ai/schemas/voice-delivery.schema";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
@@ -43,8 +45,11 @@ import {
   TranslationStructureError,
   validateTranslationStructure,
 } from "src/ai/utils/translation-output";
+import { streamVoiceSentenceMarkup } from "src/ai/utils/voice-delivery";
 import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { DB } from "src/storage/db/db.providers";
@@ -58,11 +63,12 @@ import type { ModelMessage } from "ai";
 import type {
   AiStreamMessageInput,
   AiMentorChatStreamResult,
-  AiStreamTextResult,
+  AiCoreMentorStreamResult,
   AiTranscriptionResult,
   AiUiMessageStream,
 } from "src/ai/ai-chat.types";
 import type { AiPracticeReplayMessage } from "src/ai/ai-practice.types";
+import type { VoiceDeliverySentence } from "src/ai/schemas/voice-delivery.schema";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -96,9 +102,10 @@ export class AiService {
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB)
     private readonly db: DatabasePg,
+    private readonly courseRepetitionService: CourseRepetitionService,
   ) {}
 
-  async getThreadWithSetup(data: CreateThreadBody) {
+  async getOrCreateLessonThread(data: CreateThreadBody) {
     return observe(
       async () =>
         propagateAttributes(
@@ -113,35 +120,8 @@ export class AiService {
           }),
           async () => {
             try {
-              const threadData = await this.threadService.createThreadIfNoneExist(data);
-
-              if (!threadData.newThread) {
-                return { data: threadData.thread };
-              }
-
-              return propagateAttributes(
-                buildAiMentorTraceAttributes({
-                  sessionId: threadData.thread.id,
-                  userId: data.userId,
-                  tenantId: dbAls.getStore()?.tenantId,
-                  flow: AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
-                  operation: "thread-setup",
-                  channel: "text",
-                  threadId: threadData.thread.id,
-                  lessonId: data.lessonId,
-                  aiMentorLessonId: threadData.thread.aiMentorLessonId ?? undefined,
-                }),
-                async () => {
-                  const systemPrompt = await this.promptService.setSystemPrompt({
-                    threadId: threadData.thread.id,
-                    userId: threadData.thread.userId,
-                  });
-
-                  await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
-
-                  return { data: threadData.thread };
-                },
-              );
+              const { thread } = await this.threadService.createThreadIfNoneExist(data);
+              return { data: thread };
             } catch (error) {
               updateActiveObservation({
                 level: "ERROR",
@@ -157,6 +137,60 @@ export class AiService {
 
   async getExistingThreadForLesson(lessonId: UUIDType, userId: UUIDType) {
     return this.threadService.findExistingThreadForLesson(lessonId, userId);
+  }
+
+  async initializeLessonWelcome(threadId: UUIDType, userId: UUIDType) {
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)], true);
+    if (!thread || thread.userId !== userId || thread.status !== THREAD_STATUS.ACTIVE) return;
+    if (await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.MENTOR))
+      return;
+    const systemMessage = await this.aiRepository.findFirstMessageByRoleAndThread(
+      threadId,
+      MESSAGE_ROLE.SYSTEM,
+    );
+    const { courseId } = await this.aiRepository.findLessonIdByThreadId(threadId);
+    if (!courseId) return;
+
+    const systemPrompt =
+      systemMessage?.content ?? (await this.promptService.buildSystemPrompt({ threadId, userId }));
+    const content = await this.generateWelcomeMessage(systemPrompt);
+    await this.db.transaction(async (trx) => {
+      await this.courseRepetitionService.lock(courseId, userId, trx);
+      await this.courseRepetitionService.resolveWritableState(
+        courseId,
+        userId,
+        thread.learningStateId,
+        trx,
+      );
+      const activeThread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
+      if (!activeThread || activeThread.status !== THREAD_STATUS.ACTIVE)
+        throw new ConflictException("courseRepetition.errors.staleState");
+      if (await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.MENTOR))
+        return;
+      if (
+        !systemMessage &&
+        !(await this.aiRepository.findFirstMessageByRoleAndThread(threadId, MESSAGE_ROLE.SYSTEM))
+      ) {
+        await this.aiRepository.insertMessage(
+          {
+            tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt),
+            threadId,
+            role: MESSAGE_ROLE.SYSTEM,
+            content: systemPrompt,
+          },
+          trx,
+        );
+      }
+      await this.aiRepository.insertMessage(
+        {
+          tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, content),
+          threadId,
+          role: MESSAGE_ROLE.MENTOR,
+          content,
+        },
+        trx,
+      );
+    });
   }
 
   async getPracticeThreadWithSetup(data: {
@@ -294,7 +328,7 @@ export class AiService {
 
             return {
               ...stream,
-              textStream: this.persistLumaMentorChatStream({
+              textStream: this.persistMentorChatStream({
                 stream: stream.textStream,
                 data,
                 model,
@@ -436,9 +470,10 @@ export class AiService {
 
   async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
-    if (!thread) throw new BadRequestException("Thread not found");
+    if (!thread) throw new BadRequestException("common.error.threadNotFound");
 
     const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
+    const { lessonId, courseId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
     const judged = await observe(
       async () =>
@@ -456,42 +491,54 @@ export class AiService {
             aiMentorLessonId: thread.aiMentorLessonId ?? undefined,
             practiceSessionId: thread.practiceSessionId ?? undefined,
           }),
-          () => this.judgeService.runJudge(data, viewer),
+          () => this.judgeService.evaluate(data, viewer),
         ),
       { name: "Thread Evaluator", asType: "evaluator" },
     )();
 
-    const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
     const { permissions: learnerPermissions } = await this.permissionsService.getUserAccess(
       thread.userId,
     );
 
-    if (lessonId) {
-      await this.markAsCompletedIfJudge(
-        lessonId,
-        thread.userId,
-        learnerPermissions,
-        currentUser,
-        judged.data,
-        thread.userLanguage,
-        true,
-      );
-    }
-
-    const { status: _status, ...judgeData } = judged.data;
-
-    return {
-      data: {
-        ...judgeData,
-      },
-    };
+    return this.db.transaction(async (tx) => {
+      let learningStateId = thread.learningStateId;
+      if (courseId) {
+        await this.courseRepetitionService.lock(courseId, thread.userId, tx);
+        learningStateId = await this.courseRepetitionService.resolveWritableState(
+          courseId,
+          thread.userId,
+          thread.learningStateId,
+          tx,
+        );
+      }
+      return courseLearningContext.run({ learningStateId }, async () => {
+        await this.judgeService.persistJudgement(
+          data.threadId,
+          thread.userLanguage,
+          judged.rubric,
+          judged.data,
+        );
+        if (lessonId) {
+          await this.markAsCompletedIfJudge(
+            lessonId,
+            thread.userId,
+            learnerPermissions,
+            currentUser,
+            judged.data,
+            thread.userLanguage,
+            true,
+          );
+        }
+        return { data: judged.data };
+      });
+    });
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
     if (userId && thread.userId !== userId)
-      throw new ForbiddenException("You don't have access to this thread");
+      throw new ForbiddenException("common.error.threadAccessDenied");
 
     if (thread.status !== THREAD_STATUS.ACTIVE)
       throw new BadRequestException("common.error.threadMustBeActive");
@@ -552,7 +599,7 @@ export class AiService {
       !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
       !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE)
     )
-      throw new UnauthorizedException("You are not assigned to this lesson");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     if (hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
       const courseAuthorId = await this.aiRepository.getCourseAuthorByLesson(lessonId);
@@ -760,12 +807,12 @@ export class AiService {
       topP: number;
     };
     persistOnFinish: boolean;
-  }): Promise<AiStreamTextResult> {
+  }): Promise<AiCoreMentorStreamResult> {
     const provider = await this.promptService.getOpenAI();
-    const { streamText } = await loadAiSdk();
+    const { streamText, Output, jsonSchema } = await loadAiSdk();
     const { instructions, messages } = this.toCorePrompt(prompt);
 
-    return streamText({
+    const options = {
       model: provider(model),
       instructions,
       messages,
@@ -779,6 +826,27 @@ export class AiService {
           }
         : generationConfig),
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CHAT),
+    };
+    if (isVoiceMentor) {
+      const response = streamText({
+        ...options,
+        output: Output.array({
+          element: jsonSchema<VoiceDeliverySentence>(() => voiceDeliverySentenceSchema),
+        }),
+      });
+      const stream = streamVoiceSentenceMarkup(
+        response.elementStream,
+        data.abortSignal,
+        () => response.output,
+      );
+      return {
+        textStream: persistOnFinish
+          ? this.persistMentorChatStream({ stream, data, model, currentUser, isVoiceMentor })
+          : stream,
+      };
+    }
+    const response = streamText({
+      ...options,
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 
@@ -802,9 +870,10 @@ export class AiService {
         trace.getActiveSpan()?.end();
       },
     });
+    return { textStream: response.textStream, coreStream: response };
   }
 
-  private async *persistLumaMentorChatStream({
+  private async *persistMentorChatStream({
     stream,
     data,
     model,

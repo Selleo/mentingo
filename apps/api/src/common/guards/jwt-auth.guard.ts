@@ -10,6 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 
 import { MCP_UPLOAD_TOKEN_PREFIX, McpUploadGrantService } from "src/mcp/mcp-upload-grant.service";
 import { SessionRevocationService } from "src/redis";
+import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { extractToken } from "src/utils/extract-token";
 
 import type { McpRequest } from "src/mcp/mcp.types";
@@ -22,6 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     private configService: ConfigService,
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly mcpUploadGrants: McpUploadGrantService,
+    private readonly tenantResolverService: TenantResolverService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -60,6 +62,8 @@ export class JwtAuthGuard implements CanActivate {
 
     // For protected endpoints, require valid token
     if (!token) {
+      // An unknown tenant is a missing resource; auth failures on known tenants remain 401.
+      await this.tenantResolverService.resolveTenantId(request, true);
       throw new UnauthorizedException("Access token not found");
     }
 
@@ -84,6 +88,7 @@ export class JwtAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
+      await this.tenantResolverService.resolveTenantId(request, true);
       if (error instanceof UnauthorizedException) throw error;
 
       throw new UnauthorizedException("Invalid access token");

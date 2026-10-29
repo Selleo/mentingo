@@ -1,6 +1,8 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { sql } from "drizzle-orm";
 
+import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
+
 import { REPORT_VIEWS } from "../constants/reports.constants";
 
 import type { ReportStatementContext } from "./reports-query.types";
@@ -97,6 +99,7 @@ function buildQuizFactsCtes(context: ReportStatementContext): SQL {
             JOIN lessons l ON l.id = a.lesson_id AND l.tenant_id = aa.tenant_id
             JOIN chapters ch ON ch.id = l.chapter_id AND ch.tenant_id = aa.tenant_id
             WHERE aa.tenant_id = ${context.access.tenantId} AND aa.submission_status = 'submitted'
+              AND ${currentLearningState(sql.raw("aa.learning_state_id"))}
           ),
           scoped_quiz_attempts AS MATERIALIZED (
             SELECT qa.*

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCommitScormRuntime, useFinishScormRuntime } from "~/api/mutations";
+import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
 import { toast } from "~/components/ui/use-toast";
 
 import {
@@ -134,7 +135,10 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        const result = await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
+        const result = await commitRuntimeRef.current({
+          data: buildRuntimePayload(values),
+          params: courseLearningHeaders(launch.learningStateId),
+        });
         updateLaunchRuntimeCache(values);
         await invalidateRuntimeProgressQueries();
         showRuntimeToast(result.messageKey);
@@ -160,7 +164,10 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        const result = await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
+        const result = await finishRuntimeRef.current({
+          data: buildRuntimePayload(values),
+          params: courseLearningHeaders(launch.learningStateId),
+        });
         updateLaunchRuntimeCache(values);
         await invalidateRuntimeProgressQueries();
         if (showToast) {
@@ -198,6 +205,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   }, [
     language,
     launch.attemptId,
+    launch.learningStateId,
     launch.courseId,
     launch.lessonId,
     launch.packageId,

@@ -6,6 +6,7 @@ import { validate as uuidValidate } from "uuid";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -380,6 +381,7 @@ export class IntegrationRepository {
            AND ${studentLessonProgress.chapterId} = ${chapters.id}
            AND ${studentLessonProgress.studentId} = ${pagedEnrollmentsCte.studentId}
            AND ${studentLessonProgress.tenantId} = ${pagedEnrollmentsCte.tenantId}
+           AND ${currentLearningState(studentLessonProgress.learningStateId)}
           WHERE ${lessons.tenantId} = ${tenantId}
             AND ${chapters.courseId} = ${pagedEnrollmentsCte.courseId}
         ),
@@ -410,6 +412,7 @@ export class IntegrationRepository {
            AND ${studentLessonProgress.chapterId} = ${chapters.id}
            AND ${studentLessonProgress.studentId} = ${pagedEnrollmentsCte.studentId}
            AND ${studentLessonProgress.tenantId} = ${pagedEnrollmentsCte.tenantId}
+           AND ${currentLearningState(studentLessonProgress.learningStateId)}
           WHERE ${lessons.tenantId} = ${tenantId}
             AND ${chapters.courseId} = ${pagedEnrollmentsCte.courseId}
             AND ${lessons.type} = 'quiz'

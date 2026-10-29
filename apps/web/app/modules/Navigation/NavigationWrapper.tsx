@@ -3,7 +3,9 @@ import { Outlet } from "@remix-run/react";
 import { useCurrentUser } from "~/api/queries";
 import { Navigation } from "~/components/Navigation/Navigation";
 import { MFAGuard } from "~/Guards/MFAGuard";
+import { RouteGuard } from "~/Guards/RouteGuard";
 import { cn } from "~/lib/utils";
+import { AssistantDock } from "~/modules/Assistant/AssistantDock";
 import { SupportModeBanner } from "~/modules/SupportMode/SupportModeBanner";
 
 export default function NavigationWrapper() {
@@ -19,7 +21,12 @@ export default function NavigationWrapper() {
       <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
         {currentUser && <Navigation />}
         <MFAGuard mode="public">
-          <Outlet />
+          <RouteGuard>
+            <>
+              <Outlet />
+              {currentUser && <AssistantDock actor={currentUser} />}
+            </>
+          </RouteGuard>
         </MFAGuard>
       </div>
     </div>

@@ -68,7 +68,7 @@ const setup = (
 };
 
 const run = (service: JudgeService) =>
-  service.runJudge({ threadId: "thread-id" } as never, { userId: "user-id", permissions: [] });
+  service.evaluate({ threadId: "thread-id" } as never, { userId: "user-id", permissions: [] });
 
 describe("JudgeService blocking-error verification", () => {
   it("does not fail a learner when an independent check finds only a denied or reported action", async () => {
@@ -97,14 +97,9 @@ describe("JudgeService blocking-error verification", () => {
     expect(result.data).toMatchObject({
       passed: true,
       blockingErrors: [],
-      status: THREAD_STATUS.COMPLETED,
     });
-    expect(persist).toHaveBeenCalledWith(
-      "thread-id",
-      "en",
-      rubric,
-      expect.objectContaining({ passed: true, blockingErrors: [] }),
-    );
+    expect(result.rubric).toEqual(rubric);
+    expect(persist).not.toHaveBeenCalled();
   });
 
   it("keeps a clearly corroborated blocking error and its learner-facing explanation", async () => {
@@ -194,12 +189,8 @@ describe("JudgeService blocking-error verification", () => {
 
       expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(statement);
       expect(result.data).toMatchObject({ passed: true, blockingErrors: [] });
-      expect(persist).toHaveBeenCalledWith(
-        "thread-id",
-        "en",
-        rubric,
-        expect.objectContaining({ passed: true, blockingErrors: [] }),
-      );
+      expect(result.rubric).toEqual(rubric);
+      expect(persist).not.toHaveBeenCalled();
     },
   );
 
@@ -255,14 +246,8 @@ describe("JudgeService blocking-error verification", () => {
         { blockingErrorId: secondRule.id, learnerSafeFeedback: "You deleted the client logs." },
       ],
     });
-    expect(persist).toHaveBeenCalledWith(
-      "thread-id",
-      "en",
-      twoRules,
-      expect.objectContaining({
-        blockingErrors: [expect.objectContaining({ blockingErrorId: secondRule.id })],
-      }),
-    );
+    expect(result.rubric).toEqual(twoRules);
+    expect(persist).not.toHaveBeenCalled();
   });
 
   it("starts independent checks concurrently when several blocking errors are proposed", async () => {
@@ -308,12 +293,7 @@ describe("JudgeService blocking-error verification", () => {
     await evaluation;
 
     expect(callsBeforeRelease).toBe(3);
-    expect(persist).toHaveBeenCalledWith(
-      "thread-id",
-      "en",
-      twoRules,
-      expect.objectContaining({ passed: true, blockingErrors: [] }),
-    );
+    expect(persist).not.toHaveBeenCalled();
   });
 
   it("does not turn a Polish denial of investigating client logs into an automatic failure", async () => {
@@ -344,11 +324,7 @@ describe("JudgeService blocking-error verification", () => {
 
     expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(history[2].content);
     expect(result.data).toMatchObject({ passed: true, blockingErrors: [] });
-    expect(persist).toHaveBeenCalledWith(
-      "thread-id",
-      "pl",
-      rubric,
-      expect.objectContaining({ passed: true }),
-    );
+    expect(result.rubric).toEqual(rubric);
+    expect(persist).not.toHaveBeenCalled();
   });
 });

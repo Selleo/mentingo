@@ -50,6 +50,7 @@ import { createLearningPathFactory } from "../../../../test/factory/learningPath
 import { createSettingsFactory } from "../../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../../test/helpers/e2e-settings";
+import { mockCertificateCdn } from "../../../../test/helpers/mock-certificate-cdn";
 import { addSystemRoleToUserInTests } from "../../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateAllTables } from "../../../../test/helpers/test-helpers";
 
@@ -194,6 +195,7 @@ describe("Group Manager authorization outcomes (e2e)", () => {
   };
 
   beforeAll(async () => {
+    mockCertificateCdn();
     fileServiceMock = {
       getFileUrl: jest.fn().mockResolvedValue("https://example.test/file"),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
@@ -227,6 +229,7 @@ describe("Group Manager authorization outcomes (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    jest.restoreAllMocks();
   });
 
   it("rejects unauthenticated and non-manager access", async () => {
