@@ -1,5 +1,7 @@
 """The harness: specs filmed through their own imports, the demo config and the recipe's secrets."""
 import json
+import http.server
+import ssl
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import subprocess
@@ -13,6 +15,36 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 
 import harness  # noqa: E402
+
+
+class HttpsReadiness(unittest.TestCase):
+    def test_local_ca_is_required_and_hostname_validation_remains_enabled(self):
+        with tempfile.TemporaryDirectory() as folder:
+            ca, key = Path(folder)/'ca.pem', Path(folder)/'key.pem'
+            subprocess.run(['openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '1',
+                '-subj', '/CN=localhost', '-addext', 'subjectAltName=DNS:localhost',
+                '-keyout', str(key), '-out', str(ca)], check=True, capture_output=True)
+            class Handler(http.server.BaseHTTPRequestHandler):
+                def do_GET(self):
+                    self.send_response(200); self.end_headers(); self.wfile.write(b'ready')
+                def log_message(self, *_):
+                    pass
+            server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(ca, key)
+            server.socket = context.wrap_socket(server.socket, server_side=True)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                port = server.server_address[1]
+                for authority, host, expected in [('', 'localhost', 1), (str(ca), 'localhost', 0),
+                                                    (str(ca), '127.0.0.1', 1)]:
+                    with self.subTest(authority=authority, host=host):
+                        result = subprocess.run(['node', '-e', harness.READINESS_CHECK, authority,
+                            f'https://{host}:{port}/'], capture_output=True, timeout=10)
+                        self.assertEqual(result.returncode, expected, result.stderr.decode())
+            finally:
+                server.shutdown(); server.server_close(); thread.join()
 
 
 class Specs(unittest.TestCase):

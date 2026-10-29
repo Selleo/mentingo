@@ -106,6 +106,7 @@
    "chromium"
   ],
   "isolate": true,
+  "readiness_ca": "/tmp/home/.local/share/caddy/pki/authorities/local/root.crt",
   "unavailable": [
    "No configured OpenAI, Luma or local LLM provider: AI course generation and AI settings show Disabled; do not select scenes that require generated AI results."
   ],

@@ -690,14 +690,32 @@ def server_urls(config_path):
     return re.findall(r'url\s*:\s*[`"\']((?:https?)://[^`"\']+)[`"\']', text) if 'webServer' in text else []
 
 
+READINESS_CHECK = '''const fs = require("node:fs");
+const http = require("node:http"), https = require("node:https");
+const caPath = process.argv[1];
+let ca;
+try { if (caPath) ca = fs.readFileSync(caPath); } catch { process.exit(1); }
+Promise.all(process.argv.slice(2).map(url => new Promise(resolve => {
+  const secure = new URL(url).protocol === "https:";
+  const request = (secure ? https : http).get(url, {
+    ...(secure && ca ? {ca} : {}), timeout: 5000
+  }, response => { response.resume(); resolve(response.statusCode < 500); });
+  request.on("timeout", () => request.destroy());
+  request.on("error", () => resolve(false));
+}))).then(results => process.exit(results.every(Boolean) ? 0 : 1));
+'''
+
+
 def servers_up(run, recipe, urls):
-    check = ('Promise.all(process.argv.slice(1).map(u=>fetch(u).then(r=>r.status<500).catch(()=>false)))'
-             '.then(a=>process.exit(a.every(Boolean)?0:1))')
+    # The browser already trusts the project's local HTTPS setup. Give the
+    # readiness probe its explicit CA too, retaining certificate/hostname checks.
+    check = READINESS_CHECK
+    ca = recipe.get('readiness_ca', '')
     if recipe.get('isolate'):
-        return core.sh(['docker', 'exec', runner_name(run), 'node', '-e', check, *urls], env=docker_env(run),
+        return core.sh(['docker', 'exec', runner_name(run), 'node', '-e', check, ca, *urls], env=docker_env(run),
                        check=False, timeout=30).returncode == 0
     # the recipe's Node (fetch needs 18+), not the one first on this process's PATH
-    return core.sh(['node', '-e', check, *urls], env={'PATH': test_env(run, recipe)['PATH']}, check=False,
+    return core.sh(['node', '-e', check, ca, *urls], env={'PATH': test_env(run, recipe)['PATH']}, check=False,
                    timeout=30).returncode == 0
 
 
