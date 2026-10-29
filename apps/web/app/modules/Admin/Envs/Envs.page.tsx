@@ -19,6 +19,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 import {
   ENV_GROUPS,
@@ -64,27 +65,23 @@ const ExpandableEditor = ({ active, className, children }: ExpandableEditorProps
 const STATUS_PRESENTATION = {
   [ENV_STATUS.CONFIGURED]: {
     icon: Check,
-    border: "border-success-500",
     text: "text-success-700",
-    badge: "bg-success-700",
+    badge: "border-success-200 bg-success-50",
   },
   [ENV_STATUS.ATTENTION]: {
     icon: AlertTriangle,
-    border: "border-zest-500",
-    text: "text-zest-700",
-    badge: "bg-zest-600",
+    text: "text-warning-800",
+    badge: "border-warning-200 bg-warning-50",
   },
   [ENV_STATUS.NOT_CONFIGURED]: {
     icon: Plus,
-    border: "border-neutral-300",
     text: "text-neutral-600",
-    badge: "bg-neutral-500",
+    badge: "border-neutral-200 bg-neutral-50",
   },
   [ENV_STATUS.UNKNOWN]: {
     icon: Plus,
-    border: "border-neutral-200",
     text: "text-neutral-600",
-    badge: "bg-neutral-500",
+    badge: "border-neutral-200 bg-neutral-50",
   },
 };
 
@@ -120,13 +117,14 @@ const SecretField = ({
 
   return (
     <div className="min-w-0" data-testid={ENV_PAGE_HANDLES.field(name)}>
-      <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <Label className="text-sm text-neutral-950" htmlFor={name}>
+      <div className="mb-2 flex min-w-0 items-baseline gap-2">
+        <Label className="body-sm-md text-neutral-950" htmlFor={name}>
           {t(meta.labelKey)}
         </Label>
-        <code className="break-all rounded bg-neutral-100 px-1.5 py-0.5 text-[11px] text-neutral-600">
-          {name}
-        </code>
+        <span aria-hidden="true" className="text-neutral-600">
+          ·
+        </span>
+        <code className="details break-all text-neutral-600">{name}</code>
       </div>
       <div className="relative">
         <Input
@@ -138,9 +136,10 @@ const SecretField = ({
           placeholder={t(meta.placeholderKey)}
           aria-busy={isFetching}
           aria-describedby={meta.descriptionKey ? `${name}-description` : undefined}
-          className={cn("h-11 pr-12 disabled:bg-neutral-50 disabled:opacity-100", {
-            "border-zest-500": missing,
-          })}
+          className={cn(
+            "pr-12 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:bg-neutral-50 disabled:opacity-100",
+            { "border-warning-500": missing },
+          )}
           autoComplete="off"
         />
         <Button
@@ -219,24 +218,21 @@ const GroupEditor = ({ group, status, missingKeys, active, onClose }: GroupEdito
     <section
       id={`${group.id}-editor`}
       aria-labelledby={`${group.id}-title`}
-      className={cn(
-        "col-span-full rounded-xl border bg-white p-5 shadow-sm md:p-6",
-        STATUS_PRESENTATION[status].border,
-      )}
+      className="col-span-full rounded-lg border border-neutral-200 bg-white p-5 shadow-sm md:p-6"
     >
       <form
         data-testid={active ? ENV_PAGE_HANDLES.FORM : undefined}
         onSubmit={handleSubmit(saveSecrets)}
       >
         <header className="mb-5 flex items-start gap-3">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
             <GroupIcon className="size-6" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 id={`${group.id}-title`} className="text-lg font-semibold text-neutral-950">
+            <h2 id={`${group.id}-title`} className="h6 text-neutral-950">
               {t(group.titleKey)}
             </h2>
-            <p className="mt-1 text-sm text-neutral-600">{t(group.descriptionKey)}</p>
+            <p className="body-sm mt-1 text-neutral-600">{t(group.descriptionKey)}</p>
           </div>
           <Button
             type="button"
@@ -250,7 +246,7 @@ const GroupEditor = ({ group, status, missingKeys, active, onClose }: GroupEdito
           </Button>
         </header>
         {status === ENV_STATUS.ATTENTION && (
-          <div className="mb-6 flex items-start gap-3 rounded-lg border border-zest-200 bg-zest-50 p-4 text-sm text-zest-800">
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
             <AlertTriangle className="size-5 shrink-0" />
             <p className="min-w-0 break-words">
               {t("adminEnvsView.overview.missingKeys", { keys: missingKeys.join(", ") })}
@@ -270,12 +266,19 @@ const GroupEditor = ({ group, status, missingKeys, active, onClose }: GroupEdito
             />
           ))}
         </div>
-        <footer className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-neutral-200 pt-5">
-          <Button type="button" variant="ghost" disabled={isPending} onClick={discardChanges}>
+        <footer className="-mx-5 -mb-5 mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-neutral-200 px-5 py-3 md:-mx-6 md:-mb-6 md:px-6">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPending}
+            onClick={discardChanges}
+          >
             {t("adminEnvsView.overview.cancel")}
           </Button>
           <Button
             type="submit"
+            size="sm"
             data-testid={active ? ENV_PAGE_HANDLES.SUBMIT : undefined}
             disabled={!hasChanges || isPending}
           >
@@ -350,174 +353,163 @@ const Envs = () => {
           {t("adminEnvsView.overview.description")}
         </p>
       </header>
-      <div
-        className="mb-7 flex flex-wrap gap-2"
-        role="group"
-        aria-label={t("adminEnvsView.overview.filters")}
-      >
-        {[
-          ENV_STATUS.ALL,
-          ENV_STATUS.CONFIGURED,
-          ENV_STATUS.ATTENTION,
-          ENV_STATUS.NOT_CONFIGURED,
-        ].map((value) => {
-          const FilterIcon = value !== ENV_STATUS.ALL ? STATUS_PRESENTATION[value].icon : undefined;
-          return (
-            <Button
-              key={value}
-              type="button"
-              variant="outline"
-              aria-pressed={filter === value}
-              onClick={() => setFilter(value)}
-              className={cn("h-11 gap-2 rounded-full border-neutral-300 px-4 text-neutral-800", {
-                "border-primary-700 bg-primary-700 text-contrast": filter === value,
-              })}
-            >
-              {FilterIcon && <FilterIcon className="size-3.5" />}
-              {t(`adminEnvsView.overview.status.${value}`)}
-              <span
-                className={cn(
-                  "flex size-6 items-center justify-center rounded-full bg-neutral-100 text-xs text-neutral-800",
-                  { "bg-white/20 text-contrast": filter === value },
-                )}
-              >
-                {match(value)
-                  .with(ENV_STATUS.ALL, () => groups.length)
-                  .otherwise(() => groups.filter(({ status }) => status === value).length)}
-              </span>
-            </Button>
-          );
-        })}
-      </div>
-      {isError && (
-        <div
-          role="alert"
-          className="mb-7 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-300 p-4 text-sm"
-        >
-          <p>{t("adminEnvsView.overview.statusError")}</p>
-          <Button variant="outline" onClick={() => void refetch()}>
-            {t("adminEnvsView.overview.retry")}
-          </Button>
-        </div>
-      )}
-      {attentionGroups.length > 0 && (
-        <div className="mb-7 flex flex-wrap items-center gap-4 rounded-xl border border-zest-300 bg-zest-50 px-5 py-3.5 text-zest-800">
-          <AlertTriangle className="size-5 shrink-0" />
-          <p className="min-w-0 flex-1 text-sm">
-            <strong>
-              {t("adminEnvsView.overview.attention", { count: attentionGroups.length })}
-            </strong>{" "}
-            {attentionGroups.map(({ group }) => t(group.titleKey)).join(", ")}.
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setFilter(ENV_STATUS.ATTENTION)}
-            className="border-zest-500 bg-transparent text-zest-800"
+      <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)}>
+        <div className="mb-6 overflow-x-auto border-b">
+          <TabsList
+            className="h-auto min-w-max justify-start gap-2 rounded-none bg-transparent p-0"
+            aria-label={t("adminEnvsView.overview.filters")}
           >
-            {t("adminEnvsView.overview.showIssues")}
-          </Button>
-        </div>
-      )}
-      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {visibleGroups.map(({ group, status, configuredCount, missingKeys }, index) => {
-          const presentation = STATUS_PRESENTATION[status];
-          const GroupIcon = ENV_GROUP_PRESENTATION[group.id].icon;
-          const StatusIcon = presentation.icon;
-          const active = activeGroupId === group.id;
-          return (
-            <Fragment key={group.id}>
-              <motion.button
-                layout={prefersReducedMotion ? false : "position"}
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                type="button"
-                id={group.id}
-                aria-expanded={active}
-                aria-controls={`${group.id}-editor`}
-                onClick={() => setActiveGroupId(active ? "" : group.id)}
-                className={cn(
-                  "relative flex h-full min-h-[250px] scroll-mt-6 flex-col rounded-xl border bg-white p-5 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
-                  presentation.border,
-                  {
-                    "ring-4 ring-primary-100": active,
-                    "border-dashed bg-neutral-50": status === ENV_STATUS.NOT_CONFIGURED,
-                    "sm:order-none xl:order-none": index < 2,
-                    "sm:order-2 xl:order-none": index >= 2 && index < 4,
-                    "sm:order-4 xl:order-2": index >= 4 && index < 6,
-                    "sm:order-6 xl:order-2": index >= 6 && index < 8,
-                    "sm:order-8 xl:order-4": index >= 8,
-                  },
-                )}
-              >
-                {(status === ENV_STATUS.CONFIGURED || status === ENV_STATUS.ATTENTION) && (
+            {[
+              ENV_STATUS.ALL,
+              ENV_STATUS.CONFIGURED,
+              ENV_STATUS.ATTENTION,
+              ENV_STATUS.NOT_CONFIGURED,
+            ].map((value) => {
+              const FilterIcon =
+                value !== ENV_STATUS.ALL ? STATUS_PRESENTATION[value].icon : undefined;
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="relative gap-2 rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary-600 data-[state=active]:bg-transparent data-[state=active]:text-primary-700 data-[state=active]:shadow-none"
+                >
+                  {FilterIcon && <FilterIcon className="size-4" aria-hidden="true" />}
+                  {t(`adminEnvsView.overview.status.${value}`)}
                   <span
                     className={cn(
-                      "absolute -right-2.5 -top-2.5 flex size-8 items-center justify-center rounded-full border-[3px] border-white text-white",
-                      presentation.badge,
+                      "details-md flex h-5 min-w-5 items-center justify-center rounded-md bg-neutral-100 px-1 text-neutral-600",
+                      { "bg-primary-100 text-primary-800": filter === value },
                     )}
                   >
-                    <StatusIcon className="size-4" />
+                    {match(value)
+                      .with(ENV_STATUS.ALL, () => groups.length)
+                      .otherwise(() => groups.filter(({ status }) => status === value).length)}
                   </span>
-                )}
-                <span
-                  className={cn(
-                    "mb-4 flex size-[52px] items-center justify-center rounded-xl bg-primary-100 text-primary-700",
-                    { "bg-neutral-100 text-neutral-600": status === ENV_STATUS.NOT_CONFIGURED },
-                  )}
-                >
-                  <GroupIcon className="size-6" />
-                </span>
-                <span className="text-lg font-semibold leading-6 text-neutral-950">
-                  {t(group.titleKey)}
-                </span>
-                <span className="mb-4 mt-1 text-sm leading-5 text-neutral-600">
-                  {t(group.descriptionKey)}
-                </span>
-                <span className="mt-auto flex w-full items-center gap-2 border-t border-neutral-200 pt-3 text-xs">
-                  <span
-                    className={cn("flex flex-1 items-center gap-2 font-medium", presentation.text)}
-                  >
-                    <StatusIcon className="size-3.5" />
-                    {t(`adminEnvsView.overview.status.${status}`)}
-                  </span>
-                  <span className="text-neutral-600">
-                    {status === ENV_STATUS.UNKNOWN ? "—" : configuredCount}/
-                    {group.secretNames.length} ENV
-                  </span>
-                  <ChevronDown
-                    className={cn("size-4 shrink-0 text-neutral-600 transition-transform", {
-                      "rotate-180": active,
-                    })}
-                  />
-                </span>
-              </motion.button>
-              <ExpandableEditor
-                active={active}
-                className={cn("col-span-full min-w-0 overflow-hidden", {
-                  "sm:order-1 xl:order-1": index < 2,
-                  "sm:order-3 xl:order-1": index >= 2 && index < 4,
-                  "sm:order-5 xl:order-3": index >= 4 && index < 6,
-                  "sm:order-7 xl:order-3": index >= 6 && index < 8,
-                  "sm:order-9 xl:order-5": index >= 8,
-                })}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
+        <TabsContent value={filter} className="m-0">
+          {isError && (
+            <div
+              role="alert"
+              className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-300 p-4 text-sm"
+            >
+              <p>{t("adminEnvsView.overview.statusError")}</p>
+              <Button variant="outline" onClick={() => void refetch()}>
+                {t("adminEnvsView.overview.retry")}
+              </Button>
+            </div>
+          )}
+          {attentionGroups.length > 0 && (
+            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-warning-200 bg-warning-50 p-4 text-warning-800">
+              <AlertTriangle className="size-5 shrink-0" />
+              <p className="min-w-0 flex-1 text-sm">
+                <strong>
+                  {t("adminEnvsView.overview.attention", { count: attentionGroups.length })}
+                </strong>{" "}
+                {attentionGroups.map(({ group }) => t(group.titleKey)).join(", ")}.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFilter(ENV_STATUS.ATTENTION)}
+                size="sm"
+                className="border-warning-300 bg-white text-warning-800 hover:border-warning-500"
               >
-                <GroupEditor
-                  group={group}
-                  status={status}
-                  missingKeys={missingKeys}
-                  active={active}
-                  onClose={() => setActiveGroupId("")}
-                />
-              </ExpandableEditor>
-            </Fragment>
-          );
-        })}
-      </div>
-      {visibleGroups.length === 0 && (
-        <p className="py-12 text-center text-sm text-neutral-600">
-          {t("adminEnvsView.overview.empty")}
-        </p>
-      )}
+                {t("adminEnvsView.overview.showIssues")}
+              </Button>
+            </div>
+          )}
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {visibleGroups.map(({ group, status, configuredCount, missingKeys }, index) => {
+              const presentation = STATUS_PRESENTATION[status];
+              const GroupIcon = ENV_GROUP_PRESENTATION[group.id].icon;
+              const StatusIcon = presentation.icon;
+              const active = activeGroupId === group.id;
+              return (
+                <Fragment key={group.id}>
+                  <motion.button
+                    layout={prefersReducedMotion ? false : "position"}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    type="button"
+                    id={group.id}
+                    aria-expanded={active}
+                    aria-controls={`${group.id}-editor`}
+                    onClick={() => setActiveGroupId(active ? "" : group.id)}
+                    className={cn(
+                      "flex h-full min-h-[240px] scroll-mt-6 flex-col rounded-lg border border-neutral-200 bg-white p-5 text-left shadow-sm transition-colors hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+                      {
+                        "border-primary-500 ring-2 ring-primary-100": active,
+                        "sm:order-none xl:order-none": index < 2,
+                        "sm:order-2 xl:order-none": index >= 2 && index < 4,
+                        "sm:order-4 xl:order-2": index >= 4 && index < 6,
+                        "sm:order-6 xl:order-2": index >= 6 && index < 8,
+                        "sm:order-8 xl:order-4": index >= 8,
+                      },
+                    )}
+                  >
+                    <span className="mb-4 flex w-full items-center justify-between gap-2">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                        <GroupIcon className="size-5" />
+                      </span>
+                      <span
+                        className={cn(
+                          "details-md inline-flex items-center gap-1.5 rounded-lg border px-2 py-1",
+                          presentation.badge,
+                          presentation.text,
+                        )}
+                      >
+                        <StatusIcon className="size-3.5 shrink-0" />
+                        {t(`adminEnvsView.overview.status.${status}`)}
+                      </span>
+                    </span>
+                    <span className="body-base-md text-neutral-950">{t(group.titleKey)}</span>
+                    <span className="body-sm mb-5 mt-1 text-neutral-600">
+                      {t(group.descriptionKey)}
+                    </span>
+                    <span className="mt-auto flex w-full items-center gap-2 border-t border-neutral-200 pt-3 text-xs">
+                      <span className="details flex-1 text-neutral-600">
+                        {status === ENV_STATUS.UNKNOWN ? "—" : configuredCount}/
+                        {group.secretNames.length} ENV
+                      </span>
+                      <ChevronDown
+                        className={cn("size-4 shrink-0 text-neutral-600 transition-transform", {
+                          "rotate-180": active,
+                        })}
+                      />
+                    </span>
+                  </motion.button>
+                  <ExpandableEditor
+                    active={active}
+                    className={cn("col-span-full min-w-0 overflow-hidden", {
+                      "sm:order-1 xl:order-1": index < 2,
+                      "sm:order-3 xl:order-1": index >= 2 && index < 4,
+                      "sm:order-5 xl:order-3": index >= 4 && index < 6,
+                      "sm:order-7 xl:order-3": index >= 6 && index < 8,
+                      "sm:order-9 xl:order-5": index >= 8,
+                    })}
+                  >
+                    <GroupEditor
+                      group={group}
+                      status={status}
+                      missingKeys={missingKeys}
+                      active={active}
+                      onClose={() => setActiveGroupId("")}
+                    />
+                  </ExpandableEditor>
+                </Fragment>
+              );
+            })}
+          </div>
+          {visibleGroups.length === 0 && (
+            <p className="py-12 text-center text-sm text-neutral-600">
+              {t("adminEnvsView.overview.empty")}
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
     </PageWrapper>
   );
 };
