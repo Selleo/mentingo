@@ -14,9 +14,6 @@ on:
       - .github/workflows/release-film-on-release.yml
       - .github/workflows/release-film-publish.yml
       - .github/workflows/pr-release-film-ci.yml
-      - .github/workflows/helpdesk-videos.yml
-      - .github/workflows/helpdesk-videos-on-version.yml
-      - scripts/helpdesk-publish/**
 
 permissions:
   contents: read
@@ -46,9 +43,3 @@ jobs:
       - name: Run the release film skill tests
         working-directory: .agents/skills/release-film
         run: python3 -B -m unittest discover -s tests
-
-      - name: Install the existing pinned publishing dependencies
-        run: corepack pnpm install --frozen-lockfile
-
-      - name: Test the Helpdesk SDK publishing lifecycle
-        run: node --test scripts/helpdesk-publish/publisher.test.mjs

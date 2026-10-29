@@ -37,25 +37,6 @@ on:
         required: false
         type: boolean
         default: false
-      helpdesk_spec:
-        description: Before-merge Helpdesk test for an exact docs/specs/...-business-spec.md path (empty records release recap)
-        required: false
-        type: string
-      helpdesk_target_ref:
-        description: Branch/commit to demonstrate in Helpdesk test (default selected workflow commit)
-        required: false
-        type: string
-      helpdesk_language:
-        description: Narration language for Helpdesk test
-        required: false
-        type: choice
-        options: [en, pl]
-        default: en
-      helpdesk_dry_run:
-        description: With helpdesk_spec, only analyze coverage without recording
-        required: false
-        type: boolean
-        default: false
 
 permissions: {}
 
@@ -66,7 +47,6 @@ concurrency:
 
 jobs:
   film:
-    if: ${{ inputs.helpdesk_spec == '' }}
     name: Record the release film
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -296,7 +276,7 @@ jobs:
   publish:
     name: Publish the film
     needs: film
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.helpdesk_spec == '' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
     permissions:
       actions: read
       contents: write
@@ -307,19 +287,3 @@ jobs:
       run_id: ${{ github.run_id }}
       target: release
       replace: ${{ inputs.replace }}
-
-  helpdesk_test:
-    name: Test Helpdesk video from a business spec
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.helpdesk_spec != '' }}
-    permissions:
-      contents: read
-    uses: ./.github/workflows/helpdesk-videos.yml
-    with:
-      version: ''
-      business_spec: ${{ inputs.helpdesk_spec }}
-      target_ref: ${{ inputs.helpdesk_target_ref || github.sha }}
-      languages: ${{ inputs.helpdesk_language || 'en' }}
-      test_mode: true
-      publish: false
-      dry_run: ${{ inputs.helpdesk_dry_run }}
-    secrets: inherit

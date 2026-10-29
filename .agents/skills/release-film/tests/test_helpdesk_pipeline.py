@@ -286,22 +286,31 @@ class WorkflowsTest(unittest.TestCase):
                     self.assertNotIn('state.json', step['with']['path'])
         self.assertIn('default_branch', generation['if'])
 
-    def test_registered_release_workflow_can_dispatch_a_premerge_spec_test(self):
+    def test_helpdesk_owns_its_manual_trigger_without_changing_release_recording(self):
         entry = self.load('release-film.yml')
-        test = entry['jobs']['helpdesk_test']
-        self.assertEqual(test['uses'], './.github/workflows/helpdesk-videos.yml')
-        self.assertTrue(test['with']['test_mode'])
-        self.assertFalse(test['with']['publish'])
-        self.assertIn('helpdesk_spec', test['if'])
-        self.assertIn('helpdesk_spec', entry['jobs']['film']['if'])
+        self.assertNotIn('helpdesk_test', entry['jobs'])
+        self.assertNotIn('helpdesk_spec', entry['on']['workflow_dispatch']['inputs'])
+        self.assertNotIn('if', entry['jobs']['film'])
         workflow = self.load('helpdesk-videos.yml')
-        self.assertIn('workflow_call', workflow['on'])
+        self.assertIn('workflow_dispatch', workflow['on'])
+        self.assertNotIn('workflow_call', workflow['on'])
+        self.assertIn('push', workflow['on'])
+        self.assertNotIn('secrets', str(workflow['jobs']['register']))
+        self.assertIn("github.event_name == 'workflow_dispatch'", workflow['jobs']['generate']['if'])
+        self.assertIn('!inputs.registration_only', workflow['jobs']['generate']['if'])
+        self.assertIn('!inputs.registration_only', workflow['jobs']['publish']['if'])
         self.assertIn('inputs.test_mode', workflow['jobs']['generate']['if'])
         self.assertIn('!inputs.test_mode', workflow['jobs']['publish']['if'])
         steps = {step.get('id', step.get('name')): step for step in workflow['jobs']['generate']['steps']}
         self.assertIn('!inputs.test_mode', steps['restore']['if'])
         save = steps['Checkpoint private segments even after an interrupted later flow']
         self.assertIn('!inputs.test_mode', save['if'])
+
+    def test_helpdesk_ci_has_its_own_publisher_checks(self):
+        legacy = self.load('pr-release-film-ci.yml')
+        self.assertNotIn('scripts/helpdesk-publish', str(legacy))
+        own = self.load('pr-helpdesk-videos-ci.yml')
+        self.assertIn('publisher.test.mjs', str(own['jobs']['test']['steps']))
 
 
 if __name__ == '__main__':

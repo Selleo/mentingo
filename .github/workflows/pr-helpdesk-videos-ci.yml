@@ -1,0 +1,41 @@
+name: Helpdesk Video Pull Request Check
+on:
+  pull_request:
+    paths:
+      - .github/workflows/helpdesk-videos.yml
+      - .github/workflows/helpdesk-videos-on-version.yml
+      - .github/workflows/pr-helpdesk-videos-ci.yml
+      - .agents/skills/release-film/scripts/helpdesk*.py
+      - .agents/skills/release-film/scripts/voice.py
+      - .agents/skills/release-film/projects/mentingo-helpdesk.json
+      - .agents/skills/release-film/tests/test_helpdesk*.py
+      - .agents/skills/release-film/tests/test_elevenlabs.py
+      - scripts/helpdesk-publish/**
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    name: Helpdesk flows and SDK publication tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Install deterministic media-test tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core python3-yaml >/dev/null
+      - name: Test Helpdesk flow planning and assembly
+        working-directory: .agents/skills/release-film/tests
+        run: python3 -B -m unittest test_helpdesk_catalog test_helpdesk_pipeline test_elevenlabs
+      - name: Install the existing pinned publishing dependencies
+        run: corepack pnpm install --frozen-lockfile
+      - name: Test the Helpdesk SDK publisher
+        run: node --test scripts/helpdesk-publish/publisher.test.mjs

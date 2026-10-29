@@ -16,35 +16,39 @@ GitHub suppresses ordinary push-trigger chaining from tags created with its defa
 workflow token; a version-creation workflow using that token should dispatch the
 Helpdesk workflow explicitly, using the same exact tag/default-branch contract.
 
-Production generation/publication uses the default branch. The existing
-`release-film` environment is reused for production recording; `helpdesk-publishing`
-keeps the publishing key in its separate job. Manual dispatch defaults to publication
+Production generation/publication uses the default branch and its own
+`helpdesk-recording` and `helpdesk-publishing` environments. Release-film workflows
+and environments are independent of this Helpdesk entry point. Manual dispatch defaults to publication
 off; the version-tag queuer explicitly turns it on.
 
 ## Test a specific spec before merging
 
-The already registered `release-film.yml` accepts `helpdesk_spec` on this branch
-and calls the Helpdesk workflow in isolated test mode. This entry point works before
-the new Helpdesk workflow has been merged into the default branch. Push the branch,
-then run:
+Use the standalone `helpdesk-videos.yml` workflow. A push changing that file on a
+`jh_*` branch runs only its registration job, with no environment secrets, recording
+or publication. This initial run makes its own API/CLI manual entry available before
+merging; the release-film workflow is not involved. After registration, run:
 
 ```sh
-gh workflow run release-film.yml --repo Selleo/mentingo \
+gh workflow run helpdesk-videos.yml --repo Selleo/mentingo \
   --ref jh_feat_helpdesk_ui_preview \
-  -f helpdesk_spec=docs/specs/learning-paths-business-spec.md \
-  -f helpdesk_language=en -F helpdesk_dry_run=false -F publish=false
+  -f business_spec=docs/specs/learning-paths-business-spec.md \
+  -f languages=en -F test_mode=true -F publish=false
 ```
 
-Set `helpdesk_dry_run=true` for coverage/impact analysis without recording. The source
-is the selected workflow branch commit by default; `helpdesk_target_ref` can select
-another branch or exact commit. No release/version tag is needed. An internal test
-version labels the artifacts and the publisher rejects their `testMode` marker.
+Add `-F dry_run=true` for coverage/impact analysis without recording. The source is
+the selected workflow branch commit by default; `target_ref` can select another Git
+ref (for a remote branch use `origin/<branch>`) or exact commit. No version tag is
+needed. An internal test version labels the artifacts and the publisher rejects
+their `testMode` marker. `registration_only=true` checks dispatch without model calls
+or credentials. The GitHub UI's Run workflow button may still require the file on
+the default branch; use the CLI for this pre-merge test.
 
 The selected spec must be an exact registered `docs/specs/*.md` path, not a glob.
 It selects complete feature video(s) whose declared sources include that spec; it
 does not omit other required flows from the selected feature. An unknown spec fails
-before any model calls. Direct Helpdesk dispatch also accepts `business_spec`,
-`test_mode=true`, `target_ref` and optional `domains` once that workflow is registered.
+before any model calls. The same Helpdesk entry accepts optional `domains` to narrow specs shared by more
+than one feature video. Its dedicated `pr-helpdesk-videos-ci.yml` tests generation
+and SDK publishing without adding Helpdesk jobs to release-film CI.
 
 Test runs use the `helpdesk-testing` environment with `CLAUDE_CODE_OAUTH_TOKEN` and
 `ELEVENLABS_API_KEY`, plus the repository voice-ID variables below. These can also

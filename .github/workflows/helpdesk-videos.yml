@@ -1,5 +1,10 @@
 name: Helpdesk feature videos
 on:
+  # A branch-only workflow needs an initial run before API/CLI manual dispatch.
+  # This event registers the Helpdesk workflow without running the recorder.
+  push:
+    branches: ['jh_*']
+    paths: ['.github/workflows/helpdesk-videos.yml']
   workflow_dispatch:
     inputs:
       version:
@@ -47,53 +52,33 @@ on:
         default: ''
         type: string
 
-  workflow_call:
-    inputs:
-      version:
-        required: false
-        type: string
-      domains:
-        default: ''
-        type: string
-      languages:
-        default: en
-        type: string
-      force:
+      registration_only:
+        description: Verify this manual trigger without recording, provider keys or publication
         default: false
         type: boolean
-      dry_run:
-        default: false
-        type: boolean
-      publish:
-        default: false
-        type: boolean
-      resume_publication:
-        default: false
-        type: boolean
-      retry_failed:
-        default: false
-        type: boolean
-      business_spec:
-        default: ''
-        type: string
-      test_mode:
-        default: false
-        type: boolean
-      target_ref:
-        default: ''
-        type: string
 
 permissions: {}
 concurrency:
   # This also serializes the private build-state writer across recording/publication.
-  group: helpdesk-feature-videos-${{ inputs.test_mode && github.run_id || 'production' }}
+  group: helpdesk-feature-videos-${{ (github.event_name == 'push' || inputs.registration_only || inputs.test_mode) && github.run_id || 'production' }}
   cancel-in-progress: false
   queue: max
 jobs:
+  register:
+    name: Register the standalone Helpdesk manual workflow
+    if: github.event_name == 'push' || inputs.registration_only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Confirm the Helpdesk entry point
+        run: |
+          echo 'Helpdesk workflow registered. Dispatch helpdesk-videos.yml with test_mode=true and business_spec to record a branch test.' >> "$GITHUB_STEP_SUMMARY"
+
   generate:
     name: Analyze flows and build affected feature videos
-    if: inputs.test_mode || github.ref_name == github.event.repository.default_branch
-    environment: ${{ inputs.test_mode && 'helpdesk-testing' || 'release-film' }}
+    if: github.event_name == 'workflow_dispatch' && !inputs.registration_only && (inputs.test_mode || github.ref_name == github.event.repository.default_branch)
+    environment: ${{ inputs.test_mode && 'helpdesk-testing' || 'helpdesk-recording' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     permissions:
@@ -274,7 +259,7 @@ jobs:
   publish:
     name: Upload directly to Bunny and publish indexed revisions
     needs: generate
-    if: ${{ inputs.publish && !inputs.dry_run && !inputs.test_mode && github.ref_name == github.event.repository.default_branch }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.registration_only && inputs.publish && !inputs.dry_run && !inputs.test_mode && github.ref_name == github.event.repository.default_branch }}
     environment: helpdesk-publishing
     runs-on: ubuntu-24.04
     timeout-minutes: 65
