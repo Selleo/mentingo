@@ -96,7 +96,9 @@ class PlannerTests(unittest.TestCase):
             self.assertNotIn('apps/web/not-watched.tsx', context['sourcePaths'])
             self.assertNotIn('apps/web/not-committed.tsx', context['sourcePaths'])
             self.assertNotIn('diff', context)
-            return classifier()(context)
+            answer = classifier()(context)
+            answer['evidence'].append({'path': CODE, 'reason': 'The supplied inventory contains the registered source file.'})
+            return answer
         result = catalog.plan(self.repo, 'v1.1.0', None, self.catalog, classify=classify)
         self.assertTrue(result['ok'])
 

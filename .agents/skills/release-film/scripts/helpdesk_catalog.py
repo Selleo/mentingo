@@ -355,7 +355,8 @@ def _decision(value: object, context: dict[str, object]) -> Impact | Coverage:
     evidence = row["evidence"]
     if not isinstance(evidence, list) or not 1 <= len(evidence) <= 30:
         raise ValueError("Classification must cite bounded evidence")
-    allowed = set(cast(list[str], context["changedPaths"])) | set(cast(list[str], context["specPaths"]))
+    allowed = set(cast(list[str], context["changedPaths"])) | set(cast(list[str], context["specPaths"])) \
+        | set(cast(list[str], context.get("sourcePaths", [])))
     for item in evidence:
         entry = _object(item, "evidence")
         if set(entry) != {"path", "reason"} or not isinstance(entry["path"], str) or entry["path"] not in allowed:
