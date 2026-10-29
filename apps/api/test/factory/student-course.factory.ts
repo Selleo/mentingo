@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, COURSE_PROGRESS_STATUSES } from "@repo/shared";
 import { Factory } from "fishery";
 
 import { studentCourses } from "src/storage/schema";
@@ -23,6 +23,7 @@ export const createStudentCourseFactory = (db: DatabasePg) =>
         studentId: "",
         courseId: "",
         status: COURSE_ENROLLMENT.ENROLLED,
+        progress: COURSE_PROGRESS_STATUSES.NOT_STARTED,
         enrolledAt: new Date().toISOString(),
         finishedChapterCount: 0,
       };
