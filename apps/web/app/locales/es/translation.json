@@ -6485,6 +6485,14 @@
       "summaryAccepted": "Aceptados: {{count}}",
       "summaryRejected": "Rechazados: {{count}}"
     },
+    "executionMode": {
+      "title": "Modo de trabajo",
+      "control": "Modo de trabajo: {{mode}}",
+      "review": "Revisar cambios",
+      "reviewDescription": "Revisa el esquema y los cambios antes de aplicarlos.",
+      "autonomous": "Piloto automático",
+      "autonomousDescription": "Aclara tus necesidades y después aprueba y aplica los cambios automáticamente."
+    },
     "reasoning": {
       "title": "Nivel de razonamiento",
       "low": "Rápido",
@@ -6723,6 +6731,7 @@
       "retryFailedParts": "Reintentar las partes fallidas",
       "retryProvider": "Reintentar la conexión",
       "recoveringFailedParts": "Recuperando las partes fallidas…",
+      "failureAutonomousInput": "El piloto automático no pudo tomar una decisión necesaria de forma segura. Añade instrucciones o fuentes y vuelve a intentarlo.",
       "failureGeneration": "El contenido generado no superó la validación. El reintento creará contenido nuevo para las partes fallidas y conservará el trabajo terminado.",
       "failureProvider": "El proveedor no pudo completar la solicitud. El reintento continuará el trabajo pendiente.",
       "failureEvidence": "Las fuentes disponibles no respaldan las afirmaciones requeridas. Puedes añadir fuentes o aclarar la solicitud.",

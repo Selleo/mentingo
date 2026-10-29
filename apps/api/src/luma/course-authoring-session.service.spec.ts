@@ -206,6 +206,7 @@ describe("CourseAuthoringSessionService source refresh", () => {
       action: "request.create",
       request: {
         instruction: "Use the attached handbook.",
+        executionMode: "autonomous",
         targets: [],
         sourcePolicy: {
           sourceVersionIds: [oldVersion, newVersion],
@@ -226,6 +227,7 @@ describe("CourseAuthoringSessionService source refresh", () => {
       command: expect.objectContaining({
         actorId: actor.userId,
         request: expect.objectContaining({
+          executionMode: "autonomous",
           attachedSourceVersionIds: [oldVersion],
           sourcePolicy: expect.objectContaining({ sourceVersionIds: [oldVersion, newVersion] }),
         }),

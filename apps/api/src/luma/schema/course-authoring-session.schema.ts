@@ -99,6 +99,7 @@ const request = Type.Object(
   {
     instruction: Type.String({ minLength: 1, maxLength: 20000 }),
     reasoningEffort: Type.Optional(Type.Enum(ReasoningEffort)),
+    executionMode: Type.Optional(Type.Union([Type.Literal("review"), Type.Literal("autonomous")])),
     targets: Type.Array(target),
     sourcePolicy,
     attachedSourceVersionIds: Type.Optional(Type.Array(UUIDSchema)),

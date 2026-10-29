@@ -37,7 +37,7 @@ async function generateCourseAuthoringSchema() {
     });
 
     for (const path of Object.keys(api.paths)) {
-      if (path.startsWith("/api/luma/")) delete api.paths[path];
+      if (path.startsWith("/api/luma/") && !(path in generated.paths)) delete api.paths[path];
     }
     Object.assign(api.paths, generated.paths);
     api.components = {

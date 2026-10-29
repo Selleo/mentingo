@@ -154,6 +154,7 @@ export const AuthoringBriefPanel = ({
   const [instruction, setInstruction] = useState("");
   const [reasoningEffort, setReasoningEffort] =
     useState<AuthoringRequest["reasoningEffort"]>("medium");
+  const [executionMode, setExecutionMode] = useState<"review" | "autonomous">("review");
   const [policy, setPolicy] = useState<SourcePolicy>(
     initialSourcePolicy === null ? freshSessionPolicy : (initialSourcePolicy ?? emptyPolicy),
   );
@@ -211,6 +212,7 @@ export const AuthoringBriefPanel = ({
     const sessionChanged = previousSessionId !== sessionId;
     if (sessionChanged) {
       sessionIdRef.current = sessionId;
+      if (previousSessionId) setExecutionMode("review");
       pendingPolicySelectionsRef.current = [];
       incomingPolicySequenceRef.current = null;
       setStrictSourceMode(false);
@@ -387,6 +389,7 @@ export const AuthoringBriefPanel = ({
       await onSubmit({
         instruction: submittedInstruction,
         reasoningEffort: reasoningControlAvailable ? reasoningEffort : "medium",
+        executionMode,
         targets: buildAuthoringTargets(course, selectedTargetIds, selectedBlockIds),
         sourcePolicy: currentPolicy,
         attachedSourceVersionIds,
@@ -477,6 +480,9 @@ export const AuthoringBriefPanel = ({
             course={course}
             policy={policy}
             strictSourceMode={strictSourceMode}
+            autopilot={executionMode === "autonomous"}
+            onAutopilotChange={(enabled) => setExecutionMode(enabled ? "autonomous" : "review")}
+            executionModeDisabled={disabled || isSubmitting || hasActiveGeneration}
             disabled={disabled}
             open={toolsOpen}
             onOpenChange={(open) => {

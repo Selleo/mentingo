@@ -63,6 +63,7 @@ export const authoringTaskRetryLabel = (task: AuthoringTask): string => {
 
 export const authoringTaskFailureLabel = (task: AuthoringTask): string => {
   if (task.failure) {
+    if (task.failure.code === "autonomous_input_required") return "failureAutonomousInput";
     if (task.failure.recoveryAction === AUTHORING_RECOVERY_ACTION.ANSWER_QUESTION)
       return "failureAnswerQuestion";
     if (

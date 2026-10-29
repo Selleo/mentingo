@@ -228,6 +228,7 @@ export type TargetRef = {
 export type AuthoringRequest = {
   instruction: string;
   reasoningEffort: "low" | "medium" | "high";
+  executionMode?: "review" | "autonomous";
   targets: TargetRef[];
   sourcePolicy: SourcePolicy;
   attachedSourceVersionIds?: string[];
@@ -472,6 +473,7 @@ export type QuestionView = {
 
 export type ApplicationView = {
   id: string;
+  exportId?: string | null;
   status: (typeof AUTHORING_APPLICATION_STATUS)[keyof typeof AUTHORING_APPLICATION_STATUS];
   reason: string | null;
 };

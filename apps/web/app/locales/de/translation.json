@@ -6527,6 +6527,14 @@
       "summaryAccepted": "Angenommen: {{count}}",
       "summaryRejected": "Abgelehnt: {{count}}"
     },
+    "executionMode": {
+      "title": "Arbeitsmodus",
+      "control": "Arbeitsmodus: {{mode}}",
+      "review": "Änderungen prüfen",
+      "reviewDescription": "Prüfe den Plan und die Änderungen vor der Anwendung.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Klären Sie Ihre Anforderungen, danach werden Änderungen automatisch genehmigt und übernommen."
+    },
     "reasoning": {
       "title": "Denkaufwand",
       "low": "Schnell",
@@ -6765,6 +6773,7 @@
       "retryFailedParts": "Fehlgeschlagene Teile erneut versuchen",
       "retryProvider": "Verbindung erneut versuchen",
       "recoveringFailedParts": "Fehlgeschlagene Teile werden fortgesetzt…",
+      "failureAutonomousInput": "Der Autopilot konnte eine notwendige Entscheidung nicht sicher treffen. Ergänze Anweisungen oder Quellen und versuche es erneut.",
       "failureGeneration": "Der generierte Inhalt hat die Validierung nicht bestanden. Ein erneuter Versuch erstellt neue Inhalte für die fehlgeschlagenen Teile und behält abgeschlossene Arbeit.",
       "failureProvider": "Der Anbieter konnte die Anfrage nicht abschließen. Ein erneuter Versuch setzt die offene Arbeit fort.",
       "failureEvidence": "Die verfügbaren Quellen belegen die erforderlichen Aussagen nicht. Sie können Quellen hinzufügen oder die Anfrage präzisieren.",

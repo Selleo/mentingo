@@ -6275,6 +6275,14 @@
       "summaryAccepted": "Acceptées : {{count}}",
       "summaryRejected": "Refusées : {{count}}"
     },
+    "executionMode": {
+      "title": "Mode de travail",
+      "control": "Mode de travail : {{mode}}",
+      "review": "Vérifier les modifications",
+      "reviewDescription": "Vérifiez le plan et les modifications avant leur application.",
+      "autonomous": "Pilote automatique",
+      "autonomousDescription": "Précise vos besoins, puis approuve et applique automatiquement les modifications."
+    },
     "reasoning": {
       "title": "Niveau de réflexion",
       "low": "Rapide",
@@ -6513,6 +6521,7 @@
       "retryFailedParts": "Réessayer les parties en échec",
       "retryProvider": "Réessayer la connexion",
       "recoveringFailedParts": "Reprise des parties en échec…",
+      "failureAutonomousInput": "Le pilote automatique n’a pas pu prendre une décision nécessaire en toute sécurité. Ajoutez des instructions ou des sources, puis réessayez.",
       "failureGeneration": "Le contenu généré n’a pas passé la validation. Réessayer créera un nouveau contenu pour les parties en échec et conservera le travail terminé.",
       "failureProvider": "Le fournisseur n’a pas pu terminer la demande. Réessayer reprendra le travail inachevé.",
       "failureEvidence": "Les sources disponibles ne couvrent pas les affirmations requises. Vous pouvez ajouter des sources ou préciser la demande.",

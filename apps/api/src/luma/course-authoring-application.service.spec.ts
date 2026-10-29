@@ -140,6 +140,55 @@ function setup() {
 }
 
 describe("CourseAuthoringApplicationService immutable preparation", () => {
+  it("forwards the autonomous request fence to export preparation", async () => {
+    const test = setup();
+    await test.service.enqueue(
+      courseId,
+      sessionId,
+      { commandId: assetId, proposalIds: [assetId] },
+      actor,
+      { requestId: sessionId, controlEpoch: 3 },
+    );
+    expect(test.client.authoring.prepareExport).toHaveBeenCalledWith({
+      sessionId,
+      request: expect.objectContaining({
+        actorId: actor.userId,
+        proposalIds: [assetId],
+        autonomousRequestId: sessionId,
+        autonomousControlEpoch: 3,
+      }),
+    });
+  });
+
+  it("uses the same autonomous export identity after another receipt is recorded", async () => {
+    const test = setup();
+    const input = { commandId: assetId, proposalIds: [assetId] };
+    const fence = { requestId: sessionId, controlEpoch: 3 };
+    await test.service.enqueue(courseId, sessionId, input, actor, fence);
+    test.latestTerminalSessionReceipt.mockResolvedValue({ applicationId: exportId });
+    await test.service.enqueue(courseId, sessionId, input, actor, fence);
+    expect(test.client.authoring.prepareExport.mock.calls[0][0].request.commandId).toBe(
+      test.client.authoring.prepareExport.mock.calls[1][0].request.commandId,
+    );
+  });
+
+  it("does not queue an autonomous apply when the producer rejects the fence", async () => {
+    const test = setup();
+    test.client.authoring.prepareExport.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { detail: "AUTHORING_AUTONOMOUS_FENCE_CHANGED" } },
+    });
+    await expect(
+      test.service.enqueue(
+        courseId,
+        sessionId,
+        { commandId: assetId, proposalIds: [assetId] },
+        actor,
+        { requestId: sessionId, controlEpoch: 3 },
+      ),
+    ).rejects.toThrow();
+    expect(test.enqueue).not.toHaveBeenCalled();
+  });
   it("stores final failure for receipt-only recovery and never applies native changes", async () => {
     const test = setup();
     test.exported.exportHash = courseAuthoringExportHash(test.exported);
