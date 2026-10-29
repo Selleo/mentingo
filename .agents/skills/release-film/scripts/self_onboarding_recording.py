@@ -87,6 +87,29 @@ def source_slots(repo_slug, commit, flow, checkout):
              'files': touched, 'ui': [], 'labels': [], 'touched': {'frontend': touched, 'specs': [], 'texts': []}}]
 
 
+def flow_failure(run, flow_id, folder, verdict):
+    """Persist the precise scene failure without exporting worker transcripts or secrets."""
+    folder = Path(folder)
+    result = core.load(folder/'result.json') or {}
+    latest = core.load(folder/'try.json') or {}
+    worker = core.worker_result(folder/'worker.log') or {}
+    report = _hide_tokens({'flowId': flow_id, 'takePassed': result.get('ok') is True,
+        'storySaved': (folder/'story.txt').is_file(), 'verdict': verdict,
+        'worker': {k: worker[k] for k in ('subtype', 'is_error', 'stop_reason') if k in worker},
+        'take': {k: result[k] for k in ('error', 'hint', 'page') if k in result},
+        'latestTry': {k: latest[k] for k in ('ok', 'error', 'hint') if k in latest}}, run)
+    core.save(Path(run)/'review/flow-failure.json', report)
+    if report['take'].get('error'):
+        reason = report['take']['error']
+    elif not report['takePassed']:
+        reason = 'The worker produced no passing browser take'
+    else:
+        reason = 'The browser take passed, but the worker did not save narration in story.txt'
+    status = report['worker'].get('subtype', '')
+    return RuntimeError(f"Tutorial flow {flow_id} failed: {str(reason)[:500]}; worker status: {status or 'unknown'}; "
+                        f"verdict: {str(report['verdict'])[:200]}. See review/flow-failure.json")
+
+
 def capture_flow(run, flow, domain, commit, repo_slug, addon, cache):
     """Capture one app flow with a canonical English story, once for every language."""
     code = 'en'
@@ -120,13 +143,13 @@ def capture_flow(run, flow, domain, commit, repo_slug, addon, cache):
     if workers is None:
         raise RuntimeError('Tutorial recording requires the authenticated Claude scene worker')
     verdicts = gaps.wait_for_workers(run, only={scene_id})
-    if core.gave_up(verdicts.get(scene_id, '')):
-        raise RuntimeError(f'Tutorial worker rejected its take: {flow["id"]}')
     folder = run / 'gaps' / scene_id
+    if core.gave_up(verdicts.get(scene_id, '')):
+        raise flow_failure(run, flow['id'], folder, verdicts.get(scene_id, ''))
     result = core.load(folder / 'result.json') or {}
     answer = folder / 'story.txt'
     if not result.get('ok') or not answer.is_file():
-        raise RuntimeError(f'Required tutorial flow failed: {flow["id"]}')
+        raise flow_failure(run, flow['id'], folder, verdicts.get(scene_id, ''))
     films = (core.load(run / 'captures.json') or {}).get('films') or []
     keys = {f['key']: f['capture'] for f in films if f.get('status') == 'passed' and not f.get('error')}
     key = result.get('key')

@@ -23,6 +23,29 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def test_failed_flow_reports_browser_error_and_scrubs_generated_secrets(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(run/'secrets.json', {'MASTER_KEY': 'private-fixture-key'})
+        core.save(folder/'result.json', {'ok': False, 'error': 'Search results timed out: private-fixture-key'})
+        self.patch(recording.core, 'worker_result', return_value={'subtype': 'error_max_budget_usd', 'is_error': True})
+        error = recording.flow_failure(run, 'browse-paths', folder, 'no answer')
+        self.assertIn('Search results timed out', str(error))
+        self.assertIn('error_max_budget_usd', str(error))
+        self.assertNotIn('private-fixture-key', str(error))
+        report = core.load(run/'review/flow-failure.json')
+        self.assertFalse(report['takePassed'])
+        self.assertFalse(report['storySaved'])
+
+    def test_passing_take_without_narration_has_a_distinct_failure(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(folder/'result.json', {'ok': True})
+        self.patch(recording.core, 'worker_result', return_value={})
+        error = recording.flow_failure(run, 'browse-paths', folder, 'no answer')
+        self.assertIn('browser take passed', str(error))
+        self.assertIn('did not save narration', str(error))
+
     def review_fixture(self, answers):
         folder = self.root/'capture'
         core.save(folder/'capture.json', {'actions_text': ['Open editor', 'Save']})
