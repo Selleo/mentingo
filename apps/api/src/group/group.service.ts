@@ -6,10 +6,18 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import {
+  AUTOMATION_EVENT_KINDS,
+  COURSE_ENROLLMENT,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { and, countDistinct, eq, getTableColumns, inArray, isNull, or, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
+import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import {
@@ -34,7 +42,14 @@ import { GroupSortFields } from "src/group/group.schema";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
-import { groupCourses, groups, groupUsers, studentCourses, users } from "src/storage/schema";
+import {
+  groupCourses,
+  groups,
+  groupUsers,
+  studentCourses,
+  users,
+  settings,
+} from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 
 import type { SQL } from "drizzle-orm";
@@ -500,24 +515,35 @@ export class GroupService {
     const requestedGroupIds = [...new Set(groupIds)];
 
     const userGroups = await trx
-      .select({ tenantId: users.tenantId, groupId: groupUsers.groupId })
+      .select({
+        tenantId: users.tenantId,
+        groupId: groupUsers.groupId,
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
+      })
       .from(users)
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(settings, and(eq(settings.userId, users.id), eq(settings.tenantId, users.tenantId)))
       .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
     const user = userGroups[0];
 
     if (!user) throw new NotFoundException("adminUserView.error.userNotFound");
 
-    if (requestedGroupIds.length) {
-      const existingGroups = await trx
-        .select({ id: groups.id })
-        .from(groups)
-        .where(inArray(groups.id, requestedGroupIds));
+    const language =
+      user.language && isSupportedLanguage(user.language) ? user.language : SUPPORTED_LANGUAGES.EN;
+    const existingGroups = requestedGroupIds.length
+      ? await trx
+          .select({ id: groups.id, name: this.getLocalizedGroupName(language) })
+          .from(groups)
+          .where(and(inArray(groups.id, requestedGroupIds), eq(groups.tenantId, user.tenantId)))
+      : [];
 
-      if (existingGroups.length !== requestedGroupIds.length) {
-        throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
-      }
+    if (existingGroups.length !== requestedGroupIds.length) {
+      throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
     }
 
     const currentGroupIds = new Set(
@@ -525,7 +551,7 @@ export class GroupService {
     );
     const requestedGroupIdSet = new Set(requestedGroupIds);
 
-    const groupIdsToAssign = requestedGroupIds.filter((groupId) => !currentGroupIds.has(groupId));
+    let groupIdsToAssign = requestedGroupIds.filter((groupId) => !currentGroupIds.has(groupId));
     const groupIdsToRemove = [...currentGroupIds].filter(
       (groupId) => !requestedGroupIdSet.has(groupId),
     );
@@ -537,10 +563,28 @@ export class GroupService {
     }
 
     if (groupIdsToAssign.length) {
-      await trx
+      const inserted = await trx
         .insert(groupUsers)
-        .values(groupIdsToAssign.map((groupId) => ({ userId, groupId })))
-        .onConflictDoNothing();
+        .values(groupIdsToAssign.map((groupId) => ({ userId, groupId, tenantId: user.tenantId })))
+        .onConflictDoNothing()
+        .returning({ groupId: groupUsers.groupId });
+
+      // RETURNING is authoritative: concurrent/repeated inserts must not send another welcome.
+      groupIdsToAssign = inserted.map(({ groupId }) => groupId);
+      for (const groupId of groupIdsToAssign) {
+        await this.outboxPublisher.publishDurable(
+          createUserNotificationEvent({
+            kind: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP,
+            user,
+            language,
+            eventFields: {
+              group_id: groupId,
+              group_name: existingGroups.find((group) => group.id === groupId)!.name,
+            },
+          }),
+          trx,
+        );
+      }
     }
 
     return {

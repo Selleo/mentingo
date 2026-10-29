@@ -307,6 +307,7 @@
       "password_reminder": "Account setup reminder",
       "user_invite": "User invited to the platform",
       "user_first_login": "User signed in for the first time",
+      "user_assigned_to_group": "User assigned to a group",
       "user_assigned_to_course": "Learner assigned to a course",
       "user_short_inactivity": "Learner inactive for 14 days",
       "user_long_inactivity": "Learner inactive for 30 days",
@@ -7772,6 +7773,10 @@
     }
   },
   "automationBuilder": {
+    "groupTrigger": {
+      "group": "Group",
+      "hint": "Select the group that starts this workflow. Keep email recipients set to the event recipient to welcome only the new member."
+    },
     "recipients": {
       "title": "Recipients",
       "event": "Users linked to the event",
@@ -7795,6 +7800,7 @@
         "password_reminder": "The user who still needs to create their password.",
         "user_invite": "The invited user.",
         "user_first_login": "The user who signed in for the first time.",
+        "user_assigned_to_group": "The user newly assigned to the selected group, not all group members.",
         "user_assigned_to_course": "The learners assigned to the course.",
         "user_short_inactivity": "The learners with a short period of inactivity in the course.",
         "user_long_inactivity": "The learners with a long period of inactivity in the course.",
@@ -7896,6 +7902,7 @@
       "userPasswordChanged": "Password changed",
       "userWelcome": "Welcome message",
       "userFirstLogin": "First login",
+      "userAssignedToGroup": "User assigned to a group",
       "usersAssignedToCourse": "Users assigned to course",
       "usersShortInactivity": "Short inactivity",
       "usersLongInactivity": "Long inactivity",
@@ -8011,6 +8018,8 @@
       "unavailableVariable": "Unavailable for this trigger"
     },
     "variables": {
+      "group_id": "Group ID",
+      "group_name": "Group name",
       "userFirstName": "User first name",
       "userLastName": "User last name",
       "userEmail": "Email address",
@@ -8167,6 +8176,7 @@
         "self_parent": "Check the automation steps and their connections.",
         "unsupported_step_type": "Check the automation steps and their connections.",
         "missing_trigger": "Choose a starting event.",
+        "missing_group": "Select an available group.",
         "missing_event": "Choose a starting event.",
         "missing_template": "Choose an available email template.",
         "invalid_template": "Choose an available email template.",

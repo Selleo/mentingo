@@ -307,6 +307,7 @@
       "password_reminder": "Erinnerung an die Kontoeinrichtung",
       "user_invite": "Benutzer zur Plattform eingeladen",
       "user_first_login": "Benutzer hat sich zum ersten Mal angemeldet",
+      "user_assigned_to_group": "Benutzer einer Gruppe zugewiesen",
       "user_assigned_to_course": "Lernendem wurde ein Kurs zugewiesen",
       "user_short_inactivity": "Lernender seit 14 Tagen inaktiv",
       "user_long_inactivity": "Lernender seit 30 Tagen inaktiv",
@@ -7511,6 +7512,10 @@
     }
   },
   "automationBuilder": {
+    "groupTrigger": {
+      "group": "Gruppe",
+      "hint": "Wählen Sie die auslösende Gruppe. Behalten Sie den Ereignisempfänger als E-Mail-Empfänger bei, um nur das neue Mitglied zu begrüßen."
+    },
     "recipients": {
       "title": "Empfänger",
       "event": "Mit dem Ereignis verknüpfte Benutzer",
@@ -7534,6 +7539,7 @@
         "password_reminder": "Der Benutzer, der noch ein Passwort erstellen muss.",
         "user_invite": "Der eingeladene Benutzer.",
         "user_first_login": "Der Benutzer, der sich zum ersten Mal angemeldet hat.",
+        "user_assigned_to_group": "Der neu zugewiesene Benutzer, nicht alle Gruppenmitglieder.",
         "user_assigned_to_course": "Die dem Kurs zugewiesenen Lernenden.",
         "user_short_inactivity": "Die Lernenden mit einer kurzen Phase der Inaktivität im Kurs.",
         "user_long_inactivity": "Die Lernenden mit einer langen Phase der Inaktivität im Kurs.",
@@ -7636,6 +7642,7 @@
       "userPasswordChanged": "Passwort geändert",
       "userWelcome": "Willkommensnachricht",
       "userFirstLogin": "Erste Anmeldung",
+      "userAssignedToGroup": "Benutzer einer Gruppe zugewiesen",
       "usersAssignedToCourse": "Benutzer zum Kurs zugewiesen",
       "usersShortInactivity": "Kurze Inaktivität",
       "usersLongInactivity": "Lange Inaktivität",
@@ -7748,6 +7755,8 @@
       "unavailableVariable": "Für diesen Auslöser nicht verfügbar"
     },
     "variables": {
+      "group_id": "Gruppen-ID",
+      "group_name": "Gruppenname",
       "userFirstName": "Vorname des Benutzers",
       "userLastName": "Nachname des Benutzers",
       "userEmail": "E-Mail-Adresse",
@@ -7904,6 +7913,7 @@
         "self_parent": "Prüfen Sie die Schritte und ihre Verbindungen.",
         "unsupported_step_type": "Prüfen Sie die Schritte und ihre Verbindungen.",
         "missing_trigger": "Wählen Sie ein auslösendes Ereignis.",
+        "missing_group": "Wählen Sie eine verfügbare Gruppe.",
         "missing_event": "Wählen Sie ein auslösendes Ereignis.",
         "missing_template": "Wählen Sie eine verfügbare E-Mail-Vorlage.",
         "invalid_template": "Wählen Sie eine verfügbare E-Mail-Vorlage.",

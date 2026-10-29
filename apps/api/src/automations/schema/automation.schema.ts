@@ -132,6 +132,7 @@ export const automationWorkflowSchema = Type.Object(
                 eventKind: Type.Optional(
                   Type.Union([Type.Enum(AUTOMATION_EVENT_KINDS), Type.Null()]),
                 ),
+                groupId: Type.Optional(UUIDSchema),
               },
               closed,
             ),

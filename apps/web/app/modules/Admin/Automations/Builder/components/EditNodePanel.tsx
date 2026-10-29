@@ -1,3 +1,4 @@
+import { AUTOMATION_EVENT_KINDS, AUTOMATION_RECIPIENT_TYPES } from "@repo/shared";
 import { Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,7 @@ import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 
+import { AutomationRecipientPicker } from "./AutomationRecipientPicker";
 import { AutomationSearchSelect } from "./AutomationSearchSelect";
 import { ConditionSettings } from "./ConditionSettings";
 import { EmailActionSettings } from "./EmailActionSettings";
@@ -121,6 +123,22 @@ export function EditNodePanel(props: EditNodePanelProps) {
                       ]}
                     />
                   </div>
+                  {node.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP && (
+                    <div className="space-y-2">
+                      <Label>{t("automationBuilder.groupTrigger.group")}</Label>
+                      <AutomationRecipientPicker
+                        type={AUTOMATION_RECIPIENT_TYPES.GROUP}
+                        value={node.config.groupId ?? ""}
+                        disabled={readonly}
+                        onChange={(groupId) =>
+                          props.onSaveStep({ ...node, config: { ...node.config, groupId } })
+                        }
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t("automationBuilder.groupTrigger.hint")}
+                      </p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {node.config.eventKind
                       ? t(`automationBuilder.recipients.eventDescriptions.${node.config.eventKind}`)

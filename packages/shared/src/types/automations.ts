@@ -33,7 +33,7 @@ export type AutomationPlaceholderMapping =
   | { type: typeof AUTOMATION_MAPPING_TYPES.STATIC; value: AutomationPlaceholderValue };
 
 export type AutomationPlaceholderMappings = Record<string, AutomationPlaceholderMapping>;
-export type AutomationTriggerConfig = { eventKind?: AutomationEventKind | null };
+export type AutomationTriggerConfig = { eventKind?: AutomationEventKind | null; groupId?: string };
 export type AutomationDefinitionKind =
   (typeof AUTOMATION_DEFINITION_KINDS)[keyof typeof AUTOMATION_DEFINITION_KINDS];
 

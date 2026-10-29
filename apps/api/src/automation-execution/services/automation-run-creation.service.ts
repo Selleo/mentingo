@@ -5,6 +5,7 @@ import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_MAX_EMAIL_DELIVERY_ATTEMPTS,
   AUTOMATION_STEP_TYPES,
+  AUTOMATION_EVENT_KINDS,
   AUTOMATION_TEMPLATE_TYPES,
   flattenAutomationWorkflow,
   evaluateAutomationWorkflow,
@@ -177,6 +178,17 @@ export class AutomationRunCreationService implements OnModuleInit {
       trigger.config.eventKind !== event.kind
     ) {
       return;
+    }
+
+    if (trigger.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP) {
+      const sources = event.items?.length ? event.items : event.recipients;
+
+      if (
+        !trigger.config.groupId ||
+        !sources.some((source) => source.eventFields.group_id === trigger.config.groupId)
+      ) {
+        return;
+      }
     }
 
     const plan = await this.planAutomationRun(

@@ -307,6 +307,7 @@
       "password_reminder": "Priminimas užbaigti paskyros nustatymą",
       "user_invite": "Naudotojas pakviestas į platformą",
       "user_first_login": "Naudotojas prisijungė pirmą kartą",
+      "user_assigned_to_group": "Naudotojas priskirtas grupei",
       "user_assigned_to_course": "Besimokančiajam priskirtas kursas",
       "user_short_inactivity": "Besimokantysis neaktyvus 14 dienų",
       "user_long_inactivity": "Besimokantysis neaktyvus 30 dienų",
@@ -7526,6 +7527,10 @@
     }
   },
   "automationBuilder": {
+    "groupTrigger": {
+      "group": "Grupė",
+      "hint": "Pasirinkite procesą pradedančią grupę. Palikite įvykio gavėją kaip el. laiško gavėją, kad pasveikintumėte tik naują narį."
+    },
     "recipients": {
       "title": "Gavėjai",
       "event": "Su įvykiu susiję naudotojai",
@@ -7549,6 +7554,7 @@
         "password_reminder": "Naudotojas, kuris dar turi susikurti slaptažodį.",
         "user_invite": "Pakviestas naudotojas.",
         "user_first_login": "Naudotojas, kuris prisijungė pirmą kartą.",
+        "user_assigned_to_group": "Naudotojas, naujai priskirtas pasirinktai grupei, o ne visi grupės nariai.",
         "user_assigned_to_course": "Kursui priskirti besimokantieji.",
         "user_short_inactivity": "Besimokantieji, kurie kurse buvo neaktyvūs trumpą laiką.",
         "user_long_inactivity": "Besimokantieji, kurie kurse buvo neaktyvūs ilgą laiką.",
@@ -7651,6 +7657,7 @@
       "userPasswordChanged": "Slaptažodis pakeistas",
       "userWelcome": "Pasisveikinimo žinutė",
       "userFirstLogin": "Pirmas prisijungimas",
+      "userAssignedToGroup": "Naudotojas priskirtas grupei",
       "usersAssignedToCourse": "Vartotojai priskirti kursui",
       "usersShortInactivity": "Trumpas neaktyvumas",
       "usersLongInactivity": "Ilgas neaktyvumas",
@@ -7763,6 +7770,8 @@
       "unavailableVariable": "Šiam paleidikliui neprieinama"
     },
     "variables": {
+      "group_id": "Grupės ID",
+      "group_name": "Grupės pavadinimas",
       "userFirstName": "Vartotojo vardas",
       "userLastName": "Vartotojo pavardė",
       "userEmail": "El. pašto adresas",
@@ -7919,6 +7928,7 @@
         "self_parent": "Patikrinkite automatizavimo veiksmus ir jų ryšius.",
         "unsupported_step_type": "Patikrinkite automatizavimo veiksmus ir jų ryšius.",
         "missing_trigger": "Pasirinkite pradinį įvykį.",
+        "missing_group": "Pasirinkite pasiekiamą grupę.",
         "missing_event": "Pasirinkite pradinį įvykį.",
         "missing_template": "Pasirinkite prieinamą el. laiško šabloną.",
         "invalid_template": "Pasirinkite prieinamą el. laiško šabloną.",

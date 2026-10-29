@@ -307,6 +307,7 @@
       "password_reminder": "Przypomnienie o konfiguracji konta",
       "user_invite": "Zaproszono użytkownika na platformę",
       "user_first_login": "Użytkownik zalogował się po raz pierwszy",
+      "user_assigned_to_group": "Użytkownik przypisany do grupy",
       "user_assigned_to_course": "Przypisano kurs uczestnikowi",
       "user_short_inactivity": "Uczestnik nieaktywny od 14 dni",
       "user_long_inactivity": "Uczestnik nieaktywny od 30 dni",
@@ -7592,6 +7593,10 @@
     }
   },
   "automationBuilder": {
+    "groupTrigger": {
+      "group": "Grupa",
+      "hint": "Wybierz grupę uruchamiającą ten przepływ. Pozostaw odbiorcę zdarzenia jako odbiorcę e-maila, aby powitać tylko nowego członka."
+    },
     "recipients": {
       "title": "Odbiorcy",
       "event": "Użytkownicy powiązani ze zdarzeniem",
@@ -7615,6 +7620,7 @@
         "password_reminder": "Użytkownik, który nadal musi utworzyć hasło.",
         "user_invite": "Zaproszony użytkownik.",
         "user_first_login": "Użytkownik, który zalogował się po raz pierwszy.",
+        "user_assigned_to_group": "Użytkownik nowo przypisany do wybranej grupy, a nie wszyscy członkowie grupy.",
         "user_assigned_to_course": "Uczestnicy przypisani do kursu.",
         "user_short_inactivity": "Uczestnicy z krótkim okresem nieaktywności w kursie.",
         "user_long_inactivity": "Uczestnicy z długim okresem nieaktywności w kursie.",
@@ -7716,6 +7722,7 @@
       "userPasswordChanged": "Hasło zmienione",
       "userWelcome": "Wiadomość powitalna",
       "userFirstLogin": "Pierwsze logowanie",
+      "userAssignedToGroup": "Użytkownik przypisany do grupy",
       "usersAssignedToCourse": "Użytkownicy przypisani do kursu",
       "usersShortInactivity": "Krótka nieaktywność",
       "usersLongInactivity": "Długa nieaktywność",
@@ -7831,6 +7838,8 @@
       "unavailableVariable": "Niedostępna dla tego wyzwalacza"
     },
     "variables": {
+      "group_id": "Identyfikator grupy",
+      "group_name": "Nazwa grupy",
       "userFirstName": "Imię użytkownika",
       "userLastName": "Nazwisko użytkownika",
       "userEmail": "Adres e-mail",
@@ -7987,6 +7996,7 @@
         "self_parent": "Sprawdź kroki automatyzacji i ich połączenia.",
         "unsupported_step_type": "Sprawdź kroki automatyzacji i ich połączenia.",
         "missing_trigger": "Wybierz zdarzenie wyzwalające.",
+        "missing_group": "Wybierz dostępną grupę.",
         "missing_event": "Wybierz zdarzenie wyzwalające.",
         "missing_template": "Wybierz dostępny szablon e-maila.",
         "invalid_template": "Wybierz dostępny szablon e-maila.",

@@ -16,6 +16,7 @@ import {
   AUTOMATION_TRIGGER_DEFINITIONS,
   deriveAutomationBranchFieldValues,
   AUTOMATION_STEP_TYPES,
+  AUTOMATION_EVENT_KINDS,
   evaluateAutomationWorkflow,
   getAutomationWorkflowIssues,
   SUPPORTED_LANGUAGES,
@@ -112,6 +113,24 @@ export class AutomationValidationAndSimulationService {
 
     if (!event) {
       return issues;
+    }
+
+    const trigger = workflow.steps.find((step) => step.id === workflow.rootStepId);
+
+    if (
+      trigger?.type === AUTOMATION_STEP_TYPES.TRIGGER &&
+      event.kind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
+      trigger.config.groupId &&
+      !(await this.automationRecipientOptionsRepository.doesAutomationRecipientSelectionExist(
+        { type: AUTOMATION_RECIPIENT_TYPES.GROUP, groupId: trigger.config.groupId },
+        tenantId,
+      ))
+    ) {
+      issues.push({
+        code: AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_GROUP,
+        message: "Select an available group in this organization.",
+        stepId: trigger.id,
+      });
     }
 
     for (const step of workflow.steps) {
@@ -241,6 +260,17 @@ export class AutomationValidationAndSimulationService {
 
     if (issues.length) {
       return result;
+    }
+
+    const trigger = body.workflow.steps.find((step) => step.id === body.workflow.rootStepId);
+
+    if (
+      trigger?.type === AUTOMATION_STEP_TYPES.TRIGGER &&
+      event.kind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
+      trigger.config.groupId
+    ) {
+      // Preview the configured scenario without substituting real member data.
+      fields.group_id = trigger.config.groupId;
     }
 
     const evaluation = evaluateAutomationWorkflow(body.workflow, fields);

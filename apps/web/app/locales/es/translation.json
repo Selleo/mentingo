@@ -307,6 +307,7 @@
       "password_reminder": "Recordatorio de configuración de la cuenta",
       "user_invite": "Usuario invitado a la plataforma",
       "user_first_login": "El usuario inició sesión por primera vez",
+      "user_assigned_to_group": "Usuario asignado a un grupo",
       "user_assigned_to_course": "Curso asignado a un alumno",
       "user_short_inactivity": "Alumno inactivo durante 14 días",
       "user_long_inactivity": "Alumno inactivo durante 30 días",
@@ -7700,6 +7701,10 @@
     }
   },
   "automationBuilder": {
+    "groupTrigger": {
+      "group": "Grupo",
+      "hint": "Selecciona el grupo que inicia el flujo. Mantén el destinatario del evento para dar la bienvenida solo al nuevo miembro."
+    },
     "recipients": {
       "title": "Destinatarios",
       "event": "Usuarios vinculados al evento",
@@ -7723,6 +7728,7 @@
         "password_reminder": "El usuario que aún debe crear su contraseña.",
         "user_invite": "El usuario invitado.",
         "user_first_login": "El usuario que inició sesión por primera vez.",
+        "user_assigned_to_group": "El usuario recién asignado al grupo seleccionado, no todos sus miembros.",
         "user_assigned_to_course": "Los alumnos asignados al curso.",
         "user_short_inactivity": "Los alumnos con un periodo corto de inactividad en el curso.",
         "user_long_inactivity": "Los alumnos con un periodo largo de inactividad en el curso.",
@@ -7824,6 +7830,7 @@
       "userPasswordChanged": "Contraseña cambiada",
       "userWelcome": "Mensaje de bienvenida",
       "userFirstLogin": "Primer inicio de sesión",
+      "userAssignedToGroup": "Usuario asignado a un grupo",
       "usersAssignedToCourse": "Usuarios asignados al curso",
       "usersShortInactivity": "Inactividad corta",
       "usersLongInactivity": "Inactividad prolongada",
@@ -7939,6 +7946,8 @@
       "unavailableVariable": "No disponible para este activador"
     },
     "variables": {
+      "group_id": "ID del grupo",
+      "group_name": "Nombre del grupo",
       "userFirstName": "Nombre del usuario",
       "userLastName": "Apellido del usuario",
       "userEmail": "Dirección de correo electrónico",
@@ -8095,6 +8104,7 @@
         "self_parent": "Revisa los pasos de la automatización y sus conexiones.",
         "unsupported_step_type": "Revisa los pasos de la automatización y sus conexiones.",
         "missing_trigger": "Elige un evento de inicio.",
+        "missing_group": "Selecciona un grupo disponible.",
         "missing_event": "Elige un evento de inicio.",
         "missing_template": "Elige una plantilla de correo disponible.",
         "invalid_template": "Elige una plantilla de correo disponible.",

@@ -159,6 +159,18 @@ export const getAutomationWorkflowIssues = (
         );
       }
     }
+    if (
+      options.requireComplete &&
+      step.type === "trigger" &&
+      step.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
+      !step.config.groupId
+    ) {
+      addValidationIssue(
+        AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_GROUP,
+        "Select a group for this trigger.",
+        step.id,
+      );
+    }
     if (options.requireComplete && step.type === "condition" && !step.config.field) {
       addValidationIssue(
         AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_CONDITION_FIELD,
@@ -290,6 +302,13 @@ export const evaluateAutomationWorkflow = (
       } as AutomationStepTrace,
     ]),
   );
+  if (
+    root?.type === "trigger" &&
+    root.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
+    (!root.config.groupId || root.config.groupId !== fields.group_id)
+  ) {
+    return { path: [], steps: [...traces.values()] };
+  }
   let current = ordered[0];
   let issue: AutomationWorkflowIssue | undefined;
   while (current) {

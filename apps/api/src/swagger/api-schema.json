@@ -67765,6 +67765,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "user_assigned_to_group",
+                      "type": "string"
+                    },
+                    {
                       "const": "user_short_inactivity",
                       "type": "string"
                     },
@@ -72127,6 +72131,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -76429,6 +76437,10 @@
                         },
                         {
                           "const": "user_assigned_to_course",
+                          "type": "string"
+                        },
+                        {
+                          "const": "user_assigned_to_group",
                           "type": "string"
                         },
                         {
@@ -80762,6 +80774,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -85062,6 +85078,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -89368,6 +89388,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -93562,6 +93586,10 @@
                 "type": "string"
               },
               {
+                "const": "user_assigned_to_group",
+                "type": "string"
+              },
+              {
                 "const": "user_short_inactivity",
                 "type": "string"
               },
@@ -97579,6 +97607,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -101778,6 +101810,10 @@
                     "type": "string"
                   },
                   {
+                    "const": "user_assigned_to_group",
+                    "type": "string"
+                  },
+                  {
                     "const": "user_short_inactivity",
                     "type": "string"
                   },
@@ -105760,6 +105796,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -110105,6 +110145,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -114457,6 +114501,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -118757,6 +118805,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -123074,6 +123126,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -127374,6 +127430,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -135684,6 +135744,10 @@
                                             "type": "string"
                                           },
                                           {
+                                            "const": "user_assigned_to_group",
+                                            "type": "string"
+                                          },
+                                          {
                                             "const": "user_short_inactivity",
                                             "type": "string"
                                           },
@@ -135753,6 +135817,10 @@
                                         "type": "null"
                                       }
                                     ]
+                                  },
+                                  "groupId": {
+                                    "format": "uuid",
+                                    "type": "string"
                                   }
                                 }
                               }
@@ -136314,6 +136382,10 @@
                                                     "type": "string"
                                                   },
                                                   {
+                                                    "const": "user_assigned_to_group",
+                                                    "type": "string"
+                                                  },
+                                                  {
                                                     "const": "user_short_inactivity",
                                                     "type": "string"
                                                   },
@@ -136383,6 +136455,10 @@
                                                 "type": "null"
                                               }
                                             ]
+                                          },
+                                          "groupId": {
+                                            "format": "uuid",
+                                            "type": "string"
                                           }
                                         }
                                       }
@@ -136918,6 +136994,10 @@
                     },
                     {
                       "const": "user_assigned_to_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_assigned_to_group",
                       "type": "string"
                     },
                     {
@@ -137816,6 +137896,10 @@
                                                 "type": "string"
                                               },
                                               {
+                                                "const": "user_assigned_to_group",
+                                                "type": "string"
+                                              },
+                                              {
                                                 "const": "user_short_inactivity",
                                                 "type": "string"
                                               },
@@ -137885,6 +137969,10 @@
                                             "type": "null"
                                           }
                                         ]
+                                      },
+                                      "groupId": {
+                                        "format": "uuid",
+                                        "type": "string"
                                       }
                                     }
                                   }
@@ -138428,6 +138516,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "user_assigned_to_group",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "user_short_inactivity",
                                       "type": "string"
                                     },
@@ -138497,6 +138589,10 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "groupId": {
+                              "format": "uuid",
+                              "type": "string"
                             }
                           }
                         }
@@ -139044,6 +139140,10 @@
                         },
                         {
                           "const": "missing_event",
+                          "type": "string"
+                        },
+                        {
+                          "const": "missing_group",
                           "type": "string"
                         },
                         {
@@ -139608,6 +139708,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "user_assigned_to_group",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "user_short_inactivity",
                                       "type": "string"
                                     },
@@ -139677,6 +139781,10 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "groupId": {
+                              "format": "uuid",
+                              "type": "string"
                             }
                           }
                         }
@@ -140216,6 +140324,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -140285,6 +140397,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -140846,6 +140962,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -140915,6 +141035,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -141484,6 +141608,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -141553,6 +141681,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -142114,6 +142246,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -142183,6 +142319,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -142752,6 +142892,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -142821,6 +142965,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -143382,6 +143530,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -143451,6 +143603,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -144017,6 +144173,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "user_assigned_to_group",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "user_short_inactivity",
                                       "type": "string"
                                     },
@@ -144086,6 +144246,10 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "groupId": {
+                              "format": "uuid",
+                              "type": "string"
                             }
                           }
                         }
@@ -144621,6 +144785,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -144690,6 +144858,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -145251,6 +145423,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -145320,6 +145496,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -145910,6 +146090,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -145979,6 +146163,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -146540,6 +146728,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -146609,6 +146801,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -147179,6 +147375,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -147248,6 +147448,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -147789,6 +147993,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -147858,6 +148066,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -148419,6 +148631,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -148488,6 +148704,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -149057,6 +149277,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -149126,6 +149350,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -149687,6 +149915,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -149756,6 +149988,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -150325,6 +150561,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -150394,6 +150634,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -150955,6 +151199,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -151024,6 +151272,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -151593,6 +151845,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "user_assigned_to_group",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "user_short_inactivity",
                                           "type": "string"
                                         },
@@ -151662,6 +151918,10 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
                                 }
                               }
                             }
@@ -152223,6 +152483,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "user_assigned_to_group",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "user_short_inactivity",
                                                   "type": "string"
                                                 },
@@ -152292,6 +152556,10 @@
                                               "type": "null"
                                             }
                                           ]
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -152836,6 +153104,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "user_assigned_to_group",
+                      "type": "string"
+                    },
+                    {
                       "const": "user_short_inactivity",
                       "type": "string"
                     },
@@ -153126,6 +153398,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
