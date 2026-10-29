@@ -99,7 +99,7 @@
   },
   "aiConversations": {
     "connectedAccount": "Połączone konto",
-    "slackParticipant": "Uczestnik ze Slacka",
+    "externalParticipant": "Uczestnik zewnętrzny",
     "session": "Sesja",
     "context": "Kontekst",
     "activity": "Aktywność",

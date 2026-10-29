@@ -2,9 +2,9 @@ import { ForbiddenException } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 import { PgDialect } from "drizzle-orm/pg-core";
 
-import { SlackConversationsController } from "./slack-conversations.controller";
-import { SlackConversationsRepository } from "./slack-conversations.repository";
-import { slackConversationSchema } from "./slack-conversations.schema";
+import { ExternalConversationsController } from "./external-conversations.controller";
+import { ExternalConversationsRepository } from "./external-conversations.repository";
+import { externalConversationSchema } from "./external-conversations.schema";
 
 import type { McpRequest, McpToolActor } from "./mcp.types";
 
@@ -20,14 +20,15 @@ const actor: McpToolActor = {
   },
 };
 const input = {
+  source: "slack" as const,
   threadKey: "pairing:workspace:channel:thread",
   messages: [
     {
       externalId: "1",
       role: "user" as const,
       text: "Hello",
-      slackUserId: "U123",
-      slackUserName: "Anna",
+      participantId: "U123",
+      participantName: "Anna",
       createdAt: "2026-10-29T10:00:00Z",
     },
   ],
@@ -36,9 +37,9 @@ const input = {
 describe("Slack transcript boundaries", () => {
   it("allows only the explicit student grant and passes the authenticated actor", async () => {
     const append = jest.fn().mockResolvedValue({ id: "thread" });
-    const controller = new SlackConversationsController({
+    const controller = new ExternalConversationsController({
       append,
-    } as unknown as SlackConversationsRepository);
+    } as unknown as ExternalConversationsRepository);
     await controller.append(input, { mcpActor: actor } as McpRequest);
     expect(append).toHaveBeenCalledWith(actor, input);
     for (const scopes of [[], ["account:access"], ["student:read", "courses:write"]]) {
@@ -51,24 +52,31 @@ describe("Slack transcript boundaries", () => {
   });
 
   it("bounds imported payloads and rejects tool/system roles", () => {
-    expect(Value.Check(slackConversationSchema, input)).toBe(true);
-    expect(Value.Check(slackConversationSchema, { ...input, messages: [] })).toBe(false);
+    expect(Value.Check(externalConversationSchema, input)).toBe(true);
+    expect(Value.Check(externalConversationSchema, { ...input, messages: [] })).toBe(false);
     expect(
-      Value.Check(slackConversationSchema, {
+      Value.Check(externalConversationSchema, {
         ...input,
         messages: [{ ...input.messages[0], role: "system" }],
       }),
     ).toBe(false);
-    expect(Value.Check(slackConversationSchema, { ...input, threadKey: "a".repeat(501) })).toBe(
+    expect(Value.Check(externalConversationSchema, { ...input, threadKey: "a".repeat(501) })).toBe(
       false,
     );
+  });
+
+  it("accepts supported external platforms and reserves native conversations", () => {
+    for (const source of ["slack", "discord", "whatsapp"]) expect(Value.Check(externalConversationSchema, {...input, source})).toBe(true);
+    for (const source of ["mentingo", "unknown"]) expect(Value.Check(externalConversationSchema, {...input, source})).toBe(false);
+    const withoutSource = {...input}; Reflect.deleteProperty(withoutSource, "source");
+    expect(Value.Check(externalConversationSchema, withoutSource)).toBe(false);
   });
 
   it("rejects an archived, deleted or absent account before importing messages", async () => {
     const where = jest.fn().mockReturnValue({limit: jest.fn().mockResolvedValue([])});
     const db = {select: jest.fn().mockReturnValue({from: jest.fn().mockReturnValue({where})}), insert: jest.fn()};
     const runner = {runWithTenantTransaction: jest.fn(async (_tenant, fn) => fn())};
-    const repository = new SlackConversationsRepository(db as never, runner as never);
+    const repository = new ExternalConversationsRepository(db as never, runner as never);
     await expect(repository.append(actor, input)).rejects.toThrow(ForbiddenException);
     expect(db.insert).not.toHaveBeenCalled();
     const statement = new PgDialect().sqlToQuery(where.mock.calls[0][0]);
@@ -104,7 +112,7 @@ describe("Slack transcript boundaries", () => {
         .mockReturnValueOnce({ values: messageValues }),
     };
     const runner = { runWithTenantTransaction: jest.fn(async (_tenant, fn) => fn()) };
-    const repository = new SlackConversationsRepository(db as never, runner as never);
+    const repository = new ExternalConversationsRepository(db as never, runner as never);
     await repository.append(actor, input);
     expect(runner.runWithTenantTransaction).toHaveBeenCalledWith(
       actor.grant.tenantId,
@@ -123,11 +131,11 @@ describe("Slack transcript boundaries", () => {
       expect.objectContaining({
         threadId: "thread",
         externalMessageId: "1",
-        slackUserId: "U123",
-        slackUserName: "Anna",
+        externalUserId: "U123",
+        externalUserName: "Anna",
       }),
     ]);
-    expect(threadConflict.mock.calls[0][0].target).toHaveLength(4);
+    expect(threadConflict.mock.calls[0][0].target).toHaveLength(5);
     expect(messageConflict.mock.calls[0][0].target).toHaveLength(3);
   });
 });

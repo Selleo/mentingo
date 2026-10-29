@@ -1,5 +1,5 @@
 {
-  "id": "386f66fb-95fa-4563-a0f9-877095f6449d",
+  "id": "0073bab5-8c47-47e7-940d-ba4153e64182",
   "prevId": "5b287bc0-88f8-44ef-8e93-63ea727a4787",
   "version": "7",
   "dialect": "postgresql",
@@ -22266,14 +22266,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "slack_user_id": {
-          "name": "slack_user_id",
+        "external_user_id": {
+          "name": "external_user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "slack_user_name": {
-          "name": "slack_user_name",
+        "external_user_name": {
+          "name": "external_user_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -22804,6 +22804,12 @@
             },
             {
               "expression": "external_client_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

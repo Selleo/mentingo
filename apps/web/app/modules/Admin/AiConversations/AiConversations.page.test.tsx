@@ -6,7 +6,7 @@ import { renderWith } from "~/utils/testUtils";
 
 import AiConversationsPage from "./AiConversations.page";
 
-const listState = vi.hoisted(() => ({ empty: false, slack: false }));
+const listState = vi.hoisted(() => ({ empty: false, externalSource: "" }));
 
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: (id: string) => ({
@@ -42,7 +42,7 @@ vi.mock("~/api/queries/admin/useAdminAiThreads", () => ({
         title: `Conversation ${status}`,
         openingPreview: "Welcome",
         owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: "/avatar.png" },
-        source: listState.slack ? "slack" : "mentingo",
+        source: listState.externalSource || "mentingo",
         type: "practice",
         courseTitle: null,
         status,
@@ -61,14 +61,17 @@ const Page = createRemixStub([
 ]);
 
 describe("AI conversations inbox", () => {
-  it("marks synced Slack conversations in the inbox", async () => {
-    listState.slack = true;
-    renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
-    expect(await screen.findAllByRole("img", { name: "Slack" })).toHaveLength(3);
-  });
+  it.each(["Slack", "Discord", "WhatsApp"])(
+    "marks synced %s conversations in the inbox",
+    async (platform) => {
+      listState.externalSource = platform.toLowerCase();
+      renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
+      expect(await screen.findAllByRole("img", { name: platform })).toHaveLength(3);
+    },
+  );
   beforeEach(() => {
     listState.empty = false;
-    listState.slack = false;
+    listState.externalSource = "";
   });
   afterEach(() => vi.useRealTimers());
   it("clears a pending toolbar search together with popup filters", async () => {

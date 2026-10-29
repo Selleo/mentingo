@@ -75,7 +75,7 @@ export class AdminAiThreadsRepository {
         >`CASE WHEN ${aiMentorThreads.practiceSessionId} IS NOT NULL THEN ${AI_THREAD_TYPES.PRACTICE} ELSE ${AI_THREAD_TYPES.AI_MENTOR} END`.as(
           "source_type",
         ),
-        source: sql<"mentingo" | "slack">`'mentingo'`.as("conversation_source"),
+        source: sql<NonNullable<AdminAiThreadSummary["source"]>>`'mentingo'`.as("conversation_source"),
         practiceSessionId: aiMentorThreads.practiceSessionId,
         aiMentorLessonId: aiMentorThreads.aiMentorLessonId,
         lessonId: aiMentorLessons.lessonId,
@@ -266,8 +266,8 @@ export class AdminAiThreadsRepository {
             AdminAiThreadMessage["role"]
           >`CASE WHEN ${assistantMessages.role} = ${ASSISTANT_MESSAGE_ROLES.USER} THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
           content: assistantMessages.text,
-          slackUserId: assistantMessages.slackUserId,
-          slackUserName: assistantMessages.slackUserName,
+          participantId: assistantMessages.externalUserId,
+          participantName: assistantMessages.externalUserName,
           status: assistantMessages.status,
           createdAt: assistantMessages.createdAt,
         })

@@ -31,7 +31,10 @@ import {
 } from "./aiConversations.utils";
 import { ConversationReader } from "./ConversationReader";
 import { ConversationStatus } from "./ConversationStatus";
-import { SlackConversationSource } from "./SlackConversationSource";
+import {
+  ExternalConversationSource,
+  isExternalConversationSource,
+} from "./ExternalConversationSource";
 
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
@@ -208,7 +211,9 @@ export default function AiConversationsPage() {
                 )}
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  {thread.source === "slack" && <SlackConversationSource />}
+                  {isExternalConversationSource(thread.source) && (
+                    <ExternalConversationSource source={thread.source} />
+                  )}
                   <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
                     {thread.title || t("aiConversations.untitled")}
                   </h2>

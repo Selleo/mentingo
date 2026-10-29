@@ -1,5 +1,7 @@
 import {
   SUPPORTED_LANGUAGES,
+  AI_CONVERSATION_SOURCES,
+  type AiConversationSource,
   ASSISTANT_MESSAGE_STATUSES,
   ASSISTANT_RUN_STATUSES,
   type AssistantRunStatus,
@@ -46,7 +48,7 @@ export const assistantThreads = pgTable(
       .$type<SupportedLanguages>()
       .notNull()
       .default(SUPPORTED_LANGUAGES.EN),
-    source: text("source").$type<"mentingo" | "slack">().notNull().default("mentingo"),
+    source: text("source").$type<AiConversationSource>().notNull().default(AI_CONVERSATION_SOURCES.MENTINGO),
     externalThreadKey: text("external_thread_key"),
     externalClientId: text("external_client_id"),
     archived: boolean("archived").notNull().default(false),
@@ -56,6 +58,7 @@ export const assistantThreads = pgTable(
       table.tenantId,
       table.userId,
       table.externalClientId,
+      table.source,
       table.externalThreadKey,
     ),
     ownerUpdatedIdx: index("assistant_threads_owner_updated_idx").on(
@@ -83,8 +86,8 @@ export const assistantMessages = pgTable(
       .default(ASSISTANT_MESSAGE_STATUSES.COMPLETE),
     sources: jsonb("sources").$type<AssistantSource[]>().notNull().default([]),
     externalMessageId: text("external_message_id"),
-    slackUserId: text("slack_user_id"),
-    slackUserName: text("slack_user_name"),
+    externalUserId: text("external_user_id"),
+    externalUserName: text("external_user_name"),
     clientMessageId: uuid("client_message_id"),
   },
   withTenantIdIndex("assistant_messages", (table) => ({

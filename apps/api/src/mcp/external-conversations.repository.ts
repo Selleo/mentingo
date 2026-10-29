@@ -7,17 +7,17 @@ import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { assistantMessages, assistantThreads, users } from "src/storage/schema";
 
+import type { ExternalConversationInput } from "./external-conversations.schema";
 import type { McpToolActor } from "./mcp.types";
-import type { SlackConversationInput } from "./slack-conversations.schema";
 
 @Injectable()
-export class SlackConversationsRepository {
+export class ExternalConversationsRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
-  async append(actor: McpToolActor, input: SlackConversationInput) {
+  async append(actor: McpToolActor, input: ExternalConversationInput) {
     const { tenantId, userId, clientId } = actor.grant;
     return this.tenantDbRunnerService.runWithTenantTransaction(tenantId, async () => {
       const [user] = await this.db
@@ -41,7 +41,7 @@ export class SlackConversationsRepository {
           userId,
           externalClientId: clientId,
           externalThreadKey: input.threadKey,
-          source: "slack",
+          source: input.source,
           title: input.title || input.messages[0].text.slice(0, 200),
           language: input.language ?? SUPPORTED_LANGUAGES.EN,
         })
@@ -50,6 +50,7 @@ export class SlackConversationsRepository {
             assistantThreads.tenantId,
             assistantThreads.userId,
             assistantThreads.externalClientId,
+            assistantThreads.source,
             assistantThreads.externalThreadKey,
           ],
           set: {
@@ -68,8 +69,8 @@ export class SlackConversationsRepository {
             role: message.role,
             text: message.text,
             createdAt: message.createdAt,
-            slackUserId: message.slackUserId,
-            slackUserName: message.slackUserName,
+            externalUserId: message.participantId,
+            externalUserName: message.participantName,
           })),
         )
         .onConflictDoNothing({

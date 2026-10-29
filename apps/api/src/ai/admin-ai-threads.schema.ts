@@ -1,5 +1,6 @@
 import {
   AI_THREAD_STATUSES,
+  AI_CONVERSATION_SOURCES,
   AI_THREAD_TYPES,
   ASSISTANT_MESSAGE_ROLES,
   ASSISTANT_MESSAGE_STATUSES,
@@ -30,7 +31,7 @@ export const adminAiThreadQuerySchema = Type.Object({
 export const adminAiThreadSummarySchema = Type.Object({
   id: UUIDSchema,
   type: adminAiThreadTypeSchema,
-  source: Type.Optional(Type.Union([Type.Literal("mentingo"), Type.Literal("slack")])),
+  source: Type.Optional(Type.Enum(AI_CONVERSATION_SOURCES)),
   practiceSessionId: nullableId,
   aiMentorLessonId: nullableId,
   lessonId: nullableId,
@@ -80,8 +81,8 @@ export const adminAiThreadMessageSchema = Type.Object({
   id: UUIDSchema,
   role: Type.Enum(ASSISTANT_MESSAGE_ROLES),
   content: Type.String(),
-  slackUserId: Type.Optional(nullableString),
-  slackUserName: Type.Optional(nullableString),
+  participantId: Type.Optional(nullableString),
+  participantName: Type.Optional(nullableString),
   status: Type.Optional(Type.Enum(ASSISTANT_MESSAGE_STATUSES)),
   createdAt: Type.String(),
 });

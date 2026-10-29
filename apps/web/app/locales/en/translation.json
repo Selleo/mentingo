@@ -99,7 +99,7 @@
   },
   "aiConversations": {
     "connectedAccount": "Connected account",
-    "slackParticipant": "Slack participant",
+    "externalParticipant": "External participant",
     "session": "Session",
     "context": "Context",
     "activity": "Activity",

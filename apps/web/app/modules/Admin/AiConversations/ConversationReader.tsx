@@ -17,7 +17,10 @@ import { AI_CONVERSATIONS_HANDLES } from "../../../../e2e/data/ai-conversations/
 
 import { AI_CONVERSATIONS_PATH } from "./aiConversations.utils";
 import { ConversationDetails } from "./ConversationDetails";
-import { SlackConversationSource } from "./SlackConversationSource";
+import {
+  ExternalConversationSource,
+  isExternalConversationSource,
+} from "./ExternalConversationSource";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -76,7 +79,9 @@ export function ConversationReader({
               )}
               {thread && (
                 <div className="flex items-center gap-2">
-                  {thread.source === "slack" && <SlackConversationSource />}
+                  {isExternalConversationSource(thread.source) && (
+                    <ExternalConversationSource source={thread.source} />
+                  )}
                   <h2 className="body-lg-md line-clamp-2 text-neutral-950">
                     {thread.title || t("aiConversations.untitled")}
                   </h2>
@@ -84,7 +89,8 @@ export function ConversationReader({
               )}
               {thread && (
                 <p className="body-sm mt-1 truncate text-neutral-600">
-                  {thread.source === "slack" && `${t("aiConversations.connectedAccount")}: `}
+                  {isExternalConversationSource(thread.source) &&
+                    `${t("aiConversations.connectedAccount")}: `}
                   {ownerName}
                 </p>
               )}
@@ -129,12 +135,11 @@ export function ConversationReader({
                 )}
                 {thread &&
                   rows.map((message) => {
-                    const senderName =
-                      thread.source === "slack"
-                        ? message.slackUserName ||
-                          message.slackUserId ||
-                          t("aiConversations.slackParticipant")
-                        : ownerName;
+                    const senderName = isExternalConversationSource(thread.source)
+                      ? message.participantName ||
+                        message.participantId ||
+                        t("aiConversations.externalParticipant")
+                      : ownerName;
                     return (
                       <div key={message.id} className="flex flex-col gap-2">
                         <ChatMessage
@@ -155,8 +160,9 @@ export function ConversationReader({
                           userName={senderName}
                           previewUser={{
                             displayName: senderName,
-                            profilePictureUrl:
-                              thread.source === "slack" ? null : thread.owner.profilePictureUrl,
+                            profilePictureUrl: isExternalConversationSource(thread.source)
+                              ? null
+                              : thread.owner.profilePictureUrl,
                           }}
                           messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
                           testId={AI_CONVERSATIONS_HANDLES.MESSAGE}

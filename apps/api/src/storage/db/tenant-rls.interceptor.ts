@@ -23,7 +23,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/oauth/token",
     "/api/oauth/revoke",
     "/api/mcp",
-    "/api/mcp/slack-conversations",
+    "/api/mcp/external-conversations",
   ]);
 
   constructor(

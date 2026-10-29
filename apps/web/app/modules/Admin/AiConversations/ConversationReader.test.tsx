@@ -11,7 +11,7 @@ const loading = vi.hoisted(() => ({
   messagesPending: false,
   background: false,
   failed: false,
-  slack: false,
+  externalSource: "",
 }));
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: () => ({
@@ -21,8 +21,8 @@ vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
           id: "thread",
           title: "Saved interview",
           owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
-          type: loading.slack ? "assistant" : "practice",
-          source: loading.slack ? "slack" : "mentingo",
+          type: loading.externalSource ? "assistant" : "practice",
+          source: loading.externalSource || "mentingo",
           courseTitle: null,
           status: "completed",
           language: "en",
@@ -49,16 +49,21 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
       pages: [
         {
           data: [
-            ...(loading.slack
+            ...(loading.externalSource
               ? [
                   {
                     id: "slack-named",
                     role: "user",
                     content: "Named message",
-                    slackUserId: "U123",
-                    slackUserName: "Jamie Slack",
+                    participantId: "U123",
+                    participantName: "Jamie Slack",
                   },
-                  { id: "slack-id", role: "user", content: "ID-only message", slackUserId: "U456" },
+                  {
+                    id: "slack-id",
+                    role: "user",
+                    content: "ID-only message",
+                    participantId: "U456",
+                  },
                   { id: "slack-unknown", role: "user", content: "Unknown sender" },
                 ]
               : []),
@@ -115,19 +120,22 @@ describe("conversation details", () => {
     loading.messagesPending = false;
     loading.background = false;
     loading.failed = false;
-    loading.slack = false;
+    loading.externalSource = "";
   });
 
-  it("identifies Slack and attributes each message to its participant", async () => {
-    loading.slack = true;
-    renderWith().render(<Page />);
-    expect(await screen.findByRole("img", { name: "Slack" })).toBeInTheDocument();
-    expect(screen.getByText("Connected account: Alex Learner")).toBeInTheDocument();
-    expect(screen.getByText("Jamie Slack")).toBeInTheDocument();
-    expect(screen.getByText("U456")).toBeInTheDocument();
-    expect(screen.getByText("Slack participant")).toBeInTheDocument();
-    expect(screen.queryByText("U123")).not.toBeInTheDocument();
-  });
+  it.each(["Slack", "Discord", "WhatsApp"])(
+    "identifies %s and attributes each message to its participant",
+    async (platform) => {
+      loading.externalSource = platform.toLowerCase();
+      renderWith().render(<Page />);
+      expect(await screen.findByRole("img", { name: platform })).toBeInTheDocument();
+      expect(screen.getByText("Connected account: Alex Learner")).toBeInTheDocument();
+      expect(screen.getByText("Jamie Slack")).toBeInTheDocument();
+      expect(screen.getByText("U456")).toBeInTheDocument();
+      expect(screen.getByText("External participant")).toBeInTheDocument();
+      expect(screen.queryByText("U123")).not.toBeInTheDocument();
+    },
+  );
 
   it.each([true, false])(
     "uses one quiet loading status without an Untitled flash (metadata pending: %s)",

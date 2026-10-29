@@ -56,6 +56,7 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - Use `pnpm`; do not introduce another package manager or lockfile.
 - Reuse constants from `packages/shared/src/index.ts`; do not duplicate permission, language, file, tenant, session, or access-guard values.
 - Do not hand-edit generated files: `apps/web/app/api/generated-api.ts`, `apps/api/src/swagger/api-schema.json`, or `packages/prompts/src/generated-prompts.ts`.
+- Use the existing repository generation commands for schemas and generated artifacts. Do not create one-off or feature-specific schema-generation scripts.
 - After API contract changes, regenerate the web client before using new API methods.
 - Keep tenant, permission, and language behavior explicit in both API and web changes.
 - Do not commit secrets from `.env` files or log tokens/passwords/API keys.

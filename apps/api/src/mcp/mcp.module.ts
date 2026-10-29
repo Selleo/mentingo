@@ -20,6 +20,9 @@ import { ScormModule } from "src/scorm/scorm.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 
+import { ExternalConversationsController } from "./external-conversations.controller";
+import { ExternalConversationsRepository } from "./external-conversations.repository";
+import { ExternalTranscriptSignatureGuard } from "./external-transcript-signature.guard";
 import { McpActorRepository } from "./mcp-actor.repository";
 import { McpAuthGuard } from "./mcp-auth.guard";
 import { McpConsentController } from "./mcp-consent.controller";
@@ -31,8 +34,6 @@ import { McpStudentLessonRepository } from "./mcp-student-lesson.repository";
 import { McpTokenService } from "./mcp-token.service";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { McpController } from "./mcp.controller";
-import { SlackConversationsController } from "./slack-conversations.controller";
-import { SlackConversationsRepository } from "./slack-conversations.repository";
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { SlackConversationsRepository } from "./slack-conversations.repository";
     UserModule,
   ],
   providers: [
-    SlackConversationsRepository,
+    ExternalTranscriptSignatureGuard,
+    ExternalConversationsRepository,
     McpHttpService,
     McpStudentLessonRepository,
     McpActorRepository,
@@ -71,7 +73,7 @@ import { SlackConversationsRepository } from "./slack-conversations.repository";
     McpOAuthController,
     McpConsentController,
     McpController,
-    SlackConversationsController,
+    ExternalConversationsController,
   ],
   exports: [
     McpHttpService,

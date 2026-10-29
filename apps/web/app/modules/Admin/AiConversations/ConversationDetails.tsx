@@ -5,7 +5,10 @@ import { Button } from "~/components/ui/button";
 import { AI_CONVERSATIONS_HANDLES } from "../../../../e2e/data/ai-conversations/handles";
 
 import { ConversationStatus } from "./ConversationStatus";
-import { SlackConversationSource } from "./SlackConversationSource";
+import {
+  ExternalConversationSource,
+  isExternalConversationSource,
+} from "./ExternalConversationSource";
 
 import type { GetAdminAiThreadDetailsResponse } from "~/api/generated-api";
 
@@ -28,12 +31,19 @@ export function ConversationDetails({
   const rows = [
     {
       label: t(
-        thread.source === "slack" ? "aiConversations.connectedAccount" : "aiConversations.owner",
+        isExternalConversationSource(thread.source)
+          ? "aiConversations.connectedAccount"
+          : "aiConversations.owner",
       ),
       value: `${thread.owner.firstName} ${thread.owner.lastName}`,
     },
-    ...(thread.source === "slack"
-      ? [{ label: t("aiConversations.source"), value: <SlackConversationSource /> }]
+    ...(isExternalConversationSource(thread.source)
+      ? [
+          {
+            label: t("aiConversations.source"),
+            value: <ExternalConversationSource source={thread.source} />,
+          },
+        ]
       : []),
     { label: t("aiConversations.type"), value: t(`aiConversations.types.${thread.type}`) },
     { label: t("aiConversations.status"), value: <ConversationStatus status={thread.status} /> },
