@@ -99,6 +99,23 @@ class PipelineTest(unittest.TestCase):
         self.assertNotIn('list only the pull requests', result)
         self.assertIn('Business specification', result)
 
+    def test_exact_business_spec_selects_its_complete_feature_video(self):
+        selected = helpdesk.select_spec_domains(self.catalog, 'docs/specs/learning-paths-business-spec.md')
+        self.assertEqual(selected, ['development-paths.guide'])
+        self.assertEqual(len(self.catalog['domains'][0]['flows']), 19)
+        with self.assertRaisesRegex(ValueError, 'exact'):
+            helpdesk.select_spec_domains(self.catalog, 'docs/specs/../../secrets.md')
+        with self.assertRaisesRegex(ValueError, 'no registered'):
+            helpdesk.select_spec_domains(self.catalog, 'docs/specs/nonexistent-business-spec.md')
+        with self.assertRaisesRegex(ValueError, 'no registered'):
+            helpdesk.select_spec_domains(self.catalog, 'docs/specs/learning-paths-business-spec.md', ['course-authoring'])
+
+    def test_production_cannot_select_an_untagged_ref(self):
+        args = SimpleNamespace(cache=str(self.cache), catalog=str(SKILL/'projects/mentingo-helpdesk.json'),
+                               target_ref='HEAD', test_mode=False)
+        with self.assertRaisesRegex(ValueError, 'isolated test mode'):
+            helpdesk.analyze(args)
+
     def test_unchanged_run_skips_capture_assembly_and_publication_but_dirty_domain_recovers(self):
         import hashlib
         domain = copy.deepcopy(self.domain)
@@ -262,8 +279,29 @@ class WorkflowsTest(unittest.TestCase):
                 if 'ELEVENLABS_API_KEY' in env:
                     self.assertIs(job, generation)
                     self.assertNotIn('AWS_SECRET_ACCESS_KEY', env)
-                self.assertNotIn('actions/upload-artifact', step.get('uses', ''))
+                if 'actions/upload-artifact' in step.get('uses', ''):
+                    self.assertIs(job, generation)
+                    self.assertIn('inputs.test_mode', step['if'])
+                    self.assertIn('steps.redact.outcome', step['if'])
+                    self.assertNotIn('state.json', step['with']['path'])
         self.assertIn('default_branch', generation['if'])
+
+    def test_registered_release_workflow_can_dispatch_a_premerge_spec_test(self):
+        entry = self.load('release-film.yml')
+        test = entry['jobs']['helpdesk_test']
+        self.assertEqual(test['uses'], './.github/workflows/helpdesk-videos.yml')
+        self.assertTrue(test['with']['test_mode'])
+        self.assertFalse(test['with']['publish'])
+        self.assertIn('helpdesk_spec', test['if'])
+        self.assertIn('helpdesk_spec', entry['jobs']['film']['if'])
+        workflow = self.load('helpdesk-videos.yml')
+        self.assertIn('workflow_call', workflow['on'])
+        self.assertIn('inputs.test_mode', workflow['jobs']['generate']['if'])
+        self.assertIn('!inputs.test_mode', workflow['jobs']['publish']['if'])
+        steps = {step.get('id', step.get('name')): step for step in workflow['jobs']['generate']['steps']}
+        self.assertIn('!inputs.test_mode', steps['restore']['if'])
+        save = steps['Checkpoint private segments even after an interrupted later flow']
+        self.assertIn('!inputs.test_mode', save['if'])
 
 
 if __name__ == '__main__':

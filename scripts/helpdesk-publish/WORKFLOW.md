@@ -16,10 +16,51 @@ GitHub suppresses ordinary push-trigger chaining from tags created with its defa
 workflow token; a version-creation workflow using that token should dispatch the
 Helpdesk workflow explicitly, using the same exact tag/default-branch contract.
 
-The feature branch can be reviewed/tested locally. Trusted generation/publication
-is intentionally restricted to the default branch; it does not expose production
-keys to PR code. The existing `release-film` environment is reused for recording.
-Create `helpdesk-publishing` with equivalent default-branch restrictions.
+Production generation/publication uses the default branch. The existing
+`release-film` environment is reused for production recording; `helpdesk-publishing`
+keeps the publishing key in its separate job. Manual dispatch defaults to publication
+off; the version-tag queuer explicitly turns it on.
+
+## Test a specific spec before merging
+
+The already registered `release-film.yml` accepts `helpdesk_spec` on this branch
+and calls the Helpdesk workflow in isolated test mode. This entry point works before
+the new Helpdesk workflow has been merged into the default branch. Push the branch,
+then run:
+
+```sh
+gh workflow run release-film.yml --repo Selleo/mentingo \
+  --ref jh_feat_helpdesk_ui_preview \
+  -f helpdesk_spec=docs/specs/learning-paths-business-spec.md \
+  -f helpdesk_language=en -F helpdesk_dry_run=false -F publish=false
+```
+
+Set `helpdesk_dry_run=true` for coverage/impact analysis without recording. The source
+is the selected workflow branch commit by default; `helpdesk_target_ref` can select
+another branch or exact commit. No release/version tag is needed. An internal test
+version labels the artifacts and the publisher rejects their `testMode` marker.
+
+The selected spec must be an exact registered `docs/specs/*.md` path, not a glob.
+It selects complete feature video(s) whose declared sources include that spec; it
+does not omit other required flows from the selected feature. An unknown spec fails
+before any model calls. Direct Helpdesk dispatch also accepts `business_spec`,
+`test_mode=true`, `target_ref` and optional `domains` once that workflow is registered.
+
+Test runs use the `helpdesk-testing` environment with `CLAUDE_CODE_OAUTH_TOKEN` and
+`ELEVENLABS_API_KEY`, plus the repository voice-ID variables below. These can also
+be repository secrets. The release environment's secrets are not automatically
+available in the testing environment. Configure the test environment to allow the
+Helpdesk branch. As checked during implementation, Claude exists in `release-film`;
+these two credentials were absent at repository level. Secret configuration can
+change independently of source code.
+
+Fresh test state needs no S3 or Helpdesk/Bunny/OpenAI publishing credentials. The
+workflow skips private production-cache restore/checkpoint and publication. After
+redaction it uploads only videos, captions, posters, timeline and manifest files as
+`helpdesk-test-videos` (14 days), not publisher state, AI logs or checkout files.
+Download the artifact from the Actions run to inspect the MP4 and chapters. A failed
+required flow remains a failed test; partial content is not advertised as a complete
+feature guide. No paid/hosted test was started during this code change.
 
 ## Required configuration
 

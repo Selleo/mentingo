@@ -376,7 +376,8 @@ def _decision(value: object, context: dict[str, object]) -> Impact | Coverage:
 
 def plan(repo: Path, target: str, previous: dict[str, object] | None, catalog: Catalog,
          domains: list[str] | None = None, force: bool = False,
-         classify: Callable[[dict[str, object]], object] | None = None) -> dict[str, object]:
+         classify: Callable[[dict[str, object]], object] | None = None,
+         target_ref: str | None = None) -> dict[str, object]:
     """Return decisions against each flow's last checked commit, or fail with a report.
 
     ``previous`` comes from durable build state, never the previous GitHub release.
@@ -390,7 +391,7 @@ def plan(repo: Path, target: str, previous: dict[str, object] | None, catalog: C
                           for part in (version.group(4) or "").split(".")):
         raise ValueError("Target must be a semantic-version tag, optionally prefixed with v")
     registry = validate_catalog(catalog)
-    commit = _resolve(repo, target)
+    commit = _resolve(repo, target_ref or target)
     known_domains = {d["domain"] for d in registry["domains"]} | {d["key"] for d in registry["domains"]}
     if domains and (len(set(domains)) != len(domains) or not set(domains) <= known_domains):
         raise ValueError("Unknown or duplicate selected domains")

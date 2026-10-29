@@ -42,6 +42,12 @@ def analyze(args):
     """Persist a complete decision report, including uncertainty that blocks recording."""
     state = load_state(args.cache)
     catalog = helpdesk_catalog.load_catalog(args.catalog)
+    spec = getattr(args, 'business_spec', '')
+    test_mode = getattr(args, 'test_mode', False)
+    target_ref = getattr(args, 'target_ref', None)
+    if target_ref and not test_mode:
+        raise ValueError('An untagged source ref is supported only in isolated test mode')
+    selected = select_spec_domains(catalog, spec, args.domains.split(',') if args.domains else None)
     reports = []
     try:
         for code in args.languages.split(','):
@@ -50,16 +56,34 @@ def analyze(args):
             try:
                 report = helpdesk_catalog.plan(Path(args.repo), args.target,
                     state['languages'].get(code), catalog,
-                    domains=args.domains.split(',') if args.domains else None, force=args.force)
+                    domains=selected, force=args.force, target_ref=target_ref)
             except helpdesk_catalog.ImpactUncertainError as error:
                 reports.append(dict(error.plan, language=code))
                 raise
             reports.append(dict(report, language=code))
     finally:
         if reports:
-            core.save(args.out, {'schemaVersion': 1, 'reports': reports})
+            core.save(args.out, {'schemaVersion': 1, 'testMode': test_mode, 'businessSpec': spec, 'reports': reports})
     return {'ok': True, 'plan': args.out,
             'record': sum(f['action'] == 'record' for p in reports for d in p['domains'] for f in d['flows'])}
+
+
+def select_spec_domains(catalog, spec, selected=None):
+    """Select complete feature videos whose declared sources include an exact spec.
+
+    Selecting a spec never truncates its feature's required flows. Unknown paths
+    fail before model calls, and optional domain selection narrows shared specs.
+    """
+    if not spec:
+        return selected
+    if not re.fullmatch(r'docs/specs/[a-z0-9][a-z0-9_-]*\.md', spec):
+        raise ValueError('business-spec must be an exact docs/specs/*.md path, without globs')
+    matches = [d['key'] for d in catalog['domains'] if
+        spec in set(d['specPaths']) | {path for flow in d['flows'] for path in flow['specPaths']} and
+        (not selected or d['key'] in selected or d['domain'] in selected)]
+    if not matches:
+        raise ValueError('Business spec has no registered feature video in the selected domains')
+    return matches
 
 
 def domain_identity(domain, flows):
@@ -189,7 +213,7 @@ def generate(args):
                 core.save(cache / 'state.json', state, mode=0o600)
             current['commit'] = commit
         out.mkdir(parents=True, exist_ok=True)
-        manifest = {'schemaVersion': 1, 'commit': commit, 'version': reports[0]['version'],
+        manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
                     'workflowRunId': args.workflow_run_id, 'domains': entries}
         core.save(out / 'manifest.json', manifest)
         if entries:
@@ -224,6 +248,9 @@ def main():
     p.add_argument('--languages', default='en')
     p.add_argument('--domains', default='')
     p.add_argument('--force', action='store_true')
+    p.add_argument('--business-spec', default='')
+    p.add_argument('--test-mode', action='store_true')
+    p.add_argument('--target-ref', help='Exact branch/commit to demonstrate in isolated test mode')
     p = commands.add_parser('generate')
     p.add_argument('--repo', default=str(core.REPO))
     p.add_argument('--repository', default='Selleo/mentingo')

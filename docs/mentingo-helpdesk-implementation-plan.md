@@ -103,3 +103,7 @@ Focused backend/MCP/assistant and frontend tests cover this slice. The UI defaul
 ## Version-driven workflow delivery
 
 The implemented commands, secrets, private storage, retry behavior and validation boundaries are documented in `scripts/helpdesk-publish/WORKFLOW.md`. Automatic batches check all reviewed domains; manual domain selection permits a smaller first production run. Production configuration, real complete-flow recordings and hosted playback are pending. Typed chapter-level prerequisite filtering and fully localized feature metadata are not part of this workflow slice.
+
+## Pre-merge manual generation tests
+
+The existing `release-film.yml` dispatch entry accepts `helpdesk_spec` and invokes isolated Helpdesk generation on the selected branch. An exact business-spec path selects its complete feature video; a branch/commit can be recorded without creating a version tag. Fresh test state has no production storage access, and publishing is disabled. The redacted MP4, captions and chapter metadata are downloadable run artifacts. Configuration and the exact dispatch command live in `scripts/helpdesk-publish/WORKFLOW.md`.

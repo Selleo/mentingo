@@ -84,6 +84,17 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(result['version'], '1.1.0')
         self.assertEqual(self.first_flow(result)['action'], 'record')
 
+    def test_isolated_test_can_record_an_untagged_branch_commit(self):
+        self.write(CODE, 'export const save = () => create(); // branch change\n')
+        self.git('add', '.')
+        self.git('commit', '-qm', 'Untagged branch build')
+        commit = self.git('rev-parse', 'HEAD')
+        result = catalog.plan(self.repo, 'v0.0.0-helpdesk-test.123', None, self.catalog,
+                              target_ref='HEAD', classify=classifier())
+        self.assertEqual(result['commit'], commit)
+        self.assertEqual(result['version'], '0.0.0-helpdesk-test.123')
+        self.assertEqual(self.first_flow(result)['action'], 'record')
+
     def test_unrelated_change_reuses_without_any_model_call(self):
         self.write('internal/metrics.py', 'retries = 2\n')
         self.commit('Metrics', 'v1.1.0')

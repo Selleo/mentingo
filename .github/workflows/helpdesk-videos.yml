@@ -4,7 +4,7 @@ on:
     inputs:
       version:
         description: Exact version tag to demonstrate (no GitHub Release required)
-        required: true
+        required: false
         type: string
       domains:
         description: Comma-separated domains; empty means all reviewed registry domains
@@ -23,8 +23,8 @@ on:
         default: false
         type: boolean
       publish:
-        description: Publish the reviewed feature videos to Helpdesk
-        default: true
+        description: Publish the reviewed feature videos to Helpdesk (production default-branch runs only)
+        default: false
         type: boolean
       resume_publication:
         description: Resume the saved pending bundle without analysis or recording
@@ -34,17 +34,66 @@ on:
         description: Explicitly retry recoverable failed media/indexing operations while resuming
         default: false
         type: boolean
+      business_spec:
+        description: Exact business spec path; selects its complete feature video
+        default: ''
+        type: string
+      test_mode:
+        description: Isolated branch test; fresh state and downloadable artifacts, no publishing or build-store access
+        default: false
+        type: boolean
+      target_ref:
+        description: Source branch or commit to record in test mode (default this workflow commit)
+        default: ''
+        type: string
+
+  workflow_call:
+    inputs:
+      version:
+        required: false
+        type: string
+      domains:
+        default: ''
+        type: string
+      languages:
+        default: en
+        type: string
+      force:
+        default: false
+        type: boolean
+      dry_run:
+        default: false
+        type: boolean
+      publish:
+        default: false
+        type: boolean
+      resume_publication:
+        default: false
+        type: boolean
+      retry_failed:
+        default: false
+        type: boolean
+      business_spec:
+        default: ''
+        type: string
+      test_mode:
+        default: false
+        type: boolean
+      target_ref:
+        default: ''
+        type: string
+
 permissions: {}
 concurrency:
   # This also serializes the private build-state writer across recording/publication.
-  group: helpdesk-feature-videos
+  group: helpdesk-feature-videos-${{ inputs.test_mode && github.run_id || 'production' }}
   cancel-in-progress: false
   queue: max
 jobs:
   generate:
     name: Analyze flows and build affected feature videos
-    if: github.ref_name == github.event.repository.default_branch
-    environment: release-film
+    if: inputs.test_mode || github.ref_name == github.event.repository.default_branch
+    environment: ${{ inputs.test_mode && 'helpdesk-testing' || 'release-film' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     permissions:
@@ -64,18 +113,36 @@ jobs:
         with:
           node-version: 22.15.0
       - name: Resolve version and validate configuration
+        id: source
         env:
           VERSION_TAG: ${{ inputs.version }}
+          TEST_MODE: ${{ inputs.test_mode }}
+          TARGET_REF: ${{ inputs.target_ref }}
+          BUSINESS_SPEC: ${{ inputs.business_spec }}
+          PUBLISH: ${{ inputs.publish }}
+          RESUME: ${{ inputs.resume_publication }}
           STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
         run: |
           set -euo pipefail
-          [[ "$VERSION_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
-          git rev-parse --verify "refs/tags/$VERSION_TAG^{commit}" >/dev/null
-          test -n "$STORE"
+          if [ "$TEST_MODE" = true ]; then
+            test -n "$BUSINESS_SPEC"
+            test "$PUBLISH" != true
+            test "$RESUME" != true
+            commit=$(git rev-parse --verify --end-of-options "${TARGET_REF:-$GITHUB_SHA}^{commit}")
+            echo "record_ref=$commit" >> "$GITHUB_OUTPUT"
+            echo "record_version=v0.0.0-helpdesk-test.$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+          else
+            [[ "$VERSION_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
+            test -z "$TARGET_REF"
+            git rev-parse --verify "refs/tags/$VERSION_TAG^{commit}" >/dev/null
+            test -n "$STORE"
+            echo "record_version=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          fi
           sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME/projects"
           cp .agents/skills/release-film/projects/selleo__mentingo.json "$RELEASE_FILM_HOME/projects/selleo__mentingo.json"
       - name: Restore private reusable flow segments and publication progress
         id: restore
+        if: ${{ !inputs.test_mode }}
         env:
           STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
           AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
@@ -83,6 +150,30 @@ jobs:
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
         run: python3 "$S/helpdesk_store.py" pull --uri "$STORE" --cache "$CACHE"
+      - name: Initialize isolated test state
+        if: ${{ inputs.test_mode }}
+        run: |
+          python3 - <<'PYINIT'
+          import json, os, pathlib
+          cache = pathlib.Path(os.environ['CACHE'])
+          cache.mkdir(parents=True, exist_ok=True)
+          (cache/'state.json').write_text(json.dumps({'schemaVersion':1,'languages':{},'published':{},'publications':{}}))
+          PYINIT
+      - name: Check recording credentials before model work
+        if: ${{ !inputs.resume_publication }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo '::error::Configure CLAUDE_CODE_OAUTH_TOKEN in the selected recording environment or repository secrets.'
+            exit 1
+          fi
+          if [ "$DRY_RUN" != true ] && [ -z "$ELEVENLABS_API_KEY" ]; then
+            echo '::error::Configure ELEVENLABS_API_KEY before recording, or select dry-run for analysis only.'
+            exit 1
+          fi
       - name: Install recorder tools
         if: ${{ !inputs.resume_publication }}
         run: bash .agents/skills/release-film/ci/install-tools.sh
@@ -90,7 +181,10 @@ jobs:
         if: ${{ !inputs.resume_publication }}
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          VERSION_TAG: ${{ inputs.version }}
+          VERSION_TAG: ${{ steps.source.outputs.record_version }}
+          TEST_MODE: ${{ inputs.test_mode }}
+          TARGET_REF: ${{ steps.source.outputs.record_ref }}
+          BUSINESS_SPEC: ${{ inputs.business_spec }}
           DOMAINS: ${{ inputs.domains }}
           LANGUAGES: ${{ inputs.languages }}
           FORCE: ${{ inputs.force }}
@@ -99,6 +193,8 @@ jobs:
           args=(plan --target "$VERSION_TAG" --cache "$CACHE" --out "$RUNNER_TEMP/helpdesk-plan.json" \
             --domains "$DOMAINS" --languages "$LANGUAGES")
           if [ "$FORCE" = true ]; then args+=(--force); fi
+          if [ -n "$BUSINESS_SPEC" ]; then args+=(--business-spec "$BUSINESS_SPEC"); fi
+          if [ "$TEST_MODE" = true ]; then args+=(--test-mode --target-ref "$TARGET_REF"); fi
           python3 "$S/helpdesk.py" "${args[@]}"
       - name: Record changed flows and assemble complete videos
         if: ${{ !inputs.dry_run && !inputs.resume_publication }}
@@ -131,14 +227,14 @@ jobs:
           PY
       - name: Redact recording text before saving build files
         id: redact
-        if: ${{ always() && steps.restore.outcome == 'success' && !inputs.dry_run }}
+        if: ${{ always() && !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 .agents/skills/release-film/ci/redact.py "$RELEASE_FILM_HOME/runs" "$CACHE"
       - name: Checkpoint private segments even after an interrupted later flow
-        if: ${{ always() && steps.restore.outcome == 'success' && steps.redact.outcome == 'success' && !inputs.dry_run }}
+        if: ${{ always() && !inputs.test_mode && steps.restore.outcome == 'success' && steps.redact.outcome == 'success' && !inputs.dry_run }}
         env:
           STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
           AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
@@ -146,6 +242,20 @@ jobs:
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
         run: python3 "$S/helpdesk_store.py" push --uri "$STORE" --cache "$CACHE"
+      - name: Downloadable test videos and chapter metadata
+        if: ${{ success() && inputs.test_mode && !inputs.dry_run && steps.redact.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: helpdesk-test-videos
+          path: |
+            ${{ env.CACHE }}/bundles/**/video.mp4
+            ${{ env.CACHE }}/bundles/**/poster.jpg
+            ${{ env.CACHE }}/bundles/**/captions-*.srt
+            ${{ env.CACHE }}/bundles/**/captions-*.vtt
+            ${{ env.CACHE }}/bundles/**/manifest.json
+            ${{ env.CACHE }}/bundles/**/timeline.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Report semantic decisions
         if: ${{ always() && !inputs.resume_publication }}
         run: |
@@ -164,7 +274,7 @@ jobs:
   publish:
     name: Upload directly to Bunny and publish indexed revisions
     needs: generate
-    if: ${{ inputs.publish && !inputs.dry_run }}
+    if: ${{ inputs.publish && !inputs.dry_run && !inputs.test_mode && github.ref_name == github.event.repository.default_branch }}
     environment: helpdesk-publishing
     runs-on: ubuntu-24.04
     timeout-minutes: 65

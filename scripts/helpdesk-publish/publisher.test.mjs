@@ -168,6 +168,15 @@ test("validates the whole bundle before calls and hashes video without changing 
   assert.equal(s.calls.length, 0);
 });
 
+test("isolated test bundles cannot enter the publishing lifecycle", async (t) => {
+  const f = fixture(t);
+  f.manifest.testMode = true;
+  f.write();
+  const s = stub();
+  await assert.rejects(publishBundle({ ...f.options, ...s }), /cannot be published/);
+  assert.equal(s.calls.length, 0);
+});
+
 test("rejects traversal, symlinks, duplicate tutorials and mismatched provenance", async (t) => {
   const f = fixture(t);
   assert.throws(() => bundlePath(f.root, "../video.mp4"), /path/);

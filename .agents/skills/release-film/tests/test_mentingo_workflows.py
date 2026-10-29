@@ -166,7 +166,7 @@ class Workflows(unittest.TestCase):
         self.assertNotIn('secrets', chained)
         self.assertEqual(chained['with'], {'run_id': '${{ github.run_id }}', 'target': 'release',
                                            'replace': '${{ inputs.replace }}'})
-        self.assertEqual(chained['if'], "${{ github.event_name == 'workflow_dispatch' && inputs.publish }}")
+        self.assertEqual(chained['if'], "${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.helpdesk_spec == '' }}")
         self.assertEqual(chained['permissions'], {'actions': 'read', 'contents': 'write', 'pages': 'write',
                                                   'id-token': 'write'})
         publish, pages = self.publish['jobs']['publish'], self.publish['jobs']['pages']

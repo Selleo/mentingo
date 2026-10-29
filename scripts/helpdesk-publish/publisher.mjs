@@ -264,6 +264,7 @@ async function fileHash(path) {
 /** Validate the complete batch before the first network mutation. */
 export async function readBundle(root) {
   const manifest = loadJson(bundlePath(root, "manifest.json"));
+  check(manifest?.testMode !== true, "Test video bundles cannot be published.");
   check(
     object(manifest) &&
       manifest.schemaVersion === 1 &&
