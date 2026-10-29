@@ -31,6 +31,8 @@ import { McpStudentLessonRepository } from "./mcp-student-lesson.repository";
 import { McpTokenService } from "./mcp-token.service";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { McpController } from "./mcp.controller";
+import { SlackConversationsController } from "./slack-conversations.controller";
+import { SlackConversationsRepository } from "./slack-conversations.repository";
 
 @Module({
   imports: [
@@ -55,6 +57,7 @@ import { McpController } from "./mcp.controller";
     UserModule,
   ],
   providers: [
+    SlackConversationsRepository,
     McpHttpService,
     McpStudentLessonRepository,
     McpActorRepository,
@@ -64,7 +67,12 @@ import { McpController } from "./mcp.controller";
     McpOAuthService,
     McpResourceService,
   ],
-  controllers: [McpOAuthController, McpConsentController, McpController],
+  controllers: [
+    McpOAuthController,
+    McpConsentController,
+    McpController,
+    SlackConversationsController,
+  ],
   exports: [
     McpHttpService,
     McpTokenService,

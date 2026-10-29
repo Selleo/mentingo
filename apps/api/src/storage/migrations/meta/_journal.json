@@ -1597,6 +1597,13 @@
       "when": 1793091706496,
       "tag": "0227_enable_assistant_tenant_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 228,
+      "version": "7",
+      "when": 1793276216969,
+      "tag": "0228_slack_conversation_transcripts",
+      "breakpoints": true
     }
   ]
 }

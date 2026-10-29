@@ -98,6 +98,8 @@
     }
   },
   "aiConversations": {
+    "connectedAccount": "Susieta paskyra",
+    "slackParticipant": "Slack dalyvis",
     "session": "Sesija",
     "context": "Kontekstas",
     "activity": "Veikla",

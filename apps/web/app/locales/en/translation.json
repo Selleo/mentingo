@@ -98,6 +98,8 @@
     }
   },
   "aiConversations": {
+    "connectedAccount": "Connected account",
+    "slackParticipant": "Slack participant",
     "session": "Session",
     "context": "Context",
     "activity": "Activity",

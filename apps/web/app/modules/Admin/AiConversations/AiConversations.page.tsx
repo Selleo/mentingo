@@ -31,6 +31,7 @@ import {
 } from "./aiConversations.utils";
 import { ConversationReader } from "./ConversationReader";
 import { ConversationStatus } from "./ConversationStatus";
+import { SlackConversationSource } from "./SlackConversationSource";
 
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
@@ -206,9 +207,12 @@ export default function AiConversationsPage() {
                   },
                 )}
               >
-                <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
-                  {thread.title || t("aiConversations.untitled")}
-                </h2>
+                <div className="flex min-w-0 items-center gap-2">
+                  {thread.source === "slack" && <SlackConversationSource />}
+                  <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
+                    {thread.title || t("aiConversations.untitled")}
+                  </h2>
+                </div>
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="min-w-0 flex-1 truncate text-xs leading-5 text-neutral-700">
                     {thread.owner.firstName} {thread.owner.lastName}

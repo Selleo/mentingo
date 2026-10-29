@@ -23513,6 +23513,33 @@
           }
         }
       }
+    },
+    "/api/mcp/slack-conversations": {
+      "post": {
+        "operationId": "SlackConversationsController_append",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppendResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -61163,6 +61190,18 @@
                     }
                   ]
                 },
+                "source": {
+                  "anyOf": [
+                    {
+                      "const": "mentingo",
+                      "type": "string"
+                    },
+                    {
+                      "const": "slack",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "practiceSessionId": {
                   "anyOf": [
                     {
@@ -61361,6 +61400,18 @@
                       },
                       {
                         "const": "assistant",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "source": {
+                    "anyOf": [
+                      {
+                        "const": "mentingo",
+                        "type": "string"
+                      },
+                      {
+                        "const": "slack",
                         "type": "string"
                       }
                     ]
@@ -61664,6 +61715,26 @@
                 },
                 "content": {
                   "type": "string"
+                },
+                "slackUserId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "slackUserName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "status": {
                   "anyOf": [
@@ -183513,6 +183584,127 @@
                 "updatedAt"
               ]
             }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AppendBody": {
+        "type": "object",
+        "properties": {
+          "threadKey": {
+            "minLength": 1,
+            "maxLength": 500,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "messages": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalId": {
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "role": {
+                  "anyOf": [
+                    {
+                      "const": "user",
+                      "type": "string"
+                    },
+                    {
+                      "const": "assistant",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "text": {
+                  "minLength": 1,
+                  "maxLength": 50000,
+                  "type": "string"
+                },
+                "slackUserId": {
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                "slackUserName": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "createdAt": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "externalId",
+                "role",
+                "text",
+                "createdAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "threadKey",
+          "messages"
+        ]
+      },
+      "AppendResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "required": [

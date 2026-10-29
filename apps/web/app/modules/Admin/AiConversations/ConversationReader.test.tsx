@@ -11,6 +11,7 @@ const loading = vi.hoisted(() => ({
   messagesPending: false,
   background: false,
   failed: false,
+  slack: false,
 }));
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: () => ({
@@ -20,7 +21,8 @@ vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
           id: "thread",
           title: "Saved interview",
           owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
-          type: "practice",
+          type: loading.slack ? "assistant" : "practice",
+          source: loading.slack ? "slack" : "mentingo",
           courseTitle: null,
           status: "completed",
           language: "en",
@@ -47,6 +49,19 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
       pages: [
         {
           data: [
+            ...(loading.slack
+              ? [
+                  {
+                    id: "slack-named",
+                    role: "user",
+                    content: "Named message",
+                    slackUserId: "U123",
+                    slackUserName: "Jamie Slack",
+                  },
+                  { id: "slack-id", role: "user", content: "ID-only message", slackUserId: "U456" },
+                  { id: "slack-unknown", role: "user", content: "Unknown sender" },
+                ]
+              : []),
             ...(loading.failed
               ? [
                   {
@@ -71,7 +86,20 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
   }),
 }));
 vi.mock("~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage", () => ({
-  default: ({ content }: { content: string }) => <p>{content}</p>,
+  default: ({
+    content,
+    userName,
+    previewUser,
+  }: {
+    content: string;
+    userName: string;
+    previewUser: { profilePictureUrl: string | null };
+  }) => (
+    <div data-avatar={previewUser.profilePictureUrl}>
+      <span>{userName}</span>
+      <p>{content}</p>
+    </div>
+  ),
 }));
 
 const Page = createRemixStub([
@@ -87,6 +115,18 @@ describe("conversation details", () => {
     loading.messagesPending = false;
     loading.background = false;
     loading.failed = false;
+    loading.slack = false;
+  });
+
+  it("identifies Slack and attributes each message to its participant", async () => {
+    loading.slack = true;
+    renderWith().render(<Page />);
+    expect(await screen.findByRole("img", { name: "Slack" })).toBeInTheDocument();
+    expect(screen.getByText("Connected account: Alex Learner")).toBeInTheDocument();
+    expect(screen.getByText("Jamie Slack")).toBeInTheDocument();
+    expect(screen.getByText("U456")).toBeInTheDocument();
+    expect(screen.getByText("Slack participant")).toBeInTheDocument();
+    expect(screen.queryByText("U123")).not.toBeInTheDocument();
   });
 
   it.each([true, false])(

@@ -7793,6 +7793,7 @@ export interface GetAdminAiThreadSummariesResponse {
     /** @format uuid */
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
+    source?: "mentingo" | "slack";
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7825,6 +7826,7 @@ export interface GetAdminAiThreadDetailsResponse {
     /** @format uuid */
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
+    source?: "mentingo" | "slack";
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7872,6 +7874,8 @@ export interface GetAdminAiThreadMessagesResponse {
     id: string;
     role: "user" | "assistant";
     content: string;
+    slackUserId?: string | null;
+    slackUserName?: string | null;
     status?: "pending" | "running" | "complete" | "failed" | "cancelled";
     createdAt: string;
   }[];
@@ -35712,6 +35716,50 @@ export interface ReorderResponse {
   }[];
 }
 
+export interface AppendBody {
+  /**
+   * @minLength 1
+   * @maxLength 500
+   */
+  threadKey: string;
+  /** @maxLength 200 */
+  title?: string;
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @maxItems 100
+   * @minItems 1
+   */
+  messages: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    externalId: string;
+    role: "user" | "assistant";
+    /**
+     * @minLength 1
+     * @maxLength 50000
+     */
+    text: string;
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    slackUserId?: string;
+    /** @maxLength 200 */
+    slackUserName?: string;
+    /** @format date-time */
+    createdAt: string;
+  }[];
+}
+
+export interface AppendResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -40484,6 +40532,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor" | "assistant";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name IngestionControllerIngest
      * @request POST:/api/ingestion/ingest
      */
@@ -43602,6 +43741,166 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AssistantControllerGetAvailability
+     * @request GET:/api/assistant/availability
+     */
+    assistantControllerGetAvailability: (params: RequestParams = {}) =>
+      this.request<GetAvailabilityResponse, any>({
+        path: `/api/assistant/availability`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListThreads
+     * @request GET:/api/assistant/threads
+     */
+    assistantControllerListThreads: (
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        archived?: boolean;
+        /** @maxLength 200 */
+        query?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListThreadsResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCreateThread
+     * @request POST:/api/assistant/threads
+     */
+    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetThread
+     * @request GET:/api/assistant/threads/{threadId}
+     */
+    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerUpdateThread
+     * @request PATCH:/api/assistant/threads/{threadId}
+     */
+    assistantControllerUpdateThread: (
+      threadId: string,
+      data: UpdateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListMessages
+     * @request GET:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerListMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMessagesResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerSendMessage
+     * @request POST:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerSendMessage: (
+      threadId: string,
+      data: SendMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendMessageResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCancelRun
+     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
+     */
+    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
+      this.request<CancelRunResponse, any>({
+        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name McpConsentControllerGetConsent
      * @request GET:/api/oauth/consent/{consent}
      */
@@ -46317,250 +46616,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name AssistantControllerGetAvailability
-     * @request GET:/api/assistant/availability
+     * @name SlackConversationsControllerAppend
+     * @request POST:/api/mcp/slack-conversations
      */
-    assistantControllerGetAvailability: (params: RequestParams = {}) =>
-      this.request<GetAvailabilityResponse, any>({
-        path: `/api/assistant/availability`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListThreads
-     * @request GET:/api/assistant/threads
-     */
-    assistantControllerListThreads: (
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        archived?: boolean;
-        /** @maxLength 200 */
-        query?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListThreadsResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCreateThread
-     * @request POST:/api/assistant/threads
-     */
-    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/assistant/threads`,
+    slackConversationsControllerAppend: (data: AppendBody, params: RequestParams = {}) =>
+      this.request<AppendResponse, any>({
+        path: `/api/mcp/slack-conversations`,
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetThread
-     * @request GET:/api/assistant/threads/{threadId}
-     */
-    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
-      this.request<GetThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerUpdateThread
-     * @request PATCH:/api/assistant/threads/{threadId}
-     */
-    assistantControllerUpdateThread: (
-      threadId: string,
-      data: UpdateThreadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListMessages
-     * @request GET:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerListMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListMessagesResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerSendMessage
-     * @request POST:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerSendMessage: (
-      threadId: string,
-      data: SendMessageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SendMessageResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCancelRun
-     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
-     */
-    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
-      this.request<CancelRunResponse, any>({
-        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
-     * @request GET:/api/admin/ai-threads
-     */
-    adminAiThreadsControllerGetAdminAiThreadSummaries: (
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        /** @format uuid */
-        userId?: string;
-        /** @maxLength 200 */
-        search?: string;
-        /** @format date-time */
-        from?: string;
-        /** @format date-time */
-        to?: string;
-        type?: "practice" | "ai-mentor" | "assistant";
-        status?: "active" | "completed" | "archived";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadSummariesResponse, any>({
-        path: `/api/admin/ai-threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
-     * @request GET:/api/admin/ai-threads/{threadId}
-     */
-    adminAiThreadsControllerGetAdminAiThreadDetails: (
-      threadId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadDetailsResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
-     * @request GET:/api/admin/ai-threads/{threadId}/messages
-     */
-    adminAiThreadsControllerGetAdminAiThreadMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadMessagesResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

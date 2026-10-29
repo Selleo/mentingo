@@ -75,6 +75,7 @@ export class AdminAiThreadsRepository {
         >`CASE WHEN ${aiMentorThreads.practiceSessionId} IS NOT NULL THEN ${AI_THREAD_TYPES.PRACTICE} ELSE ${AI_THREAD_TYPES.AI_MENTOR} END`.as(
           "source_type",
         ),
+        source: sql<"mentingo" | "slack">`'mentingo'`.as("conversation_source"),
         practiceSessionId: aiMentorThreads.practiceSessionId,
         aiMentorLessonId: aiMentorThreads.aiMentorLessonId,
         lessonId: aiMentorLessons.lessonId,
@@ -133,6 +134,7 @@ export class AdminAiThreadsRepository {
       .select({
         id: assistantThreads.id,
         type: sql<AdminAiThreadSummary["type"]>`${AI_THREAD_TYPES.ASSISTANT}`.as("source_type"),
+        source: assistantThreads.source,
         practiceSessionId: sql<string | null>`NULL`.as("practice_session_id"),
         aiMentorLessonId: sql<string | null>`NULL`.as("ai_mentor_lesson_id"),
         lessonId: sql<string | null>`NULL`.as("lesson_id"),
@@ -264,6 +266,8 @@ export class AdminAiThreadsRepository {
             AdminAiThreadMessage["role"]
           >`CASE WHEN ${assistantMessages.role} = ${ASSISTANT_MESSAGE_ROLES.USER} THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
           content: assistantMessages.text,
+          slackUserId: assistantMessages.slackUserId,
+          slackUserName: assistantMessages.slackUserName,
           status: assistantMessages.status,
           createdAt: assistantMessages.createdAt,
         })

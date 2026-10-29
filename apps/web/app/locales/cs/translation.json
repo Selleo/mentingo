@@ -98,6 +98,8 @@
     }
   },
   "aiConversations": {
+    "connectedAccount": "Propojený účet",
+    "slackParticipant": "Účastník Slacku",
     "session": "Relace",
     "context": "Kontext",
     "activity": "Aktivita",

@@ -6,7 +6,7 @@ import { renderWith } from "~/utils/testUtils";
 
 import AiConversationsPage from "./AiConversations.page";
 
-const listState = vi.hoisted(() => ({ empty: false }));
+const listState = vi.hoisted(() => ({ empty: false, slack: false }));
 
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: (id: string) => ({
@@ -42,6 +42,7 @@ vi.mock("~/api/queries/admin/useAdminAiThreads", () => ({
         title: `Conversation ${status}`,
         openingPreview: "Welcome",
         owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: "/avatar.png" },
+        source: listState.slack ? "slack" : "mentingo",
         type: "practice",
         courseTitle: null,
         status,
@@ -60,8 +61,14 @@ const Page = createRemixStub([
 ]);
 
 describe("AI conversations inbox", () => {
+  it("marks synced Slack conversations in the inbox", async () => {
+    listState.slack = true;
+    renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
+    expect(await screen.findAllByRole("img", { name: "Slack" })).toHaveLength(3);
+  });
   beforeEach(() => {
     listState.empty = false;
+    listState.slack = false;
   });
   afterEach(() => vi.useRealTimers());
   it("clears a pending toolbar search together with popup filters", async () => {

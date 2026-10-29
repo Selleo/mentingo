@@ -46,9 +46,18 @@ export const assistantThreads = pgTable(
       .$type<SupportedLanguages>()
       .notNull()
       .default(SUPPORTED_LANGUAGES.EN),
+    source: text("source").$type<"mentingo" | "slack">().notNull().default("mentingo"),
+    externalThreadKey: text("external_thread_key"),
+    externalClientId: text("external_client_id"),
     archived: boolean("archived").notNull().default(false),
   },
   withTenantIdIndex("assistant_threads", (table) => ({
+    externalThreadUnique: uniqueIndex("assistant_threads_external_unique").on(
+      table.tenantId,
+      table.userId,
+      table.externalClientId,
+      table.externalThreadKey,
+    ),
     ownerUpdatedIdx: index("assistant_threads_owner_updated_idx").on(
       table.tenantId,
       table.userId,
@@ -73,6 +82,9 @@ export const assistantMessages = pgTable(
       .notNull()
       .default(ASSISTANT_MESSAGE_STATUSES.COMPLETE),
     sources: jsonb("sources").$type<AssistantSource[]>().notNull().default([]),
+    externalMessageId: text("external_message_id"),
+    slackUserId: text("slack_user_id"),
+    slackUserName: text("slack_user_name"),
     clientMessageId: uuid("client_message_id"),
   },
   withTenantIdIndex("assistant_messages", (table) => ({
@@ -81,6 +93,11 @@ export const assistantMessages = pgTable(
       table.threadId,
       table.createdAt,
       table.id,
+    ),
+    externalMessageUnique: uniqueIndex("assistant_messages_external_unique").on(
+      table.tenantId,
+      table.threadId,
+      table.externalMessageId,
     ),
     clientIdUnique: uniqueIndex("assistant_messages_client_id_unique").on(
       table.tenantId,

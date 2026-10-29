@@ -98,6 +98,8 @@
     }
   },
   "aiConversations": {
+    "connectedAccount": "Verbundenes Konto",
+    "slackParticipant": "Slack-Teilnehmer",
     "session": "Sitzung",
     "context": "Kontext",
     "activity": "Aktivität",
