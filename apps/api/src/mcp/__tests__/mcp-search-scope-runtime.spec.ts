@@ -12,9 +12,9 @@ import {
 import express from "express";
 import request from "supertest";
 
-import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-helpdesk.constants";
 import { McpHttpService } from "../mcp-http.service";
 import { MCP_GLOBAL_SEARCH_PERMISSIONS } from "../mcp-search-tools";
+import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-self-onboarding.constants";
 import { MCP_SCOPES } from "../mcp-tool-scope";
 
 import type { McpToolRunner } from "../mcp-tool-runner.types";

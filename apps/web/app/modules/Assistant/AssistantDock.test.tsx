@@ -6,7 +6,7 @@ import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { helpdeskTutorialFixture } from "~/modules/Helpdesk/__tests__/fixtures";
+import { helpdeskTutorialFixture } from "~/modules/SelfOnboarding/__tests__/fixtures";
 import { server } from "~/utils/mocks/node";
 import { renderWith } from "~/utils/testUtils";
 

@@ -9,8 +9,8 @@ import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
-import { HelpdeskLauncher } from "~/modules/Helpdesk/HelpdeskLauncher";
 import { NotificationsNavigationItem } from "~/modules/Notifications/components";
+import { HelpdeskLauncher } from "~/modules/SelfOnboarding/SelfOnboardingLauncher";
 
 import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import {

@@ -1,4 +1,4 @@
-import { MCP_HELPDESK_TOOL_NAMES } from "./mcp-helpdesk.constants";
+import { MCP_HELPDESK_TOOL_NAMES } from "./mcp-self-onboarding.constants";
 
 import type { McpToolActor, McpNativeFeatureCapabilities } from "./mcp.types";
 

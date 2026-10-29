@@ -4,7 +4,10 @@ import {
   type AssistantSourceType,
 } from "@repo/shared";
 
-import { isMcpHelpdeskTool, MCP_HELPDESK_GUIDANCE_KIND } from "src/mcp/mcp-helpdesk.constants";
+import {
+  isMcpHelpdeskTool,
+  MCP_HELPDESK_GUIDANCE_KIND,
+} from "src/mcp/mcp-self-onboarding.constants";
 
 import type { AssistantSource } from "./assistant.types";
 

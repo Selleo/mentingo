@@ -134,7 +134,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
-        run: python3 "$S/helpdesk_store.py" pull --uri "$STORE" --cache "$CACHE"
+        run: python3 "$S/self_onboarding_store.py" pull --uri "$STORE" --cache "$CACHE"
       - name: Initialize isolated test state
         if: ${{ inputs.test_mode }}
         run: |
@@ -164,7 +164,7 @@ jobs:
             exit 1
           fi
           if [ "$DRY_RUN" != true ]; then
-            PYTHONPATH="$S" python3 -c 'import helpdesk_voices; helpdesk_voices.configured_pool(required=True)'
+            PYTHONPATH="$S" python3 -c 'import self_onboarding_voices; self_onboarding_voices.configured_pool(required=True)'
           fi
       - name: Install recorder tools
         if: ${{ !inputs.resume_publication }}
@@ -182,12 +182,12 @@ jobs:
           FORCE: ${{ inputs.force }}
         run: |
           set -euo pipefail
-          args=(plan --target "$VERSION_TAG" --cache "$CACHE" --out "$RUNNER_TEMP/helpdesk-plan.json" \
+          args=(plan --target "$VERSION_TAG" --cache "$CACHE" --out "$RUNNER_TEMP/self-onboarding-plan.json" \
             --domains "$DOMAINS" --languages "$LANGUAGES")
           if [ "$FORCE" = true ]; then args+=(--force); fi
           if [ -n "$BUSINESS_SPEC" ]; then args+=(--business-spec "$BUSINESS_SPEC"); fi
           if [ "$TEST_MODE" = true ]; then args+=(--test-mode --target-ref "$TARGET_REF"); fi
-          python3 "$S/helpdesk.py" "${args[@]}"
+          python3 "$S/self_onboarding.py" "${args[@]}"
       - name: Install the pinned ElevenLabs realtime transport
         if: ${{ !inputs.dry_run && !inputs.resume_publication }}
         run: |
@@ -206,7 +206,7 @@ jobs:
           ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
           ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
         run: |
-          python3 "$S/helpdesk.py" generate --plan "$RUNNER_TEMP/helpdesk-plan.json" --cache "$CACHE" \
+          python3 "$S/self_onboarding.py" generate --plan "$RUNNER_TEMP/self-onboarding-plan.json" --cache "$CACHE" \
             --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
             --out "$CACHE/bundles/$GITHUB_RUN_ID" --workflow-run-id "$GITHUB_RUN_ID"
       - name: Validate a resumed bundle belongs to the requested version
@@ -233,6 +233,24 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 .agents/skills/release-film/ci/redact.py "$RELEASE_FILM_HOME/runs" "$CACHE"
+      - name: Report recorder startup diagnostics
+        if: ${{ failure() && !inputs.dry_run && steps.redact.outcome == 'success' }}
+        run: python3 "$S/self_onboarding_diagnostics.py" "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID"
+      - name: Preserve reviewable recording progress
+        id: progress
+        if: ${{ always() && !inputs.dry_run && !inputs.resume_publication && steps.redact.outcome == 'success' }}
+        run: |
+          python3 "$S/self_onboarding_progress.py" \
+            --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
+            --cache "$CACHE" --out "$RUNNER_TEMP/self-onboarding-progress"
+      - name: Downloadable recording progress including failed runs
+        if: ${{ always() && steps.progress.outcome == 'success' && steps.redact.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: self-onboarding-progress
+          path: ${{ runner.temp }}/self-onboarding-progress
+          if-no-files-found: error
+          retention-days: 14
       - name: Checkpoint private segments even after an interrupted later flow
         if: ${{ always() && !inputs.test_mode && steps.restore.outcome == 'success' && steps.redact.outcome == 'success' && !inputs.dry_run }}
         env:
@@ -241,7 +259,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
-        run: python3 "$S/helpdesk_store.py" push --uri "$STORE" --cache "$CACHE"
+        run: python3 "$S/self_onboarding_store.py" push --uri "$STORE" --cache "$CACHE"
       - name: Downloadable test videos and chapter metadata
         if: ${{ success() && inputs.test_mode && !inputs.dry_run && steps.redact.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -261,7 +279,7 @@ jobs:
         run: |
           python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import json, os, pathlib
-          path = pathlib.Path(os.environ['RUNNER_TEMP'])/'helpdesk-plan.json'
+          path = pathlib.Path(os.environ['RUNNER_TEMP'])/'self-onboarding-plan.json'
           if path.exists():
               for report in json.loads(path.read_text())['reports']:
                   print(f"### {report['version']} / {report['language']}")
@@ -277,7 +295,7 @@ jobs:
     name: Upload directly to Bunny and publish indexed revisions
     needs: generate
     if: ${{ github.event_name == 'workflow_dispatch' && !inputs.registration_only && inputs.publish && !inputs.dry_run && !inputs.test_mode && github.ref_name == github.event.repository.default_branch }}
-    environment: helpdesk-publishing
+    environment: self-onboarding-publishing
     runs-on: ubuntu-24.04
     timeout-minutes: 65
     permissions:
@@ -302,7 +320,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
-        run: python3 "$S/helpdesk_store.py" pull --uri "$STORE" --cache "$CACHE"
+        run: python3 "$S/self_onboarding_store.py" pull --uri "$STORE" --cache "$CACHE"
       - name: Publish the verified bundle through the Guide SDK
         env:
           GUIDE_API_URL: ${{ vars.GUIDE_API_URL }}
@@ -321,9 +339,9 @@ jobs:
           PY
           )
           if [ -n "$bundle" ]; then
-            args=(--bundle "$bundle" --state "$CACHE/state.json" --output "$RUNNER_TEMP/helpdesk-publication.json")
+            args=(--bundle "$bundle" --state "$CACHE/state.json" --output "$RUNNER_TEMP/self-onboarding-publication.json")
             if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
-            node scripts/helpdesk-publish/publisher.mjs "${args[@]}"
+            node scripts/self-onboarding-publish/publisher.mjs "${args[@]}"
             python3 - <<'PY'
           import json, os, pathlib
           path = pathlib.Path(os.environ['CACHE'])/'state.json'
@@ -343,4 +361,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
           AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
-        run: python3 "$S/helpdesk_store.py" push --uri "$STORE" --cache "$CACHE"
+        run: python3 "$S/self_onboarding_store.py" push --uri "$STORE" --cache "$CACHE"

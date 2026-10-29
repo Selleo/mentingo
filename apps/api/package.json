@@ -37,7 +37,7 @@
     "workflow:build": "node --input-type=module -e \"import { resolve } from 'node:path'; import { NestLocalBuilder } from '@workflow/nest/builder'; await new NestLocalBuilder({ workingDir: process.cwd(), dirs: ['src/assistant/workflow'], outDir: resolve('dist/workflow'), moduleType: 'commonjs', distDir: 'dist/src/assistant/workflow', sourcemap: false }).build();\"",
     "workflow:typecheck": "tsc --project tsconfig.workflow.json",
     "db:migrate:prod": "node -r dotenv/config -e \"require('./dist/src/storage/db/database-migration.service').runDatabaseMigrations().catch(() => process.exitCode = 1)\"",
-    "helpdesk:generate-schema": "node -r ts-node/register/transpile-only -r tsconfig-paths/register scripts/generate-helpdesk-schema.ts"
+    "self-onboarding:generate-schema": "node -r ts-node/register/transpile-only -r tsconfig-paths/register scripts/generate-self-onboarding-schema.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.8",

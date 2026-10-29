@@ -1,6 +1,6 @@
 import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES } from "@repo/shared";
 
-import { isMcpHelpdeskTool } from "./mcp-helpdesk.constants";
+import { isMcpHelpdeskTool } from "./mcp-self-onboarding.constants";
 
 export { MCP_REQUESTABLE_SCOPES, MCP_SCOPES };
 

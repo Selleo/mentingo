@@ -48,7 +48,6 @@ import { CourseTranslationService } from "src/courses/languages/course-translati
 import { FileService } from "src/file/file.service";
 import { GlobalSearchService } from "src/global-search/global-search.service";
 import { GroupService } from "src/group/group.service";
-import { HelpdeskService } from "src/helpdesk/helpdesk.service";
 import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { AiJudgeConfigurationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration.service";
 import { AiMentorConfigurationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration.service";
@@ -60,6 +59,7 @@ import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { REDIS_CLIENT, RedisClient } from "src/redis";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { contentReferencesResource } from "src/resource-library/resource-library.utils";
+import { HelpdeskService } from "src/self-onboarding/self-onboarding.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -82,12 +82,6 @@ import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
 import { registerMcpCustomizationTools } from "./mcp-customization-tools";
 import { registerMcpGenericUploadTool } from "./mcp-generic-upload-tools";
-import { registerMcpHelpdeskTools } from "./mcp-helpdesk-tools";
-import {
-  isMcpHelpdeskTool,
-  MCP_HELPDESK_GUIDANCE_KIND,
-  MCP_HELPDESK_TOOL_NAMES,
-} from "./mcp-helpdesk.constants";
 import { linkNativeReadResult } from "./mcp-native-links";
 import {
   bindToolActor,
@@ -98,6 +92,12 @@ import {
   type NativeReadRegistration,
 } from "./mcp-native-read.types";
 import { MCP_CONTENT_SEARCH_PERMISSIONS, registerMcpSearchTools } from "./mcp-search-tools";
+import { registerMcpHelpdeskTools } from "./mcp-self-onboarding-tools";
+import {
+  isMcpHelpdeskTool,
+  MCP_HELPDESK_GUIDANCE_KIND,
+  MCP_HELPDESK_TOOL_NAMES,
+} from "./mcp-self-onboarding.constants";
 import {
   asMcpStudentUser,
   MCP_STUDENT_SEARCH_PERMISSIONS,

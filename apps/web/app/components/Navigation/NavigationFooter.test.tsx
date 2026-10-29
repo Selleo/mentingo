@@ -21,7 +21,7 @@ vi.mock("./NavigationMenuItemLink", () => ({
 }));
 vi.mock("../UserProfile/UserAvatar", () => ({ UserAvatar: () => null }));
 vi.mock("~/components/Icon", () => ({ Icon: () => null }));
-vi.mock("~/modules/Helpdesk/HelpdeskContent", () => ({
+vi.mock("~/modules/SelfOnboarding/SelfOnboardingContent", () => ({
   default: () => <input aria-label="Help search" />,
 }));
 

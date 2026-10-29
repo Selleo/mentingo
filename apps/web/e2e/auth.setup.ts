@@ -8,7 +8,7 @@ const ADMIN_PASSWORD = "password";
 const ADMIN_EMAIL = "admin@example.com";
 const apiClient = createFixtureApiClient();
 
-setup("authenticate", async ({ browser }) => {
+setup("authenticate", async ({ browser }, testInfo) => {
   const origin = process.env.CI
     ? "https://localhost:5173"
     : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
@@ -20,6 +20,16 @@ setup("authenticate", async ({ browser }) => {
     apiClient.syncTenantOrigin(origin);
     apiClient.syncCookies(await adminContext.cookies());
     await markAllOnboardingComplete(apiClient);
+  } catch (error) {
+    if (process.env.DEMO_FAILURE_SCREENSHOTS === "1") {
+      await adminPage
+        .screenshot({
+          path: testInfo.outputPath("self-onboarding-auth-failure.png"),
+          fullPage: true,
+        })
+        .catch(() => undefined);
+    }
+    throw error;
   } finally {
     apiClient.clearCookies();
     await adminContext.close();

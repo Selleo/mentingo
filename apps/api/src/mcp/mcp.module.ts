@@ -7,7 +7,6 @@ import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { GlobalSearchModule } from "src/global-search/global-search.module";
 import { GroupModule } from "src/group/group.module";
-import { HelpdeskModule } from "src/helpdesk/helpdesk.module";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -18,6 +17,7 @@ import { QuizModule } from "src/quiz/quiz.module";
 import { RedisClientsModule } from "src/redis";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { ScormModule } from "src/scorm/scorm.module";
+import { HelpdeskModule } from "src/self-onboarding/self-onboarding.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 

@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 
-import { AssistantHelpdeskLink } from "./AssistantHelpdeskLink";
+import { AssistantHelpdeskLink } from "./AssistantSelfOnboardingLink";
 
 import type { AssistantSource } from "../assistant.types";
 

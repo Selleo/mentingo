@@ -442,7 +442,8 @@ import {{ defineConfig }} from "@playwright/test";
 import base from "./{stem}";
 
 const film = {{ viewport: {{ width: 1600, height: 900 }}, deviceScaleFactor: Number(process.env.DEMO_DEVICE_SCALE || 1.5), video: "off" as const,
-  trace: "off" as const, screenshot: "off" as const }};
+  trace: "off" as const, screenshot: process.env.DEMO_KEEPER_READY && process.env.DEMO_FAILURE_SCREENSHOTS === "1"
+    ? "only-on-failure" as const : "off" as const }};
 const requestedWorkers = process.env.DEMO_WORKERS ? Number(process.env.DEMO_WORKERS) : base.workers;
 const workerLimit = process.env.DEMO_WORKER_LIMIT ? Number(process.env.DEMO_WORKER_LIMIT) : undefined;
 const workerCount = typeof requestedWorkers === "string" && requestedWorkers.endsWith("%")

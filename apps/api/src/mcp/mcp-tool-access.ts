@@ -8,8 +8,8 @@ import {
 
 import { MCP_ADMIN_TOOL_PERMISSIONS } from "./mcp-admin-tools";
 import { MCP_CUSTOMIZATION_TOOL_NAMES } from "./mcp-customization-tools";
-import { isMcpHelpdeskTool } from "./mcp-helpdesk.constants";
 import { MCP_GLOBAL_SEARCH_PERMISSIONS } from "./mcp-search-tools";
+import { isMcpHelpdeskTool } from "./mcp-self-onboarding.constants";
 
 import type { SettingsService } from "src/settings/settings.service";
 

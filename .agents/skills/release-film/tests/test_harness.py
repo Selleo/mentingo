@@ -38,6 +38,8 @@ class Specs(unittest.TestCase):
             self.assertIn('600_000', target)  # the app's web servers get time to start on a busy machine
             self.assertIn('process.env.DEMO_TRY === "1"', target)  # a tried scene fails fast on a wrong locator
             self.assertIn('actionTimeout: Math.min(use?.actionTimeout || 15_000, 15_000)', target)
+            self.assertIn('process.env.DEMO_KEEPER_READY && process.env.DEMO_FAILURE_SCREENSHOTS === "1"', target)
+            self.assertIn('? "only-on-failure" as const : "off" as const', target)
 
     def test_with_the_set_kept_up_the_demo_config_sets_nothing_up_again(self):
         with tempfile.TemporaryDirectory() as folder:
