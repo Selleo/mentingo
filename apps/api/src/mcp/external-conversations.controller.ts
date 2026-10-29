@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse } from "src/common";
@@ -29,8 +29,10 @@ export class ExternalConversationsController {
     @Body() body: ExternalConversationInput,
     @Req() request: ExternalConversationRequest,
   ): Promise<BaseResponse<ExternalConversationResponse>> {
+    const resource = request.externalConversationResource;
+    if (!resource) throw new UnauthorizedException("Invalid external transcript signature");
     return new BaseResponse(
-      await this.externalConversationsRepository.append(request.externalConversationResource!.tenantId, body),
+      await this.externalConversationsRepository.append(resource.tenantId, body),
     );
   }
 }

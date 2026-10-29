@@ -62,6 +62,7 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - Do not commit secrets from `.env` files or log tokens/passwords/API keys.
 - Keep edits scoped. Do not reformat unrelated files.
 - Do not use nested ternaries; prefer `match` from `ts-pattern` for multi-branch expressions.
+- Do not introduce non-null assertions (`value!`); validate or narrow optional values before using them.
 
 ## Shared Conventions
 

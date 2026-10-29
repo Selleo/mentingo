@@ -1,3 +1,4 @@
+import { UnauthorizedException } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
 import { assistantThreads, assistantMessages } from "src/storage/schema";
@@ -16,6 +17,17 @@ describe("External integration transcript ingestion", () => {
     const controller = new ExternalConversationsController({append} as unknown as ExternalConversationsRepository);
     await controller.append(input, {externalConversationResource: {tenantId: "tenant"}} as ExternalConversationRequest);
     expect(append).toHaveBeenCalledWith("tenant", input);
+  });
+
+  it("rejects ingestion without a verified tenant before writing", async () => {
+    const append = jest.fn();
+    const controller = new ExternalConversationsController({
+      append,
+    } as unknown as ExternalConversationsRepository);
+    await expect(controller.append(input, {} as ExternalConversationRequest)).rejects.toThrow(
+      UnauthorizedException,
+    );
+    expect(append).not.toHaveBeenCalled();
   });
 
   it("validates source, installation identity, bounds and visible message roles", () => {

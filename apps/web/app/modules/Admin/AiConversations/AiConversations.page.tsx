@@ -59,6 +59,8 @@ export default function AiConversationsPage() {
   }, [rawSearch, threadId, navigate]);
   const language = useLanguageStore((state) => state.language);
   const filters = readConversationFilters(searchParams, language);
+  const fromDate = searchParams.get("from");
+  const toDate = searchParams.get("to");
   const { data, isPending, isError, refetch } = useAdminAiThreads(filters);
   const update = (name: string, value: FilterValue) =>
     navigate(
@@ -92,13 +94,13 @@ export default function AiConversationsPage() {
       name: "from",
       type: "date",
       placeholder: t("aiConversations.from"),
-      maxDate: filters.to ? parseISO(searchParams.get("to")!) : undefined,
+      maxDate: filters.to && toDate ? parseISO(toDate) : undefined,
     },
     {
       name: "to",
       type: "date",
       placeholder: t("aiConversations.to"),
-      minDate: filters.from ? parseISO(searchParams.get("from")!) : undefined,
+      minDate: filters.from && fromDate ? parseISO(fromDate) : undefined,
     },
   ];
   const activeFilterCount = filterConfig.filter((filter) => searchParams.has(filter.name)).length;
