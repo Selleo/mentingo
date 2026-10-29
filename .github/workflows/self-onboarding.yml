@@ -1,10 +1,10 @@
-name: Helpdesk feature videos
+name: Self-onboarding
 on:
   # A branch-only workflow needs an initial run before API/CLI manual dispatch.
   # This event registers the Helpdesk workflow without running the recorder.
   push:
     branches: ['jh_*']
-    paths: ['.github/workflows/helpdesk-videos.yml']
+    paths: ['.github/workflows/self-onboarding.yml']
   workflow_dispatch:
     inputs:
       version:
@@ -16,8 +16,8 @@ on:
         default: ''
         type: string
       languages:
-        description: Comma-separated recorded languages (en,pl)
-        default: en
+        description: Comma-separated recorded languages; share one capture and voice across en,pl
+        default: en,pl
         type: string
       force:
         description: Explicitly regenerate all flows in the selected domains
@@ -60,12 +60,12 @@ on:
 permissions: {}
 concurrency:
   # This also serializes the private build-state writer across recording/publication.
-  group: helpdesk-feature-videos-${{ (github.event_name == 'push' || inputs.registration_only || inputs.test_mode) && github.run_id || 'production' }}
+  group: self-onboarding-${{ (github.event_name == 'push' || inputs.registration_only || inputs.test_mode) && github.run_id || 'production' }}
   cancel-in-progress: false
   queue: max
 jobs:
   register:
-    name: Register the standalone Helpdesk manual workflow
+    name: Register the standalone self-onboarding workflow
     if: github.event_name == 'push' || inputs.registration_only
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -73,12 +73,12 @@ jobs:
     steps:
       - name: Confirm the Helpdesk entry point
         run: |
-          echo 'Helpdesk workflow registered. Dispatch helpdesk-videos.yml with test_mode=true and business_spec to record a branch test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Self-onboarding workflow registered. Dispatch self-onboarding.yml with test_mode=true and business_spec to record a branch test.' >> "$GITHUB_STEP_SUMMARY"
 
   generate:
     name: Analyze flows and build affected feature videos
     if: github.event_name == 'workflow_dispatch' && !inputs.registration_only && (inputs.test_mode || github.ref_name == github.event.repository.default_branch)
-    environment: ${{ inputs.test_mode && 'helpdesk-testing' || 'helpdesk-recording' }}
+    environment: release-film
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     permissions:
@@ -88,7 +88,7 @@ jobs:
       RELEASE_FILM_CI: '1'
       RELEASE_FILM_CI_WORKERS: '1'
       S: .agents/skills/release-film/scripts
-      CACHE: ${{ runner.temp }}/helpdesk-build
+      CACHE: ${{ github.workspace }}/.local/helpdesk-build
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -181,15 +181,20 @@ jobs:
           if [ -n "$BUSINESS_SPEC" ]; then args+=(--business-spec "$BUSINESS_SPEC"); fi
           if [ "$TEST_MODE" = true ]; then args+=(--test-mode --target-ref "$TARGET_REF"); fi
           python3 "$S/helpdesk.py" "${args[@]}"
+      - name: Install the pinned ElevenLabs realtime transport
+        if: ${{ !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 -m venv "$RELEASE_FILM_HOME/tools/elevenlabs"
+          "$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
+          echo "RELEASE_FILM_TTS_PYTHON=$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" >> "$GITHUB_ENV"
       - name: Record changed flows and assemble complete videos
         if: ${{ !inputs.dry_run && !inputs.resume_publication }}
         env:
           GH_TOKEN: ${{ github.token }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID_EN: ${{ vars.ELEVENLABS_VOICE_ID_EN }}
-          ELEVENLABS_VOICE_ID_PL: ${{ vars.ELEVENLABS_VOICE_ID_PL }}
-          ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2' }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
         run: |
           python3 "$S/helpdesk.py" generate --plan "$RUNNER_TEMP/helpdesk-plan.json" --cache "$CACHE" \
             --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/helpdesk-$GITHUB_RUN_ID" \
@@ -231,7 +236,7 @@ jobs:
         if: ${{ success() && inputs.test_mode && !inputs.dry_run && steps.redact.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: helpdesk-test-videos
+          name: self-onboarding-test-videos
           path: |
             ${{ env.CACHE }}/bundles/**/video.mp4
             ${{ env.CACHE }}/bundles/**/poster.jpg
@@ -266,7 +271,7 @@ jobs:
     permissions:
       contents: read
     env:
-      CACHE: ${{ runner.temp }}/helpdesk-build
+      CACHE: ${{ github.workspace }}/.local/helpdesk-build
       S: .agents/skills/release-film/scripts
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

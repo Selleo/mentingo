@@ -7,8 +7,8 @@ captions keep the written text. Three providers:
 - voxcpm: VoxCPM2 (OpenBMB, Apache-2.0) on this machine's GPU, where `film.py voice-setup` installed it: one sentence at
   a time in the narrator's voice (its reference recording in the film's language), each word timed by its share of the
   sentence's syllables;
-- elevenlabs: the configured voice/model through the fixed API's with-timestamps endpoint. Character timing evidence
-  becomes word captions; failures do not fall back to another voice or automatically repeat a paid request.
+- elevenlabs: Eleven v4 Turbo through the dialogue WebSocket, or an explicitly configured legacy TTS model through
+  REST with-timestamps. Character timing becomes word captions; failures never fall back or repeat a paid request.
 
 Run with the Python that has the engine: voice.py <jobs.json>, jobs = [{"text", "sentences", "out", "engine",
 "language", "voice", "lexicon"}]; voice.py --narrator <narrator.json>: the narrator's reference recordings.
@@ -21,7 +21,9 @@ import math
 import os
 from pathlib import Path
 import re
+import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 
@@ -36,7 +38,7 @@ REFERENCE = 12  # seconds of a given recording the narrator's voice is cloned fr
 # chapters ranged from -25.9 to -30 LUFS; its peaks stay under the ceiling
 LOUDNESS = -19.5
 CEILING = 10 ** (-1.5 / 20)
-ELEVENLABS_MODEL = 'eleven_multilingual_v2'
+ELEVENLABS_MODEL = 'eleven_v4_turbo'
 ELEVENLABS_OUTPUT = 'mp3_44100_128'
 ELEVENLABS_RESPONSE_LIMIT = 24 * 1024 * 1024
 ELEVENLABS_TIMEOUT = 120
@@ -44,18 +46,18 @@ ELEVENLABS_TEXT_LIMIT = 6_000
 
 
 def elevenlabs_config(addon, code):
-    """Nonsecret, cacheable narrator identity. Voice IDs may be configured per language or supplied by CI."""
+    """Nonsecret narrator identity. One shared voice takes precedence across all narration languages."""
     config = addon.get('elevenlabs') or {}
     if not isinstance(config, dict):
         raise ValueError('elevenlabs must be a configuration object')
     voices = config.get('voice_ids') or {}
     if not isinstance(voices, dict):
         raise ValueError('elevenlabs.voice_ids must map language codes to voice IDs')
-    voice = os.environ.get(f'ELEVENLABS_VOICE_ID_{code.upper()}') or os.environ.get('ELEVENLABS_VOICE_ID') \
-        or voices.get(code) or config.get('voice_id')
+    voice = os.environ.get('ELEVENLABS_VOICE_ID') or config.get('voice_id') \
+        or os.environ.get(f'ELEVENLABS_VOICE_ID_{code.upper()}') or voices.get(code)
     model = os.environ.get('ELEVENLABS_MODEL_ID') or config.get('model_id') or ELEVENLABS_MODEL
     if not isinstance(voice, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', voice):
-        raise ValueError(f'Configure ELEVENLABS_VOICE_ID_{code.upper()} or elevenlabs.voice_ids.{code}')
+        raise ValueError('Configure ELEVENLABS_VOICE_ID or elevenlabs.voice_id')
     if not isinstance(model, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', model):
         raise ValueError('Invalid ElevenLabs model_id')
     settings = config.get('voice_settings') or {}
@@ -69,7 +71,34 @@ def elevenlabs_config(addon, code):
                 or not ((0.7 <= value <= 1.2) if name == 'speed' else (0 <= value <= 1)):
             raise ValueError(f'Invalid ElevenLabs {name} setting')
     return {'voice': voice, 'model_id': model, 'voice_settings': dict(settings),
-            'output_format': ELEVENLABS_OUTPUT, 'apply_text_normalization': 'off'}
+            'output_format': 'pcm_24000' if dialogue_model(model) else ELEVENLABS_OUTPUT,
+            'apply_text_normalization': 'off'}
+
+
+def dialogue_model(model):
+    """Eleven v3/v4 use the dialogue protocol, never the legacy TTS endpoint."""
+    return model.startswith(('eleven_v3', 'eleven_v4'))
+
+
+def pcm_to_mp3(pcm):
+    """Encode the verified PCM stream for the recorder's existing MP3 contract; FFmpeg adds no speech."""
+    import core
+    ffmpeg = core.tool('ffmpeg')
+    if not ffmpeg:
+        raise ValueError('FFmpeg is required to encode Eleven v4 narration')
+    # The input is bounded by the transport. Use files so the encoded output is also bounded before reading it.
+    with tempfile.TemporaryDirectory(prefix='elevenlabs-voice-') as folder:
+        source, target = Path(folder) / 'audio.pcm', Path(folder) / 'audio.mp3'
+        source.write_bytes(pcm)
+        try:
+            result = subprocess.run([ffmpeg, '-v', 'error', '-nostdin', '-f', 's16le', '-ar', '24000', '-ac', '1',
+                                     '-i', str(source), '-c:a', 'libmp3lame', '-b:a', '128k', str(target)],
+                                    capture_output=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired):
+            raise ValueError('Could not encode Eleven v4 narration') from None
+        if result.returncode or not target.is_file() or not 0 < target.stat().st_size <= ELEVENLABS_RESPONSE_LIMIT:
+            raise ValueError('Could not encode Eleven v4 narration')
+        return target.read_bytes()
 
 
 class NoVoiceRedirects(urllib.request.HTTPRedirectHandler):
@@ -156,15 +185,22 @@ def elevenlabs(jobs):
             # Multilingual v2 does not accept language_code. The written/spoken text already has its language.
             if config['model_id'] != 'eleven_multilingual_v2':
                 payload['language_code'] = job.get('language') or 'en'
-            answer = elevenlabs_request(config['voice'], payload, api_key)
-            events = aligned_words(answer.get('alignment') or answer.get('normalized_alignment'), spoken)
-            audio_base64 = answer.get('audio_base64')
-            if not isinstance(audio_base64, str):
-                raise ValueError('ElevenLabs returned no audio')
-            try:
-                audio = base64.b64decode(audio_base64, validate=True)
-            except (ValueError, binascii.Error):
-                raise ValueError('ElevenLabs returned invalid audio encoding') from None
+            if dialogue_model(config['model_id']):
+                import elevenlabs_v4
+                pcm, alignment = elevenlabs_v4.synthesize(config['voice'], payload, api_key)
+                # Dialogue may add boundary whitespace; transport checked every requested word before this point.
+                events = aligned_words(alignment, ''.join(alignment['characters']))
+                audio = pcm_to_mp3(pcm)
+            else:
+                answer = elevenlabs_request(config['voice'], payload, api_key)
+                events = aligned_words(answer.get('alignment') or answer.get('normalized_alignment'), spoken)
+                audio_base64 = answer.get('audio_base64')
+                if not isinstance(audio_base64, str):
+                    raise ValueError('ElevenLabs returned no audio')
+                try:
+                    audio = base64.b64decode(audio_base64, validate=True)
+                except (ValueError, binascii.Error):
+                    raise ValueError('ElevenLabs returned invalid audio encoding') from None
             if not audio:
                 raise ValueError('ElevenLabs returned empty audio')
             differently = []

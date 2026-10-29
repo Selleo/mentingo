@@ -222,7 +222,7 @@ def narrate(run, story, addon, root=None):
         if voice == 'voxcpm':
             python = str(VOXCPM / 'venv' / 'bin' / 'python')
         elif voice == 'elevenlabs':
-            python = sys.executable  # provider transport uses only the standard library
+            python = os.environ.get('RELEASE_FILM_TTS_PYTHON') or sys.executable
         else:
             python = core.ensure_tts()
         out = core.sh([python, str(core.SKILL / 'scripts' / 'voice.py'), str(root / 'jobs.json')],

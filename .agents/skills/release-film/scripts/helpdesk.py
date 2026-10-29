@@ -6,6 +6,7 @@ validated plan, reuses immutable flow segments and emits feature video bundles.
 Publication and durable private storage run separately, with separate credentials.
 """
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -48,24 +49,43 @@ def analyze(args):
     if target_ref and not test_mode:
         raise ValueError('An untagged source ref is supported only in isolated test mode')
     selected = select_spec_domains(catalog, spec, args.domains.split(',') if args.domains else None)
+    codes = [code.strip() for code in args.languages.split(',')]
+    if not codes or len(set(codes)) != len(codes) or any(code not in ('en', 'pl') for code in codes):
+        raise ValueError('Recorder languages must be unique en,pl values')
     reports = []
     try:
-        for code in args.languages.split(','):
-            if code not in ('en', 'pl'):
-                raise ValueError('Recorder languages currently supported: en,pl')
-            try:
-                report = helpdesk_catalog.plan(Path(args.repo), args.target,
-                    state['languages'].get(code), catalog,
-                    domains=selected, force=args.force, target_ref=target_ref)
-            except helpdesk_catalog.ImpactUncertainError as error:
-                reports.append(dict(error.plan, language=code))
-                raise
-            reports.append(dict(report, language=code))
+        report = helpdesk_catalog.plan(Path(args.repo), args.target, visual_baseline(state), catalog,
+            domains=selected, force=args.force, target_ref=target_ref)
+        reports = [dict(copy.deepcopy(report), language=code) for code in codes]
+    except helpdesk_catalog.ImpactUncertainError as error:
+        reports = [dict(copy.deepcopy(error.plan), language=code) for code in codes]
+        raise
     finally:
         if reports:
-            core.save(args.out, {'schemaVersion': 1, 'testMode': test_mode, 'businessSpec': spec, 'reports': reports})
+            core.save(args.out, {'schemaVersion': 1, 'force': args.force, 'testMode': test_mode,
+                                'businessSpec': spec, 'reports': reports})
     return {'ok': True, 'plan': args.out,
-            'record': sum(f['action'] == 'record' for p in reports for d in p['domains'] for f in d['flows'])}
+            'record': sum(f['action'] == 'record' for d in report['domains'] for f in d['flows'])}
+
+
+def flow_contract(flow):
+    return {key: value for key, value in flow.items() if key not in ('action', 'reason', 'evidence')}
+
+
+def visual_baseline(state):
+    """Use one semantic baseline across languages, retaining legacy migration evidence."""
+    previous = {'schemaVersion': 1, 'domains': {}}
+    languages = state.get('languages', {})
+    for code in ['en', 'pl'] + sorted(set(languages) - {'en', 'pl'}):
+        for key, domain in languages.get(code, {}).get('domains', {}).items():
+            previous['domains'].setdefault(key, copy.deepcopy(domain))
+    captures = state.get('captures', {})
+    for key, domain in captures.get('domains', {}).items():
+        legacy = previous['domains'].get(key, {})
+        merged = copy.deepcopy(domain)
+        merged['flows'] = {**legacy.get('flows', {}), **merged.get('flows', {})}
+        previous['domains'][key] = merged
+    return previous if previous['domains'] else None
 
 
 def select_spec_domains(catalog, spec, selected=None):
@@ -146,79 +166,114 @@ def generate(args):
     entries, configured = [], False
     original_environment = {name: os.environ.get(name) for name in ('RELEASE_FILM_RUN', 'RELEASE_FILM_VOICE')}
     trusted_addon = core.addon(args.repository, Path(args.repo))
+    captures = state.setdefault('captures', {'schemaVersion': 1, 'domains': {}})
+    profiles = {code: voice_provider.elevenlabs_config(trusted_addon, code) for code in codes}
+    if len({config.get('voice') for config in profiles.values()}) != 1:
+        raise ValueError('English and Polish Helpdesk narration must use the same ElevenLabs voice ID')
+    grouped = {}
+    for report in reports:
+        for domain in report['domains']:
+            group = grouped.setdefault(domain['key'], {'domain': domain, 'reports': {}, 'changedFlowIds': set()})
+            if [flow_contract(f) for f in group['domain']['flows']] != [flow_contract(f) for f in domain['flows']]:
+                raise ValueError('Languages must share the same visual flow contracts and order')
+            group['reports'][report['language']] = report
+            group['changedFlowIds'].update(flow['id'] for flow in domain['flows'] if flow['action'] == 'record')
+    addon = trusted_addon
     os.environ['RELEASE_FILM_RUN'] = str(run)
     os.environ['RELEASE_FILM_VOICE'] = 'elevenlabs'
     try:
-        for report in reports:
-            code = report['language']
-            profile = hashlib.sha256(json.dumps({'provider': voice_provider.elevenlabs_config(trusted_addon, code),
-                'pronunciation': trusted_addon.get('pronunciation', {}), 'renderer': 'tutorial-v1'}, sort_keys=True).encode()).hexdigest()
-            current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
-            for domain in report['domains']:
-                previous = current['domains'].get(domain['key'], {})
-                # A partially built new domain must not inherit another domain's
-                # newer coverage baseline when a filtered run advances the language.
+        for domain_key, group in grouped.items():
+            domain = group['domain']
+            visual = captures['domains'].setdefault(domain_key, {'commit': None, 'flows': {}})
+            # The browser is invoked only here, never once per language.
+            references = {}
+            for flow in domain['flows']:
+                contract = flow_contract(flow)
+                old_capture = visual['flows'].get(flow['id'], {})
+                reference = old_capture.get('capture')
+                changed = flow['id'] in group['changedFlowIds']
+                already_captured = reference and old_capture.get('commit') == commit and old_capture.get('contract') == contract
+                if plan.get('force') and old_capture.get('captureRequestId') != args.workflow_run_id:
+                    already_captured = False
+                if changed and not already_captured:
+                    if not configured:
+                        ready = doctor.check(args.repository)
+                        if not ready['ok']:
+                            raise RuntimeError('Recorder prerequisites missing; run film.py doctor for details')
+                        checkout = harness.checkout(Path(args.repo), commit, run)
+                        if core.sh(['git', '-C', str(checkout), 'rev-parse', 'HEAD']).stdout.strip() != commit:
+                            raise ValueError('Existing recorder checkout is for a different version')
+                        addon = core.addon(args.repository, checkout)
+                        addon['elevenlabs'] = trusted_addon.get('elevenlabs', {})
+                        addon['pronunciation'] = trusted_addon.get('pronunciation', {})
+                        core.save(run / 'meta.json', {'repo': args.repository, 'tag': commit, 'base': commit,
+                            'repo_dir': str(Path(args.repo).resolve()), 'run': str(run), 'addon': addon})
+                        harness.setup(run, addon['harness'])
+                        harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
+                        configured = True
+                    reference = recording.capture_flow(run, flow, domain, commit, args.repository, addon, cache)
+                if reference:
+                    recording.checked_file(cache, reference['path'], reference['sha256'])
+                references[flow['id']] = reference
+                visual['flows'][flow['id']] = {'contract': contract, 'commit': commit, 'capture': reference,
+                    'captureRequestId': args.workflow_run_id if changed else old_capture.get('captureRequestId')}
+                visual['discoveredFlowIds'] = [key for key in domain.get('discoveredFlowIds', []) if key in visual['flows']]
+                visual['retiredFlowIds'] = domain.get('retiredFlowIds', [])
+                core.save(cache / 'state.json', state, mode=0o600)
+            # Drop removed flows from the current index; older published revisions remain intact.
+            visual['flows'] = {f['id']: visual['flows'][f['id']] for f in domain['flows']}
+            visual['commit'] = commit
+            for code, report in group['reports'].items():
+                profile = hashlib.sha256(json.dumps({'provider': profiles[code],
+                    'pronunciation': trusted_addon.get('pronunciation', {}), 'renderer': 'tutorial-v1'}, sort_keys=True).encode()).hexdigest()
+                current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
+                previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
+                localized_domain, localized_metadata = recording.localize_domain(domain, code, previous.get('localizedMetadata'))
                 flows = {}
                 for flow in domain['flows']:
                     old = previous.get('flows', {}).get(flow['id'], {})
-                    if flow['action'] == 'reuse':
-                        if old.get('voiceProfile') != profile:
-                            raise ValueError('Voice profile changed; explicitly force the affected domain to regenerate it')
-                        if not old.get('segment'):
-                            raise ValueError('Reusable flow is missing its durable segment; restore the snapshot')
+                    reference = references[flow['id']]
+                    capture_id = reference['id'] if reference else None
+                    # Existing legacy-language outputs can remain readable, but cannot
+                    # stand in for missing raw footage when adding or rebuilding a language.
+                    reusable = old.get('segment') and old.get('voiceProfile') == profile \
+                        and (old.get('captureId') == capture_id or not reference and not old.get('captureId'))
+                    if reusable:
                         recording.checked_file(cache, old['segment']['path'], old['segment']['sha256'])
                         segment = old['segment']
                     else:
+                        if not reference:
+                            raise ValueError('Legacy build has no portable raw capture; explicitly force this domain once before adding or rebuilding a language')
                         previous['needsPublication'] = True
-                        if not configured:
-                            ready = doctor.check(args.repository)
-                            if not ready['ok']:
-                                raise RuntimeError('Recorder prerequisites missing; run film.py doctor for details')
-                            checkout = harness.checkout(Path(args.repo), commit, run)
-                            if core.sh(['git', '-C', str(checkout), 'rev-parse', 'HEAD']).stdout.strip() != commit:
-                                raise ValueError('Existing recorder checkout is for a different version')
-                            addon = core.addon(args.repository, checkout)
-                            # Narrator identity is controlled by trusted CI configuration,
-                            # consistently for cached and newly rendered segments.
-                            addon['elevenlabs'] = trusted_addon.get('elevenlabs', {})
-                            addon['pronunciation'] = trusted_addon.get('pronunciation', {})
-                            core.save(run / 'meta.json', {'repo': args.repository, 'tag': commit,
-                                'base': commit, 'repo_dir': str(Path(args.repo).resolve()), 'run': str(run), 'addon': addon})
-                            harness.setup(run, addon['harness'])
-                            harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
-                            configured = True
-                        segment = recording.record_flow(run, flow, domain, code, commit, args.repository, addon, cache)
-                    contract = {k: v for k, v in flow.items() if k not in ('action', 'reason', 'evidence')}
-                    flows[flow['id']] = {'contract': contract, 'commit': commit, 'segment': segment, 'voiceProfile': profile}
-                    # Preserve successful new segments even if a later required flow fails.
+                        segment = recording.render_flow(run, flow, domain, code, commit, args.repository, addon, cache, reference)
+                    flows[flow['id']] = {'contract': flow_contract(flow), 'commit': commit, 'segment': segment,
+                                        'voiceProfile': profile, 'captureId': capture_id}
                     previous.setdefault('flows', {})[flow['id']] = flows[flow['id']]
-                    previous['discoveredFlowIds'] = [key for key in domain.get('discoveredFlowIds', [])
-                                                     if key in previous['flows']]
+                    previous['discoveredFlowIds'] = [key for key in domain.get('discoveredFlowIds', []) if key in previous['flows']]
                     previous['retiredFlowIds'] = domain.get('retiredFlowIds', [])
-                    current['domains'][domain['key']] = previous
+                    previous['localizedMetadata'] = localized_metadata
+                    current['domains'][domain_key] = previous
                     core.save(cache / 'state.json', state, mode=0o600)
-                identity = domain_identity(domain, flows)
+                identity = domain_identity(localized_domain, flows)
                 changed = previous.get('needsPublication') or previous.get('identity') != identity
                 if changed:
-                    destination = out / domain['key'] / code
-                    entry = recording.assemble(domain, code, flows, cache, destination, commit,
+                    destination = out / domain_key / code
+                    entry = recording.assemble(localized_domain, code, flows, cache, destination, commit,
                                                report['version'], args.workflow_run_id)
                     entry['video'] = str(Path(entry['video']).relative_to(out))
                     entries.append(entry)
-                current['domains'][domain['key']] = {'commit': commit, 'identity': identity, 'flows': flows,
-                                                   'needsPublication': bool(changed),
-                                                   'discoveredFlowIds': domain.get('discoveredFlowIds', []),
-                                                   'retiredFlowIds': domain.get('retiredFlowIds', [])}
+                current['domains'][domain_key] = {'commit': commit, 'identity': identity, 'flows': flows,
+                    'needsPublication': bool(changed), 'localizedMetadata': localized_metadata,
+                    'discoveredFlowIds': domain.get('discoveredFlowIds', []), 'retiredFlowIds': domain.get('retiredFlowIds', [])}
+                current['commit'] = commit
                 core.save(cache / 'state.json', state, mode=0o600)
-            current['commit'] = commit
+        captures['commit'] = commit
         out.mkdir(parents=True, exist_ok=True)
         manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
                     'workflowRunId': args.workflow_run_id, 'domains': entries}
         core.save(out / 'manifest.json', manifest)
         if entries:
-            if not out.is_relative_to(cache):
-                raise ValueError('Publication bundles must be inside the private build cache')
             state['pendingBundle'] = str(out.relative_to(cache))
             state['pendingSelection'] = sorted([[p['language'], d['key']] for p in reports for d in p['domains']])
         core.save(cache / 'state.json', state, mode=0o600)
@@ -245,7 +300,7 @@ def main():
     p.add_argument('--cache', required=True)
     p.add_argument('--catalog', default=str(CATALOG))
     p.add_argument('--out', required=True)
-    p.add_argument('--languages', default='en')
+    p.add_argument('--languages', default='en,pl')
     p.add_argument('--domains', default='')
     p.add_argument('--force', action='store_true')
     p.add_argument('--business-spec', default='')

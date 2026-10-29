@@ -22,6 +22,20 @@ import core
 
 MAX_BYTES = 30 * 1024**3
 EXTENSIONS = {'.mp4', '.mp3', '.srt', '.vtt', '.json', '.jpg', '.txt'}
+CAPTURE_ENTRY = re.compile(r'captures/[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*/[a-f0-9]{64}/'
+                          r'(?:capture-bundle\.json|take\.mp4|capture\.json|actions\.json|page-log\.json|story-en\.json|'
+                          r'stills/\d+\.(?:jpg|jpeg|png)|documents/\d+\.(?:pdf|page1\.png)|specs/\d+\.md)\Z')
+
+
+def allowed_artifact(name):
+    path = PurePosixPath(name)
+    if name == 'state.json':
+        return True
+    if not path.parts:
+        return False
+    if path.parts[0] == 'captures':
+        return bool(CAPTURE_ENTRY.fullmatch(name))
+    return path.parts[0] in ('segments', 'bundles') and path.suffix in EXTENSIONS
 
 
 def location(value):
@@ -69,8 +83,7 @@ def extract(archive, out):
             path = PurePosixPath(member.name)
             if (path.is_absolute() or '..' in path.parts or member.name in seen or
                     not member.isfile() or not path.parts or
-                    (path.parts[0] not in ('segments', 'bundles') and member.name != 'state.json') or
-                    path.suffix not in EXTENSIONS or '\\' in member.name):
+                    not allowed_artifact(member.name) or '\\' in member.name):
                 raise ValueError('Invalid private build archive entry')
             total += member.size
             seen.add(member.name)
@@ -88,6 +101,7 @@ def extract(archive, out):
             target.chmod(0o600)
     if not (out / 'state.json').is_file():
         raise ValueError('Snapshot has no build state')
+    snapshot_files(out)
 
 
 def snapshot_files(cache):
@@ -105,6 +119,29 @@ def snapshot_files(cache):
     if pending:
         parents.add(Path(pending))
     files = {cache / 'state.json'}
+    # Captures have an exact immutable manifest allowlist. Never recursively copy
+    # their worker folders, logs, checkouts or unreferenced raw recordings.
+    for domain in state.get('captures', {}).get('domains', {}).values():
+        for flow in domain.get('flows', {}).values():
+            reference = flow.get('capture')
+            if not reference:
+                continue
+            path = cache / reference['path']
+            if (not allowed_artifact(reference['path']) or path.is_symlink() or not path.is_file()
+                    or not path.resolve().is_relative_to(cache) or file_hash(path) != reference['sha256']):
+                raise ValueError('Invalid or damaged shared raw capture reference')
+            manifest = core.load(path)
+            identity = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+            if manifest.get('schemaVersion') != 1 or reference.get('id') != identity or not isinstance(manifest.get('files'), dict):
+                raise ValueError('Invalid shared raw capture manifest')
+            files.add(path)
+            for relative, checksum in manifest['files'].items():
+                artifact = path.parent / relative
+                name = str(artifact.relative_to(cache))
+                if (not allowed_artifact(name) or artifact.is_symlink() or not artifact.is_file()
+                        or not artifact.resolve().is_relative_to(path.parent) or file_hash(artifact) != checksum):
+                    raise ValueError('Missing or damaged portable capture dependency')
+                files.add(artifact)
     for parent in parents:
         target = cache / parent
         if parent.is_absolute() or not target.resolve().is_relative_to(cache) or target.is_symlink() or not target.is_dir():
@@ -116,7 +153,7 @@ def snapshot_files(cache):
             raise ValueError('Build artifacts cannot contain symbolic links')
         if path.is_file():
             rel = path.relative_to(cache)
-            if path.suffix not in EXTENSIONS or (rel.parts[0] not in ('segments', 'bundles') and str(rel) != 'state.json'):
+            if not allowed_artifact(str(rel)):
                 raise ValueError('Unexpected file in private build artifacts')
             checked.append(path)
     if sum(p.stat().st_size for p in checked) > MAX_BYTES:

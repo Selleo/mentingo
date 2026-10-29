@@ -256,7 +256,7 @@ class WorkflowsTest(unittest.TestCase):
         return value
 
     def test_versions_not_releases_queue_the_trusted_workflow(self):
-        trigger = self.load('helpdesk-videos-on-version.yml')
+        trigger = self.load('self-onboarding-on-version.yml')
         self.assertIn('push', trigger['on'])
         self.assertNotIn('release', trigger['on'])
         step = trigger['jobs']['queue']['steps'][0]
@@ -265,12 +265,13 @@ class WorkflowsTest(unittest.TestCase):
         self.assertEqual(trigger['jobs']['queue']['permissions'], {'actions': 'write'})
 
     def test_keys_have_separate_scopes_and_state_is_never_public_artifact(self):
-        workflow = self.load('helpdesk-videos.yml')
+        workflow = self.load('self-onboarding.yml')
         generation = workflow['jobs']['generate']
         publication = workflow['jobs']['publish']
         self.assertFalse(workflow['concurrency']['cancel-in-progress'])
         self.assertNotIn('pull_request', workflow['on'])
         for job in (generation, publication):
+            self.assertNotIn('${{ runner.', str(job.get('env', {})))
             for step in job['steps']:
                 env = step.get('env', {})
                 if 'GUIDE_PUBLISH_API_KEY' in env:
@@ -291,7 +292,7 @@ class WorkflowsTest(unittest.TestCase):
         self.assertNotIn('helpdesk_test', entry['jobs'])
         self.assertNotIn('helpdesk_spec', entry['on']['workflow_dispatch']['inputs'])
         self.assertNotIn('if', entry['jobs']['film'])
-        workflow = self.load('helpdesk-videos.yml')
+        workflow = self.load('self-onboarding.yml')
         self.assertIn('workflow_dispatch', workflow['on'])
         self.assertNotIn('workflow_call', workflow['on'])
         self.assertIn('push', workflow['on'])
@@ -309,7 +310,7 @@ class WorkflowsTest(unittest.TestCase):
     def test_helpdesk_ci_has_its_own_publisher_checks(self):
         legacy = self.load('pr-release-film-ci.yml')
         self.assertNotIn('scripts/helpdesk-publish', str(legacy))
-        own = self.load('pr-helpdesk-videos-ci.yml')
+        own = self.load('pr-self-onboarding-ci.yml')
         self.assertIn('publisher.test.mjs', str(own['jobs']['test']['steps']))
 
 

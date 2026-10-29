@@ -1,4 +1,4 @@
-name: Queue Helpdesk videos for a version
+name: Queue self-onboarding for a version
 on:
   push:
     tags: ['v[0-9]*']
@@ -17,5 +17,5 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$VERSION_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
-          gh workflow run helpdesk-videos.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH" \
-            -f "version=$VERSION_TAG" -f domains= -f languages=en -F publish=true
+          gh workflow run self-onboarding.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH" \
+            -f "version=$VERSION_TAG" -f domains= -f languages=en,pl -F publish=true
