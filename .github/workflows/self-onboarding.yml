@@ -150,6 +150,10 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           DRY_RUN: ${{ inputs.dry_run }}
+          ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+          ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+          ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+          ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
         run: |
           if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
             echo '::error::Configure CLAUDE_CODE_OAUTH_TOKEN in the selected recording environment or repository secrets.'
@@ -158,6 +162,9 @@ jobs:
           if [ "$DRY_RUN" != true ] && [ -z "$ELEVENLABS_API_KEY" ]; then
             echo '::error::Configure ELEVENLABS_API_KEY before recording, or select dry-run for analysis only.'
             exit 1
+          fi
+          if [ "$DRY_RUN" != true ]; then
+            PYTHONPATH="$S" python3 -c 'import helpdesk_voices; helpdesk_voices.configured_pool(required=True)'
           fi
       - name: Install recorder tools
         if: ${{ !inputs.resume_publication }}
@@ -193,7 +200,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+          ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+          ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+          ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
           ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
         run: |
           python3 "$S/helpdesk.py" generate --plan "$RUNNER_TEMP/helpdesk-plan.json" --cache "$CACHE" \

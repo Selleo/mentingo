@@ -23,6 +23,7 @@ import helpdesk
 import helpdesk_catalog
 import helpdesk_recording as recording
 import helpdesk_store as store
+import helpdesk_voices as narrators
 import render_demo
 
 try:
@@ -263,6 +264,29 @@ class WorkflowsTest(unittest.TestCase):
         self.assertIn('--ref "$DEFAULT_BRANCH"', step['run'])
         self.assertIn('-f domains=', step['run'])
         self.assertEqual(trigger['jobs']['queue']['permissions'], {'actions': 'write'})
+
+    def test_narrator_pool_is_checked_before_models_and_forwarded_to_generation(self):
+        workflow = self.load('self-onboarding.yml')
+        steps = workflow['jobs']['generate']['steps']
+        preflight = next(step for step in steps if step.get('name') == 'Check recording credentials before model work')
+        recording = next(step for step in steps if step.get('name') == 'Record changed flows and assemble complete videos')
+        for name in narrators.VOICE_VARIABLES:
+            self.assertEqual(preflight['env'][name], '${{ vars.' + name + ' }}')
+            self.assertEqual(recording['env'][name], preflight['env'][name])
+        environment = {**os.environ, 'S': str(SKILL/'scripts'), 'CLAUDE_CODE_OAUTH_TOKEN': 'test-placeholder',
+                       'ELEVENLABS_API_KEY': 'test-placeholder', 'DRY_RUN': 'false'}
+        for name in narrators.VOICE_VARIABLES:
+            environment.pop(name, None)
+        result = subprocess.run(['bash', '-e', '-c', preflight['run']], env=environment, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        environment.update(dict(zip(narrators.VOICE_VARIABLES, ('female-one', 'female-two', 'male-one', 'male-two'))))
+        result = subprocess.run(['bash', '-e', '-c', preflight['run']], env=environment, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        for name in narrators.VOICE_VARIABLES:
+            environment.pop(name)
+        environment['DRY_RUN'] = 'true'
+        result = subprocess.run(['bash', '-e', '-c', preflight['run']], env=environment, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
 
     def test_keys_have_separate_scopes_and_state_is_never_public_artifact(self):
         workflow = self.load('self-onboarding.yml')

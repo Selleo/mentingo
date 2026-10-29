@@ -24,6 +24,7 @@ import gaps
 import harness
 import helpdesk_catalog
 import helpdesk_recording as recording
+import helpdesk_voices as narrators
 import voice as voice_provider
 
 CATALOG = core.SKILL / 'projects' / 'mentingo-helpdesk.json'
@@ -164,11 +165,13 @@ def generate(args):
     if os.environ.get('GUIDE_PUBLISH_API_KEY') or os.environ.get('AWS_SECRET_ACCESS_KEY'):
         raise ValueError('Recording must run without publishing or storage credentials')
     entries, configured = [], False
-    original_environment = {name: os.environ.get(name) for name in ('RELEASE_FILM_RUN', 'RELEASE_FILM_VOICE')}
+    original_environment = {name: os.environ.get(name) for name in
+                            ('RELEASE_FILM_RUN', 'RELEASE_FILM_VOICE', 'ELEVENLABS_VOICE_ID')}
     trusted_addon = core.addon(args.repository, Path(args.repo))
     captures = state.setdefault('captures', {'schemaVersion': 1, 'domains': {}})
-    profiles = {code: voice_provider.elevenlabs_config(trusted_addon, code) for code in codes}
-    if len({config.get('voice') for config in profiles.values()}) != 1:
+    pool = narrators.configured_pool()
+    profiles = {} if pool else {code: voice_provider.elevenlabs_config(trusted_addon, code) for code in codes}
+    if not pool and len({config.get('voice') for config in profiles.values()}) != 1:
         raise ValueError('English and Polish Helpdesk narration must use the same ElevenLabs voice ID')
     grouped = {}
     for report in reports:
@@ -185,6 +188,13 @@ def generate(args):
         for domain_key, group in grouped.items():
             domain = group['domain']
             visual = captures['domains'].setdefault(domain_key, {'commit': None, 'flows': {}})
+            if pool:
+                selected_voice = narrators.select_voice(pool, visual.get('voiceId'))
+                os.environ['ELEVENLABS_VOICE_ID'] = selected_voice
+                profiles = {code: voice_provider.elevenlabs_config(trusted_addon, code) for code in codes}
+                visual['voiceId'] = selected_voice
+                # Persist the random choice before any paid work or camera setup.
+                core.save(cache / 'state.json', state, mode=0o600)
             # The browser is invoked only here, never once per language.
             references = {}
             for flow in domain['flows']:

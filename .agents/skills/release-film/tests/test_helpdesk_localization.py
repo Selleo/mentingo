@@ -19,6 +19,7 @@ import helpdesk
 import helpdesk_catalog
 import helpdesk_recording as recording
 import helpdesk_store as store
+import helpdesk_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
@@ -223,6 +224,84 @@ class LocalizationTest(unittest.TestCase):
         self.assertEqual(self.generate(action='reuse',name='new-model')['videos'],2)
         self.camera.assert_not_called(); self.setup.assert_not_called()
         self.assertEqual(self.render.call_count,2)
+
+    def setup_voice_pool(self):
+        provider = helpdesk.voice_provider.elevenlabs_config
+        self.setup_generator()
+        self.patch(helpdesk.voice_provider, 'elevenlabs_config', side_effect=provider)
+        environment = patch.dict(os.environ, dict(zip(narrators.VOICE_VARIABLES,
+            ('female-one', 'female-two', 'male-one', 'male-two'))))
+        environment.start(); self.addCleanup(environment.stop)
+        return self.patch(narrators.secrets, 'choice', return_value='female-two')
+
+    def test_random_narrator_is_shared_by_chapters_languages_and_future_versions(self):
+        self.domain['flows'].append(dict(copy.deepcopy(self.flow), id='second-flow'))
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        choose = self.setup_voice_pool()
+        rendered_voices = []
+        render = self.render.side_effect
+        def observe(*args):
+            rendered_voices.append(os.environ['ELEVENLABS_VOICE_ID'])
+            return render(*args)
+        self.render.side_effect = observe
+        before = os.environ.get('ELEVENLABS_VOICE_ID')
+        self.generate(); self.published()
+        self.assertEqual(rendered_voices, ['female-two'] * 4)
+        choose.assert_called_once_with(('female-one', 'female-two', 'male-one', 'male-two'))
+        state = core.load(self.cache/'state.json')
+        self.assertEqual(state['captures']['domains'][self.domain['key']]['voiceId'], 'female-two')
+        self.assertEqual(os.environ.get('ELEVENLABS_VOICE_ID'), before)
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.commit = 'b' * 40
+        self.assertEqual(self.generate(action='reuse', name='refactor')['videos'], 0)
+        self.camera.assert_not_called(); self.render.assert_not_called(); choose.assert_called_once()
+        self.commit = 'c' * 40
+        self.generate(name='updated')
+        self.assertEqual(rendered_voices, ['female-two'] * 8)
+        choose.assert_called_once()
+
+    def test_later_language_keeps_saved_random_voice(self):
+        choose = self.setup_voice_pool()
+        self.generate(codes=('en',)); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.generate(codes=('pl',), action='reuse', name='polish')
+        choose.assert_called_once(); self.camera.assert_not_called(); self.render.assert_called_once()
+        state = core.load(self.cache/'state.json')
+        english = state['languages']['en']['domains'][self.domain['key']]['flows'][self.flow['id']]
+        polish = state['languages']['pl']['domains'][self.domain['key']]['flows'][self.flow['id']]
+        self.assertEqual(english['voiceProfile'], polish['voiceProfile'])
+
+    def test_failed_render_retains_narrator_and_restores_environment_on_retry(self):
+        choose = self.setup_voice_pool()
+        before = os.environ.get('ELEVENLABS_VOICE_ID')
+        render = self.render.side_effect
+        self.render.side_effect = RuntimeError('Synthetic render failure')
+        with self.assertRaisesRegex(RuntimeError, 'Synthetic render failure'): self.generate()
+        self.assertEqual(os.environ.get('ELEVENLABS_VOICE_ID'), before)
+        self.render.side_effect = render
+        self.camera.reset_mock()
+        self.generate()
+        choose.assert_called_once(); self.camera.assert_not_called()
+
+    def test_removed_narrator_revoices_all_languages_without_new_camera_capture(self):
+        choose = self.setup_voice_pool()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        os.environ['ELEVENLABS_VOICE_ID_FEMALE_2'] = 'new-female-two'
+        choose.return_value = 'male-one'
+        self.generate(action='reuse', name='new-narrator')
+        self.camera.assert_not_called(); self.assertEqual(self.render.call_count, 2)
+        self.assertEqual(choose.call_count, 2)
+        state = core.load(self.cache/'state.json')
+        self.assertEqual(state['captures']['domains'][self.domain['key']]['voiceId'], 'male-one')
+
+    def test_partial_or_duplicate_pool_fails_before_camera_or_narration(self):
+        self.setup_voice_pool()
+        os.environ['ELEVENLABS_VOICE_ID_MALE_2'] = ''
+        with self.assertRaisesRegex(ValueError, 'all four narrator'): self.generate()
+        os.environ['ELEVENLABS_VOICE_ID_MALE_2'] = 'male-one'
+        with self.assertRaisesRegex(ValueError, 'four distinct'): self.generate()
+        self.camera.assert_not_called(); self.render.assert_not_called()
 
     def test_localized_render_uses_own_labels_captions_and_measured_duration(self):
         reference=self.raw()

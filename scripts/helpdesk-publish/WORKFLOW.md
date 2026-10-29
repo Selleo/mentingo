@@ -57,8 +57,17 @@ and `staging`; allowing `jh_feat_helpdesk_ui_preview` requires an explicit envir
 branch-policy change. The user is waiting for PM approval before making that change;
 this implementation has not changed the policy or run paid recording.
 
-Add `ELEVENLABS_API_KEY` to that environment (or repository secrets), and set the
-single repository variable `ELEVENLABS_VOICE_ID`. The same voice is used for PL and EN.
+Add `ELEVENLABS_API_KEY` to that environment (or repository secrets), and configure
+four distinct voice IDs in repository or recording-environment variables:
+`ELEVENLABS_VOICE_ID_FEMALE_1`, `ELEVENLABS_VOICE_ID_FEMALE_2`,
+`ELEVENLABS_VOICE_ID_MALE_1`, `ELEVENLABS_VOICE_ID_MALE_2`.
+Choose two female and two male voices available to the API key; the slot labels
+are maintained configuration, not a provider-verified gender check. Each feature
+video randomly selects one of the four with equal probability. That selection is
+saved before recording and shared by all chapters, PL/EN variants and retries.
+Future versions retain the same narrator while its ID remains in the pool.
+An incomplete or duplicate pool fails before model work. The workflow no longer
+uses the single `ELEVENLABS_VOICE_ID` variable; local single-voice builds remain compatible.
 Optional `ELEVENLABS_MODEL_ID` defaults to `eleven_v4_turbo`. Narration uses its actual
 Text-to-Dialogue WebSocket endpoint and aligned PCM audio; it does not pass a v4 model
 to the legacy REST endpoint. The pinned transport dependency runs in a dedicated
@@ -86,14 +95,17 @@ Repository or relevant environment secrets:
 
 Repository variables:
 
-| Variable                      | Value                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------- |
-| `GUIDE_API_URL`               | Deployed Helpdesk HTTPS origin, e.g. `https://help.mentingo.com`       |
-| `ELEVENLABS_VOICE_ID`         | One narrator ID shared by English and Polish                           |
-| `ELEVENLABS_MODEL_ID`         | Optional; pinned default `eleven_v4_turbo`                             |
-| `HELPDESK_BUILD_S3_URI`       | Exclusive private prefix, e.g. `s3://private-builds/mentingo-helpdesk` |
-| `HELPDESK_BUILD_REGION`       | Optional, defaults `us-east-1`                                         |
-| `HELPDESK_BUILD_ENDPOINT_URL` | Optional HTTPS endpoint for existing S3-compatible storage             |
+| Variable                       | Value                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `GUIDE_API_URL`                | Deployed Helpdesk HTTPS origin, e.g. `https://help.mentingo.com`       |
+| `ELEVENLABS_VOICE_ID_FEMALE_1` | First female narrator ID                                               |
+| `ELEVENLABS_VOICE_ID_FEMALE_2` | Second female narrator ID                                              |
+| `ELEVENLABS_VOICE_ID_MALE_1`   | First male narrator ID                                                 |
+| `ELEVENLABS_VOICE_ID_MALE_2`   | Second male narrator ID                                                |
+| `ELEVENLABS_MODEL_ID`          | Optional; pinned default `eleven_v4_turbo`                             |
+| `HELPDESK_BUILD_S3_URI`        | Exclusive private prefix, e.g. `s3://private-builds/mentingo-helpdesk` |
+| `HELPDESK_BUILD_REGION`        | Optional, defaults `us-east-1`                                         |
+| `HELPDESK_BUILD_ENDPOINT_URL`  | Optional HTTPS endpoint for existing S3-compatible storage             |
 
 Use an existing private S3-compatible build bucket. This introduces no database or
 always-running build service. Credentials need list/read/write and multipart-upload
@@ -143,8 +155,10 @@ checksums are retained across versions. Adding another language reuses the raw
 capture and renders that language without running the browser again. Unchanged flows skip camera and voice. Changed domains concatenate their
 current segments, decode-check the result and calculate all chapter offsets again
 from measured media duration. An unchanged domain skips assembly/upload. Changing
-voice/model/settings requires an explicit forced domain rebuild, preventing mixed
-unannounced narrator profiles.
+model/settings rebuilds the selected localized segments from retained raw footage.
+Removing a video's saved voice ID from the pool randomly assigns a remaining voice
+and regenerates all selected languages' narration, keeping each video's chapters
+consistent. Adding/reordering pool entries does not change a retained narrator.
 
 Current Helpdesk DTOs accept prerequisites in chapter descriptions. Typed
 chapter-level audience/feature filtering is a separate service contract change;
