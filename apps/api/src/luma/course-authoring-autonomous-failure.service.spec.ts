@@ -28,7 +28,6 @@ describe("CourseAuthoringAutonomousFailureService", () => {
       {
         runForEachTenant: (callback: (tenantId: string) => Promise<void>) =>
           callback(data.tenantId),
-        runWithTenant: (_tenantId: string, callback: () => Promise<void>) => callback(),
       } as never,
       { getLumaClient: jest.fn().mockResolvedValue({ authoring: { sendCommand } }) } as never,
     );
@@ -82,7 +81,6 @@ describe("CourseAuthoringAutonomousFailureService", () => {
       {
         runForEachTenant: (callback: (tenantId: string) => Promise<void>) =>
           callback(data.tenantId),
-        runWithTenant: (_tenantId: string, callback: () => Promise<void>) => callback(),
       } as never,
       {
         getLumaClient: jest
