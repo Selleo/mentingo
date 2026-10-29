@@ -7,10 +7,10 @@ import {
   PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import request from "supertest";
 
-import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -19,7 +19,10 @@ import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { mockCertificateCdn } from "../../../test/helpers/mock-certificate-cdn";
-import { assignSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
+import {
+  addSystemRoleToUserInTests,
+  assignSystemRoleToUserInTests,
+} from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { ACTIVITY_LOG_ACTION_TYPES } from "../../activity-logs/types";
 import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
@@ -36,6 +39,7 @@ import {
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  tenants,
 } from "../../storage/schema";
 import {
   CERTIFICATE_ACTIVITY_TRIGGERS,
@@ -68,12 +72,13 @@ describe("CertificatesController (e2e)", () => {
 
     const {
       app: testApp,
+      db: fixtureDb,
       runAsTenant,
       defaultTenantId,
-    } = await createE2ETest({ enableActivityLogs: true });
+    } = await createE2ETest({ enableActivityLogs: true, useDbProxy: true });
     inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
-    db = app.get(DB);
+    db = fixtureDb;
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
@@ -279,10 +284,12 @@ describe("CertificatesController (e2e)", () => {
         await db.insert(certificates).values({
           userId: student.id,
           courseId: course2.id,
+          createdAt: "2026-01-01T00:00:00.000Z",
         });
         await db.insert(certificates).values({
           userId: student.id,
           courseId: course1.id,
+          createdAt: "2026-01-02T00:00:00.000Z",
         });
 
         const response = await request(app.getHttpServer())
@@ -364,20 +371,22 @@ describe("CertificatesController (e2e)", () => {
         },
       ]);
 
-      const impact = await certificatesService.getCertificateValidityImpact(
-        course.id,
-        {
-          type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
-          value: 1,
-          unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
-        },
-        {
-          userId: admin.id,
-          email: admin.email,
-          tenantId: admin.tenantId,
-          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
-        },
+      const impact = await inTenant(() =>
+        certificatesService.getCertificateValidityImpact(
+          course.id,
+          {
+            type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
+            value: 1,
+            unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
+          },
+          {
+            userId: admin.id,
+            email: admin.email,
+            tenantId: admin.tenantId,
+            roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+            permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+          },
+        ),
       );
 
       expect(impact).toEqual({
@@ -1438,11 +1447,13 @@ describe("CertificatesController (e2e)", () => {
 
   describe("Certificate expiration", () => {
     it("should record system expiration activity with company short name-based actor email", async () => {
-      await settingsService.updateCompanyInformation({
-        ...DEFAULT_GLOBAL_SETTINGS.companyInformation,
-        companyName: "Acme Learning",
-        companyShortName: "Acme LMS",
-      });
+      await inTenant(() =>
+        settingsService.updateCompanyInformation({
+          ...DEFAULT_GLOBAL_SETTINGS.companyInformation,
+          companyName: "Acme Learning",
+          companyShortName: "Acme LMS",
+        }),
+      );
 
       const admin = await userFactory.withAdminSettings(db).withAdminRole().create();
       const student = await userFactory
@@ -1762,6 +1773,223 @@ describe("CertificatesController (e2e)", () => {
         expect(response.body instanceof Buffer).toBe(true);
         expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
       });
+
+      it.each([false, true])(
+        "allows an admin (also group manager: %s) to download a learner certificate offered in course statistics",
+        async (alsoGroupManager) => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const student = await userFactory.withUserSettings(db).create();
+          if (alsoGroupManager) {
+            await addSystemRoleToUserInTests(
+              db,
+              admin.id,
+              admin.tenantId,
+              SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+            );
+          }
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            hasCertificate: true,
+          });
+          await db.insert(studentCourses).values({ studentId: student.id, courseId: course.id });
+          const [certificate] = await db
+            .insert(certificates)
+            .values({ userId: student.id, courseId: course.id })
+            .returning();
+          const cookies = await cookieFor(admin, app);
+
+          const rows = await request(app.getHttpServer())
+            .get(`/api/certificates/course/${course.id}`)
+            .set("Cookie", cookies)
+            .query({ language: "en" })
+            .expect(200);
+          expect(rows.body.data.data).toEqual(
+            expect.arrayContaining([expect.objectContaining({ certificateId: certificate.id })]),
+          );
+
+          const response = await request(app.getHttpServer())
+            .post("/api/certificates/download")
+            .set("Cookie", cookies)
+            .send({ certificateId: certificate.id, language: "en" })
+            .expect(201);
+
+          expect(response.headers["content-type"]).toBe("application/pdf");
+          expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+        },
+        FIRST_PDF_RENDER_TIMEOUT_MS,
+      );
+
+      it.each([
+        {
+          name: "course author",
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+          ownCourse: true,
+          archived: false,
+          deleted: false,
+          otherTenant: false,
+          status: 201,
+        },
+        {
+          name: "admin for another author's course",
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          ownCourse: false,
+          archived: false,
+          deleted: false,
+          otherTenant: false,
+          status: 201,
+        },
+        {
+          name: "unrelated author",
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+          ownCourse: false,
+          archived: false,
+          deleted: false,
+          otherTenant: false,
+          status: 404,
+        },
+        {
+          name: "another learner",
+          role: SYSTEM_ROLE_SLUGS.STUDENT,
+          ownCourse: false,
+          archived: false,
+          deleted: false,
+          otherTenant: false,
+          status: 404,
+        },
+        {
+          name: "admin with an archived certificate",
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          ownCourse: false,
+          archived: true,
+          deleted: false,
+          otherTenant: false,
+          status: 404,
+        },
+        {
+          name: "admin with a deleted learner",
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          ownCourse: false,
+          archived: false,
+          deleted: true,
+          otherTenant: false,
+          status: 404,
+        },
+        {
+          name: "admin in another tenant",
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          ownCourse: false,
+          archived: false,
+          deleted: false,
+          otherTenant: true,
+          status: 404,
+        },
+      ])(
+        "enforces download access for $name",
+        async ({ role, ownCourse, archived, deleted, otherTenant, status }) => {
+          const caller = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ roleSlug: role });
+          await assignSystemRoleToUserInTests(db, caller.id, caller.tenantId, role);
+          const [otherOrganization] = otherTenant
+            ? await db
+                .insert(tenants)
+                .values({
+                  name: "Other organization",
+                  host: "https://other-certificate-tenant.local",
+                })
+                .onConflictDoUpdate({ target: tenants.host, set: { name: "Other organization" } })
+                .returning()
+            : [];
+          const tenantId = otherOrganization?.id ?? caller.tenantId;
+          const author = ownCourse ? caller : await userFactory.create({ tenantId });
+          const student = await userFactory.create({
+            tenantId,
+            deletedAt: deleted ? new Date().toISOString() : null,
+          });
+          const course = await db.transaction(async (trx) => {
+            await trx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+            const category = await createCategoryFactory(trx).create();
+            return createCourseFactory(trx).create({
+              authorId: author.id,
+              categoryId: category.id,
+              hasCertificate: true,
+            });
+          });
+          const [certificate] = await db
+            .insert(certificates)
+            .values({
+              tenantId,
+              userId: student.id,
+              courseId: course.id,
+              status: archived ? CERTIFICATE_STATUSES.ARCHIVED : CERTIFICATE_STATUSES.ACTIVE,
+              archivedAt: archived ? new Date().toISOString() : null,
+              archiveReason: archived ? CERTIFICATE_ARCHIVE_REASONS.EXPIRED : null,
+            })
+            .returning();
+          const cookies = await cookieFor(caller, app);
+
+          const response = await request(app.getHttpServer())
+            .post("/api/certificates/download")
+            .set("Cookie", cookies)
+            .send({ certificateId: certificate.id, language: "en" })
+            .expect(status);
+
+          if (status === 201) {
+            expect(response.headers["content-type"]).toBe("application/pdf");
+            expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+          } else {
+            expect(response.body.message).toBe(
+              "studentCertificateView.informations.certificateNotFound",
+            );
+          }
+        },
+        FIRST_PDF_RENDER_TIMEOUT_MS,
+      );
+
+      it(
+        "allows a group manager to download their own certificate without managed group membership",
+        async () => {
+          const admin = await userFactory.withAdminRole().create();
+          const manager = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ roleSlug: SYSTEM_ROLE_SLUGS.GROUP_MANAGER });
+          await assignSystemRoleToUserInTests(
+            db,
+            manager.id,
+            manager.tenantId,
+            SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+          );
+          const cookies = await cookieFor(manager, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            hasCertificate: true,
+          });
+          const [certificate] = await db
+            .insert(certificates)
+            .values({ userId: manager.id, courseId: course.id })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .post("/api/certificates/download")
+            .set("Cookie", cookies)
+            .send({ certificateId: certificate.id, language: "en" })
+            .expect(201);
+
+          expect(response.headers["content-type"]).toBe("application/pdf");
+          expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+        },
+        FIRST_PDF_RENDER_TIMEOUT_MS,
+      );
 
       it("allows a group manager to download a managed learner certificate", async () => {
         const admin = await userFactory
