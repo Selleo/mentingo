@@ -259,7 +259,7 @@ jobs:
       - name: Report semantic decisions
         if: ${{ always() && !inputs.resume_publication }}
         run: |
-          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import json, os, pathlib
           path = pathlib.Path(os.environ['RUNNER_TEMP'])/'helpdesk-plan.json'
           if path.exists():
@@ -267,8 +267,10 @@ jobs:
                   print(f"### {report['version']} / {report['language']}")
                   for domain in report['domains']:
                       print(f"- {domain['title']}: coverage {domain.get('coverage',{}).get('decision','blocked')}")
+                      if domain.get('coverage', {}).get('reason'):
+                          print('- Coverage reason: ' + domain['coverage']['reason'])
                       for flow in domain['flows']:
-                          print(f"  - {flow['id']}: {flow['action']} ({flow['reason']})")
+                          print(f"  - {flow['id']}: {flow.get('action', 'blocked')} ({flow.get('reason', 'Analysis did not complete')})")
                       if domain.get('error'): print('- Blocked: '+domain['error'])
           PY
   publish:

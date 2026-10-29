@@ -6,9 +6,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import helpdesk_catalog as catalog
+import helpdesk_model
 
 
 SPEC = 'docs/specs/paths-business-spec.md'
@@ -83,6 +85,47 @@ class PlannerTests(unittest.TestCase):
         result = catalog.plan(self.repo, 'v1.1.0', None, self.catalog, classify=classifier())
         self.assertEqual(result['version'], '1.1.0')
         self.assertEqual(self.first_flow(result)['action'], 'record')
+
+    def test_claude_fenced_json_does_not_block_initial_feature_coverage(self):
+        self.git('tag', 'v1.1.0')
+        answer = classifier()({'phase': 'coverage'})
+        for prefix, suffix in [('', ''), ('```json\n', '\n```'), ('```\n', '\n```'),
+                               ('\ufeff\r\n```JSON\r\n', '\r\n```')]:
+            with self.subTest(prefix=prefix), patch.object(catalog.llm, 'complete',
+                    return_value=(prefix + json.dumps(answer) + suffix, {'provider': 'cli'})):
+                plan = catalog.plan(self.repo, 'v1.1.0', None, self.catalog)
+                self.assertTrue(plan['ok'])
+                self.assertEqual(self.first_flow(plan)['action'], 'record')
+
+    def test_claude_fenced_impact_result_still_distinguishes_refactors_from_changes(self):
+        self.write(CODE, 'export const save = () => repository.create();\n')
+        self.commit('Internal refactor', 'v1.1.0')
+        for decision, action in [('unchanged', 'reuse'), ('changed', 'record'), ('uncertain', 'blocked')]:
+            def complete(prompt, *_args, **_kwargs):
+                answer = classifier(decision)(json.loads(prompt))
+                return '```json\n' + json.dumps(answer) + '\n```', {'provider': 'cli'}
+            with self.subTest(decision=decision), patch.object(catalog.llm, 'complete', side_effect=complete):
+                if action == 'blocked':
+                    with self.assertRaises(catalog.ImpactUncertainError): self.run_plan()
+                else:
+                    self.assertEqual(self.first_flow(self.run_plan())['action'], action)
+
+    def test_invalid_model_json_reports_the_analysis_stage_without_echoing_response(self):
+        self.git('tag', 'v1.1.0')
+        for text in ['Not JSON private-provider-response', '```json\n{truncated\n```',
+                     '```json\n{}\n```\n```json\n{}\n```', '[]', 'null']:
+            with self.subTest(text=text), patch.object(catalog.llm, 'complete', return_value=(text, {'provider': 'cli'})):
+                with self.assertRaises(catalog.ImpactUncertainError) as caught:
+                    catalog.plan(self.repo, 'v1.1.0', None, self.catalog)
+                error = caught.exception.plan['domains'][0]['error']
+                self.assertIn('Semantic coverage analysis', error)
+                self.assertNotIn('private-provider-response', error)
+                self.assertEqual(caught.exception.plan['domains'][0]['flows'], [])
+
+    def test_json_parser_rejects_empty_prose_and_multiple_values(self):
+        for text in ['', '  ', 'Here is the result: {"decision":"complete"}', '{} {}']:
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                helpdesk_model.json_object(text, 'Semantic coverage analysis')
 
     def test_isolated_test_can_record_an_untagged_branch_commit(self):
         self.write(CODE, 'export const save = () => create(); // branch change\n')

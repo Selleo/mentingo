@@ -21,6 +21,7 @@ import cut
 import editor
 import gaps
 import harness
+import helpdesk_model
 import language
 import llm
 import montage
@@ -163,7 +164,7 @@ def verify_story(run, flow, data, story):
               json.dumps({'language': data['language'], 'flow': flow, 'chapter': story['chapters'][0],
                           'actions': capture.get('actions_text', [])}, ensure_ascii=False) + '\n' + '\n'.join(sheets))
     text, usage = llm.visual(prompt, 'Review localized Helpdesk business-flow coverage.', 'medium', read=[run / 'review'])
-    coverage = json.loads(text.strip().removeprefix('```json').removesuffix('```').strip())
+    coverage = helpdesk_model.json_object(text, 'Visual flow-coverage review')
     if set(coverage) != {'complete', 'missing'} or coverage['complete'] is not True or coverage['missing'] != []:
         raise RuntimeError('Required business-flow coverage did not pass visual review')
 
@@ -297,10 +298,7 @@ def _model_json(prompt, system):
     text, usage = llm.complete(json.dumps(prompt, ensure_ascii=False), system, effort='medium')
     if usage.get('provider') != 'cli' or not text.strip():
         raise RuntimeError('Helpdesk localization requires the authenticated text model')
-    try:
-        return json.loads(text.strip().removeprefix('```json').removesuffix('```').strip())
-    except ValueError:
-        raise ValueError('Helpdesk localization returned invalid structured text') from None
+    return helpdesk_model.json_object(text, 'Helpdesk localization')
 
 
 def _localized_text(value, name, maximum):

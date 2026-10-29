@@ -16,6 +16,7 @@ import subprocess
 from typing import Literal, TypedDict, cast
 
 import llm
+import helpdesk_model
 
 SCHEMA_VERSION = 1
 KEY = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}\Z")
@@ -337,7 +338,7 @@ def _classify(context: dict[str, object]) -> object:
     text, usage = llm.complete(json.dumps(context, ensure_ascii=False), instruction, effort="medium")
     if usage.get("provider") != "cli" or not text.strip():
         raise ValueError("Semantic flow classification is unavailable")
-    return json.loads(text)
+    return helpdesk_model.json_object(text, f'Semantic {phase} analysis')
 
 
 def _decision(value: object, context: dict[str, object]) -> Impact | Coverage:

@@ -265,6 +265,23 @@ class WorkflowsTest(unittest.TestCase):
         self.assertIn('-f domains=', step['run'])
         self.assertEqual(trigger['jobs']['queue']['permissions'], {'actions': 'write'})
 
+    def test_incomplete_analysis_reason_is_available_in_logs_and_summary(self):
+        workflow = self.load('self-onboarding.yml')
+        report = next(step for step in workflow['jobs']['generate']['steps'] if step.get('name') == 'Report semantic decisions')
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            core.save(root/'helpdesk-plan.json', {'reports': [{'version': '1.0.0', 'language': 'en', 'domains': [{
+                'title': 'Development Paths', 'flows': [{'id': 'create'}],
+                'coverage': {'decision': 'uncertain', 'reason': 'Missing implementation evidence'},
+                'error': 'Semantic coverage analysis returned invalid JSON'}]}]})
+            result = subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', report['run']],
+                env={**os.environ, 'RUNNER_TEMP': folder, 'GITHUB_STEP_SUMMARY': str(root/'summary.md')},
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('Missing implementation evidence', result.stdout)
+            self.assertIn('Semantic coverage analysis returned invalid JSON', result.stdout)
+            self.assertEqual((root/'summary.md').read_text(), result.stdout)
+
     def test_narrator_pool_is_checked_before_models_and_forwarded_to_generation(self):
         workflow = self.load('self-onboarding.yml')
         steps = workflow['jobs']['generate']['steps']
