@@ -5,21 +5,7 @@ import "video.js/dist/video-js.css";
 import "~/components/VideoPlayer/videoPlayer.css";
 import { cn } from "~/lib/utils";
 
-const MIN_HLS_RENDITION_HEIGHT = 720;
-const MAX_HLS_RENDITION_HEIGHT = 1080;
-
 type VideoJsPlayer = ReturnType<typeof videojs>;
-
-type VhsRepresentation = {
-  height?: number;
-  enabled: (enabled?: boolean) => boolean;
-};
-
-type VideoJsTechWithVhs = {
-  vhs?: {
-    representations?: () => VhsRepresentation[];
-  };
-};
 
 type HeroTrailerVideoProps = {
   src: string;
@@ -27,43 +13,6 @@ type HeroTrailerVideoProps = {
 
 const getVideoType = (src: string) =>
   /\.m3u8($|\?)/i.test(src) ? "application/vnd.apple.mpegurl" : "video/mp4";
-
-const getFallbackRepresentation = (representations: VhsRepresentation[]) =>
-  representations
-    .filter((representation) => {
-      const height = representation.height;
-      return typeof height === "number" && height < MIN_HLS_RENDITION_HEIGHT;
-    })
-    .sort((a, b) => (b.height ?? 0) - (a.height ?? 0))[0];
-
-const enforceTargetHlsRepresentation = (player: VideoJsPlayer) => {
-  const tech = player.tech() as VideoJsTechWithVhs | undefined;
-  const representations = tech?.vhs?.representations?.() ?? [];
-  const fallbackRepresentation = getFallbackRepresentation(representations);
-
-  const hasTargetRangeRepresentation = representations.some((representation) => {
-    const height = representation.height;
-    return (
-      typeof height === "number" &&
-      height >= MIN_HLS_RENDITION_HEIGHT &&
-      height <= MAX_HLS_RENDITION_HEIGHT
-    );
-  });
-
-  if (!hasTargetRangeRepresentation && !fallbackRepresentation) return;
-
-  representations.forEach((representation) => {
-    const height = representation.height;
-    const isInTargetRange =
-      typeof height === "number" &&
-      height >= MIN_HLS_RENDITION_HEIGHT &&
-      height <= MAX_HLS_RENDITION_HEIGHT;
-
-    representation.enabled(
-      hasTargetRangeRepresentation ? isInTargetRange : representation === fallbackRepresentation,
-    );
-  });
-};
 
 export function HeroTrailerVideo({ src }: HeroTrailerVideoProps) {
   const playerRef = useRef<VideoJsPlayer | null>(null);
@@ -90,13 +39,19 @@ export function HeroTrailerVideo({ src }: HeroTrailerVideoProps) {
       responsive: true,
       techOrder: ["html5"],
       html5: {
-        vhs: { overrideNative: true },
+        vhs: {
+          overrideNative: true,
+          // Start at the highest bitrate; VHS replaces this estimate with measured bandwidth.
+          bandwidth: Number.MAX_SAFE_INTEGER,
+          limitRenditionByPlayerDimensions: false,
+          // A browser downlink hint must not override the initial bandwidth estimate.
+          useNetworkInformationApi: false,
+        },
         nativeAudioTracks: false,
         nativeVideoTracks: false,
       },
     }));
 
-    const applyPreferredRepresentation = () => enforceTargetHlsRepresentation(player);
     const markFirstFrameLoaded = () => setFirstFrameLoaded(true);
 
     player.ready(() => {
@@ -107,14 +62,10 @@ export function HeroTrailerVideo({ src }: HeroTrailerVideoProps) {
       void player.play()?.catch(() => undefined);
     });
 
-    player.on("loadedmetadata", applyPreferredRepresentation);
-    player.on("loadedplaylist", applyPreferredRepresentation);
     player.on("loadeddata", markFirstFrameLoaded);
     player.on("playing", markFirstFrameLoaded);
 
     return () => {
-      player.off("loadedmetadata", applyPreferredRepresentation);
-      player.off("loadedplaylist", applyPreferredRepresentation);
       player.off("loadeddata", markFirstFrameLoaded);
       player.off("playing", markFirstFrameLoaded);
 
