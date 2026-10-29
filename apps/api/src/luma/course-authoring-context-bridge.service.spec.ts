@@ -153,4 +153,143 @@ describe("CourseAuthoringContextBridgeService", () => {
       expect.objectContaining({ jobId: `context-${tenantId}-${contextRequestId}` }),
     );
   });
+
+  it("enqueues a valid autonomous event before advancing its replay cursor", async () => {
+    const binding = {
+      id: "00000000-0000-4000-8000-000000000009",
+      tenantId,
+      courseId,
+      sessionId,
+      actorId: "00000000-0000-4000-8000-000000000010",
+      language: "en" as const,
+      cursorSequence: 4,
+    };
+    const payload = {
+      schemaVersion: 1,
+      courseId,
+      sessionId,
+      requestId,
+      actorId: binding.actorId,
+      controlEpoch: 2,
+      proposalIds: [lessonId],
+    };
+    const repository = {
+      pollableBindings: jest.fn().mockResolvedValue([binding]),
+      touchPollTime: jest.fn(),
+      persistPage: jest.fn().mockResolvedValue(undefined),
+      pending: jest.fn().mockResolvedValue([]),
+    };
+    const queue = { enqueue: jest.fn().mockResolvedValue(undefined) };
+    const service = new CourseAuthoringContextBridgeService(
+      repository as never,
+      {
+        getLumaClient: jest.fn().mockResolvedValue({
+          authoring: {
+            getEvents: jest.fn().mockResolvedValue({
+              events: [
+                {
+                  schemaVersion: 1,
+                  eventId,
+                  sessionId,
+                  sequence: 5,
+                  occurredAt: "2026-10-28",
+                  type: "autonomous.apply_requested",
+                  payload,
+                },
+              ],
+              nextSequence: 5,
+              hasMore: false,
+            }),
+          },
+        }),
+      } as never,
+      queue as never,
+      {
+        runForEachTenant: (fn: (id: string) => Promise<unknown>) => fn(tenantId),
+        runWithTenant: (_id: string, fn: () => Promise<unknown>) => fn(),
+      } as never,
+    );
+    await service.pollDisconnectedSessions();
+    expect(queue.enqueue).toHaveBeenCalledWith(
+      "course-authoring-autonomous",
+      "apply-autonomous-request",
+      {
+        courseId,
+        sessionId,
+        requestId,
+        actorId: binding.actorId,
+        controlEpoch: 2,
+        proposalIds: [lessonId],
+        tenantId,
+        eventId,
+      },
+      expect.objectContaining({ jobId: `autonomous-${tenantId}-${eventId}` }),
+    );
+    expect(queue.enqueue.mock.invocationCallOrder[0]).toBeLessThan(
+      repository.persistPage.mock.invocationCallOrder[0],
+    );
+  });
+
+  it.each(["queue failure", "wrong course", "empty selection"])(
+    "does not advance the replay cursor on an autonomous %s",
+    async (failure) => {
+      const binding = {
+        id: "00000000-0000-4000-8000-000000000009",
+        tenantId,
+        courseId,
+        sessionId,
+        actorId: "00000000-0000-4000-8000-000000000010",
+        language: "en" as const,
+        cursorSequence: 4,
+      };
+      const payload = {
+        schemaVersion: 1,
+        courseId: failure === "wrong course" ? lessonId : courseId,
+        sessionId,
+        requestId,
+        actorId: binding.actorId,
+        controlEpoch: 2,
+        proposalIds: failure === "empty selection" ? [] : [lessonId],
+      };
+      const repository = {
+        pollableBindings: jest.fn().mockResolvedValue([binding]),
+        touchPollTime: jest.fn(),
+        persistPage: jest.fn(),
+        pending: jest.fn().mockResolvedValue([]),
+      };
+      const enqueue = jest.fn();
+      if (failure === "queue failure") enqueue.mockRejectedValue(new Error("unavailable"));
+      const service = new CourseAuthoringContextBridgeService(
+        repository as never,
+        {
+          getLumaClient: jest.fn().mockResolvedValue({
+            authoring: {
+              getEvents: jest.fn().mockResolvedValue({
+                events: [
+                  {
+                    schemaVersion: 1,
+                    eventId,
+                    sessionId,
+                    sequence: 5,
+                    occurredAt: "2026-10-28",
+                    type: "autonomous.apply_requested",
+                    payload,
+                  },
+                ],
+                nextSequence: 5,
+                hasMore: false,
+              }),
+            },
+          }),
+        } as never,
+        { enqueue } as never,
+        {
+          runForEachTenant: (fn: (id: string) => Promise<unknown>) => fn(tenantId),
+          runWithTenant: (_id: string, fn: () => Promise<unknown>) => fn(),
+        } as never,
+      );
+      await service.pollDisconnectedSessions();
+      expect(repository.persistPage).not.toHaveBeenCalled();
+    },
+  );
 });

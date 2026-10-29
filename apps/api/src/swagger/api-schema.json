@@ -172474,6 +172474,18 @@
                       }
                     ]
                   },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
+                        "type": "string"
+                      }
+                    ]
+                  },
                   "targets": {
                     "type": "array",
                     "items": {
@@ -174835,6 +174847,18 @@
                       }
                     ]
                   },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
+                        "type": "string"
+                      }
+                    ]
+                  },
                   "targets": {
                     "type": "array",
                     "items": {
@@ -177187,6 +177211,18 @@
                       },
                       {
                         "const": "high",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
                         "type": "string"
                       }
                     ]

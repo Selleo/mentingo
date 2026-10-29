@@ -6579,6 +6579,14 @@
       "summaryAccepted": "Přijato: {{count}}",
       "summaryRejected": "Odmítnuto: {{count}}"
     },
+    "executionMode": {
+      "title": "Režim práce",
+      "control": "Režim práce: {{mode}}",
+      "review": "Zkontrolovat změny",
+      "reviewDescription": "Před použitím zkontrolujte plán a změny.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Upřesní vaše potřeby a poté automaticky schválí a použije změny."
+    },
     "reasoning": {
       "title": "Úroveň uvažování",
       "low": "Rychle",
@@ -6817,6 +6825,7 @@
       "retryFailedParts": "Zopakovat neúspěšné části",
       "retryProvider": "Zopakovat připojení",
       "recoveringFailedParts": "Obnovování neúspěšných částí…",
+      "failureAutonomousInput": "Autopilot nemohl bezpečně učinit potřebné rozhodnutí. Doplňte pokyny nebo zdroje a zkuste to znovu.",
       "failureGeneration": "Vygenerovaný obsah neprošel validací. Opakování vytvoří nový obsah pro neúspěšné části a zachová dokončenou práci.",
       "failureProvider": "Poskytovatel nemohl dokončit požadavek. Opakování obnoví nedokončenou práci.",
       "failureEvidence": "Dostupné zdroje nepokrývají požadovaná tvrzení. Můžete přidat zdroje nebo upřesnit požadavek.",

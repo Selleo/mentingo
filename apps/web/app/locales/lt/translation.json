@@ -6575,6 +6575,14 @@
       "summaryAccepted": "Priimta: {{count}}",
       "summaryRejected": "Atmesta: {{count}}"
     },
+    "executionMode": {
+      "title": "Darbo režimas",
+      "control": "Darbo režimas: {{mode}}",
+      "review": "Peržiūrėti pakeitimus",
+      "reviewDescription": "Prieš taikydami peržiūrėkite planą ir pakeitimus.",
+      "autonomous": "Autopilotas",
+      "autonomousDescription": "Patikslina jūsų poreikius, tada automatiškai patvirtina ir pritaiko pakeitimus."
+    },
     "reasoning": {
       "title": "Mąstymo lygis",
       "low": "Greitai",
@@ -6813,6 +6821,7 @@
       "retryFailedParts": "Kartoti nepavykusias dalis",
       "retryProvider": "Kartoti prisijungimą",
       "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
+      "failureAutonomousInput": "Autopilotas negalėjo saugiai priimti būtino sprendimo. Papildykite nurodymus arba šaltinius ir bandykite dar kartą.",
       "failureGeneration": "Sugeneruotas turinys neatitiko patikros. Pakartojimas sukurs naują nepavykusių dalių turinį ir išsaugos užbaigtą darbą.",
       "failureProvider": "Teikėjas negalėjo užbaigti užklausos. Pakartojimas tęs neužbaigtą darbą.",
       "failureEvidence": "Turimi šaltiniai nepatvirtina reikiamų teiginių. Galite pridėti šaltinių arba patikslinti užklausą.",

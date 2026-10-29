@@ -6638,6 +6638,14 @@
       "summaryAccepted": "Zaakceptowane: {{count}}",
       "summaryRejected": "Odrzucone: {{count}}"
     },
+    "executionMode": {
+      "title": "Tryb pracy",
+      "control": "Tryb pracy: {{mode}}",
+      "review": "Przeglądaj zmiany",
+      "reviewDescription": "Zatwierdź plan i zmiany przed ich zastosowaniem.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Dopytuje o Twoje potrzeby, a potem automatycznie zatwierdza i wprowadza zmiany."
+    },
     "reasoning": {
       "title": "Poziom rozumowania",
       "low": "Szybko",
@@ -6876,6 +6884,7 @@
       "retryFailedParts": "Ponów nieudane części",
       "retryProvider": "Ponów połączenie",
       "recoveringFailedParts": "Wznawianie nieudanych części…",
+      "failureAutonomousInput": "Autopilot nie mógł bezpiecznie podjąć wymaganej decyzji. Uzupełnij instrukcje lub źródła i spróbuj ponownie.",
       "failureGeneration": "Wygenerowana treść nie przeszła walidacji. Ponowienie utworzy nową treść dla nieudanych części i zachowa ukończoną pracę.",
       "failureProvider": "Dostawca nie mógł ukończyć żądania. Ponowienie wznowi niedokończoną pracę.",
       "failureEvidence": "Dostępne źródła nie potwierdzają wymaganych twierdzeń. Możesz dodać źródła lub doprecyzować prośbę.",

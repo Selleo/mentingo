@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import httpRequest from "supertest";
 
 import { CourseAuthoringApplicationService } from "src/luma/course-authoring-application.service";
+import { CourseAuthoringContextBridgeService } from "src/luma/course-authoring-context-bridge.service";
 import { LumaService } from "src/luma/luma.service";
 import { authoringSessionSchema } from "src/luma/schema/course-authoring-session.schema";
 import * as outboxConstants from "src/outbox/outbox.constants";
@@ -262,6 +263,87 @@ integration("course authoring Core to AI HTTP roundtrip", () => {
         }
         await applicationQueue.resume();
       }
+    });
+  }, 180000);
+
+  it("applies an autonomous edit through the durable bridge with no connected browser", async () => {
+    await runner.runWithTenant(actor.tenantId, async () => {
+      courseId = (
+        await createCourseFactory(db).create({
+          authorId: actor.userId,
+          title: "Autonomous roundtrip source title",
+        })
+      ).id;
+      const basePath = `/api/luma/authoring/courses/${courseId}`;
+      const openResponse = await httpRequest(app.getHttpServer())
+        .post(`${basePath}/sessions`)
+        .set("Cookie", actorCookies)
+        .send({ commandId: randomUUID(), language: SUPPORTED_LANGUAGES.EN })
+        .expect(201);
+      const { sessionId } = openResponse.body.data as { sessionId: string };
+      const contextResponse = await httpRequest(app.getHttpServer())
+        .get(`${basePath}/context`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", actorCookies)
+        .expect(200);
+      const context = contextResponse.body.data as Awaited<
+        ReturnType<CourseAuthoringContextService["getContext"]>
+      >;
+      const commandResponse = await httpRequest(app.getHttpServer())
+        .post(`${basePath}/sessions/${sessionId}/commands`)
+        .set("Cookie", actorCookies)
+        .send({
+          schemaVersion: 1,
+          commandId: randomUUID(),
+          action: "request.create",
+          request: {
+            instruction: "Shorten the course title while preserving its meaning.",
+            executionMode: "autonomous",
+            reasoningEffort: ReasoningEffort.Low,
+            targets: [
+              {
+                targetId: courseId,
+                kind: "course",
+                language: SUPPORTED_LANGUAGES.EN,
+                baselineHash: context.baselineHash,
+                blockIds: [],
+                allowedFields: ["title"],
+              },
+            ],
+            sourcePolicy,
+          },
+        })
+        .expect(201);
+      const { requestId } = commandResponse.body.data as { requestId: string };
+      expect(requestId).toBeTruthy();
+
+      // No websocket subscription or approval request is made. Poll only the native DB
+      // while the bridge and BullMQ workers execute in the background.
+      const originalTitle = context.title;
+      let updatedTitle: string | undefined;
+      for (let attempt = 0; attempt < 120; attempt += 1) {
+        // Jest disables ScheduleModule; invoke the server-side sweep that cron runs in production.
+        await app.get(CourseAuthoringContextBridgeService).pollDisconnectedSessions();
+        const [course] = await db
+          .select({ title: courses.title })
+          .from(courses)
+          .where(eq(courses.id, courseId));
+        const currentTitle = course?.title?.en;
+        if (currentTitle && currentTitle !== originalTitle) {
+          updatedTitle = currentTitle;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      expect(updatedTitle).toContain("shortened");
+      const client = await app.get(LumaService).getLumaClient();
+      const page = await client.authoring.getEvents({ sessionId, afterSequence: 0, limit: 100 });
+      expect(
+        page.events.some(
+          (item) => item.type === "autonomous.apply_requested" && item.payload.requestId === requestId,
+        ),
+      ).toBe(true);
+      expect(page.events.some((item) => item.type === "question.created")).toBe(false);
     });
   }, 180000);
 });

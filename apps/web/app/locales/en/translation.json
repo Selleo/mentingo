@@ -6583,6 +6583,14 @@
       "summaryAccepted": "Accepted: {{count}}",
       "summaryRejected": "Rejected: {{count}}"
     },
+    "executionMode": {
+      "title": "Work mode",
+      "control": "Work mode: {{mode}}",
+      "review": "Review changes",
+      "reviewDescription": "Review the outline and changes before they are applied.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Clarifies your needs, then approves and applies changes automatically."
+    },
     "reasoning": {
       "title": "Thinking effort",
       "low": "Fast",
@@ -6821,6 +6829,7 @@
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
+      "failureAutonomousInput": "Autopilot could not make a necessary decision safely. Add the missing instructions or sources, then try again.",
       "failureGeneration": "Generated content did not pass validation. Retry will create fresh content for the failed parts and keep completed work.",
       "failureProvider": "The provider could not complete the request. Retry will resume the unfinished work.",
       "failureEvidence": "The available evidence does not cover the required claims. You can add sources or clarify the request.",
