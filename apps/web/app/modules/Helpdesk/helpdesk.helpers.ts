@@ -1,6 +1,30 @@
 import type { HelpdeskSearchHit, HelpdeskTutorial } from "./helpdesk.types";
 
 const DEMO_TUTORIAL_KEY_PREFIX = "demo.";
+const HELPDESK_REFERENCE_KEY = /^[a-z0-9][a-z0-9._-]{0,127}$/;
+
+/** Resolve only canonical current-tenant tutorial links, never arbitrary model destinations. */
+export function readHelpdeskTutorialReference(value: string, origin: string) {
+  if (value.includes("\\") || value.startsWith("//")) return null;
+  try {
+    const url = new URL(value, origin);
+    if (url.origin !== new URL(origin).origin || url.username || url.password || url.hash)
+      return null;
+    const match = /^\/helpdesk\/tutorials\/([a-z0-9][a-z0-9._-]{0,127})$/.exec(url.pathname);
+    if (!match) return null;
+    const parameters = [...url.searchParams.entries()];
+    if (!parameters.length) return { key: match[1] };
+    if (
+      parameters.length !== 1 ||
+      parameters[0][0] !== "chapter" ||
+      !HELPDESK_REFERENCE_KEY.test(parameters[0][1])
+    )
+      return null;
+    return { key: match[1], chapterId: parameters[0][1] };
+  } catch {
+    return null;
+  }
+}
 
 /** Present demo status separately from the task title; avoid punctuation-heavy labels. */
 export function helpdeskTutorialLabel(tutorial: HelpdeskTutorial) {

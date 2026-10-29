@@ -33,6 +33,19 @@ vi.mock("~/components/VideoPlayer/VideoPlayer", () => ({
 }));
 
 describe("Helpdesk chapter playback", () => {
+  it("keeps chapter-list seeking when the popup's extra timeline is hidden", () => {
+    renderWith().render(
+      <HelpdeskTutorialPlayer
+        tutorial={helpdeskTutorialFixture}
+        startMs={0}
+        showChapterTimeline={false}
+      />,
+    );
+    expect(screen.queryByLabelText("Video timeline")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Review publication 0:12/ }));
+    expect(screen.getByTestId("helpdesk-player")).toHaveAttribute("data-seek", "12.345");
+  });
+
   it("uses direct Bunny HLS and preserves millisecond search/chapter offsets", () => {
     renderWith().render(
       <HelpdeskTutorialPlayer tutorial={helpdeskTutorialFixture} startMs={12_345} />,

@@ -1,17 +1,27 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { useState } from "react";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { helpdeskTutorialFixture } from "~/modules/Helpdesk/__tests__/fixtures";
+import { server } from "~/utils/mocks/node";
 import { renderWith } from "~/utils/testUtils";
 
 import { AssistantDock } from "./AssistantDock";
+import { AssistantMarkdown } from "./components/AssistantMarkdown";
 import { assistantSessionKey, writeAssistantSelection } from "./useAssistantSession";
 
 import type { CurrentUserResponse } from "~/api/generated-api";
 
 const state = vi.hoisted(() => ({
   thread: { id: "11111111-1111-4111-8111-111111111111", title: "Feedback", archived: false },
+  showHelpdesk: false,
+}));
+vi.mock("~/components/VideoPlayer/VideoPlayer", () => ({
+  VideoPlayer: () => <div data-testid="floating-help-video" />,
 }));
 vi.mock("~/api/queries/assistant/useAssistantThread", () => ({
   useAssistantThread: () => ({
@@ -31,14 +41,28 @@ vi.mock("./components/AssistantConversation", () => ({
   }) => {
     const [draft, setDraft] = useState(initialDraft);
     return (
-      <textarea
-        aria-label="Mini draft"
-        value={draft}
-        onChange={(event) => {
-          setDraft(event.target.value);
-          onDraftChange(event.target.value);
-        }}
-      />
+      <>
+        <textarea
+          aria-label="Mini draft"
+          value={draft}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            onDraftChange(event.target.value);
+          }}
+        />
+        {state.showHelpdesk && (
+          <AssistantMarkdown
+            text={`Watch [the tutorial](/helpdesk/tutorials/${helpdeskTutorialFixture.key}?chapter=review).`}
+            sources={[
+              {
+                title: "Review publication",
+                url: `/helpdesk/tutorials/${helpdeskTutorialFixture.key}?chapter=review`,
+                entityType: "helpdesk",
+              },
+            ]}
+          />
+        )}
+      </>
     );
   },
 }));
@@ -58,7 +82,7 @@ function Navigation() {
   );
 }
 const renderDock = (path = "/courses", user = actor) =>
-  renderWith().render(
+  renderWith({ withQuery: true }).render(
     <MemoryRouter initialEntries={[path]}>
       <Navigation />
       <AssistantDock actor={user} />
@@ -67,9 +91,42 @@ const renderDock = (path = "/courses", user = actor) =>
 beforeEach(() => {
   window.sessionStorage.clear();
   state.thread.archived = false;
+  state.showHelpdesk = false;
 });
 
 describe("Assistant floating conversation", () => {
+  it("closes the tutorial popup with Escape while retaining the floating conversation and draft", async () => {
+    const user = userEvent.setup();
+    state.showHelpdesk = true;
+    useLanguageStore.setState({ language: "en" });
+    server.use(
+      http.get("*/api/helpdesk/tutorials/:key", () =>
+        HttpResponse.json({ data: helpdeskTutorialFixture }),
+      ),
+      http.post("*/api/helpdesk/search", () =>
+        HttpResponse.json({ data: { mode: "browse", results: [] } }),
+      ),
+    );
+    window.sessionStorage.setItem(key(), state.thread.id);
+    renderDock();
+    fireEvent.click(await screen.findByTestId("assistant-floating-bubble"));
+    const panel = await screen.findByTestId("assistant-floating-panel");
+    fireEvent.change(within(panel).getByRole("textbox"), { target: { value: "Keep this draft" } });
+    const citation = within(panel).getByRole("link", { name: "the tutorial" });
+    await user.click(citation);
+    await screen.findByTestId("floating-help-video");
+    const popup = screen.getByRole("dialog", { name: "Publish a course" });
+    expect(popup).toHaveClass("z-[81]");
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByTestId("floating-help-video")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("assistant-floating-panel")).toBe(panel);
+    expect(within(panel).getByRole("textbox")).toHaveValue("Keep this draft");
+    expect(citation).toHaveFocus();
+    expect(screen.getByTestId("location")).toHaveTextContent("/courses:");
+  });
+
   it("appears only off the full Assistant page when a validated selection exists", async () => {
     window.sessionStorage.setItem(key(), state.thread.id);
     renderDock("/assistant");

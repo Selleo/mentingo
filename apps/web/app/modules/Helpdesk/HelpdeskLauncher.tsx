@@ -74,7 +74,6 @@ export function HelpdeskLauncher({
           }
         >
           <HelpdeskVideoDialog
-            key={selection.tutorial.revisionId}
             selection={selection}
             onSelect={setSelection}
             onClose={() => setSelection(null)}
