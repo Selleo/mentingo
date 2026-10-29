@@ -267,6 +267,33 @@ class WorkflowsTest(unittest.TestCase):
         self.assertIn('-f domains=', step['run'])
         self.assertEqual(trigger['jobs']['queue']['permissions'], {'actions': 'write'})
 
+    def test_runner_can_create_voice_environment_and_runs_after_workspace_setup(self):
+        workflow = self.load('self-onboarding.yml')
+        job = workflow['jobs']['generate']
+        self.assertEqual(job['env']['RELEASE_FILM_HOME'], '/mnt/self-onboarding')
+        self.assertNotIn('helpdesk-film', str(workflow))
+        setup = next(step for step in job['steps'] if step.get('id') == 'source')
+        installation = '\n'.join(line for line in setup['run'].splitlines() if line.startswith('sudo install -d'))
+        self.assertTrue(installation)
+        with tempfile.TemporaryDirectory() as folder:
+            home = Path(folder)/'self-onboarding'
+            (home/'projects').mkdir(parents=True)
+            # Previously only projects was writable, leaving its parent unable to
+            # accept tools or runs. Use our own read-only directory, without sudo.
+            home.chmod(0o555)
+            try:
+                result = subprocess.run(['bash', '-e', '-c', 'sudo() { "$@"; }\n' + installation],
+                    env={**os.environ, 'RELEASE_FILM_HOME': str(home)}, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue(home.stat().st_mode & 0o200)
+                result = subprocess.run([sys.executable, '-m', 'venv', '--without-pip', str(home/'tools/elevenlabs')],
+                    capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue((home/'tools/elevenlabs/bin/python').exists())
+                (home/'runs/probe.txt').write_text('The recorder can write here.')
+            finally:
+                home.chmod(0o755)
+
     def test_incomplete_analysis_reason_is_available_in_logs_and_summary(self):
         workflow = self.load('self-onboarding.yml')
         report = next(step for step in workflow['jobs']['generate']['steps'] if step.get('name') == 'Report semantic decisions')

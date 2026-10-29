@@ -84,11 +84,11 @@ jobs:
     permissions:
       contents: read
     env:
-      RELEASE_FILM_HOME: /mnt/helpdesk-film
+      RELEASE_FILM_HOME: /mnt/self-onboarding
       RELEASE_FILM_CI: '1'
       RELEASE_FILM_CI_WORKERS: '1'
       S: .agents/skills/release-film/scripts
-      CACHE: ${{ github.workspace }}/.local/helpdesk-build
+      CACHE: ${{ github.workspace }}/.local/self-onboarding-build
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -115,7 +115,7 @@ jobs:
             test "$RESUME" != true
             commit=$(git rev-parse --verify --end-of-options "${TARGET_REF:-$GITHUB_SHA}^{commit}")
             echo "record_ref=$commit" >> "$GITHUB_OUTPUT"
-            echo "record_version=v0.0.0-helpdesk-test.$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+            echo "record_version=v0.0.0-self-onboarding-test.$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
           else
             [[ "$VERSION_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
             test -z "$TARGET_REF"
@@ -123,7 +123,7 @@ jobs:
             test -n "$STORE"
             echo "record_version=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           fi
-          sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME/projects"
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME" "$RELEASE_FILM_HOME/projects" "$RELEASE_FILM_HOME/tools" "$RELEASE_FILM_HOME/runs"
           cp .agents/skills/release-film/projects/selleo__mentingo.json "$RELEASE_FILM_HOME/projects/selleo__mentingo.json"
       - name: Restore private reusable flow segments and publication progress
         id: restore
@@ -207,7 +207,7 @@ jobs:
           ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
         run: |
           python3 "$S/helpdesk.py" generate --plan "$RUNNER_TEMP/helpdesk-plan.json" --cache "$CACHE" \
-            --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/helpdesk-$GITHUB_RUN_ID" \
+            --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
             --out "$CACHE/bundles/$GITHUB_RUN_ID" --workflow-run-id "$GITHUB_RUN_ID"
       - name: Validate a resumed bundle belongs to the requested version
         if: ${{ inputs.resume_publication && !inputs.dry_run }}
@@ -283,7 +283,7 @@ jobs:
     permissions:
       contents: read
     env:
-      CACHE: ${{ github.workspace }}/.local/helpdesk-build
+      CACHE: ${{ github.workspace }}/.local/self-onboarding-build
       S: .agents/skills/release-film/scripts
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
