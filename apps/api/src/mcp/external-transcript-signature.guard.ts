@@ -9,30 +9,28 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import type { McpRequest } from "./mcp.types";
+import { McpResourceService } from "./mcp-resource.service";
 
-/** Authenticates the bot independently of its participant's read-only OAuth grant. */
+import type { ExternalConversationRequest } from "./external-conversations.types";
+
 @Injectable()
 export class ExternalTranscriptSignatureGuard implements CanActivate {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService, private readonly mcpResourceService: McpResourceService) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<RawBodyRequest<McpRequest>>();
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<RawBodyRequest<ExternalConversationRequest>>();
     try {
       const publicKeyValue = this.configService.get<string>(
         "EXTERNAL_TRANSCRIPT_SIGNING_PUBLIC_KEY",
       );
       const timestamp = request.headers["x-mentingo-transcript-timestamp"];
       const signatureValue = request.headers["x-mentingo-transcript-signature"];
-      const authorization = request.headers.authorization;
       if (
         !publicKeyValue ||
         typeof timestamp !== "string" ||
         !/^\d{1,12}$/.test(timestamp) ||
         typeof signatureValue !== "string" ||
-        !authorization?.startsWith("Bearer ") ||
-        !Buffer.isBuffer(request.rawBody) ||
-        !request.mcpActor
+        !Buffer.isBuffer(request.rawBody)
       ) {
         throw new Error("Missing signature input");
       }
@@ -47,13 +45,13 @@ export class ExternalTranscriptSignatureGuard implements CanActivate {
         throw new Error("Unsupported signature key");
       const signature = this.decodeBase64(signatureValue);
       if (signature.length !== 64) throw new Error("Invalid signature length");
+      const resource = await this.mcpResourceService.fromRequest(request);
       const signed = [
         "mentingo-external-transcript-v1",
         "POST",
-        `${request.mcpActor.grant.resource}/external-conversations`,
+        `${resource.url}/external-conversations`,
         timestamp,
         createHash("sha256").update(request.rawBody).digest("hex"),
-        createHash("sha256").update(authorization.slice("Bearer ".length)).digest("hex"),
       ].join("\n");
       if (
         request.method !== "POST" ||
@@ -61,9 +59,9 @@ export class ExternalTranscriptSignatureGuard implements CanActivate {
       ) {
         throw new Error("Invalid signature");
       }
+      request.externalConversationResource = resource;
       return true;
     } catch {
-      // A missing or invalid key disables only transcript ingestion, never app startup.
       throw new UnauthorizedException("Invalid external transcript signature");
     }
   }

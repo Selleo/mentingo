@@ -4,6 +4,7 @@ import { Type, type Static } from "@sinclair/typebox";
 import { UUIDSchema } from "src/common";
 
 export const externalConversationSchema = Type.Object({
+  integrationId: Type.String({minLength: 1, maxLength: 200}),
   source: Type.Union([Type.Literal(AI_CONVERSATION_SOURCES.SLACK), Type.Literal(AI_CONVERSATION_SOURCES.DISCORD), Type.Literal(AI_CONVERSATION_SOURCES.WHATSAPP)]),
   threadKey: Type.String({ minLength: 1, maxLength: 500 }),
   title: Type.Optional(Type.String({ maxLength: 200 })),

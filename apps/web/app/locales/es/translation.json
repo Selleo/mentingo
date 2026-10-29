@@ -98,7 +98,8 @@
     }
   },
   "aiConversations": {
-    "connectedAccount": "Cuenta conectada",
+    "integration": "Integración",
+    "integrationId": "ID de integración",
     "externalParticipant": "Participante externo",
     "session": "Sesión",
     "context": "Contexto",

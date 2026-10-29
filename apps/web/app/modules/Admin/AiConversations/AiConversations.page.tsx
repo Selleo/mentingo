@@ -220,7 +220,9 @@ export default function AiConversationsPage() {
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="min-w-0 flex-1 truncate text-xs leading-5 text-neutral-700">
-                    {thread.owner.firstName} {thread.owner.lastName}
+                    {isExternalConversationSource(thread.source)
+                      ? t("aiConversations.integration")
+                      : `${thread.owner?.firstName ?? ""} ${thread.owner?.lastName ?? ""}`.trim()}
                   </span>
                   <ConversationStatus status={thread.status} compact />
                   <time

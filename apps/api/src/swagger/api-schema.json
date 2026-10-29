@@ -61097,6 +61097,16 @@
                     }
                   ]
                 },
+                "integrationId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "practiceSessionId": {
                   "anyOf": [
                     {
@@ -61165,34 +61175,41 @@
                   ]
                 },
                 "owner": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "null"
                     },
-                    "firstName": {
-                      "type": "string"
-                    },
-                    "lastName": {
-                      "type": "string"
-                    },
-                    "profilePictureUrl": {
-                      "anyOf": [
-                        {
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
+                      },
+                      "required": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "profilePictureUrl"
                       ]
                     }
-                  },
-                  "required": [
-                    "id",
-                    "firstName",
-                    "lastName",
-                    "profilePictureUrl"
                   ]
                 },
                 "status": {
@@ -61319,6 +61336,16 @@
                       }
                     ]
                   },
+                  "integrationId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "practiceSessionId": {
                     "anyOf": [
                       {
@@ -61387,34 +61414,41 @@
                     ]
                   },
                   "owner": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "null"
                       },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
                             "type": "string"
                           },
-                          {
-                            "type": "null"
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          },
+                          "profilePictureUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
+                        },
+                        "required": [
+                          "id",
+                          "firstName",
+                          "lastName",
+                          "profilePictureUrl"
                         ]
                       }
-                    },
-                    "required": [
-                      "id",
-                      "firstName",
-                      "lastName",
-                      "profilePictureUrl"
                     ]
                   },
                   "status": {
@@ -163171,6 +163205,11 @@
       "AppendBody": {
         "type": "object",
         "properties": {
+          "integrationId": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          },
           "source": {
             "anyOf": [
               {
@@ -163281,6 +163320,7 @@
           }
         },
         "required": [
+          "integrationId",
           "source",
           "threadKey",
           "messages"

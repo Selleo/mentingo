@@ -32,6 +32,7 @@ export const adminAiThreadSummarySchema = Type.Object({
   id: UUIDSchema,
   type: adminAiThreadTypeSchema,
   source: Type.Optional(Type.Enum(AI_CONVERSATION_SOURCES)),
+  integrationId: Type.Optional(nullableString),
   practiceSessionId: nullableId,
   aiMentorLessonId: nullableId,
   lessonId: nullableId,
@@ -39,12 +40,12 @@ export const adminAiThreadSummarySchema = Type.Object({
   courseTitle: nullableString,
   title: Type.String(),
   openingPreview: nullableString,
-  owner: Type.Object({
+  owner: Type.Union([Type.Null(), Type.Object({
     id: UUIDSchema,
     firstName: Type.String(),
     lastName: Type.String(),
     profilePictureUrl: nullableString,
-  }),
+  })]),
   status: Type.Enum(AI_THREAD_STATUSES),
   language: Type.String(),
   createdAt: Type.String(),

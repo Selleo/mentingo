@@ -34,7 +34,7 @@ export class AdminAiThreadsService {
     const avatarReferences = [
       ...new Set(
         paginatedThreadSummaries.data
-          .map((threadSummary) => threadSummary.owner.avatarReference)
+          .map((threadSummary) => threadSummary.owner?.avatarReference)
           .filter((avatarReference): avatarReference is string => Boolean(avatarReference)),
       ),
     ];
@@ -49,14 +49,14 @@ export class AdminAiThreadsService {
       ...paginatedThreadSummaries,
       data: paginatedThreadSummaries.data.map(({ owner: threadOwner, ...threadSummary }) => ({
         ...threadSummary,
-        owner: {
+        owner: threadOwner?.id ? {
           id: threadOwner.id,
-          firstName: threadOwner.firstName,
-          lastName: threadOwner.lastName,
+          firstName: threadOwner.firstName ?? "",
+          lastName: threadOwner.lastName ?? "",
           profilePictureUrl: threadOwner.avatarReference
             ? (avatarUrlsByReference.get(threadOwner.avatarReference) ?? null)
             : null,
-        },
+        } : null,
       })),
     };
   }
@@ -70,14 +70,14 @@ export class AdminAiThreadsService {
     const { owner: threadOwner, ...threadMetadata } = threadSummary;
     return {
       ...threadMetadata,
-      owner: {
+      owner: threadOwner?.id ? {
         id: threadOwner.id,
-        firstName: threadOwner.firstName,
-        lastName: threadOwner.lastName,
+        firstName: threadOwner.firstName ?? "",
+        lastName: threadOwner.lastName ?? "",
         profilePictureUrl: threadOwner.avatarReference
           ? await this.fileService.getFileUrl(threadOwner.avatarReference)
           : null,
-      },
+      } : null,
       evaluation:
         threadSummary.type === AI_THREAD_TYPES.ASSISTANT
           ? null

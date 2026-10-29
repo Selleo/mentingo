@@ -7794,6 +7794,7 @@ export interface GetAdminAiThreadSummariesResponse {
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
     source?: "mentingo" | "slack" | "discord" | "whatsapp";
+    integrationId?: string | null;
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7801,7 +7802,7 @@ export interface GetAdminAiThreadSummariesResponse {
     courseTitle: string | null;
     title: string;
     openingPreview: string | null;
-    owner: {
+    owner: null | {
       /** @format uuid */
       id: string;
       firstName: string;
@@ -7827,6 +7828,7 @@ export interface GetAdminAiThreadDetailsResponse {
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
     source?: "mentingo" | "slack" | "discord" | "whatsapp";
+    integrationId?: string | null;
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7834,7 +7836,7 @@ export interface GetAdminAiThreadDetailsResponse {
     courseTitle: string | null;
     title: string;
     openingPreview: string | null;
-    owner: {
+    owner: null | {
       /** @format uuid */
       id: string;
       firstName: string;
@@ -31672,6 +31674,11 @@ export interface GetConsentResponse {
 }
 
 export interface AppendBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  integrationId: string;
   source: "slack" | "discord" | "whatsapp";
   /**
    * @minLength 1

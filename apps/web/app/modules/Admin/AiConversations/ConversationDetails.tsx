@@ -29,22 +29,22 @@ export function ConversationDetails({
     new Intl.DisplayNames([i18n.language], { type: "language" }).of(thread.language) ??
     thread.language;
   const rows = [
-    {
-      label: t(
-        isExternalConversationSource(thread.source)
-          ? "aiConversations.connectedAccount"
-          : "aiConversations.owner",
-      ),
-      value: `${thread.owner.firstName} ${thread.owner.lastName}`,
-    },
     ...(isExternalConversationSource(thread.source)
       ? [
           {
-            label: t("aiConversations.source"),
+            label: t("aiConversations.integration"),
             value: <ExternalConversationSource source={thread.source} />,
           },
+          ...(thread.integrationId
+            ? [{ label: t("aiConversations.integrationId"), value: thread.integrationId }]
+            : []),
         ]
-      : []),
+      : [
+          {
+            label: t("aiConversations.owner"),
+            value: `${thread.owner?.firstName ?? ""} ${thread.owner?.lastName ?? ""}`.trim(),
+          },
+        ]),
     { label: t("aiConversations.type"), value: t(`aiConversations.types.${thread.type}`) },
     { label: t("aiConversations.status"), value: <ConversationStatus status={thread.status} /> },
     ...(thread.courseTitle

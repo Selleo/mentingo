@@ -20,7 +20,10 @@ vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
       : {
           id: "thread",
           title: "Saved interview",
-          owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
+          owner: loading.externalSource
+            ? null
+            : { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
+          integrationId: loading.externalSource ? "integration-123" : undefined,
           type: loading.externalSource ? "assistant" : "practice",
           source: loading.externalSource || "mentingo",
           courseTitle: null,
@@ -129,11 +132,18 @@ describe("conversation details", () => {
       loading.externalSource = platform.toLowerCase();
       renderWith().render(<Page />);
       expect(await screen.findByRole("img", { name: platform })).toBeInTheDocument();
-      expect(screen.getByText("Connected account: Alex Learner")).toBeInTheDocument();
+      expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
       expect(screen.getByText("Jamie Slack")).toBeInTheDocument();
       expect(screen.getByText("U456")).toBeInTheDocument();
       expect(screen.getByText("External participant")).toBeInTheDocument();
       expect(screen.queryByText("U123")).not.toBeInTheDocument();
+      fireEvent.mouseDown(screen.getByRole("tab", { name: "Details" }), {
+        button: 0,
+        ctrlKey: false,
+      });
+      expect(screen.getByText("Integration")).toBeInTheDocument();
+      expect(screen.getByText("integration-123")).toBeInTheDocument();
+      expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
     },
   );
 

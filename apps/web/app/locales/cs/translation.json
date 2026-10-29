@@ -98,7 +98,8 @@
     }
   },
   "aiConversations": {
-    "connectedAccount": "Propojený účet",
+    "integration": "Integrace",
+    "integrationId": "ID integrace",
     "externalParticipant": "Externí účastník",
     "session": "Relace",
     "context": "Kontext",

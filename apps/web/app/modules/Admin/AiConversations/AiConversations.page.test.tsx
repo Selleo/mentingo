@@ -41,7 +41,9 @@ vi.mock("~/api/queries/admin/useAdminAiThreads", () => ({
         id: status,
         title: `Conversation ${status}`,
         openingPreview: "Welcome",
-        owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: "/avatar.png" },
+        owner: listState.externalSource
+          ? null
+          : { firstName: "Alex", lastName: "Learner", profilePictureUrl: "/avatar.png" },
         source: listState.externalSource || "mentingo",
         type: "practice",
         courseTitle: null,
@@ -67,6 +69,7 @@ describe("AI conversations inbox", () => {
       listState.externalSource = platform.toLowerCase();
       renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
       expect(await screen.findAllByRole("img", { name: platform })).toHaveLength(3);
+      expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
     },
   );
   beforeEach(() => {

@@ -40,9 +40,7 @@ export const assistantThreads = pgTable(
     ...id,
     ...timestamps,
     tenantId,
-    userId: uuid("user_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     title: text("title").notNull().default("New conversation"),
     language: text("language")
       .$type<SupportedLanguages>()
@@ -50,14 +48,13 @@ export const assistantThreads = pgTable(
       .default(SUPPORTED_LANGUAGES.EN),
     source: text("source").$type<AiConversationSource>().notNull().default(AI_CONVERSATION_SOURCES.MENTINGO),
     externalThreadKey: text("external_thread_key"),
-    externalClientId: text("external_client_id"),
+    externalIntegrationId: text("external_integration_id"),
     archived: boolean("archived").notNull().default(false),
   },
   withTenantIdIndex("assistant_threads", (table) => ({
     externalThreadUnique: uniqueIndex("assistant_threads_external_unique").on(
       table.tenantId,
-      table.userId,
-      table.externalClientId,
+      table.externalIntegrationId,
       table.source,
       table.externalThreadKey,
     ),

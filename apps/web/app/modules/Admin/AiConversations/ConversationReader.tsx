@@ -37,7 +37,9 @@ export function ConversationReader({
   const [evaluationOpen, setEvaluationOpen] = useState(false);
   const { data: thread, isPending, isError, refetch } = useAdminAiThread(threadId, language);
   const messages = useAdminAiThreadMessages(threadId);
-  const ownerName = thread ? `${thread.owner.firstName} ${thread.owner.lastName}`.trim() : "";
+  const ownerName = thread?.owner
+    ? `${thread.owner.firstName} ${thread.owner.lastName}`.trim()
+    : "";
   const rows = messages.data?.pages.flatMap((page) => page.data) ?? [];
   const isInitialLoading =
     (!thread && isPending) || (messages.isPending && rows.length === 0 && !isError);
@@ -87,12 +89,8 @@ export function ConversationReader({
                   </h2>
                 </div>
               )}
-              {thread && (
-                <p className="body-sm mt-1 truncate text-neutral-600">
-                  {isExternalConversationSource(thread.source) &&
-                    `${t("aiConversations.connectedAccount")}: `}
-                  {ownerName}
-                </p>
+              {thread && !isExternalConversationSource(thread.source) && (
+                <p className="body-sm mt-1 truncate text-neutral-600">{ownerName}</p>
               )}
             </div>
           </div>
@@ -162,7 +160,7 @@ export function ConversationReader({
                             displayName: senderName,
                             profilePictureUrl: isExternalConversationSource(thread.source)
                               ? null
-                              : thread.owner.profilePictureUrl,
+                              : thread.owner?.profilePictureUrl,
                           }}
                           messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
                           testId={AI_CONVERSATIONS_HANDLES.MESSAGE}

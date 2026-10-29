@@ -1,5 +1,5 @@
 {
-  "id": "0073bab5-8c47-47e7-940d-ba4153e64182",
+  "id": "43738313-b0d6-4d66-a1de-4dd627586c19",
   "prevId": "5b287bc0-88f8-44ef-8e93-63ea727a4787",
   "version": "7",
   "dialect": "postgresql",
@@ -22728,7 +22728,7 @@
           "name": "user_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "title": {
           "name": "title",
@@ -22757,8 +22757,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "external_client_id": {
-          "name": "external_client_id",
+        "external_integration_id": {
+          "name": "external_integration_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -22797,13 +22797,7 @@
               "nulls": "last"
             },
             {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "external_client_id",
+              "expression": "external_integration_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
