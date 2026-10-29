@@ -25,7 +25,7 @@ import {
   isSupportedLanguage,
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, or, sql } from "drizzle-orm";
 import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 import { match } from "ts-pattern";
@@ -633,11 +633,24 @@ export class CertificatesService implements OnModuleDestroy {
     const learnerScope = getGroupManagerLearnerScopeCondition(currentUser, certificates.userId, [
       PERMISSIONS.COURSE_STATISTICS,
     ]);
+    const courseStatisticsScope = match({
+      canViewStatistics: hasPermission(currentUser.permissions, PERMISSIONS.COURSE_STATISTICS),
+      canUpdateAnyCourse: hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE),
+      canUpdateOwnCourse: hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN),
+    })
+      .with({ canViewStatistics: true, canUpdateAnyCourse: true }, () =>
+        eq(certificates.tenantId, currentUser.tenantId),
+      )
+      .with({ canViewStatistics: true, canUpdateOwnCourse: true }, () =>
+        eq(courses.authorId, currentUser.userId),
+      )
+      .otherwise(() => undefined);
+
     const certificate = await this.certificateRepository.findCertificateByIdForRender(
-      learnerScope ? null : currentUser.userId,
+      currentUser.userId,
       certificateId,
       shareLanguage,
-      learnerScope,
+      or(learnerScope, courseStatisticsScope),
     );
 
     if (!certificate?.tenantId) {
