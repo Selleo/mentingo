@@ -1,6 +1,7 @@
 """Semantic planning regressions: file changes are evidence, never regeneration decisions."""
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -42,6 +43,16 @@ def classifier(decision='unchanged'):
 
 
 class PlannerTests(unittest.TestCase):
+    def test_provider_failure_is_actionable_and_credentials_are_redacted(self):
+        self.git('tag', 'v1.1.0')
+        with patch.dict(os.environ, {'CLAUDE_CODE_OAUTH_TOKEN': 'private-test-credential'}), \
+             patch.object(catalog.llm, 'complete', return_value=('', {'provider': 'agent',
+                'fallback': 'Not logged in: private-test-credential'})):
+            with self.assertRaises(catalog.ImpactUncertainError) as caught:
+                catalog.plan(self.repo, 'v1.1.0', None, self.catalog)
+        self.assertIn('Not logged in', str(caught.exception))
+        self.assertNotIn('private-test-credential', str(caught.exception))
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

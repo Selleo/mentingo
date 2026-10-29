@@ -85,7 +85,10 @@ class ImpactUncertainError(ValueError):
 
     def __init__(self, report: dict[str, object]):
         self.plan = report
-        super().__init__("Helpdesk coverage or flow impact is uncertain; inspect the decision report")
+        errors = [f"{d['key']}: {d['error']}" for d in report.get('domains', []) if d.get('error')]
+        message = 'Self-onboarding analysis failed: ' + '; '.join(errors) if errors else \
+            'Self-onboarding coverage or flow impact is uncertain; inspect the decision report'
+        super().__init__(message)
 
 
 def _object(value: object, label: str) -> dict[str, object]:
@@ -340,7 +343,7 @@ def _classify(context: dict[str, object]) -> object:
         )
     text, usage = llm.complete(json.dumps(context, ensure_ascii=False), instruction, effort="medium")
     if usage.get("provider") != "cli" or not text.strip():
-        raise ValueError("Semantic flow classification is unavailable")
+        raise ValueError('Semantic flow classification is unavailable: ' + self_onboarding_model.provider_failure(usage))
     return self_onboarding_model.json_object(text, f'Semantic {phase} analysis')
 
 

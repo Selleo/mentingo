@@ -1,9 +1,22 @@
 """Strict parsing of model JSON with optional Markdown presentation fences."""
 import json
+import os
 import re
 
 
 FENCED_JSON = re.compile(r'```(?:json)?[ \t]*\r?\n(.*?)\r?\n```', re.DOTALL | re.IGNORECASE)
+
+
+def provider_failure(usage):
+    """A bounded provider error, with configured credentials removed before logging."""
+    reason = usage.get('fallback') or 'The model returned no text response'
+    reason = str(reason)
+    values = {value for name, value in os.environ.items() if len(value) >= 8 and
+              any(marker in name.upper() for marker in ('TOKEN', 'SECRET', 'PASSWORD', 'API_KEY'))}
+    for secret in sorted(values, key=len, reverse=True):
+        reason = reason.replace(secret, '***')
+    reason = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', reason)
+    return ' '.join(reason.split())[:700]
 
 
 def json_object(text, label):
