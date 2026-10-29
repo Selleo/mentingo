@@ -32,11 +32,26 @@ describe("Admin AI conversations", () => {
   beforeEach(() => jest.resetAllMocks());
 
   it("returns integration-owned conversations with no user owner", async () => {
-    const external = {id: "external", type: AI_THREAD_TYPES.ASSISTANT, source: "slack", integrationId: "installation-1", owner: null};
+    const external = {
+      id: "external",
+      type: AI_THREAD_TYPES.ASSISTANT,
+      source: "slack",
+      integrationId: "installation-1",
+      owner: null,
+    };
     adminAiThreadsRepository.findThreadSummaryById.mockResolvedValue(external);
-    adminAiThreadsRepository.getThreadSummaries.mockResolvedValue({data: [external], pagination: {totalItems: 1}});
-    expect(await adminAiThreadsService.getThread("external")).toEqual({...external, evaluation: null});
-    expect(await adminAiThreadsService.getThreadSummaries({})).toEqual({data: [external], pagination: {totalItems: 1}});
+    adminAiThreadsRepository.getThreadSummaries.mockResolvedValue({
+      data: [external],
+      pagination: { totalItems: 1 },
+    });
+    expect(await adminAiThreadsService.getThread("external")).toEqual({
+      ...external,
+      evaluation: null,
+    });
+    expect(await adminAiThreadsService.getThreadSummaries({})).toEqual({
+      data: [external],
+      pagination: { totalItems: 1 },
+    });
     expect(fileService.getFileUrl).not.toHaveBeenCalled();
   });
 

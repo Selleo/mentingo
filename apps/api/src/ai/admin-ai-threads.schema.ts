@@ -40,12 +40,15 @@ export const adminAiThreadSummarySchema = Type.Object({
   courseTitle: nullableString,
   title: Type.String(),
   openingPreview: nullableString,
-  owner: Type.Union([Type.Null(), Type.Object({
-    id: UUIDSchema,
-    firstName: Type.String(),
-    lastName: Type.String(),
-    profilePictureUrl: nullableString,
-  })]),
+  owner: Type.Union([
+    Type.Null(),
+    Type.Object({
+      id: UUIDSchema,
+      firstName: Type.String(),
+      lastName: Type.String(),
+      profilePictureUrl: nullableString,
+    }),
+  ]),
   status: Type.Enum(AI_THREAD_STATUSES),
   language: Type.String(),
   createdAt: Type.String(),

@@ -40,6 +40,7 @@ export class ExternalConversationsRepository {
           },
         })
         .returning({ id: assistantThreads.id });
+
       await this.db
         .insert(assistantMessages)
         .values(
@@ -61,6 +62,7 @@ export class ExternalConversationsRepository {
             assistantMessages.externalMessageId,
           ],
         });
+
       return { id: thread.id };
     });
   }

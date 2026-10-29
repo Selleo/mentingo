@@ -46,7 +46,10 @@ export const assistantThreads = pgTable(
       .$type<SupportedLanguages>()
       .notNull()
       .default(SUPPORTED_LANGUAGES.EN),
-    source: text("source").$type<AiConversationSource>().notNull().default(AI_CONVERSATION_SOURCES.MENTINGO),
+    source: text("source")
+      .$type<AiConversationSource>()
+      .notNull()
+      .default(AI_CONVERSATION_SOURCES.MENTINGO),
     externalThreadKey: text("external_thread_key"),
     externalIntegrationId: text("external_integration_id"),
     archived: boolean("archived").notNull().default(false),

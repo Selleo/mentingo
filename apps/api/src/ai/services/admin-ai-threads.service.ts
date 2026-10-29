@@ -29,8 +29,10 @@ export class AdminAiThreadsService {
     ) {
       throw new BadRequestException("aiConversations.errors.invalidDateRange");
     }
+
     const paginatedThreadSummaries =
       await this.adminAiThreadsRepository.getThreadSummaries(adminAiThreadQuery);
+
     const avatarReferences = [
       ...new Set(
         paginatedThreadSummaries.data
@@ -38,6 +40,7 @@ export class AdminAiThreadsService {
           .filter((avatarReference): avatarReference is string => Boolean(avatarReference)),
       ),
     ];
+
     const avatarUrlEntries = await processInBatches(
       avatarReferences,
       async (avatarReference) =>
@@ -45,18 +48,21 @@ export class AdminAiThreadsService {
       { batchSize: AdminAiThreadsService.AVATAR_URL_BATCH_SIZE },
     );
     const avatarUrlsByReference = new Map(avatarUrlEntries);
+
     return {
       ...paginatedThreadSummaries,
       data: paginatedThreadSummaries.data.map(({ owner: threadOwner, ...threadSummary }) => ({
         ...threadSummary,
-        owner: threadOwner?.id ? {
-          id: threadOwner.id,
-          firstName: threadOwner.firstName ?? "",
-          lastName: threadOwner.lastName ?? "",
-          profilePictureUrl: threadOwner.avatarReference
-            ? (avatarUrlsByReference.get(threadOwner.avatarReference) ?? null)
-            : null,
-        } : null,
+        owner: threadOwner?.id
+          ? {
+              id: threadOwner.id,
+              firstName: threadOwner.firstName ?? "",
+              lastName: threadOwner.lastName ?? "",
+              profilePictureUrl: threadOwner.avatarReference
+                ? (avatarUrlsByReference.get(threadOwner.avatarReference) ?? null)
+                : null,
+            }
+          : null,
       })),
     };
   }
@@ -66,18 +72,25 @@ export class AdminAiThreadsService {
       threadId,
       adminAiThreadQuery,
     );
-    if (!threadSummary) throw new NotFoundException("common.toast.notFound");
+
+    if (!threadSummary) {
+      throw new NotFoundException("common.toast.notFound");
+    }
+
     const { owner: threadOwner, ...threadMetadata } = threadSummary;
+
     return {
       ...threadMetadata,
-      owner: threadOwner?.id ? {
-        id: threadOwner.id,
-        firstName: threadOwner.firstName ?? "",
-        lastName: threadOwner.lastName ?? "",
-        profilePictureUrl: threadOwner.avatarReference
-          ? await this.fileService.getFileUrl(threadOwner.avatarReference)
-          : null,
-      } : null,
+      owner: threadOwner?.id
+        ? {
+            id: threadOwner.id,
+            firstName: threadOwner.firstName ?? "",
+            lastName: threadOwner.lastName ?? "",
+            profilePictureUrl: threadOwner.avatarReference
+              ? await this.fileService.getFileUrl(threadOwner.avatarReference)
+              : null,
+          }
+        : null,
       evaluation:
         threadSummary.type === AI_THREAD_TYPES.ASSISTANT
           ? null
@@ -87,7 +100,11 @@ export class AdminAiThreadsService {
 
   async getThreadMessages(threadId: UUIDType, adminAiThreadPagination: AdminAiThreadPagination) {
     const threadSummary = await this.adminAiThreadsRepository.findThreadSummaryById(threadId);
-    if (!threadSummary) throw new NotFoundException("common.toast.notFound");
+
+    if (!threadSummary) {
+      throw new NotFoundException("common.toast.notFound");
+    }
+
     return this.adminAiThreadsRepository.getThreadMessages(
       threadId,
       adminAiThreadPagination.page,

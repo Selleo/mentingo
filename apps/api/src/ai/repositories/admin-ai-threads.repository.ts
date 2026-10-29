@@ -75,7 +75,9 @@ export class AdminAiThreadsRepository {
         >`CASE WHEN ${aiMentorThreads.practiceSessionId} IS NOT NULL THEN ${AI_THREAD_TYPES.PRACTICE} ELSE ${AI_THREAD_TYPES.AI_MENTOR} END`.as(
           "source_type",
         ),
-        source: sql<NonNullable<AdminAiThreadSummary["source"]>>`'mentingo'`.as("conversation_source"),
+        source: sql<NonNullable<AdminAiThreadSummary["source"]>>`'mentingo'`.as(
+          "conversation_source",
+        ),
         integrationId: sql<string | null>`NULL`.as("integration_id"),
         practiceSessionId: aiMentorThreads.practiceSessionId,
         aiMentorLessonId: aiMentorThreads.aiMentorLessonId,

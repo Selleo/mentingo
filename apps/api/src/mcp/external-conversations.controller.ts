@@ -30,7 +30,11 @@ export class ExternalConversationsController {
     @Req() request: ExternalConversationRequest,
   ): Promise<BaseResponse<ExternalConversationResponse>> {
     const resource = request.externalConversationResource;
-    if (!resource) throw new UnauthorizedException("Invalid external transcript signature");
+
+    if (!resource) {
+      throw new UnauthorizedException("Invalid external transcript signature");
+    }
+
     return new BaseResponse(
       await this.externalConversationsRepository.append(resource.tenantId, body),
     );
