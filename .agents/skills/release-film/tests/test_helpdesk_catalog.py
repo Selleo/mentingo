@@ -86,6 +86,20 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(result['version'], '1.1.0')
         self.assertEqual(self.first_flow(result)['action'], 'record')
 
+    def test_initial_coverage_receives_actual_target_files_for_discovered_flow_paths(self):
+        self.write('apps/web/not-watched.tsx', 'not part of this feature')
+        self.commit('Version', 'v1.1.0')
+        self.write('apps/web/not-committed.tsx', 'must not appear in inventory')
+        def classify(context):
+            self.assertIn(CODE, context['sourcePaths'])
+            self.assertIn(SPEC, context['sourcePaths'])
+            self.assertNotIn('apps/web/not-watched.tsx', context['sourcePaths'])
+            self.assertNotIn('apps/web/not-committed.tsx', context['sourcePaths'])
+            self.assertNotIn('diff', context)
+            return classifier()(context)
+        result = catalog.plan(self.repo, 'v1.1.0', None, self.catalog, classify=classify)
+        self.assertTrue(result['ok'])
+
     def test_claude_fenced_json_does_not_block_initial_feature_coverage(self):
         self.git('tag', 'v1.1.0')
         answer = classifier()({'phase': 'coverage'})

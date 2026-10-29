@@ -120,7 +120,7 @@ not public GitHub artifacts. Bunny library/OpenAI keys remain solely in Helpdesk
 
 The reviewed registry is
 `.agents/skills/release-film/projects/mentingo-helpdesk.json`. Its initial coverage
-is 19 development-path flows, 24 authoring flows and 15 learning flows. Business
+is 20 development-path flows, 24 authoring flows and 15 learning flows. Business
 specifications define scope; target-version implementation and deterministic test
 helpers must establish the real flow. Existing fixture gaps or unavailable external
 features fail a required flow; they are never replaced with fake API responses or

@@ -103,7 +103,9 @@ class PipelineTest(unittest.TestCase):
     def test_exact_business_spec_selects_its_complete_feature_video(self):
         selected = helpdesk.select_spec_domains(self.catalog, 'docs/specs/learning-paths-business-spec.md')
         self.assertEqual(selected, ['development-paths.guide'])
-        self.assertEqual(len(self.catalog['domains'][0]['flows']), 19)
+        self.assertEqual(len(self.catalog['domains'][0]['flows']), 20)
+        ids = {flow['id'] for flow in self.catalog['domains'][0]['flows']}
+        self.assertTrue({'configure-path-certificates', 'path-certificates'} <= ids)
         with self.assertRaisesRegex(ValueError, 'exact'):
             helpdesk.select_spec_domains(self.catalog, 'docs/specs/../../secrets.md')
         with self.assertRaisesRegex(ValueError, 'no registered'):

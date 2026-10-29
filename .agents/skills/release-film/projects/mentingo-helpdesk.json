@@ -518,6 +518,30 @@
           ]
         },
         {
+          "id": "configure-path-certificates",
+          "title": "Configure development-path certificates",
+          "description": "Enable development-path certificates and maintain their signature image.",
+          "audiences": ["course-author"],
+          "featureRequirements": [],
+          "pageKeys": ["development-paths"],
+          "specPaths": ["docs/specs/learning-paths-business-spec.md"],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/LearningPaths/components/LearningPathEditorDetailsSection.tsx",
+            "apps/web/app/modules/Admin/LearningPaths/hooks/useLearningPathEditorForm.ts",
+            "apps/web/app/modules/Admin/LearningPaths/hooks/useLearningPathEditorActions.ts",
+            "apps/api/src/learning-path/services/learning-path.service.ts"
+          ],
+          "goal": "Configure certificates and their signature image for a development path.",
+          "preconditions": ["The account can edit the development path."],
+          "actions": [
+            "Open the development-path editor and enable certificates.",
+            "Upload a synthetic signature image and save the path.",
+            "Reopen the editor and confirm the certificate setting and signature remain saved.",
+            "Remove the signature image, save and verify it is removed."
+          ],
+          "outcomes": ["The path's certificate setting and signature changes remain saved."]
+        },
+        {
           "id": "path-certificates",
           "title": "View and download a development-path certificate",
           "description": "View and download a development-path certificate in Mentingo.",

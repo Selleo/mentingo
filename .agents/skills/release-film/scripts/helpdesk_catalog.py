@@ -204,7 +204,7 @@ def _validate_discovery(flow: Flow, seed: Domain, shared: list[str], files: set[
         if not any(_within_watch(path, allowed) for allowed in watches):
             raise ValueError("Discovered flow watches sources outside this domain's supplied dependencies")
         if files is not None and not any(_matches(existing, [path]) for existing in files):
-            raise ValueError("Discovered flow references nonexistent target-version source paths")
+            raise ValueError(f"Discovered flow references nonexistent target-version source paths: {path}")
     if files is not None and not set(flow["specPaths"]) <= files:
         raise ValueError("Discovered flow references nonexistent target-version business specifications")
 
@@ -317,7 +317,10 @@ def _classify(context: dict[str, object]) -> object:
             '"evidence":[{"path":string,"reason":string}],"proposedFlows":[],"retiredFlowIds":[]}. Complete means '
             'every documented user task has coverage and every included flow is still delivered. For missing flows '
             'use incomplete and proposedFlows with complete flow objects matching the supplied schema. Only use '
-            'supplied spec paths and existing source paths within the supplied domain dependencies. Retire an '
+            'supplied spec paths and existing source paths within the supplied domain dependencies. sourcePaths '
+            'lists actual target-version files: choose proposed watchPaths from that inventory or the supplied '
+            'watch patterns that match it; never invent file names. The inventory proves file existence only, '
+            'not behavior: cite supplied specs or diffs for behavioral evidence. Retire an '
             'existing flow only when the supplied specs/diff establish that it was removed from the product, '
             'never because a fixture, provider or optional feature is disabled in the recording environment. '
             'A previously retired flow may be restored through proposedFlows. Do not invent unsupported UI. Business specs guide the '
@@ -442,10 +445,12 @@ def plan(repo: Path, target: str, previous: dict[str, object] | None, catalog: C
             patterns = seed["watchPaths"] + specs + registry["sharedWatchPaths"] \
                 + [path for flow in seed["flows"] + domain["flows"] for path in flow["watchPaths"]]
             paths = _changed(repo, baseline, commit, patterns) if baseline else []
+            source_paths = sorted(path for path in files if path and _matches(path, patterns))
             prior_contracts = {key: _object(value, "previous flow").get("contract") for key, value in before_flows.items()}
             contracts_changed = prior_contracts != {flow["id"]: flow for flow in domain["flows"]}
             if baseline is None or paths or contracts_changed or entry["discoveredFlowIds"] or retired:
-                context = _context(repo, baseline, commit, paths, specs, phase="coverage", domain=domain)
+                context = _context(repo, baseline, commit, paths, specs, phase="coverage", domain=domain,
+                                   sourcePaths=source_paths)
                 coverage = cast(Coverage, _decision(decide(context), context))
                 entry["coverage"] = coverage
                 entry["coverageReviews"] = [coverage]
@@ -474,7 +479,7 @@ def plan(repo: Path, target: str, previous: dict[str, object] | None, catalog: C
                     entry["discoveredFlowIds"] = [key for key in ordered_ids if key not in registered]
                     entry["retiredFlowIds"] = sorted(retired)
                     context = _context(repo, baseline, commit, paths, specs, phase="coverage", domain=domain,
-                                       rosterRecheck=True)
+                                       rosterRecheck=True, sourcePaths=source_paths)
                     coverage = cast(Coverage, _decision(decide(context), context))
                     cast(list[Coverage], entry["coverageReviews"]).append(coverage)
                     entry["coverage"] = coverage
