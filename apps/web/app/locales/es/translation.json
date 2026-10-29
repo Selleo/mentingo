@@ -2511,6 +2511,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Mostrar clave",
+      "hide": "Ocultar clave",
+      "saveError": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "platformSettings": "Configuración de la plataforma",
+      "description": "Conecta la plataforma con servicios externos. Selecciona una integración para añadir o sustituir sus claves.",
+      "filters": "Filtrar integraciones",
+      "status": {
+        "all": "Todas",
+        "configured": "Configurada",
+        "attention": "Requiere atención",
+        "notConfigured": "Sin configurar",
+        "unknown": "Estado no disponible"
+      },
+      "attention": "{{count}} integraciones requieren atención:",
+      "showIssues": "Mostrar problemas",
+      "missingKeys": "Configuración pendiente: {{keys}}",
+      "close": "Cerrar editor",
+      "cancel": "Cancelar",
+      "saveChanges": "Guardar cambios",
+      "empty": "Ninguna integración coincide con este filtro.",
+      "statusError": "No se pudo cargar el estado de la configuración.",
+      "retry": "Reintentar",
+      "secretError": "No se pudo cargar la clave. Intenta mostrarla de nuevo.",
+      "legend": "Verde: todas las claves configuradas. Naranja: faltan algunas claves. Gris discontinuo: ninguna clave configurada. El estado refleja la configuración, no la conexión.",
+      "categories": {
+        "signIn": "Inicio de sesión",
+        "calendar": "Calendario",
+        "payments": "Pagos",
+        "video": "Vídeo",
+        "ai": "IA",
+        "liveTraining": "Formación en directo",
+        "security": "Seguridad"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Inicio de sesión con Google",

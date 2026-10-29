@@ -2518,6 +2518,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Rodyti raktą",
+      "hide": "Slėpti raktą",
+      "saveError": "Nepavyko išsaugoti pakeitimų. Bandykite dar kartą.",
+      "platformSettings": "Platformos nustatymai",
+      "description": "Prijunkite platformą prie išorinių paslaugų. Pasirinkite integraciją ir pridėkite arba pakeiskite jos raktus.",
+      "filters": "Filtruoti integracijas",
+      "status": {
+        "all": "Visos",
+        "configured": "Sukonfigūruota",
+        "attention": "Reikia dėmesio",
+        "notConfigured": "Nesukonfigūruota",
+        "unknown": "Būsena nepasiekiama"
+      },
+      "attention": "{{count}} integracijoms reikia dėmesio:",
+      "showIssues": "Rodyti problemas",
+      "missingKeys": "Trūkstama konfigūracija: {{keys}}",
+      "close": "Uždaryti redaktorių",
+      "cancel": "Atšaukti",
+      "saveChanges": "Išsaugoti pakeitimus",
+      "empty": "Nė viena integracija neatitinka šio filtro.",
+      "statusError": "Nepavyko įkelti konfigūracijos būsenos.",
+      "retry": "Bandyti dar kartą",
+      "secretError": "Nepavyko įkelti rakto. Pabandykite jį parodyti dar kartą.",
+      "legend": "Žalia: visi raktai sukonfigūruoti. Oranžinė: trūksta kai kurių raktų. Pilka punktyrinė: nėra sukonfigūruotų raktų. Būsena rodo konfigūracijos išsamumą, o ne ryšio veikimą.",
+      "categories": {
+        "signIn": "Prisijungimas",
+        "calendar": "Kalendorius",
+        "payments": "Mokėjimai",
+        "video": "Vaizdo įrašai",
+        "ai": "DI",
+        "liveTraining": "Tiesioginiai mokymai",
+        "security": "Saugumas"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Prisijungimas per Google",

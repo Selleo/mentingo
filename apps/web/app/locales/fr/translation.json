@@ -2513,6 +2513,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Afficher la clé",
+      "hide": "Masquer la clé",
+      "saveError": "Impossible d’enregistrer les modifications. Veuillez réessayer.",
+      "platformSettings": "Paramètres de la plateforme",
+      "description": "Connectez la plateforme à des services externes. Sélectionnez une intégration pour ajouter ou remplacer ses clés.",
+      "filters": "Filtrer les intégrations",
+      "status": {
+        "all": "Toutes",
+        "configured": "Configurée",
+        "attention": "À vérifier",
+        "notConfigured": "Non configurée",
+        "unknown": "Statut indisponible"
+      },
+      "attention": "{{count}} intégrations nécessitent votre attention :",
+      "showIssues": "Voir les problèmes",
+      "missingKeys": "Configuration manquante : {{keys}}",
+      "close": "Fermer l’éditeur",
+      "cancel": "Annuler",
+      "saveChanges": "Enregistrer les modifications",
+      "empty": "Aucune intégration ne correspond à ce filtre.",
+      "statusError": "Impossible de charger l’état de la configuration.",
+      "retry": "Réessayer",
+      "secretError": "Impossible de charger la clé. Essayez de l’afficher à nouveau.",
+      "legend": "Vert : toutes les clés sont configurées. Orange : certaines clés manquent. Gris pointillé : aucune clé configurée. Le statut indique si la configuration est complète, pas l’état de la connexion.",
+      "categories": {
+        "signIn": "Connexion",
+        "calendar": "Calendrier",
+        "payments": "Paiements",
+        "video": "Vidéo",
+        "ai": "IA",
+        "liveTraining": "Formation en direct",
+        "security": "Sécurité"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Connexion avec Google",

@@ -2524,6 +2524,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Zobrazit klíč",
+      "hide": "Skrýt klíč",
+      "saveError": "Změny se nepodařilo uložit. Zkuste to znovu.",
+      "platformSettings": "Nastavení platformy",
+      "description": "Propojte platformu s externími službami. Vyberte integraci a doplňte nebo nahraďte její klíče.",
+      "filters": "Filtrovat integrace",
+      "status": {
+        "all": "Všechny",
+        "configured": "Nakonfigurováno",
+        "attention": "Vyžaduje pozornost",
+        "notConfigured": "Nenakonfigurováno",
+        "unknown": "Stav není dostupný"
+      },
+      "attention": "{{count}} integrací vyžaduje pozornost:",
+      "showIssues": "Zobrazit problémy",
+      "missingKeys": "Chybějící konfigurace: {{keys}}",
+      "close": "Zavřít editor",
+      "cancel": "Zrušit",
+      "saveChanges": "Uložit změny",
+      "empty": "Tomuto filtru neodpovídají žádné integrace.",
+      "statusError": "Stav konfigurace se nepodařilo načíst.",
+      "retry": "Zkusit znovu",
+      "secretError": "Klíč se nepodařilo načíst. Zkuste jej znovu zobrazit.",
+      "legend": "Zelená: všechny klíče jsou nastaveny. Oranžová: některé klíče chybí. Přerušovaná šedá: žádné nastavené klíče. Stav vyjadřuje úplnost konfigurace, nikoli funkčnost připojení.",
+      "categories": {
+        "signIn": "Přihlášení",
+        "calendar": "Kalendář",
+        "payments": "Platby",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Živá školení",
+        "security": "Zabezpečení"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Přihlášení přes Google",
