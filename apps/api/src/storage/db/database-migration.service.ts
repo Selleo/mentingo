@@ -12,6 +12,7 @@ import postgres from "postgres";
 
 import { DATABASE_MIGRATION_LOCK } from "./db.constants";
 import { WORKFLOW_BASELINE } from "./workflow-baseline.constants";
+import { grantWorkflowRuntimeRole } from "./workflow-runtime-role";
 
 @Injectable()
 export class DatabaseMigrationService {
@@ -59,6 +60,20 @@ export class DatabaseMigrationService {
         connectionString: this.configService.getOrThrow<string>("database.urlAdmin"),
       });
       await workerUtils.release();
+      const appUrl = this.configService.get<string>("database.urlApp");
+      if (appUrl) {
+        const parsed = new URL(appUrl);
+        const role = parsed.searchParams.get("user") || decodeURIComponent(parsed.username);
+        if (!role) throw new Error("Application database URL must specify its runtime role");
+        const [account] = await admin`SELECT rolname FROM pg_roles WHERE rolname = ${role}`;
+        if (account) {
+          await grantWorkflowRuntimeRole(drizzle(admin), role);
+        } else {
+          this.logger.warn(
+            "Workflow runtime grants skipped: application role does not exist yet; seed role setup or rerun migrations after provisioning it",
+          );
+        }
+      }
       if (connectionLost) throw new Error("Migration lock connection was lost");
       this.logger.log("Database migrations completed");
     } catch (error) {
@@ -159,7 +174,10 @@ export class DatabaseMigrationService {
 export async function runDatabaseMigrations() {
   await new DatabaseMigrationService(
     new ConfigService({
-      database: { urlAdmin: process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL },
+      database: {
+        urlAdmin: process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL,
+        urlApp: process.env.LMS_DATABASE_URL || process.env.DATABASE_URL,
+      },
     }),
   ).runMigrations();
 }
