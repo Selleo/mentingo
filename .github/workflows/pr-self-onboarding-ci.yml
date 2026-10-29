@@ -35,11 +35,11 @@ jobs:
         run: |
           python3 -m venv --system-site-packages "$RUNNER_TEMP/elevenlabs-tests"
           "$RUNNER_TEMP/elevenlabs-tests/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
-      - name: Test Helpdesk flow planning and assembly
+      - name: Test Self-onboarding flow planning and assembly
         working-directory: .agents/skills/release-film/tests
         run: |
           "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_helpdesk_catalog test_helpdesk_pipeline test_helpdesk_localization test_elevenlabs test_elevenlabs_v4
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
-      - name: Test the Helpdesk SDK publisher
+      - name: Test the Self-onboarding publisher
         run: node --test scripts/helpdesk-publish/publisher.test.mjs

@@ -1,7 +1,7 @@
 name: Self-onboarding
 on:
   # A branch-only workflow needs an initial run before API/CLI manual dispatch.
-  # This event registers the Helpdesk workflow without running the recorder.
+  # This event registers the Self-onboarding workflow without running the recorder.
   push:
     branches: ['jh_*']
     paths: ['.github/workflows/self-onboarding.yml']
@@ -71,7 +71,7 @@ jobs:
     timeout-minutes: 2
     permissions: {}
     steps:
-      - name: Confirm the Helpdesk entry point
+      - name: Confirm the Self-onboarding entry point
         run: |
           echo 'Self-onboarding workflow registered. Dispatch self-onboarding.yml with test_mode=true and business_spec to record a branch test.' >> "$GITHUB_STEP_SUMMARY"
 
