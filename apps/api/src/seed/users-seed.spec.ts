@@ -1,4 +1,10 @@
-import { SELF_ONBOARDING_DEMO_PEOPLE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  addEmailSuffix,
+  getTenantEmailSuffix,
+  getSelfOnboardingDemoEmail,
+  SELF_ONBOARDING_DEMO_PEOPLE,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 
 describe("Self-onboarding demo people", () => {
   const original = process.env.SELF_ONBOARDING_DEMO;
@@ -7,6 +13,22 @@ describe("Self-onboarding demo people", () => {
     if (original === undefined) delete process.env.SELF_ONBOARDING_DEMO;
     else process.env.SELF_ONBOARDING_DEMO = original;
     jest.resetModules();
+  });
+
+  it.each([
+    ["https://localhost:5173", "anna.kowalska+localhost@example.com"],
+    ["https://tenant1.lms.localhost", "anna.kowalska+tenant1@example.com"],
+  ])("uses the tenant-suffixed seeded login at %s", (origin, expected) => {
+    expect(getSelfOnboardingDemoEmail(SYSTEM_ROLE_SLUGS.ADMIN, origin)).toBe(expected);
+    for (const role of Object.keys(SELF_ONBOARDING_DEMO_PEOPLE) as Array<
+      keyof typeof SELF_ONBOARDING_DEMO_PEOPLE
+    >) {
+      const seededEmail = addEmailSuffix(
+        SELF_ONBOARDING_DEMO_PEOPLE[role].email,
+        getTenantEmailSuffix(origin),
+      );
+      expect(getSelfOnboardingDemoEmail(role, origin)).toBe(seededEmail);
+    }
   });
 
   it("uses the same seeded identities as the recording fixture with realistic names", async () => {

@@ -1,4 +1,4 @@
-import { SELF_ONBOARDING_DEMO_PEOPLE } from "@repo/shared";
+import { getSelfOnboardingDemoEmail } from "@repo/shared";
 
 import { markAllOnboardingComplete } from "../utils/onboarding";
 
@@ -20,7 +20,7 @@ export const test = base.extend({
         await authenticateContext(
           context,
           origin,
-          SELF_ONBOARDING_DEMO_PEOPLE[role].email,
+          getSelfOnboardingDemoEmail(role, origin),
           "password",
         );
         await apiClient.syncFromContext(context, origin);

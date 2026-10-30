@@ -78,6 +78,7 @@ export * from "./utils/normalizeAuthoringQuizQuestionOrder";
 export * from "./utils/permissions";
 export * from "./utils/sanitizeQuizQuestionTitle";
 export * from "./utils/sanitizeRichTextSummary";
+export * from "./utils/seedEmail";
 export * from "./utils/uiMessage";
 export * from "./utils/videoCoverage";
 export * from "./utils/videoUrls";

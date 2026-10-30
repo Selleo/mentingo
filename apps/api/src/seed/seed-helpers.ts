@@ -573,17 +573,7 @@ export async function ensureSeedTenant(
   return createdTenant;
 }
 
-export function addEmailSuffix(email: string, suffix?: string) {
-  if (!suffix) return email;
-  const [local, domain] = email.split("@");
-  if (!domain) return email;
-  return `${local}+${suffix}@${domain}`;
-}
-
-export function getTenantEmailSuffix(origin: string) {
-  const hostname = new URL(origin).hostname;
-  return hostname.split(".")[0] || hostname;
-}
+export { addEmailSuffix, getTenantEmailSuffix } from "@repo/shared";
 
 const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",

@@ -1,3 +1,5 @@
+import { addEmailSuffix, getTenantEmailSuffix } from "../utils/seedEmail";
+
 import { SYSTEM_ROLE_SLUGS } from "./permissions";
 
 /** Fictional people shared by the isolated tutorial seed and its recording fixture. */
@@ -23,3 +25,10 @@ export const SELF_ONBOARDING_DEMO_PEOPLE = {
     lastName: "Nowak",
   },
 } as const;
+
+export function getSelfOnboardingDemoEmail(
+  role: keyof typeof SELF_ONBOARDING_DEMO_PEOPLE,
+  origin: string,
+) {
+  return addEmailSuffix(SELF_ONBOARDING_DEMO_PEOPLE[role].email, getTenantEmailSuffix(origin));
+}
