@@ -329,7 +329,8 @@ export class McpHttpService {
       !binding.scopes.includes(MCP_SCOPES.SEARCH) &&
       (studentOnly || !canListMcpTool("get_lesson", permissions, settings))
     ) {
-      const search = learnerTools.get("search_lessons")!;
+      const search = learnerTools.get("search_lessons");
+      if (!search) throw new Error("Learner lesson search adapter unavailable");
       Reflect.apply(server.registerTool, server, [
         "search_lessons",
         search.config,

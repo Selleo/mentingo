@@ -98,6 +98,9 @@
     }
   },
   "aiConversations": {
+    "integration": "Integracija",
+    "integrationId": "Integracijos ID",
+    "externalParticipant": "Išorinis dalyvis",
     "session": "Sesija",
     "context": "Kontekstas",
     "activity": "Veikla",

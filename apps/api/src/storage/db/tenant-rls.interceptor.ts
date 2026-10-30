@@ -24,6 +24,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/oauth/token",
     "/api/oauth/revoke",
     "/api/mcp",
+    "/api/mcp/external-conversations",
   ]);
 
   constructor(

@@ -20,6 +20,9 @@ import { ScormModule } from "src/scorm/scorm.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 
+import { ExternalConversationsController } from "./external-conversations.controller";
+import { ExternalConversationsRepository } from "./external-conversations.repository";
+import { ExternalTranscriptSignatureGuard } from "./external-transcript-signature.guard";
 import { McpActorRepository } from "./mcp-actor.repository";
 import { McpAuthGuard } from "./mcp-auth.guard";
 import { McpConsentController } from "./mcp-consent.controller";
@@ -55,6 +58,8 @@ import { McpController } from "./mcp.controller";
     UserModule,
   ],
   providers: [
+    ExternalTranscriptSignatureGuard,
+    ExternalConversationsRepository,
     McpHttpService,
     McpStudentLessonRepository,
     McpActorRepository,
@@ -64,7 +69,12 @@ import { McpController } from "./mcp.controller";
     McpOAuthService,
     McpResourceService,
   ],
-  controllers: [McpOAuthController, McpConsentController, McpController],
+  controllers: [
+    McpOAuthController,
+    McpConsentController,
+    McpController,
+    ExternalConversationsController,
+  ],
   exports: [
     McpHttpService,
     McpTokenService,

@@ -31,6 +31,10 @@ import {
 } from "./aiConversations.utils";
 import { ConversationReader } from "./ConversationReader";
 import { ConversationStatus } from "./ConversationStatus";
+import {
+  ExternalConversationSource,
+  isExternalConversationSource,
+} from "./ExternalConversationSource";
 
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
@@ -55,6 +59,8 @@ export default function AiConversationsPage() {
   }, [rawSearch, threadId, navigate]);
   const language = useLanguageStore((state) => state.language);
   const filters = readConversationFilters(searchParams, language);
+  const fromDate = searchParams.get("from");
+  const toDate = searchParams.get("to");
   const { data, isPending, isError, refetch } = useAdminAiThreads(filters);
   const update = (name: string, value: FilterValue) =>
     navigate(
@@ -88,13 +94,13 @@ export default function AiConversationsPage() {
       name: "from",
       type: "date",
       placeholder: t("aiConversations.from"),
-      maxDate: filters.to ? parseISO(searchParams.get("to")!) : undefined,
+      maxDate: filters.to && toDate ? parseISO(toDate) : undefined,
     },
     {
       name: "to",
       type: "date",
       placeholder: t("aiConversations.to"),
-      minDate: filters.from ? parseISO(searchParams.get("from")!) : undefined,
+      minDate: filters.from && fromDate ? parseISO(fromDate) : undefined,
     },
   ];
   const activeFilterCount = filterConfig.filter((filter) => searchParams.has(filter.name)).length;
@@ -206,12 +212,19 @@ export default function AiConversationsPage() {
                   },
                 )}
               >
-                <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
-                  {thread.title || t("aiConversations.untitled")}
-                </h2>
+                <div className="flex min-w-0 items-center gap-2">
+                  {isExternalConversationSource(thread.source) && (
+                    <ExternalConversationSource source={thread.source} />
+                  )}
+                  <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
+                    {thread.title || t("aiConversations.untitled")}
+                  </h2>
+                </div>
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="min-w-0 flex-1 truncate text-xs leading-5 text-neutral-700">
-                    {thread.owner.firstName} {thread.owner.lastName}
+                    {isExternalConversationSource(thread.source)
+                      ? t("aiConversations.integration")
+                      : `${thread.owner?.firstName ?? ""} ${thread.owner?.lastName ?? ""}`.trim()}
                   </span>
                   <ConversationStatus status={thread.status} compact />
                   <time

@@ -11,6 +11,7 @@ const loading = vi.hoisted(() => ({
   messagesPending: false,
   background: false,
   failed: false,
+  externalSource: "",
 }));
 vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
   useAdminAiThread: () => ({
@@ -19,8 +20,12 @@ vi.mock("~/api/queries/admin/useAdminAiThread", () => ({
       : {
           id: "thread",
           title: "Saved interview",
-          owner: { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
-          type: "practice",
+          owner: loading.externalSource
+            ? null
+            : { firstName: "Alex", lastName: "Learner", profilePictureUrl: null },
+          integrationId: loading.externalSource ? "integration-123" : undefined,
+          type: loading.externalSource ? "assistant" : "practice",
+          source: loading.externalSource || "mentingo",
           courseTitle: null,
           status: "completed",
           language: "en",
@@ -47,6 +52,24 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
       pages: [
         {
           data: [
+            ...(loading.externalSource
+              ? [
+                  {
+                    id: "slack-named",
+                    role: "user",
+                    content: "Named message",
+                    participantId: "U123",
+                    participantName: "Jamie Slack",
+                  },
+                  {
+                    id: "slack-id",
+                    role: "user",
+                    content: "ID-only message",
+                    participantId: "U456",
+                  },
+                  { id: "slack-unknown", role: "user", content: "Unknown sender" },
+                ]
+              : []),
             ...(loading.failed
               ? [
                   {
@@ -71,7 +94,20 @@ vi.mock("~/api/queries/admin/useAdminAiThreadMessages", () => ({
   }),
 }));
 vi.mock("~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage", () => ({
-  default: ({ content }: { content: string }) => <p>{content}</p>,
+  default: ({
+    content,
+    userName,
+    previewUser,
+  }: {
+    content: string;
+    userName: string;
+    previewUser: { profilePictureUrl: string | null };
+  }) => (
+    <div data-avatar={previewUser.profilePictureUrl}>
+      <span>{userName}</span>
+      <p>{content}</p>
+    </div>
+  ),
 }));
 
 const Page = createRemixStub([
@@ -87,7 +123,29 @@ describe("conversation details", () => {
     loading.messagesPending = false;
     loading.background = false;
     loading.failed = false;
+    loading.externalSource = "";
   });
+
+  it.each(["Slack", "Discord", "WhatsApp"])(
+    "identifies %s and attributes each message to its participant",
+    async (platform) => {
+      loading.externalSource = platform.toLowerCase();
+      renderWith().render(<Page />);
+      expect(await screen.findByRole("img", { name: platform })).toBeInTheDocument();
+      expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
+      expect(screen.getByText("Jamie Slack")).toBeInTheDocument();
+      expect(screen.getByText("U456")).toBeInTheDocument();
+      expect(screen.getByText("External participant")).toBeInTheDocument();
+      expect(screen.queryByText("U123")).not.toBeInTheDocument();
+      fireEvent.mouseDown(screen.getByRole("tab", { name: "Details" }), {
+        button: 0,
+        ctrlKey: false,
+      });
+      expect(screen.getByText("Integration")).toBeInTheDocument();
+      expect(screen.getByText("integration-123")).toBeInTheDocument();
+      expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
+    },
+  );
 
   it.each([true, false])(
     "uses one quiet loading status without an Untitled flash (metadata pending: %s)",

@@ -13,3 +13,12 @@ export const AI_THREAD_TYPES = {
 } as const;
 
 export type AiThreadType = (typeof AI_THREAD_TYPES)[keyof typeof AI_THREAD_TYPES];
+
+export const AI_CONVERSATION_SOURCES = {
+  MENTINGO: "mentingo",
+  SLACK: "slack",
+  DISCORD: "discord",
+  WHATSAPP: "whatsapp",
+} as const;
+export type AiConversationSource =
+  (typeof AI_CONVERSATION_SOURCES)[keyof typeof AI_CONVERSATION_SOURCES];
