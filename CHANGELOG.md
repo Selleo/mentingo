@@ -1,3 +1,27 @@
+<a name="v4.27.0"></a>
+
+## [v4.27.0] - 30.10.2026
+
+### Features:
+
+- introduce competencies plugin to help manage and track learner skills ([#2090](https://github.com/Selleo/mentingo/issues/2090))
+
+- add course authoring Autopilot and multi-file uploads ([#2097](https://github.com/Selleo/mentingo/issues/2097))
+
+### Bug Fixes:
+
+- grant assistant runtime database access during migrations ([#2098](https://github.com/Selleo/mentingo/issues/2098))
+
+### Chores:
+
+- introduce a new workflow trigger for when users join groups ([#2092](https://github.com/Selleo/mentingo/issues/2092))
+
+- improve phishing plugin's views ([#2073](https://github.com/Selleo/mentingo/issues/2073))
+
+### Documentation:
+
+- update changelog for version v4.26.0
+
 <a name="v4.26.0"></a>
 
 ## [v4.26.0] - 29.10.2026
@@ -41,6 +65,10 @@
 ### Code Refactoring:
 
 - course service for easier maintainability ([#2080](https://github.com/Selleo/mentingo/issues/2080))
+
+### Documentation:
+
+- update changelog for version v4.26.0
 
 <a name="v4.25.0"></a>
 
@@ -3584,7 +3612,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.26.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.27.0...HEAD
+[v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0
 [v4.26.0]: https://github.com/Selleo/mentingo/compare/v4.25.0...v4.26.0
 [v4.25.0]: https://github.com/Selleo/mentingo/compare/v4.24.0...v4.25.0
 [v4.24.0]: https://github.com/Selleo/mentingo/compare/v4.23.0...v4.24.0
