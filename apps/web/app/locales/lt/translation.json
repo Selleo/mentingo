@@ -2521,6 +2521,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Rodyti raktą",
+      "hide": "Slėpti raktą",
+      "saveError": "Nepavyko išsaugoti pakeitimų. Bandykite dar kartą.",
+      "platformSettings": "Platformos nustatymai",
+      "description": "Prijunkite platformą prie išorinių paslaugų. Pasirinkite integraciją ir pridėkite arba pakeiskite jos raktus.",
+      "filters": "Filtruoti integracijas",
+      "status": {
+        "all": "Visos",
+        "configured": "Sukonfigūruota",
+        "attention": "Reikia dėmesio",
+        "notConfigured": "Nesukonfigūruota",
+        "unknown": "Būsena nepasiekiama"
+      },
+      "attention": "{{count}} integracijoms reikia dėmesio:",
+      "showIssues": "Rodyti problemas",
+      "missingKeys": "Trūkstama konfigūracija: {{keys}}",
+      "close": "Uždaryti redaktorių",
+      "cancel": "Atšaukti",
+      "saveChanges": "Išsaugoti pakeitimus",
+      "empty": "Nė viena integracija neatitinka šio filtro.",
+      "statusError": "Nepavyko įkelti konfigūracijos būsenos.",
+      "retry": "Bandyti dar kartą",
+      "secretError": "Nepavyko įkelti rakto. Pabandykite jį parodyti dar kartą.",
+      "legend": "Žalia: visi raktai sukonfigūruoti. Oranžinė: trūksta kai kurių raktų. Pilka punktyrinė: nėra sukonfigūruotų raktų. Būsena rodo konfigūracijos išsamumą, o ne ryšio veikimą.",
+      "categories": {
+        "signIn": "Prisijungimas",
+        "calendar": "Kalendorius",
+        "payments": "Mokėjimai",
+        "video": "Vaizdo įrašai",
+        "ai": "DI",
+        "liveTraining": "Tiesioginiai mokymai",
+        "security": "Saugumas"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Prisijungimas per Google",
@@ -6543,6 +6578,14 @@
       "summaryAccepted": "Priimta: {{count}}",
       "summaryRejected": "Atmesta: {{count}}"
     },
+    "executionMode": {
+      "title": "Darbo režimas",
+      "control": "Darbo režimas: {{mode}}",
+      "review": "Peržiūrėti pakeitimus",
+      "reviewDescription": "Prieš taikydami peržiūrėkite planą ir pakeitimus.",
+      "autonomous": "Autopilotas",
+      "autonomousDescription": "Patikslina jūsų poreikius, tada automatiškai patvirtina ir pritaiko pakeitimus."
+    },
     "reasoning": {
       "title": "Mąstymo lygis",
       "low": "Greitai",
@@ -6781,6 +6824,7 @@
       "retryFailedParts": "Kartoti nepavykusias dalis",
       "retryProvider": "Kartoti prisijungimą",
       "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
+      "failureAutonomousInput": "Autopilotas negalėjo saugiai priimti būtino sprendimo. Papildykite nurodymus arba šaltinius ir bandykite dar kartą.",
       "failureGeneration": "Sugeneruotas turinys neatitiko patikros. Pakartojimas sukurs naują nepavykusių dalių turinį ir išsaugos užbaigtą darbą.",
       "failureProvider": "Teikėjas negalėjo užbaigti užklausos. Pakartojimas tęs neužbaigtą darbą.",
       "failureEvidence": "Turimi šaltiniai nepatvirtina reikiamų teiginių. Galite pridėti šaltinių arba patikslinti užklausą.",
@@ -7238,6 +7282,9 @@
     "description": "Vykdykite kontroliuojamas pratybas ir skirkite mokymus po rizikingų veiksmų.",
     "newCampaign": "Nauja kampanija",
     "details": "Kampanijos informacija",
+    "detailsDescription": "Pavadinkite kampaniją, pasirinkite imituojamą el. laišką ir kursą, priskiriamą po rizikingo veiksmo.",
+    "sending": "Siuntimas",
+    "sendingDescription": "Siųskite iš karto arba atsitiktinai paskirstykite laiškus per laiko intervalą.",
     "audience": "Auditorija",
     "loading": "Įkeliama…",
     "retry": "Bandyti dar kartą",
@@ -7249,20 +7296,25 @@
     "name": "Kampanijos pavadinimas",
     "scenario": "Scenarijus",
     "choose": "Pasirinkite",
-    "scenarioLanguage": "MVP scenarijai ir simuliacijų puslapiai yra anglų kalba.",
-    "course": "Mokymo kursas (paskelbtas, nemokamas)",
+    "course": "Tęstinis kursas",
+    "courseHelp": "Automatiškai priskiriamas kiekvienam, kuris paspaudžia nuorodą arba pateikia duomenis. Rodomi tik paskelbti nemokami kursai.",
     "people": "Asmenys",
-    "groups": "Grupės / skyriai",
+    "groups": "Grupės",
     "noOptions": "Nėra tinkamų pasirinkimų.",
     "selectionHelp": "Ieškokite ir pasirinkite žmones arba grupes. Pasikartojantys gavėjai gaus vieną laišką.",
     "removeSelection": "Pašalinti {{label}}",
     "schedule": "Siųsti atsitiktinai pasirinktu laikotarpiu",
-    "start": "Pradžia (vietos laiku)",
-    "end": "Pabaiga (vietos laiku)",
+    "start": "Pradžia",
+    "end": "Pabaiga",
     "startTooltip": "Anksčiausias laikas, kada gali būti siunčiami simuliaciniai el. laiškai, jūsų vietos laiku.",
     "endTooltip": "Vėliausias laikas, kada gali būti siunčiami simuliaciniai el. laiškai, jūsų vietos laiku. Laikotarpis gali trukti iki 30 dienų.",
     "review": "Peržiūrėti kampaniją",
-    "reviewAudience": "{{people}} unikalių gavėjų iš pasirinktų asmenų ir {{groups}} grupių. Narystė dar kartą tikrinama paleidžiant.",
+    "reviewDescription": "Prieš išsiųsdami laiškus patikrinkite informaciją.",
+    "audienceCount_one": "{{count}} gavėjas",
+    "audienceCount_few": "{{count}} gavėjai",
+    "audienceCount_many": "{{count}} gavėjo",
+    "audienceCount_other": "{{count}} gavėjų",
+    "audienceRecheck": "Kelių grupių nariai skaičiuojami vieną kartą. Narystė dar kartą tikrinama paleidžiant.",
     "authorization": "Paleisdami patvirtinate organizacijos leidimą vykdyti pratybas. Vėliau gavėjų ir kurso keisti negalima.",
     "launch": "Paleisti kampaniją",
     "edit": "Redaguoti",
@@ -7271,7 +7323,6 @@
     "invalidCourse": "Pasirinkite paskelbtą nemokamą kursą.",
     "createSuccess": "Kampanija sukurta.",
     "cancelSuccess": "Laukiantys laiškai atšaukti.",
-    "hall": "Hall of Shame",
     "refresh": "Atnaujinti",
     "cancel": "Atšaukti laukiančius laiškus",
     "cancelConfirm": "Jau siunčiami laiškai dar gali būti pristatyti. Atšaukti likusius?",
@@ -7282,14 +7333,14 @@
     "conflict": "Ši užklausa jau panaudota kitai kampanijai.",
     "metrics": {
       "recipients": "Gavėjai",
-      "sent": "Išsiųsta (SMTP priimta)",
+      "sent": "Išsiųsta",
       "clicked": "Paspausta",
       "submitted": "Pateikta",
       "riskRate": "Rizika"
     },
     "columns": {
       "person": "Asmuo",
-      "sent": "Išsiųsta (SMTP priimta)",
+      "sent": "Išsiųsta",
       "clicked": "Paspausta",
       "submitted": "Pateikta",
       "courseStatus": "Kurso būsena",
@@ -7313,7 +7364,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Ieškoti pagal vardą arba el. paštą",
+    "filters": {
+      "all": "Visi asmenys",
+      "atRisk": "Tik rizikingi",
+      "allGroups": "Visos grupės"
+    },
+    "noMatches": "Filtrus atitinkančių asmenų nėra.",
+    "sortBy": "Rikiuoti pagal: {{column}}",
+    "outcomes": {
+      "title": "Rezultatai",
+      "submitted": "Pateikė duomenis",
+      "clickedOnly": "Tik paspaudė",
+      "noAction": "Jokių veiksmų"
+    },
+    "recentActivity": "Naujausia veikla",
+    "activityEmpty": "Paspaudimų ar pateikimų dar nėra.",
+    "activity": {
+      "clicked": "Paspaudė nuorodą",
+      "submitted": "Pateikė duomenis"
+    }
   },
   "automations": {
     "success": {

@@ -22700,6 +22700,127 @@
         }
       }
     },
+    "/api/phishing/options/search": {
+      "get": {
+        "operationId": "PhishingController_searchPhishingOptions",
+        "parameters": [
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "users",
+                  "type": "string"
+                },
+                {
+                  "const": "groups",
+                  "type": "string"
+                },
+                {
+                  "const": "courses",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPhishingOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/audience/count": {
+      "post": {
+        "operationId": "PhishingController_countPhishingAudience",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountPhishingAudienceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountPhishingAudienceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/phishing/campaigns": {
       "get": {
         "operationId": "PhishingController_listPhishingCampaigns",
@@ -22826,6 +22947,128 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPhishingReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/campaigns/{id}/report/recipients": {
+      "get": {
+        "operationId": "PhishingController_getPhishingReportRecipients",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "atRisk",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "name",
+                  "type": "string"
+                },
+                {
+                  "const": "-name",
+                  "type": "string"
+                },
+                {
+                  "const": "sentAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-sentAt",
+                  "type": "string"
+                },
+                {
+                  "const": "clickedAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-clickedAt",
+                  "type": "string"
+                },
+                {
+                  "const": "submittedAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-submittedAt",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPhishingReportRecipientsResponse"
                 }
               }
             }
@@ -172383,6 +172626,18 @@
                       }
                     ]
                   },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
+                        "type": "string"
+                      }
+                    ]
+                  },
                   "targets": {
                     "type": "array",
                     "items": {
@@ -174744,6 +174999,18 @@
                       }
                     ]
                   },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
+                        "type": "string"
+                      }
+                    ]
+                  },
                   "targets": {
                     "type": "array",
                     "items": {
@@ -177096,6 +177363,18 @@
                       },
                       {
                         "const": "high",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "executionMode": {
+                    "anyOf": [
+                      {
+                        "const": "review",
+                        "type": "string"
+                      },
+                      {
+                        "const": "autonomous",
                         "type": "string"
                       }
                     ]
@@ -181642,6 +181921,92 @@
           "data"
         ]
       },
+      "SearchPhishingOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "hasNextPage": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "items",
+              "hasNextPage"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CountPhishingAudienceBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "groupIds": {
+            "maxItems": 1000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds",
+          "groupIds"
+        ]
+      },
+      "CountPhishingAudienceResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "ListPhishingCampaignsResponse": {
         "type": "object",
         "properties": {
@@ -182012,81 +182377,17 @@
                   "sendWindow"
                 ]
               },
-              "recipients": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "userId": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "email": {
-                      "type": "string"
-                    },
-                    "firstName": {
-                      "type": "string"
-                    },
-                    "lastName": {
-                      "type": "string"
-                    },
-                    "groupIds": {
-                      "type": "array",
-                      "items": {
-                        "format": "uuid",
-                        "type": "string"
-                      }
-                    },
-                    "sentAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "clickedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "submittedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "failed": {
-                      "type": "boolean"
-                    },
-                    "courseStatus": {
-                      "type": "string"
-                    }
+              "riskyAction": {
+                "anyOf": [
+                  {
+                    "const": "clicked",
+                    "type": "string"
                   },
-                  "required": [
-                    "userId",
-                    "email",
-                    "firstName",
-                    "lastName",
-                    "groupIds",
-                    "sentAt",
-                    "clickedAt",
-                    "submittedAt",
-                    "failed",
-                    "courseStatus"
-                  ]
-                }
+                  {
+                    "const": "submitted",
+                    "type": "string"
+                  }
+                ]
               },
               "totals": {
                 "type": "object",
@@ -182169,18 +182470,169 @@
                     "totals"
                   ]
                 }
+              },
+              "activity": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "action": {
+                      "anyOf": [
+                        {
+                          "const": "clicked",
+                          "type": "string"
+                        },
+                        {
+                          "const": "submitted",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "firstName",
+                    "lastName",
+                    "action",
+                    "at"
+                  ]
+                }
               }
             },
             "required": [
               "campaign",
-              "recipients",
+              "riskyAction",
               "totals",
-              "groups"
+              "groups",
+              "activity"
             ]
           }
         },
         "required": [
           "data"
+        ]
+      },
+      "GetPhishingReportRecipientsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "groupIds": {
+                  "type": "array",
+                  "items": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                },
+                "sentAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "clickedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "submittedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "failed": {
+                  "type": "boolean"
+                },
+                "courseStatus": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "email",
+                "firstName",
+                "lastName",
+                "groupIds",
+                "sentAt",
+                "clickedAt",
+                "submittedAt",
+                "failed",
+                "courseStatus"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "ConnectionProbeBody": {

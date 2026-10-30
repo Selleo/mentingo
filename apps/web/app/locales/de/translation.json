@@ -2521,6 +2521,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Schlüssel anzeigen",
+      "hide": "Schlüssel verbergen",
+      "saveError": "Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "platformSettings": "Plattformeinstellungen",
+      "description": "Verbinden Sie die Plattform mit externen Diensten. Wählen Sie eine Integration, um ihre Schlüssel hinzuzufügen oder zu ersetzen.",
+      "filters": "Integrationen filtern",
+      "status": {
+        "all": "Alle",
+        "configured": "Konfiguriert",
+        "attention": "Handlungsbedarf",
+        "notConfigured": "Nicht konfiguriert",
+        "unknown": "Status nicht verfügbar"
+      },
+      "attention": "{{count}} Integrationen erfordern Aufmerksamkeit:",
+      "showIssues": "Probleme anzeigen",
+      "missingKeys": "Fehlende Konfiguration: {{keys}}",
+      "close": "Editor schließen",
+      "cancel": "Abbrechen",
+      "saveChanges": "Änderungen speichern",
+      "empty": "Keine Integrationen entsprechen diesem Filter.",
+      "statusError": "Der Konfigurationsstatus konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "secretError": "Der Schlüssel konnte nicht geladen werden. Versuchen Sie erneut, ihn anzuzeigen.",
+      "legend": "Grün: alle Schlüssel konfiguriert. Orange: einige Schlüssel fehlen. Grau gestrichelt: keine Schlüssel konfiguriert. Der Status zeigt die Vollständigkeit der Konfiguration, nicht den Verbindungszustand.",
+      "categories": {
+        "signIn": "Anmeldung",
+        "calendar": "Kalender",
+        "payments": "Zahlungen",
+        "video": "Video",
+        "ai": "KI",
+        "liveTraining": "Live-Schulung",
+        "security": "Sicherheit"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Anmeldung mit Google",
@@ -6530,6 +6565,14 @@
       "summaryAccepted": "Angenommen: {{count}}",
       "summaryRejected": "Abgelehnt: {{count}}"
     },
+    "executionMode": {
+      "title": "Arbeitsmodus",
+      "control": "Arbeitsmodus: {{mode}}",
+      "review": "Änderungen prüfen",
+      "reviewDescription": "Prüfe den Plan und die Änderungen vor der Anwendung.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Klären Sie Ihre Anforderungen, danach werden Änderungen automatisch genehmigt und übernommen."
+    },
     "reasoning": {
       "title": "Denkaufwand",
       "low": "Schnell",
@@ -6768,6 +6811,7 @@
       "retryFailedParts": "Fehlgeschlagene Teile erneut versuchen",
       "retryProvider": "Verbindung erneut versuchen",
       "recoveringFailedParts": "Fehlgeschlagene Teile werden fortgesetzt…",
+      "failureAutonomousInput": "Der Autopilot konnte eine notwendige Entscheidung nicht sicher treffen. Ergänze Anweisungen oder Quellen und versuche es erneut.",
       "failureGeneration": "Der generierte Inhalt hat die Validierung nicht bestanden. Ein erneuter Versuch erstellt neue Inhalte für die fehlgeschlagenen Teile und behält abgeschlossene Arbeit.",
       "failureProvider": "Der Anbieter konnte die Anfrage nicht abschließen. Ein erneuter Versuch setzt die offene Arbeit fort.",
       "failureEvidence": "Die verfügbaren Quellen belegen die erforderlichen Aussagen nicht. Sie können Quellen hinzufügen oder die Anfrage präzisieren.",
@@ -7225,6 +7269,9 @@
     "description": "Führen Sie kontrollierte Übungen durch und weisen Sie nach riskanten Aktionen Schulungen zu.",
     "newCampaign": "Neue Kampagne",
     "details": "Kampagnendetails",
+    "detailsDescription": "Benennen Sie die Kampagne, wählen Sie die simulierte E-Mail und den Kurs, der nach einer riskanten Aktion zugewiesen wird.",
+    "sending": "Versand",
+    "sendingDescription": "Sofort senden oder Nachrichten zufällig über ein Zeitfenster verteilen.",
     "audience": "Zielgruppe",
     "loading": "Wird geladen…",
     "retry": "Erneut versuchen",
@@ -7236,20 +7283,23 @@
     "name": "Kampagnenname",
     "scenario": "Szenario",
     "choose": "Option wählen",
-    "scenarioLanguage": "MVP-Szenarien und Simulationsseiten sind auf Englisch.",
-    "course": "Schulungskurs (veröffentlicht, kostenlos)",
+    "course": "Folgekurs",
+    "courseHelp": "Wird automatisch allen zugewiesen, die auf den Link klicken oder Daten übermitteln. Es werden nur veröffentlichte, kostenlose Kurse angezeigt.",
     "people": "Personen",
-    "groups": "Gruppen / Abteilungen",
+    "groups": "Gruppen",
     "noOptions": "Keine geeigneten Optionen verfügbar.",
     "selectionHelp": "Personen oder Gruppen suchen und auswählen. Doppelte Empfänger erhalten eine Nachricht.",
     "removeSelection": "{{label}} entfernen",
     "schedule": "Versand zufällig über ein Zeitfenster verteilen",
-    "start": "Beginn (Ortszeit)",
-    "end": "Ende (Ortszeit)",
+    "start": "Beginn",
+    "end": "Ende",
     "startTooltip": "Frühester Zeitpunkt, zu dem Simulations-E-Mails gesendet werden können, in Ihrer Ortszeit.",
     "endTooltip": "Spätester Zeitpunkt, zu dem Simulations-E-Mails gesendet werden können, in Ihrer Ortszeit. Der Zeitraum darf höchstens 30 Tage betragen.",
     "review": "Kampagne prüfen",
-    "reviewAudience": "{{people}} eindeutige Empfänger aus ausgewählten Personen und {{groups}} Gruppen. Die Mitgliedschaft wird beim Start erneut geprüft.",
+    "reviewDescription": "Prüfen Sie die Angaben, bevor die E-Mails versendet werden.",
+    "audienceCount_one": "{{count}} Empfänger",
+    "audienceCount_other": "{{count}} Empfänger",
+    "audienceRecheck": "Mitglieder mehrerer Gruppen werden einmal gezählt. Die Mitgliedschaft wird beim Start erneut geprüft.",
     "authorization": "Mit dem Start bestätigen Sie die Genehmigung Ihrer Organisation. Empfänger und Kurs können danach nicht geändert werden.",
     "launch": "Kampagne starten",
     "edit": "Bearbeiten",
@@ -7258,7 +7308,6 @@
     "invalidCourse": "Wählen Sie einen veröffentlichten, kostenlosen Kurs.",
     "createSuccess": "Kampagne erstellt.",
     "cancelSuccess": "Ausstehende Nachrichten storniert.",
-    "hall": "Hall of Shame",
     "refresh": "Aktualisieren",
     "cancel": "Ausstehende Nachrichten stornieren",
     "cancelConfirm": "Bereits versendete Nachrichten können noch eintreffen. Alle übrigen stornieren?",
@@ -7269,14 +7318,14 @@
     "conflict": "Diese Anfrage wurde bereits für eine andere Kampagne verwendet.",
     "metrics": {
       "recipients": "Empfänger",
-      "sent": "Gesendet (SMTP akzeptiert)",
+      "sent": "Gesendet",
       "clicked": "Geklickt",
       "submitted": "Abgesendet",
       "riskRate": "Risiko"
     },
     "columns": {
       "person": "Person",
-      "sent": "Gesendet (SMTP akzeptiert)",
+      "sent": "Gesendet",
       "clicked": "Geklickt",
       "submitted": "Abgesendet",
       "courseStatus": "Kursstatus",
@@ -7300,7 +7349,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Nach Name oder E-Mail suchen",
+    "filters": {
+      "all": "Alle Personen",
+      "atRisk": "Nur gefährdete",
+      "allGroups": "Alle Gruppen"
+    },
+    "noMatches": "Keine Personen entsprechen den Filtern.",
+    "sortBy": "Sortieren nach {{column}}",
+    "outcomes": {
+      "title": "Ergebnisse",
+      "submitted": "Daten übermittelt",
+      "clickedOnly": "Nur geklickt",
+      "noAction": "Keine Aktion"
+    },
+    "recentActivity": "Letzte Aktivität",
+    "activityEmpty": "Noch keine Klicks oder Übermittlungen.",
+    "activity": {
+      "clicked": "Link angeklickt",
+      "submitted": "Daten übermittelt"
+    }
   },
   "automations": {
     "success": {

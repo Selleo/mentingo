@@ -33586,6 +33586,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -34014,6 +34015,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -34441,6 +34443,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -35309,6 +35312,36 @@ export interface GetPhishingOptionsResponse {
   };
 }
 
+export interface SearchPhishingOptionsResponse {
+  data: {
+    items: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    hasNextPage: boolean;
+  };
+}
+
+export interface CountPhishingAudienceBody {
+  /**
+   * @maxItems 10000
+   * @uniqueItems true
+   */
+  userIds: string[];
+  /**
+   * @maxItems 1000
+   * @uniqueItems true
+   */
+  groupIds: string[];
+}
+
+export interface CountPhishingAudienceResponse {
+  data: {
+    count: number;
+  };
+}
+
 export interface ListPhishingCampaignsResponse {
   data: {
     /** @format uuid */
@@ -35417,19 +35450,7 @@ export interface GetPhishingReportResponse {
         end: string;
       };
     };
-    recipients: {
-      /** @format uuid */
-      userId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      groupIds: string[];
-      sentAt: string | null;
-      clickedAt: string | null;
-      submittedAt: string | null;
-      failed: boolean;
-      courseStatus: string;
-    }[];
+    riskyAction: "clicked" | "submitted";
     totals: {
       recipients: number;
       sent: number;
@@ -35451,7 +35472,37 @@ export interface GetPhishingReportResponse {
         riskRate: number;
       };
     }[];
+    activity: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      action: "clicked" | "submitted";
+      at: string;
+    }[];
   };
+}
+
+export interface GetPhishingReportRecipientsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    groupIds: string[];
+    sentAt: string | null;
+    clickedAt: string | null;
+    submittedAt: string | null;
+    failed: boolean;
+    courseStatus: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface ConnectionProbeBody {
@@ -46220,6 +46271,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name PhishingControllerSearchPhishingOptions
+     * @request GET:/api/phishing/options/search
+     */
+    phishingControllerSearchPhishingOptions: (
+      query: {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page: number;
+        /** @maxLength 200 */
+        search?: string;
+        kind: "users" | "groups" | "courses";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SearchPhishingOptionsResponse, any>({
+        path: `/api/phishing/options/search`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerCountPhishingAudience
+     * @request POST:/api/phishing/audience/count
+     */
+    phishingControllerCountPhishingAudience: (
+      data: CountPhishingAudienceBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CountPhishingAudienceResponse, any>({
+        path: `/api/phishing/audience/count`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name PhishingControllerListPhishingCampaigns
      * @request GET:/api/phishing/campaigns
      */
@@ -46279,6 +46374,47 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetPhishingReportResponse, any>({
         path: `/api/phishing/campaigns/${id}/report`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerGetPhishingReportRecipients
+     * @request GET:/api/phishing/campaigns/{id}/report/recipients
+     */
+    phishingControllerGetPhishingReportRecipients: (
+      id: string,
+      query?: {
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        groupId?: string;
+        filter?: "all" | "atRisk";
+        sort?:
+          | "name"
+          | "-name"
+          | "sentAt"
+          | "-sentAt"
+          | "clickedAt"
+          | "-clickedAt"
+          | "submittedAt"
+          | "-submittedAt";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetPhishingReportRecipientsResponse, any>({
+        path: `/api/phishing/campaigns/${id}/report/recipients`,
         method: "GET",
         query: query,
         format: "json",

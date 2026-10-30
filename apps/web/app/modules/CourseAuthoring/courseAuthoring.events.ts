@@ -367,6 +367,10 @@ export const applyAuthoringEvent = (
       },
     };
   })();
+  const applicationRecord = (() => {
+    if (event.type !== "application.changed" || !stringValue(payload.applicationId)) return null;
+    return { id: event.eventId, kind: "application", payload };
+  })();
   const withRecord = {
     ...withTurn,
     records: mergeEventRecord(
@@ -374,6 +378,7 @@ export const applyAuthoringEvent = (
       parseEventRecord(payload) ??
         questionAnswerRecord ??
         proposalStatusRecord ??
+        applicationRecord ??
         (isObject(payload.workProgress) &&
         stringValue(payload.taskId) &&
         stringValue(payload.requestId)

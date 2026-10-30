@@ -2522,6 +2522,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Show secret",
+      "hide": "Hide secret",
+      "saveError": "Could not save changes. Please try again.",
+      "platformSettings": "Platform settings",
+      "description": "Connect the platform to external services. Select an integration to add or replace its keys.",
+      "filters": "Filter integrations",
+      "status": {
+        "all": "All",
+        "configured": "Configured",
+        "attention": "Needs attention",
+        "notConfigured": "Not configured",
+        "unknown": "Status unavailable"
+      },
+      "attention": "{{count}} integrations need attention:",
+      "showIssues": "Show issues",
+      "missingKeys": "Missing configuration: {{keys}}",
+      "close": "Close editor",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "empty": "No integrations match this filter.",
+      "statusError": "Configuration status could not be loaded.",
+      "retry": "Try again",
+      "secretError": "The secret could not be loaded. Try revealing it again.",
+      "legend": "Green: all keys are configured. Orange: some keys are missing. Dashed grey: no keys are configured. Status reflects configuration completeness, not connection health.",
+      "categories": {
+        "signIn": "Sign-in",
+        "calendar": "Calendar",
+        "payments": "Payments",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Live training",
+        "security": "Security"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Google sign-in",
@@ -6551,6 +6586,14 @@
       "summaryAccepted": "Accepted: {{count}}",
       "summaryRejected": "Rejected: {{count}}"
     },
+    "executionMode": {
+      "title": "Work mode",
+      "control": "Work mode: {{mode}}",
+      "review": "Review changes",
+      "reviewDescription": "Review the outline and changes before they are applied.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Clarifies your needs, then approves and applies changes automatically."
+    },
     "reasoning": {
       "title": "Thinking effort",
       "low": "Fast",
@@ -6789,6 +6832,7 @@
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
+      "failureAutonomousInput": "Autopilot could not make a necessary decision safely. Add the missing instructions or sources, then try again.",
       "failureGeneration": "Generated content did not pass validation. Retry will create fresh content for the failed parts and keep completed work.",
       "failureProvider": "The provider could not complete the request. Retry will resume the unfinished work.",
       "failureEvidence": "The available evidence does not cover the required claims. You can add sources or clarify the request.",
@@ -7246,6 +7290,9 @@
     "description": "Run controlled exercises and assign learning after risky actions.",
     "newCampaign": "New campaign",
     "details": "Campaign details",
+    "detailsDescription": "Name the campaign, pick the simulated email and the course assigned after a risky action.",
+    "sending": "Sending",
+    "sendingDescription": "Send right away or spread messages randomly across a time window.",
     "audience": "Audience",
     "loading": "Loading…",
     "retry": "Try again",
@@ -7257,20 +7304,23 @@
     "name": "Campaign name",
     "scenario": "Scenario",
     "choose": "Choose an option",
-    "scenarioLanguage": "MVP scenarios and simulation pages are in English.",
-    "course": "Educational course (published, free)",
+    "course": "Follow-up course",
+    "courseHelp": "Assigned automatically to anyone who clicks the link or submits data. Only published, free courses are listed.",
     "people": "People",
-    "groups": "Groups / departments",
+    "groups": "Groups",
     "noOptions": "No eligible options are available.",
     "selectionHelp": "Search and select people or groups. Duplicate recipients receive one message.",
     "removeSelection": "Remove {{label}}",
     "schedule": "Spread sending randomly over a time window",
-    "start": "Start (local time)",
-    "end": "End (local time)",
+    "start": "Start",
+    "end": "End",
     "startTooltip": "The earliest moment simulation emails may be sent, in your local time.",
     "endTooltip": "The latest moment simulation emails may be sent, in your local time. The window can last up to 30 days.",
     "review": "Review campaign",
-    "reviewAudience": "{{people}} unique recipients across the selected people and {{groups}} groups. Membership is checked again at launch.",
+    "reviewDescription": "Check the details before the emails go out.",
+    "audienceCount_one": "{{count}} recipient",
+    "audienceCount_other": "{{count}} recipients",
+    "audienceRecheck": "Overlapping group members are counted once. Membership is checked again at launch.",
     "authorization": "Launching confirms that your organization authorizes this exercise. The audience and course cannot be changed after launch.",
     "launch": "Launch campaign",
     "edit": "Edit",
@@ -7279,7 +7329,6 @@
     "invalidCourse": "Choose a published, free course.",
     "createSuccess": "Campaign created.",
     "cancelSuccess": "Pending messages cancelled.",
-    "hall": "Hall of Shame",
     "refresh": "Refresh",
     "cancel": "Cancel pending messages",
     "cancelConfirm": "Messages already being sent may still arrive. Cancel all other pending messages?",
@@ -7290,14 +7339,14 @@
     "conflict": "This request was already used for a different campaign.",
     "metrics": {
       "recipients": "Recipients",
-      "sent": "Sent (SMTP accepted)",
+      "sent": "Sent",
       "clicked": "Clicked",
       "submitted": "Submitted",
       "riskRate": "At risk"
     },
     "columns": {
       "person": "Person",
-      "sent": "Sent (SMTP accepted)",
+      "sent": "Sent",
       "clicked": "Clicked",
       "submitted": "Submitted",
       "courseStatus": "Course status",
@@ -7321,7 +7370,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Search by name or email",
+    "filters": {
+      "all": "All people",
+      "atRisk": "At risk only",
+      "allGroups": "All groups"
+    },
+    "noMatches": "No people match your filters.",
+    "sortBy": "Sort by {{column}}",
+    "outcomes": {
+      "title": "Outcomes",
+      "submitted": "Submitted data",
+      "clickedOnly": "Clicked only",
+      "noAction": "No action"
+    },
+    "recentActivity": "Recent activity",
+    "activityEmpty": "No clicks or submissions yet.",
+    "activity": {
+      "clicked": "Clicked the link",
+      "submitted": "Submitted data"
+    }
   },
   "reports": {
     "errors": {

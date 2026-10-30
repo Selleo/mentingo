@@ -171,7 +171,6 @@ MCP learner curriculum regression coverage verifies free public access and activ
 
 Global lesson search tests cover keyword/vector retrieval and search-to-read through MCP, with deterministic embeddings, free public courses and enrollment in paid and private courses, revocation, drafts, archives, tenant isolation and exclusion of raw hidden HTML, assessment sources and unbound file sources.
 
-
 Learner attachment search regression coverage exercises filename-only matches and
 indexed passages in both keyword and semantic retrieval against PostgreSQL with
 RLS. It covers free public access, active enrollment for paid/private courses,

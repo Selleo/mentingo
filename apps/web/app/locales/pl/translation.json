@@ -2774,6 +2774,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Pokaż klucz",
+      "hide": "Ukryj klucz",
+      "saveError": "Nie udało się zapisać zmian. Spróbuj ponownie.",
+      "platformSettings": "Ustawienia platformy",
+      "description": "Połącz platformę z zewnętrznymi usługami. Kliknij kafelek, aby uzupełnić lub podmienić klucze danej integracji.",
+      "filters": "Filtruj integracje",
+      "status": {
+        "all": "Wszystkie",
+        "configured": "Skonfigurowane",
+        "attention": "Wymaga uwagi",
+        "notConfigured": "Nie skonfigurowano",
+        "unknown": "Status niedostępny"
+      },
+      "attention": "Integracje wymagające uwagi: {{count}}.",
+      "showIssues": "Pokaż problemy",
+      "missingKeys": "Brakujące klucze: {{keys}}",
+      "close": "Zamknij edytor",
+      "cancel": "Anuluj",
+      "saveChanges": "Zapisz zmiany",
+      "empty": "Brak integracji pasujących do tego filtra.",
+      "statusError": "Nie udało się wczytać stanu konfiguracji.",
+      "retry": "Spróbuj ponownie",
+      "secretError": "Nie udało się wczytać klucza. Spróbuj ponownie go wyświetlić.",
+      "legend": "Zielona ramka: wszystkie klucze są skonfigurowane. Pomarańczowa: brakuje części kluczy. Przerywana szara: brak skonfigurowanych kluczy. Status określa kompletność konfiguracji, nie stan połączenia.",
+      "categories": {
+        "signIn": "Logowanie",
+        "calendar": "Kalendarz",
+        "payments": "Płatności",
+        "video": "Wideo",
+        "ai": "AI",
+        "liveTraining": "Szkolenia na żywo",
+        "security": "Bezpieczeństwo"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Logowanie przez Google",
@@ -6606,6 +6641,14 @@
       "summaryAccepted": "Zaakceptowane: {{count}}",
       "summaryRejected": "Odrzucone: {{count}}"
     },
+    "executionMode": {
+      "title": "Tryb pracy",
+      "control": "Tryb pracy: {{mode}}",
+      "review": "Przeglądaj zmiany",
+      "reviewDescription": "Zatwierdź plan i zmiany przed ich zastosowaniem.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Dopytuje o Twoje potrzeby, a potem automatycznie zatwierdza i wprowadza zmiany."
+    },
     "reasoning": {
       "title": "Poziom rozumowania",
       "low": "Szybko",
@@ -6844,6 +6887,7 @@
       "retryFailedParts": "Ponów nieudane części",
       "retryProvider": "Ponów połączenie",
       "recoveringFailedParts": "Wznawianie nieudanych części…",
+      "failureAutonomousInput": "Autopilot nie mógł bezpiecznie podjąć wymaganej decyzji. Uzupełnij instrukcje lub źródła i spróbuj ponownie.",
       "failureGeneration": "Wygenerowana treść nie przeszła walidacji. Ponowienie utworzy nową treść dla nieudanych części i zachowa ukończoną pracę.",
       "failureProvider": "Dostawca nie mógł ukończyć żądania. Ponowienie wznowi niedokończoną pracę.",
       "failureEvidence": "Dostępne źródła nie potwierdzają wymaganych twierdzeń. Możesz dodać źródła lub doprecyzować prośbę.",
@@ -7303,6 +7347,9 @@
     "description": "Prowadź kontrolowane ćwiczenia i przypisuj szkolenia po ryzykownych działaniach.",
     "newCampaign": "Nowa kampania",
     "details": "Szczegóły kampanii",
+    "detailsDescription": "Nazwij kampanię, wybierz symulowany e-mail i kurs przypisywany po ryzykownym działaniu.",
+    "sending": "Wysyłka",
+    "sendingDescription": "Wyślij od razu lub rozłóż wiadomości losowo w wybranym przedziale czasu.",
     "audience": "Odbiorcy",
     "loading": "Ładowanie…",
     "retry": "Spróbuj ponownie",
@@ -7314,20 +7361,25 @@
     "name": "Nazwa kampanii",
     "scenario": "Scenariusz",
     "choose": "Wybierz opcję",
-    "scenarioLanguage": "Scenariusze i strony symulacji MVP są w języku angielskim.",
-    "course": "Kurs edukacyjny (opublikowany, bezpłatny)",
+    "course": "Kurs uzupełniający",
+    "courseHelp": "Przypisywany automatycznie każdemu, kto kliknie link lub prześle dane. Lista zawiera tylko opublikowane, bezpłatne kursy.",
     "people": "Osoby",
-    "groups": "Grupy / działy",
+    "groups": "Grupy",
     "noOptions": "Brak dostępnych pozycji spełniających wymagania.",
     "selectionHelp": "Wyszukaj i wybierz osoby lub grupy. Powtarzający się odbiorcy otrzymają jedną wiadomość.",
     "removeSelection": "Usuń {{label}}",
     "schedule": "Rozłóż wysyłkę losowo w przedziale czasu",
-    "start": "Początek (czas lokalny)",
-    "end": "Koniec (czas lokalny)",
+    "start": "Początek",
+    "end": "Koniec",
     "startTooltip": "Najwcześniejszy moment wysyłki wiadomości symulacyjnych, w Twoim czasie lokalnym.",
     "endTooltip": "Najpóźniejszy moment wysyłki wiadomości symulacyjnych, w Twoim czasie lokalnym. Okno może trwać maksymalnie 30 dni.",
     "review": "Sprawdź kampanię",
-    "reviewAudience": "{{people}} unikalnych odbiorców wśród wybranych osób i {{groups}} grup. Członkostwo jest ponownie sprawdzane przy uruchomieniu.",
+    "reviewDescription": "Sprawdź szczegóły przed wysłaniem wiadomości.",
+    "audienceCount_one": "{{count}} odbiorca",
+    "audienceCount_few": "{{count}} odbiorców",
+    "audienceCount_many": "{{count}} odbiorców",
+    "audienceCount_other": "{{count}} odbiorców",
+    "audienceRecheck": "Osoby należące do kilku grup są liczone raz. Członkostwo jest ponownie sprawdzane przy uruchomieniu.",
     "authorization": "Uruchamiając kampanię, potwierdzasz zgodę organizacji na ćwiczenie. Po uruchomieniu nie można zmienić odbiorców ani kursu.",
     "launch": "Uruchom kampanię",
     "edit": "Edytuj",
@@ -7336,7 +7388,6 @@
     "invalidCourse": "Wybierz opublikowany, bezpłatny kurs.",
     "createSuccess": "Utworzono kampanię.",
     "cancelSuccess": "Anulowano oczekujące wiadomości.",
-    "hall": "Hall of Shame",
     "refresh": "Odśwież",
     "cancel": "Anuluj oczekujące wiadomości",
     "cancelConfirm": "Wiadomości w trakcie wysyłania mogą jeszcze dotrzeć. Anulować pozostałe?",
@@ -7347,14 +7398,14 @@
     "conflict": "To żądanie zostało już użyte dla innej kampanii.",
     "metrics": {
       "recipients": "Odbiorcy",
-      "sent": "Wysłane (przyjęte przez SMTP)",
+      "sent": "Wysłane",
       "clicked": "Kliknięcia",
       "submitted": "Próby wysłania",
       "riskRate": "Ryzyko"
     },
     "columns": {
       "person": "Osoba",
-      "sent": "Wysłane (przyjęte przez SMTP)",
+      "sent": "Wysłane",
       "clicked": "Kliknięcia",
       "submitted": "Próby wysłania",
       "courseStatus": "Status kursu",
@@ -7378,7 +7429,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Szukaj po imieniu lub e-mailu",
+    "filters": {
+      "all": "Wszystkie osoby",
+      "atRisk": "Tylko zagrożone",
+      "allGroups": "Wszystkie grupy"
+    },
+    "noMatches": "Brak osób pasujących do filtrów.",
+    "sortBy": "Sortuj według: {{column}}",
+    "outcomes": {
+      "title": "Wyniki",
+      "submitted": "Przesłano dane",
+      "clickedOnly": "Tylko kliknięcie",
+      "noAction": "Brak działania"
+    },
+    "recentActivity": "Ostatnia aktywność",
+    "activityEmpty": "Brak kliknięć i przesłanych danych.",
+    "activity": {
+      "clicked": "Kliknięto link",
+      "submitted": "Przesłano dane"
+    }
   },
   "automations": {
     "success": {

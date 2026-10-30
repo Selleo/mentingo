@@ -2514,6 +2514,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Mostrar clave",
+      "hide": "Ocultar clave",
+      "saveError": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "platformSettings": "Configuración de la plataforma",
+      "description": "Conecta la plataforma con servicios externos. Selecciona una integración para añadir o sustituir sus claves.",
+      "filters": "Filtrar integraciones",
+      "status": {
+        "all": "Todas",
+        "configured": "Configurada",
+        "attention": "Requiere atención",
+        "notConfigured": "Sin configurar",
+        "unknown": "Estado no disponible"
+      },
+      "attention": "{{count}} integraciones requieren atención:",
+      "showIssues": "Mostrar problemas",
+      "missingKeys": "Configuración pendiente: {{keys}}",
+      "close": "Cerrar editor",
+      "cancel": "Cancelar",
+      "saveChanges": "Guardar cambios",
+      "empty": "Ninguna integración coincide con este filtro.",
+      "statusError": "No se pudo cargar el estado de la configuración.",
+      "retry": "Reintentar",
+      "secretError": "No se pudo cargar la clave. Intenta mostrarla de nuevo.",
+      "legend": "Verde: todas las claves configuradas. Naranja: faltan algunas claves. Gris discontinuo: ninguna clave configurada. El estado refleja la configuración, no la conexión.",
+      "categories": {
+        "signIn": "Inicio de sesión",
+        "calendar": "Calendario",
+        "payments": "Pagos",
+        "video": "Vídeo",
+        "ai": "IA",
+        "liveTraining": "Formación en directo",
+        "security": "Seguridad"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Inicio de sesión con Google",
@@ -6488,6 +6523,14 @@
       "summaryAccepted": "Aceptados: {{count}}",
       "summaryRejected": "Rechazados: {{count}}"
     },
+    "executionMode": {
+      "title": "Modo de trabajo",
+      "control": "Modo de trabajo: {{mode}}",
+      "review": "Revisar cambios",
+      "reviewDescription": "Revisa el esquema y los cambios antes de aplicarlos.",
+      "autonomous": "Piloto automático",
+      "autonomousDescription": "Aclara tus necesidades y después aprueba y aplica los cambios automáticamente."
+    },
     "reasoning": {
       "title": "Nivel de razonamiento",
       "low": "Rápido",
@@ -6726,6 +6769,7 @@
       "retryFailedParts": "Reintentar las partes fallidas",
       "retryProvider": "Reintentar la conexión",
       "recoveringFailedParts": "Recuperando las partes fallidas…",
+      "failureAutonomousInput": "El piloto automático no pudo tomar una decisión necesaria de forma segura. Añade instrucciones o fuentes y vuelve a intentarlo.",
       "failureGeneration": "El contenido generado no superó la validación. El reintento creará contenido nuevo para las partes fallidas y conservará el trabajo terminado.",
       "failureProvider": "El proveedor no pudo completar la solicitud. El reintento continuará el trabajo pendiente.",
       "failureEvidence": "Las fuentes disponibles no respaldan las afirmaciones requeridas. Puedes añadir fuentes o aclarar la solicitud.",
@@ -7183,6 +7227,9 @@
     "description": "Realiza ejercicios controlados y asigna formación tras acciones de riesgo.",
     "newCampaign": "Nueva campaña",
     "details": "Detalles de la campaña",
+    "detailsDescription": "Pon nombre a la campaña y elige el correo simulado y el curso que se asigna tras una acción de riesgo.",
+    "sending": "Envío",
+    "sendingDescription": "Envía de inmediato o reparte los mensajes al azar en un intervalo de tiempo.",
     "audience": "Destinatarios",
     "loading": "Cargando…",
     "retry": "Reintentar",
@@ -7194,20 +7241,23 @@
     "name": "Nombre de campaña",
     "scenario": "Escenario",
     "choose": "Elige una opción",
-    "scenarioLanguage": "Los escenarios y las páginas de simulación del MVP están en inglés.",
-    "course": "Curso educativo (publicado, gratuito)",
+    "course": "Curso de seguimiento",
+    "courseHelp": "Se asigna automáticamente a quien haga clic en el enlace o envíe datos. Solo se muestran cursos publicados y gratuitos.",
     "people": "Personas",
-    "groups": "Grupos / departamentos",
+    "groups": "Grupos",
     "noOptions": "No hay opciones elegibles disponibles.",
     "selectionHelp": "Busca y selecciona personas o grupos. Los destinatarios duplicados reciben un solo mensaje.",
     "removeSelection": "Quitar {{label}}",
     "schedule": "Distribuir los envíos aleatoriamente en un intervalo",
-    "start": "Inicio (hora local)",
-    "end": "Fin (hora local)",
+    "start": "Inicio",
+    "end": "Fin",
     "startTooltip": "El primer momento en que se pueden enviar los correos de simulación, en tu hora local.",
     "endTooltip": "El último momento en que se pueden enviar los correos de simulación, en tu hora local. La ventana puede durar hasta 30 días.",
     "review": "Revisar campaña",
-    "reviewAudience": "{{people}} destinatarios únicos entre las personas y {{groups}} grupos seleccionados. La pertenencia se comprueba al iniciar.",
+    "reviewDescription": "Revisa los detalles antes de enviar los correos.",
+    "audienceCount_one": "{{count}} destinatario",
+    "audienceCount_other": "{{count}} destinatarios",
+    "audienceRecheck": "Las personas de varios grupos se cuentan una vez. La pertenencia se comprueba de nuevo al iniciar.",
     "authorization": "Al iniciar confirmas la autorización de tu organización. Después no se pueden cambiar los destinatarios ni el curso.",
     "launch": "Iniciar campaña",
     "edit": "Editar",
@@ -7216,7 +7266,6 @@
     "invalidCourse": "Elige un curso publicado y gratuito.",
     "createSuccess": "Campaña creada.",
     "cancelSuccess": "Mensajes pendientes cancelados.",
-    "hall": "Hall of Shame",
     "refresh": "Actualizar",
     "cancel": "Cancelar mensajes pendientes",
     "cancelConfirm": "Los mensajes que ya se están enviando pueden llegar. ¿Cancelar los demás?",
@@ -7227,14 +7276,14 @@
     "conflict": "Esta solicitud ya se usó para otra campaña.",
     "metrics": {
       "recipients": "Destinatarios",
-      "sent": "Enviados (aceptados por SMTP)",
+      "sent": "Enviados",
       "clicked": "Clics",
       "submitted": "Formularios enviados",
       "riskRate": "Riesgo"
     },
     "columns": {
       "person": "Persona",
-      "sent": "Enviados (aceptados por SMTP)",
+      "sent": "Enviados",
       "clicked": "Clics",
       "submitted": "Formularios enviados",
       "courseStatus": "Estado del curso",
@@ -7258,7 +7307,27 @@
     },
     "PHISHING_API_KEY": "PHISHING_API_KEY",
     "PHISHING_BASE_URL": "PHISHING_BASE_URL",
-    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET",
+    "searchPeople": "Buscar por nombre o correo",
+    "filters": {
+      "all": "Todas las personas",
+      "atRisk": "Solo en riesgo",
+      "allGroups": "Todos los grupos"
+    },
+    "noMatches": "Ninguna persona coincide con los filtros.",
+    "sortBy": "Ordenar por {{column}}",
+    "outcomes": {
+      "title": "Resultados",
+      "submitted": "Enviaron datos",
+      "clickedOnly": "Solo hicieron clic",
+      "noAction": "Sin acción"
+    },
+    "recentActivity": "Actividad reciente",
+    "activityEmpty": "Aún no hay clics ni envíos.",
+    "activity": {
+      "clicked": "Hizo clic en el enlace",
+      "submitted": "Envió datos"
+    }
   },
   "reports": {
     "errors": {

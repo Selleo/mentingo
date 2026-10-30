@@ -107,8 +107,8 @@ importers:
         specifier: 0.4.0
         version: 0.4.0
       '@mentingo/phishing-simulation-sdk':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 0.2.0
+        version: 0.2.0
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4797,8 +4797,8 @@ packages:
   '@mentingo/luma-sdk@0.4.0':
     resolution: {integrity: sha512-2icUB/SSp0MszfNptdSsNqtARg8vRIU7eDUXddX9Gzd41u2dA7fObGjSA2tl1yweYGx2FiOI3ymDWEoDcRXR3g==}
 
-  '@mentingo/phishing-simulation-sdk@0.1.1':
-    resolution: {integrity: sha512-WVhGVcA3iVEHXJwGYEXZs0ex3W6FhZlroAh6wnXY8Xp40on5se6ZqHQItgWLGz++rl9JDqMZiIWPvOH87NPI6Q==}
+  '@mentingo/phishing-simulation-sdk@0.2.0':
+    resolution: {integrity: sha512-/M+m1N9mLxzp0td7fx7rSEMzsf+McYgfkCiCB34PIrP5qJ/sgc7CFJpc6oMfmuVQSqWErpzkcqGMTh4hH9X9rQ==}
     engines: {node: '>=22.15.0'}
 
   '@mentingo/voice@0.3.0':
@@ -23712,7 +23712,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@mentingo/phishing-simulation-sdk@0.1.1': {}
+  '@mentingo/phishing-simulation-sdk@0.2.0': {}
 
   '@mentingo/voice@0.3.0(@emotion/is-prop-valid@1.2.2)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
