@@ -1,34 +1,12 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
-import { boolean, index, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, text, uuid } from "drizzle-orm/pg-core";
 
-import { tenants } from ".";
+import { tenants } from "./tenant.schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-export const id = {
-  id: uuid("id")
-    .default(sql`gen_random_uuid()`)
-    .primaryKey(),
-};
-
-export const timestampWithTimezone = <TName extends string>({ name }: { name: TName }) =>
-  timestamp(name, {
-    mode: "string",
-    withTimezone: true,
-    precision: 3,
-  });
-
-export const timestamps = {
-  createdAt: timestampWithTimezone({ name: "created_at" })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-
-  updatedAt: timestampWithTimezone({ name: "updated_at" })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull()
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
-};
+export { id, timestamps, timestampWithTimezone } from "./columns";
 
 export const archived = boolean("archived").default(false).notNull();
 

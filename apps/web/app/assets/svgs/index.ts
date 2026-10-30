@@ -32,6 +32,7 @@ export {
   Building,
   MailWarning,
   MessagesSquare,
+  ShieldCheck,
   Milestone,
   Store,
   User,

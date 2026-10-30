@@ -41,6 +41,12 @@ vi.mock("~/api/queries/usePhishingConfiguration", () => ({
 vi.mock("~/api/queries/usePhishingOptions", () => ({
   usePhishingOptions: () => ({ data: fixtures.options }),
 }));
+vi.mock("~/api/queries/useInfinitePhishingOptions", () => ({
+  useInfinitePhishingOptions: () => ({ data: undefined, isError: false, isFetching: false }),
+}));
+vi.mock("~/api/queries/usePhishingAudienceCount", () => ({
+  usePhishingAudienceCount: () => ({ data: undefined, isFetching: false, isError: false }),
+}));
 vi.mock("~/api/queries/usePhishingScenarios", () => ({
   usePhishingScenarios: () => ({
     data: fixtures.scenarios,
@@ -65,25 +71,38 @@ vi.mock("~/api/queries/usePhishingCampaigns", () => ({
   usePhishingCampaigns: () => ({ data: [fixtures.campaign], refetch: fixtures.refetch }),
 }));
 vi.mock("~/api/queries/usePhishingReport", () => ({
+  phishingReportQueryKey: (id: string) => ["phishing", "report", id],
   usePhishingReport: () => ({
     data: {
       campaign: fixtures.campaign,
+      riskyAction: "clicked",
       totals: fixtures.totals,
       groups: [],
-      recipients: [
+      activity: [],
+    },
+    refetch: fixtures.refetch,
+  }),
+}));
+vi.mock("~/api/queries/usePhishingReportRecipients", () => ({
+  usePhishingReportRecipients: () => ({
+    data: {
+      data: [
         {
           userId: "user-1",
           firstName: "Ada",
           lastName: "Example",
           email: "ada@example.test",
+          groupIds: [],
           sentAt: null,
           clickedAt: null,
           submittedAt: null,
-          courseStatus: "notStarted",
+          failed: false,
+          courseStatus: "not_started",
         },
       ],
+      pagination: { page: 1, perPage: 20, totalItems: 1 },
     },
-    refetch: fixtures.refetch,
+    isPending: false,
   }),
 }));
 vi.mock("~/api/mutations/useCancelPhishingCampaign", () => ({
@@ -115,7 +134,12 @@ describe("Phishing design system", () => {
   it.each([
     ["creation", readFileSync("app/modules/Phishing/CreatePhishing.page.tsx", "utf8")],
     ["list", readFileSync("app/modules/Phishing/Phishing.page.tsx", "utf8")],
-    ["report and hall", readFileSync("app/modules/Phishing/PhishingReport.tsx", "utf8")],
+    [
+      "report",
+      ["PhishingReport.tsx", "PhishingPeopleTable.tsx"]
+        .map((file) => readFileSync(`app/modules/Phishing/${file}`, "utf8"))
+        .join("\n"),
+    ],
   ])("keeps %s on shared states and design-system surfaces", (_name, source) => {
     expect(source).not.toMatch(/<(select|input|table|thead|tbody|tr|td|th)\b/);
     expect(source).not.toMatch(/<p role="(status|alert)"/);
@@ -189,7 +213,9 @@ describe("Phishing design system", () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole("table", { name: "phishing.people" })).toHaveClass("caption-bottom");
-    expect(screen.getByText("phishing.metrics.recipients").closest(".bg-card")).not.toBeNull();
+    expect(screen.queryByText("phishing.columns.submitted")).not.toBeInTheDocument();
+    expect(screen.queryByText("phishing.outcomes.submitted")).not.toBeInTheDocument();
+    expect(screen.getByText("phishing.outcomes.title").closest(".bg-card")).not.toBeNull();
   });
   it("uses the design-system table and status badges in the campaign list", () => {
     render(
@@ -233,7 +259,7 @@ describe("Phishing design system", () => {
   });
   it("can enable scheduling without remounting or crashing the form", async () => {
     showCreate();
-    await userEvent.click(screen.getByRole("checkbox"));
+    await userEvent.click(screen.getByRole("switch", { name: "phishing.schedule" }));
     expect(screen.getByText("phishing.start")).toBeVisible();
     expect(screen.getByText("phishing.end")).toBeVisible();
     expect(document.querySelector('input[type="datetime-local"]')).toBeNull();
@@ -244,8 +270,8 @@ describe("Phishing design system", () => {
     showCreate();
     expect(screen.getByRole("combobox", { name: "phishing.scenario" }).tagName).toBe("BUTTON");
     expect(screen.getByRole("combobox", { name: "phishing.course" }).tagName).toBe("BUTTON");
-    expect(screen.getByRole("combobox", { name: "phishing.people" }).tagName).toBe("INPUT");
-    expect(screen.getByRole("combobox", { name: "phishing.groups" }).tagName).toBe("INPUT");
-    expect(screen.getByRole("checkbox", { name: "phishing.schedule" }).tagName).toBe("BUTTON");
+    expect(screen.getByRole("combobox", { name: "phishing.people" }).tagName).toBe("BUTTON");
+    expect(screen.getByRole("combobox", { name: "phishing.groups" }).tagName).toBe("BUTTON");
+    expect(screen.getByRole("switch", { name: "phishing.schedule" }).tagName).toBe("BUTTON");
   });
 });

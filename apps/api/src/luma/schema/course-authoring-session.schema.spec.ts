@@ -16,6 +16,41 @@ const proposalId = "00000000-0000-4000-8000-000000000003";
 describe("course authoring command schema", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
 
+  it("accepts the optional request execution mode and rejects unknown modes", () => {
+    const request = {
+      instruction: "Create a course",
+      targets: [],
+      sourcePolicy: {
+        sourceVersionIds: [],
+        webEnabled: false,
+        generalKnowledgeEnabled: false,
+        researchDepth: "standard",
+        requiredSectionIds: [],
+        excludedSectionIds: [],
+      },
+    };
+    const command = { schemaVersion: 1, commandId, action: "request.create", request };
+    expect(Value.Check(authoringCommandBodySchema, command)).toBe(true);
+    expect(
+      Value.Check(authoringCommandBodySchema, {
+        ...command,
+        request: { ...request, executionMode: "review" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(authoringCommandBodySchema, {
+        ...command,
+        request: { ...request, executionMode: "autonomous" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(authoringCommandBodySchema, {
+        ...command,
+        request: { ...request, executionMode: "unknown" },
+      }),
+    ).toBe(false);
+  });
+
   it("accepts an atomic proposal review with a request fence", () => {
     expect(
       Value.Check(authoringCommandBodySchema, {

@@ -40,7 +40,7 @@ For portability, authorized course managers can export supported Mentingo course
 
 ## Key Technical Context
 
-- The SCORM API is implemented in `apps/api/src/scorm`; course export support is in `apps/api/src/courses/course-scorm-export.service.ts`.
+- The SCORM API is implemented in `apps/api/src/scorm`; course export support is in `apps/api/src/courses/scorm-export/course-scorm-export.service.ts`.
 - The main web surfaces are `apps/web/app/modules/Admin/Scorm`, `apps/web/app/modules/Courses/Lesson/ScormLesson`, and `useScormRuntime`.
 - Import endpoints require `COURSE_CREATE`, `COURSE_UPDATE`, or `COURSE_UPDATE_OWN` depending on whether the user creates a course or updates curriculum content.
 - Runtime launch, commit, finish, and content streaming require course read access and also verify learner/admin authorization for the package content.

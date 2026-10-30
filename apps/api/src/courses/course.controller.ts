@@ -52,10 +52,10 @@ import {
   RepeatCourseBody,
 } from "src/course-repetition/course-repetition.schema";
 import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
-import { CourseDuplicationService } from "src/courses/course-duplication.service";
-import { CourseScormExportService } from "src/courses/course-scorm-export.service";
 import { CourseService } from "src/courses/course.service";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseDuplicationService } from "src/courses/duplication/course-duplication.service";
+import { CourseTranslationService } from "src/courses/languages/course-translation.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import {
   bulkArchiveCourseResponseSchema,
   bulkArchiveCourseSchema,
@@ -122,7 +122,7 @@ import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
-import { CourseTranslationService } from "src/courses/services/course-translation.service";
+import { CourseScormExportService } from "src/courses/scorm-export/course-scorm-export.service";
 import {
   allCoursesValidation,
   availableCourseCategoriesValidation,

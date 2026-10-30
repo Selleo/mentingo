@@ -473,7 +473,7 @@ export class AiService {
 
   async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
-    if (!thread) throw new BadRequestException("Thread not found");
+    if (!thread) throw new BadRequestException("common.error.threadNotFound");
 
     const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
     const { lessonId, courseId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
@@ -541,7 +541,7 @@ export class AiService {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
     if (userId && thread.userId !== userId)
-      throw new ForbiddenException("You don't have access to this thread");
+      throw new ForbiddenException("common.error.threadAccessDenied");
 
     if (thread.status !== THREAD_STATUS.ACTIVE)
       throw new BadRequestException("common.error.threadMustBeActive");
@@ -602,7 +602,7 @@ export class AiService {
       !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
       !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE)
     )
-      throw new UnauthorizedException("You are not assigned to this lesson");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     if (hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
       const courseAuthorId = await this.aiRepository.getCourseAuthorByLesson(lessonId);

@@ -28,7 +28,7 @@ import {
   CourseTransferLeaseLostError,
 } from "src/course-transfer/course-transfer.errors";
 import { CourseTransferRequestedEvent } from "src/course-transfer/events/course-transfer-requested.event";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import * as outboxConstants from "src/outbox/outbox.constants";

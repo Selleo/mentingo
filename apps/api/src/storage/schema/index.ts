@@ -32,7 +32,6 @@ import {
   CERTIFICATE_STATUSES,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
-  TENANT_STATUSES,
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
@@ -70,7 +69,6 @@ import {
   type SupportedLanguages,
   type PermissionKey,
   type SupportSessionStatus,
-  type TenantStatus,
   type LearningPathEnrollmentType,
   type LearningPathProgressStatus,
   type LearningPathStatus,
@@ -134,6 +132,8 @@ import { safeJsonb } from "src/utils/safe-jsonb";
 import { courseLearningStates } from "./course-learning-state.schema";
 import { int4multirange, nativeJsonb, tsvector } from "./custom-types";
 export * from "./quiz.schema";
+export { tenants } from "./tenant.schema";
+import { tenants } from "./tenant.schema";
 import {
   archived,
   availableLocales,
@@ -159,9 +159,9 @@ import type {
   CourseTransferKind,
   CourseTransferStatus,
 } from "src/course-transfer/course-transfer.types";
+import type { CourseDurationEstimatesByLanguage } from "src/courses/duration/course-duration.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
-import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
@@ -2611,21 +2611,6 @@ export const news = pgTable(
     tenantId,
   },
   withTenantIdIndex("news"),
-);
-
-export const tenants = pgTable(
-  "tenants",
-  {
-    ...id,
-    ...timestamps,
-    name: text("name").notNull(),
-    host: text("host").notNull(),
-    status: text("status").notNull().$type<TenantStatus>().default(TENANT_STATUSES.ACTIVE),
-    isManaging: boolean("is_managing").notNull().default(false),
-  },
-  (table) => ({
-    uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),
-  }),
 );
 
 export const courseTransferStreams = pgTable(

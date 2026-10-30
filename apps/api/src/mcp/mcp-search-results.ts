@@ -67,6 +67,7 @@ export function shapeMcpSearchResults(
               title: text(row.title) ?? "",
               courseId: row.courseId,
               matchedPassage: text(row.matchedPassage),
+              matchedAttachmentFileName: text(row.matchedAttachmentFileName ?? undefined) ?? null,
               url: `${courseUrl(row.courseId)}/lesson/${encodeURIComponent(row.id)}`,
             })),
           }

@@ -1,6 +1,7 @@
 import { COURSE_AUTHORING_SOURCE_FILE_TYPES, MAX_COURSE_AUTHORING_SOURCE_SIZE } from "@repo/shared";
 import {
   ArrowLeft,
+  Bot,
   Brain,
   Check,
   ChevronDown,
@@ -35,6 +36,9 @@ type Props = {
   course: CourseContext;
   policy: SourcePolicy;
   strictSourceMode: boolean;
+  autopilot?: boolean;
+  onAutopilotChange?: (enabled: boolean) => void;
+  executionModeDisabled?: boolean;
   disabled?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -452,6 +456,9 @@ export const AuthoringToolsPopover = ({
   course,
   policy,
   strictSourceMode,
+  autopilot = false,
+  onAutopilotChange,
+  executionModeDisabled,
   disabled,
   open: controlledOpen,
   onOpenChange,
@@ -516,13 +523,14 @@ export const AuthoringToolsPopover = ({
     if (!open) setView(TOOLS_VIEW.ROOT);
   }, [open]);
 
-  const handleFileChange = (file: File | undefined, reset: () => void) => {
-    if (file) {
-      const error = sourceError(file);
-      onSourceUploadError?.(error);
-      if (!error) void onUploadSource?.(file);
-    }
-    reset();
+  /** Uploads each valid selection separately; a rejected upload does not cancel its siblings. */
+  const handleFileChange = async (files: File[]) => {
+    const validated = files.map((file) => ({ file, error: sourceError(file) }));
+    onSourceUploadError?.(validated.find(({ error }) => error)?.error ?? null);
+    // The upload mutation reports per-file failures; settle every independent request.
+    await Promise.allSettled(
+      validated.filter(({ error }) => !error).map(({ file }) => onUploadSource?.(file)),
+    );
   };
 
   const updatePolicy = (next: SourcePolicy) => onPolicyChange(next);
@@ -649,14 +657,15 @@ export const AuthoringToolsPopover = ({
                     <input
                       id={inputId}
                       type="file"
+                      multiple
                       className="sr-only"
                       accept={AUTHORING_SOURCE_ACCEPT}
                       disabled={disabled || isUploadingSource}
-                      onChange={(event) =>
-                        handleFileChange(event.target.files?.[0], () => {
-                          event.currentTarget.value = "";
-                        })
-                      }
+                      onChange={(event) => {
+                        const files = Array.from(event.currentTarget.files ?? []);
+                        event.currentTarget.value = "";
+                        void handleFileChange(files);
+                      }}
                     />
                   </label>
                   {sourceUploadError && (
@@ -688,6 +697,16 @@ export const AuthoringToolsPopover = ({
                     {t("courseAuthoring.tools.aiSection")}
                   </p>
                   <div className="mx-1 mb-1 divide-y divide-neutral-100 overflow-hidden rounded-lg border border-neutral-200">
+                    {onAutopilotChange && (
+                      <ToggleRow
+                        icon={<Bot className="size-4" aria-hidden="true" />}
+                        label={t("courseAuthoring.executionMode.autonomous")}
+                        help={t("courseAuthoring.executionMode.autonomousDescription")}
+                        checked={autopilot}
+                        disabled={disabled || executionModeDisabled}
+                        onToggle={() => onAutopilotChange(!autopilot)}
+                      />
+                    )}
                     <ToggleRow
                       icon={<Globe2 className="size-4" aria-hidden="true" />}
                       label={t("courseAuthoring.tools.webSearch")}

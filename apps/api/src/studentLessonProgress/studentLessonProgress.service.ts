@@ -182,7 +182,7 @@ export class StudentLessonProgressService {
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
-      throw new UnauthorizedException("You don't have assignment to this lesson");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     const alreadyCompleted = accessCourseLessonWithDetails.lessonIsCompleted;
 
@@ -205,15 +205,15 @@ export class StudentLessonProgressService {
       .where(and(eq(lessons.id, id)));
 
     if (!lesson || !lesson.chapterId || !lesson.courseId || !lesson.chapterLessonCount) {
-      throw new NotFoundException(`Lesson with id ${id} not found`);
+      throw new NotFoundException("adminCourseView.errors.notFound.lesson");
     }
 
     if (!alreadyCompleted && lesson.type === LESSON_TYPES.QUIZ && !quizCompleted) {
-      throw new BadRequestException("Quiz not completed");
+      throw new BadRequestException("studentLessonView.error.quizNotCompleted");
     }
 
     if (!alreadyCompleted && lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
-      throw new BadRequestException("No AI Mentor Lesson Data given");
+      throw new BadRequestException("studentLessonView.error.aiMentorDataRequired");
 
     const [lessonProgress] = await dbInstance
       .select()
@@ -420,7 +420,7 @@ export class StudentLessonProgressService {
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
-      throw new UnauthorizedException("You don't have assignment to this lesson");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     const [lesson] = await dbInstance
       .select({
@@ -434,7 +434,7 @@ export class StudentLessonProgressService {
       .where(eq(lessons.id, id));
 
     if (!lesson || !lesson.chapterId || !lesson.courseId || !lesson.chapterLessonCount) {
-      throw new NotFoundException(`Lesson with id ${id} not found`);
+      throw new NotFoundException("adminCourseView.errors.notFound.lesson");
     }
 
     const updated = await dbInstance
@@ -530,12 +530,12 @@ export class StudentLessonProgressService {
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
-      throw new UnauthorizedException("You don't have assignment to this lesson");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     if (accessCourseLessonWithDetails.lessonIsCompleted) return;
 
     if (!id) {
-      throw new NotFoundException(`No lesson id provided`);
+      throw new NotFoundException("studentLessonView.error.lessonIdNotFound");
     }
 
     const [lessonProgress] = await dbInstance
@@ -1127,7 +1127,7 @@ export class StudentLessonProgressService {
       .where(eq(users.id, userId));
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("adminUserView.error.userNotFound");
     }
 
     const userAccessRows = await dbInstance

@@ -276,7 +276,7 @@ export const getNavigationConfig = (
               {
                 label: t("phishing.title"),
                 path: "phishing",
-                iconName: "MailWarning",
+                iconName: "ShieldCheck",
                 accessRequirement: routeAccessConfig.phishing,
               },
             ],

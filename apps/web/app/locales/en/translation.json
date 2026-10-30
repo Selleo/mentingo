@@ -89,7 +89,12 @@
       "unsupportedVersion": "This Mentingo package version is not supported.",
       "missingAsset": "The Mentingo package is missing a required file.",
       "invalidArchive": "This ZIP is not a valid Mentingo package.",
-      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace."
+      "courseNotSyncable": "This course was added as an editable copy and can't be synced. Delete it and add it again from the marketplace.",
+      "pathNotFound": "The development path to export was not found.",
+      "accessDenied": "You do not have permission to export this content.",
+      "liveTrainingIncomplete": "A Live Training linked to this course is incomplete and cannot be exported.",
+      "courseNotFound": "The course to export was not found.",
+      "categoryNotFound": "The course category was not found."
     }
   },
   "aiConversations": {
@@ -698,7 +703,9 @@
       "somethingWentWrong": "Something went wrong...",
       "notFound": "Resource not found",
       "lessonAccessDenied": "You do not have permission to access this lesson.",
-      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds."
+      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds.",
+      "invalidRequest": "Invalid request.",
+      "courseAccessDenied": "You do not have access to this course."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -734,7 +741,9 @@
       "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
       "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
+      "threadNotFound": "The conversation was not found.",
+      "threadAccessDenied": "You do not have access to this conversation."
     },
     "loader": {
       "textSequence": {
@@ -767,7 +776,10 @@
     "continueWithSlack": "Continue with Slack",
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
-    "refreshPage": "Refresh page"
+    "refreshPage": "Refresh page",
+    "validation": {
+      "messageRequired": "Message is required."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
@@ -1260,7 +1272,8 @@
     },
     "errors": {
       "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseTitleRequired": "Course title is required to create the course calendar event.",
+      "courseDueDateCalendarSyncFailed": "Failed to sync the course due date with the calendar."
     }
   },
   "liveTrainingView": {
@@ -2093,7 +2106,8 @@
       "bulkStatusUpdateSuccessfully": "Course statuses updated successfully",
       "bulkStatusUpdateFailed": "Failed to update course statuses",
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
-      "noCoursesSelected": "Select at least one course."
+      "noCoursesSelected": "Select at least one course.",
+      "deleteCoursesFailed": "Failed to delete courses"
     }
   },
   "adminCategoriesView": {
@@ -2508,6 +2522,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Show secret",
+      "hide": "Hide secret",
+      "saveError": "Could not save changes. Please try again.",
+      "platformSettings": "Platform settings",
+      "description": "Connect the platform to external services. Select an integration to add or replace its keys.",
+      "filters": "Filter integrations",
+      "status": {
+        "all": "All",
+        "configured": "Configured",
+        "attention": "Needs attention",
+        "notConfigured": "Not configured",
+        "unknown": "Status unavailable"
+      },
+      "attention": "{{count}} integrations need attention:",
+      "showIssues": "Show issues",
+      "missingKeys": "Missing configuration: {{keys}}",
+      "close": "Close editor",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "empty": "No integrations match this filter.",
+      "statusError": "Configuration status could not be loaded.",
+      "retry": "Try again",
+      "secretError": "The secret could not be loaded. Try revealing it again.",
+      "legend": "Green: all keys are configured. Orange: some keys are missing. Dashed grey: no keys are configured. Status reflects configuration completeness, not connection health.",
+      "categories": {
+        "signIn": "Sign-in",
+        "calendar": "Calendar",
+        "payments": "Payments",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Live training",
+        "security": "Security"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Google Sign-In",
@@ -2776,11 +2825,17 @@
         "course": "Course not found.",
         "category": "Category not found.",
         "chapter": "Chapter not found.",
-        "lesson": "Lesson not found."
+        "lesson": "Lesson not found.",
+        "author": "Course author not found."
       },
       "forbidden": {
         "updateCourse": "You do not have permission to update this course.",
-        "archivedCourseEnrollment": "This course has been archived and is no longer available for enrollment."
+        "archivedCourseEnrollment": "This course has been archived and is no longer available for enrollment.",
+        "deleteCourse": "You do not have permission to delete this course.",
+        "deleteCourses": "You do not have permission to delete these courses.",
+        "enrollOwnCourse": "You cannot enroll in your own course.",
+        "enrollGroups": "You do not have permission to enroll groups in this course.",
+        "changeStudentMode": "You do not have permission to change learning mode."
       },
       "media": {
         "imageUploadFailed": "Failed to upload the course image.",
@@ -2789,7 +2844,8 @@
       "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
-        "stripeProductFailed": "Failed to create course payment product."
+        "stripeProductFailed": "Failed to create course payment product.",
+        "chapterFailed": "Failed to create chapter."
       },
       "lesson": {
         "customTtsReferenceRequired": "Custom TTS reference is required for custom voice mode.",
@@ -2800,6 +2856,18 @@
         "optionInsertFailed": "Failed to add quiz option.",
         "embedCreateFailed": "Failed to create embed lesson.",
         "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
+      },
+      "update": {
+        "courseFailed": "Failed to update course."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "You are already enrolled in this course.",
+        "studentsRequired": "Select at least one learner to enroll.",
+        "onlyExistingUsers": "You can only enroll existing users.",
+        "studentsAlreadyEnrolled": "Some of the selected learners are already enrolled in this course.",
+        "groupsNotFound": "The selected groups were not found.",
+        "groupEnrollmentsNotFound": "The selected groups are not enrolled in this course.",
+        "enrollmentFailed": "Failed to enroll in the course."
       }
     },
     "thinking": {
@@ -4197,7 +4265,9 @@
       "lessonIdNotFound": "Lesson ID not found",
       "notAuthorizedTitle": "Not authorized",
       "notAuthorizedDescription": "You're not authorized to access this lesson.",
-      "goBackToCourse": "Go back to course"
+      "goBackToCourse": "Go back to course",
+      "quizNotCompleted": "Complete the quiz before finishing this lesson.",
+      "aiMentorDataRequired": "AI Mentor lesson results are required to complete this lesson."
     },
     "other": {
       "lesson": "Lesson",
@@ -5986,7 +6056,9 @@
       "sourceCategoryMissing": "The course to duplicate has no category",
       "targetCourseNotFound": "The duplicated course was not found",
       "tenantMissing": "The tenant for this course was not found",
-      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be duplicated"
+      "foreignSourceAsset": "This course uses a file that belongs to another organization, so it cannot be duplicated",
+      "jobNotFound": "Course duplication job not found",
+      "createFailed": "Failed to create the duplicated course"
     }
   },
   "tenantSharing": {
@@ -6212,7 +6284,12 @@
       "liveKitRoomNotAvailable": "The LiveKit room for this session is not available.",
       "activeSessionUpdateForbidden": "This Live Training cannot be changed while a session is in progress.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
-      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached.",
+      "onlyScheduledCanBeStarted": "Only scheduled or ended Live Trainings can be started.",
+      "sessionAlreadyActive": "A session for this Live Training is already in progress.",
+      "onlineSessionRequired": "This action is available only for online Live Trainings.",
+      "userNotFound": "User was not found.",
+      "sessionAlreadyFinished": "This Live Training session has already finished."
     }
   },
   "modernCourseView": {
@@ -6520,6 +6597,14 @@
       "summaryAccepted": "Accepted: {{count}}",
       "summaryRejected": "Rejected: {{count}}"
     },
+    "executionMode": {
+      "title": "Work mode",
+      "control": "Work mode: {{mode}}",
+      "review": "Review changes",
+      "reviewDescription": "Review the outline and changes before they are applied.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Clarifies your needs, then approves and applies changes automatically."
+    },
     "reasoning": {
       "title": "Thinking effort",
       "low": "Fast",
@@ -6758,6 +6843,7 @@
       "retryFailedParts": "Retry failed parts",
       "retryProvider": "Retry connection",
       "recoveringFailedParts": "Recovering failed parts…",
+      "failureAutonomousInput": "Autopilot could not make a necessary decision safely. Add the missing instructions or sources, then try again.",
       "failureGeneration": "Generated content did not pass validation. Retry will create fresh content for the failed parts and keep completed work.",
       "failureProvider": "The provider could not complete the request. Retry will resume the unfinished work.",
       "failureEvidence": "The available evidence does not cover the required claims. You can add sources or clarify the request.",
@@ -7215,6 +7301,9 @@
     "description": "Run controlled exercises and assign learning after risky actions.",
     "newCampaign": "New campaign",
     "details": "Campaign details",
+    "detailsDescription": "Name the campaign, pick the simulated email and the course assigned after a risky action.",
+    "sending": "Sending",
+    "sendingDescription": "Send right away or spread messages randomly across a time window.",
     "audience": "Audience",
     "loading": "Loading…",
     "retry": "Try again",
@@ -7226,20 +7315,23 @@
     "name": "Campaign name",
     "scenario": "Scenario",
     "choose": "Choose an option",
-    "scenarioLanguage": "MVP scenarios and simulation pages are in English.",
-    "course": "Educational course (published, free)",
+    "course": "Follow-up course",
+    "courseHelp": "Assigned automatically to anyone who clicks the link or submits data. Only published, free courses are listed.",
     "people": "People",
-    "groups": "Groups / departments",
+    "groups": "Groups",
     "noOptions": "No eligible options are available.",
     "selectionHelp": "Search and select people or groups. Duplicate recipients receive one message.",
     "removeSelection": "Remove {{label}}",
     "schedule": "Spread sending randomly over a time window",
-    "start": "Start (local time)",
-    "end": "End (local time)",
+    "start": "Start",
+    "end": "End",
     "startTooltip": "The earliest moment simulation emails may be sent, in your local time.",
     "endTooltip": "The latest moment simulation emails may be sent, in your local time. The window can last up to 30 days.",
     "review": "Review campaign",
-    "reviewAudience": "{{people}} unique recipients across the selected people and {{groups}} groups. Membership is checked again at launch.",
+    "reviewDescription": "Check the details before the emails go out.",
+    "audienceCount_one": "{{count}} recipient",
+    "audienceCount_other": "{{count}} recipients",
+    "audienceRecheck": "Overlapping group members are counted once. Membership is checked again at launch.",
     "authorization": "Launching confirms that your organization authorizes this exercise. The audience and course cannot be changed after launch.",
     "launch": "Launch campaign",
     "edit": "Edit",
@@ -7248,7 +7340,6 @@
     "invalidCourse": "Choose a published, free course.",
     "createSuccess": "Campaign created.",
     "cancelSuccess": "Pending messages cancelled.",
-    "hall": "Hall of Shame",
     "refresh": "Refresh",
     "cancel": "Cancel pending messages",
     "cancelConfirm": "Messages already being sent may still arrive. Cancel all other pending messages?",
@@ -7259,14 +7350,14 @@
     "conflict": "This request was already used for a different campaign.",
     "metrics": {
       "recipients": "Recipients",
-      "sent": "Sent (SMTP accepted)",
+      "sent": "Sent",
       "clicked": "Clicked",
       "submitted": "Submitted",
       "riskRate": "At risk"
     },
     "columns": {
       "person": "Person",
-      "sent": "Sent (SMTP accepted)",
+      "sent": "Sent",
       "clicked": "Clicked",
       "submitted": "Submitted",
       "courseStatus": "Course status",
@@ -7290,7 +7381,27 @@
     },
     "PHISHING_API_KEY": "Phishing API Key",
     "PHISHING_BASE_URL": "Phishing Base URL",
-    "PHISHING_WEBHOOK_SECRET": "Phishing Webhook Secret"
+    "PHISHING_WEBHOOK_SECRET": "Phishing Webhook Secret",
+    "searchPeople": "Search by name or email",
+    "filters": {
+      "all": "All people",
+      "atRisk": "At risk only",
+      "allGroups": "All groups"
+    },
+    "noMatches": "No people match your filters.",
+    "sortBy": "Sort by {{column}}",
+    "outcomes": {
+      "title": "Outcomes",
+      "submitted": "Submitted data",
+      "clickedOnly": "Clicked only",
+      "noAction": "No action"
+    },
+    "recentActivity": "Recent activity",
+    "activityEmpty": "No clicks or submissions yet.",
+    "activity": {
+      "clicked": "Clicked the link",
+      "submitted": "Submitted data"
+    }
   },
   "reports": {
     "errors": {
@@ -8257,6 +8368,24 @@
       "listingNotFound": "This marketplace course was not found.",
       "thumbnailNotFound": "This marketplace course has no thumbnail.",
       "serviceError": "The content marketplace could not complete the request. Try again later."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Translations can only be edited in a language other than the course base language.",
+      "criterionNotFound": "Completion criterion not found.",
+      "guidanceNotFound": "Evaluation guidance not found.",
+      "blockingErrorNotFound": "Blocking error not found.",
+      "configurationNotFound": "The completion conditions configuration was not found.",
+      "invalidLessonType": "Completion conditions are available only for AI Mentor lessons."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Translations can only be edited in a language other than the course base language.",
+      "configurationNotFound": "The AI Mentor configuration was not found.",
+      "invalidLessonType": "AI Mentor configuration is available only for AI Mentor lessons.",
+      "invalidGraph": "The AI Mentor configuration is invalid."
     }
   },
   "assistant": {

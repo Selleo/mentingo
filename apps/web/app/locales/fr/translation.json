@@ -89,7 +89,12 @@
       "unsupportedVersion": "Cette version du package Mentingo n’est pas prise en charge.",
       "missingAsset": "Un fichier requis manque dans le package Mentingo.",
       "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide.",
-      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace."
+      "courseNotSyncable": "Ce cours a été ajouté comme copie modifiable et ne peut pas être synchronisé. Supprimez-le et ajoutez-le à nouveau depuis la marketplace.",
+      "pathNotFound": "Le parcours de développement à exporter est introuvable.",
+      "accessDenied": "Vous n'avez pas l'autorisation d'exporter ce contenu.",
+      "liveTrainingIncomplete": "Une formation en direct liée à ce cours est incomplète et ne peut pas être exportée.",
+      "courseNotFound": "Le cours à exporter est introuvable.",
+      "categoryNotFound": "La catégorie du cours est introuvable."
     }
   },
   "aiConversations": {
@@ -699,7 +704,9 @@
       "somethingWentWrong": "Une erreur est survenue...",
       "notFound": "Ressource introuvable",
       "lessonAccessDenied": "Vous n'avez pas la permission d'accéder à cette leçon.",
-      "tooManyRequests": "Trop de requêtes. Réessayez dans {{seconds}} secondes."
+      "tooManyRequests": "Trop de requêtes. Réessayez dans {{seconds}} secondes.",
+      "invalidRequest": "Requête invalide.",
+      "courseAccessDenied": "Vous n'avez pas accès à ce cours."
     },
     "tooltip": {
       "soon": "Bientôt disponible"
@@ -733,7 +740,9 @@
       "somethingWentWrong": "Oups ! Quelque chose s'est mal passé.",
       "threadMustBeActive": "Le fil de discussion doit être actif.",
       "aiJudgeConfigurationMissing": "La configuration des conditions d’achèvement est manquante.",
-      "aiJudgeGenerationNotAwaitingRevision": "Cette génération n’attend pas une décision de révision."
+      "aiJudgeGenerationNotAwaitingRevision": "Cette génération n’attend pas une décision de révision.",
+      "threadNotFound": "La conversation est introuvable.",
+      "threadAccessDenied": "Vous n'avez pas accès à cette conversation."
     },
     "loader": {
       "textSequence": {
@@ -766,7 +775,10 @@
     "continueWithSlack": "Continuer avec Slack",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
-    "refreshPage": "Actualiser la page"
+    "refreshPage": "Actualiser la page",
+    "validation": {
+      "messageRequired": "Le message est obligatoire."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "L'ordre des leçons a bien été mis à jour",
@@ -1259,7 +1271,8 @@
     },
     "errors": {
       "courseDueDateRequired": "La date d'échéance est requise pour créer l'événement du calendrier du cours.",
-      "courseTitleRequired": "Le titre du cours est requis pour créer l’événement du calendrier du cours."
+      "courseTitleRequired": "Le titre du cours est requis pour créer l’événement du calendrier du cours.",
+      "courseDueDateCalendarSyncFailed": "Échec de la synchronisation de l'échéance du cours avec le calendrier."
     }
   },
   "liveTrainingView": {
@@ -2087,7 +2100,8 @@
       "bulkStatusUpdateSuccessfully": "Statuts des cours mis à jour avec succès",
       "bulkStatusUpdateFailed": "Échec de la mise à jour des statuts des cours",
       "bulkStatusUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
-      "noCoursesSelected": "Sélectionnez au moins un cours."
+      "noCoursesSelected": "Sélectionnez au moins un cours.",
+      "deleteCoursesFailed": "Échec de la suppression des cours"
     }
   },
   "adminCategoriesView": {
@@ -2502,6 +2516,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Afficher la clé",
+      "hide": "Masquer la clé",
+      "saveError": "Impossible d’enregistrer les modifications. Veuillez réessayer.",
+      "platformSettings": "Paramètres de la plateforme",
+      "description": "Connectez la plateforme à des services externes. Sélectionnez une intégration pour ajouter ou remplacer ses clés.",
+      "filters": "Filtrer les intégrations",
+      "status": {
+        "all": "Toutes",
+        "configured": "Configurée",
+        "attention": "À vérifier",
+        "notConfigured": "Non configurée",
+        "unknown": "Statut indisponible"
+      },
+      "attention": "{{count}} intégrations nécessitent votre attention :",
+      "showIssues": "Voir les problèmes",
+      "missingKeys": "Configuration manquante : {{keys}}",
+      "close": "Fermer l’éditeur",
+      "cancel": "Annuler",
+      "saveChanges": "Enregistrer les modifications",
+      "empty": "Aucune intégration ne correspond à ce filtre.",
+      "statusError": "Impossible de charger l’état de la configuration.",
+      "retry": "Réessayer",
+      "secretError": "Impossible de charger la clé. Essayez de l’afficher à nouveau.",
+      "legend": "Vert : toutes les clés sont configurées. Orange : certaines clés manquent. Gris pointillé : aucune clé configurée. Le statut indique si la configuration est complète, pas l’état de la connexion.",
+      "categories": {
+        "signIn": "Connexion",
+        "calendar": "Calendrier",
+        "payments": "Paiements",
+        "video": "Vidéo",
+        "ai": "IA",
+        "liveTraining": "Formation en direct",
+        "security": "Sécurité"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Connexion avec Google",
@@ -2769,16 +2818,23 @@
         "course": "Cours introuvable.",
         "category": "Catégorie introuvable.",
         "chapter": "Chapitre introuvable.",
-        "lesson": "Leçon introuvable."
+        "lesson": "Leçon introuvable.",
+        "author": "Auteur du cours introuvable."
       },
       "forbidden": {
         "updateCourse": "Vous n'êtes pas autorisé à modifier ce cours.",
-        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
+        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles.",
+        "deleteCourse": "Vous n'avez pas l'autorisation de supprimer ce cours.",
+        "deleteCourses": "Vous n'avez pas l'autorisation de supprimer ces cours.",
+        "enrollOwnCourse": "Vous ne pouvez pas vous inscrire à votre propre cours.",
+        "enrollGroups": "Vous n'avez pas l'autorisation d'inscrire des groupes à ce cours.",
+        "changeStudentMode": "Vous n'avez pas l'autorisation de modifier le mode d'apprentissage."
       },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
       "create": {
         "courseFailed": "Échec de la création du cours.",
-        "stripeProductFailed": "Échec de la création du produit de paiement du cours."
+        "stripeProductFailed": "Échec de la création du produit de paiement du cours.",
+        "chapterFailed": "Échec de la création du chapitre."
       },
       "lesson": {
         "customTtsReferenceRequired": "Une référence TTS personnalisée est requise pour le mode vocal personnalisé.",
@@ -2789,6 +2845,22 @@
         "optionInsertFailed": "Échec de l'ajout de l'option de quiz.",
         "embedCreateFailed": "Échec de la création de la leçon d'intégration.",
         "signedUrlDownloadFailed": "Échec du téléchargement du fichier à partir de l'URL signée."
+      },
+      "media": {
+        "imageUploadFailed": "Échec du téléversement de l'image du cours.",
+        "updateFailed": "Échec de la mise à jour des médias du cours."
+      },
+      "update": {
+        "courseFailed": "Échec de la mise à jour du cours."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Vous êtes déjà inscrit à ce cours.",
+        "studentsRequired": "Sélectionnez au moins un apprenant à inscrire.",
+        "onlyExistingUsers": "Vous ne pouvez inscrire que des utilisateurs existants.",
+        "studentsAlreadyEnrolled": "Certains des apprenants sélectionnés sont déjà inscrits à ce cours.",
+        "groupsNotFound": "Les groupes sélectionnés sont introuvables.",
+        "groupEnrollmentsNotFound": "Les groupes sélectionnés ne sont pas inscrits à ce cours.",
+        "enrollmentFailed": "Échec de l'inscription au cours."
       }
     },
     "thinking": {
@@ -3945,7 +4017,9 @@
       "lessonIdNotFound": "ID de leçon introuvable",
       "notAuthorizedTitle": "Non autorisé",
       "notAuthorizedDescription": "Vous n'êtes pas autorisé à accéder à cette leçon.",
-      "goBackToCourse": "Revenir au cours"
+      "goBackToCourse": "Revenir au cours",
+      "quizNotCompleted": "Terminez le quiz avant de terminer cette leçon.",
+      "aiMentorDataRequired": "Les résultats de la leçon AI Mentor sont requis pour terminer cette leçon."
     },
     "other": {
       "lesson": "Leçon",
@@ -5708,7 +5782,9 @@
       "sourceCategoryMissing": "Le cours à dupliquer n'a pas de catégorie",
       "targetCourseNotFound": "Le cours dupliqué est introuvable",
       "tenantMissing": "Le locataire de ce cours est introuvable",
-      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué"
+      "foreignSourceAsset": "Ce cours utilise un fichier appartenant à une autre organisation et ne peut donc pas être dupliqué",
+      "jobNotFound": "Tâche de duplication du cours introuvable",
+      "createFailed": "Échec de la création du cours dupliqué"
     }
   },
   "tenantSharing": {
@@ -5934,7 +6010,12 @@
       "liveKitRoomNotAvailable": "La salle LiveKit de cette session n'est pas disponible.",
       "activeSessionUpdateForbidden": "Cette formation en direct ne peut pas être modifiée pendant une session en cours.",
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
-      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
+      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint.",
+      "onlyScheduledCanBeStarted": "Seules les formations en direct planifiées ou terminées peuvent être démarrées.",
+      "sessionAlreadyActive": "Une session de cette formation en direct est déjà en cours.",
+      "onlineSessionRequired": "Cette action n'est disponible que pour les formations en direct en ligne.",
+      "userNotFound": "Utilisateur introuvable.",
+      "sessionAlreadyFinished": "Cette session de formation en direct est déjà terminée."
     }
   },
   "modernCourseView": {
@@ -6243,6 +6324,14 @@
       "summaryAccepted": "Acceptées : {{count}}",
       "summaryRejected": "Refusées : {{count}}"
     },
+    "executionMode": {
+      "title": "Mode de travail",
+      "control": "Mode de travail : {{mode}}",
+      "review": "Vérifier les modifications",
+      "reviewDescription": "Vérifiez le plan et les modifications avant leur application.",
+      "autonomous": "Pilote automatique",
+      "autonomousDescription": "Précise vos besoins, puis approuve et applique automatiquement les modifications."
+    },
     "reasoning": {
       "title": "Niveau de réflexion",
       "low": "Rapide",
@@ -6481,6 +6570,7 @@
       "retryFailedParts": "Réessayer les parties en échec",
       "retryProvider": "Réessayer la connexion",
       "recoveringFailedParts": "Reprise des parties en échec…",
+      "failureAutonomousInput": "Le pilote automatique n’a pas pu prendre une décision nécessaire en toute sécurité. Ajoutez des instructions ou des sources, puis réessayez.",
       "failureGeneration": "Le contenu généré n’a pas passé la validation. Réessayer créera un nouveau contenu pour les parties en échec et conservera le travail terminé.",
       "failureProvider": "Le fournisseur n’a pas pu terminer la demande. Réessayer reprendra le travail inachevé.",
       "failureEvidence": "Les sources disponibles ne couvrent pas les affirmations requises. Vous pouvez ajouter des sources ou préciser la demande.",
@@ -6938,6 +7028,9 @@
     "description": "Organisez des exercices contrôlés et attribuez des formations après les actions à risque.",
     "newCampaign": "Nouvelle campagne",
     "details": "Détails de la campagne",
+    "detailsDescription": "Nommez la campagne, choisissez l'e-mail simulé et la formation attribuée après une action à risque.",
+    "sending": "Envoi",
+    "sendingDescription": "Envoyez immédiatement ou répartissez les messages aléatoirement sur une plage horaire.",
     "audience": "Destinataires",
     "loading": "Chargement…",
     "retry": "Réessayer",
@@ -6949,20 +7042,23 @@
     "name": "Nom de la campagne",
     "scenario": "Scénario",
     "choose": "Choisir une option",
-    "scenarioLanguage": "Les scénarios et pages de simulation du MVP sont en anglais.",
-    "course": "Formation (publiée, gratuite)",
+    "course": "Formation de suivi",
+    "courseHelp": "Attribuée automatiquement à toute personne qui clique sur le lien ou soumet des données. Seules les formations publiées et gratuites sont proposées.",
     "people": "Personnes",
-    "groups": "Groupes / services",
+    "groups": "Groupes",
     "noOptions": "Aucune option éligible disponible.",
     "selectionHelp": "Recherchez et sélectionnez des personnes ou des groupes. Les destinataires en double reçoivent un seul message.",
     "removeSelection": "Retirer {{label}}",
     "schedule": "Répartir les envois aléatoirement sur une période",
-    "start": "Début (heure locale)",
-    "end": "Fin (heure locale)",
+    "start": "Début",
+    "end": "Fin",
     "startTooltip": "Le premier moment où les e-mails de simulation peuvent être envoyés, dans votre heure locale.",
     "endTooltip": "Le dernier moment où les e-mails de simulation peuvent être envoyés, dans votre heure locale. La fenêtre peut durer jusqu'à 30 jours.",
     "review": "Vérifier la campagne",
-    "reviewAudience": "{{people}} destinataires uniques parmi les personnes et {{groups}} groupes sélectionnés. Les membres sont vérifiés au lancement.",
+    "reviewDescription": "Vérifiez les détails avant l'envoi des e-mails.",
+    "audienceCount_one": "{{count}} destinataire",
+    "audienceCount_other": "{{count}} destinataires",
+    "audienceRecheck": "Les membres de plusieurs groupes sont comptés une fois. Les appartenances sont revérifiées au lancement.",
     "authorization": "En lançant la campagne, vous confirmez son autorisation par votre organisation. Les destinataires et la formation ne pourront plus être modifiés.",
     "launch": "Lancer la campagne",
     "edit": "Modifier",
@@ -6971,7 +7067,6 @@
     "invalidCourse": "Choisissez une formation publiée et gratuite.",
     "createSuccess": "Campagne créée.",
     "cancelSuccess": "Messages en attente annulés.",
-    "hall": "Hall of Shame",
     "refresh": "Actualiser",
     "cancel": "Annuler les messages en attente",
     "cancelConfirm": "Les messages en cours d’envoi peuvent encore arriver. Annuler les autres ?",
@@ -6982,14 +7077,14 @@
     "conflict": "Cette demande a déjà été utilisée pour une autre campagne.",
     "metrics": {
       "recipients": "Destinataires",
-      "sent": "Envoyés (acceptés par SMTP)",
+      "sent": "Envoyés",
       "clicked": "Clics",
       "submitted": "Formulaires soumis",
       "riskRate": "Risque"
     },
     "columns": {
       "person": "Personne",
-      "sent": "Envoyés (acceptés par SMTP)",
+      "sent": "Envoyés",
       "clicked": "Clics",
       "submitted": "Formulaires soumis",
       "courseStatus": "État de la formation",
@@ -7013,7 +7108,27 @@
     },
     "PHISHING_API_KEY": "Clé API de phishing",
     "PHISHING_BASE_URL": "URL de base du phishing",
-    "PHISHING_WEBHOOK_SECRET": "Secret du webhook de phishing"
+    "PHISHING_WEBHOOK_SECRET": "Secret du webhook de phishing",
+    "searchPeople": "Rechercher par nom ou e-mail",
+    "filters": {
+      "all": "Toutes les personnes",
+      "atRisk": "À risque uniquement",
+      "allGroups": "Tous les groupes"
+    },
+    "noMatches": "Aucune personne ne correspond aux filtres.",
+    "sortBy": "Trier par {{column}}",
+    "outcomes": {
+      "title": "Résultats",
+      "submitted": "Données soumises",
+      "clickedOnly": "Clic uniquement",
+      "noAction": "Aucune action"
+    },
+    "recentActivity": "Activité récente",
+    "activityEmpty": "Aucun clic ni envoi pour le moment.",
+    "activity": {
+      "clicked": "A cliqué sur le lien",
+      "submitted": "A soumis des données"
+    }
   },
   "reports": {
     "errors": {
@@ -7741,6 +7856,24 @@
       "listingNotFound": "Ce cours de la place de marché est introuvable.",
       "thumbnailNotFound": "Ce cours de la place de marché n'a pas de miniature.",
       "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Les traductions ne peuvent être modifiées que dans une langue différente de la langue de base du cours.",
+      "criterionNotFound": "Critère d’achèvement introuvable.",
+      "guidanceNotFound": "Consigne d'évaluation introuvable.",
+      "blockingErrorNotFound": "Erreur bloquante introuvable.",
+      "configurationNotFound": "La configuration des conditions d’achèvement est introuvable.",
+      "invalidLessonType": "Les conditions d’achèvement ne sont disponibles que pour les leçons AI Mentor."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Les traductions ne peuvent être modifiées que dans une langue différente de la langue de base du cours.",
+      "configurationNotFound": "La configuration de l'AI Mentor est introuvable.",
+      "invalidLessonType": "La configuration de l'AI Mentor n'est disponible que pour les leçons AI Mentor.",
+      "invalidGraph": "La configuration de l'AI Mentor est invalide."
     }
   },
   "assistant": {

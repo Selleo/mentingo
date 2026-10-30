@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { AI_MENTOR_TYPE, COURSE_FEATURE, ENTITY_TYPES, LESSON_TYPES } from "@repo/shared";
 
-import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
-import { MasterCourseService } from "src/courses/master-course.service";
+import { CourseFeaturePolicyService } from "src/courses/authoring/course-feature-policy.service";
+import { MasterCourseService } from "src/courses/master-course/master-course.service";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { getExactLocalizedText } from "src/localization/localization.utils";
 

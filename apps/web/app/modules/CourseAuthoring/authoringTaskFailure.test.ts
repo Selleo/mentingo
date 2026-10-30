@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   attachAuthoringTaskFailures,
+  authoringTaskFailureLabel,
   canRetryAuthoringTask,
   parseAuthoringTaskFailure,
 } from "./authoringTaskFailure";
@@ -29,6 +30,15 @@ const task: AuthoringTask = {
 };
 
 describe("authoring task recovery", () => {
+  it("explains when autopilot needs more information", () => {
+    expect(
+      authoringTaskFailureLabel({
+        ...task,
+        failure: { ...failure, code: "autonomous_input_required", category: "author_decision" },
+      }),
+    ).toBe("failureAutonomousInput");
+  });
+
   it("allows failed-part and provider retries but never service fixes or author answers", () => {
     expect(canRetryAuthoringTask({ ...task, failure })).toBe(true);
     expect(

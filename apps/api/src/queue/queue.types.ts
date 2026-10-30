@@ -19,6 +19,7 @@ export const QUEUE_NAMES = {
   COURSE_DUPLICATION: "course-duplication",
   COURSE_AUTHORING_APPLY: "course-authoring-apply",
   COURSE_AUTHORING_CONTEXT: "course-authoring-context",
+  COURSE_AUTHORING_AUTONOMOUS: "course-authoring-autonomous",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
   AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
@@ -90,6 +91,20 @@ export interface CourseDuplicationJobData {
 export interface CourseAuthoringContextFulfillmentJob {
   tenantId: UUIDType;
   contextRequestId: UUIDType;
+}
+
+/** Durable event data for a fenced, unattended authoring export. */
+export interface CourseAuthoringAutonomousApplyJob {
+  tenantId: UUIDType;
+  eventId: UUIDType;
+  sessionId: UUIDType;
+  courseId: UUIDType;
+  requestId: UUIDType;
+  actorId: UUIDType;
+  controlEpoch: number;
+  proposalIds: UUIDType[];
+  /** True after the producer durably acknowledges the sanitized terminal outcome. */
+  failureReported?: boolean;
 }
 
 export type VideoMetadataProvider = VideoProviderType;

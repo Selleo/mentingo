@@ -16,6 +16,8 @@ import { CourseAuthoringApplicationRepository } from "./course-authoring-applica
 import { CourseAuthoringApplicationService } from "./course-authoring-application.service";
 import { CourseAuthoringApplicationWorker } from "./course-authoring-application.worker";
 import { CourseAuthoringApplyService } from "./course-authoring-apply.service";
+import { CourseAuthoringAutonomousFailureService } from "./course-authoring-autonomous-failure.service";
+import { CourseAuthoringAutonomousWorker } from "./course-authoring-autonomous.worker";
 import { CourseAuthoringContextBridgeRepository } from "./course-authoring-context-bridge.repository";
 import { CourseAuthoringContextBridgeService } from "./course-authoring-context-bridge.service";
 import { CourseAuthoringContextBridgeWorker } from "./course-authoring-context-bridge.worker";
@@ -47,6 +49,8 @@ import { LumaService } from "./luma.service";
     CourseAuthoringApplyService,
     CourseAuthoringApplicationService,
     CourseAuthoringApplicationWorker,
+    CourseAuthoringAutonomousFailureService,
+    CourseAuthoringAutonomousWorker,
     CourseAuthoringStagingCleanupService,
     CourseAuthoringReceiptService,
     CourseAuthoringGateway,

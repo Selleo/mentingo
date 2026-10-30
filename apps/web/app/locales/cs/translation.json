@@ -89,7 +89,12 @@
       "unsupportedVersion": "Tato verze balíčku Mentingo není podporována.",
       "missingAsset": "V balíčku Mentingo chybí požadovaný soubor.",
       "invalidArchive": "Tento ZIP není platným balíčkem Mentingo.",
-      "courseNotSyncable": "Tento kurz byl přidán jako upravitelná kopie a nelze jej synchronizovat. Smažte jej a přidejte znovu z tržiště."
+      "courseNotSyncable": "Tento kurz byl přidán jako upravitelná kopie a nelze jej synchronizovat. Smažte jej a přidejte znovu z tržiště.",
+      "pathNotFound": "Rozvojová cesta k exportu nebyla nalezena.",
+      "accessDenied": "Nemáte oprávnění exportovat tento obsah.",
+      "liveTrainingIncomplete": "Živé školení propojené s tímto kurzem je neúplné a nelze jej exportovat.",
+      "courseNotFound": "Kurz k exportu nebyl nalezen.",
+      "categoryNotFound": "Kategorie kurzu nebyla nalezena."
     }
   },
   "aiConversations": {
@@ -704,7 +709,9 @@
       "somethingWentWrong": "Něco se pokazilo...",
       "notFound": "Zdroj nenalezen",
       "lessonAccessDenied": "Nemáte oprávnění k přístupu k této lekci.",
-      "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund."
+      "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund.",
+      "invalidRequest": "Neplatný požadavek.",
+      "courseAccessDenied": "K tomuto kurzu nemáte přístup."
     },
     "tooltip": {
       "soon": "Již brzy"
@@ -740,7 +747,9 @@
       "aiMentorConfigurationIncomplete": "Konfigurace AI mentora není úplná.",
       "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
       "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
-      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
+      "threadNotFound": "Konverzace nebyla nalezena.",
+      "threadAccessDenied": "K této konverzaci nemáte přístup."
     },
     "loader": {
       "textSequence": {
@@ -773,7 +782,10 @@
     "continueWithSlack": "Pokračujte se Slackem",
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku",
-    "refreshPage": "Obnovit stránku"
+    "refreshPage": "Obnovit stránku",
+    "validation": {
+      "messageRequired": "Zpráva je povinná."
+    }
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Pořadí lekcí bylo úspěšně aktualizováno",
@@ -1264,8 +1276,9 @@
       }
     },
     "errors": {
-      "courseDueDateRequired": "Due date is required to create the course calendar event.",
-      "courseTitleRequired": "Course title is required to create the course calendar event."
+      "courseDueDateRequired": "K vytvoření události kurzu v kalendáři je vyžadován termín.",
+      "courseTitleRequired": "K vytvoření události kurzu v kalendáři je vyžadován název kurzu.",
+      "courseDueDateCalendarSyncFailed": "Termín kurzu se nepodařilo synchronizovat s kalendářem."
     }
   },
   "liveTrainingView": {
@@ -2098,7 +2111,8 @@
       "bulkStatusUpdateSuccessfully": "Stavy kurzů byly úspěšně aktualizovány",
       "bulkStatusUpdateFailed": "Nepodařilo se aktualizovat stavy kurzů",
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
-      "noCoursesSelected": "Vyberte alespoň jeden kurz."
+      "noCoursesSelected": "Vyberte alespoň jeden kurz.",
+      "deleteCoursesFailed": "Kurzy se nepodařilo smazat"
     }
   },
   "adminCategoriesView": {
@@ -2513,6 +2527,41 @@
     }
   },
   "adminEnvsView": {
+    "overview": {
+      "show": "Zobrazit klíč",
+      "hide": "Skrýt klíč",
+      "saveError": "Změny se nepodařilo uložit. Zkuste to znovu.",
+      "platformSettings": "Nastavení platformy",
+      "description": "Propojte platformu s externími službami. Vyberte integraci a doplňte nebo nahraďte její klíče.",
+      "filters": "Filtrovat integrace",
+      "status": {
+        "all": "Všechny",
+        "configured": "Nakonfigurováno",
+        "attention": "Vyžaduje pozornost",
+        "notConfigured": "Nenakonfigurováno",
+        "unknown": "Stav není dostupný"
+      },
+      "attention": "{{count}} integrací vyžaduje pozornost:",
+      "showIssues": "Zobrazit problémy",
+      "missingKeys": "Chybějící konfigurace: {{keys}}",
+      "close": "Zavřít editor",
+      "cancel": "Zrušit",
+      "saveChanges": "Uložit změny",
+      "empty": "Tomuto filtru neodpovídají žádné integrace.",
+      "statusError": "Stav konfigurace se nepodařilo načíst.",
+      "retry": "Zkusit znovu",
+      "secretError": "Klíč se nepodařilo načíst. Zkuste jej znovu zobrazit.",
+      "legend": "Zelená: všechny klíče jsou nastaveny. Oranžová: některé klíče chybí. Přerušovaná šedá: žádné nastavené klíče. Stav vyjadřuje úplnost konfigurace, nikoli funkčnost připojení.",
+      "categories": {
+        "signIn": "Přihlášení",
+        "calendar": "Kalendář",
+        "payments": "Platby",
+        "video": "Video",
+        "ai": "AI",
+        "liveTraining": "Živá školení",
+        "security": "Zabezpečení"
+      }
+    },
     "groups": {
       "googleSignIn": {
         "title": "Přihlášení přes Google",
@@ -2781,11 +2830,17 @@
         "course": "Kurz nenalezen.",
         "category": "Kategorie nenalezena.",
         "chapter": "Kapitola nenalezena.",
-        "lesson": "Lekce nenalezena."
+        "lesson": "Lekce nenalezena.",
+        "author": "Autor kurzu nebyl nalezen."
       },
       "forbidden": {
         "updateCourse": "Nemáte oprávnění aktualizovat tento kurz.",
-        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat."
+        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat.",
+        "deleteCourse": "Nemáte oprávnění tento kurz smazat.",
+        "deleteCourses": "Nemáte oprávnění tyto kurzy smazat.",
+        "enrollOwnCourse": "Do vlastního kurzu se nemůžete zapsat.",
+        "enrollGroups": "Nemáte oprávnění zapisovat skupiny do tohoto kurzu.",
+        "changeStudentMode": "Nemáte oprávnění změnit režim učení."
       },
       "media": {
         "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
@@ -2794,7 +2849,8 @@
       "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
-        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
+        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit.",
+        "chapterFailed": "Kapitolu se nepodařilo vytvořit."
       },
       "lesson": {
         "customTtsReferenceRequired": "Vlastní reference TTS je v vlastním režimu povinná.",
@@ -2805,6 +2861,18 @@
         "optionInsertFailed": "Možnost kvízu se nepodařilo přidat.",
         "embedCreateFailed": "Vloženou lekci se nepodařilo vytvořit.",
         "signedUrlDownloadFailed": "Soubor se nepodařilo stáhnout z podepsané adresy URL."
+      },
+      "update": {
+        "courseFailed": "Kurz se nepodařilo aktualizovat."
+      },
+      "enrollment": {
+        "alreadyEnrolled": "Do tohoto kurzu jste již zapsáni.",
+        "studentsRequired": "Vyberte alespoň jednoho studenta k zápisu.",
+        "onlyExistingUsers": "Zapsat můžete pouze existující uživatele.",
+        "studentsAlreadyEnrolled": "Někteří z vybraných studentů jsou do tohoto kurzu již zapsáni.",
+        "groupsNotFound": "Vybrané skupiny nebyly nalezeny.",
+        "groupEnrollmentsNotFound": "Vybrané skupiny nejsou do tohoto kurzu zapsány.",
+        "enrollmentFailed": "Zápis do kurzu se nezdařil."
       }
     },
     "thinking": {
@@ -4203,7 +4271,9 @@
       "lessonIdNotFound": "ID lekce nebylo nalezeno",
       "notAuthorizedTitle": "Neoprávněný",
       "notAuthorizedDescription": "Nemáte oprávnění k přístupu k této lekci.",
-      "goBackToCourse": "Vraťte se do kurzu"
+      "goBackToCourse": "Vraťte se do kurzu",
+      "quizNotCompleted": "Před dokončením této lekce dokončete kvíz.",
+      "aiMentorDataRequired": "K dokončení této lekce jsou vyžadovány výsledky lekce s AI Mentorem."
     },
     "other": {
       "lesson": "Lekce",
@@ -5282,7 +5352,9 @@
       "sourceCategoryMissing": "Kurz k duplikování nemá kategorii",
       "targetCourseNotFound": "Duplikovaný kurz nebyl nalezen",
       "tenantMissing": "Tenant tohoto kurzu nebyl nalezen",
-      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat"
+      "foreignSourceAsset": "Tento kurz používá soubor jiné organizace, proto jej nelze duplikovat",
+      "jobNotFound": "Úloha duplikace kurzu nebyla nalezena",
+      "createFailed": "Duplikovaný kurz se nepodařilo vytvořit"
     }
   },
   "tenantSharing": {
@@ -6203,7 +6275,12 @@
       "liveKitRoomNotAvailable": "Místnost LiveKit pro tuto relaci není dostupná.",
       "activeSessionUpdateForbidden": "Toto živé školení nelze během probíhající relace měnit.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
-      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení.",
+      "onlyScheduledCanBeStarted": "Spustit lze pouze naplánovaná nebo ukončená živá školení.",
+      "sessionAlreadyActive": "Relace tohoto živého školení již probíhá.",
+      "onlineSessionRequired": "Tato akce je dostupná pouze pro online živá školení.",
+      "userNotFound": "Uživatel nebyl nalezen.",
+      "sessionAlreadyFinished": "Tato relace živého školení již skončila."
     }
   },
   "modernCourseView": {
@@ -6516,6 +6593,14 @@
       "summaryAccepted": "Přijato: {{count}}",
       "summaryRejected": "Odmítnuto: {{count}}"
     },
+    "executionMode": {
+      "title": "Režim práce",
+      "control": "Režim práce: {{mode}}",
+      "review": "Zkontrolovat změny",
+      "reviewDescription": "Před použitím zkontrolujte plán a změny.",
+      "autonomous": "Autopilot",
+      "autonomousDescription": "Upřesní vaše potřeby a poté automaticky schválí a použije změny."
+    },
     "reasoning": {
       "title": "Úroveň uvažování",
       "low": "Rychle",
@@ -6754,6 +6839,7 @@
       "retryFailedParts": "Zopakovat neúspěšné části",
       "retryProvider": "Zopakovat připojení",
       "recoveringFailedParts": "Obnovování neúspěšných částí…",
+      "failureAutonomousInput": "Autopilot nemohl bezpečně učinit potřebné rozhodnutí. Doplňte pokyny nebo zdroje a zkuste to znovu.",
       "failureGeneration": "Vygenerovaný obsah neprošel validací. Opakování vytvoří nový obsah pro neúspěšné části a zachová dokončenou práci.",
       "failureProvider": "Poskytovatel nemohl dokončit požadavek. Opakování obnoví nedokončenou práci.",
       "failureEvidence": "Dostupné zdroje nepokrývají požadovaná tvrzení. Můžete přidat zdroje nebo upřesnit požadavek.",
@@ -7212,6 +7298,9 @@
     "description": "Provádějte řízená cvičení a po rizikovém jednání přiřazujte školení.",
     "newCampaign": "Nová kampaň",
     "details": "Podrobnosti kampaně",
+    "detailsDescription": "Pojmenujte kampaň, vyberte simulovaný e-mail a kurz přiřazený po rizikové akci.",
+    "sending": "Odesílání",
+    "sendingDescription": "Odešlete ihned nebo rozložte zprávy náhodně do časového okna.",
     "audience": "Příjemci",
     "loading": "Načítání…",
     "retry": "Zkusit znovu",
@@ -7223,20 +7312,25 @@
     "name": "Název kampaně",
     "scenario": "Scénář",
     "choose": "Vyberte možnost",
-    "scenarioLanguage": "Scénáře a stránky simulací MVP jsou v angličtině.",
-    "course": "Vzdělávací kurz (zveřejněný, bezplatný)",
+    "course": "Navazující kurz",
+    "courseHelp": "Automaticky se přiřadí každému, kdo klikne na odkaz nebo odešle data. Zobrazují se pouze zveřejněné bezplatné kurzy.",
     "people": "Osoby",
-    "groups": "Skupiny / oddělení",
+    "groups": "Skupiny",
     "noOptions": "Nejsou k dispozici žádné způsobilé možnosti.",
     "selectionHelp": "Vyhledejte a vyberte osoby nebo skupiny. Duplicitní příjemci dostanou jednu zprávu.",
     "removeSelection": "Odebrat {{label}}",
     "schedule": "Rozložit odesílání náhodně do časového okna",
-    "start": "Začátek (místní čas)",
-    "end": "Konec (místní čas)",
+    "start": "Začátek",
+    "end": "Konec",
     "startTooltip": "Nejdřívější okamžik odeslání simulačních e-mailů ve vašem místním čase.",
     "endTooltip": "Nejpozdější okamžik odeslání simulačních e-mailů ve vašem místním čase. Okno může trvat nejvýše 30 dní.",
     "review": "Zkontrolovat kampaň",
-    "reviewAudience": "{{people}} jedinečných příjemců z vybraných osob a {{groups}} skupin. Členství se při spuštění znovu ověří.",
+    "reviewDescription": "Před odesláním zpráv zkontrolujte podrobnosti.",
+    "audienceCount_one": "{{count}} příjemce",
+    "audienceCount_few": "{{count}} příjemci",
+    "audienceCount_many": "{{count}} příjemců",
+    "audienceCount_other": "{{count}} příjemců",
+    "audienceRecheck": "Členové více skupin se počítají jednou. Členství se při spuštění znovu ověří.",
     "authorization": "Spuštěním potvrzujete souhlas organizace s cvičením. Příjemce ani kurz poté nelze změnit.",
     "launch": "Spustit kampaň",
     "edit": "Upravit",
@@ -7245,7 +7339,6 @@
     "invalidCourse": "Vyberte zveřejněný bezplatný kurz.",
     "createSuccess": "Kampaň vytvořena.",
     "cancelSuccess": "Čekající zprávy zrušeny.",
-    "hall": "Hall of Shame",
     "refresh": "Obnovit",
     "cancel": "Zrušit čekající zprávy",
     "cancelConfirm": "Již odesílané zprávy mohou dorazit. Zrušit ostatní?",
@@ -7256,14 +7349,14 @@
     "conflict": "Tento požadavek byl již použit pro jinou kampaň.",
     "metrics": {
       "recipients": "Příjemci",
-      "sent": "Odesláno (přijato SMTP)",
+      "sent": "Odesláno",
       "clicked": "Kliknutí",
       "submitted": "Odeslání formuláře",
       "riskRate": "Riziko"
     },
     "columns": {
       "person": "Osoba",
-      "sent": "Odesláno (přijato SMTP)",
+      "sent": "Odesláno",
       "clicked": "Kliknutí",
       "submitted": "Odeslání formuláře",
       "courseStatus": "Stav kurzu",
@@ -7287,7 +7380,27 @@
     },
     "PHISHING_API_KEY": "API klíč phishingu",
     "PHISHING_BASE_URL": "Základní URL phishingu",
-    "PHISHING_WEBHOOK_SECRET": "Tajný klíč webhooku phishingu"
+    "PHISHING_WEBHOOK_SECRET": "Tajný klíč webhooku phishingu",
+    "searchPeople": "Hledat podle jména nebo e-mailu",
+    "filters": {
+      "all": "Všechny osoby",
+      "atRisk": "Pouze ohrožené",
+      "allGroups": "Všechny skupiny"
+    },
+    "noMatches": "Filtrům neodpovídají žádné osoby.",
+    "sortBy": "Seřadit podle: {{column}}",
+    "outcomes": {
+      "title": "Výsledky",
+      "submitted": "Odeslali data",
+      "clickedOnly": "Pouze klikli",
+      "noAction": "Bez akce"
+    },
+    "recentActivity": "Nedávná aktivita",
+    "activityEmpty": "Zatím žádná kliknutí ani odeslání.",
+    "activity": {
+      "clicked": "Klikl(a) na odkaz",
+      "submitted": "Odeslal(a) data"
+    }
   },
   "reports": {
     "errors": {
@@ -8232,6 +8345,24 @@
       "listingNotFound": "Tento kurz z tržiště nebyl nalezen.",
       "thumbnailNotFound": "Tento kurz z tržiště nemá náhled.",
       "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později."
+    }
+  },
+  "aiJudgeConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Překlady lze upravovat pouze v jiném jazyce, než je základní jazyk kurzu.",
+      "criterionNotFound": "Kritérium dokončení nebylo nalezeno.",
+      "guidanceNotFound": "Pokyn k hodnocení nebyl nalezen.",
+      "blockingErrorNotFound": "Blokující chyba nebyla nalezena.",
+      "configurationNotFound": "Konfigurace podmínek dokončení nebyla nalezena.",
+      "invalidLessonType": "Podmínky dokončení jsou dostupné pouze pro lekce s AI Mentorem."
+    }
+  },
+  "aiMentorConfiguration": {
+    "errors": {
+      "translationRequiresNonBaseLanguage": "Překlady lze upravovat pouze v jiném jazyce, než je základní jazyk kurzu.",
+      "configurationNotFound": "Konfigurace AI Mentora nebyla nalezena.",
+      "invalidLessonType": "Konfigurace AI Mentora je dostupná pouze pro lekce s AI Mentorem.",
+      "invalidGraph": "Konfigurace AI Mentora je neplatná."
     }
   },
   "assistant": {

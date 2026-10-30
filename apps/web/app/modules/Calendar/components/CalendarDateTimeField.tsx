@@ -75,7 +75,7 @@ export function CalendarDateTimeField({
               data-testid={dateButtonTestId}
               aria-label={label}
               className={cn(
-                "w-full justify-start gap-2 border-neutral-300 bg-white font-normal shadow-none",
+                "h-[42px] w-full justify-start gap-2 rounded-lg border-neutral-300 bg-white font-normal shadow-none",
                 {
                   "text-neutral-950": selectedDate,
                   "text-neutral-500": !selectedDate,
