@@ -9,6 +9,8 @@ key stays on the external assistant deployment. Distribute the public key to ins
 trust this assistant. Missing, malformed or non-Ed25519 keys disable transcript ingestion
 without preventing Core startup. Restart Core after configuring or replacing the key.
 
+For Learn, set the SSM parameter `/learn/production/api/editable/EXTERNAL_TRANSCRIPT_SIGNING_PUBLIC_KEY`. The Learn deployment workflow imports it into the API container.
+
 The bot sends these headers without an Authorization header:
 
 - `X-Mentingo-Transcript-Timestamp`: integer Unix seconds.
