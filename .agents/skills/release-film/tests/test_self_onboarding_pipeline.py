@@ -122,6 +122,8 @@ class PipelineTest(unittest.TestCase):
         self.assertIn('Every prerequisite', result)
         self.assertNotIn('list only the pull requests', result)
         self.assertIn('Business specification', result)
+        self.assertIn('self-onboarding.fixture.ts', result)
+        self.assertIn('Reuse seeded courses, groups and people', result)
 
     def test_exact_business_spec_selects_its_complete_feature_video(self):
         selected = self_onboarding.select_spec_domains(self.catalog, 'docs/specs/learning-paths-business-spec.md')

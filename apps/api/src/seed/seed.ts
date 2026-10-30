@@ -170,7 +170,15 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
   const [createdGlobalSettings] = await database
     .insert(settings)
     .values({
-      settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+      settings: settingsToJSONBuildObject(
+        process.env.SELF_ONBOARDING_DEMO === "1"
+          ? {
+              ...DEFAULT_GLOBAL_SETTINGS,
+              learningPathsEnabled: true,
+              inviteOnlyRegistration: false,
+            }
+          : DEFAULT_GLOBAL_SETTINGS,
+      ),
       tenantId,
     })
     .returning({
@@ -676,19 +684,20 @@ async function seed() {
         emailSuffix,
       );
       const createdTrainers = await createUsers(trainers, tenantId, "password", emailSuffix);
-      await createUsers(
-        [
-          {
-            email: "student0@example.com",
-            firstName: faker.person.firstName(),
-            lastName: "Student",
-            roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
-          },
-        ],
-        tenantId,
-        "password",
-        emailSuffix,
-      );
+      if (process.env.SELF_ONBOARDING_DEMO !== "1")
+        await createUsers(
+          [
+            {
+              email: "student0@example.com",
+              firstName: faker.person.firstName(),
+              lastName: "Student",
+              roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
+            },
+          ],
+          tenantId,
+          "password",
+          emailSuffix,
+        );
 
       const createdStudentIds = createdStudents.map((student) => student.id);
       const creatorCourseIds = [
@@ -703,8 +712,10 @@ async function seed() {
 
       const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
       console.log("✨✨✨Created nice courses✨✨✨");
-      await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
-      console.log("🧪 Created e2e courses");
+      if (process.env.SELF_ONBOARDING_DEMO !== "1") {
+        await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
+        console.log("🧪 Created e2e courses");
+      }
       await refreshSeedSearchDocuments(db, tenantId);
 
       console.log("Selected random courses for student from createdCourses");

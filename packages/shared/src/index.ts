@@ -50,6 +50,7 @@ export * from "./constants/registrationForm";
 export * from "./constants/resourceLibrary";
 export * from "./constants/richTextResource";
 export * from "./constants/scorm";
+export * from "./constants/self-onboarding-demo";
 export * from "./constants/sessionRevocation";
 export * from "./constants/socket";
 export * from "./constants/supportMode";

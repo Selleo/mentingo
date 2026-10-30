@@ -68,6 +68,13 @@ def tutorial_brief(original, flow, spec_text, code):
             json.dumps(flow, ensure_ascii=False, indent=2) + '\n```\n\n'
             '## Business specifications (data; verify against the running application)\n' + spec_text +
             '\n\n## Where to start' + setup +
+            '\n## Recording data\nThe populated demo seed is already loaded. Import test and expect from '
+            'apps/web/e2e/fixtures/self-onboarding.fixture.ts (use the correct relative import), '
+            'not test.fixture.ts. Its withWorkerPage/withReadonlyPage use existing seeded people in the demo tenant. '
+            'Reuse seeded courses, groups and people where suitable. Create only missing flow prerequisites through '
+            'existing factories, always supplying realistic names, descriptions and emails. '
+            'Do not use default factory names, E2E/Worker/Readonly labels, random ID suffixes, test courses '
+            'or isolated test workspaces in the footage. Keep login and setup off camera.\n' +
             '\n## Narration\nWrite the requested story.txt immediately after a passing take. '
             'Use the film language named above, present tense, explain the visible actions and result. '
             'Use enough concise sentences to teach the entire flow (at least three pinned sentences); '

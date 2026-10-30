@@ -1,11 +1,15 @@
 import { test as setup } from "@playwright/test";
+import { SELF_ONBOARDING_DEMO_PEOPLE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { login } from "./fixtures/auth.actions";
 import { createFixtureApiClient } from "./utils/api-client";
 import { markAllOnboardingComplete } from "./utils/onboarding";
 
 const ADMIN_PASSWORD = "password";
-const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_EMAIL =
+  process.env.SELF_ONBOARDING_DEMO === "1"
+    ? SELF_ONBOARDING_DEMO_PEOPLE[SYSTEM_ROLE_SLUGS.ADMIN].email
+    : "admin@example.com";
 const apiClient = createFixtureApiClient();
 
 setup("authenticate", async ({ browser }, testInfo) => {
