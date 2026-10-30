@@ -69,7 +69,7 @@ describe("Competencies source snapshots (e2e)", () => {
         .set({ firstName: "Renamed", lastName: "Person" })
         .where(eq(users.id, subject.id));
       expect(await repository.findPeople([subject.id])).toEqual([
-        { id: subject.id, name: "Renamed Person", archived: false },
+        { id: subject.id, name: "Renamed Person", archived: false, avatarReference: null },
       ]);
       expect((await facts.snapshot(subject.id, course.id)).facts).toEqual(original);
       const sameName = await createUserFactory(db).create({
@@ -80,7 +80,7 @@ describe("Competencies source snapshots (e2e)", () => {
       await db.update(users).set({ archived: true }).where(eq(users.id, subject.id));
       expect(await repository.findActorIdentity(subject.id)).toBeNull();
       expect(await repository.findPeople([subject.id])).toEqual([
-        { id: subject.id, name: "Renamed Person", archived: true },
+        { id: subject.id, name: "Renamed Person", archived: true, avatarReference: null },
       ]);
       expect((await facts.snapshot(subject.id, course.id)).facts).toEqual(original);
       await db
