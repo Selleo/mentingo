@@ -89,6 +89,11 @@ def meta(run):
     info = core.load(Path(run) / 'meta.json')
     if (Path(run) / 'checkout').exists():
         info['addon'] = core.addon(info['repo'], Path(run) / 'checkout')
+    if (info or {}).get('recordingMode') == 'self-onboarding':
+        # Worker try/queue commands reload the base add-on in separate processes.
+        # Keep this run's demo profile when rebuilding their environment.
+        info['addon']['harness'].setdefault('env', {}).update(
+            SELF_ONBOARDING_DEMO='1', DEMO_FAILURE_SCREENSHOTS='1')
     return info
 
 

@@ -23,6 +23,25 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def test_worker_try_preserves_demo_environment_when_reloading_base_recipe(self):
+        run = self.root/'run'
+        (run/'checkout').mkdir(parents=True)
+        core.save(run/'meta.json', {'repo': 'Selleo/mentingo', 'recordingMode': 'self-onboarding',
+                                   'addon': {'harness': {'env': {'SELF_ONBOARDING_DEMO': '1'}}}})
+        self.patch(self_onboarding.film.core, 'addon', return_value={'harness': {'env': {'CI': 'true'}}})
+        camera = self.patch(self_onboarding.film.gaps, 'try_scene', return_value={'ok': True})
+        args = SimpleNamespace(run=str(run), gap='browse-paths')
+        self.assertTrue(self_onboarding.film.try_scene(args)['ok'])
+        _, recipe, env, _ = camera.call_args.args
+        self.assertEqual(recipe['env']['SELF_ONBOARDING_DEMO'], '1')
+        self.assertEqual(env['SELF_ONBOARDING_DEMO'], '1')
+        self.assertEqual(env['DEMO_FAILURE_SCREENSHOTS'], '1')
+        self.assertEqual(env['CI'], 'true')
+        # Ordinary release runs retain the base recipe and do not opt into demo seeds.
+        core.save(run/'meta.json', {'repo': 'Selleo/mentingo', 'addon': {}})
+        self.patch(self_onboarding.film.core, 'addon', return_value={'harness': {'env': {'CI': 'true'}}})
+        self.assertNotIn('SELF_ONBOARDING_DEMO', self_onboarding.film.meta(run)['addon']['harness']['env'])
+
     def test_tutorial_accepts_paraphrased_or_absent_proofs_but_keeps_action_validation(self):
         folder = self.root/'capture'
         core.save(folder/'capture.json', {'actions_text': ['0 expects "Saved"'], 'steps': [{}, {}, {}]})
@@ -255,6 +274,7 @@ class LocalizationTest(unittest.TestCase):
         self.assertEqual(result['videos'],2)
         self.camera.assert_called_once()
         self.setup.assert_called_once()
+        self.assertEqual(core.load(self.root/'run/meta.json')['recordingMode'], 'self-onboarding')
         self.assertEqual(self.render.call_count,2)
         references=[call.args[-1]['id'] for call in self.render.call_args_list]
         self.assertEqual(references[0],references[1])

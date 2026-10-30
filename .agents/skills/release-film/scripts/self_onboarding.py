@@ -219,6 +219,7 @@ def generate(args):
                         addon['harness'].setdefault('env', {})['DEMO_FAILURE_SCREENSHOTS'] = '1'
                         addon['harness']['env']['SELF_ONBOARDING_DEMO'] = '1'
                         core.save(run / 'meta.json', {'repo': args.repository, 'tag': commit, 'base': commit,
+                            'recordingMode': 'self-onboarding',
                             'repo_dir': str(Path(args.repo).resolve()), 'run': str(run), 'addon': addon})
                         harness.setup(run, addon['harness'])
                         harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
