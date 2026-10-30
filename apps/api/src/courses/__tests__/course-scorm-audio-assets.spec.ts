@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 
-import { CourseScormAssetsService } from "../course-scorm-assets.service";
+import { CourseScormAssetsService } from "../scorm-export/course-scorm-assets.service";
 
 import type { ScormExportCourseSnapshot } from "@repo/scorm-export-generator";
 

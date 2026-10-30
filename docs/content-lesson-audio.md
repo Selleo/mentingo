@@ -45,8 +45,9 @@ Executed verification:
   saves, reloads and reopens the editor; a learner enrolls, plays with advancing
   `currentTime`, seeks and resumes; authenticated full and byte-range responses
   match the fixture exactly, including content/range headers.
-- API: 50 focused tests passed across 10 suites, covering validation, upload,
-  authorization, delivery, checksums, resource references and archive assets.
+- API: 61 focused tests passed across 11 suites, covering validation, upload,
+  authorization, delivery, checksums, resource references, archive assets and MCP
+  audio-node rendering.
 - Web: 41 focused tests passed across six files.
 - API and web TypeScript checks, touched-file ESLint, and both builds passed.
 

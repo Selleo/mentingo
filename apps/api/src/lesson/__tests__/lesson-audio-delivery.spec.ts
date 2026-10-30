@@ -64,6 +64,9 @@ describe("authorized lesson audio delivery", () => {
     };
     // Supply the audio resource so missing-relation repair is not part of this rendering test.
     Object.assign(service, {
+      hostedVideoStatusService: {
+        findProcessingStatusesInCurrentTenant: jest.fn(async () => new Map()),
+      },
       fileService: {
         getResourcesForEntity: jest.fn(async () => [
           { id, contentType: "audio/mpeg", fileUrl: "signed" },
