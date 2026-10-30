@@ -1,4 +1,5 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -73,6 +74,105 @@ function courseSnapshot(
 
 describe("NativeArchiveAssetsService", () => {
   afterEach(() => jest.restoreAllMocks());
+
+  it("preserves opaque SCORM-package audio instead of applying content-lesson codec restrictions", async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), "native-scorm-audio-test-"));
+    const filePath = path.join(directory, "audio.aac");
+    try {
+      execFileSync("ffmpeg", [
+        "-v",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=duration=0.1",
+        "-c:a",
+        "aac",
+        filePath,
+      ]);
+      const asset = {
+        ...archiveAsset(`${SCORM_DIRECTORY}/audio.aac`),
+        contentType: "audio/aac",
+        byteLength: (await stat(filePath)).size,
+      };
+      const storage = {
+        isConfigured: jest.fn(() => true),
+        deleteFile: jest.fn(),
+        uploadStreamMultipart: jest.fn(async (stream) => {
+          for await (const _chunk of stream) {
+            /* consume */
+          }
+        }),
+      };
+      const archive = {
+        manifest: { assets: [asset] },
+        assetFiles: new Map([[asset.path, filePath]]),
+      } as ParsedNativeArchive;
+      const snapshot = courseSnapshot(null, [
+        { extractedFilesReference: SCORM_DIRECTORY } as SourceSnapshot["scormPackages"][number],
+      ]);
+      await new NativeArchiveAssetsService(
+        storage as never,
+        { archiveResources: jest.fn() } as never,
+      ).stageArchiveAssets(archive, ACTOR, [snapshot]);
+      expect(storage.uploadStreamMultipart).toHaveBeenCalled();
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it.each([false, true])("validates streamed imported audio, corrupt=%s", async (corrupt) => {
+    const directory = await mkdtemp(path.join(tmpdir(), "native-audio-test-"));
+    const filePath = path.join(directory, "audio.wav");
+    try {
+      if (corrupt) await writeFile(filePath, "not audio");
+      else
+        execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "sine=duration=0.1", filePath]);
+      const asset = {
+        ...archiveAsset("course/audio.wav"),
+        contentType: "audio/wav",
+        byteLength: (await stat(filePath)).size,
+      };
+      const storage = {
+        isConfigured: jest.fn(() => true),
+        deleteFile: jest.fn(),
+        uploadStreamMultipart: jest.fn(async (stream) => {
+          for await (const _chunk of stream) {
+            /* consume the real disk stream */
+          }
+        }),
+      };
+      const fileService = { archiveResources: jest.fn(), deleteFile: jest.fn() };
+      const archive = {
+        manifest: { assets: [asset] },
+        assetFiles: new Map([[asset.path, filePath]]),
+      } as ParsedNativeArchive;
+      const snapshot = {
+        ...courseSnapshot(null),
+        lessonContentResources: [{ reference: asset.sourceReference }],
+      } as SourceSnapshot;
+      const operation = new NativeArchiveAssetsService(
+        storage as never,
+        fileService as never,
+      ).stageArchiveAssets(archive, ACTOR, [snapshot]);
+      if (corrupt) {
+        await expect(operation).rejects.toThrow();
+        expect(storage.uploadStreamMultipart).not.toHaveBeenCalled();
+      } else {
+        const staged = await operation;
+        expect(storage.uploadStreamMultipart).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.stringContaining("/files/"),
+          "audio/wav",
+        );
+        expect(staged.snapshots[0].lessonContentResources[0].reference).toContain(
+          "/native-archive/imports/",
+        );
+      }
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 
   it("stages referenced image variants and SCORM files, then cleans up uploaded assets", async () => {
     const storage = {

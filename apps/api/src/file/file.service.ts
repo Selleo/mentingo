@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { createReadStream } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -8,6 +9,8 @@ import {
   Inject,
   BadRequestException,
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -72,6 +75,7 @@ import { ThumbnailService } from "./thumbnail.service";
 import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { validateAudioUpload } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
@@ -219,6 +223,33 @@ export class FileService {
     }
 
     if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
+
+    // Disk-backed lesson audio bypasses both image variants and all video providers.
+    if (file.path) {
+      await validateAudioUpload(file);
+      const extensions: Record<string, string> = {
+        "audio/mpeg": ".mp3",
+        "audio/mp4": ".m4a",
+        "audio/wav": ".wav",
+        "audio/ogg": ".ogg",
+        "audio/webm": ".webm",
+      };
+      const fileKey = prefixTenantStorageKey(
+        `${resource}/${randomUUID()}${extensions[file.mimetype]}`,
+        tenantId,
+      );
+      const stream = createReadStream(file.path);
+      try {
+        await this.s3Service.uploadFile(stream, fileKey, file.mimetype, file.size);
+      } finally {
+        stream.destroy();
+      }
+      return {
+        fileKey,
+        fileUrl: await this.s3Service.getSignedUrl(fileKey),
+        contentType: file.mimetype,
+      };
+    }
 
     const isVideo = file.mimetype.startsWith("video/");
 
@@ -551,6 +582,16 @@ export class FileService {
       return await this.s3Service.getFileStream(this.getFileStorageKey(fileKey, quality), range);
     } catch (error) {
       this.logFileOperationFailure("retrieve", fileKey, error);
+      const storageError = error as { name?: string; $metadata?: { httpStatusCode?: number } };
+      if (
+        storageError?.name === "InvalidRange" ||
+        storageError?.$metadata?.httpStatusCode === 416
+      ) {
+        throw new HttpException(
+          "Range not satisfiable",
+          HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+        );
+      }
       throw new BadRequestException("Failed to retrieve file");
     }
   }
@@ -800,7 +841,7 @@ export class FileService {
   }: UploadResourceParams) {
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
-    const checksum = getChecksum(file);
+    const checksum = await getChecksum(file);
 
     const uploadResult = await this.uploadFile(file, resourceFolder, currentUser?.tenantId);
 

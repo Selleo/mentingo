@@ -22,7 +22,7 @@ Creators can also choose which content-only chapters are available before normal
 - Create, edit, delete, and reorder chapters.
 - Create, edit, delete, and reorder lessons inside chapters.
 - Choose lesson types such as content, quiz, AI mentor, embed, SCORM, and live training where available.
-- Add lesson resources including uploaded files and embedded video or external content.
+- Add lesson resources including uploaded files, inline audio/podcasts, and embedded video or external content.
 - Build quiz lessons with supported question types.
 - Configure AI mentor lessons with mentor setup and preview behavior.
 - Mark eligible content-only chapters as free previews for paid courses or public chapters for free courses.
@@ -39,6 +39,10 @@ Multilingual structure rules protect consistency. Learners in different language
 ## How It Works
 
 Creators open the curriculum tab and work from a chapter-and-lesson tree. Selecting an item opens the relevant form on the side; adding a lesson first asks for the lesson type, then shows the type-specific fields.
+
+For listening-based training, creators upload an audio file into a content lesson using the editor's audio control, file picker, or drag-and-drop. A successful upload becomes an inline player and can sit alongside text, images, video, or other audio blocks. Audio alone is valid lesson content. Saving and reopening the lesson preserves each player; learners with access to the lesson can play, pause, seek, and adjust volume using their browser's controls. Playback does not start automatically. Removing a player removes that occurrence from the lesson rather than deleting a shared file.
+
+Audio uses the existing lesson resources rather than a separate podcast lesson type. Upload progress and failures remain visible in the existing upload queue, and playback errors appear beside the player. Supported containers/codecs and browser limitations are documented in `docs/content-lesson-audio.md`. Audio does not introduce a listening-percentage completion requirement; normal content-lesson completion rules remain in place.
 
 When the selected language is the course base language, creators can change the curriculum structure. In non-base languages, structural controls are locked and the workflow focuses on translation-friendly edits. Mentingo uses this distinction to keep localized courses aligned without blocking content translation.
 

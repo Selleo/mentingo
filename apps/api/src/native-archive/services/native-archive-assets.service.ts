@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, RESOURCE_VISIBILITY } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, isAudioFile, RESOURCE_VISIBILITY } from "@repo/shared";
 import { cloneDeepWith } from "lodash";
 import sharp from "sharp";
 
@@ -23,6 +23,7 @@ import {
   isImageQuality,
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
+import { validateAudioUpload } from "src/file/utils/validate-audio";
 import { S3Service } from "src/s3/s3.service";
 
 import { resolveImportedAssetContentType } from "../native-archive-content-type";
@@ -246,6 +247,7 @@ export class NativeArchiveAssetsService {
         asset,
         targetReference,
         resolveImportedAssetContentType(asset, Boolean(scormDirectory)),
+        !scormDirectory,
       );
       context.referenceMap.set(asset.sourceReference, targetReference);
     }
@@ -425,10 +427,26 @@ export class NativeArchiveAssetsService {
     asset: NativeArchiveAsset,
     targetReference: string,
     contentType: string,
+    validateLessonAudio: boolean,
   ): Promise<void> {
     const filePath = archive.assetFiles.get(asset.path);
 
     if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
+
+    if (
+      validateLessonAudio &&
+      (asset.contentType.startsWith("audio/") ||
+        isAudioFile({ type: asset.contentType, name: asset.sourceReference }))
+    ) {
+      const file = {
+        path: filePath,
+        originalname: path.posix.basename(asset.sourceReference),
+        mimetype: asset.contentType,
+        size: asset.byteLength,
+      } as Express.Multer.File;
+      await validateAudioUpload(file);
+      contentType = file.mimetype;
+    }
 
     if (asset.byteLength === 0) {
       await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, contentType, 0);

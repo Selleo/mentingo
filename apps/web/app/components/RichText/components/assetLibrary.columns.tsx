@@ -8,7 +8,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
-import { AssetTypeIcon, formatAssetSize, getAssetDisplayName } from "./assetLibrary.utils";
+import {
+  AssetTypeIcon,
+  formatAssetSize,
+  getAssetDisplayName,
+  getRichTextResourceTypeFromAsset,
+} from "./assetLibrary.utils";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
@@ -73,7 +78,7 @@ export const getAssetLibraryColumns = ({
       return (
         <div className="flex min-w-0 items-start gap-3">
           <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-neutral-100">
-            <AssetTypeIcon type={asset.type} />
+            <AssetTypeIcon type={asset.type} contentType={asset.contentType} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="flex min-w-0 items-center text-sm font-medium text-neutral-950">
@@ -87,7 +92,11 @@ export const getAssetLibraryColumns = ({
               )}
             </p>
             <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-600">
-              <span>{t(`richText.assetLibrary.types.${asset.type}`)}</span>
+              <span>
+                {getRichTextResourceTypeFromAsset(asset) === "audio"
+                  ? t("richText.audio.label")
+                  : t(`richText.assetLibrary.types.${asset.type}`)}
+              </span>
               <span>{formatDate(new Date(asset.createdAt), "dd.MM.yyyy")}</span>
               {fileSize && <span>{fileSize}</span>}
               <span>{t("richText.assetLibrary.usageCount", { count: asset.usageCount })}</span>

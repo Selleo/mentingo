@@ -277,6 +277,7 @@ const Editor = ({
       {editable && (
         <EditorToolbar
           editor={editor}
+          onAudioUpload={allowFiles && onUpload ? (file) => onUpload(file, editor) : undefined}
           acceptedFileTypes={acceptedFileTypes}
           assetLibrary={assetLibrary}
           showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}

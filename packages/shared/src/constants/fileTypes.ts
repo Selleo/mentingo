@@ -13,6 +13,35 @@ export const SUPPORTED_IMAGE_VARIANT_MIME_TYPES = [
   "image/webp",
 ] as const;
 
+// Containers/codecs are verified server-side; raw AAC is deliberately unsupported.
+export const ALLOWED_AUDIO_FILE_TYPES = [
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/x-mp3",
+  "audio/mp4",
+  "audio/m4a",
+  "audio/x-m4a",
+  "audio/wav",
+  "audio/wave",
+  "audio/x-wav",
+  "audio/vnd.wave",
+  "audio/ogg",
+  "application/ogg",
+  "audio/webm",
+] as const;
+
+export const AUDIO_UPLOAD_MAX_BYTES = 200 * 1024 * 1024;
+
+/** Browser upload classification only, never a substitute for content validation. */
+export const isAudioFile = (file: { type: string; name: string }): boolean => {
+  const mime = file.type.toLowerCase().split(";")[0].trim();
+  if ((ALLOWED_AUDIO_FILE_TYPES as readonly string[]).includes(mime)) return true;
+  return (
+    (!mime || mime === "application/octet-stream") &&
+    /\.(mp3|m4a|wav|ogg|oga|opus|webm)$/i.test(file.name)
+  );
+};
+
 export const ALLOWED_VIDEO_FILE_TYPES = [
   "video/mp4",
   "video/quicktime",

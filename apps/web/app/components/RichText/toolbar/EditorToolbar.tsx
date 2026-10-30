@@ -1,3 +1,4 @@
+import { ENTITY_TYPES } from "@repo/shared";
 import {
   Bold,
   Code,
@@ -25,6 +26,7 @@ import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 import { AssetLibraryDialog, type AssetLibraryConfig } from "../components/AssetLibraryDialog";
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
+import { AudioUploadControl } from "./AudioUploadControl";
 import { FormatType } from "./FormatType";
 import { TableMenu } from "./TableMenu";
 
@@ -33,6 +35,7 @@ import type { LucideIcon } from "lucide-react";
 import type React from "react";
 
 type EditorToolbarProps = {
+  onAudioUpload?: (file: File) => Promise<void>;
   editor: Editor;
   acceptedFileTypes: readonly string[];
   assetLibrary?: AssetLibraryConfig;
@@ -84,6 +87,7 @@ const ToolbarIconButton = ({
 );
 
 const EditorToolbar = ({
+  onAudioUpload,
   editor,
   acceptedFileTypes,
   assetLibrary,
@@ -217,6 +221,9 @@ const EditorToolbar = ({
                 testId={RICH_TEXT_HANDLES.ASSET_LIBRARY_BUTTON}
                 onClick={handleAssetLibraryToggle}
               />
+              {assetLibrary.entityType === ENTITY_TYPES.LESSON && onAudioUpload && (
+                <AudioUploadControl onUpload={onAudioUpload} />
+              )}
             </ToolbarSection>
           )}
         </ToggleGroup>

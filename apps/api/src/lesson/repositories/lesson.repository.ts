@@ -8,6 +8,7 @@ import {
 } from "src/ai/utils/ai-judge-evaluation.sql";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg, type UUIDType } from "src/common";
+import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
@@ -475,6 +476,40 @@ export class LessonRepository {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
+  }
+
+  async getAudioResourceLessons(resourceId: UUIDType, currentUser: CurrentUserType) {
+    const managerScope = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+    return this.db
+      .select({
+        lessonId: lessons.id,
+        authorId: courses.authorId,
+        status: courses.status,
+        isArchived: courses.isArchived,
+        isFreemium: chapters.isFreemium,
+        isEnrolled: sql<boolean>`${studentCourses.id} IS NOT NULL`,
+        isManagerPreview: sql<boolean>`COALESCE(${managerScope ?? sql`false`}, false)`,
+      })
+      .from(resourceEntity)
+      .innerJoin(lessons, eq(lessons.id, resourceEntity.entityId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, currentUser.userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .where(
+        and(
+          eq(resourceEntity.resourceId, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+          eq(courses.tenantId, currentUser.tenantId),
+          eq(lessons.type, LESSON_TYPES.CONTENT),
+        ),
+      );
   }
 
   async getResource(resourceId: UUIDType) {
