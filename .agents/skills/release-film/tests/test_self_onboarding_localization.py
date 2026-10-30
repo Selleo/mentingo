@@ -94,35 +94,57 @@ class LocalizationTest(unittest.TestCase):
         model = self.patch(recording.llm, 'visual', side_effect=[(json.dumps(v), {}) for v in answers])
         return story, model
 
-    def test_tutorial_wording_is_repaired_and_rechecked_without_losing_action_pins(self):
-        claim = {'sentence': 1, 'problem': 'Hidden behavior is not visible', 'fix': 'Open the visible path editor.'}
-        story, model = self.review_fixture([
-            {'complete': True, 'missing': [], 'claims': [claim]},
-            {'complete': True, 'missing': [], 'claims': []}])
-        pins = [s['action'] for s in story['chapters'][0]['sentences']]
-        recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
-        self.assertEqual(story['chapters'][0]['sentences'][0]['text'], claim['fix'])
-        self.assertEqual([s['action'] for s in story['chapters'][0]['sentences']], pins)
-        self.assertEqual(model.call_count, 2)
-        self.assertIn('not a release recap', model.call_args.args[0])
-        self.assertEqual(len(core.load(self.root/'run/review/claim-review.json')['reviews']), 2)
-
-    def test_missing_required_action_blocks_instead_of_rewriting_it_away(self):
-        story, model = self.review_fixture([{'complete': False, 'missing': ['Save was never shown'], 'claims': []}])
+    def test_claim_suggestions_are_advisory_and_never_mutate_a_passing_story(self):
+        result = {'complete': True, 'missing': [], 'claims': [
+            {'sentence': 1, 'problem': 'Order not provable from screenshot', 'fix': 'View the courses.'}]}
+        story, model = self.review_fixture([result])
         before = copy.deepcopy(story)
-        with self.assertRaisesRegex(RuntimeError, 'Save was never shown'):
-            recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
         self.assertEqual(story, before)
+        self.assertEqual(report['status'], 'warnings')
+        self.assertTrue(report['advisory'])
+        model.assert_called_once()
+        self.assertEqual(model.call_args.kwargs['timeout'], 120)
+        self.assertIn('A screenshot need not independently prove a documented rule', model.call_args.args[0])
+        self.assertEqual(core.load(self.root/'run/review'/self.flow['id']/'en/claim-review.json'), report)
+
+    def test_model_coverage_concerns_are_reported_without_discarding_recorded_flow(self):
+        result = {'complete': False, 'missing': ['Save was not visible in review images'], 'claims': []}
+        story, model = self.review_fixture([result])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'warnings')
+        self.assertEqual(report['reviews'][0]['missing'], result['missing'])
         model.assert_called_once()
 
-    def test_persistent_unsupported_claims_stop_after_two_corrections_with_findings_saved(self):
-        result = {'complete': True, 'missing': [], 'claims': [
-            {'sentence': 1, 'problem': 'Outcome not visible', 'fix': 'Open the editor.'}]}
-        story, model = self.review_fixture([result] * 3)
-        with self.assertRaisesRegex(RuntimeError, 'after two wording corrections.*Outcome not visible'):
-            recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
-        self.assertEqual(model.call_count, 3)
-        self.assertEqual(len(core.load(self.root/'run/review/claim-review.json')['reviews']), 3)
+    def test_clean_review_is_recorded_without_another_model_call(self):
+        story, model = self.review_fixture([{'complete': True, 'missing': [], 'claims': []}])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'reviewed')
+        model.assert_called_once()
+
+    def test_unavailable_reviewer_is_explicitly_reported_without_a_model_call(self):
+        story, model = self.review_fixture([])
+        self.patch(recording.llm, 'capabilities', return_value={'review': False})
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'pl'}, story)
+        self.assertEqual(report['status'], 'unavailable')
+        self.assertEqual(report['reviews'], [])
+        model.assert_not_called()
+
+    def test_bad_review_json_or_provider_timeout_cannot_fail_generation(self):
+        import subprocess
+        for response in ('invalid JSON', json.dumps({'complete': True, 'missing': [], 'claims': [
+                {'sentence': 999, 'problem': 'Wrong index', 'fix': 'Suggestion'}]}),
+                subprocess.TimeoutExpired('review', 120)):
+            with self.subTest(response=type(response).__name__):
+                story, model = self.review_fixture([])
+                model.side_effect = response if isinstance(response, Exception) else None
+                model.return_value = (response, {})
+                before = copy.deepcopy(story)
+                report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+                self.assertEqual(report['status'], 'unavailable')
+                self.assertIn('warning', report)
+                self.assertEqual(story, before)
+                model.assert_called_once()
 
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -164,6 +186,15 @@ class LocalizationTest(unittest.TestCase):
             document.write_text('Create and save a path.')
         return recording.cache_capture(self.cache,self.root/'run',source,{'chapters':[self.chapter]},flow,
                                        self.domain,commit,'Selleo/mentingo',checkout)
+
+    def test_advisory_findings_survive_raw_capture_cache_and_restore(self):
+        report = {'advisory': True, 'flowId': self.flow['id'], 'status': 'warnings', 'reviews': []}
+        core.save(self.root/'run/review/claim-review.json', report)
+        reference = self.raw()
+        destination = self.root/'restored'
+        manifest, _ = recording.restore_capture(self.cache, reference, destination)
+        self.assertIn('claim-review.json', manifest['files'])
+        self.assertEqual(core.load(destination/'claim-review.json'), report)
 
     def setup_generator(self):
         self.patch(self_onboarding_catalog,'load_catalog',return_value=self.registry)
