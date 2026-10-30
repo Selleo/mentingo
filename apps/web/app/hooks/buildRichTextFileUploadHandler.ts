@@ -1,20 +1,26 @@
 import {
   ALLOWED_EXCEL_FILE_TYPES,
+  AUDIO_UPLOAD_MAX_BYTES,
+  ENTITY_TYPES,
+  isAudioFile,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   classifyRichTextResourceType,
+  RICH_TEXT_RESOURCE_TYPE,
   type EntityType,
   type EditableResourceVisibility,
 } from "@repo/shared";
 
+import i18n from "i18n";
 import {
   VIDEO_UPLOAD_NODE_STATUS,
   insertVideoUploadPlaceholder,
   updateVideoUploadNodeById,
 } from "~/components/RichText/extensions/utils/videoUploadNode";
+import { AUDIO_ACCEPTED_FILE_TYPES } from "~/components/RichText/utils/audioFileTypes";
 import { buildEntityResourceUrl } from "~/components/RichText/utils/buildEntityResourceUrl";
 import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
 import { RICH_TEXT_RESOURCE_DISPLAY_MODE } from "~/components/RichText/utils/richTextResource.types";
@@ -263,6 +269,7 @@ type VideoUploadArgs = {
 };
 
 type BuildRichTextFileUploadHandlerArgs = {
+  onValidationError?: (message: string) => void;
   entityType: EntityType;
   getVideoSessionForFile: (
     file: File,
@@ -297,6 +304,7 @@ type FileCharacteristics = {
 };
 
 const getFileCharacteristics = (file: File): FileCharacteristics => {
+  const isAudio = isAudioFile(file);
   const isImage = ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type);
   const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
   const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
@@ -312,7 +320,7 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     isPresentation,
     isPdf,
     isDocument,
-    resourceType: classifyRichTextResourceType(file.type),
+    resourceType: isAudio ? RICH_TEXT_RESOURCE_TYPE.AUDIO : classifyRichTextResourceType(file.type),
   };
 };
 
@@ -325,7 +333,13 @@ export const RICH_TEXT_ACCEPTED_FILE_TYPES = [
   ...ALLOWED_PRESENTATION_FILE_TYPES,
 ] as const;
 
+export const RICH_TEXT_LESSON_ACCEPTED_FILE_TYPES = [
+  ...RICH_TEXT_ACCEPTED_FILE_TYPES,
+  ...AUDIO_ACCEPTED_FILE_TYPES,
+] as const;
+
 export const buildRichTextFileUploadHandler = ({
+  onValidationError,
   entityType,
   getVideoSessionForFile,
   uploadVideo,
@@ -343,6 +357,24 @@ export const buildRichTextFileUploadHandler = ({
     insertionPosition?: number,
   ) => {
     if (!file) return;
+
+    const audio = isAudioFile(file);
+    const unsupportedAudio = file.type.startsWith("audio/") && !audio;
+    if (audio || unsupportedAudio) {
+      const invalidType = unsupportedAudio || entityType !== ENTITY_TYPES.LESSON;
+      const oversized = file.size > AUDIO_UPLOAD_MAX_BYTES;
+      if (invalidType || oversized) {
+        const message = i18n.t(
+          invalidType ? "richText.audio.invalidType" : "richText.audio.tooLarge",
+          { maxMB: AUDIO_UPLOAD_MAX_BYTES / 1024 / 1024 },
+        );
+        const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
+        if (queueId)
+          uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, { errorMessage: message });
+        onValidationError?.(message);
+        return;
+      }
+    }
 
     const { isVideo, isPresentation, isPdf, resourceType } = getFileCharacteristics(file);
 

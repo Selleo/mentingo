@@ -24,12 +24,6 @@ import {
   COURSE_LEARNING_STATE_KINDS,
   AI_THREAD_STATUSES,
   ALLOWED_AVATAR_IMAGE_TYPES,
-  ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
   FEATURES,
   PERMISSIONS,
   RESOURCE_VISIBILITY,
@@ -65,7 +59,8 @@ import {
 } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { LessonUploadInterceptor } from "src/file/lesson-upload.interceptor";
+import { LessonUploadFilePipe } from "src/file/lesson-upload.pipe";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -510,7 +505,7 @@ export class LessonController {
 
   @Post("upload-files-to-lesson")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(LessonUploadInterceptor)
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -564,19 +559,7 @@ export class LessonController {
   async uploadFileToLesson(
     @Req() request: McpRequest,
     @CurrentUser() currentUser: CurrentUserType,
-    @UploadedFile(
-      getBaseFileTypePipe(
-        buildFileTypeRegex([
-          ...ALLOWED_PDF_FILE_TYPES,
-          ...ALLOWED_EXCEL_FILE_TYPES,
-          ...ALLOWED_WORD_FILE_TYPES,
-          ...ALLOWED_VIDEO_FILE_TYPES,
-          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-          ...ALLOWED_PRESENTATION_FILE_TYPES,
-        ]),
-        MAX_VIDEO_SIZE,
-      ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
-    )
+    @UploadedFile(LessonUploadFilePipe)
     file: Express.Multer.File,
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,

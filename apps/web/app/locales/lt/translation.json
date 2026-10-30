@@ -5157,6 +5157,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Garso įrašas",
+      "upload": "Įkelti garso įrašą",
+      "drag": "Vilkite garso įrašą",
+      "remove": "Pašalinti garso įrašą",
+      "loading": "Įkeliamas garso įrašas…",
+      "error": "Nepavyko paleisti garso įrašo. Bandykite dar kartą arba naudokite kitą naršyklę.",
+      "unsupported": "Jūsų naršyklė nepalaiko garso atkūrimo.",
+      "invalidType": "Pasirinkite MP3, M4A, WAV, Ogg arba WebM garso failą. Garsas palaikomas tik turinio pamokose.",
+      "tooLarge": "Garso failas negali viršyti {{maxMB}} MB.",
+      "uploadFailed": "Nepavyko įkelti garso įrašo. Bandykite dar kartą."
+    },
     "dropVisibilityDialog": {
       "title": "Pasirinkite išteklių matomumą",
       "description": "Pasirinkite visų {{count}} nutemptų išteklių matomumą.",

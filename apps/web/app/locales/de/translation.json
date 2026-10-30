@@ -5153,6 +5153,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Audio",
+      "upload": "Audio hochladen",
+      "drag": "Audio verschieben",
+      "remove": "Audio entfernen",
+      "loading": "Audio wird geladen…",
+      "error": "Audio konnte nicht abgespielt werden. Versuchen Sie es erneut oder verwenden Sie einen anderen Browser.",
+      "unsupported": "Ihr Browser unterstützt die Audiowiedergabe nicht.",
+      "invalidType": "Wählen Sie eine MP3-, M4A-, WAV-, Ogg- oder WebM-Audiodatei. Audio wird nur in Inhaltslektionen unterstützt.",
+      "tooLarge": "Die Audiodatei darf höchstens {{maxMB}} MB groß sein.",
+      "uploadFailed": "Audio konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    },
     "dropVisibilityDialog": {
       "title": "Sichtbarkeit der Ressourcen wählen",
       "description": "Wählen Sie die Sichtbarkeit für alle {{count}} abgelegten Ressourcen.",

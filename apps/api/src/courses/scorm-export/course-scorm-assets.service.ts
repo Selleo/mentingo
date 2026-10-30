@@ -81,6 +81,20 @@ export class CourseScormAssetsService {
       };
     }
 
+    if (asset.contentType?.startsWith("audio/")) {
+      return {
+        asset,
+        packagePath: asset.packagePath,
+        file: {
+          path: asset.packagePath,
+          streamFactory: async () => {
+            const file = await this.fileService.getFileStream(asset.sourceReference);
+            return file.stream;
+          },
+        },
+      };
+    }
+
     const buffer = await this.fileService.getRawFileBuffer(asset.sourceReference);
 
     if (!buffer) {

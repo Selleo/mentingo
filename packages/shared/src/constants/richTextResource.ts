@@ -9,6 +9,7 @@ import {
 
 export const RICH_TEXT_RESOURCE_TYPE = {
   IMAGE: "image",
+  AUDIO: "audio",
   VIDEO: "video",
   PRESENTATION: "presentation",
   PDF: "pdf",
