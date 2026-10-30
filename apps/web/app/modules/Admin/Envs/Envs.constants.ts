@@ -3,6 +3,7 @@ import {
   BrainCircuit,
   CalendarSync,
   Clapperboard,
+  Milestone,
   Presentation,
   ShieldCheck,
   WalletCards,
@@ -96,6 +97,14 @@ export const SECRET_METADATA = {
     labelKey: "phishing.PHISHING_WEBHOOK_SECRET",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  COMPETENCIES_BASE_URL: {
+    labelKey: "adminEnvsView.form.COMPETENCIES_BASE_URL.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  COMPETENCIES_API_KEY: {
+    labelKey: "adminEnvsView.form.COMPETENCIES_API_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   LUMA_API_KEY: {
     labelKey: "adminEnvsView.form.LUMA_API_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",
@@ -177,6 +186,12 @@ export const ENV_GROUPS = [
     descriptionKey: "adminEnvsView.groups.phishingSimulations.description",
     secretNames: ["PHISHING_API_KEY", "PHISHING_BASE_URL", "PHISHING_WEBHOOK_SECRET"],
   },
+  {
+    id: "competencies",
+    titleKey: "adminEnvsView.groups.competencies.title",
+    descriptionKey: "adminEnvsView.groups.competencies.description",
+    secretNames: ["COMPETENCIES_BASE_URL", "COMPETENCIES_API_KEY"],
+  },
 ] as const satisfies ReadonlyArray<{
   id: string;
   titleKey: string;
@@ -210,4 +225,5 @@ export const ENV_GROUP_PRESENTATION = {
   artificialIntelligence: { icon: BrainCircuit, category: "ai", services: ["openAI", "luma"] },
   liveTraining: { icon: Presentation, category: "liveTraining", services: ["livekit"] },
   phishingSimulations: { icon: ShieldCheck, category: "security", services: ["phishing"] },
+  competencies: { icon: Milestone, category: "learning", services: ["competencies"] },
 } as const;

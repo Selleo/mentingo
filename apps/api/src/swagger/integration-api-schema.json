@@ -141,6 +141,158 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}/plugins/competencies": {
+      "put": {
+        "operationId": "IntegrationController_configureCompetenciesConnection",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigureCompetenciesConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigureCompetenciesConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "get": {
+        "operationId": "IntegrationController_competenciesConnectionStatus",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetenciesConnectionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/learning-facts": {
+      "get": {
+        "operationId": "IntegrationController_getIntegrationLearningFacts",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subjectId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIntegrationLearningFactsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants": {
       "get": {
         "operationId": "IntegrationController_getTenants",
@@ -1968,6 +2120,187 @@
           "data"
         ]
       },
+      "ConfigureCompetenciesConnectionBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "apiKey": {
+            "minLength": 32,
+            "maxLength": 256,
+            "writeOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseUrl",
+          "apiKey"
+        ]
+      },
+      "ConfigureCompetenciesConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CompetenciesConnectionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reachable": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenantId",
+              "reachable",
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIntegrationLearningFactsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "facts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "course",
+                      "type": "string"
+                    },
+                    "resourceId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "learningStateId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "occurredAt": {
+                      "type": "string"
+                    },
+                    "validUntil": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "const": "passed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "failed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "courseId",
+                    "id",
+                    "revision",
+                    "subjectId",
+                    "kind",
+                    "resourceId",
+                    "learningStateId",
+                    "occurredAt",
+                    "validUntil",
+                    "outcome"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "subjectId",
+              "courseId",
+              "revision",
+              "facts"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetTenantsResponse": {
         "type": "object",
         "properties": {
@@ -2215,6 +2548,14 @@
           "name": {
             "anyOf": [
               {
+                "const": "COMPETENCIES_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "COMPETENCIES_BASE_URL",
+                "type": "string"
+              },
+              {
                 "const": "PHISHING_API_KEY",
                 "type": "string"
               },
@@ -2338,6 +2679,14 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "COMPETENCIES_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "COMPETENCIES_BASE_URL",
+                      "type": "string"
+                    },
                     {
                       "const": "PHISHING_API_KEY",
                       "type": "string"

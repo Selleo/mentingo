@@ -119,6 +119,8 @@ export class PhishingRepository {
   }
 
   async countAudience({ userIds, groupIds }: PhishingAudience) {
+    if (!userIds.length && !groupIds.length) return { count: 0 };
+
     const [audience] = await this.db
       .select({ count: countDistinct(users.id) })
       .from(users)
@@ -126,7 +128,10 @@ export class PhishingRepository {
       .where(
         and(
           this.activeUserCondition(),
-          or(inArray(users.id, userIds), inArray(groupUsers.groupId, groupIds)),
+          or(
+            userIds.length ? inArray(users.id, userIds) : undefined,
+            groupIds.length ? inArray(groupUsers.groupId, groupIds) : undefined,
+          ),
         ),
       );
 

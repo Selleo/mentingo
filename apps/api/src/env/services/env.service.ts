@@ -18,6 +18,7 @@ import {
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { resolveVoiceTtsProvider } from "src/env/voice-tts-provider";
 import { UpdateEnvEvent } from "src/events";
+import { toPluginOrigin } from "src/integration/utils/integration-plugin-origin.utils";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { dbAls } from "src/storage/db/db-als.store";
 
@@ -36,26 +37,32 @@ export class EnvService {
   }
 
   async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
-    if (data.some((env) => !ALLOWED_SECRETS.includes(env.name))) {
-      throw new BadRequestException("Secret not supported");
-    }
-
-    await this.encryptAndStoreEnvs(data, actor);
+    return this.persistEnvValues(await this.prepareEnvValues(data), actor);
   }
 
-  /**
-   * Stores secrets that only internal flows may write, such as plugin connections, after the
-   * caller has validated their values. User-facing env endpoints must use `bulkUpsertEnv`.
-   */
   async bulkUpsertInternalEnv(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
     if (data.some((env) => !INTERNAL_SECRETS.includes(env.name))) {
       throw new Error("Secret is not an internal secret");
     }
-
-    await this.encryptAndStoreEnvs(data, actor);
+    await this.persistEnvValues(this.encryptEnvValues(data), actor);
   }
 
-  private async encryptAndStoreEnvs(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
+  async prepareEnvValues(data: BulkUpsertEnvBody): Promise<EncryptedEnvBody[]> {
+    const validatedEnvs: BulkUpsertEnvBody = [];
+    for (const env of data) {
+      if (!ALLOWED_SECRETS.includes(env.name)) {
+        throw new BadRequestException("Secret not supported");
+      }
+      const value =
+        env.name === "COMPETENCIES_BASE_URL" && env.value
+          ? await toPluginOrigin(env.value)
+          : env.value;
+      validatedEnvs.push({ ...env, value });
+    }
+    return this.encryptEnvValues(validatedEnvs);
+  }
+
+  private encryptEnvValues(data: BulkUpsertEnvBody): EncryptedEnvBody[] {
     const processedEnvs: EncryptedEnvBody[] = [];
     for (const env of data) {
       const dek = crypto.randomBytes(32);
@@ -85,7 +92,11 @@ export class EnvService {
       });
     }
 
-    await this.envRepository.bulkUpsertEnv(processedEnvs);
+    return processedEnvs;
+  }
+
+  async persistEnvValues(data: EncryptedEnvBody[], actor?: CurrentUserType) {
+    await this.envRepository.bulkUpsertEnv(data);
 
     if (actor && this.outboxPublisher) {
       const updatedEnvKeys = data.map((env) => env.name);

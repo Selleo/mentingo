@@ -29,7 +29,7 @@ import {
   shouldRequireLearningModeForProgress,
 } from "src/common/utils/lessonLearningAccess";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
-import { QuizCompletedEvent } from "src/events";
+import { LessonProgressChangedEvent, QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { HostedVideoStatusService } from "src/file/hosted-video-status.service";
@@ -531,6 +531,15 @@ export class LessonService {
           false,
           trx,
           null,
+        );
+        await this.outboxPublisher.publishDurable(
+          new LessonProgressChangedEvent({
+            userId,
+            courseId: accessCourseLessonWithDetails.courseId,
+            lessonId,
+            actor: currentUser,
+          }),
+          trx,
         );
       } catch (error) {
         throw new ConflictException("studentLessonView.validation.quizResetFailed");

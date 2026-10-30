@@ -340,7 +340,8 @@ integration("course authoring Core to AI HTTP roundtrip", () => {
       const page = await client.authoring.getEvents({ sessionId, afterSequence: 0, limit: 100 });
       expect(
         page.events.some(
-          (item) => item.type === "autonomous.apply_requested" && item.payload.requestId === requestId,
+          (item) =>
+            item.type === "autonomous.apply_requested" && item.payload.requestId === requestId,
         ),
       ).toBe(true);
       expect(page.events.some((item) => item.type === "question.created")).toBe(false);

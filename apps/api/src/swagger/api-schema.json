@@ -19377,6 +19377,158 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}/plugins/competencies": {
+      "put": {
+        "operationId": "IntegrationController_configureCompetenciesConnection",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigureCompetenciesConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigureCompetenciesConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "get": {
+        "operationId": "IntegrationController_competenciesConnectionStatus",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetenciesConnectionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/learning-facts": {
+      "get": {
+        "operationId": "IntegrationController_getIntegrationLearningFacts",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subjectId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIntegrationLearningFactsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants": {
       "get": {
         "operationId": "IntegrationController_getTenants",
@@ -23200,6 +23352,750 @@
         }
       }
     },
+    "/api/competencies/configuration": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetenciesConfiguration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetenciesConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/summary": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetenciesSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetenciesSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/categories": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyCategories",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyCategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/catalog": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyCatalog",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "const": "none",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "archived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyCatalogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/profiles": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyProfiles",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "competencyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyProfilesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/people": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyPeople",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "readiness",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "no_profile",
+                  "type": "string"
+                },
+                {
+                  "const": "missing",
+                  "type": "string"
+                },
+                {
+                  "const": "expiring",
+                  "type": "string"
+                },
+                {
+                  "const": "met",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "teamOnly",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyPeopleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/matrix": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyMatrix",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamOnly",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyMatrixResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/reviews": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyReviews",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "pending",
+                  "type": "string"
+                },
+                {
+                  "const": "approved",
+                  "type": "string"
+                },
+                {
+                  "const": "rejected",
+                  "type": "string"
+                },
+                {
+                  "const": "revoked",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "competencyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyReviewsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/options": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencyOptions",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencyOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/subjects/{subjectId}": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencySubject",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencySubjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/subjects/{subjectId}/documents": {
+      "get": {
+        "operationId": "CompetenciesController_getCompetencySubjectDocuments",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompetencySubjectDocumentsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/commands": {
+      "post": {
+        "operationId": "CompetenciesController_executeCompetenciesCommand",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteCompetenciesCommandBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteCompetenciesCommandResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/attachments": {
+      "post": {
+        "operationId": "CompetenciesController_uploadCompetenciesAttachment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "subjectId",
+                  "competencyId"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "subjectId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "competencyId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadCompetenciesAttachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competencies/attachments/{id}": {
+      "get": {
+        "operationId": "CompetenciesController_downloadCompetenciesAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/calendar/events": {
       "get": {
         "operationId": "CalendarController_getEvents",
@@ -24536,6 +25432,14 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "competencies.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "competencies.manage",
+                      "type": "string"
+                    },
                     {
                       "const": "phishing.manage",
                       "type": "string"
@@ -167717,6 +168621,187 @@
           "data"
         ]
       },
+      "ConfigureCompetenciesConnectionBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "apiKey": {
+            "minLength": 32,
+            "maxLength": 256,
+            "writeOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseUrl",
+          "apiKey"
+        ]
+      },
+      "ConfigureCompetenciesConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CompetenciesConnectionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reachable": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenantId",
+              "reachable",
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIntegrationLearningFactsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "facts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "course",
+                      "type": "string"
+                    },
+                    "resourceId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "learningStateId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "occurredAt": {
+                      "type": "string"
+                    },
+                    "validUntil": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "const": "passed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "failed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "courseId",
+                    "id",
+                    "revision",
+                    "subjectId",
+                    "kind",
+                    "resourceId",
+                    "learningStateId",
+                    "occurredAt",
+                    "validUntil",
+                    "outcome"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "subjectId",
+              "courseId",
+              "revision",
+              "facts"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetTenantsResponse": {
         "type": "object",
         "properties": {
@@ -167964,6 +169049,14 @@
           "name": {
             "anyOf": [
               {
+                "const": "COMPETENCIES_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "COMPETENCIES_BASE_URL",
+                "type": "string"
+              },
+              {
                 "const": "PHISHING_API_KEY",
                 "type": "string"
               },
@@ -168087,6 +169180,14 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "COMPETENCIES_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "COMPETENCIES_BASE_URL",
+                      "type": "string"
+                    },
                     {
                       "const": "PHISHING_API_KEY",
                       "type": "string"
@@ -182814,6 +183915,3060 @@
             },
             "required": [
               "nonce"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetenciesConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "canManage": {
+                "type": "boolean"
+              },
+              "canPlan": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled",
+              "canManage",
+              "canPlan"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetenciesSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "warningDays": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isVerifier": {
+                "type": "boolean"
+              },
+              "pendingReviewCount": {
+                "type": "integer"
+              },
+              "setup": {
+                "type": "object",
+                "properties": {
+                  "competencies": {
+                    "type": "integer"
+                  },
+                  "profiles": {
+                    "type": "integer"
+                  },
+                  "assignments": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "competencies",
+                  "profiles",
+                  "assignments"
+                ]
+              }
+            },
+            "required": [
+              "warningDays",
+              "isVerifier",
+              "pendingReviewCount",
+              "setup"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyCategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "competencyCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "revision",
+                    "competencyCount"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyCatalogResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "categoryId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          },
+                          "name": {
+                            "minLength": 1,
+                            "maxLength": 200,
+                            "type": "string"
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "minLength": 1,
+                                  "maxLength": 100,
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "anyOf": [
+                                    {
+                                      "const": "course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "document",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "observation",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "description": {
+                                  "minLength": 1,
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "resourceId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "verifierIds": {
+                                  "type": "array",
+                                  "items": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "description"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "conditions"
+                        ]
+                      }
+                    },
+                    "categoryName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profileCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision",
+                    "archived",
+                    "name",
+                    "description",
+                    "categoryId",
+                    "levels",
+                    "categoryName",
+                    "profileCount"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyProfilesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "competencyId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "levelId": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "competencyId",
+                          "levelId"
+                        ]
+                      }
+                    },
+                    "assignedPeopleCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision",
+                    "name",
+                    "description",
+                    "requirements",
+                    "assignedPeopleCount"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyPeopleResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "profileId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profileName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "metCount": {
+                      "type": "integer"
+                    },
+                    "requirementCount": {
+                      "type": "integer"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "const": "no_profile",
+                          "type": "string"
+                        },
+                        {
+                          "const": "missing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "expiring",
+                          "type": "string"
+                        },
+                        {
+                          "const": "met",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "profileId",
+                    "profileName",
+                    "profilePictureUrl",
+                    "metCount",
+                    "requirementCount",
+                    "readiness"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "all": {
+                    "type": "integer"
+                  },
+                  "no_profile": {
+                    "type": "integer"
+                  },
+                  "missing": {
+                    "type": "integer"
+                  },
+                  "expiring": {
+                    "type": "integer"
+                  },
+                  "met": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "all",
+                  "no_profile",
+                  "missing",
+                  "expiring",
+                  "met"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination",
+              "counts"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyMatrixResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "person": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    },
+                    "cells": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "competencyId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "requiredLevelId": {
+                            "type": "string"
+                          },
+                          "currentLevelId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "met": {
+                            "type": "boolean"
+                          },
+                          "expiring": {
+                            "type": "boolean"
+                          },
+                          "metUntil": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "competencyId",
+                          "requiredLevelId",
+                          "currentLevelId",
+                          "met",
+                          "expiring",
+                          "metUntil"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "person",
+                    "cells"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              },
+              "profile": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "competencyId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "levelId": {
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "competencyId",
+                        "levelId"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "revision",
+                  "name",
+                  "description",
+                  "requirements"
+                ]
+              },
+              "competencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "categoryId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          },
+                          "name": {
+                            "minLength": 1,
+                            "maxLength": 200,
+                            "type": "string"
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "minLength": 1,
+                                  "maxLength": 100,
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "anyOf": [
+                                    {
+                                      "const": "course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "document",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "observation",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "description": {
+                                  "minLength": 1,
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "resourceId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "verifierIds": {
+                                  "type": "array",
+                                  "items": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "description"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "conditions"
+                        ]
+                      }
+                    },
+                    "categoryName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision",
+                    "archived",
+                    "name",
+                    "description",
+                    "categoryId",
+                    "levels",
+                    "categoryName"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "data",
+              "pagination",
+              "profile",
+              "competencies"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyReviewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "conditionIds": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "const": "observation",
+                          "type": "string"
+                        },
+                        {
+                          "const": "document",
+                          "type": "string"
+                        },
+                        {
+                          "const": "recognition",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "occurredAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "validUntil": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "note": {
+                      "minLength": 1,
+                      "maxLength": 10000,
+                      "type": "string"
+                    },
+                    "attachmentId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "conditionRevisions": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "pending",
+                          "type": "string"
+                        },
+                        {
+                          "const": "approved",
+                          "type": "string"
+                        },
+                        {
+                          "const": "rejected",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "createdBy": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "reviewedBy": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reviewedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "subjectName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "subjectProfilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "competencyName": {
+                      "type": "string"
+                    },
+                    "conditions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "anyOf": [
+                              {
+                                "const": "course",
+                                "type": "string"
+                              },
+                              {
+                                "const": "document",
+                                "type": "string"
+                              },
+                              {
+                                "const": "observation",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "levelId": {
+                            "type": "string"
+                          },
+                          "levelName": {
+                            "type": "string"
+                          },
+                          "levelNumber": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "description",
+                          "levelId",
+                          "levelName",
+                          "levelNumber"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "requestId",
+                    "subjectId",
+                    "competencyId",
+                    "conditionIds",
+                    "kind",
+                    "occurredAt",
+                    "validUntil",
+                    "note",
+                    "id",
+                    "version",
+                    "conditionRevisions",
+                    "status",
+                    "createdBy",
+                    "reviewedBy",
+                    "reviewedAt",
+                    "reason",
+                    "subjectName",
+                    "subjectProfilePictureUrl",
+                    "competencyName",
+                    "conditions"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "pending": {
+                    "type": "integer"
+                  },
+                  "approved": {
+                    "type": "integer"
+                  },
+                  "rejected": {
+                    "type": "integer"
+                  },
+                  "revoked": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "pending",
+                  "approved",
+                  "rejected",
+                  "revoked"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination",
+              "counts"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencyOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              },
+              "people": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "courses",
+              "people"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencySubjectResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "asOf": {
+                "type": "string"
+              },
+              "warningDays": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "person": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "profile": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "revision": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "requirements": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "competencyId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "levelId": {
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "competencyId",
+                            "levelId"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "revision",
+                      "name",
+                      "description",
+                      "requirements"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "assessment": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "subjectId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "profileId": {
+                        "anyOf": [
+                          {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profileRevision": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "asOf": {
+                        "type": "string"
+                      },
+                      "coverage": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "metCount": {
+                        "type": "integer"
+                      },
+                      "requirementCount": {
+                        "type": "integer"
+                      },
+                      "readiness": {
+                        "anyOf": [
+                          {
+                            "const": "no_profile",
+                            "type": "string"
+                          },
+                          {
+                            "const": "missing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "expiring",
+                            "type": "string"
+                          },
+                          {
+                            "const": "met",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "requirements": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "requirement": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "competencyId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "levelId": {
+                                  "minLength": 1,
+                                  "maxLength": 100,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "competencyId",
+                                "levelId"
+                              ]
+                            },
+                            "met": {
+                              "type": "boolean"
+                            },
+                            "expiring": {
+                              "type": "boolean"
+                            },
+                            "standing": {
+                              "type": "object",
+                              "properties": {
+                                "competencyId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "attainedLevelId": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "attainedLevelName": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "currentLevelId": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "effectiveFrom": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "effectiveUntil": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "expiring": {
+                                  "type": "boolean"
+                                },
+                                "levels": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "levelId": {
+                                        "type": "string"
+                                      },
+                                      "met": {
+                                        "type": "boolean"
+                                      },
+                                      "metUntil": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      },
+                                      "conditions": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "conditionId": {
+                                              "type": "string"
+                                            },
+                                            "met": {
+                                              "type": "boolean"
+                                            },
+                                            "reason": {
+                                              "anyOf": [
+                                                {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "missing",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "pending",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "expired",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "revoked",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "insufficient",
+                                                      "type": "string"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            },
+                                            "evidenceIds": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "effectiveFrom": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            },
+                                            "effectiveUntil": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "conditionId",
+                                            "met",
+                                            "reason",
+                                            "evidenceIds",
+                                            "effectiveFrom",
+                                            "effectiveUntil"
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "levelId",
+                                      "met",
+                                      "metUntil",
+                                      "conditions"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "competencyId",
+                                "attainedLevelId",
+                                "attainedLevelName",
+                                "currentLevelId",
+                                "effectiveFrom",
+                                "effectiveUntil",
+                                "expiring",
+                                "levels"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "requirement",
+                            "met",
+                            "expiring",
+                            "standing"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "subjectId",
+                      "profileId",
+                      "profileRevision",
+                      "asOf",
+                      "coverage",
+                      "metCount",
+                      "requirementCount",
+                      "readiness",
+                      "requirements"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "competencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "categoryId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          },
+                          "name": {
+                            "minLength": 1,
+                            "maxLength": 200,
+                            "type": "string"
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "minLength": 1,
+                                  "maxLength": 100,
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "anyOf": [
+                                    {
+                                      "const": "course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "document",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "observation",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "description": {
+                                  "minLength": 1,
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "resourceId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "verifierIds": {
+                                  "type": "array",
+                                  "items": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "description"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "conditions"
+                        ]
+                      }
+                    },
+                    "categoryName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "revision",
+                    "archived",
+                    "name",
+                    "description",
+                    "categoryId",
+                    "levels",
+                    "categoryName"
+                  ]
+                }
+              },
+              "standings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "attainedLevelId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "attainedLevelName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "currentLevelId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "effectiveFrom": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "effectiveUntil": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "expiring": {
+                      "type": "boolean"
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "levelId": {
+                            "type": "string"
+                          },
+                          "met": {
+                            "type": "boolean"
+                          },
+                          "metUntil": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "conditionId": {
+                                  "type": "string"
+                                },
+                                "met": {
+                                  "type": "boolean"
+                                },
+                                "reason": {
+                                  "anyOf": [
+                                    {
+                                      "anyOf": [
+                                        {
+                                          "const": "missing",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "pending",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "expired",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "revoked",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "insufficient",
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "evidenceIds": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "effectiveFrom": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "effectiveUntil": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "conditionId",
+                                "met",
+                                "reason",
+                                "evidenceIds",
+                                "effectiveFrom",
+                                "effectiveUntil"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "levelId",
+                          "met",
+                          "metUntil",
+                          "conditions"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "competencyId",
+                    "attainedLevelId",
+                    "attainedLevelName",
+                    "currentLevelId",
+                    "effectiveFrom",
+                    "effectiveUntil",
+                    "expiring",
+                    "levels"
+                  ]
+                }
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "conditionIds": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "const": "observation",
+                          "type": "string"
+                        },
+                        {
+                          "const": "document",
+                          "type": "string"
+                        },
+                        {
+                          "const": "recognition",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "occurredAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "validUntil": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "note": {
+                      "minLength": 1,
+                      "maxLength": 10000,
+                      "type": "string"
+                    },
+                    "attachmentId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "conditionRevisions": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "pending",
+                          "type": "string"
+                        },
+                        {
+                          "const": "approved",
+                          "type": "string"
+                        },
+                        {
+                          "const": "rejected",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "createdBy": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "reviewedBy": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reviewedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "requestId",
+                    "subjectId",
+                    "competencyId",
+                    "conditionIds",
+                    "kind",
+                    "occurredAt",
+                    "validUntil",
+                    "note",
+                    "id",
+                    "version",
+                    "conditionRevisions",
+                    "status",
+                    "createdBy",
+                    "reviewedBy",
+                    "reviewedAt",
+                    "reason"
+                  ]
+                }
+              },
+              "overrides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyRevision": {
+                      "type": "integer"
+                    },
+                    "conditionId": {
+                      "type": "string"
+                    },
+                    "conditionRevision": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "met",
+                          "type": "string"
+                        },
+                        {
+                          "const": "automatic",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "comment": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "createdBy": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "isCurrent": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "subjectId",
+                    "competencyId",
+                    "competencyRevision",
+                    "conditionId",
+                    "conditionRevision",
+                    "status",
+                    "comment",
+                    "createdAt",
+                    "createdBy",
+                    "isCurrent"
+                  ]
+                }
+              },
+              "revocations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "conditionIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "revokedAt": {
+                      "type": "string"
+                    },
+                    "revokedBy": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "subjectId",
+                    "competencyId",
+                    "conditionIds",
+                    "reason",
+                    "revokedAt",
+                    "revokedBy"
+                  ]
+                }
+              },
+              "canPlan": {
+                "type": "boolean"
+              },
+              "people": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "asOf",
+              "warningDays",
+              "person",
+              "profile",
+              "assessment",
+              "competencies",
+              "standings",
+              "evidence",
+              "overrides",
+              "revocations",
+              "canPlan",
+              "people"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompetencySubjectDocumentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "subjectId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "competencyId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "conditionIds": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "const": "observation",
+                          "type": "string"
+                        },
+                        {
+                          "const": "document",
+                          "type": "string"
+                        },
+                        {
+                          "const": "recognition",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "occurredAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "validUntil": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "note": {
+                      "minLength": 1,
+                      "maxLength": 10000,
+                      "type": "string"
+                    },
+                    "attachmentId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "conditionRevisions": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "pending",
+                          "type": "string"
+                        },
+                        {
+                          "const": "approved",
+                          "type": "string"
+                        },
+                        {
+                          "const": "rejected",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "createdBy": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "reviewedBy": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reviewedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "requestId",
+                    "subjectId",
+                    "competencyId",
+                    "conditionIds",
+                    "kind",
+                    "occurredAt",
+                    "validUntil",
+                    "note",
+                    "id",
+                    "version",
+                    "conditionRevisions",
+                    "status",
+                    "createdBy",
+                    "reviewedBy",
+                    "reviewedAt",
+                    "reason"
+                  ]
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "pagination"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExecuteCompetenciesCommandBody": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "save_category",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "name": {
+                "minLength": 1,
+                "maxLength": 200,
+                "pattern": "\\S",
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "name"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "delete_category",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "operation",
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "save_competency",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "value": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "description": {
+                    "maxLength": 10000,
+                    "type": "string"
+                  },
+                  "categoryId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "levels": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "type": "string"
+                        },
+                        "name": {
+                          "minLength": 1,
+                          "maxLength": 200,
+                          "type": "string"
+                        },
+                        "conditions": {
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "minLength": 1,
+                                "maxLength": 100,
+                                "type": "string"
+                              },
+                              "kind": {
+                                "anyOf": [
+                                  {
+                                    "const": "course",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "document",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "observation",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "maxLength": 2000,
+                                "type": "string"
+                              },
+                              "resourceId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "verifierIds": {
+                                "type": "array",
+                                "items": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "kind",
+                              "description"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "conditions"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "categoryId",
+                  "levels"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "value"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "delete_competency",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "operation",
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "save_profile",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "value": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "description": {
+                    "maxLength": 10000,
+                    "type": "string"
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "competencyId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "levelId": {
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "competencyId",
+                        "levelId"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "requirements"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "value"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "delete_profile",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "operation",
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "assign_profile",
+                "type": "string"
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "profileId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "subjectId",
+              "profileId"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "submit_evidence",
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "subjectId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "competencyId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "conditionIds": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "const": "observation",
+                        "type": "string"
+                      },
+                      {
+                        "const": "document",
+                        "type": "string"
+                      },
+                      {
+                        "const": "recognition",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "occurredAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "validUntil": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "minLength": 1,
+                    "maxLength": 10000,
+                    "type": "string"
+                  },
+                  "attachmentId": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "subjectId",
+                  "competencyId",
+                  "conditionIds",
+                  "kind",
+                  "occurredAt",
+                  "validUntil",
+                  "note"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "value"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "review_evidence",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "version": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "const": "approved",
+                    "type": "string"
+                  },
+                  {
+                    "const": "rejected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "revoked",
+                    "type": "string"
+                  }
+                ]
+              },
+              "reason": {
+                "minLength": 1,
+                "maxLength": 10000,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "requestId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "id",
+              "subjectId",
+              "version",
+              "decision",
+              "reason",
+              "requestId"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "revoke_confirmation",
+                "type": "string"
+              },
+              "requestId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "competencyId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "conditionIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reason": {
+                "minLength": 1,
+                "maxLength": 10000,
+                "pattern": "\\S",
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "requestId",
+              "subjectId",
+              "competencyId",
+              "revision",
+              "conditionIds",
+              "reason"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "set_condition_override",
+                "type": "string"
+              },
+              "requestId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "subjectId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "competencyId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "conditionId": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "met",
+                    "type": "string"
+                  },
+                  {
+                    "const": "automatic",
+                    "type": "string"
+                  }
+                ]
+              },
+              "comment": {
+                "minLength": 1,
+                "maxLength": 10000,
+                "pattern": "\\S",
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "requestId",
+              "subjectId",
+              "competencyId",
+              "revision",
+              "conditionId",
+              "status",
+              "comment"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "settings",
+                "type": "string"
+              },
+              "warningDays": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "maximum": 3650,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "warningDays"
+            ]
+          }
+        ]
+      },
+      "ExecuteCompetenciesCommandResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UploadCompetenciesAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
             ]
           }
         },

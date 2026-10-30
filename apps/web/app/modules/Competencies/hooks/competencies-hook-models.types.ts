@@ -1,0 +1,23 @@
+import type { useCompetenciesCatalog } from "./useCompetenciesCatalog";
+import type { useCompetenciesDocuments } from "./useCompetenciesDocuments";
+import type { useCompetenciesOverview } from "./useCompetenciesOverview";
+import type { useCompetenciesProfileEditor } from "./useCompetenciesProfileEditor";
+import type { useCompetenciesProfiles } from "./useCompetenciesProfiles";
+import type { useCompetenciesReview } from "./useCompetenciesReview";
+import type { useCompetenciesWorkspace } from "./useCompetenciesWorkspace";
+import type { useCompetencyConditionOverride } from "./useCompetencyConditionOverride";
+import type { useCompetencyEditor } from "./useCompetencyEditor";
+import type { useCompetencyEvidenceForm } from "./useCompetencyEvidenceForm";
+import type { useCompetencySubject } from "./useCompetencySubject";
+
+export type CompetenciesCatalogModel = ReturnType<typeof useCompetenciesCatalog>;
+export type CompetenciesDocumentsModel = ReturnType<typeof useCompetenciesDocuments>;
+export type CompetenciesOverviewModel = ReturnType<typeof useCompetenciesOverview>;
+export type CompetenciesProfileEditorModel = ReturnType<typeof useCompetenciesProfileEditor>;
+export type CompetenciesProfilesModel = ReturnType<typeof useCompetenciesProfiles>;
+export type CompetenciesReviewModel = ReturnType<typeof useCompetenciesReview>;
+export type CompetenciesWorkspaceModel = ReturnType<typeof useCompetenciesWorkspace>;
+export type CompetencyConditionOverrideModel = ReturnType<typeof useCompetencyConditionOverride>;
+export type CompetencyEditorModel = ReturnType<typeof useCompetencyEditor>;
+export type CompetencyEvidenceFormModel = ReturnType<typeof useCompetencyEvidenceForm>;
+export type CompetencySubjectModel = ReturnType<typeof useCompetencySubject>;

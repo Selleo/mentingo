@@ -363,6 +363,34 @@ describe("Phishing campaigns (e2e)", () => {
 
       expect(response.body.data).toEqual({ count: 2 });
     });
+
+    it("counts an audience picked only from people", async () => {
+      const pickedMember = await arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
+      const cookie = await loginAs(await arrangeUser(SYSTEM_ROLE_SLUGS.ADMIN));
+
+      const response = await api()
+        .post("/api/phishing/audience/count")
+        .send({ userIds: [pickedMember.id], groupIds: [] })
+        .set("Cookie", cookie)
+        .expect(201);
+
+      expect(response.body.data).toEqual({ count: 1 });
+    });
+
+    it("counts an audience picked only from groups", async () => {
+      const firstMember = await arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
+      const secondMember = await arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
+      const group = await arrangeGroup("Group-only team", [firstMember.id, secondMember.id]);
+      const cookie = await loginAs(await arrangeUser(SYSTEM_ROLE_SLUGS.ADMIN));
+
+      const response = await api()
+        .post("/api/phishing/audience/count")
+        .send({ userIds: [], groupIds: [group.id] })
+        .set("Cookie", cookie)
+        .expect(201);
+
+      expect(response.body.data).toEqual({ count: 2 });
+    });
   });
 
   describe("campaign creation", () => {

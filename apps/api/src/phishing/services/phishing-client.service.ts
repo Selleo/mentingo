@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -24,6 +25,8 @@ import type { PhishingClient, SignedPhishingRequest } from "../types/phishing.ty
 
 @Injectable()
 export class PhishingClientService {
+  private readonly logger = new Logger(PhishingClientService.name);
+
   constructor(private readonly envService: EnvService) {}
 
   /** Reads a tenant phishing setting, falling back to the process environment. */
@@ -89,8 +92,10 @@ export class PhishingClientService {
 
   private toPhishingHttpException(error: unknown) {
     if (error instanceof ForbiddenException) return error;
-    if (!(error instanceof PhishingApiError))
+    if (!(error instanceof PhishingApiError)) {
+      this.logger.error("Phishing request failed", error instanceof Error ? error.stack : error);
       return new BadGatewayException("phishing.serviceError");
+    }
 
     return match(error.status)
       .with(HttpStatus.NOT_FOUND, () => new NotFoundException("phishing.notFound"))

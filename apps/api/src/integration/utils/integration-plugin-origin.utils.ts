@@ -1,10 +1,11 @@
 import { lookup } from "node:dns/promises";
 import { BlockList, isIP } from "node:net";
 
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, ServiceUnavailableException } from "@nestjs/common";
 import { match } from "ts-pattern";
 
 const LOCAL_HOSTNAMES = ["localhost", "127.0.0.1", "[::1]"];
+const PLUGIN_DNS_TIMEOUT_MS = 5_000;
 
 const NON_PUBLIC_ADDRESSES = createNonPublicAddressBlockList();
 
@@ -104,12 +105,27 @@ async function isPluginHostAllowed(url: URL): Promise<boolean> {
 async function resolveHostAddresses(hostname: string): Promise<string[]> {
   if (isIP(hostname)) return [hostname];
 
+  let deadline: ReturnType<typeof setTimeout> | undefined;
   try {
-    const resolved = await lookup(hostname, { all: true, verbatim: true });
-
-    return resolved.map(({ address }) => address);
-  } catch {
+    return await Promise.race([
+      lookup(hostname, { all: true, verbatim: true }).then((resolved) =>
+        resolved.map(({ address }) => address),
+      ),
+      new Promise<never>((_resolve, reject) => {
+        deadline = setTimeout(
+          () =>
+            reject(
+              new ServiceUnavailableException("integrationApiKey.errors.pluginAddressUnavailable"),
+            ),
+          PLUGIN_DNS_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } catch (error) {
+    if (error instanceof ServiceUnavailableException) throw error;
     return [];
+  } finally {
+    if (deadline !== undefined) clearTimeout(deadline);
   }
 }
 

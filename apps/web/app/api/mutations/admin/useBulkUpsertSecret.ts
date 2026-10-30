@@ -33,6 +33,7 @@ export function useBulkUpsertSecret() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: CONFIGURATION_STATE_QUERY_KEY }),
         queryClient.invalidateQueries(stripeConfiguredQueryOptions()),
+        queryClient.invalidateQueries({ queryKey: ["competencies"] }),
         queryClient.invalidateQueries({ queryKey: ["secrets"] }),
         queryClient.invalidateQueries({ queryKey: ["phishing"] }),
         queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey }),
