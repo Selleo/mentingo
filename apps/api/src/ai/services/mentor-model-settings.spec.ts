@@ -139,6 +139,7 @@ describe("Core Mentor model settings", () => {
         { runWithTenant: async (_id: string, run: () => Promise<void>) => run() } as never,
         {} as never,
         {} as never,
+        {} as never,
       );
       const response = await service["streamCoreMentorChat"]({
         data: { threadId: "thread", content: "Sorry.", abortSignal: abort.signal } as never,
