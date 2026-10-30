@@ -8963,6 +8963,7 @@ export interface ListEmailTemplateEventsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -10010,6 +10011,7 @@ export interface DuplicateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -11050,6 +11052,7 @@ export interface ListEmailTemplatesResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -12096,6 +12099,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -13136,6 +13140,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -14176,6 +14181,7 @@ export interface GetEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -15201,6 +15207,7 @@ export interface CreateEmailTemplateBody {
     | "user_invite"
     | "user_first_login"
     | "user_assigned_to_course"
+    | "user_assigned_to_group"
     | "user_short_inactivity"
     | "user_long_inactivity"
     | "user_finished_chapter"
@@ -16199,6 +16206,7 @@ export interface CreateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -17225,6 +17233,7 @@ export interface UpdateEmailTemplateBody {
         | "user_invite"
         | "user_first_login"
         | "user_assigned_to_course"
+        | "user_assigned_to_group"
         | "user_short_inactivity"
         | "user_long_inactivity"
         | "user_finished_chapter"
@@ -18222,6 +18231,7 @@ export interface UpdateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -19267,6 +19277,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -20314,6 +20325,7 @@ export interface PublishEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -21354,6 +21366,7 @@ export interface ArchiveEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -22398,6 +22411,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -23438,6 +23452,7 @@ export interface RestoreEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -25472,6 +25487,11 @@ export interface ListAutomationsResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -25492,6 +25512,7 @@ export interface ListAutomationsResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -25623,6 +25644,11 @@ export interface ListAutomationsResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -25643,6 +25669,7 @@ export interface ListAutomationsResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -25778,6 +25805,7 @@ export interface ListAutomationEventsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -25940,6 +25968,11 @@ export interface ListBuiltInAutomationTemplatesResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -25960,6 +25993,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -26085,6 +26119,11 @@ export interface SimulateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26105,6 +26144,7 @@ export interface SimulateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -26234,6 +26274,7 @@ export interface SimulateAutomationResponse {
         | "missing_action"
         | "missing_condition_field"
         | "missing_event"
+        | "missing_group"
         | "missing_mapping"
         | "missing_parent"
         | "missing_template"
@@ -26351,6 +26392,11 @@ export interface CreateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26371,6 +26417,7 @@ export interface CreateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -26500,6 +26547,11 @@ export interface CreateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26520,6 +26572,7 @@ export interface CreateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -26651,6 +26704,11 @@ export interface CreateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26671,6 +26729,7 @@ export interface CreateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -26804,6 +26863,11 @@ export interface CreateAutomationFromTemplateResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26824,6 +26888,7 @@ export interface CreateAutomationFromTemplateResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -26955,6 +27020,11 @@ export interface CreateAutomationFromTemplateResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26975,6 +27045,7 @@ export interface CreateAutomationFromTemplateResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -27108,6 +27179,11 @@ export interface GetAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27128,6 +27204,7 @@ export interface GetAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -27259,6 +27336,11 @@ export interface GetAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27279,6 +27361,7 @@ export interface GetAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -27411,6 +27494,11 @@ export interface UpdateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -27431,6 +27519,7 @@ export interface UpdateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -27560,6 +27649,11 @@ export interface UpdateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27580,6 +27674,7 @@ export interface UpdateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -27711,6 +27806,11 @@ export interface UpdateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27731,6 +27831,7 @@ export interface UpdateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -27871,6 +27972,11 @@ export interface DuplicateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27891,6 +27997,7 @@ export interface DuplicateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28022,6 +28129,11 @@ export interface DuplicateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28042,6 +28154,7 @@ export interface DuplicateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28175,6 +28288,11 @@ export interface ApplyAutomationBody {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28195,6 +28313,7 @@ export interface ApplyAutomationBody {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28325,6 +28444,11 @@ export interface ApplyAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28345,6 +28469,7 @@ export interface ApplyAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28476,6 +28601,11 @@ export interface ApplyAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28496,6 +28626,7 @@ export interface ApplyAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28629,6 +28760,11 @@ export interface EnableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28649,6 +28785,7 @@ export interface EnableAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28780,6 +28917,11 @@ export interface EnableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28800,6 +28942,7 @@ export interface EnableAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28933,6 +29076,11 @@ export interface DisableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28953,6 +29101,7 @@ export interface DisableAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -29084,6 +29233,11 @@ export interface DisableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29104,6 +29258,7 @@ export interface DisableAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -29237,6 +29392,11 @@ export interface ArchiveAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -29257,6 +29417,7 @@ export interface ArchiveAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -29388,6 +29549,11 @@ export interface ArchiveAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29408,6 +29574,7 @@ export interface ArchiveAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -29545,6 +29712,7 @@ export interface ListAutomationRunsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -29609,6 +29777,7 @@ export interface GetAutomationRunResponse {
         | "user_invite"
         | "user_first_login"
         | "user_assigned_to_course"
+        | "user_assigned_to_group"
         | "user_short_inactivity"
         | "user_long_inactivity"
         | "user_finished_chapter"

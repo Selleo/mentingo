@@ -17,8 +17,10 @@ import {
   deriveAutomationBranchFieldValues,
   AUTOMATION_STEP_TYPES,
   evaluateAutomationWorkflow,
+  isAutomationGroupConditionField,
   getAutomationWorkflowIssues,
   SUPPORTED_LANGUAGES,
+  type AutomationConditionStep,
   type AutomationEventDefinition,
   type AutomationRecipientSelection,
   type AutomationPlaceholderMappings,
@@ -30,6 +32,7 @@ import {
   type AutomationWorkflowIssue,
   type AutomationPlaceholderValue,
 } from "@repo/shared";
+import { validate as isUuid } from "uuid";
 
 import { EmailService } from "src/common/emails/emails.service";
 import { isJsonValue } from "src/common/utils/isJsonValue";
@@ -116,19 +119,7 @@ export class AutomationValidationAndSimulationService {
 
     for (const step of workflow.steps) {
       if (step.type === AUTOMATION_STEP_TYPES.CONDITION) {
-        const field = event.fields.find((field) => field.key === step.config.field);
-
-        if (
-          !field ||
-          field.type !== AUTOMATION_PLACEHOLDER_TYPES.BOOLEAN ||
-          field.sensitivity === AUTOMATION_FIELD_SENSITIVITIES.ACCOUNT_ACTION_LINK
-        ) {
-          issues.push({
-            code: AUTOMATION_VALIDATION_ISSUE_CODES.INVALID_CONDITION_FIELD,
-            message: "Choose an available Yes/No field from this event.",
-            stepId: step.id,
-          });
-        }
+        issues.push(...(await this.collectConditionReadinessIssues(event, step, tenantId)));
 
         continue;
       }
@@ -150,6 +141,66 @@ export class AutomationValidationAndSimulationService {
     }
 
     return issues;
+  }
+
+  private async collectConditionReadinessIssues(
+    event: AutomationEventDefinition,
+    step: AutomationConditionStep,
+    tenantId?: UUIDType,
+  ): Promise<AutomationWorkflowIssue[]> {
+    if (isAutomationGroupConditionField(event.kind, step.config.field)) {
+      return this.collectGroupConditionReadinessIssues(step, tenantId);
+    }
+
+    const field = event.fields.find((field) => field.key === step.config.field);
+
+    if (
+      field &&
+      field.type === AUTOMATION_PLACEHOLDER_TYPES.BOOLEAN &&
+      field.sensitivity !== AUTOMATION_FIELD_SENSITIVITIES.ACCOUNT_ACTION_LINK &&
+      step.config.equals === undefined
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        code: AUTOMATION_VALIDATION_ISSUE_CODES.INVALID_CONDITION_FIELD,
+        message: "Choose an available Yes/No field from this event.",
+        stepId: step.id,
+      },
+    ];
+  }
+
+  private async collectGroupConditionReadinessIssues(
+    step: AutomationConditionStep,
+    tenantId?: UUIDType,
+  ): Promise<AutomationWorkflowIssue[]> {
+    const groupId = step.config.equals;
+
+    if (!groupId) {
+      return [];
+    }
+
+    const groupExists =
+      isUuid(groupId) &&
+      groupId === groupId.toLowerCase() &&
+      (await this.automationRecipientOptionsRepository.doesAutomationRecipientSelectionExist(
+        { type: AUTOMATION_RECIPIENT_TYPES.GROUP, groupId },
+        tenantId,
+      ));
+
+    if (groupExists) {
+      return [];
+    }
+
+    return [
+      {
+        code: AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_GROUP,
+        message: "Select an available group in this organization.",
+        stepId: step.id,
+      },
+    ];
   }
 
   async assertAutomationReady(
@@ -243,6 +294,13 @@ export class AutomationValidationAndSimulationService {
       return result;
     }
 
+    const groupConditionValue = this.findGroupConditionValue(body.workflow, event);
+
+    if (groupConditionValue && body.sampleValues?.group_id === undefined) {
+      // Preview the Yes branch of the configured group without substituting real member data.
+      fields.group_id = groupConditionValue;
+    }
+
     const evaluation = evaluateAutomationWorkflow(body.workflow, fields);
 
     result.steps = evaluation.steps;
@@ -323,6 +381,14 @@ export class AutomationValidationAndSimulationService {
     }
 
     return findAutomationEventDefinition(trigger.config.eventKind);
+  }
+
+  private findGroupConditionValue(workflow: AutomationWorkflow, event: AutomationEventDefinition) {
+    return workflow.steps.find(
+      (step): step is AutomationConditionStep =>
+        step.type === AUTOMATION_STEP_TYPES.CONDITION &&
+        isAutomationGroupConditionField(event.kind, step.config.field),
+    )?.config.equals;
   }
 
   private async collectEmailRecipientIssues(

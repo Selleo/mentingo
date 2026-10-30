@@ -37,7 +37,7 @@ export type AutomationTriggerConfig = { eventKind?: AutomationEventKind | null }
 export type AutomationDefinitionKind =
   (typeof AUTOMATION_DEFINITION_KINDS)[keyof typeof AUTOMATION_DEFINITION_KINDS];
 
-export type AutomationConditionConfig = { field?: string };
+export type AutomationConditionConfig = { field?: string; equals?: string };
 
 export type AutomationStepConfiguration =
   | ({ name: "condition" } & AutomationConditionConfig)

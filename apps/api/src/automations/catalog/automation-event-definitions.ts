@@ -110,6 +110,27 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
       ],
     },
     {
+      kind: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP,
+      label: "Group assignment",
+      description: "Sent when a user becomes a new member of the selected group.",
+      recipientPolicy:
+        "The user newly assigned to the group, not existing group members or the assigning administrator.",
+      fields: [
+        {
+          key: "group_id",
+          label: "Group ID",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "00000000-0000-4000-8000-000000000001",
+        },
+        {
+          key: "group_name",
+          label: "Group name",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "New managers",
+        },
+      ],
+    },
+    {
       kind: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_COURSE,
       label: "Course assignment",
       description: "Sent when a learner is assigned to a course.",

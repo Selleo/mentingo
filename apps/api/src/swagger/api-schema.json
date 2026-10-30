@@ -68008,6 +68008,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "user_assigned_to_group",
+                      "type": "string"
+                    },
+                    {
                       "const": "user_short_inactivity",
                       "type": "string"
                     },
@@ -72370,6 +72374,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -76672,6 +76680,10 @@
                         },
                         {
                           "const": "user_assigned_to_course",
+                          "type": "string"
+                        },
+                        {
+                          "const": "user_assigned_to_group",
                           "type": "string"
                         },
                         {
@@ -81005,6 +81017,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -85305,6 +85321,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -89611,6 +89631,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -93805,6 +93829,10 @@
                 "type": "string"
               },
               {
+                "const": "user_assigned_to_group",
+                "type": "string"
+              },
+              {
                 "const": "user_short_inactivity",
                 "type": "string"
               },
@@ -97822,6 +97850,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -102021,6 +102053,10 @@
                     "type": "string"
                   },
                   {
+                    "const": "user_assigned_to_group",
+                    "type": "string"
+                  },
+                  {
                     "const": "user_short_inactivity",
                     "type": "string"
                   },
@@ -106003,6 +106039,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -110348,6 +110388,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -114700,6 +114744,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -119000,6 +119048,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -123317,6 +123369,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "user_assigned_to_group",
+                        "type": "string"
+                      },
+                      {
                         "const": "user_short_inactivity",
                         "type": "string"
                       },
@@ -127617,6 +127673,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {
@@ -135851,6 +135911,11 @@
                                     "minLength": 1,
                                     "maxLength": 200,
                                     "type": "string"
+                                  },
+                                  "equals": {
+                                    "minLength": 1,
+                                    "maxLength": 200,
+                                    "type": "string"
                                   }
                                 }
                               }
@@ -135924,6 +135989,10 @@
                                           },
                                           {
                                             "const": "user_assigned_to_course",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "user_assigned_to_group",
                                             "type": "string"
                                           },
                                           {
@@ -136481,6 +136550,11 @@
                                             "minLength": 1,
                                             "maxLength": 200,
                                             "type": "string"
+                                          },
+                                          "equals": {
+                                            "minLength": 1,
+                                            "maxLength": 200,
+                                            "type": "string"
                                           }
                                         }
                                       }
@@ -136554,6 +136628,10 @@
                                                   },
                                                   {
                                                     "const": "user_assigned_to_course",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "user_assigned_to_group",
                                                     "type": "string"
                                                   },
                                                   {
@@ -137161,6 +137239,10 @@
                     },
                     {
                       "const": "user_assigned_to_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_assigned_to_group",
                       "type": "string"
                     },
                     {
@@ -137983,6 +138065,11 @@
                                         "minLength": 1,
                                         "maxLength": 200,
                                         "type": "string"
+                                      },
+                                      "equals": {
+                                        "minLength": 1,
+                                        "maxLength": 200,
+                                        "type": "string"
                                       }
                                     }
                                   }
@@ -138056,6 +138143,10 @@
                                               },
                                               {
                                                 "const": "user_assigned_to_course",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "user_assigned_to_group",
                                                 "type": "string"
                                               },
                                               {
@@ -138595,6 +138686,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -138668,6 +138764,10 @@
                                     },
                                     {
                                       "const": "user_assigned_to_course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "user_assigned_to_group",
                                       "type": "string"
                                     },
                                     {
@@ -139290,6 +139390,10 @@
                           "type": "string"
                         },
                         {
+                          "const": "missing_group",
+                          "type": "string"
+                        },
+                        {
                           "const": "missing_mapping",
                           "type": "string"
                         },
@@ -139775,6 +139879,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -139848,6 +139957,10 @@
                                     },
                                     {
                                       "const": "user_assigned_to_course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "user_assigned_to_group",
                                       "type": "string"
                                     },
                                     {
@@ -140383,6 +140496,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -140456,6 +140574,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -141013,6 +141135,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -141086,6 +141213,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -141651,6 +141782,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -141724,6 +141860,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -142281,6 +142421,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -142354,6 +142499,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -142919,6 +143068,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -142992,6 +143146,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -143549,6 +143707,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -143622,6 +143785,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -144184,6 +144351,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -144257,6 +144429,10 @@
                                     },
                                     {
                                       "const": "user_assigned_to_course",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "user_assigned_to_group",
                                       "type": "string"
                                     },
                                     {
@@ -144788,6 +144964,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -144861,6 +145042,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -145418,6 +145603,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -145491,6 +145681,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -146077,6 +146271,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -146150,6 +146349,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -146707,6 +146910,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -146780,6 +146988,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -147346,6 +147558,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -147419,6 +147636,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -147956,6 +148177,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -148029,6 +148255,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -148586,6 +148816,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -148659,6 +148894,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -149224,6 +149463,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -149297,6 +149541,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -149854,6 +150102,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -149927,6 +150180,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -150492,6 +150749,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -150565,6 +150827,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -151122,6 +151388,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -151195,6 +151466,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -151760,6 +152035,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -151833,6 +152113,10 @@
                                         },
                                         {
                                           "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_group",
                                           "type": "string"
                                         },
                                         {
@@ -152390,6 +152674,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -152463,6 +152752,10 @@
                                                 },
                                                 {
                                                   "const": "user_assigned_to_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_assigned_to_group",
                                                   "type": "string"
                                                 },
                                                 {
@@ -153079,6 +153372,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "user_assigned_to_group",
+                      "type": "string"
+                    },
+                    {
                       "const": "user_short_inactivity",
                       "type": "string"
                     },
@@ -153369,6 +153666,10 @@
                       },
                       {
                         "const": "user_assigned_to_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user_assigned_to_group",
                         "type": "string"
                       },
                       {

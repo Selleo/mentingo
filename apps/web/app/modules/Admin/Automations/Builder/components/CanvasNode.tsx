@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { AUTOMATION_STEP_TYPES } from "@repo/shared";
+import { AUTOMATION_STEP_TYPES, isAutomationGroupConditionField } from "@repo/shared";
 import { ChevronDown, GitBranch, Layers, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,7 @@ import { cn } from "~/lib/utils";
 
 import { AddNodePicker } from "./AddNodePicker";
 import { AutomationNodeIcon } from "./automationIcons";
+import { GroupConditionLabel } from "./GroupConditionLabel";
 
 import type { AutomationStep, AutomationWorkflow } from "@repo/shared";
 
@@ -87,6 +88,7 @@ export function CanvasNode(props: CanvasNodeProps) {
     .sort((left, right) => left.position - right.position);
   const isCondition = node.type === AUTOMATION_STEP_TYPES.CONDITION;
   const isTrigger = node.type === AUTOMATION_STEP_TYPES.TRIGGER;
+  const groupConditionId = getGroupConditionId(node, workflow);
   const { setNodeRef, isOver } = useDroppable({
     id: `canvas-node-${node.id}`,
     data: { parentStepId: node.id },
@@ -132,7 +134,13 @@ export function CanvasNode(props: CanvasNodeProps) {
                 />
               )}
             </span>
-            <span className="min-w-0 flex-1 break-words text-sm font-medium">{labelFor(node)}</span>
+            <span className="min-w-0 flex-1 break-words text-sm font-medium">
+              {groupConditionId ? (
+                <GroupConditionLabel groupId={groupConditionId} fallbackLabel={labelFor(node)} />
+              ) : (
+                labelFor(node)
+              )}
+            </span>
             <Button
               variant="ghost"
               size="icon"
@@ -293,4 +301,16 @@ function BranchAddButton({
       />
     </div>
   );
+}
+
+function getGroupConditionId(node: AutomationStep, workflow: AutomationWorkflow) {
+  if (node.type !== AUTOMATION_STEP_TYPES.CONDITION) return undefined;
+
+  const trigger = workflow.steps.find((step) => step.id === workflow.rootStepId);
+  const eventKind =
+    trigger?.type === AUTOMATION_STEP_TYPES.TRIGGER ? trigger.config.eventKind : null;
+
+  if (!isAutomationGroupConditionField(eventKind, node.config.field)) return undefined;
+
+  return node.config.equals;
 }

@@ -307,6 +307,7 @@
       "password_reminder": "Rappel de configuration du compte",
       "user_invite": "Utilisateur invité sur la plateforme",
       "user_first_login": "Première connexion de l’utilisateur",
+      "user_assigned_to_group": "Utilisateur affecté à un groupe",
       "user_assigned_to_course": "Cours attribué à un apprenant",
       "user_short_inactivity": "Apprenant inactif depuis 14 jours",
       "user_long_inactivity": "Apprenant inactif depuis 30 jours",
@@ -7483,6 +7484,9 @@
     }
   },
   "automationBuilder": {
+    "blocks": {
+      "userAssignedToGroup": "Utilisateur affecté à un groupe"
+    },
     "recipients": {
       "title": "Destinataires",
       "event": "Utilisateurs liés à l’événement",
@@ -7506,6 +7510,7 @@
         "password_reminder": "L’utilisateur qui doit encore créer son mot de passe.",
         "user_invite": "L’utilisateur invité.",
         "user_first_login": "L’utilisateur qui s’est connecté pour la première fois.",
+        "user_assigned_to_group": "L’utilisateur nouvellement affecté au groupe sélectionné, et non tous les membres.",
         "user_assigned_to_course": "Les apprenants affectés au cours.",
         "user_short_inactivity": "Les apprenants ayant une courte période d’inactivité dans le cours.",
         "user_long_inactivity": "Les apprenants ayant une longue période d’inactivité dans le cours.",
@@ -7613,6 +7618,8 @@
       "unavailableVariable": "Indisponible pour ce déclencheur"
     },
     "variables": {
+      "group_id": "Identifiant du groupe",
+      "group_name": "Nom du groupe",
       "userFirstName": "Prénom de l’utilisateur",
       "userLastName": "Nom de l’utilisateur",
       "userEmail": "Adresse e-mail",
@@ -7690,6 +7697,9 @@
       "field": "Choisir une condition",
       "hint": "Si la réponse est Oui, l’automatisation suit le chemin Oui. Sinon, elle suit Non. Un chemin vide se termine sans envoi d’e-mail.",
       "noFields": "Cet événement ne propose aucun champ Oui/Non.",
+      "group": "Groupe",
+      "groupIs": "est {{group}}",
+      "groupHint": "L’automatisation suit le chemin Oui lorsque l’utilisateur a été ajouté au groupe sélectionné. Sinon, elle suit le chemin Non.",
       "yes": "Oui",
       "no": "Non",
       "end": "Fin du chemin",
@@ -7723,6 +7733,7 @@
         "self_parent": "Vérifiez les étapes de l’automatisation et leurs connexions.",
         "unsupported_step_type": "Vérifiez les étapes de l’automatisation et leurs connexions.",
         "missing_trigger": "Choisissez un événement déclencheur.",
+        "missing_group": "Sélectionnez un groupe disponible.",
         "missing_event": "Choisissez un événement déclencheur.",
         "missing_template": "Choisissez un modèle d’e-mail disponible.",
         "invalid_template": "Choisissez un modèle d’e-mail disponible.",

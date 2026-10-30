@@ -16,6 +16,7 @@ The Automations workspace brings workflows, reusable workflow templates, email t
 ## Feature Functions
 
 - Create and manage event-driven email workflows.
+- Welcome newly assigned group members with a personalized email, optionally tailored per group with a group condition.
 - Start from a workflow template or edit a workflow's steps and recipients.
 - Use published built-in or custom email templates for delivery.
 - Enable, disable, and archive workflows as needs change.
@@ -32,6 +33,10 @@ Administrators can maintain timely, relevant communication without sending each 
 
 An administrator opens the Automations workspace, chooses an event, configures the email steps and recipients, then enables the workflow. Mentingo reacts to matching events, prepares recipient-specific content, and records the outcome for review.
 
+To welcome new group members, choose “User assigned to a group”. The trigger fires for every group. To tailor the email to a specific group, add a condition, choose “Group”, and pick the group: the Yes path runs when the user was added to that group, and the No path runs for any other group. The condition matches the group itself, so it keeps working after the group is renamed and for recipients in every language. Add email steps using published templates on the paths you need. Keep the email recipient set to the event recipient: this is the newly assigned user, not the administrator or everyone in the group. Map first name, last name, email, group name, and group ID into the template as needed. Enable the workflow when ready; adding this trigger does not enable any automatic email by default.
+
+Individual assignments, account creation with groups, bulk edits, imports, integration API requests, and MCP-assisted assignments use the same new-membership behavior. Saving unchanged memberships, removing a membership, or changing group details does not send a welcome. Removing and later re-adding a user is a new assignment and can send another welcome. Existing members are not backfilled when the workflow is enabled. Group names use the assigned user’s language with the group’s base-language fallback.
+
 Activity Logs capture changes saved by administrators, including workflow configuration and localized name or description edits. Explicitly saving a draft and publishing/applying it are separate actions. Apply persists current editor changes and publishes them together, recording only the apply event; it does not add a draft-save event. Initial activation can also apply the first draft. Creation from a workflow template identifies that template, and duplication identifies the source workflow. Repeating activation, deactivation, or archiving without a state change creates no additional log.
 
 Simulation entries identify a saved workflow when available and summarize success or validation issues, evaluated steps, and preview counts. Unsaved workflows can also be simulated. Sample values and rendered email content are excluded from simulation logs. Automatic runs and email delivery outcomes remain in the workspace run history.
@@ -43,6 +48,7 @@ Custom templates must remain published while an enabled workflow depends on them
 ## Key Technical Context
 
 - The workspace is at `/admin/automations`; its tabs are gated separately by `AUTOMATION_MANAGE`, `EMAIL_TEMPLATE_MANAGE`, and `AUTOMATION_LOG_READ`.
+- Group membership and its notification snapshot are saved in the same database transaction through the durable outbox. Only rows actually inserted can produce occurrences, including concurrent assignments; failures roll back both records. Groups selected in conditions are validated against the current tenant before applying; simulation previews the Yes path of the selected group.
 - The API separates workflow management, account-action token preparation, email delivery, and run history. Tenant-scoped database access and the email queue carry the work after an event.
 - Magic-link requests retain the requested recipient on the account-action intent; delivery and redemption compare it with the current account email.
 - Email-template lifecycle mutations use a shared lock and dependency check to protect enabled workflows.
@@ -54,4 +60,6 @@ Focused API service regressions cover old and changed email addresses, request-a
 
 Existing web E2E coverage exercises magic-link receipt and sign-in and email-template lifecycle. No dedicated automation workflow browser E2E spec was found in this pass.
 
-Focused automation service and activity-handler tests cover every management action, precise draft differences, source context, repeated lifecycle requests, failed writes, event materialization, and simulation summaries without sample data. These unit tests verify transaction-handle propagation and error propagation; they do not prove rollback against a live database. No new authenticated browser or database E2E check was run.
+Focused automation service and activity-handler tests cover every management action, precise draft differences, source context, repeated lifecycle requests, failed writes, event materialization, and simulation summaries without sample data. These unit tests verify transaction-handle propagation and error propagation; they do not prove rollback against a live database. No new authenticated browser check was run for those management actions.
+
+Group-assignment coverage includes the public event catalog and variables, group-condition Yes/No matching and required group selection, tenant-scoped group readiness, and synthetic simulation of the selected group. A run-creation regression confirms that a delivery is queued only when the group condition matches the assigned group, with identity and group fields preserved. A real template-rendering regression resolves the public variables into personalized subject, HTML, and plain text, including HTML escaping. No authenticated browser or SMTP end-to-end proof is claimed.
