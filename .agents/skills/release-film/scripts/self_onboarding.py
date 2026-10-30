@@ -24,6 +24,7 @@ import film
 import gaps
 import harness
 import self_onboarding_catalog
+import self_onboarding_model
 import self_onboarding_recording as recording
 import self_onboarding_voices as narrators
 import voice as voice_provider
@@ -167,9 +168,13 @@ def generate(args):
         raise ValueError('Recording must run without publishing or storage credentials')
     entries, configured = [], False
     skipped = []
+    quota_reason = None
 
     def skip_flow(domain, flow, stage, error, code=None):
+        nonlocal quota_reason
         reason = recording._hide_tokens(str(error), run)[:1000]
+        if quota_reason is None and self_onboarding_model.quota_exhausted(error):
+            quota_reason = reason
         entry = {'domain': domain['key'], 'flowId': flow['id'], 'stage': stage, 'reason': reason}
         if code:
             entry['language'] = code
@@ -218,6 +223,11 @@ def generate(args):
                 if plan.get('force') and old_capture.get('captureRequestId') != args.workflow_run_id:
                     already_captured = False
                 if changed and not already_captured:
+                    if quota_reason:
+                        skip_flow(domain, flow, 'capture', self_onboarding_model.ModelQuotaError(
+                            'Text model quota exhausted; capture not attempted after: ' + quota_reason))
+                        failed_captures.add(flow['id'])
+                        continue
                     print(f"Self-onboarding [{domain_key}] flow {flow_index}/{len(domain['flows'])}: recording {flow['id']}",
                           file=sys.stderr, flush=True)
                     if not configured:
@@ -264,7 +274,14 @@ def generate(args):
                 current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
                 previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
-                localized_domain, localized_metadata = recording.localize_domain(domain, code, previous.get('localizedMetadata'))
+                try:
+                    localized_domain, localized_metadata = recording.localize_domain(
+                        domain, code, previous.get('localizedMetadata'), allow_model=quota_reason is None)
+                except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                    for flow in domain['flows']:
+                        if flow['id'] not in failed_captures:
+                            skip_flow(domain, flow, 'localization', error, code)
+                    continue
                 flows = {}
                 for flow in domain['flows']:
                     if flow['id'] in failed_captures:
@@ -281,11 +298,15 @@ def generate(args):
                         segment = old['segment']
                     else:
                         try:
+                            if quota_reason and code != 'en':
+                                raise self_onboarding_model.ModelQuotaError(
+                                    'Text model quota exhausted; chapter translation not attempted')
                             if not reference:
                                 raise ValueError('Legacy build has no portable raw capture; explicitly force this domain once before adding or rebuilding a language')
                             previous['needsPublication'] = True
                             print(f"Self-onboarding [{domain_key}/{code}]: rendering {flow['id']}", file=sys.stderr, flush=True)
-                            segment = recording.render_flow(run, flow, domain, code, commit, args.repository, addon, cache, reference)
+                            segment = recording.render_flow(run, flow, domain, code, commit, args.repository, addon, cache,
+                                                            reference, allow_model=quota_reason is None)
                         except (RuntimeError, ValueError, OSError, subprocess.SubprocessError, SystemExit) as error:
                             if isinstance(error, SystemExit) and error.code in (0, 130, 143):
                                 raise
@@ -321,7 +342,8 @@ def generate(args):
         captures['commit'] = commit
         out.mkdir(parents=True, exist_ok=True)
         manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
-                    'workflowRunId': args.workflow_run_id, 'domains': entries, 'complete': not skipped, 'skippedFlows': skipped}
+                    'workflowRunId': args.workflow_run_id, 'domains': entries, 'complete': not skipped, 'skippedFlows': skipped,
+                    'textModelQuota': quota_reason}
         core.save(out / 'manifest.json', manifest)
         if entries:
             state['pendingBundle'] = str(out.relative_to(cache))

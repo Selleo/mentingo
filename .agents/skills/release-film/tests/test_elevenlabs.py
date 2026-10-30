@@ -62,6 +62,14 @@ class ElevenLabs(unittest.TestCase):
         self.assertNotIn('error', result)
         self.assertEqual(request.call_args.args[1]['language_code'], 'en')
 
+    def test_dialogue_boundary_whitespace_keeps_the_same_written_captions(self):
+        self.job['model_id'] = 'eleven_v4_turbo'
+        with mock.patch.object(voice, 'elevenlabs_request', return_value=response_for(' Open the course. ')):
+            [result] = voice.elevenlabs([self.job])
+        self.assertNotIn('error', result)
+        words = montage.words_from_srt((self.root/'voice/subtitles.srt').read_text())
+        self.assertEqual([word[2] for word in words], ['Open', 'the', 'course.'])
+
     def test_missing_key_stops_without_request_or_fallback(self):
         os.environ.pop('ELEVENLABS_API_KEY')
         with mock.patch.object(voice, 'elevenlabs_request') as request, mock.patch.object(voice, 'edge') as fallback:

@@ -7,8 +7,8 @@ captions keep the written text. Three providers:
 - voxcpm: VoxCPM2 (OpenBMB, Apache-2.0) on this machine's GPU, where `film.py voice-setup` installed it: one sentence at
   a time in the narrator's voice (its reference recording in the film's language), each word timed by its share of the
   sentence's syllables;
-- elevenlabs: Eleven v4 Turbo through the dialogue WebSocket, or an explicitly configured legacy TTS model through
-  REST with-timestamps. Character timing becomes word captions; failures never fall back or repeat a paid request.
+- elevenlabs: Eleven v4 Turbo through REST dialogue with-timestamps, or an explicitly configured legacy TTS model
+  through REST speech with-timestamps. Whole-utterance timing becomes word captions; no paid retry or fallback.
 
 Run with the Python that has the engine: voice.py <jobs.json>, jobs = [{"text", "sentences", "out", "engine",
 "language", "voice", "lexicon"}]; voice.py --narrator <narrator.json>: the narrator's reference recordings.
@@ -71,12 +71,12 @@ def elevenlabs_config(addon, code):
                 or not ((0.7 <= value <= 1.2) if name == 'speed' else (0 <= value <= 1)):
             raise ValueError(f'Invalid ElevenLabs {name} setting')
     return {'voice': voice, 'model_id': model, 'voice_settings': dict(settings),
-            'output_format': 'pcm_24000' if dialogue_model(model) else ELEVENLABS_OUTPUT,
+            'output_format': ELEVENLABS_OUTPUT,
             'apply_text_normalization': 'off'}
 
 
 def dialogue_model(model):
-    """Eleven v3/v4 use the dialogue protocol, never the legacy TTS endpoint."""
+    """Eleven v3/v4 use the dialogue endpoint, never the legacy TTS endpoint."""
     return model.startswith(('eleven_v3', 'eleven_v4'))
 
 
@@ -110,7 +110,17 @@ class NoVoiceRedirects(urllib.request.HTTPRedirectHandler):
 
 def elevenlabs_request(voice, payload, api_key):
     """A bounded, single paid request to the fixed provider origin; failures never echo bodies or credentials."""
-    url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={ELEVENLABS_OUTPUT}'
+    if dialogue_model(payload.get('model_id', '')):
+        url = f'https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format={ELEVENLABS_OUTPUT}'
+        settings = payload.get('voice_settings') or {}
+        payload = {'inputs': [{'text': payload['text'], 'voice_id': voice}],
+                   'model_id': payload['model_id'], 'language_code': payload.get('language_code', 'en'),
+                   'apply_text_normalization': 'off', 'seed': SEED,
+                   'settings': {key: settings[source] for source, key in
+                                (('stability', 'stability'), ('speed', 'speed'), ('similarity_boost', 'similarity'))
+                                if source in settings}}
+    else:
+        url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={ELEVENLABS_OUTPUT}'
     request = urllib.request.Request(url, json.dumps(payload).encode('utf-8'),
                                      headers={'Content-Type': 'application/json', 'xi-api-key': api_key}, method='POST')
     try:
@@ -185,22 +195,23 @@ def elevenlabs(jobs):
             # Multilingual v2 does not accept language_code. The written/spoken text already has its language.
             if config['model_id'] != 'eleven_multilingual_v2':
                 payload['language_code'] = job.get('language') or 'en'
-            if dialogue_model(config['model_id']):
-                import elevenlabs_v4
-                pcm, alignment = elevenlabs_v4.synthesize(config['voice'], payload, api_key)
-                # Dialogue may add boundary whitespace; transport checked every requested word before this point.
-                events = aligned_words(alignment, ''.join(alignment['characters']))
-                audio = pcm_to_mp3(pcm)
-            else:
-                answer = elevenlabs_request(config['voice'], payload, api_key)
-                events = aligned_words(answer.get('alignment') or answer.get('normalized_alignment'), spoken)
-                audio_base64 = answer.get('audio_base64')
-                if not isinstance(audio_base64, str):
-                    raise ValueError('ElevenLabs returned no audio')
-                try:
-                    audio = base64.b64decode(audio_base64, validate=True)
-                except (ValueError, binascii.Error):
-                    raise ValueError('ElevenLabs returned invalid audio encoding') from None
+            answer = elevenlabs_request(config['voice'], payload, api_key)
+            alignment = answer.get('alignment') or answer.get('normalized_alignment')
+            aligned_text = spoken
+            if dialogue_model(config['model_id']) and isinstance(alignment, dict):
+                chars = alignment.get('characters')
+                if isinstance(chars, list) and all(isinstance(char, str) for char in chars):
+                    aligned_text = ''.join(chars)
+                    if ' '.join(aligned_text.split()) != ' '.join(spoken.split()):
+                        raise ValueError('ElevenLabs dialogue alignment does not match the requested narration')
+            events = aligned_words(alignment, aligned_text)
+            audio_base64 = answer.get('audio_base64')
+            if not isinstance(audio_base64, str):
+                raise ValueError('ElevenLabs returned no audio')
+            try:
+                audio = base64.b64decode(audio_base64, validate=True)
+            except (ValueError, binascii.Error):
+                raise ValueError('ElevenLabs returned invalid audio encoding') from None
             if not audio:
                 raise ValueError('ElevenLabs returned empty audio')
             differently = []

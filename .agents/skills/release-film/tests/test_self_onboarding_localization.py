@@ -260,7 +260,7 @@ class LocalizationTest(unittest.TestCase):
         self.patch(self_onboarding.core,'sh',side_effect=lambda *a,**kw:SimpleNamespace(stdout=self.commit))
         self.patch(self_onboarding.film,'stop')
         self.camera = self.patch(recording,'capture_flow',side_effect=lambda run,flow,domain,commit,*a:self.raw(flow,commit))
-        def render(run,flow,domain,code,commit,repo,addon,cache,reference):
+        def render(run,flow,domain,code,commit,repo,addon,cache,reference,allow_model=True):
             folder = Path(cache)/'segments'/code/flow['id']/reference['id']
             folder.mkdir(parents=True,exist_ok=True)
             video = folder/'demo.mp4'
@@ -268,7 +268,9 @@ class LocalizationTest(unittest.TestCase):
             return {'path':str(video.relative_to(cache)),'sha256':recording.digest(video),
                 'title':'Utwórz ścieżkę' if code=='pl' else 'Create a path','captureId':reference['id'],'language':code}
         self.render = self.patch(recording,'render_flow',side_effect=render)
-        def localize(domain,code,previous=None):
+        def localize(domain,code,previous=None,allow_model=True):
+            if code != 'en' and not allow_model:
+                raise self_onboarding.self_onboarding_model.ModelQuotaError('Text model quota exhausted')
             result=copy.deepcopy(domain)
             if code=='pl':
                 result.update(title='Ścieżki rozwoju',description='Twórz i przypisuj ścieżki.')
@@ -347,13 +349,76 @@ class LocalizationTest(unittest.TestCase):
         self.render.assert_not_called()
         self.assemble.assert_not_called()
 
+    def test_model_quota_stops_new_workers_but_renders_available_english_captures(self):
+        self.domain['flows'] += [dict(copy.deepcopy(self.flow), id=name) for name in ('second-flow', 'third-flow')]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        def capture(run, flow, domain, commit, *args):
+            if flow['id'] == 'second-flow':
+                raise RuntimeError("You've hit your session limit · resets 5:10pm (UTC)")
+            return self.raw(flow, commit)
+        self.camera.side_effect = capture
+        result = self.generate()
+        self.assertEqual(self.camera.call_count, 2)  # Never launch the third worker.
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(self.render.call_count, 1)
+        self.assertEqual(self.render.call_args.args[3], 'en')
+        self.assertFalse(self.render.call_args.kwargs['allow_model'])
+        manifest = core.load(result['manifest'])
+        self.assertIn('session limit', manifest['textModelQuota'])
+        self.assertEqual(manifest['domains'][0]['language'], 'en')
+        self.assertTrue(any(s['stage'] == 'localization' and s['language'] == 'pl' for s in result['skippedFlows']))
+
+    def test_metadata_localization_failure_does_not_discard_generated_english_video(self):
+        self.setup_generator()
+        def metadata(domain, code, previous=None, allow_model=True):
+            if code == 'pl':
+                raise RuntimeError('Polish model unavailable')
+            return copy.deepcopy(domain), {'language': code}
+        self.patch(recording, 'localize_domain', side_effect=metadata)
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'localization')
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.assertEqual(core.load(result['manifest'])['domains'][0]['language'], 'en')
+
+    def test_quota_error_from_localization_keeps_its_provider_reason(self):
+        self.patch(recording.llm, 'complete', return_value=('', {
+            'provider': 'agent', 'fallback': "You've hit your session limit · resets 5:10pm (UTC)"}))
+        with self.assertRaisesRegex(self_onboarding.self_onboarding_model.ModelQuotaError, 'resets 5:10pm'):
+            recording.localize_domain(self.domain, 'pl')
+
+    def test_known_quota_blocks_uncached_translation_without_calling_model(self):
+        model = self.patch(recording.llm, 'complete')
+        with self.assertRaises(self_onboarding.self_onboarding_model.ModelQuotaError):
+            recording.localize_domain(self.domain, 'pl', allow_model=False)
+        english, _ = recording.localize_domain(self.domain, 'en', allow_model=False)
+        self.assertEqual(english['title'], self.domain['title'])
+        model.assert_not_called()
+
+    def test_known_quota_also_disables_opted_in_advisory_review(self):
+        story, model = self.review_fixture([])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story, allow_model=False)
+        self.assertEqual(report['status'], 'disabled')
+        model.assert_not_called()
+
+    def test_cached_polish_metadata_can_be_reused_after_quota_exhaustion(self):
+        source = {name: self.domain[name] for name in ('title', 'description')}
+        previous = {'sourceFingerprint': recording.hashlib.sha256(json.dumps(source, sort_keys=True).encode()).hexdigest(),
+                    'language': 'pl', 'title': 'Ścieżki rozwoju', 'description': 'Rozwijaj umiejętności.'}
+        model = self.patch(recording.llm, 'complete')
+        domain, metadata = recording.localize_domain(self.domain, 'pl', previous, allow_model=False)
+        self.assertEqual(domain['title'], previous['title'])
+        self.assertEqual(metadata, previous)
+        model.assert_not_called()
+
     def test_failed_language_render_does_not_discard_the_other_language(self):
         self.setup_generator()
         successful_render = self.render.side_effect
-        def render(*args):
+        def render(*args, **kwargs):
             if args[3] == 'pl':
                 raise SystemExit('Narration provider failed')
-            return successful_render(*args)
+            return successful_render(*args, **kwargs)
         self.render.side_effect = render
         result = self.generate()
         self.assertEqual(result['videos'], 1)
@@ -478,9 +543,9 @@ class LocalizationTest(unittest.TestCase):
         choose = self.setup_voice_pool()
         rendered_voices = []
         render = self.render.side_effect
-        def observe(*args):
+        def observe(*args, **kwargs):
             rendered_voices.append(os.environ['ELEVENLABS_VOICE_ID'])
-            return render(*args)
+            return render(*args, **kwargs)
         self.render.side_effect = observe
         before = os.environ.get('ELEVENLABS_VOICE_ID')
         self.generate(); self.published()
@@ -556,7 +621,7 @@ class LocalizationTest(unittest.TestCase):
                 'sentences':sentences}),{'provider':'cli'}
         self.patch(recording.llm,'complete',side_effect=translate)
         self.patch(recording.editor,'chapter_problems',return_value=[])
-        verified=self.patch(recording,'verify_story',side_effect=lambda run,flow,data,story:core.save(Path(run)/'sources.json',data))
+        verified=self.patch(recording,'verify_story',side_effect=lambda run,flow,data,story,allow_model=True:core.save(Path(run)/'sources.json',data))
         def narrate(run,story,addon,root=None):
             folder=Path(root)/'c1'; folder.mkdir(parents=True,exist_ok=True)
             text=' '.join(s['text'] for s in story['chapters'][0]['sentences'])

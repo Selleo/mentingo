@@ -69,9 +69,11 @@ Future versions retain the same narrator while its ID remains in the pool.
 An incomplete or duplicate pool fails before model work. The workflow no longer
 uses the single `ELEVENLABS_VOICE_ID` variable; local single-voice builds remain compatible.
 Optional `ELEVENLABS_MODEL_ID` defaults to `eleven_v4_turbo`. Narration uses its actual
-Text-to-Dialogue WebSocket endpoint and aligned PCM audio; it does not pass a v4 model
-to the legacy REST endpoint. The pinned transport dependency runs in a dedicated
-CI Python venv. Registration-only jobs use no environment or provider credentials.
+[Text-to-Dialogue with timestamps](https://elevenlabs.io/docs/api-reference/text-to-dialogue/convert-with-timestamps)
+endpoint, returning one MP3 and whole-utterance character timing in a single response.
+Offline narration does not stitch WebSocket chunk timing and does not use the legacy
+TTS endpoint for v4. Requests do not automatically retry paid synthesis or fall back
+to another voice/model. Registration-only jobs use no environment or provider credentials.
 
 Fresh test state needs no S3 or Helpdesk/Bunny/OpenAI publishing credentials. The
 workflow skips private production-cache restore/checkpoint and publication. After
@@ -214,8 +216,10 @@ node --test scripts/self-onboarding-publish/publisher.test.mjs
 ```
 
 Unit tests use fake provider transports and real temporary Git histories, including
-v4 streaming/alignment and one-capture/two-language generation. A small
+whole-utterance v4 dialogue timing, quota circuit breaking and one-capture/two-language generation. A small
 FFmpeg fixture verifies assembly/chapter timing; it is test evidence, never a product
 tutorial. Live Claude/ElevenLabs recording, private-store access, deployed Helpdesk
 publication, Bunny processing and playback require the configured hosted workflow.
-They have not been executed by this implementation.
+The latest transport and quota fixes have only been tested locally with mocked providers; the recording workflow has not been rerun for these fixes.
+
+Once a scene or translation reports explicit model-quota exhaustion, no more new scene workers or uncached translations are started in that generation attempt. Available English captures can still render with ElevenLabs. A failed metadata translation skips that language and records the reason instead of aborting the whole bundle. Quota status is recorded in the manifest and resets on the next invocation; provider quotas themselves are unchanged.

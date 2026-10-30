@@ -7,6 +7,19 @@ import re
 FENCED_JSON = re.compile(r'```(?:json)?[ \t]*\r?\n(.*?)\r?\n```', re.DOTALL | re.IGNORECASE)
 
 
+class ModelQuotaError(RuntimeError):
+    """No more text-model requests should be started in this generation attempt."""
+
+
+def quota_exhausted(error):
+    """Recognize explicit provider quota errors, not ordinary scene assertion failures."""
+    if isinstance(error, ModelQuotaError):
+        return True
+    message = str(error).lower().replace('’', "'")
+    return any(marker in message for marker in (
+        "hit your session limit", "hit your usage limit", "hit your weekly limit", 'insufficient_quota'))
+
+
 def provider_failure(usage):
     """A bounded provider error, with configured credentials removed before logging."""
     reason = usage.get('fallback') or 'The model returned no text response'

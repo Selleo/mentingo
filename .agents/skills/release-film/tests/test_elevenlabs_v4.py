@@ -168,37 +168,56 @@ class SharedVoice(unittest.TestCase):
                 config = voice.elevenlabs_config(addon, code)
                 self.assertEqual(config['voice'], 'shared_env')
                 self.assertEqual(config['model_id'], 'eleven_v4_turbo')
-                self.assertEqual(config['output_format'], 'pcm_24000')
+                self.assertEqual(config['output_format'], 'mp3_44100_128')
         with mock.patch.dict(os.environ, {'ELEVENLABS_VOICE_ID_EN': 'legacy_env_en'}, clear=True):
             self.assertEqual(voice.elevenlabs_config(addon, 'en')['voice'], 'shared_config')
 
-    def test_modern_models_use_dialogue_transport_and_explicit_language_without_rest_fallback(self):
+    def test_modern_models_use_complete_dialogue_timing_without_websocket_chunks(self):
         import tempfile
         alignment = {'characters': list('One two.'), 'character_start_times_seconds': [i / 20 for i in range(8)],
                      'character_end_times_seconds': [(i + 1) / 20 for i in range(8)]}
         for code in ('en', 'pl'):
             with self.subTest(language=code), tempfile.TemporaryDirectory() as folder, \
                     mock.patch.dict(os.environ, {'ELEVENLABS_API_KEY': 'secret-key', 'ELEVENLABS_VOICE_ID': 'shared_voice'}, clear=True), \
-                    mock.patch.object(dialogue, 'synthesize', return_value=(b'pcm', alignment)) as request, \
-                    mock.patch.object(voice, 'pcm_to_mp3', return_value=b'ID3-valid') as encode, \
-                    mock.patch.object(voice, 'elevenlabs_request') as legacy:
+                    mock.patch.object(voice, 'elevenlabs_request', return_value={
+                        'audio_base64': base64.b64encode(b'ID3-valid').decode(), 'alignment': alignment}) as request, \
+                    mock.patch.object(dialogue, 'synthesize') as realtime:
                 job = {'out': folder, 'text': 'One two.', 'language': code, 'voice': 'shared_voice'}
                 [result] = voice.elevenlabs([job])
                 self.assertNotIn('error', result)
                 self.assertEqual(request.call_args.args[0], 'shared_voice')
                 self.assertEqual(request.call_args.args[1]['language_code'], code)
                 self.assertEqual(request.call_args.args[1]['model_id'], 'eleven_v4_turbo')
-                encode.assert_called_once_with(b'pcm')
-                legacy.assert_not_called()
+                realtime.assert_not_called()
                 self.assertEqual((Path(folder) / 'audio.mp3').read_bytes(), b'ID3-valid')
+                self.assertTrue((Path(folder) / 'subtitles.srt').is_file())
 
-    def test_v4_provider_failure_never_falls_back_to_rest(self):
+    def test_dialogue_request_has_one_audio_timeline_and_never_retries_on_failure(self):
+        payload = {'text': 'One two.', 'model_id': 'eleven_v4_turbo', 'language_code': 'pl',
+                   'voice_settings': {'stability': 0.5, 'speed': 1, 'similarity_boost': 0.7}}
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({'audio_base64': 'YQ=='}).encode()
+        opener = mock.Mock()
+        opener.open.return_value = response
+        with mock.patch.object(voice.urllib.request, 'build_opener', return_value=opener):
+            voice.elevenlabs_request('shared_voice', payload, 'secret-key')
+        request = opener.open.call_args.args[0]
+        self.assertEqual(request.full_url, 'https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format=mp3_44100_128')
+        body = json.loads(request.data)
+        self.assertEqual(body['inputs'], [{'text': 'One two.', 'voice_id': 'shared_voice'}])
+        self.assertEqual(body['settings'], {'stability': 0.5, 'speed': 1, 'similarity': 0.7})
+        self.assertEqual((body['model_id'], body['language_code']), ('eleven_v4_turbo', 'pl'))
+        self.assertNotIn('secret-key', json.dumps(body))
+        opener.open.assert_called_once()
+
+    def test_v4_provider_failure_never_switches_to_websocket_or_repeats_synthesis(self):
         with mock.patch.dict(os.environ, {'ELEVENLABS_API_KEY': 'secret-key', 'ELEVENLABS_VOICE_ID': 'shared_voice'}, clear=True), \
-                mock.patch.object(dialogue, 'synthesize', side_effect=dialogue.DialogueError('Timing evidence missing')), \
-                mock.patch.object(voice, 'elevenlabs_request') as legacy:
+                mock.patch.object(voice, 'elevenlabs_request', side_effect=ValueError('Speech provider unavailable')) as request, \
+                mock.patch.object(dialogue, 'synthesize') as realtime:
             [result] = voice.elevenlabs([{'out': '/tmp/not-written', 'text': 'One two.', 'language': 'en'}])
-        self.assertEqual(result['error'], 'Timing evidence missing')
-        legacy.assert_not_called()
+        self.assertEqual(result['error'], 'Speech provider unavailable')
+        request.assert_called_once()
+        realtime.assert_not_called()
 
 
 if __name__ == '__main__':
