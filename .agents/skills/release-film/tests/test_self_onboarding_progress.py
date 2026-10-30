@@ -73,6 +73,7 @@ class ProgressTest(unittest.TestCase):
         self.write(self.run, 'secrets.json', json.dumps({'MASTER_KEY': generated}))
         self.write(self.cache, 'segments/create/captions-en.srt', '1\n' + generated + '\n' + provider)
         self.write(self.cache, 'bundles/batch/timeline.json', json.dumps({'title': generated + provider}))
+        self.write(self.run, 'review/proof-repair.json', json.dumps({'replacements': {generated: provider}}))
         self.write(self.run, 'keeper.log', generated + provider)
         for root, path in [(self.cache, 'state.json'), (self.cache, 'bundles/batch/manifest.json'),
                            (self.cache, 'captures/create/capture.json'), (self.run, '.env'),
@@ -90,6 +91,8 @@ class ProgressTest(unittest.TestCase):
                 self.assertNotIn('private execution state', text)
         self.assertEqual((self.cache/'state.json').read_text(), 'private execution state')
         self.assertIn(generated, (self.run/'keeper.log').read_text())
+        self.assertEqual(json.loads((self.out/'run/review/proof-repair.json').read_text()),
+                         {'replacements': {'***': '***'}})
 
     def test_symlink_files_and_directories_cannot_export_outside_the_run(self):
         outside = self.root/'private'

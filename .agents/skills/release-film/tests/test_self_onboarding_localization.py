@@ -23,6 +23,44 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def proof_fixture(self, replacements):
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {'actions_text': [
+            '1 clicks "Groups"', '2 expects "Enrolled via group"', '5 expects "Later result"']})
+        chapter = {'film': 'F12', 'proofs': ['Groups', 'Enrolled by group'],
+                   'sentences': [{'action': 1, 'text': 'Open groups.'}, {'action': 2, 'text': 'View enrollment.'}]}
+        model = self.patch(recording.llm, 'complete', return_value=(json.dumps({'proofs': replacements}), {'provider': 'cli'}))
+        return chapter, {'F12': str(folder)}, model
+
+    def test_missing_proof_quote_is_replaced_without_changing_narration_or_pins(self):
+        chapter, keys, model = self.proof_fixture(['Enrolled via group'])
+        sentences = copy.deepcopy(chapter['sentences'])
+        recording.repair_proof_quotes(self.root/'run', {'id': 'group-enrollment'}, chapter, keys)
+        self.assertEqual(chapter['proofs'], ['Groups', 'Enrolled via group'])
+        self.assertEqual(chapter['sentences'], sentences)
+        model.assert_called_once()
+        self.assertNotIn('Later result', model.call_args.args[0])
+        report = core.load(self.root/'run/review/proof-repair.json')
+        self.assertEqual(report['replacements'], {'Enrolled by group': 'Enrolled via group'})
+        recording.repair_proof_quotes(self.root/'run', {'id': 'group-enrollment'}, chapter, keys)
+        model.assert_called_once()  # Existing grounded quotes need no model call.
+
+    def test_proof_correction_cannot_invent_quotes_or_use_unshown_later_actions(self):
+        for replacement in ('Invented enrollment', 'Later result'):
+            with self.subTest(replacement=replacement):
+                chapter, keys, _ = self.proof_fixture([replacement])
+                before = copy.deepcopy(chapter)
+                with self.assertRaisesRegex(ValueError, 'absent from'):
+                    recording.repair_proof_quotes(self.root/'run', {'id': 'group-enrollment'}, chapter, keys)
+                self.assertEqual(chapter, before)
+
+    def test_proof_correction_cannot_remove_missing_evidence(self):
+        chapter, keys, model = self.proof_fixture([])
+        with self.assertRaisesRegex(ValueError, 'each missing proof'):
+            recording.repair_proof_quotes(self.root/'run', {'id': 'group-enrollment'}, chapter, keys)
+        model.assert_called_once()
+        self.assertEqual(chapter['proofs'], ['Groups', 'Enrolled by group'])
+
     def test_narration_freshness_uses_take_acceptance_not_conversion_time(self):
         folder = self.root/'capture'
         core.save(folder/'capture.json', {})
