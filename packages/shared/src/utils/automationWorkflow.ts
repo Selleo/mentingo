@@ -2,10 +2,14 @@ import {
   AUTOMATION_VALIDATION_ISSUE_CODES,
   type AutomationValidationIssueCode,
   AUTOMATION_EVENT_KINDS,
+  AUTOMATION_STEP_TYPES,
   BUILT_IN_EMAIL_TEMPLATE_KEYS,
 } from "../constants/automations";
 import { resolveAutomationEventFieldSourceKey } from "../constants/automationEventVariables";
-import { deriveAutomationBranchFieldValues } from "../constants/automationEmailBranches";
+import {
+  deriveAutomationBranchFieldValues,
+  isAutomationGroupConditionField,
+} from "../constants/automationEmailBranches";
 
 import type {
   AutomationStep,
@@ -13,6 +17,7 @@ import type {
   AutomationWorkflowIssue,
   AutomationPlaceholderValue,
   AutomationStepTrace,
+  AutomationConditionConfig,
 } from "../types/automations";
 
 export type AutomationWorkflowValidationOptions = {
@@ -100,6 +105,7 @@ export const getAutomationWorkflowIssues = (
     );
   }
   const root = workflow.rootStepId === null ? undefined : byId.get(workflow.rootStepId);
+  const rootEventKind = root?.type === AUTOMATION_STEP_TYPES.TRIGGER ? root.config.eventKind : null;
   if (!root || root.type !== "trigger")
     addValidationIssue(
       AUTOMATION_VALIDATION_ISSUE_CODES.INVALID_TRIGGER_ROOT,
@@ -161,20 +167,20 @@ export const getAutomationWorkflowIssues = (
     }
     if (
       options.requireComplete &&
-      step.type === "trigger" &&
-      step.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
-      !step.config.groupId
+      step.type === AUTOMATION_STEP_TYPES.CONDITION &&
+      isAutomationGroupConditionField(rootEventKind, step.config.field) &&
+      !step.config.equals
     ) {
       addValidationIssue(
         AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_GROUP,
-        "Select a group for this trigger.",
+        "Select a group for this condition.",
         step.id,
       );
     }
     if (options.requireComplete && step.type === "condition" && !step.config.field) {
       addValidationIssue(
         AUTOMATION_VALIDATION_ISSUE_CODES.MISSING_CONDITION_FIELD,
-        "Choose a Yes/No field for this condition.",
+        "Choose a field for this condition.",
         step.id,
       );
     }
@@ -277,7 +283,19 @@ export const flattenAutomationWorkflow = (workflow: AutomationWorkflow): Automat
   return path;
 };
 
-/** Evaluate strict booleans only; missing/null/string values must never mean No. */
+/** Value conditions match the configured value; others accept strict booleans only. */
+const resolveAutomationConditionOutcome = (
+  config: AutomationConditionConfig,
+  value: AutomationPlaceholderValue | undefined,
+): boolean | undefined => {
+  if (config.equals !== undefined) {
+    return typeof value === "string" ? value === config.equals : undefined;
+  }
+
+  return typeof value === "boolean" ? value : undefined;
+};
+
+/** Missing or mistyped condition values must never mean No. */
 export const evaluateAutomationWorkflow = (
   workflow: AutomationWorkflow,
   fields: Record<string, AutomationPlaceholderValue>,
@@ -302,13 +320,6 @@ export const evaluateAutomationWorkflow = (
       } as AutomationStepTrace,
     ]),
   );
-  if (
-    root?.type === "trigger" &&
-    root.config.eventKind === AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP &&
-    (!root.config.groupId || root.config.groupId !== fields.group_id)
-  ) {
-    return { path: [], steps: [...traces.values()] };
-  }
   let current = ordered[0];
   let issue: AutomationWorkflowIssue | undefined;
   while (current) {
@@ -326,18 +337,19 @@ export const evaluateAutomationWorkflow = (
       const value = field
         ? (fields[field] ?? (sourceKey ? fields[sourceKey] : undefined))
         : undefined;
-      if (typeof value !== "boolean") {
+      const outcome = resolveAutomationConditionOutcome(current.config, value);
+      if (outcome === undefined) {
         trace.failedCount = 1;
         issue = {
           code: AUTOMATION_VALIDATION_ISSUE_CODES.INVALID_CONDITION_VALUE,
-          message: "The condition needs a Yes/No value from the event.",
+          message: "The condition needs a matching value from the event.",
           stepId: current.id,
         };
         break;
       }
-      trace.trueCount = Number(value);
-      trace.falseCount = Number(!value);
-      position = value ? 0 : 1;
+      trace.trueCount = Number(outcome);
+      trace.falseCount = Number(!outcome);
+      position = outcome ? 0 : 1;
     }
     trace.matchedCount = 1;
     current = ordered.find((step) => step.parentId === current!.id && step.position === position)!;

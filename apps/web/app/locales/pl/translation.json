@@ -7593,10 +7593,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Grupa",
-      "hint": "Wybierz grupę uruchamiającą ten przepływ. Pozostaw odbiorcę zdarzenia jako odbiorcę e-maila, aby powitać tylko nowego członka."
-    },
     "recipients": {
       "title": "Odbiorcy",
       "event": "Użytkownicy powiązani ze zdarzeniem",
@@ -7963,6 +7959,9 @@
       "field": "Wybierz warunek",
       "hint": "Gdy odpowiedź to Tak, automatyzacja wybiera ścieżkę Tak. W przeciwnym razie wybiera Nie. Pusta ścieżka kończy się bez wysyłania e-maila.",
       "noFields": "To zdarzenie nie udostępnia pól Tak/Nie do sprawdzenia.",
+      "group": "Grupa",
+      "groupIs": "to {{group}}",
+      "groupHint": "Automatyzacja przechodzi ścieżką Tak, gdy użytkownik został dodany do wybranej grupy. W przeciwnym razie przechodzi ścieżką Nie.",
       "yes": "Tak",
       "no": "Nie",
       "end": "Koniec ścieżki",

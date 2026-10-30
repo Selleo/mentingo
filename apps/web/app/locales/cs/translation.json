@@ -7770,10 +7770,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Skupina",
-      "hint": "Vyberte skupinu spouštějící tento postup. Ponechte příjemce události jako příjemce e-mailu, abyste přivítali pouze nového člena."
-    },
     "recipients": {
       "title": "Příjemci",
       "event": "Uživatelé spojení s událostí",
@@ -8136,6 +8132,9 @@
       "field": "Vyberte podmínku",
       "hint": "Při odpovědi Ano pokračuje automatizace cestou Ano, jinak cestou Ne. Prázdná cesta končí bez odeslání e-mailu.",
       "noFields": "Tato událost nemá pole Ano/Ne.",
+      "group": "Skupina",
+      "groupIs": "je {{group}}",
+      "groupHint": "Automatizace pokračuje cestou Ano, pokud byl uživatel přidán do vybrané skupiny. V opačném případě pokračuje cestou Ne.",
       "yes": "Ano",
       "no": "Ne",
       "end": "Konec cesty",

@@ -7527,10 +7527,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Grupė",
-      "hint": "Pasirinkite procesą pradedančią grupę. Palikite įvykio gavėją kaip el. laiško gavėją, kad pasveikintumėte tik naują narį."
-    },
     "recipients": {
       "title": "Gavėjai",
       "event": "Su įvykiu susiję naudotojai",
@@ -7895,6 +7891,9 @@
       "field": "Pasirinkite sąlygą",
       "hint": "Jei atsakymas Taip, automatizavimas eina keliu Taip, kitu atveju – Ne. Tuščias kelias baigiasi nesiunčiant el. laiško.",
       "noFields": "Šis įvykis neturi laukų Taip/Ne.",
+      "group": "Grupė",
+      "groupIs": "yra {{group}}",
+      "groupHint": "Automatizacija eina keliu „Taip“, kai naudotojas buvo pridėtas prie pasirinktos grupės. Kitu atveju ji eina keliu „Ne“.",
       "yes": "Taip",
       "no": "Ne",
       "end": "Kelio pabaiga",

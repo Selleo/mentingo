@@ -135668,6 +135668,11 @@
                                     "minLength": 1,
                                     "maxLength": 200,
                                     "type": "string"
+                                  },
+                                  "equals": {
+                                    "minLength": 1,
+                                    "maxLength": 200,
+                                    "type": "string"
                                   }
                                 }
                               }
@@ -135817,10 +135822,6 @@
                                         "type": "null"
                                       }
                                     ]
-                                  },
-                                  "groupId": {
-                                    "format": "uuid",
-                                    "type": "string"
                                   }
                                 }
                               }
@@ -136306,6 +136307,11 @@
                                             "minLength": 1,
                                             "maxLength": 200,
                                             "type": "string"
+                                          },
+                                          "equals": {
+                                            "minLength": 1,
+                                            "maxLength": 200,
+                                            "type": "string"
                                           }
                                         }
                                       }
@@ -136455,10 +136461,6 @@
                                                 "type": "null"
                                               }
                                             ]
-                                          },
-                                          "groupId": {
-                                            "format": "uuid",
-                                            "type": "string"
                                           }
                                         }
                                       }
@@ -137820,6 +137822,11 @@
                                         "minLength": 1,
                                         "maxLength": 200,
                                         "type": "string"
+                                      },
+                                      "equals": {
+                                        "minLength": 1,
+                                        "maxLength": 200,
+                                        "type": "string"
                                       }
                                     }
                                   }
@@ -137969,10 +137976,6 @@
                                             "type": "null"
                                           }
                                         ]
-                                      },
-                                      "groupId": {
-                                        "format": "uuid",
-                                        "type": "string"
                                       }
                                     }
                                   }
@@ -138440,6 +138443,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -138589,10 +138597,6 @@
                                   "type": "null"
                                 }
                               ]
-                            },
-                            "groupId": {
-                              "format": "uuid",
-                              "type": "string"
                             }
                           }
                         }
@@ -139632,6 +139636,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -139781,10 +139790,6 @@
                                   "type": "null"
                                 }
                               ]
-                            },
-                            "groupId": {
-                              "format": "uuid",
-                              "type": "string"
                             }
                           }
                         }
@@ -140248,6 +140253,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -140397,10 +140407,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -140886,6 +140892,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -141035,10 +141046,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -141532,6 +141539,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -141681,10 +141693,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -142170,6 +142178,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -142319,10 +142332,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -142816,6 +142825,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -142965,10 +142979,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -143454,6 +143464,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -143603,10 +143618,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -144097,6 +144108,11 @@
                               "minLength": 1,
                               "maxLength": 200,
                               "type": "string"
+                            },
+                            "equals": {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
                             }
                           }
                         }
@@ -144246,10 +144262,6 @@
                                   "type": "null"
                                 }
                               ]
-                            },
-                            "groupId": {
-                              "format": "uuid",
-                              "type": "string"
                             }
                           }
                         }
@@ -144709,6 +144721,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -144858,10 +144875,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -145347,6 +145360,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -145496,10 +145514,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -146014,6 +146028,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -146163,10 +146182,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -146652,6 +146667,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -146801,10 +146821,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -147299,6 +147315,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -147448,10 +147469,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -147917,6 +147934,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -148066,10 +148088,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -148555,6 +148573,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -148704,10 +148727,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -149201,6 +149220,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -149350,10 +149374,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -149839,6 +149859,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -149988,10 +150013,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -150485,6 +150506,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -150634,10 +150660,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -151123,6 +151145,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -151272,10 +151299,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }
@@ -151769,6 +151792,11 @@
                                   "minLength": 1,
                                   "maxLength": 200,
                                   "type": "string"
+                                },
+                                "equals": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
                                 }
                               }
                             }
@@ -151918,10 +151946,6 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
                                 }
                               }
                             }
@@ -152407,6 +152431,11 @@
                                           "minLength": 1,
                                           "maxLength": 200,
                                           "type": "string"
+                                        },
+                                        "equals": {
+                                          "minLength": 1,
+                                          "maxLength": 200,
+                                          "type": "string"
                                         }
                                       }
                                     }
@@ -152556,10 +152585,6 @@
                                               "type": "null"
                                             }
                                           ]
-                                        },
-                                        "groupId": {
-                                          "format": "uuid",
-                                          "type": "string"
                                         }
                                       }
                                     }

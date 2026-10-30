@@ -25487,6 +25487,11 @@ export interface ListAutomationsResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -25526,8 +25531,6 @@ export interface ListAutomationsResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -25641,6 +25644,11 @@ export interface ListAutomationsResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -25680,8 +25688,6 @@ export interface ListAutomationsResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -25962,6 +25968,11 @@ export interface ListBuiltInAutomationTemplatesResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26001,8 +26012,6 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -26110,6 +26119,11 @@ export interface SimulateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26149,8 +26163,6 @@ export interface SimulateAutomationBody {
                   | "live_training_ended"
                 )
               | null;
-            /** @format uuid */
-            groupId?: string;
           };
         }
       | {
@@ -26380,6 +26392,11 @@ export interface CreateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26419,8 +26436,6 @@ export interface CreateAutomationBody {
                   | "live_training_ended"
                 )
               | null;
-            /** @format uuid */
-            groupId?: string;
           };
         }
       | {
@@ -26532,6 +26547,11 @@ export interface CreateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26571,8 +26591,6 @@ export interface CreateAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -26686,6 +26704,11 @@ export interface CreateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26725,8 +26748,6 @@ export interface CreateAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -26842,6 +26863,11 @@ export interface CreateAutomationFromTemplateResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26881,8 +26907,6 @@ export interface CreateAutomationFromTemplateResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -26996,6 +27020,11 @@ export interface CreateAutomationFromTemplateResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27035,8 +27064,6 @@ export interface CreateAutomationFromTemplateResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -27152,6 +27179,11 @@ export interface GetAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27191,8 +27223,6 @@ export interface GetAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -27306,6 +27336,11 @@ export interface GetAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27345,8 +27380,6 @@ export interface GetAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -27461,6 +27494,11 @@ export interface UpdateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -27500,8 +27538,6 @@ export interface UpdateAutomationBody {
                   | "live_training_ended"
                 )
               | null;
-            /** @format uuid */
-            groupId?: string;
           };
         }
       | {
@@ -27613,6 +27649,11 @@ export interface UpdateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27652,8 +27693,6 @@ export interface UpdateAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -27767,6 +27806,11 @@ export interface UpdateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27806,8 +27850,6 @@ export interface UpdateAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -27930,6 +27972,11 @@ export interface DuplicateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27969,8 +28016,6 @@ export interface DuplicateAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -28084,6 +28129,11 @@ export interface DuplicateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28123,8 +28173,6 @@ export interface DuplicateAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -28240,6 +28288,11 @@ export interface ApplyAutomationBody {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28279,8 +28332,6 @@ export interface ApplyAutomationBody {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -28393,6 +28444,11 @@ export interface ApplyAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28432,8 +28488,6 @@ export interface ApplyAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -28547,6 +28601,11 @@ export interface ApplyAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28586,8 +28645,6 @@ export interface ApplyAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -28703,6 +28760,11 @@ export interface EnableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28742,8 +28804,6 @@ export interface EnableAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -28857,6 +28917,11 @@ export interface EnableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28896,8 +28961,6 @@ export interface EnableAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -29013,6 +29076,11 @@ export interface DisableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -29052,8 +29120,6 @@ export interface DisableAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -29167,6 +29233,11 @@ export interface DisableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29206,8 +29277,6 @@ export interface DisableAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -29323,6 +29392,11 @@ export interface ArchiveAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -29362,8 +29436,6 @@ export interface ArchiveAutomationResponse {
                     | "live_training_ended"
                   )
                 | null;
-              /** @format uuid */
-              groupId?: string;
             };
           }
         | {
@@ -29477,6 +29549,11 @@ export interface ArchiveAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29516,8 +29593,6 @@ export interface ArchiveAutomationResponse {
                       | "live_training_ended"
                     )
                   | null;
-                /** @format uuid */
-                groupId?: string;
               };
             }
           | {
@@ -40578,6 +40653,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor" | "assistant";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name IngestionControllerIngest
      * @request POST:/api/ingestion/ingest
      */
@@ -43696,6 +43862,166 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AssistantControllerGetAvailability
+     * @request GET:/api/assistant/availability
+     */
+    assistantControllerGetAvailability: (params: RequestParams = {}) =>
+      this.request<GetAvailabilityResponse, any>({
+        path: `/api/assistant/availability`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListThreads
+     * @request GET:/api/assistant/threads
+     */
+    assistantControllerListThreads: (
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        archived?: boolean;
+        /** @maxLength 200 */
+        query?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListThreadsResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCreateThread
+     * @request POST:/api/assistant/threads
+     */
+    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/assistant/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerGetThread
+     * @request GET:/api/assistant/threads/{threadId}
+     */
+    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerUpdateThread
+     * @request PATCH:/api/assistant/threads/{threadId}
+     */
+    assistantControllerUpdateThread: (
+      threadId: string,
+      data: UpdateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateThreadResponse, any>({
+        path: `/api/assistant/threads/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerListMessages
+     * @request GET:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerListMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 10000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMessagesResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerSendMessage
+     * @request POST:/api/assistant/threads/{threadId}/messages
+     */
+    assistantControllerSendMessage: (
+      threadId: string,
+      data: SendMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendMessageResponse, any>({
+        path: `/api/assistant/threads/${threadId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AssistantControllerCancelRun
+     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
+     */
+    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
+      this.request<CancelRunResponse, any>({
+        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name McpConsentControllerGetConsent
      * @request GET:/api/oauth/consent/{consent}
      */
@@ -46404,257 +46730,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetAvailability
-     * @request GET:/api/assistant/availability
-     */
-    assistantControllerGetAvailability: (params: RequestParams = {}) =>
-      this.request<GetAvailabilityResponse, any>({
-        path: `/api/assistant/availability`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListThreads
-     * @request GET:/api/assistant/threads
-     */
-    assistantControllerListThreads: (
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        archived?: boolean;
-        /** @maxLength 200 */
-        query?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListThreadsResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCreateThread
-     * @request POST:/api/assistant/threads
-     */
-    assistantControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/assistant/threads`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerGetThread
-     * @request GET:/api/assistant/threads/{threadId}
-     */
-    assistantControllerGetThread: (threadId: string, params: RequestParams = {}) =>
-      this.request<GetThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerUpdateThread
-     * @request PATCH:/api/assistant/threads/{threadId}
-     */
-    assistantControllerUpdateThread: (
-      threadId: string,
-      data: UpdateThreadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateThreadResponse, any>({
-        path: `/api/assistant/threads/${threadId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerListMessages
-     * @request GET:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerListMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @max 10000
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ListMessagesResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerSendMessage
-     * @request POST:/api/assistant/threads/{threadId}/messages
-     */
-    assistantControllerSendMessage: (
-      threadId: string,
-      data: SendMessageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SendMessageResponse, any>({
-        path: `/api/assistant/threads/${threadId}/messages`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AssistantControllerCancelRun
-     * @request POST:/api/assistant/threads/{threadId}/runs/{runId}/cancel
-     */
-    assistantControllerCancelRun: (threadId: string, runId: string, params: RequestParams = {}) =>
-      this.request<CancelRunResponse, any>({
-        path: `/api/assistant/threads/${threadId}/runs/${runId}/cancel`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
-     * @request GET:/api/admin/ai-threads
-     */
-    adminAiThreadsControllerGetAdminAiThreadSummaries: (
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-        /** @format uuid */
-        userId?: string;
-        /** @maxLength 200 */
-        search?: string;
-        /** @format date-time */
-        from?: string;
-        /** @format date-time */
-        to?: string;
-        type?: "practice" | "ai-mentor" | "assistant";
-        status?: "active" | "completed" | "archived";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadSummariesResponse, any>({
-        path: `/api/admin/ai-threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
-     * @request GET:/api/admin/ai-threads/{threadId}
-     */
-    adminAiThreadsControllerGetAdminAiThreadDetails: (
-      threadId: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadDetailsResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
-     * @request GET:/api/admin/ai-threads/{threadId}/messages
-     */
-    adminAiThreadsControllerGetAdminAiThreadMessages: (
-      threadId: string,
-      query?: {
-        /**
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * @min 1
-         * @max 100
-         */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAdminAiThreadMessagesResponse, any>({
-        path: `/api/admin/ai-threads/${threadId}/messages`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

@@ -7701,10 +7701,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Grupo",
-      "hint": "Selecciona el grupo que inicia el flujo. Mantén el destinatario del evento para dar la bienvenida solo al nuevo miembro."
-    },
     "recipients": {
       "title": "Destinatarios",
       "event": "Usuarios vinculados al evento",
@@ -8071,6 +8067,9 @@
       "field": "Elegir una condición",
       "hint": "Si la respuesta es Sí, se sigue la ruta Sí. En caso contrario, se sigue No. Una ruta vacía termina sin enviar un correo.",
       "noFields": "Este evento no tiene campos Sí/No.",
+      "group": "Grupo",
+      "groupIs": "es {{group}}",
+      "groupHint": "La automatización sigue la ruta Sí cuando el usuario se añadió al grupo seleccionado. De lo contrario, sigue la ruta No.",
       "yes": "Sí",
       "no": "No",
       "end": "Fin de la ruta",

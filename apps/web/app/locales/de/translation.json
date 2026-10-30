@@ -7512,10 +7512,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Gruppe",
-      "hint": "Wählen Sie die auslösende Gruppe. Behalten Sie den Ereignisempfänger als E-Mail-Empfänger bei, um nur das neue Mitglied zu begrüßen."
-    },
     "recipients": {
       "title": "Empfänger",
       "event": "Mit dem Ereignis verknüpfte Benutzer",
@@ -7880,6 +7876,9 @@
       "field": "Bedingung auswählen",
       "hint": "Bei Ja folgt die Automatisierung dem Ja-Pfad, sonst dem Nein-Pfad. Ein leerer Pfad endet ohne E-Mail.",
       "noFields": "Dieses Ereignis bietet keine Ja/Nein-Felder.",
+      "group": "Gruppe",
+      "groupIs": "ist {{group}}",
+      "groupHint": "Die Automatisierung folgt dem Ja-Pfad, wenn der Nutzer zur ausgewählten Gruppe hinzugefügt wurde. Andernfalls folgt sie dem Nein-Pfad.",
       "yes": "Ja",
       "no": "Nein",
       "end": "Ende dieses Pfads",

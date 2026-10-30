@@ -117,7 +117,10 @@ export const automationWorkflowSchema = Type.Object(
             ...identity,
             type: Type.Literal(AUTOMATION_STEP_TYPES.CONDITION),
             config: Type.Object(
-              { field: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })) },
+              {
+                field: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
+                equals: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
+              },
               closed,
             ),
           },
@@ -132,7 +135,6 @@ export const automationWorkflowSchema = Type.Object(
                 eventKind: Type.Optional(
                   Type.Union([Type.Enum(AUTOMATION_EVENT_KINDS), Type.Null()]),
                 ),
-                groupId: Type.Optional(UUIDSchema),
               },
               closed,
             ),

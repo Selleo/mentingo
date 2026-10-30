@@ -7,7 +7,7 @@ import type { AutomationRecipientRepository } from "../repositories/automation-r
 import type { AutomationRecord } from "src/automations/automation.types";
 import type { DatabasePg } from "src/common";
 
-it("queues a personalized welcome only for the new member of the configured group", async () => {
+it("queues a personalized welcome only when the group condition matches the assigned group", async () => {
   const groupId = "00000000-0000-4000-8000-000000000002";
   const automation = (id: string, selectedGroupId: string) =>
     ({
@@ -22,11 +22,18 @@ it("queues a personalized welcome only for the new member of the configured grou
               parentId: null,
               position: 0,
               type: "trigger",
-              config: { eventKind: "user_assigned_to_group", groupId: selectedGroupId },
+              config: { eventKind: "user_assigned_to_group" },
+            },
+            {
+              id: "00000000-0000-4000-8000-000000000012",
+              parentId: "00000000-0000-4000-8000-000000000010",
+              position: 0,
+              type: "condition",
+              config: { field: "group_id", equals: selectedGroupId },
             },
             {
               id: "00000000-0000-4000-8000-000000000011",
-              parentId: "00000000-0000-4000-8000-000000000010",
+              parentId: "00000000-0000-4000-8000-000000000012",
               position: 0,
               type: "send_email",
               config: { template: { type: "builtin", key: "welcome" }, mappings: {} },
@@ -74,7 +81,6 @@ it("queues a personalized welcome only for the new member of the configured grou
   await service.createAutomationRunsForNotificationEvent(event, {
     execute: async () => [],
   } as unknown as DatabasePg);
-  expect(insertRun).toHaveBeenCalledTimes(1);
   expect(insertRun).toHaveBeenCalledWith(
     expect.objectContaining({ automationId: "matching" }),
     expect.anything(),

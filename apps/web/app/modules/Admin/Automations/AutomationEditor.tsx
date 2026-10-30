@@ -29,7 +29,7 @@ import { BuilderHeader } from "./Builder/components/BuilderHeader";
 import { EditNodePanel } from "./Builder/components/EditNodePanel";
 import { SimulationPanel } from "./Builder/components/SimulationPanel";
 import { useAutomationEditor } from "./Builder/hooks/useAutomationEditor";
-import { getBooleanConditionFieldOptions } from "./Builder/utils/conditionFields";
+import { getConditionFieldOptions } from "./Builder/utils/conditionFields";
 import { serializeAutomationTemplateReference } from "./Builder/utils/templateReference";
 import { DeleteAutomationDialog } from "./components/DeleteAutomationDialog";
 
@@ -147,7 +147,7 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
 
   function getStepLabel(step: AutomationStep) {
     if (step.type === AUTOMATION_STEP_TYPES.CONDITION) {
-      const field = getBooleanConditionFieldOptions(selectedEvent).find(
+      const field = getConditionFieldOptions(selectedEvent).find(
         (field) =>
           selectedEvent &&
           getCanonicalAutomationField(selectedEvent, field.key) ===

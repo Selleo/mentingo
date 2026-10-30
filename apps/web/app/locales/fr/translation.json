@@ -7450,10 +7450,8 @@
     }
   },
   "automationBuilder": {
-    "blocks": { "userAssignedToGroup": "Utilisateur affecté à un groupe" },
-    "groupTrigger": {
-      "group": "Groupe",
-      "hint": "Choisissez le groupe déclencheur. Conservez le destinataire de l’événement pour accueillir uniquement le nouveau membre."
+    "blocks": {
+      "userAssignedToGroup": "Utilisateur affecté à un groupe"
     },
     "recipients": {
       "title": "Destinataires",
@@ -7665,6 +7663,9 @@
       "field": "Choisir une condition",
       "hint": "Si la réponse est Oui, l’automatisation suit le chemin Oui. Sinon, elle suit Non. Un chemin vide se termine sans envoi d’e-mail.",
       "noFields": "Cet événement ne propose aucun champ Oui/Non.",
+      "group": "Groupe",
+      "groupIs": "est {{group}}",
+      "groupHint": "L’automatisation suit le chemin Oui lorsque l’utilisateur a été ajouté au groupe sélectionné. Sinon, elle suit le chemin Non.",
       "yes": "Oui",
       "no": "Non",
       "end": "Fin du chemin",

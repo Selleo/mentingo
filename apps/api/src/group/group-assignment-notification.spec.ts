@@ -1,6 +1,7 @@
 import { PERMISSIONS } from "@repo/shared";
 
 import { GroupService } from "./group.service";
+import { GroupMembershipAssignmentRepository } from "./repositories/group-membership-assignment.repository";
 
 import type { DatabasePg } from "src/common";
 import type { CourseService } from "src/courses/course.service";
@@ -45,6 +46,9 @@ function setup(inserted = [{ groupId }]) {
     transaction: jest.fn(async (work) => work(trx)),
   };
   const outboxPublisher = { publish: jest.fn(), publishDurable: jest.fn() };
+  const localizationService = {
+    getLocalizedSqlField: jest.fn(() => "Nowi pracownicy"),
+  } as unknown as LocalizationService;
   const service = new GroupService(
     trx as unknown as DatabasePg,
     {} as CourseService,
@@ -52,7 +56,8 @@ function setup(inserted = [{ groupId }]) {
     {
       getUserAccess: jest.fn(async () => ({ permissions: [PERMISSIONS.USER_MANAGE] })),
     } as unknown as PermissionsService,
-    { getLocalizedSqlField: jest.fn(() => "Nowi pracownicy") } as unknown as LocalizationService,
+    localizationService,
+    new GroupMembershipAssignmentRepository(trx as unknown as DatabasePg, localizationService),
   );
   return { service, outboxPublisher, trx };
 }

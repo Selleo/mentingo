@@ -2,7 +2,7 @@ import { AutomationValidationAndSimulationService } from "./automation-validatio
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-it("rejects an unavailable or foreign-tenant trigger group before applying", async () => {
+it("rejects an unavailable or foreign-tenant condition group before applying", async () => {
   const exists = jest.fn(async () => false);
   const service = new AutomationValidationAndSimulationService(
     ...([
@@ -17,6 +17,7 @@ it("rejects an unavailable or foreign-tenant trigger group before applying", asy
     ] as unknown as ConstructorParameters<typeof AutomationValidationAndSimulationService>),
   );
   const id = "00000000-0000-4000-8000-000000000001";
+  const conditionId = "00000000-0000-4000-8000-000000000004";
   const groupId = "00000000-0000-4000-8000-000000000002";
   const tenantId = "00000000-0000-4000-8000-000000000003";
   const issues = await service.collectAutomationReadinessIssues(
@@ -28,7 +29,14 @@ it("rejects an unavailable or foreign-tenant trigger group before applying", asy
           parentId: null,
           position: 0,
           type: "trigger",
-          config: { eventKind: "user_assigned_to_group", groupId },
+          config: { eventKind: "user_assigned_to_group" },
+        },
+        {
+          id: conditionId,
+          parentId: id,
+          position: 0,
+          type: "condition",
+          config: { field: "group_id", equals: groupId },
         },
       ],
     },
@@ -36,10 +44,12 @@ it("rejects an unavailable or foreign-tenant trigger group before applying", asy
     tenantId,
   );
   expect(exists).toHaveBeenCalledWith({ type: "group", groupId }, tenantId);
-  expect(issues).toContainEqual(expect.objectContaining({ code: "missing_group", stepId: id }));
+  expect(issues).toContainEqual(
+    expect.objectContaining({ code: "missing_group", stepId: conditionId }),
+  );
 });
 
-it("simulates the configured group rather than silently skipping a synthetic group ID", async () => {
+it("simulates the Yes branch of the configured group condition", async () => {
   const service = new AutomationValidationAndSimulationService(
     ...([{ publish: jest.fn() }, {}, {}, {}, {}, {}, {}, {}] as unknown as ConstructorParameters<
       typeof AutomationValidationAndSimulationService
@@ -47,6 +57,7 @@ it("simulates the configured group rather than silently skipping a synthetic gro
   );
   jest.spyOn(service, "collectAutomationReadinessIssues").mockResolvedValue([]);
   const id = "00000000-0000-4000-8000-000000000001";
+  const conditionId = "00000000-0000-4000-8000-000000000004";
   const result = await service.simulateAutomation(
     {
       workflow: {
@@ -57,15 +68,21 @@ it("simulates the configured group rather than silently skipping a synthetic gro
             parentId: null,
             position: 0,
             type: "trigger",
-            config: {
-              eventKind: "user_assigned_to_group",
-              groupId: "00000000-0000-4000-8000-000000000002",
-            },
+            config: { eventKind: "user_assigned_to_group" },
+          },
+          {
+            id: conditionId,
+            parentId: id,
+            position: 0,
+            type: "condition",
+            config: { field: "group_id", equals: "00000000-0000-4000-8000-000000000002" },
           },
         ],
       },
     },
     { tenantId: "tenant" } as CurrentUserType,
   );
-  expect(result.steps[0]).toMatchObject({ matchedCount: 1, skippedCount: 0 });
+  expect(result.steps).toContainEqual(
+    expect.objectContaining({ stepId: conditionId, trueCount: 1, falseCount: 0 }),
+  );
 });

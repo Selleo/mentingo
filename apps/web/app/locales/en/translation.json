@@ -7773,10 +7773,6 @@
     }
   },
   "automationBuilder": {
-    "groupTrigger": {
-      "group": "Group",
-      "hint": "Select the group that starts this workflow. Keep email recipients set to the event recipient to welcome only the new member."
-    },
     "recipients": {
       "title": "Recipients",
       "event": "Users linked to the event",
@@ -8143,6 +8139,9 @@
       "field": "Choose a condition",
       "hint": "When the answer is Yes, the automation follows the Yes path. Otherwise, it follows No. An empty path ends without sending an email.",
       "noFields": "This event has no Yes/No fields to check.",
+      "group": "Group",
+      "groupIs": "is {{group}}",
+      "groupHint": "The automation follows Yes when the user was added to the selected group. Otherwise, it follows No.",
       "yes": "Yes",
       "no": "No",
       "end": "End of this path",
