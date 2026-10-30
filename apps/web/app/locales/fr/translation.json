@@ -4899,6 +4899,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Audio",
+      "upload": "Importer un audio",
+      "drag": "Déplacer l’audio",
+      "remove": "Supprimer l’audio",
+      "loading": "Chargement de l’audio…",
+      "error": "Impossible de lire l’audio. Réessayez ou utilisez un autre navigateur.",
+      "unsupported": "Votre navigateur ne prend pas en charge la lecture audio.",
+      "invalidType": "Choisissez un fichier audio MP3, M4A, WAV, Ogg ou WebM. L’audio est pris en charge uniquement dans les leçons de contenu.",
+      "tooLarge": "Le fichier audio ne doit pas dépasser {{maxMB}} Mo.",
+      "uploadFailed": "Échec de l’importation audio. Veuillez réessayer."
+    },
     "dropVisibilityDialog": {
       "title": "Choisir la visibilité des ressources",
       "description": "Choisissez la visibilité des {{count}} ressources déposées.",

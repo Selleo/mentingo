@@ -1,3 +1,4 @@
+import { ENTITY_TYPES } from "@repo/shared";
 import { match } from "ts-pattern";
 
 import { buildEntityResourceUrl } from "~/components/RichText/utils/buildEntityResourceUrl";
@@ -22,6 +23,7 @@ export const insertResourceIntoEditor = ({
   displayMode = RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW,
   videoProvider,
 }: InsertResourceArgs) => {
+  if (resourceType === RICH_TEXT_RESOURCE_TYPE.AUDIO && entityType !== ENTITY_TYPES.LESSON) return;
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
 
   return match(resourceType)
@@ -33,6 +35,12 @@ export const insertResourceIntoEditor = ({
           alt: file.name,
           resourceId,
         },
+      }),
+    )
+    .with(RICH_TEXT_RESOURCE_TYPE.AUDIO, () =>
+      insertContentIntoEditor(editor, {
+        type: RICH_TEXT_RESOURCE_TYPE.AUDIO,
+        attrs: { src: resourceUrl, name: file.name },
       }),
     )
     .with(RICH_TEXT_RESOURCE_TYPE.VIDEO, () =>

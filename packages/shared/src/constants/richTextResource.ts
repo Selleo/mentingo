@@ -1,5 +1,6 @@
 import {
   ALLOWED_EXCEL_FILE_TYPES,
+  isAudioFile,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
   ALLOWED_PRESENTATION_FILE_TYPES,
@@ -9,6 +10,7 @@ import {
 
 export const RICH_TEXT_RESOURCE_TYPE = {
   IMAGE: "image",
+  AUDIO: "audio",
   VIDEO: "video",
   PRESENTATION: "presentation",
   PDF: "pdf",
@@ -28,6 +30,7 @@ export type RichTextResourceDisplayMode =
   (typeof RICH_TEXT_RESOURCE_DISPLAY_MODE)[keyof typeof RICH_TEXT_RESOURCE_DISPLAY_MODE];
 
 export function classifyRichTextResourceType(mimeType: string): RichTextResourceType {
+  if (isAudioFile({ type: mimeType, name: "" })) return RICH_TEXT_RESOURCE_TYPE.AUDIO;
   if (ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(mimeType)) return RICH_TEXT_RESOURCE_TYPE.IMAGE;
   if (ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) return RICH_TEXT_RESOURCE_TYPE.VIDEO;
   if (ALLOWED_PRESENTATION_FILE_TYPES.includes(mimeType))

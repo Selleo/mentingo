@@ -599,6 +599,62 @@ export class LessonService {
       throw new NotFoundException("common.toast.notFound");
     }
 
+    if (lessonResource.contentType?.startsWith("audio/")) {
+      if (!currentUser) throw new UnauthorizedException("common.toast.lessonAccessDenied");
+      if (lessonResource.tenantId !== currentUser.tenantId) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+      const canManageAll = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+      const canManageOwn = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
+      const relations = await this.lessonRepository.getAudioResourceLessons(
+        resourceId,
+        currentUser,
+      );
+      let allowed = canManageAll;
+      // Unsaved editor uploads belong only to their uploader (or a full content manager).
+      if (
+        !lessonResource.entityId &&
+        canManageOwn &&
+        lessonResource.uploadedBy === currentUser.userId
+      ) {
+        allowed = true;
+      }
+      for (const relation of relations) {
+        if (
+          currentUser.permissions.includes(PERMISSIONS.MANAGED_GROUP_RESULTS_READ) &&
+          relation.isManagerPreview
+        ) {
+          allowed = true;
+          break;
+        }
+        if (canManageOwn && relation.authorId === currentUser.userId) {
+          allowed = true;
+          break;
+        }
+        if (
+          currentUser.permissions.includes(PERMISSIONS.COURSE_READ) &&
+          relation.status === "published" &&
+          !relation.isArchived &&
+          (relation.isEnrolled || relation.isFreemium) &&
+          (await this.lessonRepository.getHasLessonAccess(
+            relation.lessonId,
+            currentUser.userId,
+            true,
+          ))
+        ) {
+          allowed = true;
+          break;
+        }
+      }
+      if (!allowed) throw new ForbiddenException("common.toast.lessonAccessDenied");
+      res.setHeader("Cache-Control", "private, no-store");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      return this.streamResource(req, res, lessonResource.reference, {
+        contentType: lessonResource.contentType,
+        preview,
+      });
+    }
+
     if (!currentUser) {
       if (!lessonResource.entityId || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
         throw new NotFoundException("common.toast.notFound");
@@ -769,7 +825,7 @@ export class LessonService {
       videos,
     } = injectResourcesIntoContent(lesson.description, mappedResources, {
       resourceIdRegex: createLessonResourceIdRegex(),
-      trackNodeTypes: ["video", "image", "presentation", "downloadable-file"],
+      trackNodeTypes: ["video", "audio", "image", "presentation", "downloadable-file"],
       convertImageAnchors: false,
     });
 

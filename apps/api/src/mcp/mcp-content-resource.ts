@@ -34,6 +34,11 @@ export function renderLessonResourceNode(input: {
         throw new BadRequestException("Images support preview mode only");
       return `<div data-node-type="image" data-src="${url}" data-alt="${name}" data-resource-id="${input.resourceId}"></div>`;
     })
+    .with(RICH_TEXT_RESOURCE_TYPE.AUDIO, () => {
+      if (input.displayMode !== RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW)
+        throw new BadRequestException("Audio supports preview mode only");
+      return `<audio data-node-type="audio" src="${url}" data-name="${name}" controls preload="metadata"></audio>`;
+    })
     .with(RICH_TEXT_RESOURCE_TYPE.VIDEO, () => {
       if (input.displayMode !== RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW)
         throw new BadRequestException("Videos support preview mode only");

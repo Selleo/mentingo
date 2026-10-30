@@ -5471,6 +5471,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Audio",
+      "upload": "Prześlij audio",
+      "drag": "Przeciągnij audio",
+      "remove": "Usuń audio",
+      "loading": "Ładowanie audio…",
+      "error": "Nie można odtworzyć audio. Spróbuj ponownie lub użyj innej przeglądarki.",
+      "unsupported": "Twoja przeglądarka nie obsługuje odtwarzania audio.",
+      "invalidType": "Wybierz plik audio MP3, M4A, WAV, Ogg lub WebM. Audio jest obsługiwane tylko w lekcjach z treścią.",
+      "tooLarge": "Plik audio nie może przekraczać {{maxMB}} MB.",
+      "uploadFailed": "Przesyłanie audio nie powiodło się. Spróbuj ponownie."
+    },
     "dropVisibilityDialog": {
       "title": "Wybierz widoczność zasobów",
       "description": "Wybierz widoczność dla wszystkich {{count}} przeciągniętych zasobów.",

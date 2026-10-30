@@ -14,7 +14,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import {
   buildRichTextFileUploadHandler,
-  RICH_TEXT_ACCEPTED_FILE_TYPES,
+  RICH_TEXT_LESSON_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
@@ -129,6 +129,7 @@ const ContentLessonForm = ({
       attachUploadId,
       remove,
     },
+    onValidationError: (message) => toast({ description: message, variant: "destructive" }),
   });
 
   const missingTranslations =
@@ -221,7 +222,7 @@ const ContentLessonForm = ({
                       placeholder={getBaseLanguageTextPlaceholder(baseLanguageLesson?.description)}
                       lessonId={lessonToEdit?.id}
                       allowFiles={!!lessonToEdit?.id || !!contextId}
-                      acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
+                      acceptedFileTypes={RICH_TEXT_LESSON_ACCEPTED_FILE_TYPES}
                       onUpload={handleFileUpload}
                       assetLibrary={{
                         entityType: ENTITY_TYPES.LESSON,

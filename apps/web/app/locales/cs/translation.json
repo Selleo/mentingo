@@ -5162,6 +5162,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Zvuk",
+      "upload": "Nahrát zvuk",
+      "drag": "Přetáhnout zvuk",
+      "remove": "Odstranit zvuk",
+      "loading": "Načítání zvuku…",
+      "error": "Zvuk se nepodařilo přehrát. Zkuste to znovu nebo použijte jiný prohlížeč.",
+      "unsupported": "Váš prohlížeč nepodporuje přehrávání zvuku.",
+      "invalidType": "Vyberte zvukový soubor MP3, M4A, WAV, Ogg nebo WebM. Zvuk je podporován pouze v obsahových lekcích.",
+      "tooLarge": "Zvukový soubor nesmí přesáhnout {{maxMB}} MB.",
+      "uploadFailed": "Nahrávání zvuku se nezdařilo. Zkuste to znovu."
+    },
     "dropVisibilityDialog": {
       "title": "Zvolte viditelnost zdrojů",
       "description": "Zvolte viditelnost pro všech {{count}} přetažených zdrojů.",

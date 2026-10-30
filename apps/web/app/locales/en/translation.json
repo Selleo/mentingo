@@ -5173,6 +5173,18 @@
     }
   },
   "richText": {
+    "audio": {
+      "label": "Audio",
+      "upload": "Upload audio",
+      "drag": "Drag audio",
+      "remove": "Remove audio",
+      "loading": "Loading audio…",
+      "error": "Audio could not be played. Try again or use a different browser.",
+      "unsupported": "Your browser does not support audio playback.",
+      "invalidType": "Choose an MP3, M4A, WAV, Ogg or WebM audio file. Audio is supported in content lessons only.",
+      "tooLarge": "Audio must be no larger than {{maxMB}} MB.",
+      "uploadFailed": "Audio upload failed. Please try again."
+    },
     "dropVisibilityDialog": {
       "title": "Choose asset visibility",
       "description": "Choose the visibility for all {{count}} dropped assets.",

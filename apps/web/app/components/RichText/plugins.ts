@@ -11,6 +11,7 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import i18n from "i18n";
+import { AudioEmbedEditor, AudioEmbedViewer } from "~/components/RichText/extensions/audio";
 import {
   DownloadableFileEmbedEditor,
   DownloadableFileEmbedViewer,
@@ -135,6 +136,7 @@ export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) =
     placeholder: ({ node }) =>
       node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
   }),
+  AudioEmbedEditor.configure(options),
   DownloadableFileEmbedEditor.configure(options),
   LoadingAiAssetEditor,
   ImageEmbedEditor.configure(options),
@@ -151,6 +153,7 @@ export const contentViewerPlugins = [
   ...basePlugins,
   ...tablePlugins,
   AuthoringBlockId.configure({ generateIds: false }),
+  AudioEmbedViewer,
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
   ImageEmbedViewer,
