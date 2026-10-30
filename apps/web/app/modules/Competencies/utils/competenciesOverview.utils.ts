@@ -29,8 +29,6 @@ export const STATUS_DOT_CLASS_NAMES: Record<CompetencyReadiness, string> = {
   [COMPETENCY_READINESS.NO_PROFILE]: "bg-neutral-400",
 };
 
-export const PROFILE_OPTIONS_PAGE = { page: 1, perPage: 100 };
-
 export function buildOverviewQueries(
   options: CompetenciesOverviewQueryOptions,
   profiles: CompetencyProfileItem[],

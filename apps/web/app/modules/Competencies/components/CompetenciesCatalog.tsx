@@ -10,7 +10,7 @@ import { useCompetenciesCatalog } from "../hooks/useCompetenciesCatalog";
 import { UNCATEGORIZED_FILTER } from "../utils/competenciesCatalog.utils";
 
 import { CompetenciesCatalogTable } from "./CompetenciesCatalogTable";
-import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetenciesCategoryPicker } from "./CompetenciesCategoryPicker";
 
 import type { CompetenciesCatalogOptions } from "../hooks/competencies-hooks.types";
 
@@ -27,7 +27,7 @@ export function CompetenciesCatalog({ onEdit, onCreate }: CompetenciesCatalogPro
     setPage,
     perPage,
     setPerPage,
-    categories,
+    hasCategories,
     query,
     competencies,
     totalItems,
@@ -79,16 +79,15 @@ export function CompetenciesCatalog({ onEdit, onCreate }: CompetenciesCatalogPro
           wrapperClassName="w-full sm:max-w-xs"
           className="max-w-none"
         />
-        {categories.length > 0 && (
-          <CompetenciesSelect
+        {hasCategories && (
+          <CompetenciesCategoryPicker
             label={t("competencies.category")}
             hideLabel
             className="w-full sm:w-56"
             value={categoryId}
             emptyLabel={t("competencies.catalogTable.allCategories")}
-            options={[
+            leadingOptions={[
               { value: UNCATEGORIZED_FILTER, label: t("competencies.categories.none") },
-              ...categories.map((category) => ({ value: category.id, label: category.name })),
             ]}
             onChange={(value) => {
               setCategoryId(value);
@@ -134,7 +133,6 @@ export function CompetenciesCatalog({ onEdit, onCreate }: CompetenciesCatalogPro
 export { CompetenciesCatalogEditor } from "./CompetenciesCatalogEditor";
 
 export {
-  CATEGORY_OPTIONS_PAGE,
   CONDITION_KIND_ICONS,
   UNCATEGORIZED_FILTER,
   tableHeadClassName,

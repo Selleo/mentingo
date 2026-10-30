@@ -119,7 +119,7 @@ export class CompetenciesService {
   async getCategories(actor: CurrentUserType, query: CompetencyCategoriesQuery) {
     const context = await this.buildActorContext(actor);
     return this.competenciesClientService.requestWithClient((client) =>
-      client.categories(context, normalizePageQuery(query)),
+      client.categories(context, { ...normalizePageQuery(query), ids: query.ids }),
     );
   }
 
@@ -129,7 +129,11 @@ export class CompetenciesService {
       client.catalog(context, {
         ...normalizePageQuery(query),
         categoryId: normalizeCategoryFilter(query.categoryId),
-        archived: query.archived === COMPETENCIES_BOOLEAN_QUERY_VALUES.TRUE,
+        archived:
+          query.archived === undefined
+            ? undefined
+            : query.archived === COMPETENCIES_BOOLEAN_QUERY_VALUES.TRUE,
+        ids: query.ids,
       }),
     );
   }
@@ -137,7 +141,11 @@ export class CompetenciesService {
   async getProfiles(actor: CurrentUserType, query: CompetencyProfilesQuery) {
     const context = await this.buildActorContext(actor);
     return this.competenciesClientService.requestWithClient((client) =>
-      client.profiles(context, { ...normalizePageQuery(query), competencyId: query.competencyId }),
+      client.profiles(context, {
+        ...normalizePageQuery(query),
+        competencyId: query.competencyId,
+        ids: query.ids,
+      }),
     );
   }
 

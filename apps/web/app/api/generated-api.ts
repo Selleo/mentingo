@@ -47192,6 +47192,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         /** @maxLength 200 */
         search?: string;
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
       },
       params: RequestParams = {},
     ) =>
@@ -47225,6 +47230,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         categoryId?: string | "none";
         archived?: "true" | "false";
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
       },
       params: RequestParams = {},
     ) =>
@@ -47258,6 +47268,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         /** @format uuid */
         competencyId?: string;
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
       },
       params: RequestParams = {},
     ) =>

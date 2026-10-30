@@ -5,7 +5,7 @@ import type {
   CompetencySubjectWorkspace,
 } from "../competencies.types";
 
-export const SUBMITTED_DOCUMENTS_PAGE = { page: 1, perPage: 100 };
+export const SUBMITTED_DOCUMENTS_PAGE_SIZE = 20;
 
 export const countBadgeClassName =
   "flex size-6 items-center justify-center rounded-full text-xs font-semibold";

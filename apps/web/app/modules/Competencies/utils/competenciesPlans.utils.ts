@@ -1,3 +1,5 @@
+import { isConditionExpiring } from "./competenciesExpiry.utils";
+
 import type { CompetencySubjectWorkspace } from "../competencies.types";
 
 export function getSubjectRequiredSteps(workspace: CompetencySubjectWorkspace) {
@@ -35,9 +37,12 @@ export function getSubjectDocumentSteps(workspace: CompetencySubjectWorkspace) {
       (level) => level.id === standing.currentLevelId,
     );
     for (const level of definition.levels.slice(0, currentIndex + 1)) {
+      const results = standing.levels.find((result) => result.levelId === level.id)?.conditions;
       for (const condition of level.conditions) {
         const key = `${definition.id}:${condition.id}`;
         if (condition.kind !== "document" || included.has(key)) continue;
+        const result = results?.find((item) => item.conditionId === condition.id);
+        if (!isConditionExpiring(result, workspace.asOf, workspace.warningDays)) continue;
         included.add(key);
         steps.push({ definition, level, condition, pending: false });
       }

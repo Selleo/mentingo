@@ -46,7 +46,6 @@ export { CompetenciesPerson } from "./components/CompetenciesPerson";
 export { CompetenciesWorkspace } from "./components/CompetenciesWorkspace";
 
 export {
-  COMPARE_PROFILE_OPTIONS_PAGE,
   WORKSPACE_SEARCH_PARAMS,
   WORKSPACE_TABS,
   getDefaultWorkspaceTab,

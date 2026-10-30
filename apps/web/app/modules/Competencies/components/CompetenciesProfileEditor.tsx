@@ -14,8 +14,8 @@ import { Textarea } from "~/components/ui/textarea";
 
 import { useCompetenciesProfileEditor } from "../hooks/useCompetenciesProfileEditor";
 
+import { CompetenciesCompetencyPicker } from "./CompetenciesCompetencyPicker";
 import { CompetenciesProfileRequirementList } from "./CompetenciesProfileRequirementList";
-import { CompetenciesSelect } from "./CompetenciesSelect";
 
 import type { CompetenciesProfileEditorOptions } from "../hooks/competencies-hooks.types";
 
@@ -36,7 +36,8 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
     catalog,
     value,
     setValue,
-    availableCompetencies,
+    isAvailableCompetency,
+    isResolvingRequirements,
   } = useCompetenciesProfileEditor({ profile, close });
   return (
     <Dialog
@@ -81,18 +82,13 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
                       {t("competencies.profileEditor.requirementsHelp")}
                     </p>
                   </div>
-                  <CompetenciesSelect
+                  <CompetenciesCompetencyPicker
                     label={t("competencies.profileEditor.addCompetency")}
                     hideLabel
                     className="w-full sm:w-72"
                     value=""
                     placeholder={t("competencies.profileEditor.addCompetency")}
-                    options={availableCompetencies.map((competency) => ({
-                      value: competency.id,
-                      label: competency.name,
-                      description: competency.categoryName ?? undefined,
-                    }))}
-                    disabled={!availableCompetencies.length}
+                    isAvailable={isAvailableCompetency}
                     onChange={addRequirement}
                   />
                 </div>
@@ -105,6 +101,7 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
                     removeRequirement={removeRequirement}
                     updateRequirementLevel={updateRequirementLevel}
                     catalog={catalog}
+                    isResolvingRequirements={isResolvingRequirements}
                     value={value}
                   />
                 )}

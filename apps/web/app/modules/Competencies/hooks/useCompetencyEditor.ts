@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCompetencyCategories } from "~/api/queries/useCompetencyCategories";
 import { useCompetencyOptions } from "~/api/queries/useCompetencyOptions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { CATEGORY_OPTIONS_PAGE } from "../utils/competenciesCatalog.utils";
 import {
   NO_OPTIONS,
   createCompetencyDraft,
-  getCompetencyCategoryOptions,
   updateCompetencyCondition,
 } from "../utils/competencyEditor.utils";
 
@@ -32,7 +29,6 @@ export function useCompetencyEditor({
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const options = useCompetencyOptions({ language }).data ?? NO_OPTIONS;
-  const categories = useCompetencyCategories(CATEGORY_OPTIONS_PAGE).data?.data ?? [];
 
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [categoryEditorOpen, setCategoryEditorOpen] = useState(false);
@@ -91,13 +87,12 @@ export function useCompetencyEditor({
     categoryEditorOpen,
     setCategoryEditorOpen,
     selectCreatedCategory,
-    categoryOptions: getCompetencyCategoryOptions(categories, createdCategory),
+    createdCategory,
     deleteConfirmationOpen,
     setDeleteConfirmationOpen,
     deleteCompetency,
     t,
     options,
-    categories,
     setSelectedLevelId,
     draft,
     setDraft,

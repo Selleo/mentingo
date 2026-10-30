@@ -57,6 +57,7 @@ import {
   type CompetencyCatalogPageResponse,
   type CompetencyCatalogQuery,
   type CompetencyCategoriesPageResponse,
+  type CompetencyCategoriesQuery,
   type CompetencyCommandResponse,
   type CompetencyDocumentsPageResponse,
   type CompetencyMatrixPageResponse,
@@ -66,6 +67,7 @@ import {
   type CompetencyPeoplePageResponse,
   type CompetencyPeopleQuery,
   type CompetencyProfilesPageResponse,
+  type CompetencyProfilesQuery,
   type CompetencyReviewsPageResponse,
   type CompetencyReviewsQuery,
   type CompetencySubjectResponse,
@@ -105,10 +107,11 @@ export class CompetenciesController {
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
+    @Query("ids") ids: CompetencyCategoriesQuery["ids"],
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<CompetencyCategoriesPageResponse>> {
     return new BaseResponse(
-      await this.competenciesService.getCategories(actor, { page, perPage, search }),
+      await this.competenciesService.getCategories(actor, { page, perPage, search, ids }),
     );
   }
 
@@ -124,6 +127,7 @@ export class CompetenciesController {
     @Query("search") search: string | undefined,
     @Query("categoryId") categoryId: CompetencyCatalogQuery["categoryId"],
     @Query("archived") archived: CompetencyCatalogQuery["archived"],
+    @Query("ids") ids: CompetencyCatalogQuery["ids"],
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<CompetencyCatalogPageResponse>> {
     return new BaseResponse(
@@ -133,6 +137,7 @@ export class CompetenciesController {
         search,
         categoryId,
         archived,
+        ids,
       }),
     );
   }
@@ -148,10 +153,17 @@ export class CompetenciesController {
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
     @Query("competencyId") competencyId: string | undefined,
+    @Query("ids") ids: CompetencyProfilesQuery["ids"],
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<CompetencyProfilesPageResponse>> {
     return new BaseResponse(
-      await this.competenciesService.getProfiles(actor, { page, perPage, search, competencyId }),
+      await this.competenciesService.getProfiles(actor, {
+        page,
+        perPage,
+        search,
+        competencyId,
+        ids,
+      }),
     );
   }
 

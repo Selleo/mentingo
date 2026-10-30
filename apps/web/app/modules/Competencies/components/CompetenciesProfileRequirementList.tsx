@@ -9,11 +9,12 @@ import type { CompetenciesProfileEditorModel } from "../hooks/competencies-hook-
 
 type CompetenciesProfileRequirementListProps = Pick<
   CompetenciesProfileEditorModel,
-  "catalog" | "value" | "removeRequirement" | "updateRequirementLevel"
+  "catalog" | "isResolvingRequirements" | "value" | "removeRequirement" | "updateRequirementLevel"
 >;
 
 export function CompetenciesProfileRequirementList({
   catalog,
+  isResolvingRequirements,
   value,
   removeRequirement,
   updateRequirementLevel,
@@ -32,7 +33,9 @@ export function CompetenciesProfileRequirementList({
               key={requirement.competencyId}
               className="flex items-center justify-between gap-3 px-4 py-3"
             >
-              <p className="body-sm text-neutral-700">{t("competencies.archived")}</p>
+              <p className="body-sm text-neutral-700">
+                {isResolvingRequirements ? t("competencies.loading") : t("competencies.archived")}
+              </p>
               <Button
                 type="button"
                 variant="ghost"
@@ -52,7 +55,9 @@ export function CompetenciesProfileRequirementList({
           >
             <div className="min-w-0 flex-1 basis-48">
               <p className="body-sm-md truncate text-neutral-950">{competency.name}</p>
-              <p className="details text-neutral-700">{competency.categoryName}</p>
+              <p className="details text-neutral-700">
+                {competency.archived ? t("competencies.archived") : competency.categoryName}
+              </p>
             </div>
             {competency.levels.length > 0 && (
               <CompetenciesSelect

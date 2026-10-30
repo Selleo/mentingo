@@ -23175,6 +23175,20 @@
               "maxLength": 200,
               "type": "string"
             }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -23256,6 +23270,20 @@
                 }
               ]
             }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -23311,6 +23339,20 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxItems": 100,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
             }
           }
         ],

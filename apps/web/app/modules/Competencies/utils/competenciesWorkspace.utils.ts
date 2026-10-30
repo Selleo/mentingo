@@ -52,8 +52,6 @@ export function parseWorkspaceTab(value: string | null, capabilities: Capabiliti
     .otherwise(() => getDefaultWorkspaceTab(capabilities));
 }
 
-export const COMPARE_PROFILE_OPTIONS_PAGE = { page: 1, perPage: 100 };
-
 export function getWorkspacePresentation(
   capabilities: Capabilities,
   summary: CompetenciesSummary,

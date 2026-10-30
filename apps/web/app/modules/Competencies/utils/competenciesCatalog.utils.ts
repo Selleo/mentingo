@@ -11,6 +11,4 @@ export const CONDITION_KIND_ICONS: Record<CompetencyCondition["kind"], LucideIco
 
 export const UNCATEGORIZED_FILTER = "none";
 
-export const CATEGORY_OPTIONS_PAGE = { page: 1, perPage: 100 };
-
 export const tableHeadClassName = "details-md text-neutral-800";

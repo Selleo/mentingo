@@ -15,14 +15,14 @@ import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles"
 import { tableHeadClassName } from "../utils/competenciesOverview.utils";
 
 import { CompetenciesPersonAvatar } from "./CompetenciesPersonAvatar";
-import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
 import { CompetencyReadinessBadge } from "./CompetencyReadinessBadge";
 
 import type { CompetenciesOverviewModel } from "../hooks/competencies-hook-models.types";
 
 type CompetenciesPeopleTableProps = Pick<
   CompetenciesOverviewModel,
-  "execute" | "isPending" | "profiles" | "people" | "profileOptions" | "canManage" | "onPersonOpen"
+  "execute" | "isPending" | "profiles" | "people" | "canManage" | "onPersonOpen"
 >;
 
 export function CompetenciesPeopleTable({
@@ -30,7 +30,6 @@ export function CompetenciesPeopleTable({
   isPending,
   profiles,
   people,
-  profileOptions,
   canManage,
   onPersonOpen,
 }: CompetenciesPeopleTableProps) {
@@ -81,12 +80,12 @@ export function CompetenciesPeopleTable({
             </TableCell>
             <TableCell className="w-72 min-w-56">
               {canManage && profiles.length > 0 ? (
-                <CompetenciesSelect
+                <CompetenciesProfilePicker
                   label={`${t("competencies.profile")}: ${item.name}`}
                   hideLabel
                   value={item.profileId ?? ""}
+                  selectedLabel={item.profileName ?? undefined}
                   emptyLabel={t("competencies.noProfile")}
-                  options={profileOptions}
                   disabled={isPending}
                   onChange={(profileId) =>
                     void execute({

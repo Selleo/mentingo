@@ -14,8 +14,8 @@ import { OVERVIEW_VIEWS } from "../utils/competenciesOverview.utils";
 import { CompetenciesGettingStarted } from "./CompetenciesGettingStarted";
 import { CompetenciesMatrix } from "./CompetenciesMatrix";
 import { CompetenciesPeopleTable } from "./CompetenciesPeopleTable";
+import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
 import { CompetenciesReadinessFilters } from "./CompetenciesReadinessFilters";
-import { CompetenciesSelect } from "./CompetenciesSelect";
 
 import type { CompetenciesOverviewOptions } from "../hooks/competencies-hooks.types";
 
@@ -51,7 +51,6 @@ export function CompetenciesOverview({
     counts,
     totalItems,
     hasFilters,
-    profileOptions,
     resetPage,
     startSetupStep,
   } = useCompetenciesOverview({ summary, canManage, onPersonOpen, onSetupStepStart });
@@ -112,7 +111,7 @@ export function CompetenciesOverview({
             />
             {profiles.length > 0 && (
               <div className="w-full sm:w-64">
-                <CompetenciesSelect
+                <CompetenciesProfilePicker
                   label={t("competencies.profile")}
                   hideLabel
                   value={activeProfileFilter}
@@ -121,7 +120,6 @@ export function CompetenciesOverview({
                       ? t("competencies.overview.allProfiles")
                       : undefined
                   }
-                  options={profileOptions}
                   onChange={(value) => {
                     setProfileFilter(value);
                     resetPage();
@@ -178,7 +176,6 @@ export function CompetenciesOverview({
                   isPending={isPending}
                   profiles={profiles}
                   people={people}
-                  profileOptions={profileOptions}
                   canManage={canManage}
                   onPersonOpen={onPersonOpen}
                 />
@@ -218,7 +215,6 @@ export function CompetenciesOverview({
 
 export {
   OVERVIEW_VIEWS,
-  PROFILE_OPTIONS_PAGE,
   STATUS_DOT_CLASS_NAMES,
   STATUS_FILTERS,
   tableHeadClassName,

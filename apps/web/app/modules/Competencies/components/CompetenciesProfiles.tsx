@@ -16,7 +16,7 @@ import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles"
 import { CompetenciesEmpty, CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
 import { useCompetenciesProfiles } from "../hooks/useCompetenciesProfiles";
 
-import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetenciesCompetencyPicker } from "./CompetenciesCompetencyPicker";
 
 import type { CompetenciesProfilesOptions } from "../hooks/competencies-hooks.types";
 
@@ -33,7 +33,7 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
     setPage,
     perPage,
     setPerPage,
-    competencies,
+    hasCompetencies,
     query,
     profiles,
     totalItems,
@@ -91,17 +91,13 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
           wrapperClassName="w-full sm:max-w-xs"
           className="max-w-none"
         />
-        {competencies.length > 0 && (
-          <CompetenciesSelect
+        {hasCompetencies && (
+          <CompetenciesCompetencyPicker
             label={t("competencies.recordKinds.competency")}
             hideLabel
             className="w-full sm:w-56"
             value={competencyId}
             emptyLabel={t("competencies.profilesTable.allCompetencies")}
-            options={competencies.map((competency) => ({
-              value: competency.id,
-              label: competency.name,
-            }))}
             onChange={(value) => {
               setCompetencyId(value);
               setPage(1);

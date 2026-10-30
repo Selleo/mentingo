@@ -341,6 +341,9 @@ const pageQuery = {
   perPage: Type.Optional(Type.Integer({ minimum: 1, maximum: COMPETENCIES_MAX_PAGE_SIZE })),
   search: Type.Optional(Type.String({ maxLength: 200 })),
 };
+const idsQuery = Type.Optional(
+  Type.Array(UUIDSchema, { maxItems: COMPETENCIES_MAX_PAGE_SIZE, uniqueItems: true }),
+);
 const booleanQuery = Type.Optional(
   Type.Union([
     Type.Literal(COMPETENCIES_BOOLEAN_QUERY_VALUES.TRUE),
@@ -348,15 +351,17 @@ const booleanQuery = Type.Optional(
   ]),
 );
 
-export const competencyCategoriesQuerySchema = Type.Object(pageQuery);
+export const competencyCategoriesQuerySchema = Type.Object({ ...pageQuery, ids: idsQuery });
 export const competencyCatalogQuerySchema = Type.Object({
   ...pageQuery,
   categoryId: Type.Optional(Type.Union([UUIDSchema, Type.Literal(COMPETENCIES_UNCATEGORIZED)])),
   archived: booleanQuery,
+  ids: idsQuery,
 });
 export const competencyProfilesQuerySchema = Type.Object({
   ...pageQuery,
   competencyId: Type.Optional(UUIDSchema),
+  ids: idsQuery,
 });
 export const competencyPeopleQuerySchema = Type.Object({
   ...pageQuery,

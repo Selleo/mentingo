@@ -13,7 +13,7 @@ import { Textarea } from "~/components/ui/textarea";
 
 import { useCompetencyEditor } from "../hooks/useCompetencyEditor";
 
-import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetenciesCategoryPicker } from "./CompetenciesCategoryPicker";
 import { CompetencyCategoryEditor } from "./CompetencyCategoryEditor";
 import { CompetencyDeleteConfirmation } from "./CompetencyDeleteConfirmation";
 import { CompetencyLevelFields } from "./CompetencyLevelFields";
@@ -35,7 +35,7 @@ export function CompetencyEditor({
     categoryEditorOpen,
     setCategoryEditorOpen,
     selectCreatedCategory,
-    categoryOptions,
+    createdCategory,
     setDeleteConfirmationOpen,
     deleteCompetency,
     saveCompetencyDraft,
@@ -78,11 +78,13 @@ export function CompetencyEditor({
                   />
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <CompetenciesSelect
+                  <CompetenciesCategoryPicker
                     label={t("competencies.category")}
                     value={draft.categoryId ?? ""}
                     emptyLabel={t("competencies.categories.none")}
-                    options={categoryOptions}
+                    selectedLabel={
+                      createdCategory?.id === draft.categoryId ? createdCategory.name : undefined
+                    }
                     createAction={{
                       label: t("competencies.categories.new"),
                       onSelect: () => setCategoryEditorOpen(true),

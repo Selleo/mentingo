@@ -15,7 +15,24 @@ import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 
-type CompetenciesSelectOption = { value: string; label: string; description?: string };
+export type CompetenciesSelectOption = { value: string; label: string; description?: string };
+
+export type CompetenciesSelectProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: CompetenciesSelectOption[];
+  emptyLabel?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  hideLabel?: boolean;
+  className?: string;
+  createAction?: { label: string; onSelect: () => void };
+  /** Label of the selected value when it is not among the loaded options. */
+  selectedLabel?: string;
+  /** Searches on the server instead of filtering the loaded options. */
+  onSearchChange?: (search: string) => void;
+};
 
 export function CompetenciesSelect({
   label,
@@ -28,27 +45,31 @@ export function CompetenciesSelect({
   hideLabel = false,
   className,
   createAction,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: CompetenciesSelectOption[];
-  emptyLabel?: string;
-  placeholder?: string;
-  disabled?: boolean;
-  hideLabel?: boolean;
-  className?: string;
-  createAction?: { label: string; onSelect: () => void };
-}) {
+  selectedLabel,
+  onSearchChange,
+}: CompetenciesSelectProps) {
   const { t } = useTranslation();
   const id = useId();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [chosen, setChosen] = useState<CompetenciesSelectOption>();
   const triggerRef = useRef<HTMLElement | null>(null);
-  const selected = options.find((option) => option.value === value);
-  const triggerLabel = selected?.label ?? (value ? undefined : emptyLabel);
+  const selected =
+    options.find((option) => option.value === value) ??
+    (chosen?.value === value ? chosen : undefined);
+  const triggerLabel = selected?.label ?? (value ? selectedLabel : emptyLabel);
+  const changeSearch = (next: string) => {
+    setSearch(next);
+    onSearchChange?.(next);
+  };
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    if (!next && search) changeSearch("");
+  };
   const choose = (next: string) => {
+    setChosen(options.find((option) => option.value === next));
     onChange(next);
-    setOpen(false);
+    changeOpen(false);
   };
 
   return (
@@ -56,7 +77,7 @@ export function CompetenciesSelect({
       <Label htmlFor={id} className={cn(hideLabel && "sr-only")}>
         {label}
       </Label>
-      <Popover open={open} onOpenChange={setOpen} modal>
+      <Popover open={open} onOpenChange={changeOpen} modal>
         <PopoverTrigger asChild>
           <Button
             ref={(node) => {
@@ -89,8 +110,10 @@ export function CompetenciesSelect({
           align="start"
           className="w-[var(--radix-popover-trigger-width)] min-w-64 p-0"
         >
-          <Command className="[&_[cmdk-input]]:outline-none">
+          <Command className="[&_[cmdk-input]]:outline-none" shouldFilter={!onSearchChange}>
             <CommandInput
+              value={search}
+              onValueChange={changeSearch}
               placeholder={t("competencies.select.search")}
               className="outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
             />
@@ -128,7 +151,7 @@ export function CompetenciesSelect({
                   <CommandItem
                     forceMount
                     onSelect={() => {
-                      setOpen(false);
+                      changeOpen(false);
                       requestAnimationFrame(createAction.onSelect);
                     }}
                     className="text-primary-700"

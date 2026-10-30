@@ -1,7 +1,9 @@
+import { Pagination } from "~/components/Pagination/Pagination";
 import { Accordion } from "~/components/ui/accordion";
 
 import { CompetenciesEmpty, CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
 import { useCompetenciesDocuments } from "../hooks/useCompetenciesDocuments";
+import { SUBMITTED_DOCUMENTS_PAGE_SIZE } from "../utils/competenciesDocuments.utils";
 
 import { CompetenciesDocumentGroup } from "./CompetenciesDocumentGroup";
 import { CompetenciesSection } from "./CompetenciesSection";
@@ -25,6 +27,9 @@ export function CompetenciesDocuments({
     canSubmit,
     showsSubmissions,
     recordsQuery,
+    submittedCount,
+    page,
+    setPage,
     groups,
     levelIndexOf,
     description,
@@ -69,6 +74,15 @@ export function CompetenciesDocuments({
             );
           })}
         </Accordion>
+      )}
+      {submittedCount > SUBMITTED_DOCUMENTS_PAGE_SIZE && (
+        <Pagination
+          currentPage={page}
+          totalItems={submittedCount}
+          itemsPerPage={SUBMITTED_DOCUMENTS_PAGE_SIZE}
+          canChangeItemsPerPage={false}
+          onPageChange={setPage}
+        />
       )}
       {submission && (
         <CompetencyEvidenceForm

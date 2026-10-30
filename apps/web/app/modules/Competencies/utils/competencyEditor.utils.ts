@@ -1,21 +1,10 @@
 import { match } from "ts-pattern";
 
 import type {
-  CompetencyCategory,
   CompetencyCondition,
   CompetencyInput,
   CompetencyOptions,
 } from "../competencies.types";
-
-export function getCompetencyCategoryOptions(
-  categories: Pick<CompetencyCategory, "id" | "name">[],
-  createdCategory?: Pick<CompetencyCategory, "id" | "name">,
-) {
-  const availableCategories = [...categories];
-  if (createdCategory && !categories.some((category) => category.id === createdCategory.id))
-    availableCategories.push(createdCategory);
-  return availableCategories.map((category) => ({ value: category.id, label: category.name }));
-}
 
 export const NO_OPTIONS: CompetencyOptions = { courses: [], people: [] };
 

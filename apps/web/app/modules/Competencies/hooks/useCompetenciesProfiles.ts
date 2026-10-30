@@ -6,7 +6,7 @@ import { useCompetencyProfiles } from "~/api/queries/useCompetencyProfiles";
 import { useDebounce } from "~/hooks/useDebounce";
 import { usePaginationReducer } from "~/hooks/usePaginationReducer";
 
-import { COMPETENCY_OPTIONS_PAGE } from "../utils/competenciesProfiles.utils";
+import { PICKER_PAGE } from "../utils/competenciesPicker.utils";
 
 export function useCompetenciesProfiles() {
   const { t } = useTranslation();
@@ -14,7 +14,7 @@ export function useCompetenciesProfiles() {
   const { pagination, setSearch, setPage, setPerPage } = usePaginationReducer({ perPage: 20 });
   const { search, page, perPage } = pagination;
   const debouncedSearch = useDebounce(search.trim());
-  const competencies = useCompetencyCatalog(COMPETENCY_OPTIONS_PAGE).data?.data ?? [];
+  const hasCompetencies = Boolean(useCompetencyCatalog(PICKER_PAGE).data?.pagination.totalItems);
   const query = useCompetencyProfiles({
     page,
     perPage,
@@ -35,7 +35,7 @@ export function useCompetenciesProfiles() {
     setPage,
     perPage,
     setPerPage,
-    competencies,
+    hasCompetencies,
     query,
     profiles,
     totalItems,

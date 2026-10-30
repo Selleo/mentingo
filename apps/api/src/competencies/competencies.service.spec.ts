@@ -181,7 +181,16 @@ describe("CompetenciesService", () => {
     await service.getCatalog(actor, { categoryId: "none" });
     expect(sdk.catalog).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ categoryId: null, archived: false }),
+      expect.objectContaining({ categoryId: null, archived: undefined }),
+    );
+  });
+
+  it("forwards listed ids so selected competencies resolve outside the current page", async () => {
+    const { service, sdk } = setup();
+    await service.getCatalog(actor, { ids: [SUBJECT_ID], archived: "false" });
+    expect(sdk.catalog).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ ids: [SUBJECT_ID], archived: false }),
     );
   });
 

@@ -8,10 +8,10 @@ import { Button } from "~/components/ui/button";
 
 import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
 import { CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
-import { COMPARE_PROFILE_OPTIONS_PAGE } from "../utils/competenciesWorkspace.utils";
+import { PICKER_PAGE } from "../utils/competenciesPicker.utils";
 
 import { CompetenciesDocuments } from "./CompetenciesDocuments";
-import { CompetenciesSelect } from "./CompetenciesSelect";
+import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
 import { CompetencySubject } from "./CompetencySubject";
 
 export function CompetenciesPerson({
@@ -31,7 +31,9 @@ export function CompetenciesPerson({
 }) {
   const { t } = useTranslation();
   const [compareProfileId, setCompareProfileId] = useState("");
-  const profiles = useCompetencyProfiles(COMPARE_PROFILE_OPTIONS_PAGE, canCompare).data?.data ?? [];
+  const hasProfiles = Boolean(
+    useCompetencyProfiles(PICKER_PAGE, canCompare).data?.pagination.totalItems,
+  );
   const { data, isPending, isError, refetch } = useCompetencySubject(
     subjectId,
     compareProfileId || undefined,
@@ -70,13 +72,12 @@ export function CompetenciesPerson({
             canManage={canManage}
             headerAction={
               canCompare &&
-              profiles.length > 0 && (
-                <CompetenciesSelect
+              hasProfiles && (
+                <CompetenciesProfilePicker
                   label={t("competencies.compareProfile")}
                   hideLabel
                   value={compareProfileId}
                   emptyLabel={t("competencies.compareWithAssigned")}
-                  options={profiles.map((item) => ({ value: item.id, label: item.name }))}
                   onChange={setCompareProfileId}
                 />
               )
