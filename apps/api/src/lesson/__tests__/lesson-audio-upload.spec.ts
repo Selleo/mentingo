@@ -6,7 +6,11 @@ import path from "node:path";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
 
+import { AiService } from "src/ai/services/ai.service";
 import { FeaturesGuard } from "src/common/guards/features.guard";
+import { CourseLearningWriteInterceptor } from "src/course-repetition/course-learning-write.interceptor";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
+import { CourseService } from "src/courses/course.service";
 
 jest.mock("../services/adminLesson.service", () => ({ AdminLessonService: class {} }));
 jest.mock("../services/lesson.service", () => ({ LessonService: class {} }));
@@ -15,7 +19,7 @@ import { LessonController } from "../lesson.controller";
 import { AdminLessonService } from "../services/adminLesson.service";
 import { LessonService } from "../services/lesson.service";
 
-import type { INestApplication } from "@nestjs/common";
+import type { CallHandler, ExecutionContext, INestApplication } from "@nestjs/common";
 
 describe("lesson audio multipart upload", () => {
   let app: INestApplication;
@@ -43,8 +47,14 @@ describe("lesson audio multipart upload", () => {
       providers: [
         { provide: AdminLessonService, useValue: { uploadFileToLesson: upload } },
         { provide: LessonService, useValue: {} },
+        { provide: AiService, useValue: {} },
+        { provide: "DB", useValue: {} },
+        { provide: CourseRepetitionService, useValue: {} },
+        { provide: CourseService, useValue: {} },
       ],
     })
+      .overrideInterceptor(CourseLearningWriteInterceptor)
+      .useValue({ intercept: (_context: ExecutionContext, next: CallHandler) => next.handle() })
       .overrideGuard(FeaturesGuard)
       .useValue({ canActivate: () => true })
       .compile();
