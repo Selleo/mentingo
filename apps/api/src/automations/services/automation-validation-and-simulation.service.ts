@@ -32,6 +32,7 @@ import {
   type AutomationWorkflowIssue,
   type AutomationPlaceholderValue,
 } from "@repo/shared";
+import { validate as isUuid } from "uuid";
 
 import { EmailService } from "src/common/emails/emails.service";
 import { isJsonValue } from "src/common/utils/isJsonValue";
@@ -175,15 +176,19 @@ export class AutomationValidationAndSimulationService {
     step: AutomationConditionStep,
     tenantId?: UUIDType,
   ): Promise<AutomationWorkflowIssue[]> {
-    if (!step.config.equals) {
+    const groupId = step.config.equals;
+
+    if (!groupId) {
       return [];
     }
 
     const groupExists =
-      await this.automationRecipientOptionsRepository.doesAutomationRecipientSelectionExist(
-        { type: AUTOMATION_RECIPIENT_TYPES.GROUP, groupId: step.config.equals },
+      isUuid(groupId) &&
+      groupId === groupId.toLowerCase() &&
+      (await this.automationRecipientOptionsRepository.doesAutomationRecipientSelectionExist(
+        { type: AUTOMATION_RECIPIENT_TYPES.GROUP, groupId },
         tenantId,
-      );
+      ));
 
     if (groupExists) {
       return [];
