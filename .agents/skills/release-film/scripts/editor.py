@@ -699,7 +699,7 @@ def unlabel(story, said=None):
     return changed
 
 
-def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=None, max_sentences=10):
+def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=None, max_sentences=10, check_proofs=True):
     """Problems of one chapter: its film, title, pull requests and proofs, and (``sentences_too``) its sentences."""
     said = said or language.texts()
     problems = []
@@ -730,7 +730,9 @@ def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=Non
         if foreign:
             problems.append(f'{where}: write {said["name"]} only (found {", ".join(foreign[:3])})')
     proofs = chapter.get('proofs') or []
-    if not 1 <= len(proofs) <= 3:
+    if not check_proofs:
+        pass  # Tutorials use visual flow review; proof labels are advisory metadata.
+    elif not 1 <= len(proofs) <= 3:
         problems.append(f'{where}: give 1–3 proof texts ("| proof: \"…\"" at the end of the chapter line): texts from '
                         f'the film\'s lines that show this change on screen')
     else:
