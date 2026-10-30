@@ -10,6 +10,9 @@ on:
       - .agents/skills/release-film/tests/test_self_onboarding*.py
       - .agents/skills/release-film/tests/test_elevenlabs*.py
       - scripts/self-onboarding-publish/**
+      - apps/web/e2e/flows/learning-paths/expect-learning-path-access.flow.ts
+      - apps/web/e2e/recording-checks/**
+      - apps/web/playwright.self-onboarding-checks.config.ts
 permissions:
   contents: read
 concurrency:
@@ -43,3 +46,7 @@ jobs:
         run: corepack pnpm install --frozen-lockfile
       - name: Test the Self-onboarding publisher
         run: node --test scripts/self-onboarding-publish/publisher.test.mjs
+      - name: Install browser for recorder helper checks
+        run: corepack pnpm --filter web exec playwright install --with-deps chromium
+      - name: Check recorder assertions against seeded progress states
+        run: corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import sys
+import subprocess
 from types import SimpleNamespace
 
 sys.dont_write_bytecode = True
@@ -165,6 +166,17 @@ def generate(args):
     if os.environ.get('GUIDE_PUBLISH_API_KEY') or os.environ.get('AWS_SECRET_ACCESS_KEY'):
         raise ValueError('Recording must run without publishing or storage credentials')
     entries, configured = [], False
+    skipped = []
+
+    def skip_flow(domain, flow, stage, error, code=None):
+        reason = recording._hide_tokens(str(error), run)[:1000]
+        entry = {'domain': domain['key'], 'flowId': flow['id'], 'stage': stage, 'reason': reason}
+        if code:
+            entry['language'] = code
+        skipped.append(entry)
+        core.save(run / 'review/skipped-flows.json', {'skippedFlows': skipped})
+        print(f"Self-onboarding: skipped {flow['id']} ({code or 'all languages'}, {stage}): {reason}",
+              file=sys.stderr, flush=True)
     original_environment = {name: os.environ.get(name) for name in
                             ('RELEASE_FILM_RUN', 'RELEASE_FILM_VOICE', 'ELEVENLABS_VOICE_ID')}
     trusted_addon = core.addon(args.repository, Path(args.repo))
@@ -196,8 +208,8 @@ def generate(args):
                 # Persist the random choice before any paid work or camera setup.
                 core.save(cache / 'state.json', state, mode=0o600)
             # The browser is invoked only here, never once per language.
-            references = {}
-            for flow in domain['flows']:
+            references, failed_captures = {}, set()
+            for flow_index, flow in enumerate(domain['flows'], 1):
                 contract = flow_contract(flow)
                 old_capture = visual['flows'].get(flow['id'], {})
                 reference = old_capture.get('capture')
@@ -206,6 +218,8 @@ def generate(args):
                 if plan.get('force') and old_capture.get('captureRequestId') != args.workflow_run_id:
                     already_captured = False
                 if changed and not already_captured:
+                    print(f"Self-onboarding [{domain_key}] flow {flow_index}/{len(domain['flows'])}: recording {flow['id']}",
+                          file=sys.stderr, flush=True)
                     if not configured:
                         ready = doctor.check(args.repository)
                         if not ready['ok']:
@@ -224,7 +238,13 @@ def generate(args):
                         harness.setup(run, addon['harness'])
                         harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
                         configured = True
-                    reference = recording.capture_flow(run, flow, domain, commit, args.repository, addon, cache)
+                    try:
+                        reference = recording.capture_flow(run, flow, domain, commit, args.repository, addon, cache)
+                    except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                        skip_flow(domain, flow, 'capture', error)
+                        failed_captures.add(flow['id'])
+                        continue
+                    print(f"Self-onboarding [{domain_key}]: captured {flow['id']}", file=sys.stderr, flush=True)
                 if reference:
                     recording.checked_file(cache, reference['path'], reference['sha256'])
                 references[flow['id']] = reference
@@ -234,8 +254,10 @@ def generate(args):
                 visual['retiredFlowIds'] = domain.get('retiredFlowIds', [])
                 core.save(cache / 'state.json', state, mode=0o600)
             # Drop removed flows from the current index; older published revisions remain intact.
-            visual['flows'] = {f['id']: visual['flows'][f['id']] for f in domain['flows']}
+            visual['flows'] = {f['id']: visual['flows'][f['id']] for f in domain['flows'] if f['id'] in visual['flows']}
             visual['commit'] = commit
+            if len(failed_captures) == len(domain['flows']):
+                continue
             for code, report in group['reports'].items():
                 profile = hashlib.sha256(json.dumps({'provider': profiles[code],
                     'pronunciation': trusted_addon.get('pronunciation', {}), 'renderer': 'tutorial-v1'}, sort_keys=True).encode()).hexdigest()
@@ -245,6 +267,8 @@ def generate(args):
                 localized_domain, localized_metadata = recording.localize_domain(domain, code, previous.get('localizedMetadata'))
                 flows = {}
                 for flow in domain['flows']:
+                    if flow['id'] in failed_captures:
+                        continue
                     old = previous.get('flows', {}).get(flow['id'], {})
                     reference = references[flow['id']]
                     capture_id = reference['id'] if reference else None
@@ -256,10 +280,17 @@ def generate(args):
                         recording.checked_file(cache, old['segment']['path'], old['segment']['sha256'])
                         segment = old['segment']
                     else:
-                        if not reference:
-                            raise ValueError('Legacy build has no portable raw capture; explicitly force this domain once before adding or rebuilding a language')
-                        previous['needsPublication'] = True
-                        segment = recording.render_flow(run, flow, domain, code, commit, args.repository, addon, cache, reference)
+                        try:
+                            if not reference:
+                                raise ValueError('Legacy build has no portable raw capture; explicitly force this domain once before adding or rebuilding a language')
+                            previous['needsPublication'] = True
+                            print(f"Self-onboarding [{domain_key}/{code}]: rendering {flow['id']}", file=sys.stderr, flush=True)
+                            segment = recording.render_flow(run, flow, domain, code, commit, args.repository, addon, cache, reference)
+                        except (RuntimeError, ValueError, OSError, subprocess.SubprocessError, SystemExit) as error:
+                            if isinstance(error, SystemExit) and error.code in (0, 130, 143):
+                                raise
+                            skip_flow(domain, flow, 'render', error, code)
+                            continue
                     flows[flow['id']] = {'contract': flow_contract(flow), 'commit': commit, 'segment': segment,
                                         'voiceProfile': profile, 'captureId': capture_id}
                     previous.setdefault('flows', {})[flow['id']] = flows[flow['id']]
@@ -268,13 +299,19 @@ def generate(args):
                     previous['localizedMetadata'] = localized_metadata
                     current['domains'][domain_key] = previous
                     core.save(cache / 'state.json', state, mode=0o600)
+                if not flows:
+                    print(f"Self-onboarding: no usable flows for {domain_key}/{code}; no video generated", file=sys.stderr, flush=True)
+                    continue
+                localized_domain['flows'] = [f for f in localized_domain['flows'] if f['id'] in flows]
                 identity = domain_identity(localized_domain, flows)
                 changed = previous.get('needsPublication') or previous.get('identity') != identity
                 if changed:
                     destination = out / domain_key / code
+                    print(f"Self-onboarding [{domain_key}/{code}]: assembling {len(flows)} chapters", file=sys.stderr, flush=True)
                     entry = recording.assemble(localized_domain, code, flows, cache, destination, commit,
                                                report['version'], args.workflow_run_id)
                     entry['video'] = str(Path(entry['video']).relative_to(out))
+                    entry['skippedFlowIds'] = [f['id'] for f in domain['flows'] if f['id'] not in flows]
                     entries.append(entry)
                 current['domains'][domain_key] = {'commit': commit, 'identity': identity, 'flows': flows,
                     'needsPublication': bool(changed), 'localizedMetadata': localized_metadata,
@@ -284,13 +321,13 @@ def generate(args):
         captures['commit'] = commit
         out.mkdir(parents=True, exist_ok=True)
         manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
-                    'workflowRunId': args.workflow_run_id, 'domains': entries}
+                    'workflowRunId': args.workflow_run_id, 'domains': entries, 'complete': not skipped, 'skippedFlows': skipped}
         core.save(out / 'manifest.json', manifest)
         if entries:
             state['pendingBundle'] = str(out.relative_to(cache))
             state['pendingSelection'] = sorted([[p['language'], d['key']] for p in reports for d in p['domains']])
         core.save(cache / 'state.json', state, mode=0o600)
-        return {'ok': True, 'videos': len(entries), 'manifest': str(out / 'manifest.json')}
+        return {'ok': True, 'videos': len(entries), 'skippedFlows': skipped, 'manifest': str(out / 'manifest.json')}
     finally:
         # Stop all owned children before a later trusted step receives storage credentials.
         try:

@@ -27,6 +27,10 @@ on:
         description: Analyze coverage and flow changes without recording or publishing
         default: false
         type: boolean
+      visual_review:
+        description: Optional advisory image review (slower; never blocks generation)
+        default: false
+        type: boolean
       publish:
         description: Publish the reviewed feature videos to Helpdesk (production default-branch runs only)
         default: false
@@ -194,7 +198,7 @@ jobs:
           python3 -m venv "$RELEASE_FILM_HOME/tools/elevenlabs"
           "$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
           echo "RELEASE_FILM_TTS_PYTHON=$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" >> "$GITHUB_ENV"
-      - name: Record changed flows and assemble complete videos
+      - name: Record changed flows and assemble available videos
         if: ${{ !inputs.dry_run && !inputs.resume_publication }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -205,6 +209,7 @@ jobs:
           ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
           ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
           ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
+          SELF_ONBOARDING_VISUAL_REVIEW: ${{ inputs.visual_review && '1' || '0' }}
         run: |
           python3 "$S/self_onboarding.py" generate --plan "$RUNNER_TEMP/self-onboarding-plan.json" --cache "$CACHE" \
             --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
@@ -274,6 +279,20 @@ jobs:
             ${{ env.CACHE }}/bundles/**/timeline.json
           if-no-files-found: error
           retention-days: 14
+      - name: Report skipped flows
+        if: ${{ always() && !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['CACHE'])/'bundles'/os.environ['GITHUB_RUN_ID']/'manifest.json'
+          if path.exists():
+              manifest = json.loads(path.read_text())
+              skipped = manifest.get('skippedFlows', [])
+              print(f"### Generated {len(manifest['domains'])} videos; skipped {len(skipped)} flow attempts")
+              for item in skipped:
+                  reason = ' '.join(item['reason'].split())[:240]
+                  print(f"- {item['domain']} / {item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}")
+          PY
       - name: Report semantic decisions
         if: ${{ always() && !inputs.resume_publication }}
         run: |

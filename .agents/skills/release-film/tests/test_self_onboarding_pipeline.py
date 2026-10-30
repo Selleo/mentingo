@@ -124,6 +124,8 @@ class PipelineTest(unittest.TestCase):
         self.assertIn('Business specification', result)
         self.assertIn('self-onboarding.fixture.ts', result)
         self.assertIn('Reuse seeded courses, groups and people', result)
+        self.assertIn('expectLearningPathAccessFlow', result)
+        self.assertIn('Both Start path and Continue path are valid', result)
 
     def test_exact_business_spec_selects_its_complete_feature_video(self):
         selected = self_onboarding.select_spec_domains(self.catalog, 'docs/specs/learning-paths-business-spec.md')
@@ -354,7 +356,7 @@ class WorkflowsTest(unittest.TestCase):
         workflow = self.load('self-onboarding.yml')
         steps = workflow['jobs']['generate']['steps']
         preflight = next(step for step in steps if step.get('name') == 'Check recording credentials before model work')
-        recording = next(step for step in steps if step.get('name') == 'Record changed flows and assemble complete videos')
+        recording = next(step for step in steps if step.get('name') == 'Record changed flows and assemble available videos')
         for name in narrators.VOICE_VARIABLES:
             self.assertEqual(preflight['env'][name], '${{ vars.' + name + ' }}')
             self.assertEqual(recording['env'][name], preflight['env'][name])

@@ -23,6 +23,36 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def test_default_generation_does_not_wait_for_visual_review(self):
+        story, model = self.review_fixture([])
+        with patch.dict(os.environ, {'SELF_ONBOARDING_VISUAL_REVIEW': '0'}):
+            report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'disabled')
+        model.assert_not_called()
+
+    def test_english_labels_reuse_narration_without_a_model_call(self):
+        model = self.patch(recording.llm, 'complete', side_effect=AssertionError('English needs no translation'))
+        localized, description = recording.localize_story(self.chapter, 'en', 'Create a path.')
+        self.assertEqual(description, 'Create a path.')
+        self.assertEqual([s['text'] for s in localized['sentences']], [s['text'] for s in self.chapter['sentences']])
+        self.assertEqual([s['action'] for s in localized['sentences']], [0, 1, 2])
+        self.assertTrue(all(s['label'] for s in localized['sentences']))
+        model.assert_not_called()
+
+    def test_tutorial_worker_has_a_short_bounded_deadline_and_two_browser_tries(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(folder/'gap.json', {'tutorialMode': True})
+        self.patch(recording.gaps, 'runner_wait', return_value=999)
+        self.assertEqual(recording.gaps.deadlines(run, 100, 'browse'), (340, 400))
+        (folder/'scene.spec.ts').write_text('test scene')
+        (folder/'tries').mkdir()
+        for index in range(2):
+            (folder/'tries'/f'{index}.spec.ts').write_text('previous try')
+        result = recording.gaps.try_scene(run, {}, {}, 'browse')
+        self.assertFalse(result['ok'])
+        self.assertIn('two tries', result['error'])
+
     def test_worker_try_preserves_demo_environment_when_reloading_base_recipe(self):
         run = self.root/'run'
         (run/'checkout').mkdir(parents=True)
@@ -105,6 +135,9 @@ class LocalizationTest(unittest.TestCase):
         self.assertIn('did not save narration', str(error))
 
     def review_fixture(self, answers):
+        manager = patch.dict(os.environ, {'SELF_ONBOARDING_VISUAL_REVIEW': '1'})
+        manager.start()
+        self.addCleanup(manager.stop)
         folder = self.root/'capture'
         core.save(folder/'capture.json', {'actions_text': ['Open editor', 'Save']})
         story = {'chapters': [copy.deepcopy(self.chapter)], 'keys': {'F1': str(folder)}}
@@ -275,12 +308,64 @@ class LocalizationTest(unittest.TestCase):
         self.camera.assert_called_once()
         self.setup.assert_called_once()
         self.assertEqual(core.load(self.root/'run/meta.json')['recordingMode'], 'self-onboarding')
+
         self.assertEqual(self.render.call_count,2)
         references=[call.args[-1]['id'] for call in self.render.call_args_list]
         self.assertEqual(references[0],references[1])
         self.assertEqual([call.args[3] for call in self.render.call_args_list],['en','pl'])
         self.assertEqual([d['metadata']['title'] for d in core.load(result['manifest'])['domains']],
                          ['Development Paths','Ścieżki rozwoju'])
+
+    def test_failed_capture_is_skipped_and_remaining_flows_are_assembled_in_both_languages(self):
+        second = dict(copy.deepcopy(self.flow), id='next-flow')
+        self.domain['flows'].append(second)
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        def capture(run, flow, domain, commit, *args):
+            if flow['id'] == self.flow['id']:
+                raise RuntimeError('Expected Start path, received Continue path')
+            return self.raw(flow, commit)
+        self.camera.side_effect = capture
+        result = self.generate()
+        self.assertEqual(result['videos'], 2)
+        self.assertEqual(len(result['skippedFlows']), 1)
+        manifest = core.load(result['manifest'])
+        self.assertFalse(manifest['complete'])
+        self.assertEqual(manifest['domains'][0]['skippedFlowIds'], [self.flow['id']])
+        for call in self.assemble.call_args_list:
+            self.assertEqual([f['id'] for f in call.args[0]['flows']], ['next-flow'])
+            self.assertEqual(set(call.args[2]), {'next-flow'})
+
+    def test_all_failed_captures_produce_a_summary_without_an_empty_video_or_publication(self):
+        self.setup_generator()
+        self.camera.side_effect = RuntimeError('No passing take')
+        result = self.generate()
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['videos'], 0)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'capture')
+        self.assertNotIn('pendingBundle', core.load(self.cache/'state.json'))
+        self.render.assert_not_called()
+        self.assemble.assert_not_called()
+
+    def test_failed_language_render_does_not_discard_the_other_language(self):
+        self.setup_generator()
+        successful_render = self.render.side_effect
+        def render(*args):
+            if args[3] == 'pl':
+                raise SystemExit('Narration provider failed')
+            return successful_render(*args)
+        self.render.side_effect = render
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'render')
+
+    def test_startup_failure_is_not_misreported_as_a_skipped_chapter(self):
+        self.setup_generator()
+        self.setup.side_effect = RuntimeError('Database unavailable')
+        with self.assertRaisesRegex(RuntimeError, 'Database unavailable'):
+            self.generate()
+        self.camera.assert_not_called()
 
     def test_adding_polish_later_never_starts_browser(self):
         self.setup_generator()
@@ -308,8 +393,9 @@ class LocalizationTest(unittest.TestCase):
         state=core.load(self.cache/'state.json'); state.pop('captures')
         core.save(self.cache/'state.json',state)
         self.camera.reset_mock()
-        with self.assertRaisesRegex(ValueError,'explicitly force'):
-            self.generate(codes=('pl',),action='reuse',name='legacy')
+        result = self.generate(codes=('pl',),action='reuse',name='legacy')
+        self.assertEqual(result['videos'], 0)
+        self.assertIn('explicitly force', result['skippedFlows'][0]['reason'])
         self.camera.assert_not_called()
 
     def test_analyze_calls_semantic_planner_once_for_both_languages(self):
@@ -428,7 +514,9 @@ class LocalizationTest(unittest.TestCase):
         before = os.environ.get('ELEVENLABS_VOICE_ID')
         render = self.render.side_effect
         self.render.side_effect = RuntimeError('Synthetic render failure')
-        with self.assertRaisesRegex(RuntimeError, 'Synthetic render failure'): self.generate()
+        result = self.generate()
+        self.assertEqual(result['videos'], 0)
+        self.assertEqual(len(result['skippedFlows']), 2)
         self.assertEqual(os.environ.get('ELEVENLABS_VOICE_ID'), before)
         self.render.side_effect = render
         self.camera.reset_mock()

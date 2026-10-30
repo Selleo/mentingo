@@ -2,8 +2,9 @@
 
 Flow segments are immutable build inputs. A candidate code change never enters this
 module until the semantic planner has selected that flow for recording. Every required
-flow must pass camera, narration and visual coverage checks; none can be dropped to
-make a shorter release recap. Legacy camera fields named ``prs`` are source slots here,
+flow is attempted with camera and narration validation. Failed flows are reported and
+skipped while successful chapters continue; visual review is optional and advisory.
+Legacy camera fields named ``prs`` are source slots here,
 backed by real business-spec URLs, and never become fictitious pull-request evidence.
 """
 import copy
@@ -59,9 +60,13 @@ def tutorial_brief(original, flow, spec_text, code):
     setup = setup.replace('change', 'flow').replace('pull request', 'source specification')
     narration = original.split('The format (of ', 1)[1].split('If you learned', 1)[0]
     narration = 'The format (of ' + narration.replace('pull requests', 'source slots')
-    return ('# Helpdesk tutorial flow\n\nFilm language: ' + language.texts({'language': code})['name'] + '.\n'
+    return ('# Self-onboarding tutorial flow\n\nFilm language: ' + language.texts({'language': code})['name'] + '.\n'
             'Teach the complete current task, not what changed in a release. '
-            'There is no release introduction, closing, cross-chapter reference, or arbitrary word target. '
+            'There is no release introduction, closing, or cross-chapter reference. '
+            'Aim for one focused 20–40 second scene, with 3–4 concise sentences (roughly 40–70 words). '
+            'Show only the essential happy path, prerequisites off camera; avoid repeated tours and filler. '
+            'Use locator waits instead of fixed sleeps. Make the first try within 90 seconds; at most two browser '
+            'tries (one repair), then report failure so the next flow can continue. '
             'Every prerequisite, required visible action and expected outcome below must be covered. '
             'If any cannot be demonstrated, report failure; never omit it. '
             'Other flows are recorded separately and may be reused in future versions.\n\n'
@@ -76,9 +81,18 @@ def tutorial_brief(original, flow, spec_text, code):
             'existing factories, always supplying realistic names, descriptions and emails. '
             'Do not use default factory names, E2E/Worker/Readonly labels, random ID suffixes, test courses '
             'or isolated test workspaces in the footage. Keep login and setup off camera.\n' +
+            '\n## State-aware assertions\nSeeded learners may already have course progress, and earlier flows '
+            'may have changed shared demo data. Assert only this flow\'s required outcome, not unrelated initial '
+            'states or guessed button text. For path assignment/enrollment, use expectLearningPathAccessFlow '
+            'from apps/web/e2e/flows/learning-paths/expect-learning-path-access.flow.ts in the member learner '
+            'view after verifying the actual assignment. It checks that the path has an available course link. '
+            'Both Start path and Continue path are valid; neither label proves group membership or is required '
+            'for enrollment. Only test an exact progress state in a flow that explicitly demonstrates progress, '
+            'with that state deliberately arranged beforehand. On a failed try, fix the assertion or setup '
+            'that contradicts the observed valid state before trying again; do not repeat the same expectation.\n' +
             '\n## Narration\nWrite the requested story.txt immediately after a passing take. '
             'Use the film language named above, present tense, explain the visible actions and result. '
-            'Use enough concise sentences to teach the entire flow (at least three pinned sentences); '
+            'Use 3–4 concise sentences, with at least three action pins, to teach the flow; '
             'do not describe it as new or mention a release. Pin every sentence to its verified action. '
             'Keep setup and authentication outside narration. No unfilmed promises.\n' + narration +
             '\nProof labels are optional hints for review; concise descriptions of the demonstrated outcome are fine.\n' +
@@ -108,6 +122,7 @@ def flow_failure(run, flow_id, folder, verdict):
         'take': {k: result[k] for k in ('error', 'hint', 'page') if k in result},
         'latestTry': {k: latest[k] for k in ('ok', 'error', 'hint') if k in latest}}, run)
     core.save(Path(run)/'review/flow-failure.json', report)
+    core.save(Path(run)/'review'/flow_id/'flow-failure.json', report)
     if report['take'].get('error'):
         reason = report['take']['error']
     elif not report['takePassed']:
@@ -144,7 +159,7 @@ def capture_flow(run, flow, domain, commit, repo_slug, addon, cache):
     if not bases:
         raise ValueError(f'No existing Playwright fixture for {flow["id"]}')
     scene_id = domain['key'].replace('.', '-') + '-' + code + '-' + flow['id']
-    gap = {'id': scene_id, 'title': flow['title'], 'prs': [1], 'base': bases[0],
+    gap = {'id': scene_id, 'title': flow['title'], 'prs': [1], 'base': bases[0], 'tutorialMode': True,
            'show': json.dumps(flow.get('contract', flow), ensure_ascii=False), 'proofs': []}
     (run / 'gaps.txt').write_text(gaps.render([gap]) + '\n', encoding='utf-8')
     made = gaps.briefs(run, [gap], data, recipe, roots)
@@ -194,6 +209,11 @@ def verify_story(run, flow, data, story):
     chapter = story['chapters'][0]
     report = {'advisory': True, 'flowId': flow['id'], 'language': data['language'],
               'status': 'unavailable', 'reviews': []}
+    if os.environ.get('SELF_ONBOARDING_VISUAL_REVIEW') != '1':
+        report['status'] = 'disabled'
+        core.save(run / 'review' / flow['id'] / data['language'] / 'claim-review.json', report)
+        core.save(run / 'review/claim-review.json', report)
+        return report
     try:
         folder = Path(story['keys'][chapter['film']])
         capture = core.load(folder / 'capture.json')
@@ -388,6 +408,11 @@ def localize_story(canonical, code, description):
     """Translate only display text; action pins and visible proof strings stay exact."""
     if code not in ('en', 'pl'):
         raise ValueError('Unsupported Helpdesk narration language')
+    if code == 'en':
+        localized = copy.deepcopy(canonical)
+        for sentence in localized['sentences']:
+            sentence['label'] = sentence['text'] if len(sentence['text']) <= 110 else canonical['title']
+        return localized, description
     payload = {'language': language.texts({'language': code})['name'], 'title': canonical['title'],
                'description': description,
                'sentences': [{'action': sentence.get('action'), 'text': sentence['text']} for sentence in canonical['sentences']]}
@@ -499,7 +524,7 @@ def record_flow(run, flow, domain, code, commit, repo_slug, addon, cache):
     return render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, reference)
 
 def assemble(domain, code, flow_states, cache, out, commit, version, workflow_id):
-    """Assemble all required flows and derive fresh offsets from measured segments."""
+    """Assemble available flows and derive fresh offsets from measured segments."""
     cache, out = Path(cache), Path(out)
     out.mkdir(parents=True, exist_ok=True)
     segments, chapters, cues, cursor = [], [], [], 0.0

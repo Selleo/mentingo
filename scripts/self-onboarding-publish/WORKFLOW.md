@@ -78,20 +78,25 @@ workflow skips private production-cache restore/checkpoint and publication. Afte
 redaction it uploads only videos, captions, posters, timeline and manifest files as
 `self-onboarding-test-videos` (14 days), not publisher state, AI logs or checkout files.
 Download the artifact from the Actions run to inspect the MP4 and chapters. A failed
-required flow remains a failed test; partial content is not advertised as a complete
-feature guide. No paid/hosted test was started during this code change.
+flow is skipped while successful flows still produce videos. The manifest and Actions
+summary list skipped captures and language renders. If every flow fails, the run emits
+a diagnostic manifest without a video or publication.
 
 Recording attempts also upload `self-onboarding-progress` after success or failure,
 retained for 14 days. It contains any available raw captures, rendered flow clips,
 audio, captions and failure screenshots, with sanitized startup diagnostics and an
 index identifying the output as partial review material. Early startup failures
 may have only diagnostics and screenshots because recording has not begun.
-This preserves reviewable footage without publishing an incomplete guide.
+This preserves reviewable footage. Assembled videos contain available chapters; omitted flows are listed explicitly in the manifest and summary.
 Browser sessions, traces, private build checkpoints and checkout source are excluded.
 The artifact is for inspection; test retries still start with fresh build state.
-`run/review/claim-review.json` records tutorial review findings and up to two
-wording-correction attempts. Each correction is rechecked against the footage;
-missing required actions and persistent unsupported claims still block generation.
+Visual review is off by default. Set `visual_review=true` to collect one bounded,
+advisory image review per capture/language. Findings in `run/review/claim-review.json`
+and per-flow reports never rewrite narration or stop generation. `skipped-flows.json`
+lists failed captures/renders. Scenes target 20–40 seconds with 3–4 concise narration
+sentences, two browser attempts and a shorter worker deadline. English overlays reuse
+canonical narration without another model call. Startup, configuration, cache integrity
+and final media validation still fail explicitly.
 
 ## Required configuration
 

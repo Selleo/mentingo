@@ -269,6 +269,10 @@ def deadlines(run, started, gap_id=None):
     the project's one camera was busy with the capture (``free``: when it was freed). A scene also gets bounded
     credit for its own recorded runner waits after that startup; overlapping waits count once."""
     camera = core.load(Path(run) / 'camera.json') or {}
+    if gap_id and (core.load(Path(run) / 'gaps' / gap_id / 'gap.json') or {}).get('tutorialMode') is True:
+        # Tutorial setup is already running; bound coding and permit a short camera wait.
+        credit = min(60, runner_wait(run, gap_id, started))
+        return started + 180 + credit, started + 240 + credit
     tries = started + SCENE_TRIES
     if camera.get('ready'):
         tries = max(tries, camera['ready'] + TRY_WINDOW)
@@ -334,9 +338,10 @@ def launch_workers(run, made, provider=None):
         if alive(core.load(folder / 'worker.json')) or (core.load(folder / 'result.json') or {}).get('ok'):
             continue  # `gaps` run again: a scene already being written or filmed keeps its worker
         home = tempfile.mkdtemp(prefix=f'rf-scene-{gap_id}-')
+        tutorial = (core.load(folder / 'gap.json') or {}).get('tutorialMode') is True
         # SIGTERM alone does not stop the CLI in the middle of a command: it is killed 15 s later
         cmd = [*core.timeout_command(WORKER_LIMIT), 'claude', '-p', '--model', llm.MODEL,
-               '--effort', SCENE_EFFORT, '--setting-sources', 'project', '--permission-mode', 'default',
+               '--effort', 'medium' if tutorial else SCENE_EFFORT, '--setting-sources', 'project', '--permission-mode', 'default',
                '--tools', SCENE_TOOLS, '--allowedTools', *scene_allow(folder), '--disallowedTools', *llm.PRIVATE,
                '--permission-prompts', 'none',
                '--max-budget-usd', str(WORKER_BUDGET), '--output-format', 'stream-json', '--verbose',
@@ -1040,6 +1045,8 @@ def _try_scene(run, recipe, env, gap_id, exacted):
     scene = folder / 'scene.spec.ts'
     if not gap or not scene.is_file():
         return {'ok': False, 'error': f'write the scene to {scene} first'}
+    if gap.get('tutorialMode') is True and len(list((folder / 'tries').glob('*.spec.ts'))) >= 2:
+        return {'ok': False, 'error': 'Tutorial browser try limit reached (two tries); report failure and continue with the next flow'}
     source = scene.read_text(encoding='utf-8')
     issue = knowledge.scene_policy_issue(source)
     if issue:

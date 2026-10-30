@@ -134,6 +134,28 @@ function stub() {
   return { client: { publishing }, methods, calls, upload, operation };
 }
 
+test("available chapters remain publishable with explicit skipped-flow diagnostics", async (t) => {
+  const f = fixture(t);
+  f.manifest.complete = false;
+  f.manifest.skippedFlows = [
+    {
+      domain: "development-paths",
+      flowId: "assign-groups",
+      stage: "capture",
+      reason: "No passing take",
+    },
+  ];
+  f.entry.skippedFlowIds = ["assign-groups"];
+  f.write();
+  const result = await readBundle(f.root);
+  assert.equal(result.manifest.complete, false);
+  assert.deepEqual(
+    result.entries[0].metadata.chapters.map((chapter) => chapter.id),
+    ["create-path"],
+  );
+  assert.equal(result.manifest.skippedFlows[0].flowId, "assign-groups");
+});
+
 function progressOf(path) {
   const state = JSON.parse(readFileSync(path, "utf8"));
   return Object.values(state.publications)[0];
