@@ -23,6 +23,29 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def test_narration_freshness_uses_take_acceptance_not_conversion_time(self):
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {})
+        answer = self.root/'story.txt'
+        answer.write_text('Narration for F1')
+        os.utime(answer, (110, 110))
+        # Conversion finishes after the worker saves its narration.
+        os.utime(folder/'capture.json', (150, 150))
+        recording.validate_narration(answer, {'key': 'F1', 'since': 100}, {'F1': str(folder)})
+        # A replacement take still invalidates narration for the previous take.
+        with self.assertRaisesRegex(RuntimeError, 'stale'):
+            recording.validate_narration(answer, {'key': 'F1', 'since': 120}, {'F1': str(folder)})
+
+    def test_narration_freshness_rejects_missing_identity_timestamp_and_story(self):
+        answer = self.root/'story.txt'
+        for since in (None, True, 0, float('nan'), float('inf'), '100'):
+            with self.subTest(since=since), self.assertRaisesRegex(RuntimeError, 'acceptance timestamp'):
+                recording.validate_narration(answer, {'key': 'F1', 'since': since}, {'F1': 'capture'})
+        with self.assertRaisesRegex(RuntimeError, 'not registered'):
+            recording.validate_narration(answer, {'key': 'F2', 'since': 100}, {'F1': 'capture'})
+        with self.assertRaisesRegex(RuntimeError, 'missing or stale'):
+            recording.validate_narration(answer, {'key': 'F1', 'since': 100}, {'F1': 'capture'})
+
     def test_failed_flow_reports_browser_error_and_scrubs_generated_secrets(self):
         run = self.root/'run'
         folder = run/'gaps/browse'

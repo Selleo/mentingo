@@ -110,6 +110,17 @@ def flow_failure(run, flow_id, folder, verdict):
                         f"verdict: {str(report['verdict'])[:200]}. See review/flow-failure.json")
 
 
+def validate_narration(answer, result, keys):
+    """Bind narration to the accepted take, independent of background conversion writes."""
+    since = result.get('since')
+    if result.get('key') not in keys:
+        raise RuntimeError('The selected tutorial capture is not registered as passed')
+    if not isinstance(since, (int, float)) or isinstance(since, bool) or not math.isfinite(since) or since <= 0:
+        raise RuntimeError('The selected tutorial capture has no valid acceptance timestamp')
+    if not answer.is_file() or answer.stat().st_mtime < since - 1:
+        raise RuntimeError('Narration is missing or stale for the selected capture')
+
+
 def capture_flow(run, flow, domain, commit, repo_slug, addon, cache):
     """Capture one app flow with a canonical English story, once for every language."""
     code = 'en'
@@ -153,8 +164,7 @@ def capture_flow(run, flow, domain, commit, repo_slug, addon, cache):
     films = (core.load(run / 'captures.json') or {}).get('films') or []
     keys = {f['key']: f['capture'] for f in films if f.get('status') == 'passed' and not f.get('error')}
     key = result.get('key')
-    if key not in keys or answer.stat().st_mtime < (Path(keys[key]) / 'capture.json').stat().st_mtime:
-        raise RuntimeError('Narration is missing or stale for the selected capture')
+    validate_narration(answer, result, keys)
     story = editor.tidy(editor.parse(answer.read_text()), quotes=language.texts(data)['quotes'])
     if len(story['chapters']) != 1 or story['chapters'][0]['film'] != key:
         raise RuntimeError('One complete flow must produce exactly one chapter')
