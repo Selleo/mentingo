@@ -84,6 +84,20 @@ class Captions(unittest.TestCase):
         with self.assertRaises(ValueError):
             prepare_captions(cue(end='00:00:10,002'), 10)
 
+    def test_tutorial_provider_tail_is_trimmed_to_measured_audio_and_reported(self):
+        # Reproduces the saved v4 narration: last word ends 80 ms after actual audio.
+        srt = cue('Result.', start='00:00:21,304', end='00:00:21,944')
+        result = prepare_captions(srt, 21.864, offset=0, end_tolerance_ms=250)
+        self.assertEqual(result[0]['end'], 21.864)
+        self.assertEqual(result[0]['timing'], 'word_boundary_trimmed')
+        with self.assertRaises(ValueError):
+            prepare_captions(srt, 21.864)  # Release defaults remain strict.
+
+    def test_tutorial_tolerance_does_not_allow_missing_audio_or_large_drift(self):
+        for start, end in [('00:00:21,304', '00:00:22,115'), ('00:00:21,865', '00:00:21,944')]:
+            with self.subTest(start=start), self.assertRaises(ValueError):
+                prepare_captions(cue('Result.', start=start, end=end), 21.864, end_tolerance_ms=250)
+
 
 if __name__ == '__main__':
     unittest.main()

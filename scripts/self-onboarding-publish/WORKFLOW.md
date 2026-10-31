@@ -223,3 +223,12 @@ publication, Bunny processing and playback require the configured hosted workflo
 The latest transport and quota fixes have only been tested locally with mocked providers; the recording workflow has not been rerun for these fixes.
 
 Once a scene or translation reports explicit model-quota exhaustion, no more new scene workers or uncached translations are started in that generation attempt. Available English captures can still render with ElevenLabs. A failed metadata translation skips that language and records the reason instead of aborting the whole bundle. Quota status is recorded in the manifest and resets on the next invocation; provider quotas themselves are unchanged.
+
+Tutorial renders forward the configured Mentingo palette into the renderer instead of
+using the renderer's generic orange/graphite defaults. Brand settings participate in
+the render cache identity, so changed branding rebuilds retained captures without
+recording again. Tutorial captions clip provider timing tails of at most 250 ms to
+measured audio duration and mark those cues in the preparation report; malformed,
+empty, out-of-order or larger timing errors still fail that render. Release-film's
+existing 1 ms tolerance is unchanged. The Actions summary reports included/expected
+chapter counts per language, so a partial video is visible even when skips are nonfatal.

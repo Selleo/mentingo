@@ -528,6 +528,16 @@ class LocalizationTest(unittest.TestCase):
         self.camera.assert_not_called(); self.setup.assert_not_called()
         self.assertEqual(self.render.call_count,2)
 
+    def test_brand_change_rerenders_retained_captures_without_recording_again(self):
+        self.setup_generator()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.patch(self_onboarding.core, 'addon', return_value={'harness': {}, 'brand': {
+            'colors': {'frame': '#222949', 'accent': '#3f58b6'}}})
+        self.assertEqual(self.generate(action='reuse', name='branded')['videos'], 2)
+        self.camera.assert_not_called()
+        self.assertEqual(self.render.call_count, 2)
+
     def setup_voice_pool(self):
         provider = self_onboarding.voice_provider.elevenlabs_config
         self.setup_generator()
@@ -635,7 +645,7 @@ class LocalizationTest(unittest.TestCase):
             return entry,{}
         self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
         self.patch(recording.cut,'film_font',return_value=('unused-font','Test',None))
-        self.patch(recording.render_demo,'prepare')
+        prepared = self.patch(recording.render_demo,'prepare')
         run=self.root/'render-run'
         self.patch(recording.render_demo,'load_plan',side_effect=lambda *args,**kwargs:{'language':core.load(run/'sources.json')['language']})
         def render(plan,out):
@@ -646,7 +656,10 @@ class LocalizationTest(unittest.TestCase):
             (out/'poster.jpg').write_bytes(b'image'); core.save(out/'timeline.json',{'duration':8 if code=='pl' else 6})
         self.patch(recording.render_demo,'render',side_effect=render)
         self.patch(recording.render_demo,'probe',side_effect=lambda path:{'format':{'duration':8 if Path(path).read_bytes()==b'pl' else 6}})
-        english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',{},self.cache,reference)
+        brand = {'brand': {'colors': {'accent': '#3f58b6', 'frame': '#222949'}}}
+        english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',brand,self.cache,reference)
+        authored = core.load(prepared.call_args.args[0])
+        self.assertEqual(authored['colors'], brand['brand']['colors'])
         polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,reference)
         self.assertEqual((english['duration'],polish['duration']),(6,8))
         self.assertEqual(polish['captureId'],english['captureId'])

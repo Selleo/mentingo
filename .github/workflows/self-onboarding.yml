@@ -289,6 +289,10 @@ jobs:
               manifest = json.loads(path.read_text())
               skipped = manifest.get('skippedFlows', [])
               print(f"### Generated {len(manifest['domains'])} videos; skipped {len(skipped)} flow attempts")
+              for entry in manifest['domains']:
+                  included = len(entry['metadata']['chapters'])
+                  expected = included + len(entry.get('skippedFlowIds', []))
+                  print(f"- {entry['key']} / {entry['language']}: {included}/{expected} chapters included")
               for item in skipped:
                   reason = ' '.join(item['reason'].split())[:240]
                   print(f"- {item['domain']} / {item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}")

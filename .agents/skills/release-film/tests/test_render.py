@@ -201,6 +201,19 @@ class RenderTest(unittest.TestCase):
         self.assertGreater(abs(grey(3.0) - grey(3.97)), 5)  # the colour bars, then nearly the card's ground
         self.assertLess(abs(grey(3.97) - 0x30), 12)
 
+    def test_tutorial_prepare_keeps_brand_and_bounds_provider_caption_tail(self):
+        data = copy.deepcopy(self.data)
+        data.update(mode='tutorial', colors={'accent': '#3f58b6', 'frame': '#222949'})
+        chapter = data['chapters'][0]
+        chapter.update(id='browse-paths', prs=['https://github.com/example/project/blob/abc/spec.md'], srt='provider.srt')
+        chapter.pop('captions')
+        (self.root/'provider.srt').write_text('1\n00:00:00,100 --> 00:00:02,080\nResult.\n')
+        report = render_demo.prepare(self.plan(data, 'provider.json'), self.root/'provider-prepared', enforce_duration=False)
+        self.assertEqual(report['captions'][-1]['end'], 4.0)
+        self.assertEqual(report['caption_timing'][0]['cues'], ['word_boundary_trimmed'])
+        plan = load_plan(self.root/'provider-prepared/editing-plan.json', enforce_duration=False)
+        self.assertEqual(plan['colors'], {'accent': '0x3f58b6', 'frame': '0x222949'})
+
     def test_a_projects_brand_colours_the_cards_band_and_marks(self):
         data = dict(copy.deepcopy(self.data), colors={'frame': '#222949', 'accent': '#3f58b6'})
         plan = load_plan(self.plan(data, 'brand.json'), enforce_duration=False)

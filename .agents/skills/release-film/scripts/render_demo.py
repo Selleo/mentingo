@@ -695,7 +695,8 @@ def prepare(path, out, enforce_duration=True, strict=True):
         if not any(s['codec_type'] == 'audio' for s in info['streams']):
             raise ValueError('Narration has no audio stream')
         prepared = prepare_captions(srt.read_text(encoding='utf-8-sig'),
-            float(info['format']['duration']), chapter.get('audio_offset', 2), limits=limits)
+            float(info['format']['duration']), chapter.get('audio_offset', 2), limits=limits,
+            end_tolerance_ms=250 if data.get('mode') == 'tutorial' else 1)
         copied['captions'] = [{key: cue[key] for key in ['start', 'end', 'text']} for cue in prepared]
         caption_timing.append(dict(chapter=len(result['chapters'])+1, cues=[cue['timing'] for cue in prepared]))
         copied['clips'] = []

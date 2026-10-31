@@ -496,10 +496,12 @@ def render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, captur
     entry, _ = cut.chapter_cut(core.tool('ffmpeg'), chapter, keys[key], voice / 'c1', data, last=False)
     entry['id'] = flow['id']
     font, _, _ = cut.film_font(addon, cut.drawn_text([entry]))
+    colors, _ = cut.film_colors(addon)
     work = run / 'rendered' / domain['key'] / code / flow['id']
     if work.exists():
         shutil.rmtree(work)
-    core.save(work / 'authored.json', {'mode': 'tutorial', 'language': code, 'font': font, 'chapters': [entry]})
+    core.save(work / 'authored.json', {'mode': 'tutorial', 'language': code, 'font': font, 'chapters': [entry],
+                                     **({'colors': colors} if colors else {})})
     render_demo.FFMPEG, render_demo.FFPROBE = core.tool('ffmpeg'), core.tool('ffprobe') or 'ffprobe'
     render_demo.prepare(work / 'authored.json', work / 'prepared', enforce_duration=False, strict=True)
     plan = render_demo.load_plan(work / 'prepared' / 'editing-plan.json', enforce_duration=False)
