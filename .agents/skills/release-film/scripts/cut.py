@@ -502,7 +502,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
                                'evidence': f"Page 1 of {doc['name']}, downloaded in this test"})
     stats = {'film_seconds': film['duration'], 'narration_waits': [[round(t, 1), round(d, 1)] for t, d in film['silences']],
              'late': [[a['beat'], a['late']] for a in film['anchors'] if a['late'] > 0.5],
-             'metrics': metrics.chapter(film, spans, metrics.captions_of(words, film, speech), capture)}
+             'metrics': metrics.chapter(film, spans, metrics.captions_of(words, film, speech, mode=sources.get('mode', 'release')), capture)}
     return entry, stats
 
 

@@ -117,11 +117,11 @@ def chapter(film, spans, captions, capture):
             'late_beats': sum(1 for a in film['anchors'] if a['late'] > 0.5), **empty_states(film, capture)}
 
 
-def captions_of(words, film, speech):
+def captions_of(words, film, speech, mode='release'):
     """The chapter's caption cues in film time, as the render makes them (the voice retimed around its waits)."""
     silences = film['silences']
     return prepare_captions(montage.shifted_srt(words, silences), speech + sum(d for _, d in silences), 0,
-                            limits=montage.caption_limits(film))
+                            limits=montage.caption_limits(film), end_tolerance_ms=None if mode == 'tutorial' else 1)
 
 
 def summary(chapters):

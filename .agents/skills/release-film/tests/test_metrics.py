@@ -27,6 +27,14 @@ def film(**extra):
 
 
 class Chapter(unittest.TestCase):
+    def test_tutorial_metrics_clip_the_same_provider_tail_as_the_renderer(self):
+        words = metrics.montage.words_from_srt('1\n00:00:24,859 --> 00:00:25,659\nResult.\n')
+        result = metrics.captions_of(words, film(), 25.631, mode='tutorial')
+        self.assertEqual(result[-1]['end'], 25.631)
+        self.assertEqual(result[-1]['timing'], 'word_boundary_trimmed')
+        with self.assertRaises(ValueError):
+            metrics.captions_of(words, film(), 25.631)
+
     def test_a_caption_held_past_the_next_change_is_counted_by_what_the_picture_moved_to(self):
         captions = [{'start': 0.2, 'end': 9.0, 'text': 'one'},  # sentence 1, over the unnamed step at 8 s by 1 s
                     {'start': 10.0, 'end': 19.0, 'text': 'two'}]  # sentence 2: nothing changes after its click

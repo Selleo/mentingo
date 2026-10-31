@@ -283,7 +283,7 @@ jobs:
         if: ${{ always() && !inputs.dry_run && !inputs.resume_publication }}
         run: |
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json, os, pathlib
+          import json, os, pathlib, sys
           path = pathlib.Path(os.environ['CACHE'])/'bundles'/os.environ['GITHUB_RUN_ID']/'manifest.json'
           if path.exists():
               manifest = json.loads(path.read_text())
@@ -296,6 +296,8 @@ jobs:
               for item in skipped:
                   reason = ' '.join(item['reason'].split())[:240]
                   print(f"- {item['domain']} / {item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}")
+                  warning = f"{item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}"
+                  print("::warning::" + warning.replace("%", "%25"), file=sys.stderr)
           PY
       - name: Report semantic decisions
         if: ${{ always() && !inputs.resume_publication }}
@@ -313,6 +315,17 @@ jobs:
                       for flow in domain['flows']:
                           print(f"  - {flow['id']}: {flow.get('action', 'blocked')} ({flow.get('reason', 'Analysis did not complete')})")
                       if domain.get('error'): print('- Blocked: '+domain['error'])
+          PY
+      - name: Reject an empty result after preserving artifacts
+        if: ${{ success() && !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['CACHE'])/'bundles'/os.environ['GITHUB_RUN_ID']/'manifest.json'
+          manifest = json.loads(path.read_text())
+          if not manifest['domains'] and manifest.get('skippedFlows'):
+              print('::error::No usable videos were generated. Recording progress and failure details were saved as artifacts.')
+              raise SystemExit(1)
           PY
   publish:
     name: Upload directly to Bunny and publish indexed revisions

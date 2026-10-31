@@ -308,6 +308,22 @@ class WorkflowsTest(unittest.TestCase):
         self.assertIn("steps.redact.outcome == 'success'", step['if'])
         self.assertNotIn('env', step)
 
+    def test_zero_video_failure_happens_after_uploads_but_partial_and_noop_pass(self):
+        steps = self.load('self-onboarding.yml')['jobs']['generate']['steps']
+        gate = next(step for step in steps if step.get('name') == 'Reject an empty result after preserving artifacts')
+        upload = next(step for step in steps if step.get('name') == 'Downloadable test videos and chapter metadata')
+        self.assertGreater(steps.index(gate), steps.index(upload))
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder)/'bundles/123/manifest.json'
+            for domains, skipped, expected in [([], [{'flowId': 'browse'}], 1),
+                                               ([{'key': 'guide'}], [{'flowId': 'browse'}], 0), ([], [], 0)]:
+                core.save(path, {'domains': domains, 'skippedFlows': skipped})
+                result = subprocess.run(['bash', '-e', '-c', gate['run']],
+                    env={**os.environ, 'CACHE': folder, 'GITHUB_RUN_ID': '123'}, capture_output=True, text=True)
+                self.assertEqual(result.returncode, expected, result.stderr)
+                if expected:
+                    self.assertIn('::error::No usable videos', result.stdout)
+
     def test_runner_can_create_voice_environment_and_runs_after_workspace_setup(self):
         workflow = self.load('self-onboarding.yml')
         job = workflow['jobs']['generate']
