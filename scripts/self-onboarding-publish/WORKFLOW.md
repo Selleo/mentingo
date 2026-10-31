@@ -227,8 +227,9 @@ Once a scene or translation reports explicit model-quota exhaustion, no more new
 Tutorial renders forward the configured Mentingo palette into the renderer instead of
 using the renderer's generic orange/graphite defaults. Brand settings participate in
 the render cache identity, so changed branding rebuilds retained captures without
-recording again. Tutorial captions clip provider timing tails of at most 250 ms to
-measured audio duration and mark those cues in the preparation report; malformed,
-empty, out-of-order or larger timing errors still fail that render. Release-film's
+recording again. Tutorial captions clip provider timing tails to measured audio
+duration without a mismatch cutoff and mark those cues in the preparation report.
+Cues entirely after the audio are omitted. Malformed timestamps, empty captions,
+reversed intervals and unusable overlaps still fail that render. Release-film's
 existing 1 ms tolerance is unchanged. The Actions summary reports included/expected
 chapter counts per language, so a partial video is visible even when skips are nonfatal.

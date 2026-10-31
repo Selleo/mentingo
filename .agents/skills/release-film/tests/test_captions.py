@@ -87,16 +87,26 @@ class Captions(unittest.TestCase):
     def test_tutorial_provider_tail_is_trimmed_to_measured_audio_and_reported(self):
         # Reproduces the saved v4 narration: last word ends 80 ms after actual audio.
         srt = cue('Result.', start='00:00:21,304', end='00:00:21,944')
-        result = prepare_captions(srt, 21.864, offset=0, end_tolerance_ms=250)
+        result = prepare_captions(srt, 21.864, offset=0, end_tolerance_ms=None)
         self.assertEqual(result[0]['end'], 21.864)
         self.assertEqual(result[0]['timing'], 'word_boundary_trimmed')
         with self.assertRaises(ValueError):
             prepare_captions(srt, 21.864)  # Release defaults remain strict.
 
-    def test_tutorial_tolerance_does_not_allow_missing_audio_or_large_drift(self):
-        for start, end in [('00:00:21,304', '00:00:22,115'), ('00:00:21,865', '00:00:21,944')]:
-            with self.subTest(start=start), self.assertRaises(ValueError):
-                prepare_captions(cue('Result.', start=start, end=end), 21.864, end_tolerance_ms=250)
+    def test_tutorial_tail_has_no_arbitrary_cutoff_and_omits_unplayable_cues(self):
+        srt = '\n'.join([
+            cue('Result.', start='00:00:21,304', end='00:00:24,000'),
+            cue('Tail.', start='00:00:24,000', end='00:00:25,000', index=2)])
+        result = prepare_captions(srt, 21.864, offset=0, end_tolerance_ms=None)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['text'], 'Result.')
+        self.assertEqual(result[0]['end'], 21.864)
+        self.assertEqual(result[0]['timing'], 'word_boundary_trimmed')
+
+    def test_tutorial_still_rejects_broken_intervals_and_malformed_timestamps(self):
+        for srt in [cue(start='nan'), cue(start='00:00:02,000', end='00:00:01,000')]:
+            with self.subTest(srt=srt), self.assertRaises(ValueError):
+                prepare_captions(srt, 10, end_tolerance_ms=None)
 
 
 if __name__ == '__main__':

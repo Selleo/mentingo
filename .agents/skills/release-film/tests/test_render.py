@@ -207,7 +207,7 @@ class RenderTest(unittest.TestCase):
         chapter = data['chapters'][0]
         chapter.update(id='browse-paths', prs=['https://github.com/example/project/blob/abc/spec.md'], srt='provider.srt')
         chapter.pop('captions')
-        (self.root/'provider.srt').write_text('1\n00:00:00,100 --> 00:00:02,080\nResult.\n')
+        (self.root/'provider.srt').write_text('1\n00:00:00,100 --> 00:00:05,080\nResult.\n')
         report = render_demo.prepare(self.plan(data, 'provider.json'), self.root/'provider-prepared', enforce_duration=False)
         self.assertEqual(report['captions'][-1]['end'], 4.0)
         self.assertEqual(report['caption_timing'][0]['cues'], ['word_boundary_trimmed'])

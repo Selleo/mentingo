@@ -271,7 +271,7 @@ def generate(args):
             for code, report in group['reports'].items():
                 profile = hashlib.sha256(json.dumps({'provider': profiles[code],
                     'pronunciation': trusted_addon.get('pronunciation', {}), 'brand': trusted_addon.get('brand', {}),
-                    'renderer': 'tutorial-v2'}, sort_keys=True).encode()).hexdigest()
+                    'renderer': 'tutorial-v3'}, sort_keys=True).encode()).hexdigest()
                 current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
                 previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
