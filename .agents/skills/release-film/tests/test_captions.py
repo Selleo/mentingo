@@ -62,7 +62,7 @@ class Captions(unittest.TestCase):
         invalid = ['', 'stray text', cue(' '), cue('Dwa słowa'), cue('…'),
                    cue(start='-00:00:01,000'), cue(start='nan'), cue(end='inf'),
                    cue(end='00:60:00,000'), cue(end='00:00:10.000'),
-                   cue(end='00:00:10,002'), cue(end='00:00:00,000'),
+                   cue(start='00:00:10,000', end='00:00:11,000'), cue(end='00:00:00,000'),
                    cue(start='00:00:02,000', end='00:00:01,000'),
                    cue() + '\ntrailing garbage',
                    cue(end='00:00:01,000') + '\n' + cue(start='00:00:00,939', index=2),
@@ -78,11 +78,13 @@ class Captions(unittest.TestCase):
                 with self.subTest(field=field, value=value), self.assertRaises(ValueError):
                     prepare_captions(cue(), **args)
 
-    def test_one_millisecond_overhang_is_clamped(self):
-        captions = prepare_captions(cue(end='00:00:10,001'), 10)
-        self.assertEqual(captions[-1]['end'], 12)
-        with self.assertRaises(ValueError):
-            prepare_captions(cue(end='00:00:10,002'), 10)
+    def test_codec_or_provider_overhang_is_clamped_without_an_arbitrary_cutoff(self):
+        for milliseconds in [1, 2, 28, 80, 250, 2000]:
+            with self.subTest(milliseconds=milliseconds):
+                captions = prepare_captions(cue(end=stamp(10 + milliseconds / 1000)), 10)
+                self.assertEqual(captions[-1]['end'], 12)
+                self.assertEqual(captions[-1]['timing'], 'word_boundary_trimmed')
+                self.assertEqual(captions[-1]['text'], 'Wynik.')
 
 
 if __name__ == '__main__':

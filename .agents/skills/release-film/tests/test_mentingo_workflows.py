@@ -134,6 +134,13 @@ class Workflows(unittest.TestCase):
         self.assertEqual(brand['body_font']['family'], 'Open Sans')
         self.assertEqual(brand['colors'], {'accent': '#3f58b6', 'frame': '#222949'})  # primary-700, primary-950
 
+    def test_failed_render_reports_retain_the_audio_subtitles_and_authored_plan(self):
+        report = next(step for step in self.film['steps'] if step.get('name') == "Upload the run's report")
+        self.assertIn('always()', report['if'])
+        self.assertIn("steps.redact.outcome == 'success'", report['if'])
+        for suffix in ['/voice/*/*.mp3', '/voice/*/*.wav', '/voice/*/*.srt', '/film-plan/*.json']:
+            self.assertIn(suffix, report['with']['path'])
+
     def test_the_artifacts_hold_no_secret_and_the_knowledge_only_its_own_runs(self):
         steps = {s.get('name'): s for s in self.film['steps']}
         names = [s.get('name') for s in self.film['steps']]
