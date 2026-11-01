@@ -17,7 +17,7 @@
     }
   },
   "harness": {
-    "config": "apps/web/playwright.release-film.config.ts",
+    "config": "apps/web/playwright.recording.config.ts",
     "node": "22.15.0",
     "pnpm": "10.22.0",
     "install": [
@@ -102,7 +102,7 @@
     "recording_files": [
       {
         "source": "projects/mentingo-recording/playwright.config.ts",
-        "target": "apps/web/playwright.release-film.config.ts"
+        "target": "apps/web/playwright.recording.config.ts"
       },
       {
         "source": "projects/mentingo-recording/accounts.ts",

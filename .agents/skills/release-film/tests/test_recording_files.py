@@ -34,6 +34,18 @@ class RecordingFiles(unittest.TestCase):
         self.assertTrue(harness.one_off(self.root / self.recipe['config']))
         self.assertEqual(harness.test_roots(self.root, self.recipe), ['apps/web/e2e/specs'])
 
+    def test_generated_config_does_not_overwrite_or_import_itself(self):
+        harness.recording_files(self.run, self.recipe)
+        original = self.root / self.recipe['config']
+        before = original.read_bytes()
+        generated = harness.demo_config(original)
+        self.assertNotEqual(original, generated)
+        self.assertEqual(original.read_bytes(), before)
+        self.assertIn('import base from "./playwright.recording.config";', generated.read_text())
+        with self.assertRaisesRegex(ValueError, 'different filename'):
+            harness.demo_config(generated)
+        self.assertIn('import base from "./playwright.recording.config";', generated.read_text())
+
     def test_manual_fixture_changes_are_not_silently_overwritten(self):
         harness.recording_files(self.run, self.recipe)
         self.fixture.write_text('user edit')
