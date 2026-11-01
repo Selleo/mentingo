@@ -36,6 +36,20 @@ def uses(step, action):
 
 @unittest.skipUnless(yaml and RECORD.is_file() and PUBLISH.is_file(), "PyYAML and Mentingo's release film workflows")
 class Workflows(unittest.TestCase):
+    def test_elevenlabs_pool_and_credentials_reach_only_the_required_steps(self):
+        job = self.record['jobs']['film']
+        self.assertEqual(job['env']['RELEASE_FILM_VOICE'], 'elevenlabs')
+        for suffix in ['FEMALE_1', 'FEMALE_2', 'MALE_1', 'MALE_2']:
+            self.assertEqual(job['env']['ELEVENLABS_VOICE_ID_' + suffix],
+                             '${{ vars.ELEVENLABS_VOICE_ID_' + suffix + ' }}')
+        self.assertNotIn('ELEVENLABS_API_KEY', job['env'])
+        required = {'Check the machine', "Check the narrator's voice from this runner", 'Record the film',
+                    "Hide secrets in the run's files"}
+        for step in job['steps']:
+            self.assertEqual('ELEVENLABS_API_KEY' in step.get('env', {}), step.get('name') in required)
+        names = [step.get('name') for step in job['steps']]
+        self.assertLess(names.index('Validate the four narrator voices'), names.index('Check Claude Opus on the seat'))
+
     def setUp(self):
         self.record, self.publish = load(RECORD), load(PUBLISH)
         self.film = self.record['jobs']['film']

@@ -121,6 +121,13 @@ class FilmLength(unittest.TestCase):
 
 
 class Redact(unittest.TestCase):
+    def test_elevenlabs_key_is_removed_from_recording_reports(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'voice-error.json'
+            path.write_text(json.dumps({'error': TOKEN}))
+            redact.redact([folder], redact.values({'ELEVENLABS_API_KEY': TOKEN}))
+            self.assertEqual(json.loads(path.read_text()), {'error': '***'})
+
     def test_the_ci_secrets_are_hidden_in_the_runs_files_and_nowhere_else(self):
         with tempfile.TemporaryDirectory() as folder:
             run = Path(folder) / 'run'
