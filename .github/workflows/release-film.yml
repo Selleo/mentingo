@@ -263,6 +263,13 @@ jobs:
             ${{ steps.release.outputs.run }}/*.jsonl
             ${{ steps.release.outputs.run }}/*.log
             ${{ steps.release.outputs.run }}/*.txt
+            ${{ steps.release.outputs.run }}/voice/*.json
+            ${{ steps.release.outputs.run }}/voice/*/*.json
+            ${{ steps.release.outputs.run }}/voice/*/*.srt
+            ${{ steps.release.outputs.run }}/voice/*/*.mp3
+            ${{ steps.release.outputs.run }}/voice/*/*.wav
+            ${{ steps.release.outputs.run }}/film-plan/*.json
+            ${{ steps.release.outputs.run }}/film-plan/prepared/*.json
             ${{ steps.release.outputs.run }}/gaps/*/*.log
             ${{ steps.release.outputs.run }}/gaps/*/*.json
             ${{ steps.release.outputs.run }}/gaps/*/*.ts

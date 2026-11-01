@@ -76,7 +76,11 @@ inside an existing film.
 ElevenLabs uses `eleven_v4_turbo` by default (`ELEVENLABS_MODEL_ID` overrides it),
 one complete audio-and-timestamps response per chapter, and no automatic paid
 retry or fallback voice. Speech cache identity includes voice, model, settings,
-language and pronunciation. Local recording uses the same setup when
+language and pronunciation. Caption ends are clipped to measured audio duration
+without a timing-overhang cutoff, including after pause insertion; malformed,
+reversed and entirely out-of-audio intervals remain errors. Failed-run reports
+retain narration audio, word subtitles and the authored render plan for diagnosis.
+Local recording uses the same setup when
 `RELEASE_FILM_VOICE=elevenlabs`; a single explicit `ELEVENLABS_VOICE_ID` or
 `elevenlabs.voice_id` add-on is also supported without the four-voice pool.
 Never combine `ELEVENLABS_VOICE_ID` with the pool.

@@ -5,7 +5,8 @@ of more than 0.8 s starts a new cue. A cue stays on screen through the pause bef
 flicker off between sentences, but never past the moment the picture leaves its sentence (``limits``, from the
 montage): a caption over the next picture reads as a caption behind it.
 Overlaps up to 60 ms advance the next word's start to the previous word's end; larger overlaps and words collapsed by
-it are rejected. A word ending up to 1 ms past the audio is clamped to it; a larger overhang is rejected.
+it are rejected. Provider and codec timing tails are clamped to measured playable audio without an overhang
+cutoff. A word entirely outside the audio is still unusable and rejected.
 """
 from decimal import Decimal
 import math
@@ -46,8 +47,12 @@ def words_of(srt, audio_seconds):
         if len(interval) != 2:
             raise ValueError('Malformed SRT interval')
         start, end = map(milliseconds, interval)
-        if start < previous_start or end <= start or end > audio_milliseconds + 1:
-            raise ValueError('SRT intervals must be ordered, positive and within audio')
+        if start < previous_start or end <= start:
+            raise ValueError(f'SRT intervals must be ordered and positive (cue {lines[0].strip()}: {start}–{end} ms)')
+        trimmed = end > audio_milliseconds
+        if start >= audio_milliseconds:
+            raise ValueError(f'SRT cue {lines[0].strip()} starts outside playable audio '
+                             f'({start} ms; audio {audio_milliseconds} ms)')
         end = min(end, audio_seconds * 1000)
         previous_start = start
         if previous_end - start > 60:
@@ -63,7 +68,7 @@ def words_of(srt, audio_seconds):
         text = [word if len(word) <= LINE else word[:LINE - 1] + '…' for word in text]
         if sum(any(c.isalnum() for c in word) for word in text) != 1:
             raise ValueError('A word cue must hold exactly one word')
-        words.append(dict(start=start / 1000, end=end / 1000, text=' '.join(text)))
+        words.append(dict(start=start / 1000, end=end / 1000, text=' '.join(text), trimmed=trimmed))
     return words
 
 
@@ -82,7 +87,7 @@ def prepare_captions(srt, audio_seconds, offset=2, limits=None):
 
     def emit():
         captions.append(dict(start=offset + group[0]['start'], end=offset + group[-1]['end'], text='\n'.join(lines(group)),
-                             timing='word_boundary'))
+                             timing='word_boundary_trimmed' if any(w['trimmed'] for w in group) else 'word_boundary'))
 
     for word in words_of(srt, audio_seconds):
         if group and (len(lines([*group, word])) > 2 or word['start'] - group[-1]['end'] > PAUSE
