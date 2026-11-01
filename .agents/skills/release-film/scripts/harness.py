@@ -457,6 +457,9 @@ def warm_up(root, specs):
 
 
 def demo_config(config_path):
+    target = Path(config_path).with_name(f'{DEMO_CONFIG}.ts')
+    if Path(config_path).stem == DEMO_CONFIG or Path(config_path).resolve() == target.resolve():
+        raise ValueError('Recording input config must have a different filename from the generated release-film config')
     base = Path(config_path).name
     stem = base.rsplit('.', 1)[0]
     text = f'''// Written by release-film: the project's config, filmed (1600x900 at 1.5x, one report, no retries).
@@ -505,7 +508,6 @@ export default defineConfig({{
   webServer: servers.length ? servers : undefined,
 }});
 '''
-    target = Path(config_path).with_name(f'{DEMO_CONFIG}.ts')
     core.write(target, text, changed_only=True)  # a try may be loading it right now
     return target
 
