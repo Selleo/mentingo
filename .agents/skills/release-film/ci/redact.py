@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 import sys
 
-SECRETS = ('CLAUDE_CODE_OAUTH_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN', 'ACTIONS_RUNTIME_TOKEN', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN')
+SECRETS = ('ELEVENLABS_API_KEY', 'CLAUDE_CODE_OAUTH_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN', 'ACTIONS_RUNTIME_TOKEN', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN')
 SHORTEST = 16  # a shorter value is no token (and *** in its place everywhere would spoil the files)
 MEDIA = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.mp3', '.wav', '.m4a', '.ogg'}
 SKIPPED = {'checkout', 'node_modules', '.git', 'toolchain'}  # folders no artifact takes a file from

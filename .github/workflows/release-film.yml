@@ -58,6 +58,12 @@ jobs:
       pull-requests: read
     env:
       GH_TOKEN: ${{ github.token }}
+      RELEASE_FILM_VOICE: elevenlabs
+      ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+      ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+      ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+      ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
+      ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
       # The skill's CI mode: sized for a 2-core, 8 GB runner (this one is larger), the page written but not served.
       RELEASE_FILM_CI: "1"
       # Two Playwright workers, as the project's films were rehearsed (its config asks for four)
@@ -84,9 +90,13 @@ jobs:
       - name: Prepare the film home
         run: sudo install -d -o "$(id -u)" -g "$(id -g)" "${RELEASE_FILM_HOME}"
 
+      - name: Validate the four narrator voices
+        run: python3 -c "import sys; sys.path.insert(0, '$S'); import narrator_pool; narrator_pool.configured_pool(required=True)"
+
       - name: Check the machine
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 "$S/film.py" doctor --repo "${GITHUB_REPOSITORY}"
 
       - name: Check Claude Opus on the seat
@@ -100,8 +110,10 @@ jobs:
           echo "Claude Opus answered: ${answer}"
           grep -qi ready <<<"${answer}"
 
-      # edge-tts, Microsoft's free service, may refuse a cloud machine: found out before a film spends anything.
+      # Check the configured ElevenLabs narrator before spending the Claude quota.
       - name: Check the narrator's voice from this runner
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 "$S/film.py" voice-check --language en
 
       - name: Resolve the release
@@ -190,6 +202,7 @@ jobs:
         if: env.FILM == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           TAG: ${{ steps.release.outputs.tag }}
           BASE: ${{ inputs.base }}
           LEARN: ${{ inputs.learn }}
@@ -207,6 +220,7 @@ jobs:
         if: always() && env.FILM == 'true' && steps.release.outputs.run
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           RUN: ${{ steps.release.outputs.run }}
         run: python3 .agents/skills/release-film/ci/redact.py "${RUN}" "${RELEASE_FILM_HOME}/projects"
 
