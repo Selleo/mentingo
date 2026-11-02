@@ -144,4 +144,19 @@ describe("AuthoringBlockId", () => {
     ).toBe(resourceId);
     viewer.destroy();
   });
+
+  it("assigns initial IDs without emitting an update or adding an undo step", async () => {
+    const onUpdate = vi.fn();
+    const editor = new Editor({
+      extensions: getContentEditorPlugins(),
+      content: "<p>Existing content</p>",
+      onUpdate,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(getBlockIds(editor.getHTML())[0]).toMatch(UUID_PATTERN);
+    expect(onUpdate).not.toHaveBeenCalled();
+    expect(editor.can().undo()).toBe(false);
+    editor.destroy();
+  });
 });
