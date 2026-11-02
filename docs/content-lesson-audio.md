@@ -2,7 +2,7 @@
 
 ## Author and learner workflow
 
-Audio is a resource inside a **content lesson**, not a new lesson type or a separate podcast library. Authors use the audio upload control, the existing resource picker, or file drag-and-drop. A successful upload inserts a native inline player. Multiple players can be mixed with text, images, video, and downloadable resources. An audio-only lesson is valid.
+Audio is a resource inside a **content lesson**, not a new lesson type or a separate podcast library. Authors upload audio through the asset library or by dragging a file into the editor; there is no separate audio button. A successful upload inserts a native inline player. Multiple players can be mixed with text, images, video, and downloadable resources. An audio-only lesson is valid.
 
 The upload queue shows pending work and failures. An upload that fails must not insert a playable-looking node. Authors remove a player with the normal editor node controls or selection/deletion. This removes the occurrence, not the stored resource; other references remain intact.
 
@@ -35,9 +35,10 @@ MP3; M4A/MP4 with AAC-LC; WAV with 16-bit PCM; Ogg Vorbis/Opus; and WebM Opus.
 Raw AAC and containers containing video streams are rejected. Audio delivery
 requires an authenticated, authorized user, including for freemium lessons.
 
-The dedicated upload control is the supported audio upload entry point. The
-resource picker can reuse stored audio, but its generic upload endpoint does not
-accept audio files.
+Both entry points use the standard in-memory upload pipeline: the asset library
+uploads through the resource library endpoint and drag-and-drop through the lesson
+upload endpoint. Each accepts audio only for lessons, and both validate the content
+before storing it.
 
 Executed verification:
 

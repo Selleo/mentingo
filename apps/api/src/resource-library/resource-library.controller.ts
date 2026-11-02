@@ -14,6 +14,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
+  ALLOWED_AUDIO_FILE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
@@ -221,6 +222,7 @@ export class ResourceLibraryController {
           ...ALLOWED_VIDEO_FILE_TYPES,
           ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
           ...ALLOWED_PRESENTATION_FILE_TYPES,
+          ...ALLOWED_AUDIO_FILE_TYPES,
         ]),
         MAX_VIDEO_SIZE,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),

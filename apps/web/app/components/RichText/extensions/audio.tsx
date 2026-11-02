@@ -1,93 +1,70 @@
 import { Node } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { GripVertical, X } from "lucide-react";
-import { useState } from "react";
+import { FileAudio, GripVertical, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { baseUrl } from "~/utils/baseUrl";
 
+import { AudioPlayer } from "../components/AudioPlayer";
+
+import { safeAudioSrc } from "./utils/audio";
 import { removeResourceNode } from "./utils/resourceNode";
-
-const safeAudioSrc = (src: unknown): string | null => {
-  if (typeof src !== "string" || (!src.startsWith("/") && !/^https?:\/\//i.test(src))) return null;
-  try {
-    const origin = new URL(baseUrl).origin;
-    const url = new URL(src, origin);
-    if (url.origin !== origin || url.username || url.password || url.search || url.hash)
-      return null;
-    if (!/^\/api\/lesson\/lesson-resource\/[0-9a-f-]{36}$/i.test(url.pathname)) return null;
-    return src;
-  } catch {
-    return null;
-  }
-};
 
 import type { RichTextResourceNodeOptions } from "./utils/resourceNode";
 import type { NodeViewProps } from "@tiptap/react";
 
-const AudioView = ({ node, editor, getPos }: NodeViewProps) => {
+const AudioEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const src = safeAudioSrc(node.attrs.src);
   const name = node.attrs.name || t("richText.audio.label");
   if (!src) return null;
 
   return (
-    <NodeViewWrapper className="audio-node my-3 min-w-0 w-full max-w-full" contentEditable={false}>
-      <div className="min-w-0 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-        <div className="mb-2 flex items-center gap-2">
-          {editor.isEditable && (
-            <Button
-              type="button"
-              size="xs"
-              variant="ghost"
-              data-drag-handle
-              aria-label={t("richText.audio.drag")}
-            >
-              <GripVertical className="size-4" aria-hidden />
-            </Button>
-          )}
-          <p className="m-0 min-w-0 flex-1 break-words text-sm font-medium">{name}</p>
-          {editor.isEditable && (
-            <Button
-              type="button"
-              size="xs"
-              variant="ghost"
-              aria-label={t("richText.audio.remove")}
-              onClick={() => removeResourceNode({ editor, getPos, nodeSize: node.nodeSize })}
-            >
-              <X className="size-4" aria-hidden />
-            </Button>
-          )}
+    <NodeViewWrapper className="audio-node my-3 w-full max-w-full" contentEditable={false}>
+      <div className="flex min-w-0 flex-col gap-2 rounded-md border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            className="rounded-full text-neutral-500 hover:bg-neutral-200"
+            aria-label={t("richText.audio.drag")}
+            data-drag-handle
+          >
+            <GripVertical className="size-4" aria-hidden />
+          </Button>
+          <FileAudio className="size-4 shrink-0 text-neutral-700" aria-hidden />
+          <span className="min-w-0 flex-1 truncate">{name}</span>
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            aria-label={t("richText.audio.remove")}
+            onClick={() => removeResourceNode({ editor, getPos, nodeSize: node.nodeSize })}
+          >
+            <X className="size-3.5" aria-hidden />
+          </Button>
         </div>
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- Audio uploads do not include a text track. */}
-        <audio
-          key={src}
-          src={src}
-          aria-label={name}
-          controls
-          preload="metadata"
-          className="block w-full max-w-full"
-          onLoadStart={() => setStatus("loading")}
-          onWaiting={() => setStatus("loading")}
-          onLoadedMetadata={() => setStatus("ready")}
-          onCanPlay={() => setStatus("ready")}
-          onPlaying={() => setStatus("ready")}
-          onError={() => setStatus("error")}
-        >
-          {t("richText.audio.unsupported")}
-        </audio>
-        {status === "loading" && (
-          <p role="status" className="m-0 mt-2 text-sm">
-            {t("richText.audio.loading")}
-          </p>
-        )}
-        {status === "error" && (
-          <p role="alert" className="m-0 mt-2 text-sm text-error-600">
-            {t("richText.audio.error")}
-          </p>
-        )}
+        <AudioPlayer src={src} name={name} />
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+const AudioViewerView = ({ node }: NodeViewProps) => {
+  const { t } = useTranslation();
+  const src = safeAudioSrc(node.attrs.src);
+  const name = node.attrs.name || t("richText.audio.label");
+  if (!src) return null;
+
+  return (
+    <NodeViewWrapper className="audio-node my-3 w-full max-w-full" contentEditable={false}>
+      <div className="flex min-w-0 flex-col gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm">
+        <div className="flex min-w-0 items-center gap-3">
+          <FileAudio className="size-4 shrink-0" aria-hidden />
+          <span className="min-w-0 truncate">{name}</span>
+        </div>
+        <AudioPlayer src={src} name={name} />
       </div>
     </NodeViewWrapper>
   );
@@ -103,7 +80,7 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
     return {};
   },
   addNodeView() {
-    return ReactNodeViewRenderer(AudioView);
+    return ReactNodeViewRenderer(AudioEditorView);
   },
   addAttributes() {
     return {
@@ -136,4 +113,8 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   },
 });
 
-export const AudioEmbedViewer = AudioEmbedEditor.extend({});
+export const AudioEmbedViewer = AudioEmbedEditor.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(AudioViewerView);
+  },
+});

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { access, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -37,9 +37,8 @@ describe("lesson audio multipart upload", () => {
       path.join(directory, "audio.wav"),
     ]);
     upload = jest.fn(async (_user, file: Express.Multer.File) => {
-      expect(file.buffer).toBeUndefined();
-      expect(file.mimetype).toBe("audio/wav");
-      expect(await readFile(file.path)).toEqual(await readFile(path.join(directory, "audio.wav")));
+      expect(file.path).toBeUndefined();
+      expect(file.buffer).toEqual(await readFile(path.join(directory, "audio.wav")));
       return { resourceId: "11111111-1111-4111-8111-111111111111" };
     });
     const module = await Test.createTestingModule({
@@ -66,7 +65,7 @@ describe("lesson audio multipart upload", () => {
     await rm(directory, { recursive: true, force: true });
   });
 
-  it("accepts canonicalizable audio and cleans up its temporary file after delivery", async () => {
+  it("accepts audio through the standard in-memory upload pipe", async () => {
     const response = await request(app.getHttpServer())
       .post("/lesson/upload-files-to-lesson")
       .field("language", "en")
@@ -75,8 +74,6 @@ describe("lesson audio multipart upload", () => {
       .attach("file", path.join(directory, "audio.wav"), { contentType: "audio/x-wav" })
       .expect(201);
     expect(response.body.data.resourceId).toBe("11111111-1111-4111-8111-111111111111");
-    const file = upload.mock.calls[0][1] as Express.Multer.File;
-    // Cleanup is awaited before the success response is completed.
-    await expect(access(file.path)).rejects.toThrow();
+    expect(upload).toHaveBeenCalledTimes(1);
   });
 });

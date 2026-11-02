@@ -30,15 +30,26 @@ export const ALLOWED_AUDIO_FILE_TYPES = [
   "audio/webm",
 ] as const;
 
+export const AUDIO_FILE_EXTENSIONS = [
+  ".mp3",
+  ".m4a",
+  ".wav",
+  ".ogg",
+  ".oga",
+  ".opus",
+  ".webm",
+] as const;
+
 export const AUDIO_UPLOAD_MAX_BYTES = 200 * 1024 * 1024;
 
 /** Browser upload classification only, never a substitute for content validation. */
 export const isAudioFile = (file: { type: string; name: string }): boolean => {
   const mime = file.type.toLowerCase().split(";")[0].trim();
   if ((ALLOWED_AUDIO_FILE_TYPES as readonly string[]).includes(mime)) return true;
+  const fileName = file.name.toLowerCase();
   return (
     (!mime || mime === "application/octet-stream") &&
-    /\.(mp3|m4a|wav|ogg|oga|opus|webm)$/i.test(file.name)
+    AUDIO_FILE_EXTENSIONS.some((extension) => fileName.endsWith(extension))
   );
 };
 

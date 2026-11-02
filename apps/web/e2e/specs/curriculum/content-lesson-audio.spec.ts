@@ -13,7 +13,7 @@ import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-p
 import { openExistingLessonFlow } from "../../flows/curriculum/open-existing-lesson.flow";
 import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
 import { saveContentLessonFormFlow } from "../../flows/curriculum/save-content-lesson-form.flow";
-import { uploadContentAudioFlow } from "../../flows/curriculum/upload-content-audio.flow";
+import { uploadContentResourceFlow } from "../../flows/curriculum/upload-content-resource.flow";
 
 import { createCurriculumCourse } from "./curriculum-test-helpers";
 
@@ -53,11 +53,10 @@ test("author uploads persistent content lesson audio and enrolled learner plays 
     await openNewLessonFormFlow(page, chapter.id, "content");
     await fillContentLessonFormFlow(page, { title, description: "Listen to this lesson." });
     const editor = page.getByTestId(CONTENT_LESSON_FORM_HANDLES.ROOT);
-    await expect(editor.getByTestId(RICH_TEXT_HANDLES.AUDIO_UPLOAD_BUTTON)).toBeVisible();
-    await uploadContentAudioFlow(page, audioPath);
+    await uploadContentResourceFlow(page, { path: audioPath });
     const authorAudio = editor.locator("audio");
     await expect(authorAudio).toHaveCount(1);
-    await expect(authorAudio).toHaveAttribute("controls", "");
+    await expect(editor.getByTestId(RICH_TEXT_HANDLES.AUDIO_PLAY_BUTTON)).toBeVisible();
     await expect.poll(() => authorAudio.evaluate((el: HTMLAudioElement) => el.duration)).toBe(12);
     storedSource = (await authorAudio.getAttribute("src")) ?? "";
     expect(storedSource).not.toMatch(/^(blob:|data:)/);
@@ -90,11 +89,11 @@ test("author uploads persistent content lesson audio and enrolled learner plays 
     await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(title);
     const audio = page.locator("audio");
     await expect(audio).toHaveCount(1);
-    await expect(audio).toHaveAttribute("controls", "");
+    const playButton = page.getByTestId(RICH_TEXT_HANDLES.AUDIO_PLAY_BUTTON);
+    await expect(playButton).toBeVisible();
     await expect.poll(() => audio.evaluate((el: HTMLAudioElement) => el.duration)).toBe(12);
-    // Activate native playback after a trusted click; exercise the browser media decoder, not a mock.
-    await audio.click();
-    await audio.evaluate((el: HTMLAudioElement) => el.play());
+    // Start playback with a trusted click on the custom control; exercise the real media decoder.
+    await playButton.click();
     await expect
       .poll(() => audio.evaluate((el: HTMLAudioElement) => el.currentTime))
       .toBeGreaterThan(0.25);

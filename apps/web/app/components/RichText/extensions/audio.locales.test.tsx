@@ -20,12 +20,16 @@ describe("audio translations", () => {
       expect(audio).toBeDefined();
       for (const key of [
         "label",
-        "upload",
         "drag",
         "remove",
         "loading",
         "error",
-        "unsupported",
+        "play",
+        "pause",
+        "seek",
+        "volume",
+        "mute",
+        "unmute",
         "invalidType",
         "tooLarge",
         "uploadFailed",

@@ -80,7 +80,7 @@ describe("rich text audio", () => {
     unmount();
     act(() => editor.destroy());
   });
-  it("renders accessible native viewer playback with loading and recoverable errors", () => {
+  it("renders custom viewer playback controls with loading and recoverable errors", () => {
     const editor = new Editor({
       editorProps: { handleScrollToSelection: () => true },
       extensions: contentViewerPlugins,
@@ -90,9 +90,13 @@ describe("rich text audio", () => {
     const { container, unmount } = render(<EditorContent editor={editor} />);
     const player = container.querySelector("audio")!;
     expect(player).toHaveAttribute("aria-label", "Interview.mp3");
-    expect(player).toHaveClass("w-full");
-    expect(player).toHaveAttribute("controls");
+    expect(player).not.toHaveAttribute("controls");
     expect(player).not.toHaveAttribute("autoplay");
+    expect(screen.getByText("Interview.mp3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: i18n.t("richText.audio.play") })).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: i18n.t("richText.audio.seek") })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: i18n.t("richText.audio.mute") })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: i18n.t("richText.audio.remove") })).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent(i18n.t("richText.audio.loading"));
     fireEvent.loadedMetadata(player);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
@@ -100,7 +104,25 @@ describe("rich text audio", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(i18n.t("richText.audio.error"));
     fireEvent.canPlay(player);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    unmount();
+    act(() => editor.destroy());
+  });
+
+  it("toggles the play and pause label with media playback events", () => {
+    const editor = new Editor({
+      editorProps: { handleScrollToSelection: () => true },
+      extensions: contentViewerPlugins,
+      editable: false,
+      content: `<audio data-node-type="audio" src="${src}" data-name="Interview.mp3"></audio>`,
+    });
+    const { container, unmount } = render(<EditorContent editor={editor} />);
+    const player = container.querySelector("audio")!;
+    fireEvent.play(player);
+    expect(
+      screen.getByRole("button", { name: i18n.t("richText.audio.pause") }),
+    ).toBeInTheDocument();
+    fireEvent.pause(player);
+    expect(screen.getByRole("button", { name: i18n.t("richText.audio.play") })).toBeInTheDocument();
     unmount();
     act(() => editor.destroy());
   });

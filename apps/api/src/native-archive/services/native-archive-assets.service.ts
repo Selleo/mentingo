@@ -23,7 +23,7 @@ import {
   isImageQuality,
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
-import { validateAudioUpload } from "src/file/utils/validate-audio";
+import { validateAudioFileAtPath } from "src/file/utils/validate-audio";
 import { S3Service } from "src/s3/s3.service";
 
 import { resolveImportedAssetContentType } from "../native-archive-content-type";
@@ -427,29 +427,18 @@ export class NativeArchiveAssetsService {
     asset: NativeArchiveAsset,
     targetReference: string,
     contentType: string,
-    validateLessonAudio: boolean,
+    shouldValidateLessonAudio: boolean,
   ): Promise<void> {
     const filePath = archive.assetFiles.get(asset.path);
 
     if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
 
-    if (
-      validateLessonAudio &&
-      (asset.contentType.startsWith("audio/") ||
-        isAudioFile({ type: asset.contentType, name: asset.sourceReference }))
-    ) {
-      const file = {
-        path: filePath,
-        originalname: path.posix.basename(asset.sourceReference),
-        mimetype: asset.contentType,
-        size: asset.byteLength,
-      } as Express.Multer.File;
-      await validateAudioUpload(file);
-      contentType = file.mimetype;
-    }
+    const uploadContentType = shouldValidateLessonAudio
+      ? await this.resolveValidatedAudioContentType(asset, filePath, contentType)
+      : contentType;
 
     if (asset.byteLength === 0) {
-      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, contentType, 0);
+      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, uploadContentType, 0);
 
       return;
     }
@@ -457,8 +446,27 @@ export class NativeArchiveAssetsService {
     await this.s3Service.uploadStreamMultipart(
       createReadStream(filePath),
       targetReference,
-      contentType,
+      uploadContentType,
     );
+  }
+
+  /** Imported lesson audio gets the same content validation as a direct upload. */
+  private async resolveValidatedAudioContentType(
+    asset: NativeArchiveAsset,
+    filePath: string,
+    contentType: string,
+  ) {
+    const isAudioAsset =
+      asset.contentType.startsWith("audio/") ||
+      isAudioFile({ type: asset.contentType, name: asset.sourceReference });
+
+    if (!isAudioAsset) return contentType;
+
+    return validateAudioFileAtPath(filePath, {
+      originalname: path.posix.basename(asset.sourceReference),
+      mimetype: asset.contentType,
+      size: asset.byteLength,
+    });
   }
 
   private rewriteReferences<T>(value: T, referenceMap: ReadonlyMap<string, string>): T {

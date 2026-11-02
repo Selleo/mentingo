@@ -7,9 +7,8 @@ export const TOAST_HANDLES = {
 
 export const RICH_TEXT_HANDLES = {
   ROOT: "rich-text-editor",
-  AUDIO_UPLOAD_BUTTON: "rich-text-editor-audio-upload-button",
-  AUDIO_UPLOAD_INPUT: "rich-text-editor-audio-upload-input",
   CONTENT: "rich-text-editor-content",
+  AUDIO_PLAY_BUTTON: "rich-text-audio-play-button",
   ASSET_LIBRARY_BUTTON: "rich-text-editor-asset-library-button",
   TABLE_MENU_BUTTON: "rich-text-editor-table-menu-button",
   TABLE_INSERT_BUTTON: "rich-text-editor-table-insert-button",

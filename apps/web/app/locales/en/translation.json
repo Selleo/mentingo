@@ -5010,7 +5010,9 @@
       "contentTypeMismatch": "File content type does not match the provided content type",
       "invalidFileType": "Invalid file type.",
       "missingTenantContext": "Missing tenant context for file upload",
-      "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}."
+      "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}.",
+      "audioFileTooLarge": "Audio file is too large. Upload audio up to 200 MB.",
+      "rangeNotSatisfiable": "The requested byte range is not available."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -5191,13 +5193,17 @@
   },
   "richText": {
     "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "seek": "Seek",
+      "volume": "Volume",
+      "mute": "Mute",
+      "unmute": "Unmute",
       "label": "Audio",
-      "upload": "Upload audio",
       "drag": "Drag audio",
       "remove": "Remove audio",
       "loading": "Loading audio…",
       "error": "Audio could not be played. Try again or use a different browser.",
-      "unsupported": "Your browser does not support audio playback.",
       "invalidType": "Choose an MP3, M4A, WAV, Ogg or WebM audio file. Audio is supported in content lessons only.",
       "tooLarge": "Audio must be no larger than {{maxMB}} MB.",
       "uploadFailed": "Audio upload failed. Please try again."

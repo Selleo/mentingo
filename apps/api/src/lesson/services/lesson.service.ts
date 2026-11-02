@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
@@ -21,7 +22,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
-import { hasAnyPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   canTrackLessonProgress,
@@ -71,7 +72,10 @@ import type {
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
-import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
+import type {
+  AudioResourceLesson,
+  EnrolledLessonWithSearch,
+} from "../repositories/lesson.repository";
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -613,49 +617,9 @@ export class LessonService {
       if (lessonResource.tenantId !== currentUser.tenantId) {
         throw new NotFoundException("common.toast.notFound");
       }
-      const canManageAll = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
-      const canManageOwn = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
-      const relations = await this.lessonRepository.getAudioResourceLessons(
-        resourceId,
-        currentUser,
-      );
-      let allowed = canManageAll;
-      // Unsaved editor uploads belong only to their uploader (or a full content manager).
-      if (
-        !lessonResource.entityId &&
-        canManageOwn &&
-        lessonResource.uploadedBy === currentUser.userId
-      ) {
-        allowed = true;
+      if (!(await this.canStreamAudioResource(resourceId, lessonResource, currentUser))) {
+        throw new ForbiddenException("common.toast.lessonAccessDenied");
       }
-      for (const relation of relations) {
-        if (
-          currentUser.permissions.includes(PERMISSIONS.MANAGED_GROUP_RESULTS_READ) &&
-          relation.isManagerPreview
-        ) {
-          allowed = true;
-          break;
-        }
-        if (canManageOwn && relation.authorId === currentUser.userId) {
-          allowed = true;
-          break;
-        }
-        if (
-          currentUser.permissions.includes(PERMISSIONS.COURSE_READ) &&
-          relation.status === "published" &&
-          !relation.isArchived &&
-          (relation.isEnrolled || relation.isFreemium) &&
-          (await this.lessonRepository.getHasLessonAccess(
-            relation.lessonId,
-            currentUser.userId,
-            true,
-          ))
-        ) {
-          allowed = true;
-          break;
-        }
-      }
-      if (!allowed) throw new ForbiddenException("common.toast.lessonAccessDenied");
       res.setHeader("Cache-Control", "private, no-store");
       res.setHeader("X-Content-Type-Options", "nosniff");
       return this.streamResource(req, res, lessonResource.reference, {
@@ -721,6 +685,68 @@ export class LessonService {
       contentType: lessonResource.contentType,
       preview,
     });
+  }
+
+  /**
+   * Audio is never public: only content managers, the uploader of an unsaved editor upload,
+   * course authors, in-scope group managers, and learners with lesson access may stream it.
+   */
+  private async canStreamAudioResource(
+    resourceId: UUIDType,
+    audioResource: { entityId: UUIDType | null; uploadedBy: UUIDType | null },
+    currentUser: CurrentUserType,
+  ) {
+    if (hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)) return true;
+
+    const isOwnUnsavedUpload =
+      !audioResource.entityId && audioResource.uploadedBy === currentUser.userId;
+
+    if (
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
+      isOwnUnsavedUpload
+    ) {
+      return true;
+    }
+
+    const audioLessons = await this.lessonRepository.getAudioResourceLessons(
+      resourceId,
+      currentUser,
+    );
+
+    for (const audioLesson of audioLessons) {
+      if (await this.canStreamAudioLesson(audioLesson, currentUser)) return true;
+    }
+
+    return false;
+  }
+
+  private async canStreamAudioLesson(
+    audioLesson: AudioResourceLesson,
+    { permissions, userId }: CurrentUserType,
+  ) {
+    if (
+      hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ) &&
+      audioLesson.isManagerPreview
+    ) {
+      return true;
+    }
+
+    if (
+      hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
+      audioLesson.authorId === userId
+    ) {
+      return true;
+    }
+
+    const isLearnerReachable =
+      hasPermission(permissions, PERMISSIONS.COURSE_READ) &&
+      audioLesson.status === COURSE_STATUSES.PUBLISHED &&
+      !audioLesson.isArchived &&
+      (audioLesson.isEnrolled || audioLesson.isFreemium);
+
+    if (!isLearnerReachable) return false;
+
+    return this.lessonRepository.getHasLessonAccess(audioLesson.lessonId, userId, true);
   }
 
   private async streamResource(

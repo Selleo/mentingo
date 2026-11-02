@@ -1,4 +1,4 @@
-import { RESOURCE_VISIBILITY } from "@repo/shared";
+import { RESOURCE_VISIBILITY, RICH_TEXT_RESOURCE_TYPE } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { Lock, Trash2, Unlock } from "lucide-react";
 
@@ -93,7 +93,7 @@ export const getAssetLibraryColumns = ({
             </p>
             <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-600">
               <span>
-                {getRichTextResourceTypeFromAsset(asset) === "audio"
+                {getRichTextResourceTypeFromAsset(asset) === RICH_TEXT_RESOURCE_TYPE.AUDIO
                   ? t("richText.audio.label")
                   : t(`richText.assetLibrary.types.${asset.type}`)}
               </span>

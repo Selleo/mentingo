@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
-import { and, eq, getTableColumns, isNull, ne, type SQL, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, isNotNull, isNull, ne, type SQL, sql } from "drizzle-orm";
 
 import {
   buildAiJudgeBlockingErrorEvaluationsSql,
@@ -40,6 +40,10 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonsFilters } from "src/lesson/lesson.schema";
 import type { AiMentorEvaluationDetails, LessonTypes } from "src/lesson/lesson.type";
 import type * as schema from "src/storage/schema";
+
+export type AudioResourceLesson = Awaited<
+  ReturnType<LessonRepository["getAudioResourceLessons"]>
+>[number];
 
 export type EnrolledLessonWithSearch = {
   id: UUIDType;
@@ -479,7 +483,9 @@ export class LessonRepository {
   }
 
   async getAudioResourceLessons(resourceId: UUIDType, currentUser: CurrentUserType) {
-    const managerScope = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+    const groupManagerCourseScope =
+      getGroupManagerCourseScopeCondition(currentUser, courses.id, []) ?? sql`false`;
+
     return this.db
       .select({
         lessonId: lessons.id,
@@ -487,8 +493,8 @@ export class LessonRepository {
         status: courses.status,
         isArchived: courses.isArchived,
         isFreemium: chapters.isFreemium,
-        isEnrolled: sql<boolean>`${studentCourses.id} IS NOT NULL`,
-        isManagerPreview: sql<boolean>`COALESCE(${managerScope ?? sql`false`}, false)`,
+        isEnrolled: sql<boolean>`${isNotNull(studentCourses.id)}`,
+        isManagerPreview: sql<boolean>`${groupManagerCourseScope}`,
       })
       .from(resourceEntity)
       .innerJoin(lessons, eq(lessons.id, resourceEntity.entityId))

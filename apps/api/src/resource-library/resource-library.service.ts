@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import {
   ENTITY_TYPES,
+  isAudioFile,
   PERMISSIONS,
   RESOURCE_VISIBILITY,
   VIDEO_EMBED_PROVIDERS,
@@ -170,6 +171,11 @@ export class ResourceLibraryService {
     currentUser: CurrentUserType,
   ) {
     if (!file) throw new BadRequestException("resourceLibrary.error.fileRequired");
+
+    const isAudio = isAudioFile({ type: file.mimetype, name: file.originalname });
+    if (isAudio && body.entityType !== ENTITY_TYPES.LESSON) {
+      throw new BadRequestException("richText.audio.invalidType");
+    }
 
     if (body.entityId) await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 

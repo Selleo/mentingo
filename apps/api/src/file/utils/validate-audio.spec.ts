@@ -1,9 +1,9 @@
 import { execFileSync } from "node:child_process";
-import { mkdtemp, open, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, open, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { validateAudioUpload } from "./validate-audio";
+import { validateAudioFileAtPath, validateAudioUpload } from "./validate-audio";
 
 describe("actual-content audio validation", () => {
   let directory: string;
@@ -44,12 +44,11 @@ describe("actual-content audio validation", () => {
     Buffer.from([0x42, 0x82, 0x84, 0x77, 0x65, 0x62, 0x6d]).copy(bytes, offset);
     await writeFile(filePath, bytes);
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "forged.webm",
         mimetype: "audio/webm",
         size: bytes.length,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
@@ -74,12 +73,11 @@ describe("actual-content audio validation", () => {
     bytes.fill(0, offset + 4, offset - 4 + length);
     await writeFile(filePath, bytes);
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "audio.m4a",
         mimetype: "audio/mp4",
         size: bytes.length,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
@@ -89,12 +87,11 @@ describe("actual-content audio validation", () => {
     await handle.truncate(209715201);
     await handle.close();
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "oversized.wav",
         mimetype: "audio/wav",
         size: 209715201,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow("files.toast.audioFileTooLarge");
   });
 
@@ -113,12 +110,11 @@ describe("actual-content audio validation", () => {
       filePath,
     ]);
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "spoofed.m4a",
         mimetype: "audio/mp4",
         size: (await stat(filePath)).size,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
@@ -137,24 +133,22 @@ describe("actual-content audio validation", () => {
       filePath,
     ]);
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "audio.wav",
         mimetype: "audio/wav",
         size: (await stat(filePath)).size,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
   it("rejects a non-audio browser MIME rather than weakening image validation", async () => {
     const filePath = path.join(directory, "audio.wav");
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "audio.wav",
         mimetype: "image/png",
         size: (await stat(filePath)).size,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
@@ -178,14 +172,13 @@ describe("actual-content audio validation", () => {
       codec,
       filePath,
     ]);
-    const file = {
-      path: filePath,
-      originalname: `audio.${extension}`,
-      mimetype: browserMime,
-      size: (await stat(filePath)).size,
-    } as Express.Multer.File;
-    await validateAudioUpload(file);
-    expect(file.mimetype).toBe(canonicalMime);
+    await expect(
+      validateAudioFileAtPath(filePath, {
+        originalname: `audio.${extension}`,
+        mimetype: browserMime,
+        size: (await stat(filePath)).size,
+      }),
+    ).resolves.toBe(canonicalMime);
   });
 
   it.each([
@@ -208,24 +201,30 @@ describe("actual-content audio validation", () => {
       filePath,
     ]);
     await expect(
-      validateAudioUpload({
-        path: filePath,
+      validateAudioFileAtPath(filePath, {
         originalname: "spoofed.mp3",
         mimetype: "audio/mpeg",
         size: (await stat(filePath)).size,
-      } as Express.Multer.File),
+      }),
     ).rejects.toThrow();
   });
 
-  it("validates disk-backed PCM WAV with an empty browser MIME and canonicalizes it", async () => {
-    const file = {
-      path: path.join(directory, "audio.wav"),
-      originalname: "audio.wav",
-      mimetype: "",
-      size: (await stat(path.join(directory, "audio.wav"))).size,
-    } as Express.Multer.File;
-    await validateAudioUpload(file);
-    expect(file.mimetype).toBe("audio/wav");
-    expect(file.buffer).toBeUndefined();
+  it("validates an in-memory upload with an empty browser MIME and removes its temporary copy", async () => {
+    const tempEntriesBefore = (await readdir(tmpdir())).filter((entry) =>
+      entry.startsWith("mentingo-audio-"),
+    );
+    const buffer = await readFile(path.join(directory, "audio.wav"));
+    await expect(
+      validateAudioUpload({
+        buffer,
+        originalname: "audio.wav",
+        mimetype: "",
+        size: buffer.length,
+      } as Express.Multer.File),
+    ).resolves.toBe("audio/wav");
+    const tempEntriesAfter = (await readdir(tmpdir())).filter((entry) =>
+      entry.startsWith("mentingo-audio-"),
+    );
+    expect(tempEntriesAfter).toEqual(tempEntriesBefore);
   });
 });
