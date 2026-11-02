@@ -7,7 +7,11 @@ import { test as base } from "./release-film.base.fixture";
 // Every existing scene import now uses seeded demo accounts, without E2E worker tenants.
 export const test = base.extend({
   withWorkerPage: async ({ browser, apiClient, baseURL }, use) => {
-    if (process.env.RELEASE_FILM_DEMO !== "1" || new URL(baseURL!).origin !== RECORDING_ORIGIN) {
+    if (
+      !baseURL ||
+      process.env.RELEASE_FILM_DEMO !== "1" ||
+      new URL(baseURL).origin !== RECORDING_ORIGIN
+    ) {
       throw new Error(
         "Release-film demo fixtures require the isolated localhost recording environment",
       );
