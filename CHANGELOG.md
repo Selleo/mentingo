@@ -1,3 +1,21 @@
+<a name="v4.28.0"></a>
+
+## [v4.28.0] - 02.11.2026
+
+### Features:
+
+- add audio player to content lessons ([#2100](https://github.com/Selleo/mentingo/issues/2100))
+
+- show signed external assistant conversations in Mentingo ([#2096](https://github.com/Selleo/mentingo/issues/2096))
+
+### Bug Fixes:
+
+- stabilize release film recording and narration ([#2103](https://github.com/Selleo/mentingo/issues/2103))
+
+- keep existing content when opening the article editor ([#2102](https://github.com/Selleo/mentingo/issues/2102))
+
+- ensure all document attachments are preserved in articles and news ([#2101](https://github.com/Selleo/mentingo/issues/2101))
+
 <a name="v4.27.0"></a>
 
 ## [v4.27.0] - 30.10.2026
@@ -19,6 +37,8 @@
 - improve phishing plugin's views ([#2073](https://github.com/Selleo/mentingo/issues/2073))
 
 ### Documentation:
+
+- update changelog for version v4.27.0
 
 - update changelog for version v4.26.0
 
@@ -3612,7 +3632,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.27.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.28.0...HEAD
+[v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
 [v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0
 [v4.26.0]: https://github.com/Selleo/mentingo/compare/v4.25.0...v4.26.0
 [v4.25.0]: https://github.com/Selleo/mentingo/compare/v4.24.0...v4.25.0
