@@ -176,14 +176,14 @@ class ReleaseNotes(unittest.TestCase):
         self.assertIn('[Download MP4](https://example.test/film.mp4)', section)
         self.assertNotIn('![', release_assets.notes_section('v1.2.0', 'en', {names['film']: links[names['film']]}))
 
-    def test_native_player_is_a_standalone_url_with_only_watch_and_download_links(self):
+    def test_native_player_is_a_standalone_url_without_redundant_links(self):
         names = release_assets.asset_names('v1.2.0', 'en')
         links = {name: 'https://example.test/' + name for name in names.values()}
         url = 'https://github.com/user-attachments/assets/1234-abcd'
         section = release_assets.notes_section('v1.2.0', 'en', links, 'https://example.test/films/', url, 'a' * 64)
         self.assertIn('\n\n' + url + '\n\n', section)
-        self.assertIn('[Watch video](https://example.test/films/v1.2.0/)', section)
-        self.assertIn('[Download MP4]', section)
+        self.assertNotIn('[Watch video]', section)
+        self.assertNotIn('[Download MP4]', section)
         for clutter in ('![', 'narrated demo', 'ZIP', 'VTT', 'subtitles'):
             self.assertNotIn(clutter, section)
 
@@ -289,7 +289,7 @@ class Publish(unittest.TestCase):
                 self.assertTrue(release['body'].startswith(release_assets.MARK_START))
                 self.assertTrue(release['body'].endswith('# Release Summary\n\nNotes.\n'))
                 self.assertNotIn('![', release['body'])
-                self.assertIn('Download MP4', release['body'])
+                self.assertNotIn('Download MP4', release['body'])
                 self.assertNotIn('(ZIP)', release['body'])
                 self.assertIn('https://github.com/user-attachments/assets/1234-abcd', release['body'])
                 again = release_assets.publish(folder, 'release', repo='o/r')  # a second publish changes nothing

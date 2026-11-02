@@ -81,8 +81,8 @@ class RenderTest(unittest.TestCase):
         def accent_pixels(at):  # the label's orange accent
             pixels = self.frame(out/'demo.mp4', at, 'crop=12:70:178:942', 'rgb24')
             return sum(1 for i in range(0, len(pixels), 3) if pixels[i] > 200 and pixels[i+2] < 100)
-        self.assertLess(bright_pixels(1.0), 20)  # the chapter card: no label
-        self.assertEqual(accent_pixels(1.0), 0)
+        self.assertGreater(bright_pixels(1.0), 300)  # real opening screen and chapter title from frame zero
+        self.assertGreater(accent_pixels(1.0), 100)
         self.assertGreater(bright_pixels(2.6), 300)  # the first step's label, then the second one's
         self.assertGreater(bright_pixels(3.4), 300)
         self.assertGreater(accent_pixels(3.4), 100)
@@ -194,7 +194,7 @@ class RenderTest(unittest.TestCase):
         out = self.root / 'brand-out'
         render(plan, out)
         rgb = lambda at, crop: self.average(out / 'demo.mp4', at, crop)
-        ground, bar = rgb(1.0, 'crop=40:40:20:20'), rgb(1.0, 'crop=150:5:110:421')  # the chapter card at 1 s
+        ground, bar = rgb(1.0, 'crop=40:40:20:20'), rgb(1.0, 'crop=150:5:110:0')  # opening frame and top accent
         self.assertTrue(all(abs(a - b) < 14 for a, b in zip(ground, (0x22, 0x29, 0x49))), ground)
         self.assertTrue(all(abs(a - b) < 20 for a, b in zip(bar, (0x3f, 0x58, 0xb6))), bar)
         default = load_plan(self.plan(), enforce_duration=False)

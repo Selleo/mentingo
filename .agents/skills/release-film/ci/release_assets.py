@@ -132,7 +132,7 @@ def plan_uploads(staged, existing):
 
 
 def notes_section(tag, code, links, base_url=None, video_url=None, video_sha256=None):
-    """A playable film and two useful actions; build files remain in the release assets."""
+    """An inline player; watch/download links appear only when embedding is unavailable."""
     names = asset_names(tag, code)
     watch = f'{base_url.rstrip("/")}/{tag}/' if base_url else None
     parts = [f'[Watch video]({watch})'] if watch else []
@@ -144,6 +144,7 @@ def notes_section(tag, code, links, base_url=None, video_url=None, video_sha256=
               'the inline video must be a GitHub media attachment')
         check(re.fullmatch(r'[a-f0-9]{64}', video_sha256 or ''), 'the inline video needs its film checksum')
         preview = f'<!-- release-film-video sha256={video_sha256} url={video_url} -->\n\n{video_url}\n\n'
+        parts = []
     elif names['poster'] in links and (watch or names['film'] in links):
         preview = f'[![Watch video]({links[names["poster"]]})]({watch or links[names["film"]]})\n\n'
     return f'{MARK_START}\n## 🎬 Release film\n\n{preview}{" · ".join(parts)}\n{MARK_END}'

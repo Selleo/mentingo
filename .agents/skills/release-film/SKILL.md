@@ -323,8 +323,7 @@ worker writes.
 After a successful recording (unless its `publish` input is off) the same
 run's second job, without the Claude token, calls
 `.github/workflows/release-film-publish.yml`: it attaches the film to the tag's
-release with an inline video player and Watch video / Download MP4 links at the top of its notes
-(`ci/release_assets.py`) and
+release with an inline video player at the top of its notes (`ci/release_assets.py`) and
 rebuilds the public GitHub Pages site of the films from every release's page ZIP
 (`site`: an index and each film at `/<tag>/`). Started by hand, the same
 workflow publishes an earlier recording to a test draft release or to the
@@ -340,7 +339,10 @@ Republication keeps one film section, reuses an inline attachment when the film 
 and preserves the remaining release notes. The inline player uses GitHub media attachments, the same upload
 endpoint as the official GitHub CLI. GitHub may refuse an upload because of token permissions or its media
 size limit (up to 100 MB, depending on the repository plan). Publication then reports a warning and keeps
-the poster linked to the Pages player; the MP4, captions and page ZIP remain release assets.
+the poster linked to the Pages player, with Watch video / Download MP4 links only for this fallback;
+the MP4, captions and page ZIP remain release assets. An embedded player has no redundant links beneath it.
+The first two seconds hold the first demonstrated screen with its chapter title, fully visible from the first
+frame. Later chapters retain their title cards. Narration and chapter timings stay unchanged.
 Captions are selectable in the Pages player; the inline GitHub player uses GitHub's own controls.
 There is no monthly schedule; each stable release starts its own film once the
 workflows are deployed to the default branch and the release tag. Existing

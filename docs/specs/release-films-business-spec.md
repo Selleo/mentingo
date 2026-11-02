@@ -21,7 +21,8 @@ accounts for the release's pull requests, including changes not demonstrated.
 
 - Generate a narrated demonstration after each stable release is published.
 - Show selected user-facing changes since the previous published ancestor release.
-- Play the film directly above the release notes, with separate online-player and MP4 download links.
+- Play the film directly above the release notes without redundant links beneath the player.
+- Start on a real demonstration screen so the embedded video thumbnail already shows the application.
 - Keep current and earlier demonstrations accessible in the public film archive.
 - Retry recording or publication manually while protecting an existing film from unintended replacement.
 
@@ -40,10 +41,11 @@ The existing process records scenes, checks the narration against the pictures, 
 After a successful recording, publication attaches the film, poster, subtitles and page archive to the release,
 places one film section at the top of its notes, and rebuilds the GitHub Pages archive while keeping earlier films.
 Repeated publication updates the section without duplicating it, reuses the media attachment when the film has
-not changed, and keeps the remaining notes. The section contains an inline GitHub player, Watch video and
-Download MP4. Build archives and subtitle files stay under release assets instead of cluttering the notes.
+not changed, and keeps the remaining notes. The section contains the inline GitHub player without extra links. Build archives and subtitle files stay under release assets instead of cluttering the notes.
 The Pages player includes selectable captions. If GitHub refuses the inline attachment (permissions or file size),
-publication reports a warning and links the poster to the Pages player, while preserving the downloadable film.
+publication reports a warning and offers a poster linked to the Pages player plus watch/download links.
+The first two seconds show the first kept capture frame and chapter title immediately, without a blank color
+fade. Later title cards and all narration/chapter timing remain unchanged.
 
 Drafts and prereleases do not queue automatic films. There is no monthly timer: each stable release triggers its
 own recording. A failed recording leaves the release published and can be retried manually. Existing films require
@@ -69,6 +71,8 @@ an explicit replacement choice; releases published before this automation is dep
 - Publication tests verify that the film section precedes the original notes, older sections move to the top,
   repeated publication stays idempotent, attachments are reused, and upload rejection retains the browser player.
   Existing tests cover asset protection and preservation of films already shown on Pages.
+- Opening-frame tests decode real local media to verify that frame zero shows the first kept capture, stays
+  stable throughout the opening, and preserves chapter/audio timing. No provider generation is needed.
 - The existing v4.27.0 film was uploaded as a GitHub media attachment and verified playing inside the release
   notes in a signed-in browser. Its Pages player was also deployed from existing release assets. No new
   provider-backed recording was generated. The new automatic upload still requires validation with the Actions token.
