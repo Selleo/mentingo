@@ -232,6 +232,11 @@ jobs:
       - name: Build packages
         run: pnpm -w packages:build
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Run unit tests
         run: pnpm --filter=api test:ci --shard=${{ matrix.shard }}/2
 
