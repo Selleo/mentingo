@@ -1,5 +1,11 @@
 # LLM-as-a-judge evaluators
 
+For application regression tests, use the
+[regression evaluation policy](regression-evaluations.md). The generic rubrics
+below are legacy reference material; they do not establish persisted-state,
+access-control or delivery correctness and require calibration before use as
+release gates.
+
 This guide outlines the evaluation prompts used in Langfuse for Mentingo. Each section mirrors the deployment guide structure so you can skim quickly, copy the code blocks, and understand exactly how and why to use them.
 
 ---

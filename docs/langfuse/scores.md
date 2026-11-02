@@ -1,5 +1,10 @@
 # Human Annotation Scores
 
+For versioned regression cases and benchmark review, follow the
+[regression evaluation policy](regression-evaluations.md). These generic score
+anchors alone do not establish agreement with human judgments or application
+correctness.
+
 This guide outlines the human annotation scores used in Langfuse for Mentingo. Each section defines a scoring dimension so you can understand the scale, anchor points, and how to apply consistent ratings across evaluations.
 
 ---
