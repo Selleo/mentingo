@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { ArticleFactory } from "../factories/article.factory";
 import {
   getSelfOnboardingLanguage,
   recordingText,
   recordingValue,
 } from "../utils/self-onboarding-context";
+
+import type { FixtureApiClient } from "../utils/api-client";
 
 /** Run in separate EN/PL processes, matching actual localized scenario replay. */
 test("native control selectors and example data agree with the recording language", async ({
@@ -30,4 +33,33 @@ test("missing native translation keys fail visibly instead of using an English f
   expect(() => recordingText("selfOnboarding.doesNotExist")).toThrow(
     "Missing recording UI translation",
   );
+});
+
+test("article section prerequisites use the native recording language", async () => {
+  const calls: unknown[] = [];
+  const section = { id: "native-section", title: "Knowledge base" };
+  const apiClient = {
+    api: {
+      articlesControllerCreateArticleSection: async (body: unknown) => {
+        calls.push(body);
+        return { data: { data: section } };
+      },
+      articlesControllerUpdateArticleSection: async (_id: string, body: unknown) => {
+        calls.push(body);
+      },
+      articlesControllerGetArticleSection: async (_id: string, query: unknown) => {
+        calls.push(query);
+        return { data: { data: section } };
+      },
+    },
+  } as unknown as FixtureApiClient;
+  const language = getSelfOnboardingLanguage();
+  const title = recordingValue({ en: "Employee handbook", pl: "Poradnik pracownika" });
+  await new ArticleFactory(apiClient).createSection({ title });
+  expect(calls).toEqual([
+    { language },
+    { translations: [{ language, title }] },
+    { language },
+    { language },
+  ]);
 });

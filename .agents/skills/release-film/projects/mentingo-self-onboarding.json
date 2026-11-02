@@ -2147,6 +2147,391 @@
           ]
         }
       ]
+    },
+    {
+      "key": "knowledge-base-articles.guide",
+      "domain": "knowledge-base-articles",
+      "title": "Knowledge Base Articles",
+      "description": "Browse, create, organize, localize and maintain knowledge-base articles, including covers and public visibility.",
+      "specPaths": [
+        "docs/specs/knowledge-base-articles-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Articles/**",
+        "apps/api/src/articles/**",
+        "apps/web/e2e/specs/articles/**",
+        "apps/web/e2e/flows/articles/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-articles",
+          "title": "Browse and read knowledge-base articles",
+          "description": "Browse and read knowledge-base articles in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Browse and read knowledge-base articles.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "Published articles with realistic localized content exist."
+          ],
+          "actions": [
+            "Open Articles through application navigation.",
+            "Browse the section table of contents and open an article in the selected language."
+          ],
+          "outcomes": [
+            "The selected article displays its title, summary and rich content."
+          ]
+        },
+        {
+          "id": "create-section",
+          "title": "Create an article section",
+          "description": "Create an article section in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Create an article section.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions."
+          ],
+          "actions": [
+            "Open Articles and add a section from the table of contents.",
+            "Give the section a realistic localized title and save."
+          ],
+          "outcomes": [
+            "The new section appears in the table of contents."
+          ]
+        },
+        {
+          "id": "edit-section",
+          "title": "Rename and localize an article section",
+          "description": "Rename and localize an article section in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Rename and localize an article section.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "A disposable article section exists."
+          ],
+          "actions": [
+            "Open the section editing controls.",
+            "Update its title, add a supported language version and save.",
+            "Inspect the section in each selected language."
+          ],
+          "outcomes": [
+            "Each language shows its saved section title."
+          ]
+        },
+        {
+          "id": "create-article",
+          "title": "Create an article in a section",
+          "description": "Create an article in a section in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Create an article in a section.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "The content author can manage own articles and a section exists."
+          ],
+          "actions": [
+            "Open an expanded section and choose New article.",
+            "Open the new article editor, enter a localized title, summary and content, then save."
+          ],
+          "outcomes": [
+            "The saved article can be opened from its section and shows the entered content."
+          ]
+        },
+        {
+          "id": "edit-article",
+          "title": "Edit article title, summary and content",
+          "description": "Edit article title, summary and content in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Edit article title, summary and content.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "A populated article owned by the recording author exists."
+          ],
+          "actions": [
+            "Open the article through the table of contents and choose Edit.",
+            "Update the title, summary and rich content, then save.",
+            "Reopen the article through navigation."
+          ],
+          "outcomes": [
+            "The updated content is displayed and remains saved."
+          ]
+        },
+        {
+          "id": "preview-article",
+          "title": "Preview article content before saving",
+          "description": "Preview article content before saving in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Preview article content before saving.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "An editable article contains realistic localized rich content."
+          ],
+          "actions": [
+            "Open the article editor and edit its rich content.",
+            "Switch to the preview tab for the active language.",
+            "Return to editing and save the article."
+          ],
+          "outcomes": [
+            "The preview renders the active language content and the article can be saved."
+          ]
+        },
+        {
+          "id": "localize-article",
+          "title": "Maintain multiple article language versions",
+          "description": "Maintain multiple article language versions in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Maintain multiple article language versions.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "An editable article with populated base-language content exists."
+          ],
+          "actions": [
+            "Open the language selector and add another supported language.",
+            "Edit titles, summaries and content in both languages, switching before saving.",
+            "Save once, reopen and inspect each language."
+          ],
+          "outcomes": [
+            "Both changed translations remain saved without overwriting each other."
+          ]
+        },
+        {
+          "id": "replace-article-cover",
+          "title": "Replace an article cover image",
+          "description": "Replace an article cover image in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Replace an article cover image.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "An editable article and a neutral image fixture without written English text are available."
+          ],
+          "actions": [
+            "Open the article editor for the selected language.",
+            "Choose a cover image through the visible upload control and save.",
+            "Return to article details."
+          ],
+          "outcomes": [
+            "The article displays the uploaded cover for the selected language."
+          ]
+        },
+        {
+          "id": "configure-public-article",
+          "title": "Control public article access",
+          "description": "Control public article access in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Control public article access.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "An article exists; enable the Articles module and public article tenant setting off camera using existing helpers."
+          ],
+          "actions": [
+            "Open article editing, enable public access and save.",
+            "Show the article in a visitor window.",
+            "Return to management, turn public access off and save, then inspect a fresh visitor window."
+          ],
+          "outcomes": [
+            "A visitor can read the public article, while the private version is unavailable to visitors."
+          ]
+        },
+        {
+          "id": "delete-article",
+          "title": "Delete an article",
+          "description": "Delete an article in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Delete an article.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "A disposable synthetic article exists in a section."
+          ],
+          "actions": [
+            "Open the disposable article and choose Delete.",
+            "Complete the displayed confirmation."
+          ],
+          "outcomes": [
+            "The deleted article is no longer listed in its section."
+          ]
+        },
+        {
+          "id": "delete-section",
+          "title": "Delete an article section",
+          "description": "Delete an article section in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Delete an article section.",
+          "preconditions": [
+            "The Articles module is enabled off camera with the existing ensureArticlesModuleEnabled helper; the account has the required article permissions.",
+            "A disposable synthetic section exists; do not remove shared demonstration content."
+          ],
+          "actions": [
+            "Open the disposable section actions and choose Delete.",
+            "Complete the displayed confirmation."
+          ],
+          "outcomes": [
+            "The deleted section is absent from the table of contents."
+          ]
+        }
+      ]
     }
   ]
 }

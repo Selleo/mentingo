@@ -11,6 +11,7 @@ Core now retrieves published guidance from the separate Helpdesk service through
 - Learners find guidance about taking courses and following development paths.
 - Course authors find help with creating and editing courses.
 - Administrators find guidance about managing development paths and learning workflows.
+- Knowledge-base authors and learners find guidance about article sections, editing, localization, covers and public visibility.
 
 These are subjects of public product guidance. Viewing a tutorial does not grant access to the corresponding product action or another user's information.
 
@@ -79,3 +80,11 @@ Accepted scenarios are retained in private checkpoints. Adding a language replay
 Recordings target focused scenes of roughly twenty to forty seconds with three or four narration sentences. Each flow has at most two browser attempts and a shorter coding deadline. English overlays reuse the existing narration without an extra model request; Polish still translates the narration and overlays. Per-flow progress is printed during recording. These changes reduce work per flow; total runtime still depends on app startup, selected flow count, provider latency and media rendering.
 
 When the text model reports an exhausted quota, generation stops launching new scene workers and translations for that attempt. Already captured English flows can continue to narration and rendering. Unavailable localized metadata skips that language with a report, preserving other language outputs. The workflow does not reset or increase provider quotas.
+
+## Knowledge-base article recording scope
+
+The standalone catalog includes an Articles feature video selected by `docs/specs/knowledge-base-articles-business-spec.md`.
+Its eleven explicit flows cover browsing, section creation/editing/deletion, article creation/editing/deletion,
+preview, multiple languages, cover replacement and public access. Recording enables the Articles module off camera
+using existing test helpers. Article factories default to the recording language in demo mode and remain English
+in ordinary E2E runs. The current editor has no separate publication toggle; create/save is the demonstrated flow.

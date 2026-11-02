@@ -35,6 +35,9 @@ gh workflow run self-onboarding.yml --repo Selleo/mentingo \
   -f languages=en,pl -F test_mode=true -F publish=false
 ```
 
+For Articles, use `business_spec=docs/specs/knowledge-base-articles-business-spec.md`.
+The registered feature includes section management, authoring, localization, preview, cover images and public access.
+
 Add `-F dry_run=true` for coverage/impact analysis without recording. The source is
 the selected workflow branch commit by default; `target_ref` can select another Git
 ref (for a remote branch use `origin/<branch>`) or exact commit. No version tag is
@@ -139,7 +142,7 @@ not public GitHub artifacts. Bunny library/OpenAI keys remain solely in Helpdesk
 
 The reviewed registry is
 `.agents/skills/release-film/projects/mentingo-self-onboarding.json`. Its initial coverage
-is 20 development-path flows, 24 authoring flows and 15 learning flows. Business
+is 20 development-path flows, 24 authoring flows, 15 learning flows and 11 knowledge-base article flows. Business
 specifications define scope; target-version implementation and deterministic test
 helpers must establish the real flow. Existing fixture gaps or unavailable external
 features fail a required flow; they are never replaced with fake API responses or

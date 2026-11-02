@@ -452,12 +452,26 @@ class RegistryTests(unittest.TestCase):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
         loaded = catalog.load_catalog(path)
         self.assertEqual({d['domain'] for d in loaded['domains']},
-                         {'development-paths', 'course-authoring', 'course-learning'})
+                         {'development-paths', 'course-authoring', 'course-learning', 'knowledge-base-articles'})
         paths = next(d for d in loaded['domains'] if d['domain'] == 'development-paths')
         ids = {f['id'] for f in paths['flows']}
         self.assertTrue({'create-path', 'browse-paths', 'edit-path', 'delete-path', 'assign-learners',
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
+
+    def test_articles_spec_selects_its_supported_ui_flows(self):
+        path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
+        loaded = catalog.load_catalog(path)
+        articles = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
+        spec = 'docs/specs/knowledge-base-articles-business-spec.md'
+        self.assertEqual(articles['specPaths'], [spec])
+        self.assertEqual(len(articles['flows']), 11)
+        for flow in articles['flows']:
+            self.assertEqual(flow['specPaths'], [spec])
+            self.assertEqual(flow['pageKeys'], ['articles'])
+        self.assertTrue({'create-section', 'edit-section', 'delete-section', 'create-article', 'edit-article',
+                         'localize-article', 'preview-article', 'replace-article-cover', 'configure-public-article',
+                         'delete-article', 'browse-articles'} == {f['id'] for f in articles['flows']})
 
     def test_unsafe_paths_duplicate_ids_and_unknown_fields_are_rejected(self):
         mutations = (
