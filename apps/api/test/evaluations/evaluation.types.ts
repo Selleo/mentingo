@@ -6,7 +6,7 @@ import type {
 export type RegressionCase = {
   id: string;
   flow: string;
-  execution: "judge" | "search" | "mentor" | "authoring" | "prepared";
+  execution: "judge" | "search" | "mentor" | "authoring" | "assessment" | "prepared";
   provenance: "synthetic";
   reviewStatus: "pending_domain_review";
   input: Record<string, unknown>;
@@ -34,6 +34,9 @@ export type HttpFixture = {
   courseId?: string;
   expectedResultIds?: string[];
   forbiddenResultIds?: string[];
+  blockingErrorIds?: Record<string, string>;
+  lessonId?: string;
+  rubricCookieEnv?: string;
   /** Exact UUIDs of distinct fixtures whose content was prepared for this case. */
   isolated: true;
 };

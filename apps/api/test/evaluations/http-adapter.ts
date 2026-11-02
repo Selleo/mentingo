@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 
-import { MESSAGE_ROLE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { AI_THREAD_STATUSES, MESSAGE_ROLE, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { completeCase, scoreSearch } from "./evaluation";
 
@@ -45,11 +45,15 @@ export async function runHttpCase(
   const cookie = process.env[fixture.cookieEnv];
   if (!cookie) throw new Error("Missing fixture cookie environment variable");
   const base = config.baseUrl.replace(/\/$/, "");
-  const request = async (path: string, body?: JsonObject): Promise<JsonObject> => {
+  const request = async (
+    path: string,
+    body?: JsonObject,
+    requestCookie = cookie,
+  ): Promise<JsonObject> => {
     const response = await fetch(`${base}${path}`, {
       method: body ? "POST" : "GET",
       redirect: "error",
-      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      headers: { Cookie: requestCookie, "Content-Type": "application/json" },
       body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(30000),
     });
@@ -73,6 +77,102 @@ export async function runHttpCase(
       await request(`/global-search?${query}`),
       fixture.expectedResultIds,
       fixture.forbiddenResultIds,
+    );
+  }
+
+  if (item.execution === "assessment") {
+    const configured = item.input.rubric as JsonObject;
+    if (
+      !fixture.threadId ||
+      !fixture.lessonId ||
+      !fixture.blockingErrorIds ||
+      !Array.isArray(item.input.transcript) ||
+      !Array.isArray(item.expected.blockerRefs) ||
+      !Array.isArray(configured?.blockingErrors)
+    )
+      throw new Error("Assessment fixture lacks owned transcript/rubric/blocker mappings");
+    const refs = configured.blockingErrors.map((blocker: JsonObject) => blocker.ref);
+    const allMappedIds = refs.map((ref: string) => fixture.blockingErrorIds?.[ref]);
+    if (
+      allMappedIds.some((id: unknown) => typeof id !== "string" || !id) ||
+      new Set(allMappedIds).size !== allMappedIds.length ||
+      Object.keys(fixture.blockingErrorIds).length !== refs.length
+    )
+      throw new Error("Every configured blocker needs a unique persisted ID mapping");
+    const threadPath = `/ai/thread?thread=${encodeURIComponent(fixture.threadId)}`;
+    const beforeThread = await request(threadPath);
+    if (
+      beforeThread.id !== fixture.threadId ||
+      beforeThread.status !== AI_THREAD_STATUSES.ACTIVE ||
+      beforeThread.userLanguage !== item.input.language
+    )
+      throw new Error("Assessment requires the expected active owned thread and language");
+    const rubricCookie = fixture.rubricCookieEnv ? process.env[fixture.rubricCookieEnv] : cookie;
+    if (!rubricCookie) throw new Error("Missing authorized rubric read credential");
+    const rubric = await request(
+      `/lesson/${encodeURIComponent(
+        fixture.lessonId,
+      )}/ai-judge-configuration?language=${encodeURIComponent(String(item.input.language))}`,
+      undefined,
+      rubricCookie,
+    );
+    const expectedBlockers = configured.blockingErrors.map((blocker: JsonObject) => ({
+      id: fixture.blockingErrorIds?.[blocker.ref],
+      description: blocker.description,
+    }));
+    if (
+      rubric.aiMentorLessonId !== beforeThread.aiMentorLessonId ||
+      rubric.language !== item.input.language ||
+      rubric.taskGoal !== configured.taskGoal ||
+      rubric.passingThresholdPercent !== configured.passingThresholdPercent ||
+      !Array.isArray(rubric.criteria) ||
+      rubric.criteria.length !== 0 ||
+      JSON.stringify(rubric.blockingErrors) !== JSON.stringify(expectedBlockers)
+    )
+      throw new Error("Persisted assessment rubric does not match the versioned regression policy");
+    const transcript = await request(
+      `/ai/thread/messages?thread=${encodeURIComponent(fixture.threadId)}`,
+    );
+    if (!Array.isArray(transcript)) throw new Error("Assessment transcript readback is invalid");
+    const actual = transcript
+      .filter((message) => [MESSAGE_ROLE.USER, MESSAGE_ROLE.MENTOR].includes(message.role))
+      .map(({ role, content }) => ({ role, content }));
+    if (JSON.stringify(actual) !== JSON.stringify(item.input.transcript))
+      throw new Error("Assessment fixture transcript does not match the regression case");
+    const expectedIds = item.expected.blockerRefs.map(
+      (ref) => fixture.blockingErrorIds?.[String(ref)],
+    );
+    if (expectedIds.some((id) => typeof id !== "string" || !id))
+      throw new Error("Unknown expected blocker reference");
+    // This endpoint runs Core's initial judge and independent blocking-error verification.
+    const judged = await request(`/ai/judge/${encodeURIComponent(fixture.threadId)}`, {});
+    const afterThread = await request(threadPath);
+    const returnedIds = Array.isArray(judged.blockingErrors)
+      ? judged.blockingErrors.map((blocker: JsonObject) => blocker.blockingErrorId)
+      : null;
+    return completeCase(
+      item,
+      {
+        expectedPass: judged.passed === item.expected.passed,
+        exactVerifiedBlockers:
+          returnedIds !== null &&
+          JSON.stringify([...returnedIds].sort()) === JSON.stringify([...expectedIds].sort()),
+        emptyScoredRubric:
+          Array.isArray(judged.criteria) &&
+          judged.criteria.length === 0 &&
+          judged.score === 0 &&
+          judged.maxScore === 0,
+        nativeThreadCompleted:
+          afterThread.id === fixture.threadId &&
+          afterThread.status === AI_THREAD_STATUSES.COMPLETED,
+      },
+      {
+        transcript: actual,
+        judgement: judged,
+        rubric,
+        threadId: afterThread.id,
+        nativeThreadStatus: afterThread.status,
+      },
     );
   }
 
@@ -234,10 +334,15 @@ export async function runHttpCase(
       },
       {
         courseId: fixture.courseId,
+        requestedInstruction: item.input.instruction,
         beforeTitle: oldTitle,
         afterTitle: newTitle,
         exportId: queued.exportId,
         receiptStatus: applied.receipt?.status,
+        proposedTitle: proposal.operations[0].payload.title,
+        receipt: applied.receipt,
+        originalCourse: before.course,
+        persistedCourse: after.course,
       },
     );
   }

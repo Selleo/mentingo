@@ -5,7 +5,16 @@ This is the cross-repository evaluation policy for Mentingo Core, Luma
 synthetic candidate benchmarks. Passing their deterministic checks does not
 establish model quality, production delivery, grading validity or audible voice
 quality. No remote Langfuse dataset, prompt, evaluator or experiment needs to be
-created to run the offline checks.
+created to run the offline checks. The companion
+[history-to-regression map](regression-history.md) explains which past failures
+the incident datasets reconstruct and what evidence is required to detect them.
+
+LLM-as-a-judge evaluators are separate opt-in execution paths. They analyze
+captured output and return structured dimension verdicts with evidence anchors.
+Deterministic application failures still block acceptance. The ordinary offline
+commands below do not invoke those providers. Evaluator calibration on paired
+synthetic examples is reported separately from regression results for actual
+application outputs.
 
 ## Core commands
 
@@ -25,6 +34,15 @@ case for the opt-in HTTP adapter. Ten further scenarios define expectations and
 required evidence but have no execution adapter yet. Validation checks catalogue
 structure; it does not execute those application flows. Jest checks the scorers
 with deliberately wrong results as well as the grading cases.
+
+An additional [`assessment-cases.v1.json`](../../apps/api/test/evaluations/assessment-cases.v1.json)
+contains 20 PL/EN cases for the actual assessment workflow from
+[#2018](https://github.com/Selleo/mentingo/pull/2018) and
+[#2019](https://github.com/Selleo/mentingo/issues/2019). The combined catalogue has
+54 cases. These minimal pairs cover own-account versus client activity,
+denial/admission, speaker attribution, quotation, hypothetical/ambiguous action,
+mixed statements and multiple blockers. Expected verified blocker sets and
+pass/fail labels are independent of any evaluator model.
 
 Exit code 0 means every selected executable contract passed, 1 means failure or
 an unsupported case, and 2 means transport checks passed but semantic review is
@@ -79,6 +97,88 @@ An unready semantic index is a failed precondition, not a valid hybrid baseline.
 Luma's commands and coverage matrix live in its `docs/evaluations/README.md`.
 Slackbot's commands and evidence format live in `apps/slack-bot/evals/README.md`
 in `mentingo-plugins`. Both run independently without remote Langfuse execution.
+
+## Actual assessment workflow, later
+
+For an assessment fixture, seed the exact transcript and rubric from the case,
+using a new active owned thread per case. Its fixture entry needs `threadId`,
+`lessonId`, `blockingErrorIds` mapping both `B1` and `B2` to their persisted UUIDs,
+and the learner's `cookieEnv`. Set `rubricCookieEnv` to an independently authorized
+author/admin cookie variable if the learner cannot read the hidden rubric. This
+does not expand the learner's permissions.
+
+The adapter reads the active thread and native localized rubric, verifies every
+configured blocker mapping and the exact transcript, then calls
+`POST /ai/judge/:threadId`. That invokes Core's production assessment and
+independent blocker-verification orchestration. It compares the final blocker
+identities/pass flag and reads back the completed owned thread. A direct call to
+Luma's generic Judge generation is a different operation. The fixture has no
+scored criteria so these cases isolate blocker semantics from scoring attainment.
+
+After fixture provisioning, select one case explicitly:
+
+```sh
+pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode http --allow-app-requests --config /tmp/core-eval-fixtures.json --case assessment-2019-own-account-en --out /tmp/core-assessment.json
+```
+
+This command can invoke the configured application model. It is not part of the
+offline checks and was not executed during this PR. The endpoint response and
+thread readback do not by themselves expose every internal model/verifier span;
+retain normal application tracing separately when inspecting those details.
+
+## LLM evaluators and calibration, later
+
+[`semantic-cases.v1.json`](../../apps/api/test/evaluations/semantic-cases.v1.json)
+contains eight semantic scenarios and 16 contrasting candidate outputs with
+concrete source facts and history links. Five scenarios map to captured Mentor
+and title-only authoring output. Three additional scenarios test the evaluator
+against historical false blockers, attachment provenance and falsely reported
+application success. They are calibration examples, not extra application runs.
+
+The evaluator separately judges source grounding, task fulfillment, role/language
+and safe behavior where applicable. It requires concise reasons and exact quotes
+from candidate output; grounding also needs an independent source quote. Code
+validates dimensions, quotes and shape, and derives the result. Captured workflow
+checks contribute a separate deterministic dimension: a failed application check
+cannot become successful because of model approval or missing judge output.
+Effective evaluator prompt, evidence, dataset/capture and model configuration
+hashes are recorded. Provider bodies and credentials are not printed.
+
+Prepare an explicit local judge config and set its API key variable in the shell:
+
+```json
+{
+  "model": "<explicit evaluator model>",
+  "apiKeyEnv": "EVAL_JUDGE_API_KEY",
+  "timeoutMs": 60000
+}
+```
+
+The default provider endpoint is OpenAI; an explicit HTTPS `baseURL` can select
+another compatible endpoint. No model is chosen automatically. Requests disable
+telemetry and provider storage. These commands invoke a model only after the
+explicit flag; neither was run during this PR:
+
+```sh
+# Analyze an actual HTTP capture; does not rerun the app.
+pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode evaluate --capture /tmp/core-http-evals.json --judge-config /tmp/core-judge.json --allow-judge-requests --out /tmp/core-semantic.json
+
+# Measure judge agreement on paired synthetic outputs; does not run the app.
+pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode calibrate --judge-config /tmp/core-judge.json --allow-judge-requests --out /tmp/core-calibration.json
+```
+
+Calibration reports agreement, false passes, false failures, inconclusive and
+missing results per dimension, with the number actually judged. Invalid/provider
+responses never receive agreement credit. No synthetic candidate labels are
+shown to the judge. Labels remain developer-authored, not human-validated gold.
+Mocked provider tests prove request/validation/accounting behavior; only an actual
+judge run can establish whether the model discriminates these examples.
+
+Semantic verdicts remain explicitly `uncalibrated` even when every dimension
+passes. Review false positives/negatives and approve the reference labels before
+turning model agreement or application quality scores into release gates. The
+structured provider and validation are safeguards, not evidence of immunity to
+prompt injection or semantic judging errors.
 
 ## What constitutes a test case
 

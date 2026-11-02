@@ -20,7 +20,9 @@ export function validateDataset(dataset: RegressionDataset): void {
     if (!item.id || ids.has(item.id)) throw new Error("Missing or duplicate case ID");
     ids.add(item.id);
     if (
-      !["judge", "search", "mentor", "authoring", "prepared"].includes(item.execution) ||
+      !["judge", "search", "mentor", "authoring", "assessment", "prepared"].includes(
+        item.execution,
+      ) ||
       !item.flow ||
       !item.input ||
       !item.expected ||

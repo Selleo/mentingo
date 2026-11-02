@@ -6,8 +6,11 @@ import { parseArgs } from "node:util";
 
 import { runJudgeCase, summarize, validateDataset } from "./evaluation";
 import { runHttpCase, validateHttpConfig } from "./http-adapter";
+import { runSemanticCommand } from "./run-semantic";
+import { validateSemanticRegistry } from "./semantic-evaluator";
 
 import type { CaseResult, HttpRunConfig, RegressionDataset } from "./evaluation.types";
+import type { SemanticRegistry } from "./semantic-evaluator.types";
 
 async function main() {
   const { values } = parseArgs({
@@ -17,13 +20,48 @@ async function main() {
       config: { type: "string" },
       case: { type: "string", multiple: true },
       "allow-app-requests": { type: "boolean", default: false },
+      capture: { type: "string" },
+      "judge-config": { type: "string" },
+      "allow-judge-requests": { type: "boolean", default: false },
     },
   });
-  if (!["offline", "http", "validate"].includes(String(values.mode)))
+  if (!["offline", "http", "validate", "evaluate", "calibrate"].includes(String(values.mode)))
     throw new Error("Unknown mode");
-  const raw = readFileSync(resolve(__dirname, "dataset.v1.json"), "utf8");
-  const dataset = JSON.parse(raw) as RegressionDataset;
+  const baseRaw = readFileSync(resolve(__dirname, "dataset.v1.json"), "utf8");
+  const assessmentRaw = readFileSync(resolve(__dirname, "assessment-cases.v1.json"), "utf8");
+  const baseDataset = JSON.parse(baseRaw) as RegressionDataset;
+  const assessmentDataset = JSON.parse(assessmentRaw) as RegressionDataset;
+  validateDataset(baseDataset);
+  validateDataset(assessmentDataset);
+  const raw = baseRaw + "\n" + assessmentRaw;
+  const dataset: RegressionDataset = {
+    version: 1,
+    name: "mentingo-core-ai-regression-catalogue",
+    cases: [...baseDataset.cases, ...assessmentDataset.cases],
+  };
   validateDataset(dataset);
+  validateSemanticRegistry(
+    JSON.parse(
+      readFileSync(resolve(__dirname, "semantic-cases.v1.json"), "utf8"),
+    ) as SemanticRegistry,
+  );
+  if (values.mode === "evaluate" || values.mode === "calibrate") {
+    process.exitCode = await runSemanticCommand(
+      {
+        mode: values.mode,
+        out: values.out,
+        capture: values.capture,
+        judgeConfig: values["judge-config"],
+        allowJudgeRequests: values["allow-judge-requests"],
+        cases: values.case,
+      },
+      [
+        createHash("sha256").update(baseRaw).digest("hex"),
+        createHash("sha256").update(raw).digest("hex"),
+      ],
+    );
+    return;
+  }
   if (values.mode === "validate") {
     process.stdout.write(
       `Valid catalogue: ${dataset.cases.length} cases; semantic review remains pending.\n`,
@@ -47,7 +85,7 @@ async function main() {
   const results: CaseResult[] = [];
   for (const item of selected) {
     if (values.mode === "offline" && item.execution === "judge") results.push(runJudgeCase(item));
-    else if (config && ["mentor", "search", "authoring"].includes(item.execution)) {
+    else if (config && ["mentor", "search", "authoring", "assessment"].includes(item.execution)) {
       try {
         results.push(await runHttpCase(item, config));
       } catch {
