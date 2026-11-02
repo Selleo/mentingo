@@ -30,7 +30,7 @@ export function ContentMarketplaceListingCard({ listing }: ContentMarketplaceLis
           className="rounded-none bg-primary-50 transition-transform duration-500 ease-out group-hover:scale-105 [&>svg]:text-primary-200"
         />
         {category && (
-          <span className="absolute left-3 top-3 max-w-[calc(100%-1.5rem)] truncate rounded-full bg-primary-700 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+          <span className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full bg-primary-700 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
             {category}
           </span>
         )}
