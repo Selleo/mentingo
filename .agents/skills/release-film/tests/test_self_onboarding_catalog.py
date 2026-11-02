@@ -452,7 +452,7 @@ class RegistryTests(unittest.TestCase):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
         loaded = catalog.load_catalog(path)
         self.assertEqual({d['domain'] for d in loaded['domains']},
-                         {'development-paths', 'course-authoring', 'course-learning', 'knowledge-base-articles'})
+                         {'development-paths', 'course-authoring', 'course-learning', 'knowledge-base-articles', 'news'})
         paths = next(d for d in loaded['domains'] if d['domain'] == 'development-paths')
         ids = {f['id'] for f in paths['flows']}
         self.assertTrue({'create-path', 'browse-paths', 'edit-path', 'delete-path', 'assign-learners',
@@ -472,6 +472,20 @@ class RegistryTests(unittest.TestCase):
         self.assertTrue({'create-section', 'edit-section', 'delete-section', 'create-article', 'edit-article',
                          'localize-article', 'preview-article', 'replace-article-cover', 'configure-public-article',
                          'delete-article', 'browse-articles'} == {f['id'] for f in articles['flows']})
+
+    def test_news_spec_selects_explicit_editorial_and_learner_flows(self):
+        path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
+        loaded = catalog.load_catalog(path)
+        news = next(d for d in loaded['domains'] if d['domain'] == 'news')
+        spec = 'docs/specs/news-hub-business-spec.md'
+        self.assertEqual(news['specPaths'], [spec])
+        self.assertEqual(len(news['flows']), 11)
+        for flow in news['flows']:
+            self.assertEqual(flow['specPaths'], [spec])
+            self.assertEqual(flow['pageKeys'], ['news'])
+        self.assertEqual({'browse-news', 'create-news-draft', 'edit-news', 'publish-news', 'unpublish-news',
+                          'localize-news', 'preview-news', 'replace-news-cover', 'embed-news-resource',
+                          'configure-public-news', 'delete-news'}, {f['id'] for f in news['flows']})
 
     def test_unsafe_paths_duplicate_ids_and_unknown_fields_are_rejected(self):
         mutations = (

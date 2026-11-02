@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { ArticleFactory } from "../factories/article.factory";
+import { NewsFactory } from "../factories/news.factory";
 import {
   getSelfOnboardingLanguage,
   recordingText,
@@ -59,6 +60,50 @@ test("article section prerequisites use the native recording language", async ()
   expect(calls).toEqual([
     { language },
     { translations: [{ language, title }] },
+    { language },
+    { language },
+  ]);
+});
+
+test("news prerequisites create native-language drafts and content", async () => {
+  const calls: unknown[] = [];
+  const post = { id: "native-news" };
+  const apiClient = {
+    api: {
+      newsControllerCreateNews: async (body: unknown) => {
+        calls.push(body);
+        return { data: { data: post } };
+      },
+      newsControllerUpdateNews: async (_id: string, body: unknown) => {
+        calls.push(body);
+      },
+      newsControllerGetNews: async (_id: string, query: unknown) => {
+        calls.push(query);
+        return { data: { data: post } };
+      },
+    },
+  } as unknown as FixtureApiClient;
+  const language = getSelfOnboardingLanguage();
+  const title = recordingValue({ en: "Team learning update", pl: "Aktualności akademii zespołu" });
+  const summary = recordingValue({
+    en: "Explore our new program.",
+    pl: "Poznaj nasz nowy program.",
+  });
+  const content = `<p>${summary}</p>`;
+  await new NewsFactory(apiClient).create({
+    title,
+    summary,
+    content,
+    status: "draft",
+    isPublic: false,
+  });
+  expect(calls).toEqual([
+    { language },
+    {
+      translations: JSON.stringify([{ language, title, summary, content }]),
+      status: "draft",
+      isPublic: false,
+    },
     { language },
     { language },
   ]);

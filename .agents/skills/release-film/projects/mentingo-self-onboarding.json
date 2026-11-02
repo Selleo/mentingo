@@ -2532,6 +2532,392 @@
           ]
         }
       ]
+    },
+    {
+      "key": "news.guide",
+      "domain": "news",
+      "title": "News",
+      "description": "Browse, create, edit, publish, localize and maintain news posts, including media and public visibility.",
+      "specPaths": [
+        "docs/specs/news-hub-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/News/**",
+        "apps/api/src/news/**",
+        "apps/web/e2e/specs/news/**",
+        "apps/web/e2e/flows/news/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-news",
+          "title": "Browse and read company news",
+          "description": "Browse and read company news in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Browse and read company news.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "Several published news posts with realistic localized content exist."
+          ],
+          "actions": [
+            "Open News through application navigation and browse the available posts.",
+            "Open a post, read its content and use its table of contents or previous/next navigation when available."
+          ],
+          "outcomes": [
+            "The learner can read published updates in the selected language and navigate between posts."
+          ]
+        },
+        {
+          "id": "create-news-draft",
+          "title": "Create a news draft",
+          "description": "Create a news draft in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Create a news draft.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions."
+          ],
+          "actions": [
+            "Open News and choose the create action.",
+            "Enter a realistic localized title, summary and rich content.",
+            "Save with Draft status and reopen the draft as its author."
+          ],
+          "outcomes": [
+            "The saved draft retains its content and is not shown in a learner window."
+          ]
+        },
+        {
+          "id": "edit-news",
+          "title": "Edit a news post",
+          "description": "Edit a news post in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Edit a news post.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "A populated news post owned by the recording author exists."
+          ],
+          "actions": [
+            "Open the post and choose Edit.",
+            "Update the title, summary and rich content, then save.",
+            "Reopen the post through navigation."
+          ],
+          "outcomes": [
+            "The updated content remains saved."
+          ]
+        },
+        {
+          "id": "publish-news",
+          "title": "Publish a news draft",
+          "description": "Publish a news draft in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Publish a news draft.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "An owned draft has a title and content in every active language."
+          ],
+          "actions": [
+            "Open the draft editor, select Published status and save.",
+            "Switch to a learner window and open the newly published post through News."
+          ],
+          "outcomes": [
+            "Learners can find and read the published update in the selected language."
+          ]
+        },
+        {
+          "id": "unpublish-news",
+          "title": "Return published news to draft",
+          "description": "Return published news to draft in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Return published news to draft.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "A disposable published post owned by the author is visible to a learner."
+          ],
+          "actions": [
+            "Open post editing, change its status to Draft and save.",
+            "Show the manager draft view, then inspect a fresh learner view."
+          ],
+          "outcomes": [
+            "The author retains the editable draft while the learner list no longer shows it."
+          ]
+        },
+        {
+          "id": "localize-news",
+          "title": "Maintain multiple news language versions",
+          "description": "Maintain multiple news language versions in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Maintain multiple news language versions.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "An editable news post has populated base-language content."
+          ],
+          "actions": [
+            "Open the editor language selector and add another supported language.",
+            "Enter localized title, summary and content, switching languages before saving.",
+            "Save once, reopen and inspect both translations."
+          ],
+          "outcomes": [
+            "Both changed translations remain saved without overwriting each other."
+          ]
+        },
+        {
+          "id": "preview-news",
+          "title": "Preview unsaved news content",
+          "description": "Preview unsaved news content in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Preview unsaved news content.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "An editable news post has realistic localized rich content."
+          ],
+          "actions": [
+            "Open post editing and change its rich content.",
+            "Switch to the Preview tab for the active language.",
+            "Return to editing and save."
+          ],
+          "outcomes": [
+            "The preview displays the unsaved active-language content, and the saved post retains it."
+          ]
+        },
+        {
+          "id": "replace-news-cover",
+          "title": "Replace a news cover image",
+          "description": "Replace a news cover image in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Replace a news cover image.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "An editable news post and a neutral image fixture without written English text are available."
+          ],
+          "actions": [
+            "Open news editing for the selected language.",
+            "Choose a cover through the visible image upload control and save.",
+            "Return to the news detail view."
+          ],
+          "outcomes": [
+            "The news post displays its new cover for the selected language."
+          ]
+        },
+        {
+          "id": "embed-news-resource",
+          "title": "Add supporting media to news",
+          "description": "Add supporting media to news in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Add supporting media to news.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "An editable news post and a small neutral supported image or document fixture are available."
+          ],
+          "actions": [
+            "Open the rich-content editor and use its visible resource upload control.",
+            "Add the supporting resource, preview the content and save.",
+            "Open the post detail view."
+          ],
+          "outcomes": [
+            "The saved post displays or links the uploaded supporting resource."
+          ]
+        },
+        {
+          "id": "configure-public-news",
+          "title": "Control public news access",
+          "description": "Control public news access in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Control public news access.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "A published localized news post exists; enable public News access off camera using existing content-feature helpers."
+          ],
+          "actions": [
+            "Open news editing, enable public visibility and save.",
+            "Show the post in a visitor window.",
+            "Return to management, turn public visibility off and save, then inspect a fresh visitor window."
+          ],
+          "outcomes": [
+            "Visitors can read the public published post, while the private version is unavailable to them."
+          ]
+        },
+        {
+          "id": "delete-news",
+          "title": "Delete a news post",
+          "description": "Delete a news post in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "news"
+          ],
+          "specPaths": [
+            "docs/specs/news-hub-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/News/**",
+            "apps/api/src/news/**",
+            "apps/web/e2e/specs/news/**",
+            "apps/web/e2e/flows/news/**"
+          ],
+          "goal": "Delete a news post.",
+          "preconditions": [
+            "The News module is enabled off camera with the existing ensureNewsModuleEnabled helper; the recording account has the required news permissions.",
+            "A disposable synthetic news post exists; do not delete shared demonstration posts."
+          ],
+          "actions": [
+            "Open the disposable news post and choose Delete.",
+            "Complete the displayed confirmation."
+          ],
+          "outcomes": [
+            "The deleted post is no longer listed."
+          ]
+        }
+      ]
     }
   ]
 }

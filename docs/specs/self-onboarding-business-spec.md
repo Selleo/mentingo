@@ -88,3 +88,11 @@ Its eleven explicit flows cover browsing, section creation/editing/deletion, art
 preview, multiple languages, cover replacement and public access. Recording enables the Articles module off camera
 using existing test helpers. Article factories default to the recording language in demo mode and remain English
 in ordinary E2E runs. The current editor has no separate publication toggle; create/save is the demonstrated flow.
+
+## News recording scope
+
+The News feature video is selected by `docs/specs/news-hub-business-spec.md`. Its eleven registered flows cover
+learner browsing, draft creation, editing, publication, returning to draft, multiple languages, unsaved preview,
+cover replacement, supporting media, public visibility and confirmed deletion. The recorder enables News off
+camera using existing helpers, uses native-language synthetic prerequisites, and keeps EN and PL screen recordings
+separate. Ordinary E2E factory defaults remain English outside the self-onboarding demo environment.
