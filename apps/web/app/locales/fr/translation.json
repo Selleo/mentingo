@@ -4925,6 +4925,7 @@
       "volume": "Volume",
       "mute": "Couper le son",
       "unmute": "Réactiver le son",
+      "playbackSpeed": "Vitesse de lecture",
       "label": "Audio",
       "drag": "Déplacer l’audio",
       "remove": "Supprimer l’audio",

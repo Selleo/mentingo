@@ -5179,6 +5179,7 @@
       "volume": "Lautstärke",
       "mute": "Stummschalten",
       "unmute": "Stummschaltung aufheben",
+      "playbackSpeed": "Wiedergabegeschwindigkeit",
       "label": "Audio",
       "drag": "Audio verschieben",
       "remove": "Audio entfernen",

@@ -3,6 +3,19 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
+  DEFAULT_MEDIA_PLAYBACK_RATE,
+  MEDIA_PLAYBACK_RATES,
+  isMediaPlaybackRate,
+  type MediaPlaybackRate,
+} from "~/utils/mediaPlayback";
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
@@ -31,7 +44,7 @@ type AudioPlayerProps = {
 };
 
 export const AudioPlayer = ({ src, name }: AudioPlayerProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [status, setStatus] = useState<AudioPlaybackStatus>(AUDIO_PLAYBACK_STATUS.LOADING);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -39,6 +52,7 @@ export const AudioPlayer = ({ src, name }: AudioPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState<MediaPlaybackRate>(DEFAULT_MEDIA_PLAYBACK_RATE);
 
   const isReady = status === AUDIO_PLAYBACK_STATUS.READY;
   const playbackLabel = isPlaying ? t("richText.audio.pause") : t("richText.audio.play");
@@ -68,6 +82,15 @@ export const AudioPlayer = ({ src, name }: AudioPlayerProps) => {
     audioRef.current.volume = nextVolume;
     audioRef.current.muted = nextVolume === 0;
   };
+
+  const changePlaybackRate = (nextRate: number) => {
+    if (!audioRef.current || !isMediaPlaybackRate(nextRate)) return;
+
+    audioRef.current.defaultPlaybackRate = nextRate;
+    audioRef.current.playbackRate = nextRate;
+  };
+
+  const formatPlaybackRate = (rate: number) => `${rate.toLocaleString(i18n.language)}×`;
 
   const toggleMuted = () => {
     if (!audioRef.current) return;
@@ -101,6 +124,10 @@ export const AudioPlayer = ({ src, name }: AudioPlayerProps) => {
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
+        onRateChange={(event) => {
+          const { playbackRate: nextRate } = event.currentTarget;
+          if (isMediaPlaybackRate(nextRate)) setPlaybackRate(nextRate);
+        }}
         onVolumeChange={(event) => {
           setVolume(event.currentTarget.volume);
           setIsMuted(event.currentTarget.muted);
@@ -143,6 +170,37 @@ export const AudioPlayer = ({ src, name }: AudioPlayerProps) => {
           onChange={(event) => seekTo(Number(event.target.value))}
           className="h-1 min-w-0 flex-1 cursor-pointer accent-primary-700 disabled:cursor-default"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              size="xs"
+              variant="ghost"
+              className="h-7 shrink-0 rounded-full px-2 text-xs tabular-nums text-neutral-700 hover:bg-neutral-200"
+              aria-label={t("richText.audio.playbackSpeed")}
+              title={t("richText.audio.playbackSpeed")}
+              data-testid={RICH_TEXT_HANDLES.AUDIO_PLAYBACK_SPEED_BUTTON}
+            >
+              {formatPlaybackRate(playbackRate)}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-20">
+            <DropdownMenuRadioGroup
+              value={String(playbackRate)}
+              onValueChange={(value) => changePlaybackRate(Number(value))}
+            >
+              {MEDIA_PLAYBACK_RATES.map((rate) => (
+                <DropdownMenuRadioItem
+                  key={rate}
+                  value={String(rate)}
+                  className="pl-2 tabular-nums data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                >
+                  {formatPlaybackRate(rate)}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           type="button"
           size="xs"

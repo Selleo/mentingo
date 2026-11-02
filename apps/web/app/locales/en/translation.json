@@ -5199,6 +5199,7 @@
       "volume": "Volume",
       "mute": "Mute",
       "unmute": "Unmute",
+      "playbackSpeed": "Playback speed",
       "label": "Audio",
       "drag": "Drag audio",
       "remove": "Remove audio",

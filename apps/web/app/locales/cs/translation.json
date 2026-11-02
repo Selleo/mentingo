@@ -5188,6 +5188,7 @@
       "volume": "Hlasitost",
       "mute": "Ztlumit",
       "unmute": "Zrušit ztlumení",
+      "playbackSpeed": "Rychlost přehrávání",
       "label": "Zvuk",
       "drag": "Přetáhnout zvuk",
       "remove": "Odstranit zvuk",

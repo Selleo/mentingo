@@ -30,6 +30,7 @@ describe("audio translations", () => {
         "volume",
         "mute",
         "unmute",
+        "playbackSpeed",
         "invalidType",
         "tooLarge",
         "uploadFailed",

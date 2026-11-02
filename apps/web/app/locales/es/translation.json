@@ -5136,6 +5136,7 @@
       "volume": "Volumen",
       "mute": "Silenciar",
       "unmute": "Activar sonido",
+      "playbackSpeed": "Velocidad de reproducción",
       "label": "Audio",
       "drag": "Arrastrar audio",
       "remove": "Eliminar audio",

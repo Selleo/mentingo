@@ -1,5 +1,6 @@
 import { ENTITY_TYPES } from "@repo/shared";
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Editor } from "@tiptap/core";
 import { EditorContent } from "@tiptap/react";
 import { describe, expect, it } from "vitest";
@@ -123,6 +124,32 @@ describe("rich text audio", () => {
     ).toBeInTheDocument();
     fireEvent.pause(player);
     expect(screen.getByRole("button", { name: i18n.t("richText.audio.play") })).toBeInTheDocument();
+    unmount();
+    act(() => editor.destroy());
+  });
+
+  it("changes the playback speed from the speed menu", async () => {
+    const user = userEvent.setup();
+    const editor = new Editor({
+      editorProps: { handleScrollToSelection: () => true },
+      extensions: contentViewerPlugins,
+      editable: false,
+      content: `<audio data-node-type="audio" src="${src}" data-name="Interview.mp3"></audio>`,
+    });
+    const { container, unmount } = render(<EditorContent editor={editor} />);
+    const player = container.querySelector("audio")!;
+    const speedButton = screen.getByRole("button", {
+      name: i18n.t("richText.audio.playbackSpeed"),
+    });
+    expect(speedButton).toHaveTextContent("1×");
+
+    await user.click(speedButton);
+    await user.click(await screen.findByRole("menuitemradio", { name: /^1[.,]5×$/ }));
+
+    expect(player.playbackRate).toBe(1.5);
+    expect(player.defaultPlaybackRate).toBe(1.5);
+    fireEvent(player, new Event("ratechange"));
+    expect(speedButton).toHaveTextContent(/^1[.,]5×$/);
     unmount();
     act(() => editor.destroy());
   });
