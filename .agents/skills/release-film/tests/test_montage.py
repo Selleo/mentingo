@@ -588,7 +588,7 @@ class Camera(unittest.TestCase):
         film = montage.cut(spec, taken, words, audio_duration=4.0)
         self.assertEqual(montage.camera(spec, taken, film, 1.5),
                          ([(0.0, None, 'establish')], [{'start': 0.0, 'end': None, 'crop': None}]))
-        self.assertEqual(montage.scale_crop(None, 1.5), [12, 0, 2376, 1336])
+        self.assertEqual(montage.scale_crop(None, 1.5), [0, 0, 2400, 1350])
 
 
 if __name__ == '__main__':
