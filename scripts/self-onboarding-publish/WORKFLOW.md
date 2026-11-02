@@ -225,3 +225,7 @@ Cues entirely after the audio are omitted. Malformed timestamps, empty captions,
 reversed intervals and unusable overlaps still fail that render. Release-film's
 existing 1 ms tolerance is unchanged. The Actions summary reports included/expected
 chapter counts per language, so a partial video is visible even when skips are nonfatal.
+
+The full-viewport render profile retains every edge of the recorded page; the removed clock-strip crop
+is not used for CDP recordings. It invalidates earlier clipped video segments while retaining portable
+captures, translations and paid narration, so the correction does not require authoring scenes again.

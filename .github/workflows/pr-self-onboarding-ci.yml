@@ -46,7 +46,7 @@ jobs:
       - name: Test Self-onboarding flow planning and assembly
         working-directory: .agents/skills/release-film/tests
         run: |
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media
+          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media test_viewport_edges
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
       - name: Build the shared recording contracts
