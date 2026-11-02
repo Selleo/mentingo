@@ -12,6 +12,11 @@ on:
       - scripts/self-onboarding-publish/**
       - apps/web/e2e/flows/learning-paths/expect-learning-path-access.flow.ts
       - apps/web/e2e/recording-checks/**
+      - apps/web/e2e/utils/self-onboarding-context.ts
+      - apps/web/e2e/fixtures/self-onboarding.fixture.ts
+      - apps/api/src/seed/self-onboarding-data-seed*
+      - packages/shared/src/constants/self-onboarding-demo.ts
+      - .agents/skills/release-film/tests/test_tutorial_media.py
       - apps/web/playwright.self-onboarding-checks.config.ts
 permissions:
   contents: read
@@ -41,12 +46,18 @@ jobs:
       - name: Test Self-onboarding flow planning and assembly
         working-directory: .agents/skills/release-film/tests
         run: |
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4
+          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
+      - name: Build the shared recording contracts
+        run: corepack pnpm --filter @repo/shared build
+      - name: Test localized demo seeds
+        run: corepack pnpm --filter api test -- --runInBand src/seed/users-seed.spec.ts src/seed/self-onboarding-data-seed.spec.ts
       - name: Test the Self-onboarding publisher
         run: node --test scripts/self-onboarding-publish/publisher.test.mjs
       - name: Install browser for recorder helper checks
         run: corepack pnpm --filter web exec playwright install --with-deps chromium
       - name: Check recorder assertions against seeded progress states
-        run: corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
+        run: |
+          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=en corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
+          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=pl corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts

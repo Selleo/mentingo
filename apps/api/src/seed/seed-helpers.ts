@@ -15,6 +15,7 @@ import {
   SYSTEM_RULE_SET_SLUGS,
   SUPPORTED_LANGUAGES,
   type SystemRoleSlug,
+  type SupportedLanguages,
 } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
@@ -93,6 +94,7 @@ const createSeedAssessmentQuestion = async (
   displayOrder: number,
   createdAt: string,
   tenantId: UUIDType,
+  language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
 ) => {
   const questionId = crypto.randomUUID();
   const options = questionData.options ?? [];
@@ -116,10 +118,10 @@ const createSeedAssessmentQuestion = async (
     displayOrder,
     maximumPoints: "1",
     gradingMode: isManual ? ASSESSMENT_GRADING_MODES.MANUAL : ASSESSMENT_GRADING_MODES.AUTOMATIC,
-    prompt: buildJsonbField(SUPPORTED_LANGUAGES.EN, description ?? questionData.title),
-    title: buildJsonbField(SUPPORTED_LANGUAGES.EN, questionData.title),
+    prompt: buildJsonbField(language, description ?? questionData.title),
+    title: buildJsonbField(language, questionData.title),
     description: questionData.description
-      ? buildJsonbField(SUPPORTED_LANGUAGES.EN, questionData.description)
+      ? buildJsonbField(language, questionData.description)
       : null,
     createdAt,
     updatedAt: createdAt,
@@ -159,7 +161,7 @@ const createSeedAssessmentQuestion = async (
       options.map((option, index) => ({
         id: optionIds[index],
         questionId,
-        language: SUPPORTED_LANGUAGES.EN,
+        language: language,
         displayOrder: index + 1,
         correctValue: option.isCorrect ?? false,
         statement: option.optionText,
@@ -175,7 +177,7 @@ const createSeedAssessmentQuestion = async (
         questionId,
         displayOrder: index + 1,
         scaleValue: option.scaleAnswer ?? index + 1,
-        label: buildJsonbField(SUPPORTED_LANGUAGES.EN, option.optionText),
+        label: buildJsonbField(language, option.optionText),
         createdAt,
         updatedAt: createdAt,
         tenantId,
@@ -197,7 +199,7 @@ const createSeedAssessmentQuestion = async (
         const answer = options.find((option, optionIndex) => optionIds[optionIndex] === blankId)!;
         return {
           blankId,
-          language: SUPPORTED_LANGUAGES.EN,
+          language: language,
           preferredAnswer: answer.matchedWord || answer.optionText,
           acceptedAnswers: [answer.matchedWord || answer.optionText],
           createdAt,
@@ -211,7 +213,7 @@ const createSeedAssessmentQuestion = async (
         options.map((option, index) => ({
           id: optionIds[index],
           questionId,
-          language: SUPPORTED_LANGUAGES.EN,
+          language: language,
           label: option.optionText,
           targetBlankId: option.isCorrect ? optionIds[index] : null,
           displayOrder: index + 1,
@@ -225,7 +227,7 @@ const createSeedAssessmentQuestion = async (
       options.map((option, index) => ({
         id: optionIds[index],
         questionId,
-        language: SUPPORTED_LANGUAGES.EN,
+        language: language,
         displayOrder: index + 1,
         isCorrect: option.isCorrect ?? false,
         label: option.optionText,
@@ -247,6 +249,7 @@ export async function createNiceCourses(
 
   for (let i = 0; i < data.length; i++) {
     const courseData = data[i];
+    const courseLanguage = courseData.language ?? SUPPORTED_LANGUAGES.EN;
     const creatorIndex = i % creatorUserIds.length;
     const creatorUserId = creatorUserIds[creatorIndex];
 
@@ -265,9 +268,9 @@ export async function createNiceCourses(
       : await db
           .insert(categories)
           .values({
-            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, courseData.category),
-            baseLanguage: SUPPORTED_LANGUAGES.EN,
-            availableLocales: [SUPPORTED_LANGUAGES.EN],
+            title: buildJsonbField(courseLanguage, courseData.category),
+            baseLanguage: courseLanguage,
+            availableLocales: [courseLanguage],
             tenantId,
           })
           .returning();
@@ -315,8 +318,10 @@ export async function createNiceCourses(
       .insert(courses)
       .values({
         id: crypto.randomUUID(),
-        title: sql`json_build_object('en', ${courseData.title}::text)`,
-        description: sql`json_build_object('en', ${courseData.description}::text)`,
+        title: buildJsonbField(courseLanguage, courseData.title),
+        description: buildJsonbField(courseLanguage, courseData.description),
+        baseLanguage: courseLanguage,
+        availableLocales: [courseLanguage],
         thumbnailS3Key: courseData.thumbnailS3Key,
         status: courseData.status,
         priceInCents: courseData.priceInCents,
@@ -337,7 +342,7 @@ export async function createNiceCourses(
         .insert(chapters)
         .values({
           id: crypto.randomUUID(),
-          title: sql`json_build_object('en', ${chapterData.title}::text)`,
+          title: buildJsonbField(courseLanguage, chapterData.title),
           authorId: creatorUserId,
           courseId: course.id,
           isFreemium: chapterData.isFreemium,
@@ -354,8 +359,8 @@ export async function createNiceCourses(
           .insert(lessons)
           .values({
             id: crypto.randomUUID(),
-            title: sql`json_build_object('en', ${lessonData.title}::text)`,
-            description: sql`json_build_object('en', ${lessonData.description ?? ""}::text)`,
+            title: buildJsonbField(courseLanguage, lessonData.title),
+            description: buildJsonbField(courseLanguage, lessonData.description ?? ""),
             type: lessonData.type,
             displayOrder: index + 1,
             fileS3Key: null,
@@ -386,7 +391,7 @@ export async function createNiceCourses(
               aiMentorLessonId: aiMentorLesson.id,
               type: AI_MENTOR_TYPE.ROLEPLAY,
               additionalInstructions: buildJsonbField(
-                SUPPORTED_LANGUAGES.EN,
+                courseLanguage,
                 lessonData.additionalInstructions,
               ),
               tenantId,
@@ -403,10 +408,7 @@ export async function createNiceCourses(
             .insert(aiJudgeConfigurations)
             .values({
               aiMentorLessonId: aiMentorLesson.id,
-              taskGoal: buildJsonbField(
-                SUPPORTED_LANGUAGES.EN,
-                lessonData.aiJudgeConfiguration.taskGoal,
-              ),
+              taskGoal: buildJsonbField(courseLanguage, lessonData.aiJudgeConfiguration.taskGoal),
               passingThresholdPercent: lessonData.aiJudgeConfiguration.passingThresholdPercent,
               tenantId,
             })
@@ -417,11 +419,8 @@ export async function createNiceCourses(
               .insert(aiJudgeCriteria)
               .values({
                 configurationId: configuration.id,
-                title: buildJsonbField(SUPPORTED_LANGUAGES.EN, criterionData.title),
-                expectedBehavior: buildJsonbField(
-                  SUPPORTED_LANGUAGES.EN,
-                  criterionData.expectedBehavior,
-                ),
+                title: buildJsonbField(courseLanguage, criterionData.title),
+                expectedBehavior: buildJsonbField(courseLanguage, criterionData.expectedBehavior),
                 maxScore: criterionData.maxScore,
                 tenantId,
               })
@@ -431,9 +430,9 @@ export async function createNiceCourses(
               criterionData.scoreGuidance.map((guidance) => ({
                 criterionId: criterion.id,
                 score: guidance.score,
-                description: buildJsonbField(SUPPORTED_LANGUAGES.EN, guidance.description),
+                description: buildJsonbField(courseLanguage, guidance.description),
                 example: guidance.example
-                  ? buildJsonbField(SUPPORTED_LANGUAGES.EN, guidance.example)
+                  ? buildJsonbField(courseLanguage, guidance.example)
                   : undefined,
                 tenantId,
               })),
@@ -444,7 +443,7 @@ export async function createNiceCourses(
             await db.insert(aiJudgeBlockingErrors).values(
               lessonData.aiJudgeConfiguration.blockingErrors.map((blockingError) => ({
                 configurationId: configuration.id,
-                description: buildJsonbField(SUPPORTED_LANGUAGES.EN, blockingError.description),
+                description: buildJsonbField(courseLanguage, blockingError.description),
                 tenantId,
               })),
             );
@@ -459,8 +458,8 @@ export async function createNiceCourses(
               maximumAttempts: null,
               attemptCooldown: null,
               feedbackMode: ASSESSMENT_FEEDBACK_MODES.FULL,
-              baseLanguage: SUPPORTED_LANGUAGES.EN,
-              availableLocales: [SUPPORTED_LANGUAGES.EN],
+              baseLanguage: courseLanguage,
+              availableLocales: [courseLanguage],
               createdAt,
               updatedAt: createdAt,
               tenantId,
@@ -474,6 +473,7 @@ export async function createNiceCourses(
               index + 1,
               createdAt,
               tenantId,
+              courseLanguage,
             );
           }
         }

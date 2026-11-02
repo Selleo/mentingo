@@ -73,7 +73,8 @@
   ],
   "setup": [
    "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION --entrypoint sh amazon/aws-cli:latest -c 'aws --endpoint-url http://localhost:9000 s3api head-bucket --bucket test-bucket 2>/dev/null || aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket test-bucket'",
-   "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3api put-bucket-cors --bucket test-bucket --cors-configuration '{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}'"
+   "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3api put-bucket-cors --bucket test-bucket --cors-configuration '{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}'",
+   "if [ \"${SELF_ONBOARDING_DEMO:-0}\" = \"1\" ]; then docker run --rm --network container:{service:runner} -v \"$PWD/e2e/data/self-onboarding/cover.svg:/cover.svg:ro\" -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3 cp /cover.svg s3://test-bucket/self-onboarding/course-cover.svg --content-type image/svg+xml; fi"
   ],
   "env": {
    "CI": "true",

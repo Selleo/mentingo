@@ -32,3 +32,6 @@ export function getSelfOnboardingDemoEmail(
 ) {
   return addEmailSuffix(SELF_ONBOARDING_DEMO_PEOPLE[role].email, getTenantEmailSuffix(origin));
 }
+
+/** Object uploaded by the isolated tutorial harness before seeding demo courses. */
+export const SELF_ONBOARDING_DEMO_COVER_KEY = "self-onboarding/course-cover.svg";

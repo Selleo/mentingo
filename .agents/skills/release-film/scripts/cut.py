@@ -171,8 +171,10 @@ def spoken(run, story, addon=None):
     same = before == expected
     if legacy:
         same = [job['text'] for job in before] == [job['text'] for job in expected]
-    return same and all((run / 'voice' / f'c{n}' / name).is_file()
-                        for n in range(1, len(expected) + 1) for name in ('audio.mp3', 'subtitles.srt'))
+    return same and all((Path(job['out']) / name).is_file()
+                        for job in expected for name in
+                        (('audio.mp3', 'subtitles.srt', 'paced.wav') if job.get('audio_profile') else ('audio.mp3', 'subtitles.srt')))
+
 
 
 def narration_jobs(run, story, addon, root):
@@ -195,7 +197,8 @@ def narration_jobs(run, story, addon, root):
         used = pronunciation.used_terms(pronunciation.speakable(text, words, said['code'])[1])
         jobs.append({'text': text, 'sentences': sentences, 'out': str(root / f'c{index + 1}'), 'engine': selected,
                      'language': said['code'], 'lexicon': {term: words[term] for term in used},
-                     'voice': narrator, 'pause': PAUSE, **provider})
+                     'voice': narrator, 'pause': PAUSE, **provider,
+                     **({'audio_profile': 'pcm-48000-v1'} if (core.load(Path(run) / 'sources.json') or {}).get('mode') == 'tutorial' else {})})
     return jobs
 
 
@@ -215,7 +218,7 @@ def narrate(run, story, addon, root=None):
     cached = core.load(done) or {}
     before = {job['out']: (job, result) for job, result in zip(cached.get('jobs') or [], cached.get('results') or [])}
     todo = [job for job in jobs if before.get(job['out'], (None,))[0] != job
-            or not all((Path(job['out']) / name).is_file() for name in ('audio.mp3', 'subtitles.srt'))]
+            or not all((Path(job['out']) / name).is_file() for name in (('audio.mp3', 'subtitles.srt', 'paced.wav') if job.get('audio_profile') else ('audio.mp3', 'subtitles.srt')))]
     if todo:
         core.save(root / 'jobs.json', todo)
         core.mark(root.parent, 'voice', 'start', f'{voice}: {len(todo)} of {len(jobs)} chapters')
@@ -233,7 +236,8 @@ def narrate(run, story, addon, root=None):
         if failed:
             raise SystemExit(f'narration failed: {failed}')
         for job in todo:
-            paced(core.tool('ffmpeg') or 'ffmpeg', job['out'], job['sentences'])
+            paced(core.tool('ffmpeg') or 'ffmpeg', job['out'], job['sentences'],
+                  lossless=job.get('audio_profile') == 'pcm-48000-v1')
         before.update({job['out']: (job, result) for job, result in zip(todo, results)})
     results = [before[job['out']][1] for job in jobs]
     core.save(done, {'jobs': jobs, 'results': results})
@@ -287,7 +291,7 @@ def voice_waits(chapter, folder, voice_dir, limit=1.0, language=None):
     [{'sentence', 'seconds', 'fix'}]."""
     spec, capture = chapter_setup(chapter, folder, language=language)
     words = montage.words_from_srt((Path(voice_dir) / 'subtitles.srt').read_text(encoding='utf-8'))
-    film = montage.cut(spec, capture, words, audio_duration=audio_seconds(Path(voice_dir) / 'audio.mp3'))
+    film = montage.cut(spec, capture, words, audio_duration=audio_seconds(narration_audio(voice_dir)))
     starts = montage.sentence_starts(words, spec.get('sentences'))
     found = []
     for at, seconds in film['silences']:
@@ -310,7 +314,7 @@ def audio_seconds(path):
 def splice(ffmpeg, audio, silences, target, codec):
     """``audio`` with ``silences`` ``[(time in it, seconds)]`` inserted, encoded with ``codec`` into ``target``."""
     bounds = [0.0] + [t for t, _ in silences] + [None]
-    form = 'aformat=sample_fmts=fltp:sample_rates=24000:channel_layouts=mono'
+    form = 'aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=mono'
     graph = [f'[0:a]{form},asplit={len(bounds) - 1}' + ''.join(f'[in{i}]' for i in range(len(bounds) - 1))]
     parts = []
     for i in range(len(bounds) - 1):
@@ -318,14 +322,19 @@ def splice(ffmpeg, audio, silences, target, codec):
         graph.append(f'[in{i}]atrim=start={bounds[i]:.3f}{end},asetpts=PTS-STARTPTS[s{i}]')
         parts.append(f'[s{i}]')
         if i < len(silences):
-            graph.append(f'aevalsrc=0:c=mono:s=24000:d={silences[i][1]:.3f},{form}[z{i}]')
+            graph.append(f'aevalsrc=0:c=mono:s=48000:d={silences[i][1]:.3f},{form}[z{i}]')
             parts.append(f'[z{i}]')
     graph.append(''.join(parts) + f'concat=n={len(parts)}:v=0:a=1[out]')
     core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(audio), '-filter_complex', ';'.join(graph), '-map', '[out]', *codec,
              str(target)], timeout=300)
 
 
-def paced(ffmpeg, folder, sentences):
+def narration_audio(folder):
+    lossless = Path(folder) / 'paced.wav'
+    return lossless if lossless.is_file() else Path(folder) / 'audio.mp3'
+
+
+def paced(ffmpeg, folder, sentences, lossless=False):
     """The narration in ``folder`` (audio.mp3 and its word SRT) with at least PAUSE between two sentences: the silence
     goes in halfway between one sentence's last word and the next one's first, and the words after it move."""
     folder = Path(folder)
@@ -333,6 +342,20 @@ def paced(ffmpeg, folder, sentences):
     starts, ends = montage.sentence_starts(words, sentences), montage.sentence_ends(words, sentences)
     silences = [(round((ends[i - 1] + starts[i]) / 2, 3), round(PAUSE - (starts[i] - ends[i - 1]), 3))
                 for i in range(1, len(starts)) if starts[i] - ends[i - 1] < PAUSE - 0.05]
+    if lossless:
+        target = folder / 'paced.wav'
+        if silences:
+            splice(ffmpeg, folder / 'audio.mp3', silences, target, ['-c:a', 'pcm_s16le'])
+        else:
+            core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(folder / 'audio.mp3'), '-ar', '48000',
+                     '-ac', '1', '-c:a', 'pcm_s16le', str(target)], timeout=300)
+        duration = audio_seconds(target)
+        shifted = montage.words_from_srt(montage.shifted_srt(words, silences))
+        if any(start >= duration for start, _, _ in shifted):
+            raise ValueError('Narration word starts outside playable audio')
+        (folder / 'subtitles.srt').write_text(montage.shifted_srt(
+            [(start, min(end, duration), text) for start, end, text in shifted], []), encoding='utf-8')
+        return
     if not silences:
         return
     splice(ffmpeg, folder / 'audio.mp3', silences, folder / 'paced.mp3', ['-c:a', 'libmp3lame', '-b:a', '64k'])
@@ -457,7 +480,7 @@ def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, lang
     (``last``: the film's last chapter, whose last picture stays a little longer before the film fades out)."""
     spec, capture = chapter_setup(chapter, folder, cached_only=cached_only, language=language)
     words = montage.words_from_srt((Path(voice_dir) / 'subtitles.srt').read_text(encoding='utf-8'))
-    speech = audio_seconds(Path(voice_dir) / 'audio.mp3')
+    speech = audio_seconds(narration_audio(voice_dir))
     film = montage.cut(spec, capture, words, audio_duration=speech, tail=montage.FINAL_TAIL if last else None)
     _, spans = montage.camera(spec, capture, film, capture['scale'])
     return spec, capture, words, speech, film, spans
@@ -484,7 +507,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
             entry.update({'from': montage.scale_crop(span['from'], capture['scale']), 'to': montage.scale_crop(span['to'], capture['scale'])})
         camera.append(entry)
     pieces = [list(p) for p in montage.video_pieces(film['pieces'], [tuple(p) for p in capture['timeline']])]
-    audio, srt = retime(ffmpeg, Path(voice_dir) / 'audio.mp3', Path(voice_dir) / 'subtitles.srt', words, film['silences'],
+    audio, srt = retime(ffmpeg, narration_audio(voice_dir), Path(voice_dir) / 'subtitles.srt', words, film['silences'],
                         Path(retimed or voice_dir))
     urls = {pr['number']: pr['url'] for pr in sources['prs']}
     entry = {'title': chapter['title'], 'prs': [urls[n] for n in chapter['prs'] if n in urls], 'audio': audio, 'srt': srt,

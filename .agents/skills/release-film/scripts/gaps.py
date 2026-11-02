@@ -1048,6 +1048,10 @@ def _try_scene(run, recipe, env, gap_id, exacted):
     if gap.get('tutorialMode') is True and len(list((folder / 'tries').glob('*.spec.ts'))) >= 2:
         return {'ok': False, 'error': 'Tutorial browser try limit reached (two tries); report failure and continue with the next flow'}
     source = scene.read_text(encoding='utf-8')
+    if gap.get('tutorialMode') is True and 'self-onboarding.fixture' not in source:
+        return {'ok': False, 'preflight': True,
+                'error': 'Tutorial scenes must import self-onboarding.fixture to use localized seeded people, not E2E worker accounts'}
+
     issue = knowledge.scene_policy_issue(source)
     if issue:
         return {'ok': False, 'error': f"scene rejected: {issue}. Use the project's existing test helpers/factories; "

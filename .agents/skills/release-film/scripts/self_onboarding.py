@@ -182,6 +182,29 @@ def generate(args):
         core.save(run / 'review/skipped-flows.json', {'skippedFlows': skipped})
         print(f"Self-onboarding: skipped {flow['id']} ({code or 'all languages'}, {stage}): {reason}",
               file=sys.stderr, flush=True)
+    def ensure_recorder():
+        nonlocal configured, addon
+        if configured:
+            return
+        ready = doctor.check(args.repository)
+        if not ready['ok']:
+            raise RuntimeError('Recorder prerequisites missing; run film.py doctor for details')
+        checkout = harness.checkout(Path(args.repo), commit, run)
+        if core.sh(['git', '-C', str(checkout), 'rev-parse', 'HEAD']).stdout.strip() != commit:
+            raise ValueError('Existing recorder checkout is for a different version')
+        addon = core.addon(args.repository, checkout)
+        addon['elevenlabs'] = trusted_addon.get('elevenlabs', {})
+        addon['pronunciation'] = trusted_addon.get('pronunciation', {})
+        addon['harness'].setdefault('env', {})['DEMO_FAILURE_SCREENSHOTS'] = '1'
+        addon['harness']['env']['SELF_ONBOARDING_DEMO'] = '1'
+        addon['harness']['env']['SELF_ONBOARDING_LANGUAGE'] = 'en'
+        core.save(run / 'meta.json', {'repo': args.repository, 'tag': commit, 'base': commit,
+            'recordingMode': 'self-onboarding',
+            'repo_dir': str(Path(args.repo).resolve()), 'run': str(run), 'addon': addon})
+        harness.setup(run, addon['harness'])
+        harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
+        configured = True
+
     original_environment = {name: os.environ.get(name) for name in
                             ('RELEASE_FILM_RUN', 'RELEASE_FILM_VOICE', 'ELEVENLABS_VOICE_ID')}
     trusted_addon = core.addon(args.repository, Path(args.repo))
@@ -212,13 +235,14 @@ def generate(args):
                 visual['voiceId'] = selected_voice
                 # Persist the random choice before any paid work or camera setup.
                 core.save(cache / 'state.json', state, mode=0o600)
-            # The browser is invoked only here, never once per language.
+            # Author one scenario; each native language is captured with deterministic replay.
             references, failed_captures = {}, set()
             for flow_index, flow in enumerate(domain['flows'], 1):
                 contract = flow_contract(flow)
                 old_capture = visual['flows'].get(flow['id'], {})
                 reference = old_capture.get('capture')
-                changed = flow['id'] in group['changedFlowIds']
+                changed = (flow['id'] in group['changedFlowIds'] or
+                           bool(reference and reference.get('recordingProfile') != 'localized-v1'))
                 already_captured = reference and old_capture.get('commit') == commit and old_capture.get('contract') == contract
                 if plan.get('force') and old_capture.get('captureRequestId') != args.workflow_run_id:
                     already_captured = False
@@ -230,26 +254,10 @@ def generate(args):
                         continue
                     print(f"Self-onboarding [{domain_key}] flow {flow_index}/{len(domain['flows'])}: recording {flow['id']}",
                           file=sys.stderr, flush=True)
-                    if not configured:
-                        ready = doctor.check(args.repository)
-                        if not ready['ok']:
-                            raise RuntimeError('Recorder prerequisites missing; run film.py doctor for details')
-                        checkout = harness.checkout(Path(args.repo), commit, run)
-                        if core.sh(['git', '-C', str(checkout), 'rev-parse', 'HEAD']).stdout.strip() != commit:
-                            raise ValueError('Existing recorder checkout is for a different version')
-                        addon = core.addon(args.repository, checkout)
-                        addon['elevenlabs'] = trusted_addon.get('elevenlabs', {})
-                        addon['pronunciation'] = trusted_addon.get('pronunciation', {})
-                        addon['harness'].setdefault('env', {})['DEMO_FAILURE_SCREENSHOTS'] = '1'
-                        addon['harness']['env']['SELF_ONBOARDING_DEMO'] = '1'
-                        core.save(run / 'meta.json', {'repo': args.repository, 'tag': commit, 'base': commit,
-                            'recordingMode': 'self-onboarding',
-                            'repo_dir': str(Path(args.repo).resolve()), 'run': str(run), 'addon': addon})
-                        harness.setup(run, addon['harness'])
-                        harness.keep_set(run, addon['harness'], harness.test_env(run, addon['harness']))
-                        configured = True
+                    ensure_recorder()
                     try:
-                        reference = recording.capture_flow(run, flow, domain, commit, args.repository, addon, cache)
+                        reference = recording.capture_flow(run, flow, domain, commit, args.repository, addon, cache,
+                                                           reference if old_capture.get('contract') == contract else None)
                     except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
                         skip_flow(domain, flow, 'capture', error)
                         failed_captures.add(flow['id'])
@@ -259,7 +267,8 @@ def generate(args):
                     recording.checked_file(cache, reference['path'], reference['sha256'])
                 references[flow['id']] = reference
                 visual['flows'][flow['id']] = {'contract': contract, 'commit': commit, 'capture': reference,
-                    'captureRequestId': args.workflow_run_id if changed else old_capture.get('captureRequestId')}
+                    'captureRequestId': args.workflow_run_id if changed else old_capture.get('captureRequestId'),
+                    'localizedCaptures': old_capture.get('localizedCaptures', {}) if (old_capture.get('capture') or {}).get('id') == (reference or {}).get('id') else {}}
                 visual['discoveredFlowIds'] = [key for key in domain.get('discoveredFlowIds', []) if key in visual['flows']]
                 visual['retiredFlowIds'] = domain.get('retiredFlowIds', [])
                 core.save(cache / 'state.json', state, mode=0o600)
@@ -271,7 +280,7 @@ def generate(args):
             for code, report in group['reports'].items():
                 profile = hashlib.sha256(json.dumps({'provider': profiles[code],
                     'pronunciation': trusted_addon.get('pronunciation', {}), 'brand': trusted_addon.get('brand', {}),
-                    'renderer': 'tutorial-v3'}, sort_keys=True).encode()).hexdigest()
+                    'renderer': 'tutorial-v4-continuous-localized'}, sort_keys=True).encode()).hexdigest()
                 current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
                 previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
@@ -289,6 +298,21 @@ def generate(args):
                         continue
                     old = previous.get('flows', {}).get(flow['id'], {})
                     reference = references[flow['id']]
+                    if reference and code != 'en':
+                        localized = visual['flows'][flow['id']].setdefault('localizedCaptures', {})
+                        localized_reference = localized.get(code)
+                        if not localized_reference or localized_reference.get('parentCaptureId') != reference['id']:
+                            try:
+                                ensure_recorder()
+                                print(f"Self-onboarding [{domain_key}/{code}]: replaying {flow['id']} without a model worker", file=sys.stderr, flush=True)
+                                localized_reference = recording.replay_flow(run, flow, domain, code, commit,
+                                    args.repository, addon, cache, reference)
+                                localized[code] = localized_reference
+                                core.save(cache / 'state.json', state, mode=0o600)
+                            except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                                skip_flow(domain, flow, 'localized-capture', error, code)
+                                continue
+                        reference = localized_reference
                     capture_id = reference['id'] if reference else None
                     # Existing legacy-language outputs can remain readable, but cannot
                     # stand in for missing raw footage when adding or rebuilding a language.

@@ -93,7 +93,7 @@ def meta(run):
         # Worker try/queue commands reload the base add-on in separate processes.
         # Keep this run's demo profile when rebuilding their environment.
         info['addon']['harness'].setdefault('env', {}).update(
-            SELF_ONBOARDING_DEMO='1', DEMO_FAILURE_SCREENSHOTS='1')
+            SELF_ONBOARDING_DEMO='1', SELF_ONBOARDING_LANGUAGE='en', DEMO_FAILURE_SCREENSHOTS='1')
     return info
 
 

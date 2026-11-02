@@ -1,4 +1,4 @@
-"""Shared camera evidence, localized narration and portable private-state regressions."""
+"""Shared scenarios, native-language captures and portable private-state regressions."""
 import copy
 import json
 import os
@@ -23,6 +23,60 @@ import self_onboarding_voices as narrators
 
 
 class LocalizationTest(unittest.TestCase):
+    def test_polish_render_rejects_english_footage_instead_of_silently_reusing_it(self):
+        reference = self.raw()
+        narrator = self.patch(recording.cut, 'narrate')
+        with self.assertRaisesRegex(ValueError, 'footage language'):
+            recording.render_flow(self.root/'run', self.flow, self.domain, 'pl', self.commit,
+                                  'Selleo/mentingo', {}, self.cache, reference)
+        narrator.assert_not_called()
+
+    def test_verified_translation_is_reused_without_calling_a_model_again(self):
+        translated = copy.deepcopy(self.chapter)
+        translated['title'] = 'Utwórz ścieżkę'
+        model = self.patch(recording, 'localize_story', return_value=(translated, 'Opis ścieżki'))
+        first = recording.localized_story(self.cache, self.chapter, 'pl', 'Create a path.')
+        second = recording.localized_story(self.cache, self.chapter, 'pl', 'Create a path.', allow_model=False)
+        self.assertEqual(first, second)
+        model.assert_called_once()
+
+    def test_localized_capture_failure_does_not_discard_the_english_video(self):
+        self.setup_generator()
+        self.replay.side_effect = RuntimeError('Polish selector no longer matches')
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'localized-capture')
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.camera.assert_called_once()
+
+    def test_saved_scenario_replay_records_polish_without_an_authoring_worker(self):
+        reference = self.raw()
+        # Save a source that uses the real localized recording fixture.
+        source_root = self.root/'raw'/self.commit/self.flow['id']/'en'
+        reference = recording.cache_capture(self.cache, self.root/'run', source_root, {'chapters': [self.chapter]},
+            self.flow, self.domain, self.commit, 'Selleo/mentingo', self.root/'checkout',
+            scenario={'base': 'apps/web/e2e/specs/demo.spec.ts',
+                      'source': 'import { test } from "../fixtures/self-onboarding.fixture";\ntest("flow", async () => {});'})
+        self.raw(code='pl')
+        run = self.root/'run'
+        shutil.copytree(self.root/'checkout', run/'checkout', dirs_exist_ok=True)
+        base = run/'checkout/apps/web/e2e/specs/demo.spec.ts'
+        base.parent.mkdir(parents=True, exist_ok=True); base.write_text('original test')
+        camera = self.patch(recording.harness, 'capture', return_value=[{'status': 'passed', 'error': '',
+            'capture': str(self.root/'raw'/self.commit/self.flow['id']/'pl')}])
+        self.patch(recording.harness, 'test_env', return_value={})
+        self.patch(recording.takes, 'convert')
+        worker = self.patch(recording.gaps, 'launch_workers', side_effect=AssertionError('No model needed for replay'))
+        result = recording.replay_flow(run, self.flow, self.domain, 'pl', self.commit, 'Selleo/mentingo',
+                                       {'harness': {}}, self.cache, reference)
+        manifest, _ = recording.restore_capture(self.cache, result, self.root/'polish-restore')
+        self.assertEqual(manifest['language'], 'pl')
+        self.assertNotEqual(result['id'], reference['id'])
+        self.assertEqual(result['parentCaptureId'], reference['id'])
+        self.assertEqual(camera.call_args.args[2]['SELF_ONBOARDING_LANGUAGE'], 'pl')
+        worker.assert_not_called()
+        self.assertFalse(list(base.parent.glob('rf-localized-*.spec.ts')))
+
     def test_default_generation_does_not_wait_for_visual_review(self):
         story, model = self.review_fixture([])
         with patch.dict(os.environ, {'SELF_ONBOARDING_VISUAL_REVIEW': '0'}):
@@ -65,6 +119,7 @@ class LocalizationTest(unittest.TestCase):
         _, recipe, env, _ = camera.call_args.args
         self.assertEqual(recipe['env']['SELF_ONBOARDING_DEMO'], '1')
         self.assertEqual(env['SELF_ONBOARDING_DEMO'], '1')
+        self.assertEqual(env['SELF_ONBOARDING_LANGUAGE'], 'en')
         self.assertEqual(env['DEMO_FAILURE_SCREENSHOTS'], '1')
         self.assertEqual(env['CI'], 'true')
         # Ordinary release runs retain the base recipe and do not opt into demo seeds.
@@ -218,9 +273,9 @@ class LocalizationTest(unittest.TestCase):
         self.addCleanup(manager.stop)
         return result
 
-    def raw(self, flow=None, commit=None):
+    def raw(self, flow=None, commit=None, code='en'):
         flow,commit = flow or self.flow,commit or self.commit
-        source = self.root/'raw'/commit/flow['id']
+        source = self.root/'raw'/commit/flow['id']/code
         source.mkdir(parents=True,exist_ok=True)
         (source/'take.mp4').write_bytes(b'visual '+commit.encode())
         (source/'first.jpg').write_bytes(b'review still')
@@ -237,7 +292,8 @@ class LocalizationTest(unittest.TestCase):
             document.parent.mkdir(parents=True,exist_ok=True)
             document.write_text('Create and save a path.')
         return recording.cache_capture(self.cache,self.root/'run',source,{'chapters':[self.chapter]},flow,
-                                       self.domain,commit,'Selleo/mentingo',checkout)
+                                       self.domain,commit,'Selleo/mentingo',checkout, code=code,
+                                       scenario={'base': 'apps/web/e2e/specs/demo.spec.ts', 'source': 'test scenario'})
 
     def test_advisory_findings_survive_raw_capture_cache_and_restore(self):
         report = {'advisory': True, 'flowId': self.flow['id'], 'status': 'warnings', 'reviews': []}
@@ -260,6 +316,11 @@ class LocalizationTest(unittest.TestCase):
         self.patch(self_onboarding.core,'sh',side_effect=lambda *a,**kw:SimpleNamespace(stdout=self.commit))
         self.patch(self_onboarding.film,'stop')
         self.camera = self.patch(recording,'capture_flow',side_effect=lambda run,flow,domain,commit,*a:self.raw(flow,commit))
+        def replay(run,flow,domain,code,commit,repo,addon,cache,reference):
+            localized = self.raw(flow, commit, code=code)
+            localized['parentCaptureId'] = reference['id']
+            return localized
+        self.replay = self.patch(recording, 'replay_flow', side_effect=replay)
         def render(run,flow,domain,code,commit,repo,addon,cache,reference,allow_model=True):
             folder = Path(cache)/'segments'/code/flow['id']/reference['id']
             folder.mkdir(parents=True,exist_ok=True)
@@ -303,7 +364,7 @@ class LocalizationTest(unittest.TestCase):
                 domain['needsPublication']=False
         core.save(self.cache/'state.json',state)
 
-    def test_one_camera_capture_supports_two_localized_videos(self):
+    def test_one_agent_scenario_supports_two_native_language_captures(self):
         self.setup_generator()
         result=self.generate()
         self.assertEqual(result['videos'],2)
@@ -313,7 +374,8 @@ class LocalizationTest(unittest.TestCase):
 
         self.assertEqual(self.render.call_count,2)
         references=[call.args[-1]['id'] for call in self.render.call_args_list]
-        self.assertEqual(references[0],references[1])
+        self.assertNotEqual(references[0],references[1])
+        self.replay.assert_called_once()
         self.assertEqual([call.args[3] for call in self.render.call_args_list],['en','pl'])
         self.assertEqual([d['metadata']['title'] for d in core.load(result['manifest'])['domains']],
                          ['Development Paths','Ścieżki rozwoju'])
@@ -432,13 +494,13 @@ class LocalizationTest(unittest.TestCase):
             self.generate()
         self.camera.assert_not_called()
 
-    def test_adding_polish_later_never_starts_browser(self):
+    def test_adding_polish_later_replays_without_an_authoring_agent(self):
         self.setup_generator()
         self.generate(codes=('en',))
         self.published()
         self.camera.reset_mock(); self.setup.reset_mock(); self.render.reset_mock()
         self.assertEqual(self.generate(codes=('pl',),action='reuse',name='polish')['videos'],1)
-        self.camera.assert_not_called(); self.setup.assert_not_called(); self.render.assert_called_once()
+        self.camera.assert_not_called(); self.setup.assert_called_once(); self.render.assert_called_once()
 
     def test_semantic_change_records_once_but_internal_refactor_records_nothing(self):
         self.setup_generator()
@@ -631,7 +693,7 @@ class LocalizationTest(unittest.TestCase):
                 'sentences':sentences}),{'provider':'cli'}
         self.patch(recording.llm,'complete',side_effect=translate)
         self.patch(recording.editor,'chapter_problems',return_value=[])
-        verified=self.patch(recording,'verify_story',side_effect=lambda run,flow,data,story,allow_model=True:core.save(Path(run)/'sources.json',data))
+        verified=self.patch(recording,'verify_story',return_value={})
         def narrate(run,story,addon,root=None):
             folder=Path(root)/'c1'; folder.mkdir(parents=True,exist_ok=True)
             text=' '.join(s['text'] for s in story['chapters'][0]['sentences'])
@@ -640,7 +702,7 @@ class LocalizationTest(unittest.TestCase):
         narration=self.patch(recording.cut,'narrate',side_effect=narrate)
         entries=[]
         def chapter_cut(ffmpeg,chapter,folder,voice,sources,**kwargs):
-            entry={'title':chapter['title'],'steps':[[i,s['label']] for i,s in enumerate(chapter['sentences'])]}
+            entry={'title':chapter['title'], 'audio': str(Path(voice)/'audio.mp3'), 'srt': str(Path(voice)/'subtitles.srt'), 'steps':[[i,s['label']] for i,s in enumerate(chapter['sentences'])]}
             entries.append((sources['language'],copy.deepcopy(entry)))
             return entry,{}
         self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
@@ -660,9 +722,9 @@ class LocalizationTest(unittest.TestCase):
         english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',brand,self.cache,reference)
         authored = core.load(prepared.call_args.args[0])
         self.assertEqual(authored['colors'], brand['brand']['colors'])
-        polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,reference)
+        polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,self.raw(code='pl'))
         self.assertEqual((english['duration'],polish['duration']),(6,8))
-        self.assertEqual(polish['captureId'],english['captureId'])
+        self.assertNotEqual(polish['captureId'],english['captureId'])
         self.assertEqual(verified.call_count,2); self.assertEqual(narration.call_count,2)
         self.assertEqual(entries[1][1]['steps'][0][1],texts[0])
         self.assertIn(texts[0],(self.cache/polish['captions']).read_text())

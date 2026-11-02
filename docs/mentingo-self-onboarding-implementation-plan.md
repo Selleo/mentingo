@@ -113,3 +113,12 @@ The separate `self-onboarding.yml` dispatch entry accepts `business_spec` and in
 Recording defaults favor focused 20–40 second scenes, 3–4 narration sentences, medium scene-worker effort and two browser attempts. Tutorial workers receive three minutes for new tries and four minutes total before bounded camera/narration allowances; release-film defaults stay unchanged. English labels reuse canonical text without a model request. Flow-level capture/render errors are skipped; global startup/configuration and corrupt cache/final assembled-media failures still report an unsuccessful run.
 
 Offline Eleven v4 narration uses `/v1/text-to-dialogue/with-timestamps` to obtain one audio file and its absolute character timeline; the WebSocket chunk-timing path is not used for these videos. Explicit model-quota errors stop further workers/uncached translations within that invocation. Domain metadata localization failures are recorded per language without discarding other completed outputs. These changes are verified with local provider mocks, without restarting the hosted generation workflow.
+
+## Native-language recording and media corrections
+
+- Reuse a verified scenario, not English pixels: EN and PL have independent native-language captures and matching synthetic content.
+- Persist passing scenario source in the verified private bundle and replay it without a second authoring worker. Retry a same-contract update using that scenario before requesting repair.
+- Store Polish courses, lessons and group labels in their actual locale; set seeded user language before recording and use the local language-neutral cover.
+- Preserve narration as PCM during pause insertion and mix continuous chapter audio separately from visual segments.
+- Set each narration job's language explicitly and cache translations and speech independently of branding/camera settings.
+- Local regression checks cover native selectors, replay failures, speech reuse and decoded audio continuity. A new hosted video review remains required.

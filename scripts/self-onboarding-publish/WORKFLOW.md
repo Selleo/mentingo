@@ -10,7 +10,7 @@ independent complete flows. It does not run on GitHub Release publication.
 trusted default branch when a `vX.Y.Z` version tag is pushed (prerelease suffixes are
 supported). Both workflow files must first exist on the appropriate branch/tag.
 Manual dispatch accepts an exact version tag, domains, languages, force, dry-run,
-publish and resume-publication. Empty domains means all reviewed domains. English and Polish are the default automatic batch, sharing one raw capture per flow.
+publish and resume-publication. Empty domains means all reviewed domains. English and Polish are the default automatic batch, reusing one verified scenario with separate native-language captures.
 GitHub suppresses ordinary push-trigger chaining from tags created with its default
 workflow token; a version-creation workflow using that token should dispatch the
 Helpdesk workflow explicitly, using the same exact tag/default-branch contract.
@@ -156,25 +156,14 @@ Discovery paths are bounded to supplied specs and the feature’s existing sourc
 roots, with actual target-tree verification. Ambiguous changes block generation;
 model output cannot add executable setup.
 
-Each selected flow is filmed, narrated and visually checked independently with the
-existing release-film harness. Every required action/result must pass coverage
-review. Release framing, chapter-dropping, total-word budgets and recap duration
-limits do not govern tutorial selection. Stable flow IDs survive assembly/reordering.
-The browser records one canonical application flow. Shared raw footage and action
-pins are reused across EN/PL; each language gets its own localized title, narration,
-short overlay labels and captions, spoken by the same ElevenLabs voice. Each localized
-render has its own final chapter timings because speech durations differ. The captured
-application UI stays as filmed; it is not falsely presented as a separately localized
-application session. Localized copy must preserve every action pin and observed result.
-Feature titles/descriptions are localized as well. Voice timing and existing
-pronunciation rules feed the existing MP3/SRT montage contract.
+Each selected flow is filmed and narrated independently with the existing release-film harness. Browser assertions and action pins validate the flow; optional visual review remains advisory. Failed flows are recorded explicitly without discarding other usable chapters. Release framing and recap duration limits do not govern tutorial selection.
 
-Shared raw capture bundles and localized segments, audio, captions, transcripts and
-checksums are retained across versions. Adding another language reuses the raw
-capture and renders that language without running the browser again. Unchanged flows skip camera and voice. Changed domains concatenate their
-current segments, decode-check the result and calculate all chapter offsets again
-from measured media duration. An unchanged domain skips assembly/upload. Changing
-model/settings rebuilds the selected localized segments from retained raw footage.
+The authoring worker prepares one verified, locale-aware Playwright scenario. English and Polish replay it against their native application UI and synthetic examples. Use stable test IDs, real application translation keys through `recordingText`, and bilingual sample values through `recordingValue`. The fixture updates the seeded person's language and browser locale. Polish output requires Polish footage; failure to replay it is a `localized-capture` skip rather than an English-video fallback.
+
+The passing scenario and base-spec location travel inside the checksum-verified private capture bundle. Adding a language requires browser replay but no new authoring worker. A same-contract refresh tries the saved scenario before requesting repair. Legacy English-only bundles need a fresh locale-aware recording once. Unchanged native flows skip camera and speech. Translation and paid speech caches are independent of visual settings; speech cache files are checksum-checked. PCM narration is mixed continuously across video cuts instead of encoding sentence fragments into each visual segment.
+
+Each language has its own localized title, narration, labels and captions, spoken by the same saved ElevenLabs voice. Narration requests explicitly use that language. Chapter offsets come from measured language-specific media durations. Changing voice/model settings rebuilds narration from retained native footage; changing branding can reuse existing speech.
+
 Removing a video's saved voice ID from the pool randomly assigns a remaining voice
 and regenerates all selected languages' narration, keeping each video's chapters
 consistent. Adding/reordering pool entries does not change a retained narrator.
@@ -216,7 +205,7 @@ node --test scripts/self-onboarding-publish/publisher.test.mjs
 ```
 
 Unit tests use fake provider transports and real temporary Git histories, including
-whole-utterance v4 dialogue timing, quota circuit breaking and one-capture/two-language generation. A small
+whole-utterance v4 dialogue timing, quota circuit breaking and one-scenario/native-language replay. A small
 FFmpeg fixture verifies assembly/chapter timing; it is test evidence, never a product
 tutorial. Live Claude/ElevenLabs recording, private-store access, deployed Helpdesk
 publication, Bunny processing and playback require the configured hosted workflow.

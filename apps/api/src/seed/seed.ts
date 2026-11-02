@@ -60,6 +60,7 @@ import {
   seedTruncateAllTables,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
+import { selfOnboardingCourses } from "./self-onboarding-data-seed";
 import { admin, contentCreators, students, trainers } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
@@ -304,11 +305,24 @@ async function createDeadlineGroups(
   const createdGroups = await db
     .insert(groups)
     .values(
-      deadlineGroupsData.map((groupData) => ({
-        name: sql`json_build_object('en', ${groupData.name}::text)`,
-        characteristic: sql`json_build_object('en', ${groupData.characteristic}::text)`,
-        tenantId,
-      })),
+      deadlineGroupsData.map((groupData, index) => {
+        if (process.env.SELF_ONBOARDING_DEMO === "1") {
+          const polishName = index === 0 ? "Akademia zespołu" : "Zespół analityczny";
+          const polishDescription =
+            "Uczestnicy rozwijający umiejętności w ramach wspólnego planu nauki.";
+          return {
+            name: sql`json_build_object('en', ${groupData.name}::text, 'pl', ${polishName}::text)`,
+            characteristic: sql`json_build_object('en', ${groupData.characteristic}::text, 'pl', ${polishDescription}::text)`,
+            availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+            tenantId,
+          };
+        }
+        return {
+          name: sql`json_build_object('en', ${groupData.name}::text)`,
+          characteristic: sql`json_build_object('en', ${groupData.characteristic}::text)`,
+          tenantId,
+        };
+      }),
     )
     .returning();
 
@@ -710,7 +724,12 @@ async function seed() {
       console.log("Created or found content creators user:", createdContentCreators);
       console.log("Created or found trainers user:", createdTrainers);
 
-      const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
+      const createdCourses = await createNiceCourses(
+        creatorCourseIds,
+        db,
+        process.env.SELF_ONBOARDING_DEMO === "1" ? selfOnboardingCourses : niceCourses,
+        tenantId,
+      );
       console.log("✨✨✨Created nice courses✨✨✨");
       if (process.env.SELF_ONBOARDING_DEMO !== "1") {
         await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);

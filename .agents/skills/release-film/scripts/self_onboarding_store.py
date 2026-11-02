@@ -21,9 +21,9 @@ from urllib.parse import urlsplit
 import core
 
 MAX_BYTES = 30 * 1024**3
-EXTENSIONS = {'.mp4', '.mp3', '.srt', '.vtt', '.json', '.jpg', '.txt'}
+EXTENSIONS = {'.mp4', '.mp3', '.wav', '.srt', '.vtt', '.json', '.jpg', '.txt'}
 CAPTURE_ENTRY = re.compile(r'captures/[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*/[a-f0-9]{64}/'
-                          r'(?:capture-bundle\.json|take\.mp4|capture\.json|actions\.json|page-log\.json|story-en\.json|'
+                          r'(?:capture-bundle\.json|take\.mp4|capture\.json|actions\.json|page-log\.json|story-en\.json|claim-review\.json|scenario\.json|scene\.spec\.ts|'
                           r'stills/\d+\.(?:jpg|jpeg|png)|documents/\d+\.(?:pdf|page1\.png)|specs/\d+\.md)\Z')
 
 
