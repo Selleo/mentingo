@@ -5,6 +5,23 @@ import { renderLessonResourceNode } from "./mcp-content-resource";
 const base = { resourceId: "11111111-1111-1111-1111-111111111111", name: "file.ext" };
 
 describe("renderLessonResourceNode", () => {
+  it("renders stored lesson audio with native controls in preview mode", () => {
+    const html = renderLessonResourceNode({
+      ...base,
+      contentType: "audio/wav",
+      displayMode: "preview",
+    });
+    expect(html).toContain('data-node-type="audio"');
+    expect(html).toContain(`src="/api/lesson/lesson-resource/${base.resourceId}"`);
+    expect(html).toContain("controls");
+    expect(html).not.toContain("autoplay");
+  });
+
+  it("rejects audio in download mode", () => {
+    expect(() =>
+      renderLessonResourceNode({ ...base, contentType: "audio/wav", displayMode: "download" }),
+    ).toThrow(BadRequestException);
+  });
   it("renders an image node in preview mode", () => {
     const html = renderLessonResourceNode({
       ...base,

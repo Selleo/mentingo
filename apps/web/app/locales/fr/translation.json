@@ -4736,7 +4736,9 @@
       "contentTypeMismatch": "Le type de contenu du fichier ne correspond pas au type de contenu fourni",
       "invalidFileType": "Type de fichier invalide.",
       "missingTenantContext": "Contexte de locataire manquant pour le téléchargement de fichiers",
-      "presentationFileTooLarge": "La présentation est trop volumineuse. Importez un fichier de {{size}} {{unit}} maximum."
+      "presentationFileTooLarge": "La présentation est trop volumineuse. Importez un fichier de {{size}} {{unit}} maximum.",
+      "audioFileTooLarge": "Le fichier audio est trop volumineux. Importez un fichier audio de 200 Mo maximum.",
+      "rangeNotSatisfiable": "La plage d'octets demandée n'est pas disponible."
     },
     "import": {
       "noFileUploaded": "Aucun fichier téléchargé",
@@ -4916,6 +4918,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Lire",
+      "pause": "Pause",
+      "seek": "Rechercher",
+      "volume": "Volume",
+      "mute": "Couper le son",
+      "unmute": "Réactiver le son",
+      "playbackSpeed": "Vitesse de lecture",
+      "label": "Audio",
+      "drag": "Déplacer l’audio",
+      "remove": "Supprimer l’audio",
+      "loading": "Chargement de l’audio…",
+      "error": "Impossible de lire l’audio. Réessayez ou utilisez un autre navigateur.",
+      "invalidType": "Choisissez un fichier audio MP3, M4A, WAV, Ogg ou WebM. L’audio est pris en charge uniquement dans les leçons de contenu.",
+      "tooLarge": "Le fichier audio ne doit pas dépasser {{maxMB}} Mo.",
+      "uploadFailed": "Échec de l’importation audio. Veuillez réessayer."
+    },
     "dropVisibilityDialog": {
       "title": "Choisir la visibilité des ressources",
       "description": "Choisissez la visibilité des {{count}} ressources déposées.",

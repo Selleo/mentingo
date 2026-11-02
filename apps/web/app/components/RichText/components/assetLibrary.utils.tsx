@@ -1,6 +1,7 @@
-import { ALLOWED_VIDEO_FILE_TYPES, RESOURCE_LIBRARY_ASSET_TYPE } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, RESOURCE_LIBRARY_ASSET_TYPE, isAudioFile } from "@repo/shared";
 import {
   Archive,
+  FileAudio,
   File as FileIcon,
   FileSpreadsheet,
   FileText,
@@ -33,21 +34,33 @@ export const formatAssetSize = (bytes: number | null) => {
 
 export const isAssetLibraryVideoFile = (file: File) => ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
 
-export const getRichTextResourceTypeFromAsset = (asset: ResourceLibraryAsset) =>
-  match(asset.type)
+export const getRichTextResourceTypeFromAsset = (asset: ResourceLibraryAsset) => {
+  if (isAudioFile({ type: asset.contentType, name: asset.originalFilename || asset.fileName }))
+    return RICH_TEXT_RESOURCE_TYPE.AUDIO;
+  return match(asset.type)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.IMAGE, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.VIDEO, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.PDF, () => RICH_TEXT_RESOURCE_TYPE.PDF)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.DOCUMENT, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
     .otherwise(() => RICH_TEXT_RESOURCE_TYPE.OTHER);
+};
 
 export const richTextResourceTypeNeedsDisplayMode = (
   type: ReturnType<typeof getRichTextResourceTypeFromAsset>,
 ) => type === RICH_TEXT_RESOURCE_TYPE.PRESENTATION || type === RICH_TEXT_RESOURCE_TYPE.PDF;
 
-export const AssetTypeIcon = ({ type }: { type: ResourceLibraryAsset["type"] }) => {
+export const AssetTypeIcon = ({
+  type,
+  contentType = "",
+}: {
+  type: ResourceLibraryAsset["type"];
+  contentType?: string;
+}) => {
   const className = "size-5 text-neutral-700";
+
+  if (isAudioFile({ type: contentType, name: "" }))
+    return <FileAudio className={className} aria-hidden />;
 
   return match(type)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.IMAGE, () => <Image className={className} aria-hidden />)

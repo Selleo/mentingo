@@ -4990,7 +4990,9 @@
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
       "invalidFileType": "Ungültiger Dateityp.",
       "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",
-      "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch."
+      "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch.",
+      "audioFileTooLarge": "Die Audiodatei ist zu groß. Laden Sie Audio mit bis zu 200 MB hoch.",
+      "rangeNotSatisfiable": "Der angeforderte Bytebereich ist nicht verfügbar."
     },
     "import": {
       "noFileUploaded": "Keine Datei hochgeladen",
@@ -5170,6 +5172,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Abspielen",
+      "pause": "Pausieren",
+      "seek": "Spulen",
+      "volume": "Lautstärke",
+      "mute": "Stummschalten",
+      "unmute": "Stummschaltung aufheben",
+      "playbackSpeed": "Wiedergabegeschwindigkeit",
+      "label": "Audio",
+      "drag": "Audio verschieben",
+      "remove": "Audio entfernen",
+      "loading": "Audio wird geladen…",
+      "error": "Audio konnte nicht abgespielt werden. Versuchen Sie es erneut oder verwenden Sie einen anderen Browser.",
+      "invalidType": "Wählen Sie eine MP3-, M4A-, WAV-, Ogg- oder WebM-Audiodatei. Audio wird nur in Inhaltslektionen unterstützt.",
+      "tooLarge": "Die Audiodatei darf höchstens {{maxMB}} MB groß sein.",
+      "uploadFailed": "Audio konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    },
     "dropVisibilityDialog": {
       "title": "Sichtbarkeit der Ressourcen wählen",
       "description": "Wählen Sie die Sichtbarkeit für alle {{count}} abgelegten Ressourcen.",

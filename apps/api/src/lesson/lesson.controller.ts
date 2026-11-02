@@ -23,6 +23,7 @@ import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import {
   COURSE_LEARNING_STATE_KINDS,
   AI_THREAD_STATUSES,
+  ALLOWED_AUDIO_FILE_TYPES,
   ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
@@ -573,6 +574,7 @@ export class LessonController {
           ...ALLOWED_VIDEO_FILE_TYPES,
           ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
           ...ALLOWED_PRESENTATION_FILE_TYPES,
+          ...ALLOWED_AUDIO_FILE_TYPES,
         ]),
         MAX_VIDEO_SIZE,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),

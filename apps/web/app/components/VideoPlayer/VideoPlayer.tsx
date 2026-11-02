@@ -14,6 +14,7 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import "videojs-youtube";
 import { cn } from "~/lib/utils";
+import { MEDIA_PLAYBACK_RATES } from "~/utils/mediaPlayback";
 
 import { getVideoAspectRatio } from "./aspectRatio";
 import {
@@ -63,7 +64,6 @@ type VideoJsPlayerWithUserActivity = VideoJSType & {
   userActive?: (isActive: boolean) => void;
 };
 
-const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl";
 const MP4_MIME_TYPE = "video/mp4";
 const KEYBOARD_SEEK_SECONDS = 5;
@@ -446,7 +446,7 @@ export const VideoPlayer = ({
       controls: true,
       inactivityTimeout: 3000,
       loop: false,
-      playbackRates: PLAYBACK_RATES,
+      playbackRates: [...MEDIA_PLAYBACK_RATES],
       bigPlayButton: false,
       responsive: true,
       fluid: false,

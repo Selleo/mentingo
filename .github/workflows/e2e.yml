@@ -102,10 +102,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Caddy
+      - name: Install Caddy and ffmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y caddy
+          sudo apt-get install -y caddy ffmpeg
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

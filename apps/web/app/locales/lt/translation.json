@@ -4994,7 +4994,9 @@
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
       "invalidFileType": "Neteisingas failo tipas.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
-      "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}."
+      "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}.",
+      "audioFileTooLarge": "Garso failas per didelis. Įkelkite garso įrašą iki 200 MB.",
+      "rangeNotSatisfiable": "Prašomas baitų intervalas nepasiekiamas."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -5174,6 +5176,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Groti",
+      "pause": "Pristabdyti",
+      "seek": "Prasukti",
+      "volume": "Garsumas",
+      "mute": "Nutildyti",
+      "unmute": "Įjungti garsą",
+      "playbackSpeed": "Atkūrimo greitis",
+      "label": "Garso įrašas",
+      "drag": "Vilkite garso įrašą",
+      "remove": "Pašalinti garso įrašą",
+      "loading": "Įkeliamas garso įrašas…",
+      "error": "Nepavyko paleisti garso įrašo. Bandykite dar kartą arba naudokite kitą naršyklę.",
+      "invalidType": "Pasirinkite MP3, M4A, WAV, Ogg arba WebM garso failą. Garsas palaikomas tik turinio pamokose.",
+      "tooLarge": "Garso failas negali viršyti {{maxMB}} MB.",
+      "uploadFailed": "Nepavyko įkelti garso įrašo. Bandykite dar kartą."
+    },
     "dropVisibilityDialog": {
       "title": "Pasirinkite išteklių matomumą",
       "description": "Pasirinkite visų {{count}} nutemptų išteklių matomumą.",

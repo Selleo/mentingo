@@ -4999,7 +4999,9 @@
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
       "invalidFileType": "Neplatný typ souboru.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
-      "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}."
+      "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}.",
+      "audioFileTooLarge": "Zvukový soubor je příliš velký. Nahrajte zvuk o velikosti do 200 MB.",
+      "rangeNotSatisfiable": "Požadovaný rozsah bajtů není k dispozici."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",
@@ -5179,6 +5181,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Přehrát",
+      "pause": "Pozastavit",
+      "seek": "Posunout",
+      "volume": "Hlasitost",
+      "mute": "Ztlumit",
+      "unmute": "Zrušit ztlumení",
+      "playbackSpeed": "Rychlost přehrávání",
+      "label": "Zvuk",
+      "drag": "Přetáhnout zvuk",
+      "remove": "Odstranit zvuk",
+      "loading": "Načítání zvuku…",
+      "error": "Zvuk se nepodařilo přehrát. Zkuste to znovu nebo použijte jiný prohlížeč.",
+      "invalidType": "Vyberte zvukový soubor MP3, M4A, WAV, Ogg nebo WebM. Zvuk je podporován pouze v obsahových lekcích.",
+      "tooLarge": "Zvukový soubor nesmí přesáhnout {{maxMB}} MB.",
+      "uploadFailed": "Nahrávání zvuku se nezdařilo. Zkuste to znovu."
+    },
     "dropVisibilityDialog": {
       "title": "Zvolte viditelnost zdrojů",
       "description": "Zvolte viditelnost pro všech {{count}} přetažených zdrojů.",

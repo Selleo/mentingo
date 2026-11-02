@@ -4947,7 +4947,9 @@
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
       "invalidFileType": "Tipo de archivo no válido.",
       "missingTenantContext": "Falta contexto de inquilino para la carga de archivos",
-      "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}."
+      "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}.",
+      "audioFileTooLarge": "El archivo de audio es demasiado grande. Cargue un audio de hasta 200 MB.",
+      "rangeNotSatisfiable": "El rango de bytes solicitado no está disponible."
     },
     "import": {
       "noFileUploaded": "No se ha subido ningún archivo",
@@ -5127,6 +5129,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "seek": "Buscar",
+      "volume": "Volumen",
+      "mute": "Silenciar",
+      "unmute": "Activar sonido",
+      "playbackSpeed": "Velocidad de reproducción",
+      "label": "Audio",
+      "drag": "Arrastrar audio",
+      "remove": "Eliminar audio",
+      "loading": "Cargando audio…",
+      "error": "No se pudo reproducir el audio. Inténtalo de nuevo o utiliza otro navegador.",
+      "invalidType": "Selecciona un archivo de audio MP3, M4A, WAV, Ogg o WebM. El audio solo se admite en las lecciones de contenido.",
+      "tooLarge": "El audio no debe superar los {{maxMB}} MB.",
+      "uploadFailed": "No se pudo subir el audio. Inténtalo de nuevo."
+    },
     "dropVisibilityDialog": {
       "title": "Elegir visibilidad de recursos",
       "description": "Elige la visibilidad para los {{count}} recursos soltados.",

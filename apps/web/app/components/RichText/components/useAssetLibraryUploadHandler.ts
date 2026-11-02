@@ -85,6 +85,7 @@ export const useAssetLibraryUploadHandler = ({
     },
     fallbackUploadErrorMessage: t("common.toast.somethingWentWrong"),
     insertOnUpload: false,
+    onValidationError: (message) => toast({ description: message, variant: "destructive" }),
   });
 
   return {

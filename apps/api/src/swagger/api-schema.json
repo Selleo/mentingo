@@ -1825,27 +1825,6 @@
         "operationId": "StatisticsController_getDashboardDeadlineRisks",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "integer"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -1898,6 +1877,27 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
             }
           }
         ],
@@ -2058,32 +2058,6 @@
             }
           },
           {
-            "name": "urgency",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "overdue",
-                  "type": "string"
-                },
-                {
-                  "const": "dueSoon",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "maxLength": 200,
-              "type": "string"
-            }
-          },
-          {
             "name": "sortBy",
             "required": false,
             "in": "query",
@@ -2123,6 +2097,32 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "urgency",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "overdue",
+                  "type": "string"
+                },
+                {
+                  "const": "dueSoon",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
             }
           },
           {
@@ -2825,7 +2825,16 @@
     "/api/user/onboarding-status/{page}": {
       "patch": {
         "operationId": "UserController_markOnboardingComplete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3054,6 +3063,15 @@
         "operationId": "GroupController_getUserGroups",
         "parameters": [
           {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "keyword",
             "required": false,
             "in": "query",
@@ -3076,15 +3094,6 @@
             "in": "query",
             "schema": {
               "type": "number"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
             }
           },
           {
@@ -3510,23 +3519,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -3542,27 +3534,6 @@
                 },
                 {
                   "const": "private",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "isArchived",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "true",
-                  "type": "string"
-                },
-                {
-                  "const": "false",
-                  "type": "string"
-                },
-                {
-                  "const": "all",
                   "type": "string"
                 }
               ]
@@ -3626,6 +3597,23 @@
             }
           },
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -3658,6 +3646,27 @@
                 },
                 {
                   "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "isArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
                   "type": "string"
                 }
               ]
@@ -4060,36 +4069,19 @@
         "operationId": "CourseController_getStudentsWithEnrollmentDate",
         "parameters": [
           {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
@@ -4189,6 +4181,23 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -4656,22 +4665,6 @@
         "operationId": "CourseController_getContentCreatorCourses",
         "parameters": [
           {
-            "name": "title",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "authorId",
             "required": true,
             "in": "query",
@@ -4707,6 +4700,22 @@
             "in": "query",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
@@ -5448,19 +5457,19 @@
         "operationId": "CourseController_enrollCourse",
         "parameters": [
           {
-            "name": "x-test-key",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-test-key",
+            "required": true,
+            "in": "header",
+            "schema": {
               "type": "string"
             }
           }
@@ -5648,6 +5657,15 @@
         "operationId": "CourseController_unenrollCourses",
         "parameters": [
           {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "userIds",
             "required": false,
             "in": "query",
@@ -5656,15 +5674,6 @@
               "items": {
                 "type": "string"
               }
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
             }
           }
         ],
@@ -5722,30 +5731,6 @@
         "operationId": "CourseController_getCourseLearningTimeStatistics",
         "parameters": [
           {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -5770,6 +5755,30 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           },
           {
@@ -5955,6 +5964,15 @@
         "operationId": "CourseController_getCourseStudentsProgress",
         "parameters": [
           {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -5975,15 +5993,6 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -6102,6 +6111,15 @@
         "operationId": "CourseController_getCourseStudentsQuizResults",
         "parameters": [
           {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -6126,28 +6144,19 @@
             }
           },
           {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "groupId",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
@@ -6257,6 +6266,15 @@
         "operationId": "CourseController_getCourseStudentsAiMentorResults",
         "parameters": [
           {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -6281,28 +6299,19 @@
             }
           },
           {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "groupId",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
@@ -8662,31 +8671,6 @@
         "operationId": "CertificatesController_getAllCertificates",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "userId",
             "required": false,
             "in": "query",
@@ -8731,6 +8715,31 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9232,7 +9241,24 @@
     "/api/certificates/share": {
       "get": {
         "operationId": "CertificatesController_getCertificateSharePage",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -9243,7 +9269,24 @@
     "/api/certificates/share-image": {
       "get": {
         "operationId": "CertificatesController_getCertificateShareImage",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -9588,6 +9631,43 @@
             }
           },
           {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "type",
             "required": false,
             "in": "query",
@@ -9624,43 +9704,6 @@
                 },
                 {
                   "const": "archived",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -9749,6 +9792,15 @@
         "operationId": "AdminAiThreadsController_getAdminAiThreadMessages",
         "parameters": [
           {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -9766,15 +9818,6 @@
               "minimum": 1,
               "maximum": 100,
               "type": "integer"
-            }
-          },
-          {
-            "name": "threadId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
             }
           }
         ],
@@ -11224,24 +11267,6 @@
         "operationId": "AnnouncementsController_getAllAnnouncements",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -11314,6 +11339,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -11409,24 +11452,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -11461,6 +11486,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -11497,7 +11540,16 @@
     "/api/announcements/{id}/read": {
       "patch": {
         "operationId": "AnnouncementsController_markAnnouncementAsRead",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -11514,7 +11566,16 @@
     "/api/announcements/{id}": {
       "delete": {
         "operationId": "AnnouncementsController_deleteAnnouncement",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -15696,36 +15757,19 @@
         "operationId": "LearningPathEnrollmentController_getStudentsWithEnrollmentDate",
         "parameters": [
           {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "learningPathId",
             "required": true,
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           },
@@ -15787,6 +15831,23 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -16238,7 +16299,24 @@
     "/api/learning-path/certificates/share": {
       "get": {
         "operationId": "LearningPathCertificateController_getCertificateSharePage",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -16249,7 +16327,24 @@
     "/api/learning-path/certificates/share-image": {
       "get": {
         "operationId": "LearningPathCertificateController_getCertificateShareImage",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -18749,7 +18844,16 @@
       },
       "head": {
         "operationId": "ScormController_getTusUpload",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -18758,7 +18862,16 @@
       },
       "patch": {
         "operationId": "ScormController_patchTusUpload",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -18987,15 +19100,6 @@
             }
           },
           {
-            "name": "scoId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -19031,6 +19135,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           },
           {
@@ -21171,23 +21284,6 @@
             }
           },
           {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "active",
-                  "type": "string"
-                },
-                {
-                  "const": "inactive",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
             "name": "sort",
             "required": false,
             "in": "query",
@@ -21207,6 +21303,23 @@
                 },
                 {
                   "const": "-activityCountLast14Days",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "active",
+                  "type": "string"
+                },
+                {
+                  "const": "inactive",
                   "type": "string"
                 }
               ]
@@ -21729,6 +21842,87 @@
             }
           },
           {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
+                },
+                {
+                  "const": "email_template",
+                  "type": "string"
+                },
+                {
+                  "const": "automation",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "from",
             "required": false,
             "in": "query",
@@ -22067,87 +22261,6 @@
                 }
               ]
             }
-          },
-          {
-            "name": "resourceType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "user",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                },
-                {
-                  "const": "chapter",
-                  "type": "string"
-                },
-                {
-                  "const": "lesson",
-                  "type": "string"
-                },
-                {
-                  "const": "announcement",
-                  "type": "string"
-                },
-                {
-                  "const": "group",
-                  "type": "string"
-                },
-                {
-                  "const": "settings",
-                  "type": "string"
-                },
-                {
-                  "const": "integration",
-                  "type": "string"
-                },
-                {
-                  "const": "category",
-                  "type": "string"
-                },
-                {
-                  "const": "qa",
-                  "type": "string"
-                },
-                {
-                  "const": "news",
-                  "type": "string"
-                },
-                {
-                  "const": "article",
-                  "type": "string"
-                },
-                {
-                  "const": "articleSection",
-                  "type": "string"
-                },
-                {
-                  "const": "live_training",
-                  "type": "string"
-                },
-                {
-                  "const": "learning_path",
-                  "type": "string"
-                },
-                {
-                  "const": "scorm",
-                  "type": "string"
-                },
-                {
-                  "const": "email_template",
-                  "type": "string"
-                },
-                {
-                  "const": "automation",
-                  "type": "string"
-                }
-              ]
-            }
           }
         ],
         "responses": {
@@ -22395,15 +22508,6 @@
         "operationId": "CourseAuthoringController_previewAuthoringAsset",
         "parameters": [
           {
-            "name": "revision",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -22428,6 +22532,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
             }
           }
         ],
@@ -22620,15 +22733,6 @@
         "operationId": "CourseAuthoringController_getAuthoringEvents",
         "parameters": [
           {
-            "name": "afterSequence",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -22644,6 +22748,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "afterSequence",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
             }
           }
         ],
@@ -22664,17 +22777,6 @@
       "get": {
         "operationId": "CourseAuthoringController_getAuthoringCourseContext",
         "parameters": [
-          {
-            "name": "lessonIds",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
           {
             "name": "courseId",
             "required": true,
@@ -22719,6 +22821,17 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "lessonIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],

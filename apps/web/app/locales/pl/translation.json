@@ -5308,7 +5308,9 @@
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
       "invalidFileType": "Nieprawidłowy typ pliku.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
-      "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}."
+      "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}.",
+      "audioFileTooLarge": "Plik audio jest zbyt duży. Prześlij plik audio o rozmiarze do 200 MB.",
+      "rangeNotSatisfiable": "Żądany zakres bajtów jest niedostępny."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
@@ -5488,6 +5490,23 @@
     }
   },
   "richText": {
+    "audio": {
+      "play": "Odtwórz",
+      "pause": "Wstrzymaj",
+      "seek": "Przewiń",
+      "volume": "Głośność",
+      "mute": "Wycisz",
+      "unmute": "Wyłącz wyciszenie",
+      "playbackSpeed": "Prędkość odtwarzania",
+      "label": "Audio",
+      "drag": "Przeciągnij audio",
+      "remove": "Usuń audio",
+      "loading": "Ładowanie audio…",
+      "error": "Nie można odtworzyć audio. Spróbuj ponownie lub użyj innej przeglądarki.",
+      "invalidType": "Wybierz plik audio MP3, M4A, WAV, Ogg lub WebM. Audio jest obsługiwane tylko w lekcjach z treścią.",
+      "tooLarge": "Plik audio nie może przekraczać {{maxMB}} MB.",
+      "uploadFailed": "Przesyłanie audio nie powiodło się. Spróbuj ponownie."
+    },
     "dropVisibilityDialog": {
       "title": "Wybierz widoczność zasobów",
       "description": "Wybierz widoczność dla wszystkich {{count}} przeciągniętych zasobów.",
