@@ -1,6 +1,10 @@
 import { Readable } from "node:stream";
 
+import express from "express";
+import request from "supertest";
+
 import { NATIVE_ARCHIVE_JOB_ACTION } from "../../native-archive.constants";
+import { streamNativeArchiveDownload } from "../../utils/native-archive-download.utils";
 import { NativeArchiveJobService } from "../native-archive-job.service";
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -17,6 +21,79 @@ const PATH_ID = "b7e3f32d-c1ab-4cb9-95e1-79212698bf54";
 const COURSE_ID = "f594d687-096b-4599-84bf-1f296afdb1e1";
 
 describe("NativeArchiveJobService", () => {
+  it.each([
+    [
+      NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE,
+      "Bezpieczna praca zdalna",
+      "bezpieczna-praca-zdalna.zip",
+    ],
+    [
+      NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE,
+      "Zażółć gęślą jaźń ĄĆĘŁŃÓŚŹŻ",
+      "zazolc-gesla-jazn-acelnoszz.zip",
+    ],
+    [NATIVE_ARCHIVE_JOB_ACTION.EXPORT_LEARNING_PATH, "Polska ścieżka", "polska-sciezka.zip"],
+    [NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE, ' ../ Kurs: "BHP" / 2026! ', "kurs-bhp-2026.zip"],
+    [NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE, "🎓", "mentingo-package.zip"],
+  ])("downloads %s named %s as %s", async (action, title, filename) => {
+    const snapshot = {
+      courses: {
+        [COURSE_ID]: {
+          course: { id: COURSE_ID, title: { en: "Other title", pl: title }, baseLanguage: "pl" },
+        },
+      },
+      learningPath: { id: PATH_ID, title: { en: "Other path", pl: title }, baseLanguage: "pl" },
+      files: [],
+    };
+    let archiveBytes = Buffer.alloc(0);
+    const storage = {
+      uploadStreamMultipart: jest.fn(async (stream: Readable) => {
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+        archiveBytes = Buffer.concat(chunks);
+      }),
+      getFileStream: jest.fn(async () => ({
+        stream: Readable.from(archiveBytes),
+        contentLength: archiveBytes.length,
+      })),
+    };
+    const job = { data: { actor: ACTOR }, returnvalue: {}, getState: async () => "completed" };
+    const service = new NativeArchiveJobService(
+      { getConnection: () => ({}), getQueue: () => ({ getJob: async () => job }) } as never,
+      storage as never,
+      {
+        runWithTenant: async (_tenantId: string, callback: () => Promise<unknown>) => callback(),
+      } as never,
+      {
+        buildCourseExportSnapshot: async () => snapshot,
+        buildLearningPathExportSnapshot: async () => snapshot,
+      } as never,
+      {} as never,
+      {} as never,
+    );
+    job.returnvalue = await service["processExportJob"](
+      action,
+      action === NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE ? COURSE_ID : PATH_ID,
+      ACTOR,
+    );
+    const file = await service.getArchiveDownloadStream("export-job", ACTOR);
+    const app = express();
+    app.get("/download", (_req, response) => streamNativeArchiveDownload(file, response));
+    const response = await request(app)
+      .get("/download")
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+        response.on("error", (error) => callback(error, undefined));
+      })
+      .expect(200);
+    expect(response.headers["content-disposition"]).toBe(`attachment; filename="${filename}"`);
+    expect(response.headers["content-type"]).toContain("application/zip");
+    expect(response.body).toEqual(archiveBytes);
+    expect(archiveBytes.subarray(0, 2).toString()).toBe("PK");
+  });
   it("stages learning path files while the tenant context is active", async () => {
     let tenantContextActive = false;
     const openVideo = jest.fn(async () => {
