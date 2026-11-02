@@ -323,7 +323,8 @@ worker writes.
 After a successful recording (unless its `publish` input is off) the same
 run's second job, without the Claude token, calls
 `.github/workflows/release-film-publish.yml`: it attaches the film to the tag's
-release with a clickable poster and links at the top of its notes (`ci/release_assets.py`) and
+release with an inline video player and Watch video / Download MP4 links at the top of its notes
+(`ci/release_assets.py`) and
 rebuilds the public GitHub Pages site of the films from every release's page ZIP
 (`site`: an index and each film at `/<tag>/`). Started by hand, the same
 workflow publishes an earlier recording to a test draft release or to the
@@ -335,7 +336,12 @@ release, or its page on the site) stops a publication, and a recording that
 would publish over it before it spends the seat, unless `replace` is on: then
 that film's release assets are deleted first (never another asset or a
 release), its notes section is rewritten and the site shows the new film.
-Republication keeps one film section and preserves the remaining release notes.
+Republication keeps one film section, reuses an inline attachment when the film checksum is unchanged,
+and preserves the remaining release notes. The inline player uses GitHub media attachments, the same upload
+endpoint as the official GitHub CLI. GitHub may refuse an upload because of token permissions or its media
+size limit (up to 100 MB, depending on the repository plan). Publication then reports a warning and keeps
+the poster linked to the Pages player; the MP4, captions and page ZIP remain release assets.
+Captions are selectable in the Pages player; the inline GitHub player uses GitHub's own controls.
 There is no monthly schedule; each stable release starts its own film once the
 workflows are deployed to the default branch and the release tag. Existing
 releases can be recorded by hand.

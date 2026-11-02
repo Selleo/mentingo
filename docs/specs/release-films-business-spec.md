@@ -4,7 +4,7 @@
 
 Each stable Mentingo release can present its main user-facing changes as a short narrated demonstration. Publishing
 the release automatically queues the existing film process, so release owners do not need to start a recording
-separately. Viewers find a clickable film preview at the top of the release notes and can browse the public archive
+separately. Viewers find an inline video player at the top of the release notes and can browse the public archive
 on GitHub Pages.
 
 The recording follows the same process as the v4.15.0 demonstration: scenes show changes in the released application,
@@ -21,7 +21,7 @@ accounts for the release's pull requests, including changes not demonstrated.
 
 - Generate a narrated demonstration after each stable release is published.
 - Show selected user-facing changes since the previous published ancestor release.
-- Present a clickable poster and film download link above the existing release notes.
+- Play the film directly above the release notes, with separate online-player and MP4 download links.
 - Keep current and earlier demonstrations accessible in the public film archive.
 - Retry recording or publication manually while protecting an existing film from unintended replacement.
 
@@ -39,8 +39,11 @@ The existing process records scenes, checks the narration against the pictures, 
 
 After a successful recording, publication attaches the film, poster, subtitles and page archive to the release,
 places one film section at the top of its notes, and rebuilds the GitHub Pages archive while keeping earlier films.
-Repeated publication updates the section without duplicating it and keeps the remaining notes. The poster opens
-the MP4; it is not an inline video player.
+Repeated publication updates the section without duplicating it, reuses the media attachment when the film has
+not changed, and keeps the remaining notes. The section contains an inline GitHub player, Watch video and
+Download MP4. Build archives and subtitle files stay under release assets instead of cluttering the notes.
+The Pages player includes selectable captions. If GitHub refuses the inline attachment (permissions or file size),
+publication reports a warning and links the poster to the Pages player, while preserving the downloadable film.
 
 Drafts and prereleases do not queue automatic films. There is no monthly timer: each stable release triggers its
 own recording. A failed recording leaves the release published and can be retried manually. Existing films require
@@ -64,7 +67,8 @@ an explicit replacement choice; releases published before this automation is dep
 - Workflow tests check stable-publication eligibility and execute the dispatch shell step with a fake GitHub CLI,
   verifying the exact tag, default branch, publication options, dispatch failure and safe handling of tag text.
 - Publication tests verify that the film section precedes the original notes, older sections move to the top,
-  repeated publication stays idempotent, and the poster points to the film. Existing tests cover asset protection
-  and preservation of films already shown on Pages.
-- No application behavior changes. A live GitHub release event, provider-backed recording and public deployment
-  have not been executed as part of this change; they require the workflows to be deployed.
+  repeated publication stays idempotent, attachments are reused, and upload rejection retains the browser player.
+  Existing tests cover asset protection and preservation of films already shown on Pages.
+- The existing v4.27.0 film was uploaded as a GitHub media attachment and verified playing inside the release
+  notes in a signed-in browser. Its Pages player was also deployed from existing release assets. No new
+  provider-backed recording was generated. The new automatic upload still requires validation with the Actions token.

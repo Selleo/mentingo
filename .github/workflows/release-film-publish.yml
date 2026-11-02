@@ -1,8 +1,8 @@
 name: Publish release film
 
 # Attaches a film that release-film.yml recorded (the release-film artifact of the run given) to a release: the film,
-# its page as a ZIP, its captions and poster, with a section of links in the release notes. It records nothing and
-# holds no Claude token. A re-run adds what is missing. A tag that already has another film (on its release or on the
+# its page as a ZIP, its captions and poster, with an inline video player and watch/download links in the notes.
+# It records nothing and holds no Claude token. A re-run adds what is missing. A tag that already has another film (on its release or on the
 # Pages site) stops the publication and nothing changes, unless replace is on: then that film's release assets are
 # deleted first (no other asset is touched) and the site shows the new film. The draft target publishes to a test
 # draft release made for the tag (deleted by hand after checking); the release target to the tag's published release,
@@ -117,6 +117,8 @@ jobs:
           removed, uploaded = ', '.join(done['removed']) or 'nothing', ', '.join(done['uploaded']) or 'nothing new'
           print(f"## Release film published ({done['target']})\n\n{done['release']}\n\n"
                 f"Removed: {removed}; uploaded: {uploaded}; notes {done['notes']}.")
+          if done.get("inline_player_error"):
+              print("\nInline player unavailable; use the watch/download links in the release notes.")
           PY
 
   # The public site of the films (https://<owner>.github.io/<repo>/), rebuilt from every published release's film
