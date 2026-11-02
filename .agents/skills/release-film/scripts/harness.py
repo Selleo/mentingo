@@ -283,9 +283,35 @@ def build_images(run, recipe, log):
     return built
 
 
+def recording_files(run, recipe):
+    """Apply trusted recording scaffolding only to this run's isolated release checkout."""
+    root = (Path(run) / 'checkout').resolve()
+    for entry in recipe.get('recording_files') or []:
+        source = (core.SKILL / entry['source']).resolve()
+        target = (root / entry['target']).resolve()
+        if not source.is_relative_to(core.SKILL.resolve()) or not source.is_file():
+            raise ValueError('Recording scaffold source must be a file within the trusted skill')
+        if not target.is_relative_to(root):
+            raise ValueError('Recording scaffold target must stay inside the release checkout')
+        if entry.get('preserve_as'):
+            saved = (root / entry['preserve_as']).resolve()
+            if not saved.is_relative_to(root) or saved == target:
+                raise ValueError('Original recording fixture must stay inside the release checkout')
+            if saved.exists():
+                if not target.is_file() or target.read_bytes() != source.read_bytes():
+                    raise ValueError('Recording fixture was changed after preparation; use a fresh run')
+            else:
+                if not target.is_file():
+                    raise ValueError('The release is missing the fixture required by this recording recipe')
+                saved.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(target, saved)
+        core.write(target, source.read_text(encoding='utf-8'), changed_only=True)
+
+
 def setup(run, recipe):
     """Toolchain, dependencies, images, services and the recipe's setup commands; returns the test environment."""
     run = Path(run)
+    recording_files(run, recipe)
     (run / 'keeper.stopped').unlink(missing_ok=True)  # explicit env/start permits a new runtime
     log = run / 'env.log'
     cwd = run / 'checkout' / Path(recipe['config']).parent
@@ -431,6 +457,9 @@ def warm_up(root, specs):
 
 
 def demo_config(config_path):
+    target = Path(config_path).with_name(f'{DEMO_CONFIG}.ts')
+    if Path(config_path).stem == DEMO_CONFIG or Path(config_path).resolve() == target.resolve():
+        raise ValueError('Recording input config must have a different filename from the generated release-film config')
     base = Path(config_path).name
     stem = base.rsplit('.', 1)[0]
     text = f'''// Written by release-film: the project's config, filmed (1600x900 at 1.5x, one report, no retries).
@@ -479,7 +508,6 @@ export default defineConfig({{
   webServer: servers.length ? servers : undefined,
 }});
 '''
-    target = Path(config_path).with_name(f'{DEMO_CONFIG}.ts')
     core.write(target, text, changed_only=True)  # a try may be loading it right now
     return target
 

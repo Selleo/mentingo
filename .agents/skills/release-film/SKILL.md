@@ -64,11 +64,31 @@ in Polish, else English. `start` returns it and keeps it in the run's
 `sources.json`; the narration, the bottom bar, the card titles, the lines the
 film adds, the captions, the page and the voice all follow it.
 
-The narrator is edge-tts, Microsoft's free `en-US-GuyNeural` or
-`pl-PL-MarekNeural` (the add-on's `voice` names another), locally as in CI: one
-voice from the first chapter to the last, at its own rate, with at least 1.1 s
-between two sentences while the picture holds what the sentence named
-(`cut.PAUSE`). `RELEASE_FILM_VOICE=voxcpm` asks for
+Mentingo's release workflow uses ElevenLabs (`RELEASE_FILM_VOICE=elevenlabs`),
+with `ELEVENLABS_API_KEY` in the `release-film` GitHub environment. Configure four
+unique voice IDs in that environment's variables: `ELEVENLABS_VOICE_ID_FEMALE_1`,
+`ELEVENLABS_VOICE_ID_FEMALE_2`, `ELEVENLABS_VOICE_ID_MALE_1`, and
+`ELEVENLABS_VOICE_ID_MALE_2`. A random narrator is saved in the run's
+`narrator.json` and reused for every chapter, language and retry. If that voice
+is removed from the pool, restore it or start a new run; never mix narrators
+inside an existing film.
+
+ElevenLabs uses `eleven_v4_turbo` by default (`ELEVENLABS_MODEL_ID` overrides it),
+one complete audio-and-timestamps response per chapter, and no automatic paid
+retry or fallback voice. Speech cache identity includes voice, model, settings,
+language and pronunciation. Caption ends are clipped to measured audio duration
+without a timing-overhang cutoff, including after pause insertion; malformed,
+reversed and entirely out-of-audio intervals remain errors. Failed-run reports
+retain narration audio, word subtitles and the authored render plan for diagnosis.
+Local recording uses the same setup when
+`RELEASE_FILM_VOICE=elevenlabs`; a single explicit `ELEVENLABS_VOICE_ID` or
+`elevenlabs.voice_id` add-on is also supported without the four-voice pool.
+Never combine `ELEVENLABS_VOICE_ID` with the pool.
+
+For other projects the default remains Edge TTS; `RELEASE_FILM_VOICE=edge`
+selects it explicitly. Narration keeps at least 1.1 s between sentences while
+the picture holds the named action.
+`RELEASE_FILM_VOICE=voxcpm` asks for
 VoxCPM2 (OpenBMB, Apache-2.0) on an NVIDIA GPU instead, once
 `python3 $S/film.py voice-setup [--narrator RECORDING]` has installed it: its
 own Python, the model and the narrator's reference line in each language,
@@ -76,7 +96,7 @@ cloned from the recording's first seconds (without `--narrator`, a voice
 described in `cut.NARRATOR`); about 11 GB in `<film home>/tools/voxcpm`. It
 clones every sentence anew, and its tone changed from chapter to chapter.
 
-Both voices are told the same text: numbers, dates, hours, amounts, units and
+Every provider is told the same text: numbers, dates, hours, amounts, units and
 versions in words of the film's language (VoxCPM2 now and then says a digit
 wrong), with the grammar around them in Polish ("72 godziny", "wobec
 pięćdziesięciu dziewięciu", "dwudziestego ósmego września") and abbreviations
@@ -95,6 +115,7 @@ sentences did not change keeps its voice.
 2. If `environment` is `no recipe`, follow **Project setup** below and run
    `python3 $S/film.py env --run RUN` before continuing.
 3. Start these concurrently:
+
    - `python3 $S/film.py capture --run RUN && python3 $S/film.py write --run RUN`
    - `python3 $S/film.py gaps --run RUN`
 
@@ -106,6 +127,7 @@ sentences did not change keeps its voice.
    of the project's own is filmed) and `write` groups the pull requests no
    scene shows. Edit `gaps.txt` before launching workers to remove unsuitable
    scenes.
+
 4. When `workers: true`, launch no duplicates. Without workers, an explicitly
    available Opus scene subagent can follow each brief; otherwise report the
    missing capability. A model limit is a blocker, not permission to count a
@@ -245,6 +267,21 @@ the release's own files only, and `{tag}` in its name and in
 job's `E2E_IMAGE_TAG`); nothing else of the caller's environment reaches
 project commands.
 
+Mentingo release recordings use the standard populated `db:seed`, with its
+localhost demo accounts, rather than `db:seed-e2e`. The trusted recipe copies
+recording-only config and fixture adapters into the isolated tag checkout
+before dependency installation. The original test fixture is retained as
+`release-film.base.fixture.ts`; application source and the normal E2E setup are
+unchanged in the repository. Startup authenticates the seeded admin through the
+existing auth helper, then checks that the actual app profile control renders.
+CORS and the seed tenant both use `https://localhost:5173`. Scene writers should
+reuse populated courses and groups and supply realistic names for extra data.
+
+Trusted recipes can declare `recording_files` entries (`source` relative to the
+skill, `target` relative to the isolated checkout, optional `preserve_as` for an
+original fixture) and `recording_instructions` for scene briefs. These are
+recording scaffolding, not a way to patch the release's product behavior.
+
 Optional add-on keys: `language`, `brand.font`, `voice`, `pronunciation`,
 `editor.instructions`, `specs.prefer` and `specs.avoid`. The project's look:
 `brand.font` (`family`, `source`: the film's font file; `kit`: its stylesheet
@@ -325,7 +362,7 @@ nothing more.
 In CI, `ci/install-tools.sh` installs what a fresh Ubuntu 24.04 runner lacks
 (FFmpeg, DejaVu, poppler, Chromium's libraries, a pinned Claude Code), and
 `film.py voice-check` speaks one sentence with the narrator a run would use:
-edge-tts, a free service, may refuse a cloud machine. `film.py report` adds the
+Mentingo checks ElevenLabs before starting the recording. `film.py report` adds the
 seat's 5-hour and weekly limits used while the scene workers ran.
 
 - `python3 $S/film.py metrics --run RUN` measures the film from the run's

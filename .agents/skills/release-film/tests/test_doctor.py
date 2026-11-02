@@ -29,6 +29,11 @@ def proposal(found):
 
 
 class Judge(unittest.TestCase):
+    def test_elevenlabs_requires_key_and_accepts_the_configured_provider(self):
+        self.assertEqual(doctor.judge(dict(READY, voice='elevenlabs', elevenlabs_key=True)), ([], []))
+        missing, _ = doctor.judge(dict(READY, voice='elevenlabs', elevenlabs_key=False))
+        self.assertIn('elevenlabs key', names(missing))
+
     def test_a_ready_mac_needs_nothing(self):
         self.assertEqual(doctor.judge(READY), ([], []))
 
