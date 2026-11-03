@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { VideoPlayer } from "~/components/VideoPlayer/VideoPlayer";
 import { cn } from "~/lib/utils";
 
-import { formatHelpdeskTime, HELPDESK_DOMAIN_LABELS } from "./self-onboarding.helpers";
+import { formatHelpdeskTime, helpdeskDomainLabel } from "./self-onboarding.helpers";
 
 import type { HelpdeskTutorial } from "./self-onboarding.types";
 
@@ -29,7 +29,7 @@ export function HelpdeskTutorialPlayer({ tutorial, startMs, showChapterTimeline 
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 px-6 pb-4 text-xs font-medium text-primary-700">
-        <span>{t(HELPDESK_DOMAIN_LABELS[tutorial.domain])}</span>
+        <span>{helpdeskDomainLabel(tutorial)}</span>
         <span aria-hidden>·</span>
         <Clock3 className="size-3" aria-hidden />
         <span>{formatHelpdeskTime(tutorial.durationMs / 1000)}</span>

@@ -1,5 +1,6 @@
 """Semantic planning regressions: file changes are evidence, never regeneration decisions."""
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -453,20 +454,175 @@ class RegistryTests(unittest.TestCase):
     def test_reviewed_registry_covers_domains_and_explicit_path_flows(self):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
         loaded = catalog.load_catalog(path)
-        self.assertEqual({d['domain'] for d in loaded['domains']},
-                         {'development-paths', 'course-authoring', 'course-learning', 'knowledge-base-articles', 'news'})
+        repo = Path(__file__).resolve().parents[4]
+        public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
+        self.assertEqual({d['domain'] for d in loaded['domains']}, {area['key'] for area in public['areas']})
         paths = next(d for d in loaded['domains'] if d['domain'] == 'development-paths')
         ids = {f['id'] for f in paths['flows']}
         self.assertTrue({'create-path', 'browse-paths', 'edit-path', 'delete-path', 'assign-learners',
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
 
+    def test_app_coverage_audit_requires_every_area_spec_and_real_source(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
+        report = catalog.validate_app_coverage(loaded, public, repo)
+        self.assertEqual(report, {'areas': 29, 'specs': 58, 'flows': 207, 'videos': 86})
+        mutations = []
+        missing_area = copy.deepcopy(loaded)
+        missing_area['domains'].pop()
+        mutations.append(missing_area)
+        missing_spec = copy.deepcopy(loaded)
+        missing_spec['domains'][1]['specPaths'] = ['docs/specs/not-a-feature-business-spec.md']
+        mutations.append(missing_spec)
+        missing_source = copy.deepcopy(loaded)
+        missing_source['domains'][0]['flows'][0]['watchPaths'] = ['apps/web/missing-source/**']
+        mutations.append(missing_source)
+        bad_page = copy.deepcopy(loaded)
+        bad_page['domains'][0]['flows'][0]['pageKeys'] = ['unknown.page']
+        mutations.append(bad_page)
+        for invalid in mutations:
+            with self.subTest(invalid=invalid['domains'][0]['domain']), self.assertRaises(ValueError):
+                catalog.validate_app_coverage(invalid, public, repo)
+        with tempfile.TemporaryDirectory() as folder:
+            # A real but unassigned business spec must not silently fall outside coverage.
+            shadow = Path(folder)
+            (shadow / 'docs/specs').mkdir(parents=True)
+            (shadow / 'apps').symlink_to(repo / 'apps', target_is_directory=True)
+            for spec in (repo / 'docs/specs').glob('*-business-spec.md'):
+                (shadow / 'docs/specs' / spec.name).symlink_to(spec)
+            (shadow / 'docs/specs/unassigned-business-spec.md').write_text('# New app capability')
+            with self.assertRaisesRegex(ValueError, 'Business specifications need an app tutorial area'):
+                catalog.validate_app_coverage(loaded, public, shadow)
+
+    def test_original_flow_contracts_and_video_groups_remain_stable(self):
+        path = Path(__file__).resolve().parents[1] / 'projects/mentingo-self-onboarding.json'
+        loaded = catalog.load_catalog(path)
+        original_ids = {'development-paths': ['browse-paths',
+                               'create-path',
+                               'edit-path',
+                               'delete-path',
+                               'localize-path',
+                               'add-courses',
+                               'reorder-courses',
+                               'remove-courses',
+                               'publish-path',
+                               'configure-sequence',
+                               'assign-learners',
+                               'assign-groups',
+                               'remove-enrollment',
+                               'self-enroll',
+                               'continue-path',
+                               'configure-path-certificates',
+                               'path-certificates',
+                               'share-path',
+                               'export-package',
+                               'import-package'],
+         'course-authoring': ['browse-courses',
+                              'create-course',
+                              'edit-overview',
+                              'course-media',
+                              'localize-course',
+                              'manage-chapters',
+                              'content-lessons',
+                              'quiz-lessons',
+                              'scorm-course-lessons',
+                              'other-lesson-types',
+                              'publish-course',
+                              'archive-restore-delete',
+                              'bulk-course-actions',
+                              'course-settings',
+                              'course-certificates',
+                              'reset-certificates',
+                              'course-pricing',
+                              'enroll-users',
+                              'enroll-groups',
+                              'course-ownership',
+                              'course-statistics',
+                              'share-course',
+                              'export-import-package',
+                              'export-scorm'],
+         'course-learning': ['browse-enroll',
+                             'start-resume',
+                             'lesson-navigation',
+                             'content-resources',
+                             'video-controls',
+                             'required-video-resume',
+                             'quiz-submit-retake',
+                             'embed-lesson',
+                             'scorm-lesson',
+                             'ai-mentor-lesson',
+                             'live-training',
+                             'course-completion',
+                             'learner-certificates',
+                             'repeat-course',
+                             'course-discussion'],
+         'knowledge-base-articles': ['browse-articles',
+                                     'create-section',
+                                     'edit-section',
+                                     'create-article',
+                                     'edit-article',
+                                     'preview-article',
+                                     'localize-article',
+                                     'replace-article-cover',
+                                     'configure-public-article',
+                                     'delete-article',
+                                     'delete-section'],
+         'news': ['browse-news',
+                  'create-news-draft',
+                  'edit-news',
+                  'publish-news',
+                  'unpublish-news',
+                  'localize-news',
+                  'preview-news',
+                  'replace-news-cover',
+                  'embed-news-resource',
+                  'configure-public-news',
+                  'delete-news']}
+        original_videos = set(['development-paths.getting-started',
+         'development-paths.path-details',
+         'development-paths.path-courses',
+         'development-paths.availability',
+         'development-paths.assignments',
+         'development-paths.certificates',
+         'development-paths.packages',
+         'course-authoring.course-details',
+         'course-authoring.media-languages',
+         'course-authoring.curriculum',
+         'course-authoring.lesson-formats',
+         'course-authoring.course-lifecycle',
+         'course-authoring.settings-pricing',
+         'course-authoring.certificates',
+         'course-authoring.enrollments',
+         'course-authoring.sharing-packages',
+         'course-learning.getting-started',
+         'course-learning.resources-video',
+         'course-learning.interactive-content',
+         'course-learning.guided-learning',
+         'course-learning.completion',
+         'knowledge-base-articles.writing',
+         'knowledge-base-articles.sections',
+         'knowledge-base-articles.languages-covers',
+         'knowledge-base-articles.access-lifecycle',
+         'news.writing',
+         'news.publishing',
+         'news.languages-media',
+         'news.reading-lifecycle'])
+        retained = [(feature['domain'], [flow for flow in feature['flows']
+                     if flow['id'] in original_ids[feature['domain']]],
+                     [video for video in feature['videos'] if video['key'] in original_videos])
+                    for feature in loaded['domains'] if feature['domain'] in original_ids]
+        self.assertEqual(sum(len(row[1]) for row in retained), 81)
+        self.assertEqual(sum(len(row[2]) for row in retained), 29)
+        self.assertEqual(hashlib.sha256(json.dumps(retained, sort_keys=True).encode()).hexdigest(), '6636b00ec4dc6ee0f06148784f0f8a61b7d5e0b17ab9a6c587d98bf15efc6708')
+
     def test_articles_spec_selects_its_supported_ui_flows(self):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
         loaded = catalog.load_catalog(path)
         articles = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
         spec = 'docs/specs/knowledge-base-articles-business-spec.md'
-        self.assertEqual(articles['specPaths'], [spec])
+        self.assertEqual(articles['specPaths'], [spec, 'docs/specs/knowledge-base-business-spec.md'])
         self.assertEqual(len(articles['flows']), 11)
         for flow in articles['flows']:
             self.assertEqual(flow['specPaths'], [spec])

@@ -6,6 +6,7 @@ import { BaseResponse } from "src/common";
 
 import {
   helpdeskDomainsBaseResponseSchema,
+  helpdeskDomainsQuerySchema,
   helpdeskSearchBaseResponseSchema,
   helpdeskSearchRequestSchema,
   helpdeskTutorialBaseResponseSchema,
@@ -16,6 +17,7 @@ import {
 import { HelpdeskService } from "./self-onboarding.service";
 
 import type {
+  HelpdeskDomainsQuery,
   HelpdeskDomainsResponse,
   HelpdeskSearchResponse,
   HelpdeskTutorialQuery,
@@ -59,9 +61,14 @@ export class HelpdeskController {
   @Get("domains")
   @ApiOperation({ operationId: "getHelpdeskDomains" })
   @Validate({
+    request: [
+      { type: "query", name: "language", schema: helpdeskDomainsQuerySchema.properties.language },
+    ],
     response: { schema: helpdeskDomainsBaseResponseSchema, name: "HelpdeskDomainsResponse" },
   })
-  async getDomains(): Promise<BaseResponse<HelpdeskDomainsResponse>> {
-    return new BaseResponse(await this.helpdeskService.getDomains());
+  async getDomains(
+    @Query("language") language?: HelpdeskDomainsQuery["language"],
+  ): Promise<BaseResponse<HelpdeskDomainsResponse>> {
+    return new BaseResponse(await this.helpdeskService.getDomains(language ? { language } : {}));
   }
 }

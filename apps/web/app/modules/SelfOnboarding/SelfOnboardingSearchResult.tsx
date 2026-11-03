@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   formatHelpdeskTime,
-  HELPDESK_DOMAIN_LABELS,
+  helpdeskDomainLabel,
   helpdeskTutorialLabel,
 } from "./self-onboarding.helpers";
 
@@ -33,7 +33,7 @@ export function HelpdeskSearchResult({ group, onSelect }: Props) {
         <span className="min-w-0 flex-1">
           <span className="line-clamp-2 body-sm-md text-neutral-950">{title}</span>
           <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500">
-            <span>{t(HELPDESK_DOMAIN_LABELS[tutorial.domain])}</span>
+            <span>{helpdeskDomainLabel(tutorial)}</span>
             <span aria-hidden>·</span>
             <span>{formatHelpdeskTime(tutorial.durationMs / 1000)}</span>
             {isDemo && (

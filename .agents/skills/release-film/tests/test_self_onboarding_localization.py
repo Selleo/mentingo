@@ -512,6 +512,8 @@ class LocalizationTest(unittest.TestCase):
         self.setup.assert_called_once()
         self.assertEqual(core.load(self.root/'run/meta.json')['recordingMode'], 'self-onboarding')
 
+        self.assertEqual([call.args[0]['domainLabel'] for call in self.assemble.call_args_list],
+                         ['Development Paths', 'Ścieżki rozwoju'])
         self.assertEqual(self.render.call_count,2)
         references=[call.args[-1]['id'] for call in self.render.call_args_list]
         self.assertNotEqual(references[0],references[1])
@@ -578,7 +580,7 @@ class LocalizationTest(unittest.TestCase):
         def metadata(domain, code, previous=None, allow_model=True):
             if code == 'pl':
                 raise RuntimeError('Polish model unavailable')
-            return copy.deepcopy(domain), {'language': code}
+            return copy.deepcopy(domain), {'language': code, 'title': domain['title'], 'description': domain['description']}
         self.patch(recording, 'localize_domain', side_effect=metadata)
         result = self.generate()
         self.assertEqual(result['videos'], 1)

@@ -25,9 +25,9 @@ const SHA256 = /^[0-9a-f]{64}$/;
 const COMMIT = /^[0-9a-f]{40}$/;
 const VERSION =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/;
-const DOMAINS = new Set(["development-paths", "course-authoring", "course-learning"]);
 const BUNNY_TUS = "https://video.bunnycdn.com/tusupload";
 const MAX_JSON_BYTES = 8 * 1024 * 1024;
+const MAX_BUNDLE_VIDEOS = 256;
 const MAX_VIDEO_BYTES = 5 * 1024 ** 3;
 const POLL_INTERVAL_MS = 5_000;
 const DEFAULT_DEADLINE_MS = 45 * 60_000;
@@ -170,8 +170,14 @@ function validateMetadata(metadata, manifest, entry) {
     "Invalid tutorial metadata.",
   );
   check(
-    DOMAINS.has(metadata.domain) && metadata.language === entry.language,
+    typeof metadata.domain === "string" &&
+      KEY.test(metadata.domain) &&
+      metadata.language === entry.language,
     "Invalid tutorial domain or language.",
+  );
+  check(
+    metadata.domainLabel === undefined || text(metadata.domainLabel, 200),
+    "Invalid tutorial domain label.",
   );
   let language;
   try {
@@ -277,7 +283,7 @@ export async function readBundle(root) {
   check(
     Array.isArray(manifest.domains) &&
       manifest.domains.length > 0 &&
-      manifest.domains.length <= 100,
+      manifest.domains.length <= MAX_BUNDLE_VIDEOS,
     "Invalid bundle domains.",
   );
   const slots = new Set();

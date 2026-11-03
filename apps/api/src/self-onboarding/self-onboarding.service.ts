@@ -11,6 +11,7 @@ import helpdeskConfig, { HelpdeskConfig } from "src/common/configuration/self-on
 import { SettingsService } from "src/settings/settings.service";
 
 import {
+  helpdeskDomainsQuerySchema,
   helpdeskSearchRequestSchema,
   helpdeskTutorialKeySchema,
   helpdeskTutorialQuerySchema,
@@ -19,6 +20,7 @@ import { HelpdeskClientService } from "./self-onboarding-client.service";
 import { resolveHelpdeskAppVersion } from "./self-onboarding-context";
 
 import type {
+  HelpdeskDomainsQuery,
   HelpdeskDomainsResponse,
   HelpdeskSearchRequest,
   HelpdeskSearchResponse,
@@ -26,6 +28,7 @@ import type {
   HelpdeskTutorialResponse,
 } from "./schemas/self-onboarding.schema";
 
+const domainsQueryValidator = TypeCompiler.Compile(helpdeskDomainsQuerySchema);
 const searchValidator = TypeCompiler.Compile(helpdeskSearchRequestSchema);
 const tutorialKeyValidator = TypeCompiler.Compile(helpdeskTutorialKeySchema);
 const tutorialQueryValidator = TypeCompiler.Compile(helpdeskTutorialQuerySchema);
@@ -68,9 +71,12 @@ export class HelpdeskService {
     });
   }
 
-  getDomains(): Promise<HelpdeskDomainsResponse> {
+  getDomains(query: HelpdeskDomainsQuery = {}): Promise<HelpdeskDomainsResponse> {
     this.requireEnabled();
-    return this.helpdeskClientService.getDomains();
+    if (!domainsQueryValidator.Check(query)) {
+      throw new BadRequestException("helpdesk.errors.invalidRequest");
+    }
+    return this.helpdeskClientService.getDomains(query);
   }
 
   private requireEnabled(): void {

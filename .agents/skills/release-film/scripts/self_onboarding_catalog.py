@@ -225,6 +225,61 @@ def load_catalog(path: Path | str) -> Catalog:
     return validate_catalog(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
+
+def validate_app_coverage(catalog: Catalog, public_registry: object, repo: Path) -> dict[str, int]:
+    """Audit source-backed registration, not successful recordings or provider readiness.
+
+    The public area registry is the app routing inventory. Recording contracts remain
+    private here; all areas need explicit flows and a complete short-video partition.
+    Release-film documentation is infrastructure rather than an in-app user feature.
+    """
+    reviewed = validate_catalog(catalog)
+    public = _object(public_registry, "public area registry")
+    areas = public.get("areas")
+    if public.get("schemaVersion") != 1 or not isinstance(areas, list) or not areas:
+        raise ValueError("Unsupported public area registry schema")
+    indexed: dict[str, dict[str, object]] = {}
+    for row in areas:
+        area = _object(row, "public area")
+        key = _text(area.get("key"), "area key")
+        if key in indexed:
+            raise ValueError("Duplicate public area key")
+        indexed[key] = area
+    features = {feature["domain"]: feature for feature in reviewed["domains"]}
+    if features.keys() != indexed.keys():
+        missing = sorted(indexed.keys() - features.keys())
+        unknown = sorted(features.keys() - indexed.keys())
+        raise ValueError(f"App tutorial area mismatch: missing={missing}, unknown={unknown}")
+    covered_specs: set[str] = set()
+    for key, feature in features.items():
+        area = indexed[key]
+        expected_specs = _paths(area.get("specPaths"), "public specPaths", specs=True)
+        if not set(expected_specs) <= set(feature["specPaths"]):
+            raise ValueError(f"App area {key} omits public business specifications")
+        routes = area.get("routes")
+        if not isinstance(routes, list) or not routes:
+            raise ValueError(f"App area {key} has no routes")
+        page_keys = {_text(_object(route, "route").get("pageKey"), "pageKey") for route in routes}
+        for contract in [feature, *feature["flows"]]:
+            for spec in contract["specPaths"]:
+                if not (repo / spec).is_file():
+                    raise ValueError(f"Missing tutorial business specification: {spec}")
+                covered_specs.add(spec)
+            # Legacy watches may intentionally retain removed paths for change detection.
+            # Every contract still needs at least one actual implementation source.
+            if not any(path.is_file() for watch in contract["watchPaths"] for path in repo.glob(watch)):
+                raise ValueError(f"App area {key} has no implementation evidence")
+        if any(not set(flow["pageKeys"]) <= page_keys for flow in feature["flows"]):
+            raise ValueError(f"App area {key} uses an unregistered page key")
+    excluded_specs = {"docs/specs/release-films-business-spec.md"}
+    app_specs = {str(path.relative_to(repo)) for path in (repo / "docs/specs").glob("*-business-spec.md")}
+    unassigned = app_specs - covered_specs - excluded_specs
+    if unassigned:
+        raise ValueError(f"Business specifications need an app tutorial area: {sorted(unassigned)}")
+    return {"areas": len(features), "specs": len(app_specs - excluded_specs),
+            "flows": sum(len(feature["flows"]) for feature in features.values()),
+            "videos": sum(len(feature["videos"]) for feature in features.values())}
+
 def _flow_contract(value: object) -> Flow:
     row = _object(value, "planned flow")
     return _flow({key: item for key, item in row.items() if key not in ("action", "reason", "evidence")})

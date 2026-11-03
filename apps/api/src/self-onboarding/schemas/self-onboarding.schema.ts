@@ -1,10 +1,10 @@
-import { SearchMode, SearchQueryMode, TutorialDomain } from "@mentingo/guide-sdk";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { SearchMode, SearchQueryMode } from "@mentingo/guide-sdk";
+import { SELF_ONBOARDING_KEY_PATTERN, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { baseResponse } from "src/common";
 
-export const helpdeskDomainSchema = Type.Enum(TutorialDomain);
+export const helpdeskDomainSchema = Type.String({ pattern: SELF_ONBOARDING_KEY_PATTERN });
 export const helpdeskTutorialKeySchema = Type.String({
   pattern: "^[a-z0-9][a-z0-9._-]{0,127}$",
 });
@@ -48,6 +48,9 @@ export const helpdeskTutorialResponseSchema = Type.Object(
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     }),
     domain: helpdeskDomainSchema,
+    domainLabel: Type.Optional(
+      Type.Union([Type.String({ minLength: 1, maxLength: 200 }), Type.Null()]),
+    ),
     title: Type.String({ minLength: 1, maxLength: 200 }),
     description: Type.String({ minLength: 1, maxLength: 8_000 }),
     language: Type.String({
@@ -86,8 +89,16 @@ export const helpdeskSearchResponseSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const helpdeskDomainsResponseSchema = Type.Array(helpdeskDomainSchema, {
-  maxItems: Object.values(TutorialDomain).length,
+export const helpdeskDomainsQuerySchema = Type.Object(
+  { language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)) },
+  { additionalProperties: false },
+);
+export const helpdeskDomainDescriptorSchema = Type.Object(
+  { key: helpdeskDomainSchema, label: Type.String({ minLength: 1, maxLength: 200 }) },
+  { additionalProperties: false },
+);
+export const helpdeskDomainsResponseSchema = Type.Array(helpdeskDomainDescriptorSchema, {
+  maxItems: 1_000,
   uniqueItems: true,
 });
 export const helpdeskSearchBaseResponseSchema = baseResponse(helpdeskSearchResponseSchema);
@@ -99,3 +110,5 @@ export type HelpdeskTutorialQuery = Static<typeof helpdeskTutorialQuerySchema>;
 export type HelpdeskSearchResponse = Static<typeof helpdeskSearchResponseSchema>;
 export type HelpdeskTutorialResponse = Static<typeof helpdeskTutorialResponseSchema>;
 export type HelpdeskDomainsResponse = Static<typeof helpdeskDomainsResponseSchema>;
+
+export type HelpdeskDomainsQuery = Static<typeof helpdeskDomainsQuerySchema>;

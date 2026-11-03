@@ -740,3 +740,25 @@ test("grouped videos account for every required flow and reject cross-video dupl
   f.write();
   await assert.rejects(readBundle(f.root), /duplicated across video groups/);
 });
+
+test("accepts app-wide and future domain keys without an SDK or publisher enum", async (t) => {
+  const f = fixture(t);
+  for (const domain of [
+    "news",
+    "knowledge-base-articles",
+    "users",
+    "reports",
+    "automations",
+    "future-feature.v2",
+  ]) {
+    f.metadata.domain = domain;
+    f.metadata.domainLabel = "A readable feature label";
+    f.write();
+    assert.equal((await readBundle(f.root)).entries[0].metadata.domain, domain);
+  }
+  for (const domain of ["", "News", "../users", "users/private-id", "x".repeat(129)]) {
+    f.metadata.domain = domain;
+    f.write();
+    await assert.rejects(readBundle(f.root), /Invalid tutorial domain/);
+  }
+});

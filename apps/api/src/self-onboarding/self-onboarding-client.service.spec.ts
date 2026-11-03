@@ -1,10 +1,4 @@
-import {
-  createGuideClient,
-  GuideApiError,
-  SearchMode,
-  SearchQueryMode,
-  TutorialDomain,
-} from "@mentingo/guide-sdk";
+import { createGuideClient, GuideApiError, SearchMode, SearchQueryMode } from "@mentingo/guide-sdk";
 import { NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { CanceledError } from "axios";
 
@@ -16,7 +10,7 @@ const VIDEO_ID = "94ae6718-a5f9-4c5a-9c16-7e84fde8ad38";
 const tutorial: PublicTutorial = {
   key: "edit-course",
   revisionId: "a4b78126-80de-4edb-8900-cf513d419ed7",
-  domain: TutorialDomain.CourseAuthoring,
+  domain: "course-authoring",
   title: "Edit a course",
   description: "Course editing guide",
   language: "en",
@@ -83,7 +77,7 @@ describe("Helpdesk generated SDK adapter", () => {
         ],
       },
       tutorial,
-      Object.values(TutorialDomain),
+      [{ key: "course-authoring", label: "Course authoring" }],
     ]);
     const result = await service.search({
       query: "edit",
@@ -98,7 +92,8 @@ describe("Helpdesk generated SDK adapter", () => {
       appVersion: "4.20.1",
       features: "news",
     });
-    await service.getDomains();
+    await service.getDomains({ language: "pl" });
+    expect(requests[2].params).toEqual({ language: "pl" });
     expect(requests.map(({ url, method }) => [url, method])).toEqual([
       ["/api/v1/search", "post"],
       ["/api/v1/tutorials/edit-course", "get"],
@@ -218,15 +213,28 @@ describe("Helpdesk generated SDK adapter", () => {
     }
   });
 
-  it("rejects unknown or duplicate domains", async () => {
+  it("rejects malformed or duplicate domain descriptors", async () => {
     for (const response of [
-      ["private-domain"],
-      [TutorialDomain.CourseAuthoring, TutorialDomain.CourseAuthoring],
+      [{ key: "INVALID/key", label: "Invalid" }],
+      [
+        { key: "news", label: "News" },
+        { key: "news", label: "Aktualności" },
+      ],
     ]) {
       await expect(adapterFixture([response]).service.getDomains()).rejects.toBeInstanceOf(
         ServiceUnavailableException,
       );
     }
+  });
+
+  it("accepts future domain keys and localized tutorial labels without a client update", async () => {
+    const domains = [{ key: "future-plugin.area", label: "Nowy moduł" }];
+    const extended = { ...tutorial, domain: "future-plugin.area", domainLabel: "Nowy moduł" };
+    const { service } = adapterFixture([domains, extended]);
+    await expect(service.getDomains({ language: "pl" })).resolves.toEqual(domains);
+    await expect(
+      service.getTutorial("edit-course", { language: "pl", appVersion: "4.20.1" }),
+    ).resolves.toEqual(extended);
   });
 
   it("maps safe retry information and hides upstream messages, IDs, and raw bodies", async () => {

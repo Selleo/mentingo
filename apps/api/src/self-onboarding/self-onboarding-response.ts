@@ -72,6 +72,7 @@ export function readHelpdeskTutorial(data: unknown): HelpdeskTutorialResponse {
     key: data.key,
     revisionId: data.revisionId,
     domain: data.domain,
+    ...(data.domainLabel !== undefined ? { domainLabel: data.domainLabel } : {}),
     title: data.title,
     description: data.description,
     language: data.language,
@@ -122,5 +123,10 @@ export function readHelpdeskSearch(data: unknown): HelpdeskSearchResponse {
 
 export function readHelpdeskDomains(data: unknown): HelpdeskDomainsResponse {
   if (!domainsValidator.Check(data)) invalidResponse();
-  return [...data];
+  const keys = new Set<string>();
+  return data.map(({ key, label }) => {
+    if (keys.has(key)) invalidResponse();
+    keys.add(key);
+    return { key, label };
+  });
 }

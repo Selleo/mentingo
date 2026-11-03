@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useHelpdeskSearch } from "~/api/queries/self-onboarding/useSelfOnboardingSearch";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { HELPDESK_DOMAIN_LABELS, helpdeskTutorialLabel } from "./self-onboarding.helpers";
+import { helpdeskDomainLabel, helpdeskTutorialLabel } from "./self-onboarding.helpers";
 
 import type { HelpdeskSelection } from "./self-onboarding.types";
 
@@ -39,7 +39,7 @@ export function HelpdeskRelatedTutorials({
                 {helpdeskTutorialLabel(tutorial).title}
               </span>
               <span className="mt-1 block text-xs text-neutral-500">
-                {t(HELPDESK_DOMAIN_LABELS[tutorial.domain])}
+                {helpdeskDomainLabel(tutorial)}
               </span>
             </span>
             <ArrowUpRight className="size-4 shrink-0 text-neutral-400" aria-hidden />

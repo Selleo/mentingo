@@ -9,6 +9,7 @@ import {
 import { HELPDESK_CLIENT, HELPDESK_TIMEOUT_MS } from "./self-onboarding.types";
 
 import type {
+  HelpdeskDomainsQuery,
   HelpdeskDomainsResponse,
   HelpdeskSearchResponse,
   HelpdeskTutorialResponse,
@@ -36,9 +37,9 @@ export class HelpdeskClientService {
     );
   }
 
-  getDomains(): Promise<HelpdeskDomainsResponse> {
+  getDomains(query: HelpdeskDomainsQuery = {}): Promise<HelpdeskDomainsResponse> {
     return this.run(async (client) =>
-      readHelpdeskDomains(await client.tutorials.domains(this.requestOptions())),
+      readHelpdeskDomains(await client.tutorials.domains(query, this.requestOptions())),
     );
   }
 

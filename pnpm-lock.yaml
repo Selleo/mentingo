@@ -104,8 +104,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0
       '@mentingo/guide-sdk':
-        specifier: file:../../vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz
-        version: file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz
+        specifier: file:../../vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz
+        version: file:vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz
       '@mentingo/luma-sdk':
         specifier: 0.4.0
         version: 0.4.0
@@ -4797,9 +4797,9 @@ packages:
     resolution: {integrity: sha512-E4ONXeomg7QojFSdyempCqtRkzGgX10moG/pHfGXODn6h/Lq5CSNKKbJcFbvM8jtEbt5IUV/yZQGrXPDICJLYA==}
     engines: {node: '>=22.15.0'}
 
-  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz':
-    resolution: {integrity: sha512-nZJi/YiQVs42yNq5BAP90oHPPxYh/thxKafQCPyOn+IQESyqd+WYBcCEKyxAH5dY4g6f5j/61vSFfuXrVx2G4g==, tarball: file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz}
-    version: 0.1.0
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz':
+    resolution: {integrity: sha512-M2m45gWiXxeeUwmWCZzfuYlHb/M4KilbH2T/8xs5swJeXnynOm36R3i9bMNdLYj0HfFeRScD96hUd6oWW3T2RQ==, tarball: file:vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz}
+    version: 0.2.0
     engines: {node: '>=22.15.0'}
 
   '@mentingo/luma-sdk@0.4.0':
@@ -23713,7 +23713,7 @@ snapshots:
 
   '@mentingo/content-marketplace-sdk@0.1.0': {}
 
-  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.1.0-44e0c96594a1.tgz':
+  '@mentingo/guide-sdk@file:vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz':
     dependencies:
       axios: 1.21.0(debug@4.4.3)
     transitivePeerDependencies:
@@ -23722,7 +23722,7 @@ snapshots:
 
   '@mentingo/luma-sdk@0.4.0':
     dependencies:
-      axios: 1.20.0(debug@4.4.3)
+      axios: 1.20.0
       socket.io-client: 4.8.3
     transitivePeerDependencies:
       - bufferutil
@@ -31530,7 +31530,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.20.0(debug@4.4.3):
+  axios@1.20.0:
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6
@@ -35232,7 +35232,7 @@ snapshots:
       '@types/debug': 4.1.12
       '@types/node': 18.19.127
       '@types/tough-cookie': 4.0.5
-      axios: 1.20.0(debug@4.4.3)
+      axios: 1.21.0(debug@4.4.3)
       camelcase: 6.3.0
       debug: 4.4.3(supports-color@8.1.1)
       dotenv: 16.4.5
@@ -35242,7 +35242,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.20.0(debug@4.4.3))
+      retry-axios: 2.6.0(axios@1.21.0(debug@4.4.3))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -40059,9 +40059,9 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.20.0(debug@4.4.3)):
+  retry-axios@2.6.0(axios@1.21.0(debug@4.4.3)):
     dependencies:
-      axios: 1.20.0(debug@4.4.3)
+      axios: 1.21.0(debug@4.4.3)
 
   retry@0.12.0: {}
 

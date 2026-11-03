@@ -8965,7 +8965,8 @@ export interface HelpdeskSearchRequest {
   mode?: "keyword" | "hybrid";
   /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
   pageKey?: string;
-  domain?: "development-paths" | "course-authoring" | "course-learning";
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  domain?: string;
   /**
    * @min 1
    * @max 10
@@ -8983,7 +8984,9 @@ export interface HelpdeskSearchResponse {
         key: string;
         /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
         revisionId: string;
-        domain: "development-paths" | "course-authoring" | "course-learning";
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        domain: string;
+        domainLabel?: string | null;
         /**
          * @minLength 1
          * @maxLength 200
@@ -9053,7 +9056,9 @@ export interface HelpdeskTutorialResponse {
     key: string;
     /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
     revisionId: string;
-    domain: "development-paths" | "course-authoring" | "course-learning";
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    domain: string;
+    domainLabel?: string | null;
     /**
      * @minLength 1
      * @maxLength 200
@@ -9108,7 +9113,15 @@ export interface HelpdeskTutorialResponse {
 }
 
 export interface HelpdeskDomainsResponse {
-  data: ("development-paths" | "course-authoring" | "course-learning")[];
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    label: string;
+  }[];
 }
 
 export interface ListEmailTemplateEventsResponse {
@@ -41846,10 +41859,16 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetHelpdeskDomains
      * @request GET:/api/helpdesk/domains
      */
-    getHelpdeskDomains: (params: RequestParams = {}) =>
+    getHelpdeskDomains: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<HelpdeskDomainsResponse, any>({
         path: `/api/helpdesk/domains`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

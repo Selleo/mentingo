@@ -111,6 +111,21 @@ describe("HelpdeskService compatibility and privacy", () => {
     expect(client.search).not.toHaveBeenCalled();
   });
 
+  it("accepts any validated area key and forwards localized domain discovery", async () => {
+    await service().search({ query: "", language: "pl", domain: "future-plugin.area" });
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ domain: "future-plugin.area" }),
+    );
+    await service().getDomains({ language: "pl" });
+    expect(client.getDomains).toHaveBeenCalledWith({ language: "pl" });
+    expect(() =>
+      service().getDomains({ language: "xx" } as unknown as Parameters<HelpdeskService["getDomains"]>[0]),
+    ).toThrow(BadRequestException);
+    await expect(
+      service().search({ query: "", language: "en", domain: "INVALID/key" }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it("rejects invalid detail keys/languages and supplied compatibility overrides", async () => {
     await expect(service().getTutorial("../private", { language: "en" })).rejects.toBeInstanceOf(
       BadRequestException,

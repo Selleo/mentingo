@@ -693,7 +693,8 @@ def assemble(domain, code, flow_states, cache, out, commit, version, workflow_id
     core.sh([ffmpeg, '-v', 'error', '-y', '-ss', str(min(3, duration / 2)), '-i', str(video),
              '-frames:v', '1', '-update', '1', str(out / 'poster.jpg')])
     core.save(out / 'timeline.json', {'durationMs': math.floor(duration * 1000), 'chapters': chapters})
-    metadata = {'domain': domain['domain'], 'language': code, 'title': domain['title'],
+    metadata = {'domain': domain['domain'], 'domainLabel': domain.get('domainLabel', domain['title']),
+                'language': code, 'title': domain['title'],
                 'description': domain['description'], 'keywords': [chapter['title'] for chapter in chapters],
                 'pageKeys': sorted({v for f in domain['flows'] for v in f.get('pageKeys', [])}),
                 'audiences': sorted({v for f in domain['flows'] for v in f.get('audiences', [])}),

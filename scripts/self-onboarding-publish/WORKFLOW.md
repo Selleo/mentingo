@@ -145,12 +145,9 @@ not public GitHub artifacts. Bunny library/OpenAI keys remain solely in Helpdesk
 ## Selection, recording and assembly
 
 The reviewed registry is
-`.agents/skills/release-film/projects/mentingo-self-onboarding.json`. Its initial coverage
-is 20 development-path flows, 24 authoring flows, 15 learning flows 11 knowledge-base article flows and 11 news flows. Business
+`.agents/skills/release-film/projects/mentingo-self-onboarding.json`. Its app-wide coverage is audited against the shared area registry, application routes and business specifications. The coverage inventory is documented in `docs/specs/self-onboarding-app-coverage.md`. Business
 specifications define scope; target-version implementation and deterministic test
-helpers must establish the real flow. Existing fixture gaps or unavailable external
-features fail a required flow; they are never replaced with fake API responses or
-quietly omitted from the video.
+helpers must establish the real flow. Fixture gaps or unavailable external features are recorded as explicit failed flows while other videos continue. They are never replaced with fake API responses or quietly omitted.
 
 Changed module/spec/shared-navigation paths select candidates for semantic review.
 The planner compares each flow with its last checked commit, including full relevant
@@ -206,9 +203,14 @@ flow IDs. Individual capture failures remain explicit partial output, never an u
 to discard other groups. Publication completion clears flags per video while preserving feature-level semantic
 baselines and portable capture caches.
 
-The current pinned Guide SDK/publisher supports the original development-paths, course-authoring and
-course-learning domains. Articles/News recording tests do not establish production publication support; align
-the service contract, SDK and publisher allowlist before enabling their production publishing.
+The service, pinned Guide SDK and publisher accept stable app-area keys matching
+`^[a-z0-9][a-z0-9._-]{0,127}$`. Core maps pages through the shared area registry; private
+recording contracts map each area to business specifications and short video groups.
+Revision metadata carries a localized `domainLabel`. Public domain discovery derives
+keys and labels from finalized, published tutorials, with requested-language and English
+fallbacks. Adding an area no longer requires a Rust enum change. Apply the forward
+SQLx migration before deploying the upgraded service. A bundle is limited to 256
+video/language entries. Registration does not prove successful recording or publication.
 
 ## Publication and recovery
 

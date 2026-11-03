@@ -46,6 +46,12 @@ def analyze(args):
     """Persist a complete decision report, including uncertainty that blocks recording."""
     state = load_state(args.cache)
     catalog = self_onboarding_catalog.load_catalog(args.catalog)
+    if Path(args.catalog).resolve() == CATALOG.resolve():
+        # Audit the control checkout: older target versions may predate this registry.
+        control_repo = core.SKILL.parents[2]
+        self_onboarding_catalog.validate_app_coverage(catalog,
+            core.load(control_repo / 'packages/shared/src/constants/self-onboarding-areas.json'),
+            control_repo)
     spec = getattr(args, 'business_spec', '')
     test_mode = getattr(args, 'test_mode', False)
     target_ref = getattr(args, 'target_ref', None)
@@ -61,6 +67,9 @@ def analyze(args):
     codes = [code.strip() for code in args.languages.split(',')]
     if not codes or len(set(codes)) != len(codes) or any(code not in ('en', 'pl') for code in codes):
         raise ValueError('Recorder languages must be unique en,pl values')
+    chosen = [d for d in catalog['domains'] if not selected or d['key'] in selected or d['domain'] in selected]
+    if sum(len(d['videos']) for d in chosen) * len(codes) > 256:
+        raise ValueError('Select fewer features; a publication bundle supports at most 256 videos')
     reports = []
     try:
         report = self_onboarding_catalog.plan(Path(args.repo), args.target, visual_baseline(state), catalog,
@@ -149,6 +158,7 @@ def domain_identity(domain, flows):
                      for flow in domain['flows']]
     data['segments'] = [flows[f['id']]['segment'] for f in domain['flows']]
     data['voiceProfiles'] = [flows[f['id']].get('voiceProfile') for f in domain['flows']]
+    data['domainLabel'] = domain.get('domainLabel', domain['title'])
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
 
 
@@ -211,6 +221,8 @@ def generate(args):
             self_onboarding_catalog.validate_video_groups(domain)
     if test_flow:
         reports = scope_test_flow(reports, test_flow)
+    if sum(len(d['videos']) for p in reports for d in p['domains']) > 256:
+        raise ValueError('Select fewer features; a publication bundle supports at most 256 videos')
     commits = {p['commit'] for p in reports}
     if len(commits) != 1 or not self_onboarding_catalog.COMMIT.fullmatch(next(iter(commits))) or len({p['version'] for p in reports}) != 1:
         raise ValueError('All languages must record the same version')
@@ -368,7 +380,17 @@ def generate(args):
                 current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
                 previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
-                localized_metadata = previous.get('localizedMetadata')
+                try:
+                    _, localized_metadata = recording.localize_domain(
+                        domain, code, previous.get('localizedMetadata'), allow_model=quota_reason is None)
+                except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                    for flow in domain['flows']:
+                        if flow['id'] not in failed_captures:
+                            skip_flow(domain, flow, 'localization', error, code)
+                    for video in domain['videos']:
+                        video_coverage.append({'key':video['key'], 'featureKey':domain_key, 'language':code,
+                            'requiredFlowIds':video['flowIds'], 'status':'failed', 'skippedFlowIds':video['flowIds']})
+                    continue
                 flows = {}
                 for flow in domain['flows']:
                     if flow['id'] in failed_captures:
@@ -439,7 +461,8 @@ def generate(args):
                         video_coverage.append(dict(coverage, status='failed'))
                         continue
                     video_domain = dict(domain, key=video['key'], title=video['title'],
-                                        description=video['description'], flows=available)
+                                        description=video['description'], flows=available,
+                                        domainLabel=localized_metadata['title'])
                     identity = domain_identity(video_domain, flows)
                     old_video = video_states.get(video['key'], {})
                     # Compatibility for a one-video legacy checkpoint whose public key is unchanged.

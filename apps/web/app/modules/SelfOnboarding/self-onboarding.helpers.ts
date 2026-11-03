@@ -1,3 +1,5 @@
+import { getSelfOnboardingAreaTitle, getSelfOnboardingPageKey } from "@repo/shared";
+
 import type { HelpdeskSearchHit, HelpdeskTutorial } from "./self-onboarding.types";
 
 const DEMO_TUTORIAL_KEY_PREFIX = "demo.";
@@ -63,21 +65,18 @@ export function groupHelpdeskResults(hits: HelpdeskSearchHit[]): HelpdeskResultG
   return [...groups.values()];
 }
 
-export const HELPDESK_DOMAIN_LABELS = {
-  "course-authoring": "helpdesk.domains.authoring",
-  "development-paths": "helpdesk.domains.paths",
-  "course-learning": "helpdesk.domains.learning",
-} as const;
+/** Prefer the localized catalog label; older revisions use the central registry or a readable key. */
+export function helpdeskDomainLabel(tutorial: { domain: string; domainLabel?: string | null }) {
+  if (tutorial.domainLabel?.trim()) return tutorial.domainLabel;
+  return getSelfOnboardingAreaTitle(tutorial.domain);
+}
 
 export const formatHelpdeskTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 /** Send a symbolic product area, never a route containing tenant/resource identifiers. */
 export function getHelpdeskPageKey(pathname: string): string | undefined {
-  if (/^\/(?:admin\/)?development-paths(?:\/|$)/.test(pathname)) return "development-paths";
-  if (/^\/admin\/(?:beta-courses|courses)(?:\/|$)/.test(pathname)) return "admin.course.curriculum";
-  if (/^\/course(?:\/|$)/.test(pathname) || pathname === "/courses") return "student.course";
-  return undefined;
+  return getSelfOnboardingPageKey(pathname);
 }
 
 export function helpdeskTutorialPath(key: string, chapterId?: string) {
