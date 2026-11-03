@@ -62,8 +62,25 @@ def aws(arguments, missing_ok=False, namespace='s3api'):
                       'AuthorizationHeaderMalformed', 'NoSuchBucket', 'NoSuchKey', '403', '404',
                       'InvalidRequest', 'RequestTimeTooSkewed', 'InvalidToken', 'ExpiredToken',
                       'PermanentRedirect', 'NotImplemented', 'XAmzContentSHA256Mismatch'}
-        code = match.group(1) if match and match.group(1) in safe_codes else 'CLI configuration or connection error'
-        raise RuntimeError(f'Private build storage request failed ({code}); check access and endpoint configuration')
+        reasons = {
+            'Unable to locate credentials': 'credentials unavailable',
+            'Partial credentials': 'incomplete credentials',
+            'SSL validation failed': 'TLS certificate validation failed',
+            'Could not connect to the endpoint URL': 'endpoint connection failed',
+            'Connect timeout': 'endpoint connection timed out',
+            'Read timeout': 'endpoint read timed out',
+            'Invalid endpoint': 'invalid endpoint configuration',
+            'Invalid region': 'invalid region configuration',
+            'Invalid header': 'invalid credential header formatting',
+            'Invalid bucket name': 'invalid bucket configuration',
+            'Unknown options': 'unsupported CLI options',
+            'Parameter validation failed': 'invalid CLI parameters',
+            'Error parsing parameter': 'invalid CLI parameter encoding',
+        }
+        reason = next((label for fragment, label in reasons.items() if fragment in result.stderr),
+                      'CLI configuration or connection error')
+        code = match.group(1) if match and match.group(1) in safe_codes else reason
+        raise RuntimeError(f'Private build storage request failed ({code}, exit {result.returncode}); check access and endpoint configuration')
     return True
 
 
