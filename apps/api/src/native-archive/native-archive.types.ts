@@ -230,5 +230,10 @@ export type NativeArchiveBuiltZip = { stream: Readable; cleanup: () => Promise<v
 export type NativeArchiveFileHash = { sha256: string; byteLength: number };
 export type NativeArchiveRecord = Record<string, unknown>;
 
-export type NativeArchiveExportResult = { key: string; kind: NativeArchiveKind; rootId: UUIDType };
+export type NativeArchiveExportResult = {
+  key: string;
+  kind: NativeArchiveKind;
+  rootId: UUIDType;
+  filename?: string;
+};
 export type NativeArchiveJobResult = NativeArchiveImportResult | NativeArchiveExportResult;

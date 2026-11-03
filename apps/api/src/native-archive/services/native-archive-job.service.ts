@@ -39,6 +39,7 @@ import {
   NATIVE_ARCHIVE_KIND,
   NATIVE_ARCHIVE_LIMITS,
 } from "../native-archive.constants";
+import { buildNativeArchiveFilename } from "../utils/native-archive-filename.utils";
 
 import { NativeArchiveImportService } from "./native-archive-import.service";
 import { toPublicArchiveFailureCode } from "./native-archive-job-error.utils";
@@ -217,7 +218,9 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       jobId,
       state: await job.getState(),
       result: result
-        ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== "key"))
+        ? Object.fromEntries(
+            Object.entries(result).filter(([key]) => key !== "key" && key !== "filename"),
+          )
         : null,
       failedReason: toPublicArchiveFailureCode(job.failedReason),
     };
@@ -226,7 +229,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   async getArchiveDownloadStream(
     jobId: string,
     actor: CurrentUserType,
-  ): Promise<FileStreamPayload> {
+  ): Promise<FileStreamPayload & { filename?: string }> {
     const job = await this.getAuthorizedArchiveJob(jobId, actor);
 
     if ((await job.getState()) !== NATIVE_ARCHIVE_JOB_STATE.COMPLETED)
@@ -238,7 +241,12 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       throw new NotFoundException("nativeArchive.error.notReady");
     }
 
-    return this.s3Service.getFileStream(key);
+    const file = await this.s3Service.getFileStream(key);
+    const filename =
+      isRecord(job.returnvalue) && typeof job.returnvalue.filename === "string"
+        ? job.returnvalue.filename
+        : undefined;
+    return { ...file, filename };
   }
 
   private async getAuthorizedArchiveJob(
@@ -417,24 +425,32 @@ export class NativeArchiveJobService implements OnModuleDestroy {
         ? NATIVE_ARCHIVE_KIND.COURSE
         : NATIVE_ARCHIVE_KIND.LEARNING_PATH;
 
-    const archive = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
-      const snapshot =
-        kind === NATIVE_ARCHIVE_KIND.COURSE
-          ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(
-              rootId,
-              actor,
-              exportAccess,
-            )
-          : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(rootId, actor);
+    const { archive, filename } = await this.tenantDbRunnerService.runWithTenant(
+      actor.tenantId,
+      async () => {
+        const snapshot =
+          kind === NATIVE_ARCHIVE_KIND.COURSE
+            ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(
+                rootId,
+                actor,
+                exportAccess,
+              )
+            : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(
+                rootId,
+                actor,
+              );
 
-      return buildNativeArchive({ kind, rootId, ...snapshot });
-    });
+        const input = { kind, rootId, ...snapshot };
+        const filename = buildNativeArchiveFilename(input);
+        return { archive: await buildNativeArchive(input), filename };
+      },
+    );
     const exportKey = getNativeArchiveExportKey(actor.tenantId, randomUUID());
 
     try {
       await this.s3Service.uploadStreamMultipart(archive.stream, exportKey, "application/zip");
 
-      return { key: exportKey, kind, rootId };
+      return { key: exportKey, kind, rootId, filename };
     } finally {
       await archive.cleanup();
     }

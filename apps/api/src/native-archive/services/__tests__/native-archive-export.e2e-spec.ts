@@ -112,7 +112,7 @@ describe("NativeArchive export (e2e)", () => {
     const downloaded = await downloadNativeArchive(app, jobId, cookie);
     expect(downloaded.headers["content-type"]).toContain("application/zip");
     expect(downloaded.headers["content-disposition"]).toContain(
-      'attachment; filename="mentingo-package.zip"',
+      'attachment; filename="archive-course-in-english.zip"',
     );
     const downloadedArchive = await readNativeArchiveBytes(downloaded.body as Buffer);
     expect(downloadedArchive.manifest).toEqual(
