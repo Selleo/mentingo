@@ -38,6 +38,10 @@ For Articles, use `business_spec=docs/specs/knowledge-base-articles-business-spe
 The registered feature includes section management, authoring, localization, preview, cover images and public access.
 For News, use `business_spec=docs/specs/news-hub-business-spec.md` to generate the complete news feature video.
 
+For a single-flow smoke test, add `-f test_flow=create-news-draft` with the News spec and
+`test_mode=true`. The full registry and plan are validated first; only the selected flow is filmed.
+The resulting manifest is explicitly marked test-only and the publisher rejects it.
+
 Add `-F dry_run=true` for coverage/impact analysis without recording. The source is
 the selected workflow branch commit by default; `target_ref` can select another Git
 ref (for a remote branch use `origin/<branch>`) or exact commit. No version tag is

@@ -49,9 +49,15 @@ def analyze(args):
     spec = getattr(args, 'business_spec', '')
     test_mode = getattr(args, 'test_mode', False)
     target_ref = getattr(args, 'target_ref', None)
+    test_flow = getattr(args, 'test_flow', '')
+    if test_flow and not test_mode:
+        raise ValueError('A single-flow selection is supported only in isolated test mode')
     if target_ref and not test_mode:
         raise ValueError('An untagged source ref is supported only in isolated test mode')
     selected = select_spec_domains(catalog, spec, args.domains.split(',') if args.domains else None)
+    if test_flow:
+        selected_features = [d for d in catalog['domains'] if not selected or d['key'] in selected or d['domain'] in selected]
+        scope_test_flow([{'domains':selected_features}], test_flow)
     codes = [code.strip() for code in args.languages.split(',')]
     if not codes or len(set(codes)) != len(codes) or any(code not in ('en', 'pl') for code in codes):
         raise ValueError('Recorder languages must be unique en,pl values')
@@ -75,9 +81,27 @@ def analyze(args):
     finally:
         if reports:
             core.save(args.out, {'schemaVersion': 1, 'force': args.force, 'testMode': test_mode,
-                                'businessSpec': spec, 'reports': reports})
+                                'businessSpec': spec, 'testFlow': test_flow, 'reports': reports})
+    selected_report = scope_test_flow(reports, test_flow)[0] if test_flow else report
     return {'ok': True, 'plan': args.out,
-            'record': sum(f['action'] == 'record' for d in report['domains'] for f in d['flows'])}
+            'record': sum(f['action'] == 'record' for d in selected_report['domains'] for f in d['flows'])}
+
+
+def scope_test_flow(reports, flow_id):
+    """Narrow only a test run after validating the complete trusted feature registry and plan."""
+    if not self_onboarding_catalog.KEY.fullmatch(flow_id):
+        raise ValueError('Invalid test flow ID')
+    result = copy.deepcopy(reports)
+    for report in result:
+        matches = [(domain, flow) for domain in report['domains'] for flow in domain['flows'] if flow['id'] == flow_id]
+        if len(matches) != 1:
+            raise ValueError('Test flow must identify exactly one registered flow in the selected features')
+        domain, flow = matches[0]
+        video = next(video for video in domain['videos'] if flow_id in video['flowIds'])
+        domain['flows'] = [flow]
+        domain['videos'] = [dict(video, flowIds=[flow_id])]
+        report['domains'] = [domain]
+    return result
 
 
 def flow_contract(flow):
@@ -159,6 +183,9 @@ def generate(args):
     if not plan or plan.get('schemaVersion') != 1:
         raise ValueError('A validated generation plan is required')
     reports = plan['reports']
+    test_flow = plan.get('testFlow', '')
+    if test_flow and not plan.get('testMode'):
+        raise ValueError('A single-flow selection cannot be used in production')
     # A malformed/uncertain plan must not be usable as a way around the analysis gate.
     if not reports or any(p.get('ok') is not True or not p.get('domains') for p in reports) or any(
             d.get('coverage', {}).get('decision') != 'complete' or not d.get('flows') or
@@ -182,6 +209,8 @@ def generate(args):
                 repo=Path(args.repo) if discovered else None, commit=report['commit'] if discovered else None,
                 shared_watch_paths=registry.get('sharedWatchPaths', []))
             self_onboarding_catalog.validate_video_groups(domain)
+    if test_flow:
+        reports = scope_test_flow(reports, test_flow)
     commits = {p['commit'] for p in reports}
     if len(commits) != 1 or not self_onboarding_catalog.COMMIT.fullmatch(next(iter(commits))) or len({p['version'] for p in reports}) != 1:
         raise ValueError('All languages must record the same version')
@@ -453,7 +482,7 @@ def generate(args):
         out.mkdir(parents=True, exist_ok=True)
         manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
                     'workflowRunId': args.workflow_run_id, 'domains': entries, 'complete': not skipped, 'skippedFlows': skipped,
-                    'textModelQuota': quota_reason, 'videoCoverage': video_coverage}
+                    'textModelQuota': quota_reason, 'videoCoverage': video_coverage, 'testFlow': test_flow}
         core.save(out / 'manifest.json', manifest)
         if entries:
             state['pendingRegistry'] = registry_identity
@@ -516,6 +545,7 @@ def main():
     p.add_argument('--force', action='store_true')
     p.add_argument('--business-spec', default='')
     p.add_argument('--test-mode', action='store_true')
+    p.add_argument('--test-flow', default='', help='Isolated test only: record exactly one registered flow')
     p.add_argument('--target-ref', help='Exact branch/commit to demonstrate in isolated test mode')
     p = commands.add_parser('generate')
     p.add_argument('--repo', default=str(core.REPO))

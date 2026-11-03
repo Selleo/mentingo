@@ -51,6 +51,10 @@ on:
         description: Isolated branch test; fresh state and downloadable artifacts, no publishing or build-store access
         default: false
         type: boolean
+      test_flow:
+        description: Isolated test only; exact registered flow ID to record (empty records all selected flows)
+        default: ''
+        type: string
       target_ref:
         description: Source branch or commit to record in test mode (default this workflow commit)
         default: ''
@@ -181,6 +185,7 @@ jobs:
           TEST_MODE: ${{ inputs.test_mode }}
           TARGET_REF: ${{ steps.source.outputs.record_ref }}
           BUSINESS_SPEC: ${{ inputs.business_spec }}
+          TEST_FLOW: ${{ inputs.test_flow }}
           DOMAINS: ${{ inputs.domains }}
           LANGUAGES: ${{ inputs.languages }}
           FORCE: ${{ inputs.force }}
@@ -190,6 +195,7 @@ jobs:
             --domains "$DOMAINS" --languages "$LANGUAGES")
           if [ "$FORCE" = true ]; then args+=(--force); fi
           if [ -n "$BUSINESS_SPEC" ]; then args+=(--business-spec "$BUSINESS_SPEC"); fi
+          if [ -n "$TEST_FLOW" ]; then args+=(--test-flow "$TEST_FLOW"); fi
           if [ "$TEST_MODE" = true ]; then args+=(--test-mode --target-ref "$TARGET_REF"); fi
           python3 "$S/self_onboarding.py" "${args[@]}"
       - name: Install the pinned ElevenLabs realtime transport

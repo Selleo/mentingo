@@ -302,6 +302,31 @@ class LocalizationTest(unittest.TestCase):
             self.generate(codes=('en',), name='regrouped')
         self.camera.assert_not_called()
 
+    def test_single_flow_smoke_test_is_explicitly_scoped_and_cannot_publish(self):
+        self.split_feature()
+        domain = copy.deepcopy(self.domain)
+        domain['coverage'] = {'decision':'complete'}
+        domain['flows'] = [dict(flow, action='record') for flow in domain['flows']]
+        plan = self.root/'single-plan.json'
+        core.save(plan, {'schemaVersion':1, 'testMode':True, 'testFlow':'flow-0',
+            'reports':[{'ok':True,'domains':[domain],'commit':self.commit,'version':'1.2.0','language':'en'}]})
+        args = SimpleNamespace(plan=str(plan), run=str(self.root/'run'), cache=str(self.cache),
+            out=str(self.cache/'bundles/smoke'), repo=str(self.root), repository='Selleo/mentingo', workflow_run_id='123')
+        result = self_onboarding.generate(args)
+        self.camera.assert_called_once(); self.render.assert_called_once()
+        manifest = core.load(result['manifest'])
+        self.assertTrue(manifest['testMode'])
+        self.assertEqual(manifest['testFlow'], 'flow-0')
+        self.assertEqual(manifest['domains'][0]['requiredFlowIds'], ['flow-0'])
+        self.assertEqual(len(manifest['videoCoverage']), 1)
+        data = core.load(plan); data['testMode'] = False; core.save(plan,data)
+        with self.assertRaisesRegex(ValueError,'cannot be used in production'):
+            self_onboarding.generate(args)
+
+    def test_unknown_smoke_flow_is_rejected(self):
+        with self.assertRaisesRegex(ValueError,'exactly one registered flow'):
+            self_onboarding.scope_test_flow([{'domains':[self.domain]}], 'unknown-flow')
+
     def split_feature(self):
         self.domain['flows'] = [dict(copy.deepcopy(self.flow), id=f'flow-{index}') for index in range(6)]
         self.domain['videos'] = [{'key':f'development-paths.video-{index}', 'title':f'Video {index}',
