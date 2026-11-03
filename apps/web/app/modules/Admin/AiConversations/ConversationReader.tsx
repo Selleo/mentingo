@@ -81,12 +81,12 @@ export function ConversationReader({
               )}
               {thread && (
                 <div className="flex items-center gap-2">
+                  <h2 className="body-lg-md line-clamp-2 min-w-0 text-neutral-950">
+                    {thread.title || t("aiConversations.untitled")}
+                  </h2>
                   {isExternalConversationSource(thread.source) && (
                     <ExternalConversationSource source={thread.source} />
                   )}
-                  <h2 className="body-lg-md line-clamp-2 text-neutral-950">
-                    {thread.title || t("aiConversations.untitled")}
-                  </h2>
                 </div>
               )}
               {thread && !isExternalConversationSource(thread.source) && (
