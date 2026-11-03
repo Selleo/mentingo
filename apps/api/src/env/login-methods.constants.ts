@@ -1,5 +1,7 @@
 import { LOGIN_METHODS } from "@repo/shared";
 
+import { ENTRA_ID_SECRETS } from "src/env/env.config";
+
 import type { LoginMethod } from "@repo/shared";
 import type { LoginMethodEnvKeys } from "src/env/login-methods.types";
 
@@ -20,6 +22,12 @@ export const LOGIN_METHOD_ENV_KEYS = {
     enabledFlag: "SLACK_OAUTH_ENABLED",
     publicEnabledFlag: "VITE_SLACK_OAUTH_ENABLED",
     credentials: ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"],
+    enabledByDefault: false,
+  },
+  [LOGIN_METHODS.ENTRA_ID]: {
+    enabledFlag: "ENTRA_ID_OAUTH_ENABLED",
+    publicEnabledFlag: "VITE_ENTRA_ID_OAUTH_ENABLED",
+    credentials: Object.values(ENTRA_ID_SECRETS),
     enabledByDefault: false,
   },
   [LOGIN_METHODS.MAGIC_LINK]: {

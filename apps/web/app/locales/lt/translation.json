@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Prisijungimo nuoroda",
     "password": "Slaptažodis",
     "description": "Pasirinkite, kaip jūsų organizacijos žmonės gali prisijungti.",
@@ -34,6 +35,8 @@
       "disabled": "Šis prisijungimo būdas išjungtas.",
       "missingConfiguration": "Pirmiausia pridėkite tiekėjo prisijungimo duomenis aplinkos nustatymuose.",
       "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "invalidDirectoryId": "Įveskite katalogo (nuomininko) ID iš Entra programos registracijos GUID formatu.",
+      "untrustedDirectory": "Ši paskyra nepriklauso jūsų organizacijos Entra ID katalogui.",
       "save": "Nepavyko išsaugoti prisijungimo būdų.",
       "load": "Nepavyko įkelti prisijungimo būdų."
     }
@@ -778,6 +781,7 @@
     "continueWithGoogle": "Tęskite su Google",
     "continueWithMicrosoft": "Tęskite su Microsoft",
     "continueWithSlack": "Tęskite su Slack",
+    "continueWithEntraId": "Tęskite su Entra ID",
     "enterFullscreen": "Visas ekranas",
     "exitFullscreen": "Išeikite per visą ekraną",
     "refreshPage": "Atnaujinti puslapį",
@@ -2573,6 +2577,10 @@
         "title": "Prisijungimas per Slack",
         "description": "Leiskite naudotojams prisijungti su Slack paskyra."
       },
+      "entraIdSignIn": {
+        "title": "Prisijungimas per Entra ID",
+        "description": "Leiskite naudotojams prisijungti tik paskyromis iš jūsų organizacijos Microsoft Entra ID katalogo."
+      },
       "microsoftCalendar": {
         "title": "Microsoft kalendorius",
         "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
@@ -2664,6 +2672,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra ID katalogo (nuomininko) ID",
+        "description": "Katalogo (nuomininko) ID GUID iš programos registracijos apžvalgos. Prisijungti gali tik šio katalogo paskyros."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra ID kliento ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra ID kliento slaptažodis"
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"

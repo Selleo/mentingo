@@ -14,6 +14,7 @@ const schema = Type.Object({
   MICROSOFT: Type.String(),
   SLACK: Type.String(),
   GOOGLE: Type.String(),
+  ENTRA_ID: Type.String(),
 });
 
 type CallbackUrlConfigSchema = Static<typeof schema>;
@@ -25,6 +26,7 @@ export default registerAs("callback_url", (): CallbackUrlConfigSchema => {
     MICROSOFT: getCallbackUrl("microsoft"),
     SLACK: getCallbackUrl("slack"),
     GOOGLE: getCallbackUrl("google"),
+    ENTRA_ID: getCallbackUrl("entra-id"),
   };
 
   return validateCallbackUrlConfig(values);

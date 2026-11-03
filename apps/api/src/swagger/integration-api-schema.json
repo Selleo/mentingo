@@ -2636,6 +2636,18 @@
                 "type": "string"
               },
               {
+                "const": "ENTRA_ID_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_DIRECTORY_ID",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -2765,6 +2777,18 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_DIRECTORY_ID",
                       "type": "string"
                     },
                     {

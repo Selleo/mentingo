@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Enlace de acceso",
     "password": "Contraseña",
     "description": "Elige cómo pueden iniciar sesión las personas de tu organización.",
@@ -34,6 +35,8 @@
       "disabled": "Este método de acceso está desactivado.",
       "missingConfiguration": "Primero añade las credenciales del proveedor en la configuración del entorno.",
       "lastMethod": "Mantenga al menos un método de acceso utilizable activado.",
+      "invalidDirectoryId": "Introduzca el ID de directorio (inquilino) de su registro de aplicación de Entra como GUID.",
+      "untrustedDirectory": "Esta cuenta no pertenece al directorio de Entra ID de su organización.",
       "save": "No se pudieron guardar los métodos de acceso.",
       "load": "No se pudieron cargar los métodos de acceso."
     }
@@ -781,6 +784,7 @@
     "continueWithGoogle": "Continuar con Google",
     "continueWithMicrosoft": "Continuar con Microsoft",
     "continueWithSlack": "Continuar con Slack",
+    "continueWithEntraId": "Continuar con Entra ID",
     "enterFullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa",
     "refreshPage": "Actualizar página",
@@ -2566,6 +2570,10 @@
         "title": "Inicio de sesión con Slack",
         "description": "Permite que los usuarios inicien sesión con su cuenta de Slack."
       },
+      "entraIdSignIn": {
+        "title": "Inicio de sesión con Entra ID",
+        "description": "Permita que los usuarios inicien sesión solo con cuentas del directorio de Microsoft Entra ID de su organización."
+      },
       "microsoftCalendar": {
         "title": "Calendario de Microsoft",
         "description": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook."
@@ -2657,6 +2665,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secreto del cliente de Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID de directorio (inquilino) de Entra ID",
+        "description": "El GUID del ID de directorio (inquilino) que aparece en la información general del registro de la aplicación. Solo pueden iniciar sesión cuentas de este directorio."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID de cliente de Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Secreto de cliente de Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Clave"

@@ -21,6 +21,7 @@ import { AllowPasswordChangeRequired } from "src/common/decorators/allow-passwor
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { EntraIdOAuthGuard } from "src/common/guards/entra-id-oauth.guard";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
@@ -417,6 +418,41 @@ export class AuthController {
     } catch (e) {
       await this.authService.handleAuthFailed({
         email: slackUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
+      response.redirect(await this.getOAuthErrorRedirectUrl(request, e as Error));
+    }
+  }
+
+  @Public()
+  @Get("entra-id")
+  @UseGuards(EntraIdOAuthGuard)
+  async entraIdAuth() {
+    // Initiates the Entra ID OAuth flow against the tenant's configured directory
+  }
+
+  @Public()
+  @Get("entra-id/callback")
+  @UseGuards(EntraIdOAuthGuard)
+  async entraIdAuthCallback(
+    @Req() request: Request & { user: ProviderLoginUserType },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const entraIdUser = request.user;
+
+    try {
+      const { accessToken, refreshToken, shouldVerifyMFA } =
+        await this.authService.handleProviderLoginCallback(entraIdUser);
+
+      shouldVerifyMFA
+        ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+        : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+      response.redirect(await this.getOAuthRedirectBaseUrl(request));
+    } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: entraIdUser.email,
         method: USER_LOGIN_METHOD.PROVIDER,
         error: (e as Error)?.message,
       });

@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Magic link",
     "password": "Password",
     "description": "Choose how people in your organization can sign in.",
@@ -34,6 +35,8 @@
       "disabled": "This login method is disabled.",
       "missingConfiguration": "Add this provider's credentials in environment settings first.",
       "lastMethod": "Keep at least one usable login method enabled.",
+      "invalidDirectoryId": "Enter the Directory (tenant) ID from your Entra app registration as a GUID.",
+      "untrustedDirectory": "This account doesn't belong to your organization's Entra ID directory.",
       "save": "Unable to save login methods.",
       "load": "Unable to load login methods."
     }
@@ -778,6 +781,7 @@
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft",
     "continueWithSlack": "Continue with Slack",
+    "continueWithEntraId": "Continue with Entra ID",
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
     "refreshPage": "Refresh page",
@@ -2574,6 +2578,10 @@
         "title": "Slack Sign-In",
         "description": "Let users sign in with their Slack account."
       },
+      "entraIdSignIn": {
+        "title": "Entra ID Sign-In",
+        "description": "Let users sign in only with accounts from your organization's Microsoft Entra ID directory."
+      },
       "microsoftCalendar": {
         "title": "Microsoft Calendar",
         "description": "Sync live training sessions to Microsoft Outlook calendars."
@@ -2665,6 +2673,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra ID Directory (tenant) ID",
+        "description": "The Directory (tenant) ID GUID from your app registration's overview. Only accounts from this directory can sign in."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra ID Client ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra ID Client Secret"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"

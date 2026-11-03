@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Přihlašovací odkaz",
     "password": "Heslo",
     "description": "Zvolte, jak se mohou lidé ve vaší organizaci přihlašovat.",
@@ -34,6 +35,8 @@
       "disabled": "Tento způsob přihlášení je vypnutý.",
       "missingConfiguration": "Nejprve přidejte přihlašovací údaje poskytovatele v nastavení prostředí.",
       "lastMethod": "Ponechte zapnutý alespoň jeden použitelný způsob přihlášení.",
+      "invalidDirectoryId": "Zadejte ID adresáře (tenanta) z registrace aplikace Entra ve formátu GUID.",
+      "untrustedDirectory": "Tento účet nepatří do adresáře Entra ID vaší organizace.",
       "save": "Způsoby přihlášení se nepodařilo uložit.",
       "load": "Způsoby přihlášení se nepodařilo načíst."
     }
@@ -784,6 +787,7 @@
     "continueWithGoogle": "Pokračujte s Googlem",
     "continueWithMicrosoft": "Pokračujte s Microsoftem",
     "continueWithSlack": "Pokračujte se Slackem",
+    "continueWithEntraId": "Pokračujte s Entra ID",
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku",
     "refreshPage": "Obnovit stránku",
@@ -2579,6 +2583,10 @@
         "title": "Přihlášení přes Slack",
         "description": "Umožněte uživatelům přihlásit se účtem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Přihlášení přes Entra ID",
+        "description": "Umožněte uživatelům přihlásit se pouze účty z adresáře Microsoft Entra ID vaší organizace."
+      },
       "microsoftCalendar": {
         "title": "Kalendář Microsoft",
         "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
@@ -2670,6 +2678,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Tajné tajemství klienta Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID adresáře (tenanta) Entra ID",
+        "description": "GUID ID adresáře (tenanta) z přehledu registrace aplikace. Přihlásit se mohou pouze účty z tohoto adresáře."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API klíč"
