@@ -76,6 +76,15 @@ describe("NativeArchiveJobService", () => {
       action === NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE ? COURSE_ID : PATH_ID,
       ACTOR,
     );
+    await expect(service.getArchiveJobStatus("export-job", ACTOR)).resolves.toEqual({
+      jobId: "export-job",
+      state: "completed",
+      result: {
+        kind: action === NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE ? "course" : "learning-path",
+        rootId: action === NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE ? COURSE_ID : PATH_ID,
+      },
+      failedReason: null,
+    });
     const file = await service.getArchiveDownloadStream("export-job", ACTOR);
     const app = express();
     app.get("/download", (_req, response) => streamNativeArchiveDownload(file, response));

@@ -218,7 +218,9 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       jobId,
       state: await job.getState(),
       result: result
-        ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== "key"))
+        ? Object.fromEntries(
+            Object.entries(result).filter(([key]) => key !== "key" && key !== "filename"),
+          )
         : null,
       failedReason: toPublicArchiveFailureCode(job.failedReason),
     };
