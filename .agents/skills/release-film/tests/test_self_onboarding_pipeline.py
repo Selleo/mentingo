@@ -263,6 +263,13 @@ class PipelineTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'CLI configuration or connection error') as caught:
                 store.pull('s3://bucket/self-onboarding', self.cache)
         self.assertNotIn(private, str(caught.exception))
+        result.stderr = 'Unexpected CLI failure: short-key https://private.invalid ' + 'A'*32
+        with patch.dict(store.os.environ, {'AWS_SECRET_ACCESS_KEY': 'short-key'}), patch.object(store.subprocess, 'run', return_value=result):
+            with self.assertRaises(RuntimeError) as caught:
+                store.pull('s3://bucket/self-onboarding', self.cache)
+        self.assertNotIn('short-key', str(caught.exception))
+        self.assertNotIn('private.invalid', str(caught.exception))
+        self.assertNotIn('A'*32, str(caught.exception))
 
     @unittest.skipUnless(shutil.which('ffmpeg'), 'FFmpeg required')
     def test_real_assembly_keeps_ids_and_recalculates_offsets_without_rerecording(self):

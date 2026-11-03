@@ -79,6 +79,15 @@ def aws(arguments, missing_ok=False, namespace='s3api'):
         }
         reason = next((label for fragment, label in reasons.items() if fragment in result.stderr),
                       'CLI configuration or connection error')
+        if reason == 'CLI configuration or connection error' and not match:
+            # Only the CLI's first diagnostic line, never its response/debug body.
+            summary = result.stderr.strip().splitlines()[0] if result.stderr.strip() else 'no diagnostic on stderr'
+            for name, value in sorted(environment.items(), key=lambda item: len(item[1]), reverse=True):
+                if value and any(part in name.upper() for part in ('SECRET', 'TOKEN', 'PASSWORD', 'ACCESS_KEY', 'API_KEY')):
+                    summary = summary.replace(value, '[redacted]')
+            summary = re.sub(r'https?://\S+', '[endpoint]', summary)
+            summary = re.sub(r'[A-Za-z0-9/+_.=-]{16,}', '[redacted]', summary)
+            reason += ': ' + summary[:240]
         code = match.group(1) if match and match.group(1) in safe_codes else reason
         raise RuntimeError(f'Private build storage request failed ({code}, exit {result.returncode}); check access and endpoint configuration')
     return True
