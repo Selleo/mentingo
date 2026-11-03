@@ -7,7 +7,7 @@ import {
 import { FEATURES, FEATURE_SETTINGS_KEYS } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 
-import helpdeskConfig, { HelpdeskConfig } from "src/common/configuration/self-onboarding";
+import helpdeskConfig from "src/common/configuration/self-onboarding";
 import { SettingsService } from "src/settings/settings.service";
 
 import {
@@ -18,6 +18,7 @@ import {
 } from "./schemas/self-onboarding.schema";
 import { HelpdeskClientService } from "./self-onboarding-client.service";
 import { resolveHelpdeskAppVersion } from "./self-onboarding-context";
+import { HelpdeskConfig } from "./self-onboarding.types";
 
 import type {
   HelpdeskDomainsQuery,

@@ -1,13 +1,8 @@
 import { registerAs } from "@nestjs/config";
 
-export interface HelpdeskConfig {
-  enabled: boolean;
-  baseURL: string;
-  appVersion?: string;
-}
-
-/** Read-only catalog configuration. Core never accepts a publishing credential. */
-export function readHelpdeskConfig(env: NodeJS.ProcessEnv = process.env): HelpdeskConfig {
+/** Read-only catalog settings registered through Nest's ConfigModule. */
+export default registerAs("helpdesk", () => {
+  const env = process.env;
   const enabled = env.HELPDESK_ENABLED?.trim().toLowerCase() ?? "true";
   if (enabled !== "true" && enabled !== "false") {
     throw new Error("HELPDESK_ENABLED must be true or false");
@@ -39,6 +34,4 @@ export function readHelpdeskConfig(env: NodeJS.ProcessEnv = process.env): Helpde
     baseURL: url.origin,
     ...(appVersion ? { appVersion } : {}),
   };
-}
-
-export default registerAs("helpdesk", () => readHelpdeskConfig());
+});

@@ -6,7 +6,7 @@ import { resolveHelpdeskAppVersion } from "./self-onboarding-context";
 import { HelpdeskService } from "./self-onboarding.service";
 
 import type { HelpdeskClientService } from "./self-onboarding-client.service";
-import type { HelpdeskConfig } from "src/common/configuration/self-onboarding";
+import type { HelpdeskConfig } from "./self-onboarding.types";
 import type { SettingsService } from "src/settings/settings.service";
 
 jest.mock("src/settings/settings.service", () => ({ SettingsService: class SettingsService {} }));

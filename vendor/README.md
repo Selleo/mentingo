@@ -17,7 +17,10 @@ To replace it after changing the authoritative Rust OpenAPI contract or SDK:
    `mentingo-guide-sdk.json`, the API's relative dependency and `pnpm-lock.yaml` with
    `pnpm install --filter api`. Remove only the superseded SDK artifact.
 4. Run the Core Helpdesk/MCP tests. For Core relay contract changes, run
-   `pnpm --filter api helpdesk:generate-schema` and `pnpm --filter web generate:client`.
+   the API through its normal development bootstrap (`pnpm --filter api dev`) with
+   the required local services configured. `src/main.ts` exports the complete Swagger
+   document from the real Nest application. Then run `pnpm generate:client`. Do not
+   generate or merge feature-specific Swagger fragments.
 
 Use the repository's Node/pnpm versions. No publishing key is required by Core's
 read-only SDK provider. The trusted video-generation workflow will use the SDK's

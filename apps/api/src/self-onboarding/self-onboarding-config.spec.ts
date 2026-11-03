@@ -1,6 +1,8 @@
 import { createGuideClient } from "@mentingo/guide-sdk";
+import { ConfigModule } from "@nestjs/config";
+import { Test } from "@nestjs/testing";
 
-import { readHelpdeskConfig } from "src/common/configuration/self-onboarding";
+import helpdeskConfig from "src/common/configuration/self-onboarding";
 
 import { createHelpdeskSdkClient } from "./self-onboarding-client.provider";
 
@@ -10,6 +12,32 @@ jest.mock("@mentingo/guide-sdk", () => ({
 }));
 
 describe("Helpdesk read-only configuration", () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  function readHelpdeskConfig(env: NodeJS.ProcessEnv = {}) {
+    process.env = { ...env };
+    return helpdeskConfig();
+  }
+
+  it("registers its namespace through the Nest ConfigModule", async () => {
+    process.env = { HELPDESK_API_URL: "http://127.0.0.1:5300" };
+    const module = await Test.createTestingModule({
+      imports: [ConfigModule.forFeature(helpdeskConfig)],
+    }).compile();
+    try {
+      expect(module.get(helpdeskConfig.KEY)).toEqual({
+        enabled: true,
+        baseURL: "http://127.0.0.1:5300",
+      });
+    } finally {
+      await module.close();
+    }
+  });
+
   it("defaults to the public HTTPS service with explicit opt-out", () => {
     expect(readHelpdeskConfig({})).toEqual({ enabled: true, baseURL: "https://help.mentingo.com" });
     expect(readHelpdeskConfig({ HELPDESK_ENABLED: "false" }).enabled).toBe(false);
