@@ -184,7 +184,7 @@ describe("Integration native archive export (e2e)", () => {
     });
     expect(downloaded.headers).toMatchObject({
       "content-type": expect.stringContaining("application/zip"),
-      "content-disposition": 'attachment; filename="mentingo-package.zip"',
+      "content-disposition": 'attachment; filename="marketplace-algebra.zip"',
     });
     expect(archive.manifest).toMatchObject({
       format: "mentingo-package",
