@@ -16,6 +16,23 @@ from pathlib import Path
 from manage import OWNER, ProjectClient, digest, validate_manifest
 
 
+def otlp_headers(client):
+    """Select observations-first ingestion required for experiment synthesis."""
+    return {
+        "Authorization": client.authorization,
+        "x-langfuse-ingestion-version": "4",
+    }
+
+
+def assert_new_trace(client, trace_id):
+    existing = client.request(
+        "GET",
+        "/api/public/v2/observations?traceId=" + trace_id + "&limit=1&fields=core",
+    )
+    if existing.get("data"):
+        raise ValueError("This report/run trace already exists; choose a new run name")
+
+
 def normalize_report(report, manifest):
     lookup = {}
     for feature in validate_manifest(manifest):
@@ -140,7 +157,7 @@ def record_report(client, setup, manifest, report, run_name):
         def __init__(self):
             self.delegate = OTLPSpanExporter(
                 endpoint=client.origin + "/api/public/otel/v1/traces",
-                headers={"Authorization": client.authorization},
+                headers=otlp_headers(client),
                 timeout=60,
             )
             self.results = []
@@ -198,6 +215,7 @@ def record_report(client, setup, manifest, report, run_name):
                 + report_hash,
             ).hex
             ids.item = stable_item
+            assert_new_trace(client, format(ids.generate_trace_id(), "032x"))
             attributes = {
                 "langfuse.environment": "regression-experiment",
                 "langfuse.trace.name": "regression/" + row["featureId"],

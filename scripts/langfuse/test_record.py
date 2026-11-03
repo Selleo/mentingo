@@ -2,11 +2,29 @@
 
 import unittest
 
-from record import normalize_report
+from record import assert_new_trace, normalize_report, otlp_headers
 from test_manage import manifest
 
 
 class RecordTests(unittest.TestCase):
+    def test_existing_trace_is_not_exported_again(self):
+        class Client:
+            def request(self, method, path):
+                self.last = (method, path)
+                return {"data": [{"id": "already-recorded"}]}
+
+        client = Client()
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            assert_new_trace(client, "abc")
+        self.assertEqual(client.last[0], "GET")
+
+    def test_export_selects_v4_so_experiments_are_synthesized(self):
+        client = type("Client", (), {"authorization": "Basic synthetic"})()
+        self.assertEqual(
+            otlp_headers(client),
+            {"Authorization": "Basic synthetic", "x-langfuse-ingestion-version": "4"},
+        )
+
     def test_actual_output_is_retained_without_copying_the_reference(self):
         report = {
             "results": [

@@ -29,4 +29,6 @@ The apply command verifies project identity, updates stable dataset item IDs, an
 python3 scripts/langfuse/record.py --help
 ```
 
+The exporter explicitly selects Langfuse v4 ingestion so experiment attributes synthesize experiment runs. It refuses a trace already visible for the same report/run; concurrent runs and delayed indexing are not an atomic deduplication guarantee. Use a unique run name for each intended capture.
+
 Captured-response spans reflect ingestion time, not original inference latency. Reports preserve prompt provenance, actual input hashes, execution level, and any mismatch with subsequently edited fixtures. No prompt-update webhook, schedule, production deployment, or real Slack message was created by this setup.
