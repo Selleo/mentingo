@@ -29,7 +29,6 @@ export interface SemanticSearchReconcileOptions {
 /** The embedding space a stored or query vector belongs to; vectors only compare within one. */
 export interface SemanticSearchEmbeddingIdentity {
   model: string;
-  dimensions: number;
 }
 
 export interface SemanticSearchEmbeddings {

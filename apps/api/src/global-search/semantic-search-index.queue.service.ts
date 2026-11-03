@@ -4,10 +4,7 @@ import { Injectable } from "@nestjs/common";
 
 import { QUEUE_NAMES, QueueService } from "src/queue";
 
-import {
-  getPreferredSemanticSearchEmbeddingModel,
-  getSemanticSearchEmbeddingDimensions,
-} from "./semantic-search-index.config";
+import { getPreferredSemanticSearchEmbeddingModel } from "./semantic-search-index.config";
 import {
   SEMANTIC_SEARCH_BATCH_SIZE,
   SEMANTIC_SEARCH_INDEX_VERSION,
@@ -38,7 +35,6 @@ export class SemanticSearchIndexQueueService {
     const sources = await this.repository.findPending(limit, options.offset ?? 0);
     await this.repository.cleanupDeleted();
     const preferredModel = getPreferredSemanticSearchEmbeddingModel() ?? "";
-    const dimensions = getSemanticSearchEmbeddingDimensions();
     const queue = this.queue.getQueue(QUEUE_NAMES.SEMANTIC_SEARCH_INDEX);
     const counts = await queue.getJobCounts("waiting", "active", "delayed");
     let capacity = Math.max(0, 500 - counts.waiting - counts.active - counts.delayed);
@@ -57,7 +53,6 @@ export class SemanticSearchIndexQueueService {
             source.sourceRevision,
             SEMANTIC_SEARCH_INDEX_VERSION,
             preferredModel,
-            dimensions,
           ]),
         )
         .digest("hex");

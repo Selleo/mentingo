@@ -29,7 +29,7 @@ describe("global search modes", () => {
   };
   const queryEmbedding = {
     embedding: [1],
-    identity: { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 },
+    identity: { model: "Qwen/Qwen3-Embedding-4B" },
   };
   const embeddings = { embedQuery: jest.fn().mockResolvedValue(queryEmbedding) };
   const service = new GlobalSearchService(

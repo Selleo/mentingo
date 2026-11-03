@@ -1604,13 +1604,6 @@
       "when": 1793278990402,
       "tag": "0228_external_conversation_transcripts",
       "breakpoints": true
-    },
-    {
-      "idx": 229,
-      "version": "7",
-      "when": 1793699831854,
-      "tag": "0229_add_search_chunks_embedding_dimensions",
-      "breakpoints": true
     }
   ]
 }

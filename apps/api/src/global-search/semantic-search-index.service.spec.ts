@@ -16,7 +16,7 @@ const source = {
   resourceContentType: null,
 };
 
-const qwen = { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 };
+const qwen = { model: "Qwen/Qwen3-Embedding-4B" };
 
 describe("semantic search indexing", () => {
   function setup() {
@@ -94,9 +94,7 @@ describe("semantic search indexing", () => {
     embedding.embedTexts.mockImplementation(async (texts: string[]) => ({
       embeddings: texts.map(() => Array(1536).fill(0.2)),
       identity:
-        embedding.embedTexts.mock.calls.length === 1
-          ? qwen
-          : { model: "text-embedding-3-small", dimensions: 1536 },
+        embedding.embedTexts.mock.calls.length === 1 ? qwen : { model: "text-embedding-3-small" },
     }));
 
     await expect(service.process({ ...source, tenantId: "tenant" } as never)).rejects.toThrow(

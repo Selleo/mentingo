@@ -16,7 +16,7 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
     roleSlugs: [],
   };
   const embedding = [1, ...Array<number>(1535).fill(0)];
-  const openAiSpace = { model: "text-embedding-3-small", dimensions: 1536 };
+  const openAiSpace = { model: "text-embedding-3-small" };
   const match = (id: string, candidateCount: number) => ({
     entityId: id,
     languages: ["en"],
@@ -217,13 +217,12 @@ describe("HybridSearchRepository MCP learner lesson eligibility", () => {
         [],
         false,
         false,
-        { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 },
+        { model: "Qwen/Qwen3-Embedding-4B" },
       ),
     );
     expect(query.sql).toContain("c.embedding_model =");
-    expect(query.sql).toContain("c.embedding_dimensions =");
     expect(query.sql).toContain("c.index_version =");
-    expect(query.params).toEqual(expect.arrayContaining(["Qwen/Qwen3-Embedding-4B", 1536]));
+    expect(query.params).toEqual(expect.arrayContaining(["Qwen/Qwen3-Embedding-4B"]));
   });
 
   it("refuses a query vector from another embedding size", async () => {

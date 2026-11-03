@@ -8,7 +8,6 @@ const originalEnv = { ...process.env };
 const resetEnv = () => {
   process.env = { ...originalEnv };
   delete process.env.SEMANTIC_SEARCH_EMBEDDING_MODEL;
-  delete process.env.SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS;
 };
 
 describe("semantic search embeddings", () => {
@@ -51,7 +50,7 @@ describe("semantic search embeddings", () => {
 
     await expect(service.embedTexts(["policy"])).resolves.toEqual({
       embeddings: [Array(1536).fill(0.1)],
-      identity: { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 },
+      identity: { model: "Qwen/Qwen3-Embedding-4B" },
     });
   });
 
@@ -80,21 +79,11 @@ describe("semantic search embedding configuration", () => {
   });
 
   it("keeps the existing OpenAI space by default", () => {
-    expect(getDefaultSemanticSearchEmbeddingIdentity()).toEqual({
-      model: SEMANTIC_SEARCH_MODEL,
-      dimensions: 1536,
-    });
+    expect(getDefaultSemanticSearchEmbeddingIdentity()).toEqual({ model: SEMANTIC_SEARCH_MODEL });
   });
 
   it("uses the preferred model when one is configured", () => {
     process.env.SEMANTIC_SEARCH_EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-4B";
     expect(getDefaultSemanticSearchEmbeddingIdentity().model).toBe("Qwen/Qwen3-Embedding-4B");
-  });
-
-  it.each(["2560", "1024", "abc"])("rejects unsupported dimension %s", (dimensions) => {
-    process.env.SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS = dimensions;
-    expect(() => getDefaultSemanticSearchEmbeddingIdentity()).toThrow(
-      "SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS must be one of: 1536",
-    );
   });
 });

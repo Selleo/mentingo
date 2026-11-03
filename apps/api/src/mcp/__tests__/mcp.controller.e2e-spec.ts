@@ -605,7 +605,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
         .mockResolvedValue({
           embedding: [1, ...Array<number>(1535).fill(0)],
-          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+          identity: { model: "text-embedding-3-small" },
         });
       try {
         for (const reader of await readers()) {
@@ -854,7 +854,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
         .mockResolvedValue({
           embedding: [1, ...Array<number>(1535).fill(0)],
-          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+          identity: { model: "text-embedding-3-small" },
         });
       try {
         const tools = (await rpc(reader, "tools/list")).result.tools.map(
@@ -942,7 +942,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
         .mockResolvedValue({
           embedding: [1, ...Array<number>(1535).fill(0)],
-          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+          identity: { model: "text-embedding-3-small" },
         });
       try {
         for (const reader of await readers()) {

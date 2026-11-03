@@ -49,10 +49,9 @@ Every AI feature calls Luma first when Luma runs that capability on a Custom pro
 
 The Core assistant and global search use Luma's OpenAI-compatible endpoint (`/api/public/v1/ai/openai`), which runs the AI Mentor chat and embeddings Custom profiles. The chat model must support tool calling.
 
-| Variable                               | Purpose                                                                                                                                                                                                                                     |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SEMANTIC_SEARCH_EMBEDDING_MODEL`      | Optional. The embedding model global search should converge on, normally the Luma embeddings profile model (for example `Qwen/Qwen3-Embedding-4B`). Chunks from any other model are re-embedded. Unset: chunks from any model stay current. |
-| `SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS` | Vector size requested from Luma. Only `1536` is supported, because stored vectors use a fixed `vector(1536)` column. MRL models such as Qwen3-Embedding must be asked for 1536.                                                             |
+| Variable                          | Purpose                                                                                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SEMANTIC_SEARCH_EMBEDDING_MODEL` | Optional. The embedding model global search should converge on, normally the Luma embeddings profile model (for example `Qwen/Qwen3-Embedding-4B`). Chunks from any other model are re-embedded. Unset: chunks from any model stay current. |
 
 How global search avoids mixing embedding models:
 

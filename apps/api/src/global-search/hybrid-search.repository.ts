@@ -18,6 +18,7 @@ import { DB } from "src/storage/db/db.providers";
 import { SEARCH_DOCUMENT_TYPES, SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { getDefaultSemanticSearchEmbeddingIdentity } from "./semantic-search-index.config";
 import {
+  SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS,
   SEMANTIC_SEARCH_INDEX_VERSION,
   SEMANTIC_SEARCH_ENTITY_LIMIT,
   SEMANTIC_SEARCH_INITIAL_CANDIDATES,
@@ -85,7 +86,7 @@ export class HybridSearchRepository {
     learnerLessons = false,
     identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
   ): Promise<MatchRow[]> {
-    if (embedding.length !== identity.dimensions) {
+    if (embedding.length !== SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS) {
       throw new Error("Query embedding does not match the configured semantic search space");
     }
     return this.db.transaction(async (trx) => {
@@ -186,10 +187,9 @@ export class HybridSearchRepository {
     `;
   }
 
-  /** Only chunks from the query vector's own model, size and index version are compared. */
+  /** Only chunks from the query vector's own model and index version are compared. */
   private currentEmbeddingSpace(identity: SemanticSearchEmbeddingIdentity): SQL {
     return sql`c.embedding_model = ${identity.model}
-      AND c.embedding_dimensions = ${identity.dimensions}
       AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}`;
   }
 

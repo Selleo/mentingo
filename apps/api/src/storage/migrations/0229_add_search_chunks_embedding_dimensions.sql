@@ -1,1 +1,0 @@
-ALTER TABLE "search_chunks" ADD COLUMN "embedding_dimensions" integer DEFAULT 1536 NOT NULL;

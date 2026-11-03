@@ -12,7 +12,6 @@ import { resourceEntity, resources, searchChunks, searchDocuments } from "src/st
 import {
   getDefaultSemanticSearchEmbeddingIdentity,
   getPreferredSemanticSearchEmbeddingModel,
-  getSemanticSearchEmbeddingDimensions,
 } from "./semantic-search-index.config";
 import { SEMANTIC_SEARCH_INDEX_VERSION } from "./semantic-search-index.constants";
 import { semanticSearchResourceSources } from "./semantic-search-resource.utils";
@@ -123,11 +122,9 @@ export class SemanticSearchIndexRepository {
   }
 
   /** Chunks count as current in any model unless a preferred model asks the index to converge. */
-  private currentEmbeddingSpace(chunks: { model: SQL; dimensions: SQL }) {
+  private currentEmbeddingSpace(model: SQL) {
     const preferredModel = getPreferredSemanticSearchEmbeddingModel();
-    return sql`${chunks.dimensions} = ${getSemanticSearchEmbeddingDimensions()} AND ${
-      preferredModel ? sql`${chunks.model} = ${preferredModel}` : sql`true`
-    }`;
+    return preferredModel ? sql`${model} = ${preferredModel}` : sql`true`;
   }
 
   private pendingSourcesQuery() {
@@ -145,10 +142,7 @@ export class SemanticSearchIndexRepository {
         AND ${searchChunks.sourceRevision} = CASE WHEN ${
           resources.id
         } IS NULL THEN '' ELSE ${semanticSearchResourceRevision()} END
-        AND ${this.currentEmbeddingSpace({
-          model: sql`${searchChunks.embeddingModel}`,
-          dimensions: sql`${searchChunks.embeddingDimensions}`,
-        })}
+        AND ${this.currentEmbeddingSpace(sql`${searchChunks.embeddingModel}`)}
         AND ${searchChunks.indexVersion} = ${SEMANTIC_SEARCH_INDEX_VERSION}
     )`,
       ),
@@ -181,10 +175,7 @@ export class SemanticSearchIndexRepository {
           AND c.entity_id = r.entity_id AND c.document_type = r.document_type
           AND c.language = r.language AND c.source_hash = md5(r.content)
           AND c.source_revision = md5(coalesce(file.reference, '') || ':' || file.updated_at::text || ':' || file.content_type)
-          AND ${this.currentEmbeddingSpace({
-            model: sql`c.embedding_model`,
-            dimensions: sql`c.embedding_dimensions`,
-          })}
+          AND ${this.currentEmbeddingSpace(sql`c.embedding_model`)}
           AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
     )
     SELECT count(*)::integer AS pending FROM (
@@ -299,7 +290,6 @@ export class SemanticSearchIndexRepository {
           sourceHash: source.sourceHash,
           sourceRevision: source.sourceRevision,
           embeddingModel: identity.model,
-          embeddingDimensions: identity.dimensions,
           indexVersion: SEMANTIC_SEARCH_INDEX_VERSION,
           metadata: sql`${JSON.stringify(source.metadata)}::text::jsonb`,
         })),

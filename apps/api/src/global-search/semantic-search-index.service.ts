@@ -53,11 +53,7 @@ export class SemanticSearchIndexService {
     for (let offset = 0; offset < chunks.length; offset += 32) {
       const batch = await this.embeddings.embedTexts(chunks.slice(offset, offset + 32));
       // A mid-source fallback would store one source in two spaces; the job retries instead.
-      if (
-        identity &&
-        (identity.model !== batch.identity.model ||
-          identity.dimensions !== batch.identity.dimensions)
-      ) {
+      if (identity && identity.model !== batch.identity.model) {
         throw new Error("Semantic search embedding model changed while indexing a source");
       }
       identity = batch.identity;
