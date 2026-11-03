@@ -1,20 +1,27 @@
 import { Module } from "@nestjs/common";
 
-import { AiModule } from "src/ai/ai.module";
+import { RagRepository } from "src/ai/repositories/rag.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
+import { RagService } from "src/ai/services/rag.service";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
-import { CourseModule } from "src/courses/course.module";
+import { MasterCourseRepository } from "src/courses/master-course/master-course.repository";
 import { FileModule } from "src/file/files.module";
+import { LocalizationModule } from "src/localization/localization.module";
+import { isQueueSandboxProcess } from "src/queue/queue.constants";
 import { QueueModule } from "src/queue/queue.module";
 import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { DbModule } from "src/storage/db/db.module";
 
 import { NativeArchiveController } from "./controllers/native-archive.controller";
+import { NativeArchiveWorker } from "./native-archive.worker";
 import { NativeArchiveImportRepository } from "./repositories/native-archive-import.repository";
 import { NativeArchiveSnapshotRepository } from "./repositories/native-archive-snapshot.repository";
 import { NativeArchiveAssetsService } from "./services/native-archive-assets.service";
+import { NativeArchiveExportReuseService } from "./services/native-archive-export-reuse.service";
 import { NativeArchiveImportService } from "./services/native-archive-import.service";
+import { NativeArchiveJobFulfillmentService } from "./services/native-archive-job-fulfillment.service";
 import { NativeArchiveJobService } from "./services/native-archive-job.service";
 import { NativeArchiveLiveTrainingService } from "./services/native-archive-live-training.service";
 import { NativeArchiveSnapshotService } from "./services/native-archive-snapshot.service";
@@ -23,11 +30,10 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
 
 @Module({
   imports: [
-    AiModule,
-    CourseModule,
     CourseTransferModule,
     FileModule,
     BunnyStreamModule,
+    LocalizationModule,
     S3Module,
     SettingsModule,
     QueueModule,
@@ -35,16 +41,23 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
   ],
   controllers: [NativeArchiveController],
   providers: [
+    AiRuntimeService,
+    RagRepository,
+    RagService,
+    MasterCourseRepository,
     NativeArchiveImportRepository,
     NativeArchiveSnapshotRepository,
     NativeArchiveAssetsService,
+    NativeArchiveExportReuseService,
     NativeArchiveImportService,
     NativeArchiveLiveTrainingService,
     NativeArchiveSnapshotService,
     NativeArchiveJobService,
+    NativeArchiveJobFulfillmentService,
     NativeArchiveTusService,
     NativeArchiveValidationService,
+    ...(isQueueSandboxProcess() ? [] : [NativeArchiveWorker]),
   ],
-  exports: [NativeArchiveJobService],
+  exports: [NativeArchiveJobService, NativeArchiveJobFulfillmentService],
 })
 export class NativeArchiveModule {}

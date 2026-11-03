@@ -381,6 +381,7 @@ export function createInMemoryNativeArchiveStorage() {
     listFileKeysByPrefix: jest.fn(async (prefix: string) =>
       [...storedObjects.keys()].filter((key) => key.startsWith(prefix)),
     ),
+    getFileExists: jest.fn(async (key: string) => storedObjects.has(key)),
     copyFile: jest.fn(async (sourceKey: string, targetKey: string, contentType?: string) => {
       const source = storedObjects.get(sourceKey);
       if (!source) throw new Error(`Missing in-memory source object: ${sourceKey}`);

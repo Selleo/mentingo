@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
+import { ConditionalModule, ConfigModule } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
@@ -35,17 +35,8 @@ import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
 import { CategoryModule } from "./category/category.module";
 import { CertificatesModule } from "./certificates/certificates.module";
-import bunnyConfig from "./common/configuration/bunny";
-import callbackUrlConfig from "./common/configuration/callbackUrl";
-import database from "./common/configuration/database";
-import emailConfig from "./common/configuration/email";
-import jwtConfig from "./common/configuration/jwt";
-import livekitConfig from "./common/configuration/livekit";
-import { getOptionalConfigs } from "./common/configuration/optional-config-loader";
-import phishingConfig from "./common/configuration/phishing";
-import redisConfig from "./common/configuration/redis";
-import s3Config from "./common/configuration/s3";
-import stripeConfig from "./common/configuration/stripe";
+import { getAppConfigLoaders } from "./common/configuration/app-config-loaders";
+import { jwtModuleOptions } from "./common/configuration/jwt-module-options";
 import { EmailModule } from "./common/emails/emails.module";
 import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
@@ -100,35 +91,12 @@ import type { RedisClient } from "src/redis";
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [
-        database,
-        jwtConfig,
-        emailConfig,
-        s3Config,
-        stripeConfig,
-        phishingConfig,
-        redisConfig,
-        callbackUrlConfig,
-        bunnyConfig,
-        livekitConfig,
-        ...getOptionalConfigs(),
-      ],
+      load: getAppConfigLoaders(),
       isGlobal: true,
     }),
     DbModule,
     SupportModeModule,
-    JwtModule.registerAsync({
-      useFactory(configService: ConfigService) {
-        return {
-          secret: configService.get<string>("jwt.secret")!,
-          signOptions: {
-            expiresIn: configService.get<string>("jwt.expirationTime"),
-          },
-        };
-      },
-      inject: [ConfigService],
-      global: true,
-    }),
+    JwtModule.registerAsync(jwtModuleOptions),
     MulterModule.register({
       limits: {
         fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos

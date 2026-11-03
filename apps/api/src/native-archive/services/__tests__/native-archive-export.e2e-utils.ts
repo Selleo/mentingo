@@ -1,7 +1,8 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { buffer } from "node:stream/consumers";
 
 import { faker } from "@faker-js/faker";
 import {
@@ -184,6 +185,7 @@ export function createNativeArchiveExportStorage() {
   const archives = new Map<string, Buffer>();
   const sourceAssets = new Map<string, { bytes: Buffer; contentType: string }>();
   const uploadedKeys: string[] = [];
+  const copiedKeys: string[] = [];
   const s3ServiceMock = {
     isConfigured: jest.fn(() => true),
     uploadStreamMultipart: jest.fn(async (stream: Readable, key: string) => {
@@ -206,17 +208,31 @@ export function createNativeArchiveExportStorage() {
       [...sourceAssets.keys()].filter((key) => key.startsWith(prefix)),
     ),
     deleteFile: jest.fn(async () => undefined),
+    getFileExists: jest.fn(async (key: string) => archives.has(key) || sourceAssets.has(key)),
+    copyFile: jest.fn(async (sourceKey: string, targetKey: string) => {
+      const bytes = archives.get(sourceKey);
+      if (!bytes) throw new Error(`Missing test S3 object ${sourceKey}`);
+      archives.set(targetKey, bytes);
+      copiedKeys.push(targetKey);
+    }),
+    getSignedUrl: jest.fn(
+      async (key: string, expiresIn: number, options: { downloadFilename?: string } = {}) =>
+        `https://storage.test/${key}?expires=${expiresIn}&filename=${options.downloadFilename}`,
+    ),
   };
 
   return {
     provider: { provide: S3Service, useValue: s3ServiceMock },
     uploadedKeys,
+    copiedKeys,
+    s3ServiceMock,
     addSourceAsset: (key: string, bytes: Buffer, contentType = "application/octet-stream") =>
       sourceAssets.set(key, { bytes, contentType }),
     clear: () => {
       archives.clear();
       sourceAssets.clear();
       uploadedKeys.length = 0;
+      copiedKeys.length = 0;
     },
     readArchive: async (key: string) => {
       const bytes = archives.get(key);
@@ -236,8 +252,9 @@ export async function readNativeArchiveBytes(bytes: Buffer) {
     try {
       const assetContents = new Map(
         await Promise.all(
-          [...parsed.assetFiles].map(
-            async ([archivePath, assetPath]) => [archivePath, await readFile(assetPath)] as const,
+          parsed.manifest.assets.map(
+            async ({ path: archivePath }) =>
+              [archivePath, await buffer(parsed.openAsset(archivePath))] as const,
           ),
         ),
       );

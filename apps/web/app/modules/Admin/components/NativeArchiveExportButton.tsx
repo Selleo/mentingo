@@ -11,6 +11,8 @@ import {
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/components/ui/use-toast";
 
+import { NativeArchiveJobProgress } from "./NativeArchiveJobProgress";
+
 import type { NativeArchiveExportRequest } from "~/api/mutations/admin/nativeArchive.types";
 
 type NativeArchiveExportButtonProps = NativeArchiveExportRequest;
@@ -69,6 +71,7 @@ export function NativeArchiveExportButton({ kind, id }: NativeArchiveExportButto
         <Download className="size-4" />
         {isWorking ? t("nativeArchive.preparing") : t("nativeArchive.exportButton")}
       </Button>
+      {isWorking && jobId && <NativeArchiveJobProgress progress={status.data?.progress} />}
       {status.data?.state === NATIVE_ARCHIVE_JOB_STATE.FAILED && (
         <p className="text-sm text-red-600">
           {t(`nativeArchive.errors.${status.data.failedReason?.split(".").at(-1)}`, {

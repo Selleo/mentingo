@@ -8,13 +8,20 @@ import type {
   NATIVE_ARCHIVE_IMPORT_MODES,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
+  NATIVE_ARCHIVE_JOB_STAGES,
 } from "./native-archive.constants";
 import type { NativeArchiveLiveTrainingLesson } from "./schemas/native-archive-live-training.schema";
+import type {
+  nativeArchiveDownloadUrlResponseSchema,
+  nativeArchiveJobProgressSchema,
+} from "./schemas/native-archive.schema";
 import type { PERMISSIONS } from "@repo/shared";
+import type { Static } from "@sinclair/typebox";
 import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
+import type { FileStreamPayload } from "src/file/types/file-stream.type";
 import type {
   calendarEvents,
   liveLessons,
@@ -185,7 +192,8 @@ export type NativeArchiveFile = {
 };
 
 export type ParsedNativeArchive = NativeArchiveDocument & {
-  assetFiles: Map<string, string>;
+  openAsset: (assetPath: string) => Readable;
+  extractAsset: (assetPath: string) => Promise<string>;
   cleanup: () => Promise<void>;
 };
 
@@ -194,11 +202,22 @@ export type NativeArchivePermission = (typeof PERMISSIONS)[keyof typeof PERMISSI
 export type NativeArchiveImportArchive = Pick<NativeArchiveJob, "key" | "archiveOrigin">;
 
 export type NativeArchiveJobReceipt = { jobId: string };
+export type NativeArchiveDownloadUrl = Static<typeof nativeArchiveDownloadUrlResponseSchema>;
+export type NativeArchiveJobStage =
+  (typeof NATIVE_ARCHIVE_JOB_STAGES)[keyof typeof NATIVE_ARCHIVE_JOB_STAGES];
+export type NativeArchiveJobProgress = Static<typeof nativeArchiveJobProgressSchema>;
+
+/** Reports how far a job is, as a stage and the share of that stage's work that is done. */
+export type NativeArchiveProgressReporter = {
+  enterStage: (stage: NativeArchiveJobStage) => void;
+  reportStageWork: (stage: NativeArchiveJobStage, completed: number, total: number) => void;
+};
 export type NativeArchiveJobStatus = {
   jobId: string;
   state: string;
   result: Record<string, unknown> | null;
   failedReason: string | null;
+  progress: NativeArchiveJobProgress | null;
 };
 export type NativeArchiveTusSession = {
   uploadId: string;
@@ -226,7 +245,18 @@ export type NativeArchiveBuildInput = {
   learningPath?: Record<string, unknown>;
   files: NativeArchiveFile[];
 };
-export type NativeArchiveBuiltZip = { stream: Readable; cleanup: () => Promise<void> };
+export type NativeArchiveBuiltZip = {
+  stream: Readable;
+  /** The uncompressed size of the package's contents, close to its size since assets are stored. */
+  estimatedByteLength: number;
+  cleanup: () => Promise<void>;
+};
+export type NativeArchiveBuildOptions = {
+  onAssetStaged?: (stagedCount: number, totalCount: number) => void;
+};
+export type NativeArchiveReadOptions = {
+  onAssetVerified?: (verifiedCount: number, totalCount: number) => void;
+};
 export type NativeArchiveFileHash = { sha256: string; byteLength: number };
 export type NativeArchiveRecord = Record<string, unknown>;
 
@@ -234,6 +264,7 @@ export type NativeArchiveExportResult = {
   key: string;
   kind: NativeArchiveKind;
   rootId: UUIDType;
-  filename?: string;
+  filename: string;
 };
+export type NativeArchiveDownload = { file: FileStreamPayload; filename: string };
 export type NativeArchiveJobResult = NativeArchiveImportResult | NativeArchiveExportResult;

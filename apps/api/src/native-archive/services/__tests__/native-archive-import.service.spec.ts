@@ -67,7 +67,8 @@ describe("NativeArchiveImportService", () => {
       },
       courses: { [COURSE_ID]: snapshot },
       learningPath,
-      assetFiles: new Map(),
+      openAsset: jest.fn(),
+      extractAsset: jest.fn(),
       cleanup,
     } as ParsedNativeArchive);
 
@@ -159,7 +160,8 @@ describe("NativeArchiveImportService", () => {
         assets: [],
       },
       courses: { [COURSE_ID]: { course: { id: COURSE_ID, originalId: null } } },
-      assetFiles: new Map(),
+      openAsset: jest.fn(),
+      extractAsset: jest.fn(),
       cleanup,
     } as ParsedNativeArchive);
 
@@ -220,7 +222,8 @@ describe("NativeArchiveImportService", () => {
         assets: [],
       },
       courses: {},
-      assetFiles: new Map(),
+      openAsset: jest.fn(),
+      extractAsset: jest.fn(),
       cleanup,
     } as ParsedNativeArchive);
 
@@ -266,7 +269,8 @@ describe("NativeArchiveImportService", () => {
           course: { id: COURSE_ID, baseLanguage: "en", availableLocales: ["en"] },
         },
       },
-      assetFiles: new Map(),
+      openAsset: jest.fn(),
+      extractAsset: jest.fn(),
       cleanup,
     } as ParsedNativeArchive);
 

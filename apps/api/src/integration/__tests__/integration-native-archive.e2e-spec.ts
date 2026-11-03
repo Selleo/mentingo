@@ -19,6 +19,7 @@ import { truncateAllTables } from "../../../test/helpers/test-helpers";
 import { KEY_KINDS } from "./integration-courses.scenarios";
 import {
   ARCHIVED_COURSE,
+  ARCHIVED_COURSE_DOWNLOAD_FILENAME,
   EXPORT_ACCESS_CASES,
   FOREIGN_TENANT_JOB_CASES,
   JOB_ENDPOINTS,
@@ -117,6 +118,12 @@ describe("Integration native archive export (e2e)", () => {
       .set("X-API-Key", apiKey)
       .set("X-Tenant-Id", tenantId);
 
+  const getDownloadUrl = (apiKey: string, tenantId: UUIDType, jobId: string) =>
+    request(app.getHttpServer())
+      .get(`/api/integration/native-archive/jobs/${jobId}/download-url`)
+      .set("X-API-Key", apiKey)
+      .set("X-Tenant-Id", tenantId);
+
   const downloadArchive = (apiKey: string, tenantId: UUIDType, jobId: string) =>
     requestArchiveDownload(apiKey, tenantId, jobId)
       .buffer(true)
@@ -138,6 +145,7 @@ describe("Integration native archive export (e2e)", () => {
     match(endpoint)
       .with(JOB_ENDPOINTS.STATUS, () => getJobStatus(apiKey, tenantId, jobId))
       .with(JOB_ENDPOINTS.DOWNLOAD, () => requestArchiveDownload(apiKey, tenantId, jobId))
+      .with(JOB_ENDPOINTS.DOWNLOAD_URL, () => getDownloadUrl(apiKey, tenantId, jobId))
       .exhaustive();
 
   const waitForFinishedJob = async (
@@ -184,7 +192,7 @@ describe("Integration native archive export (e2e)", () => {
     });
     expect(downloaded.headers).toMatchObject({
       "content-type": expect.stringContaining("application/zip"),
-      "content-disposition": 'attachment; filename="marketplace-algebra.zip"',
+      "content-disposition": `attachment; filename="${ARCHIVED_COURSE_DOWNLOAD_FILENAME}"`,
     });
     expect(archive.manifest).toMatchObject({
       format: "mentingo-package",
@@ -195,6 +203,19 @@ describe("Integration native archive export (e2e)", () => {
     expect(storage.uploadedKeys).toEqual([
       expect.stringMatching(new RegExp(`^${getNativeArchiveExportPrefix(contentTenant.id)}`)),
     ]);
+  });
+
+  it("returns a short-lived storage URL for the finished archive", async () => {
+    const { apiKey, jobId } = await arrangeStartedExport();
+    await waitForFinishedJob(apiKey, contentTenant.id, jobId);
+
+    const response = await getDownloadUrl(apiKey, contentTenant.id, jobId).expect(200);
+
+    expect(response.body.data).toEqual({
+      url: expect.stringContaining(`filename=${ARCHIVED_COURSE_DOWNLOAD_FILENAME}`),
+      expiresInSeconds: 300,
+    });
+    expect(response.body.data.url).toContain(getNativeArchiveExportPrefix(contentTenant.id));
   });
 
   it("fails the export of a course that belongs to another tenant", async () => {

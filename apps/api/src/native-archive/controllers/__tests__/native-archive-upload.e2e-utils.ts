@@ -92,7 +92,10 @@ export function createNativeArchiveUploadE2EDoubles() {
     getArchiveDownloadStream: jest.fn(async (id: string, actor: Actor) => {
       const job = ensureActor(id, actor);
       if (job.state !== "completed") throw new NotFoundException("nativeArchive.error.notReady");
-      return { stream: Readable.from(Buffer.from("archive")), contentLength: 7 };
+      return {
+        file: { stream: Readable.from(Buffer.from("archive")), contentLength: 7 },
+        filename: "mentingo-package.zip",
+      };
     }),
   };
 

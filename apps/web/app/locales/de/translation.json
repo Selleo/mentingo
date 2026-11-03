@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "Eine mit diesem Kurs verknüpfte Live-Schulung ist unvollständig und kann nicht exportiert werden.",
       "courseNotFound": "Der zu exportierende Kurs wurde nicht gefunden.",
       "categoryNotFound": "Die Kurskategorie wurde nicht gefunden."
+    },
+    "progress": {
+      "waiting": "Warten auf den Start…",
+      "step": "Schritt {{current}} von {{total}}",
+      "uploadingPackage": "Paket wird hochgeladen",
+      "stages": {
+        "collecting-content": "Kursinhalte werden gesammelt",
+        "copying-files": "Dateien werden kopiert",
+        "packaging": "Paket wird erstellt",
+        "downloading": "Paket wird heruntergeladen",
+        "verifying": "Paket wird geprüft",
+        "uploading-files": "Dateien werden hochgeladen",
+        "indexing": "KI-Inhalte werden vorbereitet",
+        "saving": "Kurs wird gespeichert"
+      }
     }
   },
   "aiConversations": {
@@ -995,38 +1010,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Zurück",
-    "eyebrow": "Kurseinrichtung",
     "title": "Neuen Kurs erstellen",
     "subtitle": "Wählen Sie den Standardeditor, ein SCORM-Paket oder ein Mentingo-Paket.",
     "standard": {
       "title": "Standard",
-      "description": "Erstellen Sie einen Kurs mit integriertem Curriculum, Lektionen, Quizzen und Einstellungen.",
-      "features": {
-        "authoring": "Mit dem nativen Kurseditor erstellt",
-        "curriculum": "Kapitel, Lektionen und Quizze in Mentingo verwaltet",
-        "translations": "Kurssprachen und Übersetzungen unterstützt",
-        "settings": "Preise, Status und Zertifikate enthalten"
-      }
+      "description": "Erstellen Sie einen Kurs mit integriertem Curriculum, Lektionen, Quizzen und Einstellungen."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket.",
-      "features": {
-        "import": "Aus einem SCORM-1.2-ZIP-Paket erstellt",
-        "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
-        "structure": "Importierte Paketstruktur bleibt erhalten",
-        "future": "Preise, Status und Zertifikate enthalten"
-      }
+      "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket."
     },
     "mentingoPackage": {
       "title": "Mentingo-Paket",
-      "description": "Stellen Sie einen Kurs oder Lernpfad aus einem Mentingo-Paket wieder her.",
-      "features": {
-        "structure": "Kursstruktur und Übersetzungen wiederherstellen",
-        "settings": "Einstellungen und Metadaten wiederherstellen",
-        "assets": "Zugehörige Dateien enthalten",
-        "learningPath": "Lernpfade und ihre Kurse unterstützt"
-      }
+      "description": "Stellen Sie einen Kurs oder Lernpfad aus einem Mentingo-Paket wieder her."
     }
   },
   "studentChapterCardView": {
