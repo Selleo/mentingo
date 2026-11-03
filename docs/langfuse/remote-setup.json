@@ -1,0 +1,1620 @@
+{
+  "schemaVersion": 1,
+  "owner": "mentingo-regression-v1",
+  "project": {
+    "id": "cmiitc20o00qtad07rwd8bx29",
+    "name": "mentingo"
+  },
+  "origin": "https://cloud.langfuse.com",
+  "trigger": "experiments_manual__new_root_traces_100_percent",
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "onlineEnabled": true
+  },
+  "datasets": [
+    {
+      "id": "cmw0lma8f0050ad0hjxwnpdll",
+      "name": "core/mentor-welcome/v1",
+      "featureId": "mentor-welcome",
+      "items": 2,
+      "manifestSha256": "f34951e1434ede0db5a8f9413b7d1f01b7e97ac29b9974c1b60f1c3f4788bee6"
+    },
+    {
+      "id": "cmw0lmapa0054ad0hobzwd7u8",
+      "name": "core/mentor-teacher-chat/v1",
+      "featureId": "mentor-teacher-chat",
+      "items": 2,
+      "manifestSha256": "84cec11ca0a92eb69cd391a1f5fae204d56a36d813b232d8b1e6fd89c8287d9f"
+    },
+    {
+      "id": "cmw0lmb6e0043ad0ma7yln4w0",
+      "name": "core/mentor-roleplay-chat/v1",
+      "featureId": "mentor-roleplay-chat",
+      "items": 2,
+      "manifestSha256": "e5108a1e9136dafd5201bf38fcec0f991250399cbb9a4e4dfc0c8bb2f9f2adff"
+    },
+    {
+      "id": "cmw0lmbpv0047ad0mvqa06aej",
+      "name": "core/mentor-learner-name/v1",
+      "featureId": "mentor-learner-name",
+      "items": 2,
+      "manifestSha256": "9bd1f7c4902e4a2a142ea18a1f7bcb2843ab0c5fe374fa6e68d1f285db710cf5"
+    },
+    {
+      "id": "cmw0lmc7j006ead0egkonx6zu",
+      "name": "core/mentor-rag-grounding/v1",
+      "featureId": "mentor-rag-grounding",
+      "items": 2,
+      "manifestSha256": "193ab69b276e9b76098786675cdacbed4503a4d838e7e21e420cb7c3df94df72"
+    },
+    {
+      "id": "cmw0lmclk006vad0d58jpt6m9",
+      "name": "core/mentor-voice-spoken-display/v1",
+      "featureId": "mentor-voice-spoken-display",
+      "items": 2,
+      "manifestSha256": "708f0f2e8e3917e590e0dd9770c0cf01d99c8d6c164fce1fdbdca473a15272f5"
+    },
+    {
+      "id": "cmw0lmd0x0067ad0e7lrsek9q",
+      "name": "core/mentor-voice-elevenlabs/v1",
+      "featureId": "mentor-voice-elevenlabs",
+      "items": 2,
+      "manifestSha256": "c7570e543b8f8f764221ea268a9afdc77a5b6feabf3547bb810be52bfeb24890"
+    },
+    {
+      "id": "cmw0lmdio005bad0h04iuheur",
+      "name": "core/mentor-voice-interruption/v1",
+      "featureId": "mentor-voice-interruption",
+      "items": 2,
+      "manifestSha256": "6ca3dde2a84ad1192606ba85be74ea366482589cb8180c63b5f040d2e65fdf15"
+    },
+    {
+      "id": "cmw0lmdxt006iad0e7u3i5gdc",
+      "name": "core/mentor-transcription/v1",
+      "featureId": "mentor-transcription",
+      "items": 2,
+      "manifestSha256": "7c80ad71dad8ceae219eeae7e709a4cb079d89899b78021e04bd5864ab4e4bd0"
+    },
+    {
+      "id": "cmw0lmec3009iad0ifmiwo0xp",
+      "name": "core/mentor-summary/v1",
+      "featureId": "mentor-summary",
+      "items": 2,
+      "manifestSha256": "83a7650cd285c5e0808c3441ecf3b9a75dba32ef235f4332cec56dcb9ba3e709"
+    },
+    {
+      "id": "cmw0lmesd002sad0j0ggsvbky",
+      "name": "core/course-translation/v1",
+      "featureId": "course-translation",
+      "items": 2,
+      "manifestSha256": "bcb451025ae30f52bc7e6f1a9719b3049016e70e3b5f7ed99e1e0ecd64ec65e7"
+    },
+    {
+      "id": "cmw0lmf79005fad0h850pbm5p",
+      "name": "core/mentor-config-create/v1",
+      "featureId": "mentor-config-create",
+      "items": 3,
+      "manifestSha256": "3a21f99f89f106e6f376265ac8f3763ccc0109a94f810245c666e7f012647990"
+    },
+    {
+      "id": "cmw0lmfte006ead0en5ikk8ea",
+      "name": "core/mentor-config-improve/v1",
+      "featureId": "mentor-config-improve",
+      "items": 3,
+      "manifestSha256": "129ee6a80ec55133dcba99d4b7c9e1921f80d5383762d5a66a38062441cc1e05"
+    },
+    {
+      "id": "cmw0lmge50070ad0dizhh5l88",
+      "name": "core/mentor-config-repair/v1",
+      "featureId": "mentor-config-repair",
+      "items": 3,
+      "manifestSha256": "b19e234db02fff4846a39af85f3a23912b522f60de009ad791b0fc31fdc0bf5d"
+    },
+    {
+      "id": "cmw0lmgz9006nad0ecd0twjg2",
+      "name": "core/mentor-config-validate/v1",
+      "featureId": "mentor-config-validate",
+      "items": 3,
+      "manifestSha256": "0d947ed51a410ec50acfa3f5ee3b93bdc6c764a3a07c855ed4aac43006d68922"
+    },
+    {
+      "id": "cmw0lmhl4005lad0htco21ys4",
+      "name": "core/judge-config-create/v1",
+      "featureId": "judge-config-create",
+      "items": 2,
+      "manifestSha256": "46255bce02c32d6e08a4872e421dcafe7e5a438c518381c83cf512dc77852c5e"
+    },
+    {
+      "id": "cmw0lmi0q009uad0ite0iltcd",
+      "name": "core/judge-config-improve/v1",
+      "featureId": "judge-config-improve",
+      "items": 2,
+      "manifestSha256": "52858bb2887d07fa0f9b451f87acffbf8af164ce5f0fff148bf7e4b5e265a82b"
+    },
+    {
+      "id": "cmw0lmipm005qad0jvj2dbjmh",
+      "name": "core/judge-config-repair/v1",
+      "featureId": "judge-config-repair",
+      "items": 2,
+      "manifestSha256": "fa887dadcb45df00f8edc61ba52b19a36af97c89d18dc1d98caf689d4d4f9a3a"
+    },
+    {
+      "id": "cmw0lmj51002wad0jarcinhe9",
+      "name": "core/judge-config-validate/v1",
+      "featureId": "judge-config-validate",
+      "items": 2,
+      "manifestSha256": "410d8cf37d64d1bee8230e82d9fdfc3c44f0ac821bffc0f88d23dd21b6922deb"
+    },
+    {
+      "id": "cmw0lmjm00030ad0jt8ld1ur2",
+      "name": "core/daily-practice/v1",
+      "featureId": "daily-practice",
+      "items": 3,
+      "manifestSha256": "e69d93a872c0707cc59fec5940fbedda98c59b3a793a5951f90c172eee7975e7"
+    },
+    {
+      "id": "cmw0lmk7n006wad0ehxuzy5ib",
+      "name": "core/mentor-rag-embeddings/v1",
+      "featureId": "mentor-rag-embeddings",
+      "items": 2,
+      "manifestSha256": "067ced3b01bed63fe5a421e54b25ba6cffaff3519369e2c246cbfa80a7d3d502"
+    },
+    {
+      "id": "cmw0lmkln006jad0e8dy2s93b",
+      "name": "core/global-search-embeddings/v1",
+      "featureId": "global-search-embeddings",
+      "items": 2,
+      "manifestSha256": "9b1e3cc5fd385cfebcb4bd203a6888c5bd2e70aff39814e3c46e43b151714ac2"
+    },
+    {
+      "id": "cmw0lmkyz0037ad0j1xvmt7sr",
+      "name": "core/global-search-native/v1",
+      "featureId": "global-search-native",
+      "items": 2,
+      "manifestSha256": "ebaacd66ead57a22d6871be763dd60919ec25f41a31690ab00681f9a0fc23dc8"
+    },
+    {
+      "id": "cmw0lmlcx005pad0h90p3gln0",
+      "name": "core/mentor-native-chat/v1",
+      "featureId": "mentor-native-chat",
+      "items": 2,
+      "manifestSha256": "f50d4f4e14813b94e8858fd5d4d7a8bef8fa5e08dc4b9a2ab8baf312c6acb4c8"
+    },
+    {
+      "id": "cmw0lmlqf003cad0jpdvg9zk9",
+      "name": "core/core-luma-authoring-proposal/v1",
+      "featureId": "core-luma-authoring-proposal",
+      "items": 2,
+      "manifestSha256": "0ef690e74d6b947549218d693f4bd2a51d27925796226125e53ce81a7e27f0f5"
+    },
+    {
+      "id": "cmw0lmm3q00a4ad0ict36rsv5",
+      "name": "core/core-luma-authoring-apply/v1",
+      "featureId": "core-luma-authoring-apply",
+      "items": 2,
+      "manifestSha256": "13287a88253e619927df6b677da960c66e15f629c2441bdc53a3a1bac876158b"
+    },
+    {
+      "id": "cmw0lmmil003gad0jg7f4nbks",
+      "name": "core/assistant-conversation/v1",
+      "featureId": "assistant-conversation",
+      "items": 2,
+      "manifestSha256": "833619c13bd76fb9a3aff904065f1ec51423fe091827bb9e3c418736db0aae93"
+    },
+    {
+      "id": "cmw0lmmw10072ad0e5j4rgwxm",
+      "name": "core/assistant-authorized-read-tools/v1",
+      "featureId": "assistant-authorized-read-tools",
+      "items": 2,
+      "manifestSha256": "9379a17ecc6d9cd23f7988c1be91e5e6e2205aa9f2214e7a94b0b790f86862b6"
+    },
+    {
+      "id": "cmw0lmnbn005uad0hzn6y4oq7",
+      "name": "core/assistant-readonly-failure/v1",
+      "featureId": "assistant-readonly-failure",
+      "items": 2,
+      "manifestSha256": "1d6ddcb287302b1c1ab99e7d32631b03e5a3befdf0f3e7ac5e85abd43fdcea1e"
+    },
+    {
+      "id": "cmw0lmnq7003nad0jlcb4y51h",
+      "name": "core/mentor-verified-judge/v1",
+      "featureId": "mentor-verified-judge",
+      "items": 20,
+      "manifestSha256": "3106c2cd2cbddc7c015b9663e92331b709805997d0f7c75ae871e73a416b889c"
+    },
+    {
+      "id": "cmw0lnn7f007lad0d3gv7pjfn",
+      "name": "core/mentor-blocker-verification/v1",
+      "featureId": "mentor-blocker-verification",
+      "items": 20,
+      "manifestSha256": "80e5e9fccc3760830b1fb63e3748daa17a8a2ca7b072ed403c09648b4eeff8f3"
+    }
+  ],
+  "evaluators": [
+    {
+      "id": "cmw0lgvqu0018ad0efrcpxftf",
+      "name": "regression/mentingo/output-evidence/v1",
+      "version": 1,
+      "definitionSha256": "384cce63bf0179a863a6f5fde55cac437decf5cfe3aa45f57b5b8fede400c357"
+    },
+    {
+      "id": "cmw0lgxst001ead0eo6vicqnk",
+      "name": "regression/mentingo/live-task_completion/v1",
+      "version": 1,
+      "definitionSha256": "451e59e6560420b4b658899dc220e8e233b7ded708afe87d7f4bde0483d1e8a9"
+    },
+    {
+      "id": "cmw0lgyqu000kad0myn0smu5z",
+      "name": "regression/mentingo/live-grounding/v1",
+      "version": 1,
+      "definitionSha256": "6aba554733c4f74986642a4a43da61a66919bc52a8e619088828c5706e736d3f"
+    },
+    {
+      "id": "cmw0lgzu2001bad0ehn1vpub5",
+      "name": "regression/mentingo/live-safety_and_scope/v1",
+      "version": 1,
+      "definitionSha256": "c37922ca15c0dad5a5fb1aad6f1b5e3a7412a64d0710573cf8b4e787be0155d1"
+    },
+    {
+      "id": "cmw0li6v8001vad0d4v79kzc9",
+      "name": "regression/mentingo/experiment-mentor-welcome/v1",
+      "version": 1,
+      "definitionSha256": "88f8a21eb8d9b9751356654c6b20d72afb6099a1219ff34495561d844a356992"
+    },
+    {
+      "id": "cmw0li827002yad0eish3vq66",
+      "name": "regression/mentingo/experiment-mentor-teacher-chat/v1",
+      "version": 1,
+      "definitionSha256": "2ecec89064e6dfb9318d37cd01b01c08d78bd58c877f5ca44679e905b033209e"
+    },
+    {
+      "id": "cmw0li95b0033ad0eoona89r7",
+      "name": "regression/mentingo/experiment-mentor-roleplay-chat/v1",
+      "version": 1,
+      "definitionSha256": "644b82e7cf019e37ca18f9742aade67c438af55e5ddb6845ae409e83a04eb501"
+    },
+    {
+      "id": "cmw0lia0l000xad0ja5wsedfm",
+      "name": "regression/mentingo/experiment-mentor-learner-name/v1",
+      "version": 1,
+      "definitionSha256": "6c11dd73af5458281d6128634d5d88cc83ec32053c14a1e717596db906d917ec"
+    },
+    {
+      "id": "cmw0liath0038ad0ezadrhbm4",
+      "name": "regression/mentingo/experiment-mentor-rag-grounding/v1",
+      "version": 1,
+      "definitionSha256": "010c151447208816aeaa44b4d5a890be643053bb3901f279e97968ec90f97ef1"
+    },
+    {
+      "id": "cmw0liblo003ead0e34afqz8o",
+      "name": "regression/mentingo/experiment-mentor-voice-spoken-display/v1",
+      "version": 1,
+      "definitionSha256": "84c69ceac0dc04b1b0b1f154860d7127468dde241dd72da4a0dbdc51cf0dafd9"
+    },
+    {
+      "id": "cmw0lica90029ad0ddab2us4x",
+      "name": "regression/mentingo/experiment-mentor-voice-elevenlabs/v1",
+      "version": 1,
+      "definitionSha256": "48c8f2bca659943d8c6adc0709da88eaf04ed4fbe2483c4906b00ef789c03e7e"
+    },
+    {
+      "id": "cmw0lid4f003jad0egu3gye9p",
+      "name": "regression/mentingo/experiment-mentor-voice-interruption/v1",
+      "version": 1,
+      "definitionSha256": "083b386666ab3232bc0afc4802e57d7daad335333f88069aaf61fa8bd94849d7"
+    },
+    {
+      "id": "cmw0liebg002gad0el6ywfmz9",
+      "name": "regression/mentingo/experiment-mentor-transcription/v1",
+      "version": 1,
+      "definitionSha256": "4b2eb07fa57135cff887f78a8fe01843031f59090060514cd136e00dd8d97993"
+    },
+    {
+      "id": "cmw0lifbd002oad0dyximhlt8",
+      "name": "regression/mentingo/experiment-mentor-summary/v1",
+      "version": 1,
+      "definitionSha256": "ec83dc2c438c58dd796a6d3a64d4ea1fb86fe7c6a2fa36fc2e7115a72d22e105"
+    },
+    {
+      "id": "cmw0ligbo002xad0e41ppf2hr",
+      "name": "regression/mentingo/experiment-course-translation/v1",
+      "version": 1,
+      "definitionSha256": "988e12b417f0aee9369d09e483dadd60e91c0ceee90f0a65b1e3c886d41a6386"
+    },
+    {
+      "id": "cmw0ljhk6002lad0js92j5pxk",
+      "name": "regression/mentingo/experiment-mentor-config-create/v1",
+      "version": 1,
+      "definitionSha256": "6b343de74fc64efd0102720d828365a159046f0f1c54c87fb75d62a4cae2e74c"
+    },
+    {
+      "id": "cmw0ljir8003vad0d8yry2ejp",
+      "name": "regression/mentingo/experiment-mentor-config-improve/v1",
+      "version": 1,
+      "definitionSha256": "aae8d8d1e3daafb068d7f62a23415ba4f15915c73ba0eab495a67a760f578fcc"
+    },
+    {
+      "id": "cmw0ljjm5003bad0jbvourm8h",
+      "name": "regression/mentingo/experiment-mentor-config-repair/v1",
+      "version": 1,
+      "definitionSha256": "ab484a39a09b3bc4d9299f0a4e2402d671d7cfbf27ce6421fedeb05fb39a2006"
+    },
+    {
+      "id": "cmw0lks55002sad0d3xxak5x6",
+      "name": "regression/mentingo/experiment-mentor-config-validate/v1",
+      "version": 1,
+      "definitionSha256": "f3b0dd584dc646a9a2fd443c115201c80da44587904e3756a512f6ed70b2c7bc"
+    },
+    {
+      "id": "cmw0lkswo002xad0ddqfnmxdc",
+      "name": "regression/mentingo/experiment-judge-config-create/v1",
+      "version": 1,
+      "definitionSha256": "7274f9ef69e811a82201262b648965c48d82efa6fd362801c8881bb4b8e56761"
+    },
+    {
+      "id": "cmw0lktl7001aad0j4aq76zzg",
+      "name": "regression/mentingo/experiment-judge-config-improve/v1",
+      "version": 1,
+      "definitionSha256": "95c5dc94b15d2e83e38a20a728d9999c645d0712c4aaed14cdf182903c7c7544"
+    },
+    {
+      "id": "cmw0lkui9002uad0gxmo4bwve",
+      "name": "regression/mentingo/experiment-judge-config-repair/v1",
+      "version": 1,
+      "definitionSha256": "fad37236c9e59e5839ddb865b3cf1f15718372c8021574a7bd114e7405f03f2c"
+    },
+    {
+      "id": "cmw0lkva0002zad0gcdcj15fz",
+      "name": "regression/mentingo/experiment-judge-config-validate/v1",
+      "version": 1,
+      "definitionSha256": "b98a4a44bbea69b2eee4daba263a5cc675237a08f210a26c15fb56cfd2775d7b"
+    },
+    {
+      "id": "cmw0lkw3l004xad0dknrlzen2",
+      "name": "regression/mentingo/experiment-daily-practice/v1",
+      "version": 1,
+      "definitionSha256": "474a2f5eb3f9328bdfbe985d0f2c5ae56758a0629159e9f2ac9a5869a7637a94"
+    },
+    {
+      "id": "cmw0lkws50034ad0d6nn1bc55",
+      "name": "regression/mentingo/experiment-mentor-rag-embeddings/v1",
+      "version": 1,
+      "definitionSha256": "ca3c016330fc7c7a211354e1ceaf1115e10f83e0043a4434d228957ed2f80b28"
+    },
+    {
+      "id": "cmw0lkxss0058ad0ef389kvo2",
+      "name": "regression/mentingo/experiment-global-search-embeddings/v1",
+      "version": 1,
+      "definitionSha256": "b3bfc0e52dfc72cec27bca0809e8332cae95bb3927cf8c802b401b7f42078f79"
+    },
+    {
+      "id": "cmw0lm37j002zad0mtnt0dbzb",
+      "name": "regression/mentingo/experiment-global-search-native/v1",
+      "version": 1,
+      "definitionSha256": "e524a64db3d3b0e3a1e04288ec2d21963cec13445c8b32618d3958d83eaaf24a"
+    },
+    {
+      "id": "cmw0lm3xj006gad0d97ig4n3x",
+      "name": "regression/mentingo/experiment-mentor-native-chat/v1",
+      "version": 1,
+      "definitionSha256": "f69d6cb23eadf2bfcb704736a5d33499eed311775275b1a42ddbea3b28d38ce9"
+    },
+    {
+      "id": "cmw0lm4yc0061ad0ewl5j2pjw",
+      "name": "regression/mentingo/experiment-core-luma-authoring-proposal/v1",
+      "version": 1,
+      "definitionSha256": "4dd0e6693fd1859466173c942319af0ddca910cf891ea69136fa00ea469016a3"
+    },
+    {
+      "id": "cmw0lm5xn004vad0hihchv833",
+      "name": "regression/mentingo/experiment-core-luma-authoring-apply/v1",
+      "version": 1,
+      "definitionSha256": "a7534fc68c84c1ad47f1ef39c9842176d6c4c44db4f41d6f63dec7d2ede6bb64"
+    },
+    {
+      "id": "cmw0lm6xy008ead0ixo14jy5i",
+      "name": "regression/mentingo/experiment-assistant-conversation/v1",
+      "version": 1,
+      "definitionSha256": "6af1d03844340923ce47cdd137fd274d103341adcd5976bd0c59285cf4bef549"
+    },
+    {
+      "id": "cmw0lm7us003qad0m74v3xz3r",
+      "name": "regression/mentingo/experiment-assistant-authorized-read-tools/v1",
+      "version": 1,
+      "definitionSha256": "b623398fe6158a2002180a8703cd6c5918cbe9ee2bc2ada715558da38c5f5c90"
+    },
+    {
+      "id": "cmw0lm8l2008jad0i8co7i9ib",
+      "name": "regression/mentingo/experiment-assistant-readonly-failure/v1",
+      "version": 1,
+      "definitionSha256": "9563ac8f59abdf4ae42d466af4fe95208a81fbac05a3e675890e2d26c3798e47"
+    },
+    {
+      "id": "cmw0lm9di008pad0ib6xlnxs6",
+      "name": "regression/mentingo/experiment-mentor-verified-judge/v1",
+      "version": 1,
+      "definitionSha256": "b3a8c1b376b4638643de45cc49e40ad745cfeb18eb82d95d151d90d32e402905"
+    },
+    {
+      "id": "cmw0lma3m003wad0megj8tx1j",
+      "name": "regression/mentingo/experiment-mentor-blocker-verification/v1",
+      "version": 1,
+      "definitionSha256": "9bc380aedd365328a30e7203ba1eaf64f6a5665ea1a0115385b646bca78d4dce"
+    }
+  ],
+  "rules": [
+    {
+      "id": "cmw0lnqg3003had0mlmiu2u4x",
+      "name": "regression/mentingo/every-new-trace-evidence/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "boolean",
+          "column": "isRootObservation",
+          "operator": "=",
+          "value": true
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": false
+        },
+        {
+          "type": "stringOptions",
+          "column": "environment",
+          "operator": "none of",
+          "value": [
+            "langfuse-code-eval",
+            "langfuse-evaluation"
+          ]
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnql0007uad0d05xfeg5h",
+      "name": "regression/mentingo/every-new-trace-quality/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "boolean",
+          "column": "isRootObservation",
+          "operator": "=",
+          "value": true
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": false
+        },
+        {
+          "type": "stringOptions",
+          "column": "environment",
+          "operator": "none of",
+          "value": [
+            "langfuse-code-eval",
+            "langfuse-evaluation"
+          ]
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgxst001ead0eo6vicqnk",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lgyqu000kad0myn0smu5z",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lgzu2001bad0ehn1vpub5",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnqpx007pad0ew1a51dz4",
+      "name": "regression/mentingo/nested-feature-operations/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "boolean",
+          "column": "isRootObservation",
+          "operator": "=",
+          "value": false
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": false
+        },
+        {
+          "type": "stringOptions",
+          "column": "name",
+          "operator": "any of",
+          "value": [
+            "Conversation",
+            "Generate AI Judge Configuration Draft",
+            "Generate AI Mentor Configuration Draft",
+            "Generate Evaluation",
+            "Generate Prompt",
+            "RAG",
+            "Start Conversation",
+            "Summary",
+            "Thread Evaluator",
+            "Validate AI Judge Configuration Draft",
+            "Validate AI Mentor Configuration Draft",
+            "core-assistant-run",
+            "core-assistant.complete",
+            "core-assistant.context",
+            "core-assistant.failed",
+            "core-assistant.validate-outcome",
+            "transcription-generator",
+            "translation-generator"
+          ]
+        },
+        {
+          "type": "stringOptions",
+          "column": "environment",
+          "operator": "none of",
+          "value": [
+            "langfuse-code-eval",
+            "langfuse-evaluation"
+          ]
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgxst001ead0eo6vicqnk",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lgyqu000kad0myn0smu5z",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lgzu2001bad0ehn1vpub5",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnqul0081ad0dubraiqth",
+      "name": "regression/mentingo/experiment-mentor-welcome/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lma8f0050ad0hjxwnpdll"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0li6v8001vad0d4v79kzc9",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnqzd0087ad0d14j22czx",
+      "name": "regression/mentingo/experiment-mentor-teacher-chat/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmapa0054ad0hobzwd7u8"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0li827002yad0eish3vq66",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnr4200b0ad0ipc9ppd2y",
+      "name": "regression/mentingo/experiment-mentor-roleplay-chat/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmb6e0043ad0ma7yln4w0"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0li95b0033ad0eoona89r7",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnrbv003uad0j51i0qdvb",
+      "name": "regression/mentingo/experiment-mentor-learner-name/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmbpv0047ad0mvqa06aej"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lia0l000xad0ja5wsedfm",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnrgc003vad0e5l0twq9k",
+      "name": "regression/mentingo/experiment-mentor-rag-grounding/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmc7j006ead0egkonx6zu"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0liath0038ad0ezadrhbm4",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnrkx0040ad0jvzov6d0y",
+      "name": "regression/mentingo/experiment-mentor-voice-spoken-display/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmclk006vad0d58jpt6m9"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0liblo003ead0e34afqz8o",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnrph008dad0dubs9sdbs",
+      "name": "regression/mentingo/experiment-mentor-voice-elevenlabs/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmd0x0067ad0e7lrsek9q"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lica90029ad0ddab2us4x",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnru2008jad0d0ltiknkk",
+      "name": "regression/mentingo/experiment-mentor-voice-interruption/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmdio005bad0h04iuheur"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lid4f003jad0egu3gye9p",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnryo005yad0j8jaj4tk6",
+      "name": "regression/mentingo/experiment-mentor-transcription/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmdxt006iad0e7u3i5gdc"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0liebg002gad0el6ywfmz9",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lns3j0041ad0g3o8znwef",
+      "name": "regression/mentingo/experiment-mentor-summary/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmec3009iad0ifmiwo0xp"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lifbd002oad0dyximhlt8",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lns8g006fad0h97izkkm4",
+      "name": "regression/mentingo/experiment-course-translation/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmesd002sad0j0ggsvbky"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0ligbo002xad0e41ppf2hr",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnsdb004sad0jnxf1ggzf",
+      "name": "regression/mentingo/experiment-mentor-config-create/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmf79005fad0h850pbm5p"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0ljhk6002lad0js92j5pxk",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnsi5008pad0dfsh0dccl",
+      "name": "regression/mentingo/experiment-mentor-config-improve/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmfte006ead0en5ikk8ea"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0ljir8003vad0d8yry2ejp",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnsmu0047ad0g6ztl0uvu",
+      "name": "regression/mentingo/experiment-mentor-config-repair/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmge50070ad0dizhh5l88"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0ljjm5003bad0jbvourm8h",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnsry004yad0jyvbdo7jt",
+      "name": "regression/mentingo/experiment-mentor-config-validate/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmgz9006nad0ecd0twjg2"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lks55002sad0d3xxak5x6",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnswi004mad0ef6b15puj",
+      "name": "regression/mentingo/experiment-judge-config-create/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmhl4005lad0htco21ys4"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkswo002xad0ddqfnmxdc",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnt1c008vad0dhauc9v7x",
+      "name": "regression/mentingo/experiment-judge-config-improve/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmi0q009uad0ite0iltcd"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lktl7001aad0j4aq76zzg",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnt640054ad0j8x7wznm5",
+      "name": "regression/mentingo/experiment-judge-config-repair/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmipm005qad0jvj2dbjmh"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkui9002uad0gxmo4bwve",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lntar006zad0eulp1v1hw",
+      "name": "regression/mentingo/experiment-judge-config-validate/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmj51002wad0jarcinhe9"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkva0002zad0gcdcj15fz",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lntfb004sad0equdr8xfk",
+      "name": "regression/mentingo/experiment-daily-practice/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmjm00030ad0jt8ld1ur2"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkw3l004xad0dknrlzen2",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lntjs007wad0ettf88umu",
+      "name": "regression/mentingo/experiment-mentor-rag-embeddings/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmk7n006wad0ehxuzy5ib"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkws50034ad0d6nn1bc55",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lntoq0075ad0e6rsthih3",
+      "name": "regression/mentingo/experiment-global-search-embeddings/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmkln006jad0e8dy2s93b"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lkxss0058ad0ef389kvo2",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lntt90041ad0eswxevod5",
+      "name": "regression/mentingo/experiment-global-search-native/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmkyz0037ad0j1xvmt7sr"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm37j002zad0mtnt0dbzb",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnu0t00b6ad0isk57qobs",
+      "name": "regression/mentingo/experiment-mentor-native-chat/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmlcx005pad0h90p3gln0"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm3xj006gad0d97ig4n3x",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnu6d004yad0emeo4wgkm",
+      "name": "regression/mentingo/experiment-core-luma-authoring-proposal/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmlqf003cad0jpdvg9zk9"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm4yc0061ad0ewl5j2pjw",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lnuav0054ad0eoilds41x",
+      "name": "regression/mentingo/experiment-core-luma-authoring-apply/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmm3q00a4ad0ict36rsv5"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm5xn004vad0hihchv833",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lp1560092ad0duncue4bu",
+      "name": "regression/mentingo/experiment-assistant-conversation/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmmil003gad0jg7f4nbks"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm6xy008ead0ixo14jy5i",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lp1a3005nad0jkgirxbvo",
+      "name": "regression/mentingo/experiment-assistant-authorized-read-tools/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmmw10072ad0e5j4rgwxm"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm7us003qad0m74v3xz3r",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lp1ex0098ad0d9mne05yt",
+      "name": "regression/mentingo/experiment-assistant-readonly-failure/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmnbn005uad0hzn6y4oq7"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm8l2008jad0i8co7i9ib",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lp1jt004cad0ehnlgd6sq",
+      "name": "regression/mentingo/experiment-mentor-verified-judge/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lmnq7003nad0jlcb4y51h"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lm9di008pad0ib6xlnxs6",
+          "variableMapping": null
+        }
+      ]
+    },
+    {
+      "id": "cmw0lp1og007pad0ems7yogrw",
+      "name": "regression/mentingo/experiment-mentor-blocker-verification/v1",
+      "enabled": true,
+      "sampling": 1,
+      "filter": [
+        {
+          "type": "stringOptions",
+          "column": "datasetId",
+          "operator": "any of",
+          "value": [
+            "cmw0lnn7f007lad0d3gv7pjfn"
+          ]
+        },
+        {
+          "type": "boolean",
+          "column": "isExperimentItemRootSpan",
+          "operator": "=",
+          "value": true
+        }
+      ],
+      "evaluatorAssignments": [
+        {
+          "evaluatorId": "cmw0lgvqu0018ad0efrcpxftf",
+          "variableMapping": null
+        },
+        {
+          "evaluatorId": "cmw0lma3m003wad0megj8tx1j",
+          "variableMapping": null
+        }
+      ]
+    }
+  ],
+  "supersededLegacyRules": [
+    {
+      "id": "44ec0fb1-33b1-4616-9e2d-9758e9cb4fef",
+      "name": "System Prompt Adherance",
+      "previousEnabled": true
+    },
+    {
+      "id": "c9f50e7f-d8a4-4886-b878-26838bb94720",
+      "name": "Hallucination",
+      "previousEnabled": true
+    },
+    {
+      "id": "e2099108-0a16-4b39-82d1-ba58c0bfc276",
+      "name": "Toxicity",
+      "previousEnabled": true
+    },
+    {
+      "id": "83267e2c-2730-445b-9889-687b92405b1d",
+      "name": "Context Relevance",
+      "previousEnabled": true
+    },
+    {
+      "id": "6b8a01b2-9808-42a7-ba4b-f300eafb6816",
+      "name": "Quality",
+      "previousEnabled": true
+    }
+  ],
+  "verification": {
+    "projectIdentityVerified": true,
+    "credentialStorageChanges": false,
+    "manualExperimentsNotAutomaticallyLaunched": true,
+    "qualityAwaitingUserConnection": false,
+    "allRulesReadBack": true
+  }
+}
