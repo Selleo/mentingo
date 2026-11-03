@@ -16,10 +16,10 @@ import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-libr
 import { DB } from "src/storage/db/db.providers";
 
 import { SEARCH_DOCUMENT_TYPES, SEARCH_ENTITY_TYPES } from "./global-search.constants";
-import { getDefaultSemanticSearchEmbeddingIdentity } from "./semantic-search-index.config";
 import {
   SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS,
   SEMANTIC_SEARCH_INDEX_VERSION,
+  SEMANTIC_SEARCH_MODEL,
   SEMANTIC_SEARCH_ENTITY_LIMIT,
   SEMANTIC_SEARCH_INITIAL_CANDIDATES,
   SEMANTIC_SEARCH_MAX_CANDIDATE_BATCHES,
@@ -84,7 +84,7 @@ export class HybridSearchRepository {
     actor: CurrentUserType,
     metadataOnly = false,
     learnerLessons = false,
-    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
+    identity: SemanticSearchEmbeddingIdentity = { model: SEMANTIC_SEARCH_MODEL },
   ): Promise<MatchRow[]> {
     if (embedding.length !== SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS) {
       throw new Error("Query embedding does not match the configured semantic search space");
@@ -146,7 +146,7 @@ export class HybridSearchRepository {
     excludedEntityIds: readonly string[] = [],
     metadataOnly = false,
     learnerLessons = false,
-    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
+    identity: SemanticSearchEmbeddingIdentity = { model: SEMANTIC_SEARCH_MODEL },
   ): SQL {
     const vector = `[${embedding.join(",")}]`;
     const unseen = excludedEntityIds.length
@@ -195,7 +195,7 @@ export class HybridSearchRepository {
 
   async hasCurrentChunks(
     actor: CurrentUserType,
-    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
+    identity: SemanticSearchEmbeddingIdentity = { model: SEMANTIC_SEARCH_MODEL },
   ): Promise<boolean> {
     const embeddingSpace = this.currentEmbeddingSpace(identity);
     const eligibility = sql.join(

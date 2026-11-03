@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { RESOURCE_VISIBILITY } from "@repo/shared";
-import { and, eq, sql, type SQL } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-library.constants";
@@ -10,10 +10,9 @@ import { DB } from "src/storage/db/db.providers";
 import { resourceEntity, resources, searchChunks, searchDocuments } from "src/storage/schema";
 
 import {
-  getDefaultSemanticSearchEmbeddingIdentity,
-  getPreferredSemanticSearchEmbeddingModel,
-} from "./semantic-search-index.config";
-import { SEMANTIC_SEARCH_INDEX_VERSION } from "./semantic-search-index.constants";
+  SEMANTIC_SEARCH_INDEX_VERSION,
+  SEMANTIC_SEARCH_MODEL,
+} from "./semantic-search-index.constants";
 import { semanticSearchResourceSources } from "./semantic-search-resource.utils";
 
 import type {
@@ -121,12 +120,6 @@ export class SemanticSearchIndexRepository {
     return source;
   }
 
-  /** Chunks count as current in any model unless a preferred model asks the index to converge. */
-  private currentEmbeddingSpace(model: SQL) {
-    const preferredModel = getPreferredSemanticSearchEmbeddingModel();
-    return preferredModel ? sql`${model} = ${preferredModel}` : sql`true`;
-  }
-
   private pendingSourcesQuery() {
     return this.sourceQuery().where(
       and(
@@ -142,7 +135,6 @@ export class SemanticSearchIndexRepository {
         AND ${searchChunks.sourceRevision} = CASE WHEN ${
           resources.id
         } IS NULL THEN '' ELSE ${semanticSearchResourceRevision()} END
-        AND ${this.currentEmbeddingSpace(sql`${searchChunks.embeddingModel}`)}
         AND ${searchChunks.indexVersion} = ${SEMANTIC_SEARCH_INDEX_VERSION}
     )`,
       ),
@@ -175,7 +167,6 @@ export class SemanticSearchIndexRepository {
           AND c.entity_id = r.entity_id AND c.document_type = r.document_type
           AND c.language = r.language AND c.source_hash = md5(r.content)
           AND c.source_revision = md5(coalesce(file.reference, '') || ':' || file.updated_at::text || ':' || file.content_type)
-          AND ${this.currentEmbeddingSpace(sql`c.embedding_model`)}
           AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
     )
     SELECT count(*)::integer AS pending FROM (
@@ -225,7 +216,7 @@ export class SemanticSearchIndexRepository {
     source: SemanticSearchSource,
     chunks: string[],
     embeddings: number[][],
-    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
+    identity: SemanticSearchEmbeddingIdentity = { model: SEMANTIC_SEARCH_MODEL },
   ): Promise<boolean> {
     const tenantId = this.tenantId();
     // Lock the committed source row while validating and replacing its entire revision.

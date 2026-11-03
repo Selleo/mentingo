@@ -49,15 +49,7 @@ Every AI feature calls Luma first when Luma runs that capability on a Custom pro
 
 The Core assistant and global search use Luma's OpenAI-compatible endpoint (`/api/public/v1/ai/openai`), which runs the AI Mentor chat and embeddings Custom profiles. The chat model must support tool calling.
 
-| Variable                          | Purpose                                                                                                                                                                                                                                     |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SEMANTIC_SEARCH_EMBEDDING_MODEL` | Optional. The embedding model global search should converge on, normally the Luma embeddings profile model (for example `Qwen/Qwen3-Embedding-4B`). Chunks from any other model are re-embedded. Unset: chunks from any model stay current. |
-
-How global search avoids mixing embedding models:
-
-- Every stored chunk records the model that actually produced it, which may be the OpenAI fallback, along with its size.
-- A query vector is compared only with chunks from the same model, size and index version. When a query falls back to OpenAI against a Luma-indexed corpus, search returns keyword results and reports the semantic status as `pending`.
-- After setting or changing `SEMANTIC_SEARCH_EMBEDDING_MODEL`, the per-minute reconciliation job re-embeds every source through the semantic search queue.
+Global search records which model embedded each chunk and compares a query only with chunks from the same model. When a query falls back to OpenAI against a Luma-indexed corpus, search returns keyword results instead of mixing vector spaces.
 
 AI Mentor lesson documents do not record their embedding model. Re-upload them after the embedding model changes or after documents were embedded during a Luma outage.
 
