@@ -420,6 +420,8 @@ class WorkflowsTest(unittest.TestCase):
                         self.assertIn('inputs.test_mode', step['if'])
                     self.assertNotIn('state.json', step['with']['path'])
         self.assertIn('default_branch', generation['if'])
+        self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', generation['if'])
+        self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', workflow['jobs']['publish']['if'])
 
     def test_helpdesk_owns_its_manual_trigger_without_changing_release_recording(self):
         entry = self.load('release-film.yml')

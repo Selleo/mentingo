@@ -20,6 +20,15 @@ Claude Code subscription token; it does not modify the release-film workflow.
 `self-onboarding-publishing` keeps its separate publishing token. Manual dispatch defaults to publication
 off; the version-tag queuer explicitly turns it on.
 
+For an explicitly authorized pre-merge publication, an administrator may set the
+repository variable `SELF_ONBOARDING_PUBLISH_SHA` to the full reviewed workflow
+commit SHA. Manual non-test dispatch from that exact commit may generate and
+publish a real tagged version. A branch name, another commit, a pull-request event
+or a push does not satisfy this exception. Both generation and publication enforce
+the same SHA check, retain the shared production concurrency group, and still use
+the existing recording/publishing environments. Delete the variable after the
+publication test. `test_mode=true` remains unable to publish.
+
 ## Test a specific spec before merging
 
 Use the standalone `self-onboarding.yml` workflow. A push changing that file on a
@@ -59,10 +68,9 @@ and SDK publishing without adding Helpdesk jobs to release-film CI.
 
 Recording jobs, including branch tests, use the existing `release-film` environment.
 `CLAUDE_CODE_OAUTH_TOKEN` already exists there and does not need to be read, copied,
-or replaced with an Anthropic API key. The environment currently allows only `main`
-and `staging`; allowing `jh_feat_helpdesk_ui_preview` requires an explicit environment
-branch-policy change. The user is waiting for PM approval before making that change;
-this implementation has not changed the policy or run paid recording.
+or replaced with an Anthropic API key. Its deployment branch policy must permit any reviewed branch used for a manual
+recording or approved-commit publication. The workflow SHA exception does not bypass
+GitHub environment policies. The existing token is not copied to another environment.
 
 Add `ELEVENLABS_API_KEY` to that environment (or repository secrets), and configure
 four distinct voice IDs in repository or recording-environment variables:
