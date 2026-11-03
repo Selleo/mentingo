@@ -82,8 +82,8 @@ class RenderTest(unittest.TestCase):
         def accent_pixels(at):  # the label's orange accent
             pixels = self.frame(out/'demo.mp4', at, 'crop=12:70:178:942', 'rgb24')
             return sum(1 for i in range(0, len(pixels), 3) if pixels[i] > 200 and pixels[i+2] < 100)
-        self.assertLess(bright_pixels(1.0), 20)  # the chapter card: no label
-        self.assertEqual(accent_pixels(1.0), 0)
+        self.assertGreater(bright_pixels(1.0), 300)  # real opening screen and chapter title from frame zero
+        self.assertGreater(accent_pixels(1.0), 100)
         self.assertGreater(bright_pixels(2.6), 300)  # the first step's label, then the second one's
         self.assertGreater(bright_pixels(3.4), 300)
         self.assertGreater(accent_pixels(3.4), 100)
@@ -221,7 +221,7 @@ class RenderTest(unittest.TestCase):
         out = self.root / 'brand-out'
         render(plan, out)
         rgb = lambda at, crop: self.average(out / 'demo.mp4', at, crop)
-        ground, bar = rgb(1.0, 'crop=40:40:20:20'), rgb(1.0, 'crop=150:5:110:421')  # the chapter card at 1 s
+        ground, bar = rgb(1.0, 'crop=40:40:20:20'), rgb(1.0, 'crop=150:5:110:0')  # opening frame and top accent
         self.assertTrue(all(abs(a - b) < 14 for a, b in zip(ground, (0x22, 0x29, 0x49))), ground)
         self.assertTrue(all(abs(a - b) < 20 for a, b in zip(bar, (0x3f, 0x58, 0xb6))), bar)
         default = load_plan(self.plan(), enforce_duration=False)
@@ -294,6 +294,29 @@ class RenderTest(unittest.TestCase):
             self.assertEqual(measured.call_count, 2)
             load_plan(path, enforce_duration=False)
             self.assertEqual(measured.call_count, 4)
+
+    def test_prepare_clips_provider_tail_after_pause_insertion(self):
+        # Provider timings can extend into codec padding; pause insertion shifts the same word tail.
+        mp3 = self.root / 'padding.mp3'
+        run(['ffmpeg', '-v', 'error', '-y', '-i', self.root/'voice.wav', '-c:a', 'libmp3lame', mp3])
+        duration = cut.audio_seconds(mp3)
+        words = [(0.1, int(duration * 1000) / 1000 + 0.08, 'Result.')]
+        srt = self.root / 'padding.srt'
+        srt.write_text(cut.montage.shifted_srt(words, []))
+        audio, shifted = cut.retime(render_demo.FFMPEG, mp3, srt, words, [(0.05, 0.2)], self.root)
+        actual = cut.audio_seconds(audio)
+        self.assertGreater(cut.montage.words_from_srt(Path(shifted).read_text())[-1][1], actual + 0.001)
+        data = copy.deepcopy(self.data)
+        chapter = data['chapters'][0]
+        chapter.pop('captions')
+        chapter.update(audio=audio, srt=shifted)
+        footage = chapter['clips'][0]['footage']
+        footage.update(duration=3.0, pieces=[[0, 3, 0]])
+        report = render_demo.prepare(self.plan(data, 'padding-authored.json'), self.root/'padding-prepared',
+                                     enforce_duration=False)
+        self.assertEqual(report['captions'][-1]['end'], 2 + actual)
+        self.assertEqual(report['caption_timing'][0]['cues'], ['word_boundary_trimmed'])
+        load_plan(self.root/'padding-prepared/editing-plan.json', enforce_duration=False)
 
     def test_prepare_preserves_words_timings_and_rejects_short_story(self):
         authored = copy.deepcopy(self.data)

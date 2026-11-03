@@ -3,7 +3,7 @@
 text (pronunciation.speakable, in the film's language: in Polish numbers, units, dates and abbreviations in words);
 captions keep the written text. Three providers:
 - edge: edge-tts, Microsoft's free neural voices (pl-PL-MarekNeural, en-US-GuyNeural), whose service times each word;
-  the voice in CI;
+  an explicit alternative to the configured ElevenLabs narrator;
 - voxcpm: VoxCPM2 (OpenBMB, Apache-2.0) on this machine's GPU, where `film.py voice-setup` installed it: one sentence at
   a time in the narrator's voice (its reference recording in the film's language), each word timed by its share of the
   sentence's syllables;

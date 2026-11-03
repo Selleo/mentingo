@@ -32,6 +32,41 @@ const readySource = (id: string, name: string): SourceView => ({
 });
 
 describe("AuthoringBriefPanel", () => {
+  it("sends the opt-in autopilot mode with the request", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderWith().render(
+      <AuthoringBriefPanel
+        course={course}
+        initialSourcePolicy={null}
+        onSubmit={onSubmit}
+        onSelectSources={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Work mode: Review changes" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("course-authoring-tools-trigger"));
+    expect(screen.getByRole("button", { name: "Autopilot" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await user.click(screen.getByRole("button", { name: "Autopilot" }));
+    expect(screen.getByRole("button", { name: "Autopilot" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await user.keyboard("{Escape}");
+    await user.type(screen.getByTestId("course-authoring-brief-input"), "Create a course");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ executionMode: "autonomous" }),
+    );
+  });
+
   it("keeps the effort popover open while dragging its slider inside the drawer", async () => {
     const user = userEvent.setup();
     renderWith().render(
@@ -601,6 +636,70 @@ describe("AuthoringBriefPanel", () => {
 
     expect(screen.queryByTestId("course-authoring-composer-attachments")).toBeNull();
     expect(onSelectSources).not.toHaveBeenCalled();
+  });
+
+  it("uploads four selected files independently and keeps successful files when one fails", async () => {
+    const user = userEvent.setup();
+    const onSelectSources = vi.fn();
+    const files = ["one", "two", "three", "four"].map(
+      (name) => new File([name], `${name}.pdf`, { type: "application/pdf" }),
+    );
+    const onUploadSource = vi.fn(async (file: File) => {
+      if (file === files[1]) throw new Error("Upload failed");
+      return `source-${file.name}`;
+    });
+    renderWith().render(
+      <AuthoringBriefPanel
+        course={course}
+        initialSourcePolicy={null}
+        onSubmit={vi.fn()}
+        onSelectSources={onSelectSources}
+        onUploadSource={onUploadSource}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Open course tools" }));
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input.multiple).toBe(true);
+    await user.upload(input, files);
+    await vi.waitFor(() => expect(onUploadSource).toHaveBeenCalledTimes(4));
+    files.forEach((file, index) => expect(onUploadSource).toHaveBeenNthCalledWith(index + 1, file));
+    await vi.waitFor(() =>
+      expect(onSelectSources).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sourceVersionIds: ["source-one.pdf", "source-three.pdf", "source-four.pdf"],
+        }),
+      ),
+    );
+    expect(screen.getByTestId("course-authoring-composer-attachments")).toHaveTextContent(
+      "four.pdf",
+    );
+    expect(screen.queryByText("two.pdf")).not.toBeInTheDocument();
+    expect(input.value).toBe("");
+  });
+
+  it("skips invalid files while uploading valid siblings from the same selection", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    const onUploadSource = vi.fn().mockResolvedValue("valid-source");
+    renderWith().render(
+      <AuthoringBriefPanel
+        course={course}
+        initialSourcePolicy={null}
+        onSubmit={vi.fn()}
+        onSelectSources={vi.fn()}
+        onUploadSource={onUploadSource}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Open course tools" }));
+    const valid = new File(["pdf"], "guide.pdf", { type: "application/pdf" });
+    await user.upload(document.querySelector('input[type="file"]') as HTMLInputElement, [
+      new File(["video"], "video.mp4", { type: "video/mp4" }),
+      valid,
+    ]);
+    expect(onUploadSource).toHaveBeenCalledOnce();
+    expect(onUploadSource).toHaveBeenCalledWith(valid);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Choose a PDF, DOCX, plain text or Markdown file.",
+    );
   });
 
   it("merges concurrent upload selections and keeps removal decisions current", async () => {

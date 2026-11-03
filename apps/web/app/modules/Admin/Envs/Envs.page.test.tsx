@@ -8,9 +8,15 @@ import { renderWith } from "~/utils/testUtils";
 
 mockRemixReact();
 
+const api = vi.hoisted(() => ({ saveSecrets: vi.fn() }));
+
+vi.mock("~/api/api-client", () => ({
+  ApiClient: { api: { envControllerBulkUpsertEnv: api.saveSecrets } },
+}));
+
 vi.mock("~/api/queries/admin/useSecret", () => ({
   useSecret: () => ({
-    data: { name: "", value: "" },
+    data: { data: { name: "", value: "" } },
   }),
 }));
 
@@ -24,6 +30,7 @@ const RemixStub = createRemixStub([
 describe("Environment page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    api.saveSecrets.mockResolvedValue({ data: {} });
   });
 
   it("renders the Microsoft Calendar environment fields", () => {

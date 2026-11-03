@@ -13,7 +13,7 @@ export function getAncestorConditionOutcomes(
   while (step?.parentId && !visited.has(step.id)) {
     visited.add(step.id);
     const parent = workflow.steps.find((candidate) => candidate.id === step!.parentId);
-    if (parent?.type === "condition" && parent.config.field) {
+    if (parent?.type === "condition" && parent.config.field && parent.config.equals === undefined) {
       const key = getCanonicalAutomationField(event, parent.config.field);
       if (!(key in facts)) facts[key] = step.position === 0;
     }

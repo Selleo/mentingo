@@ -11,6 +11,12 @@ export type CourseAuthoringApplicationClaim = {
   actorId: UUIDType;
 };
 
+/** Producer-owned request fence for a system-initiated export freeze. */
+export type CourseAuthoringAutonomousFence = {
+  requestId: UUIDType;
+  controlEpoch: number;
+};
+
 export type PreparedCourseAuthoringApplication = {
   exportId: UUIDType;
   exportHash: string;

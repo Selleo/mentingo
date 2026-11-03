@@ -1,5 +1,7 @@
 import {
+  ENTITY_TYPES,
   RESOURCE_VISIBILITY,
+  RICH_TEXT_RESOURCE_TYPE,
   type EditableResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -143,6 +145,10 @@ export const AssetLibraryDialog = ({
     }
 
     const resourceType = getRichTextResourceTypeFromAsset(asset);
+    if (resourceType === RICH_TEXT_RESOURCE_TYPE.AUDIO && entityType !== ENTITY_TYPES.LESSON) {
+      toast({ description: t("richText.audio.invalidType"), variant: "destructive" });
+      return;
+    }
     const displayName = getAssetDisplayName(asset);
     const displayMode = await getDisplayMode(resourceType, displayName);
 

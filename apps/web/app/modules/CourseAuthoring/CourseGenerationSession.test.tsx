@@ -1083,6 +1083,23 @@ describe("CourseGenerationSession proposal decisions", () => {
     expect(state.refetchCalls).toBe(1);
   });
 
+  it("refreshes the curriculum after an unattended application appears in a restored session", async () => {
+    state.progressRecords = [
+      {
+        id: "application-record",
+        kind: "application",
+        payload: { exportId: "autonomous-export", status: "applied" },
+      },
+    ];
+
+    renderWith().render(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+
+    await waitFor(() => expect(state.contextRefetchCalls).toBe(1));
+    expect(state.refetchCalls).toBe(1);
+  });
+
   it("keeps a confirmed application complete when authoring-context refresh fails", async () => {
     state.applicationResult = { exportId: "export-context-refresh-error", status: "applied" };
     state.contextRefetchFails = true;

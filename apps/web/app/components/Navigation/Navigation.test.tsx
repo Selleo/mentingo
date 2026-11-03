@@ -2,6 +2,7 @@ import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
 
 import { Navigation } from "./Navigation";
@@ -24,6 +25,9 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({}
 vi.mock("~/api/queries/useLearningPaths", () => ({ useLearningPaths: () => ({}) }));
 vi.mock("~/api/queries/useStripeConfigured", () => ({ useStripeConfigured: () => ({}) }));
 vi.mock("~/api/queries/usePhishingConfiguration", () => ({ usePhishingConfiguration: vi.fn() }));
+vi.mock("~/api/queries/useCompetenciesConfiguration", () => ({
+  useCompetenciesConfiguration: vi.fn(),
+}));
 vi.mock("~/hooks/usePermissions", () => ({
   usePermissions: () => ({ hasAccess: false, permissions: state.permissions }),
 }));
@@ -74,6 +78,13 @@ vi.mock("./NavigationMenu", () => ({
     </section>
   ),
 }));
+
+beforeEach(() => {
+  vi.mocked(useCompetenciesConfiguration).mockReturnValue({
+    data: { enabled: false },
+    isError: false,
+  } as ReturnType<typeof useCompetenciesConfiguration>);
+});
 
 describe("Phishing navigation availability", () => {
   beforeEach(() => {

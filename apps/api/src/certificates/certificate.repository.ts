@@ -476,10 +476,10 @@ export class CertificateRepository {
   }
 
   async findCertificateByIdForRender(
-    userId: string | null,
+    userId: string,
     certificateId: string,
     language: SupportedLanguages,
-    learnerScope?: SQL,
+    additionalAccessScope?: SQL,
   ) {
     const [certificate] = await this.db
       .select({
@@ -507,10 +507,9 @@ export class CertificateRepository {
       .where(
         and(
           eq(certificates.id, certificateId),
-          userId ? eq(certificates.userId, userId) : undefined,
+          or(eq(certificates.userId, userId), additionalAccessScope),
           eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
           isNull(users.deletedAt),
-          learnerScope,
         ),
       );
 

@@ -1,0 +1,74 @@
+# Competencies Business Spec
+
+## Business Overview
+
+Organizations can describe the capabilities a job requires, check each person's current confirmation and see what is still missing. Employees see what is expected of them and which evidence they still need. Managers compare their current teams with job profiles, while designated verifiers confirm observations and review documents.
+
+Mentingo supplies people, reporting relationships, courses and learning results. The connected competencies plugin owns the catalog, evidence, confirmation rules and job requirements. These are separately entitled for each organization.
+
+## Who Uses It
+
+- Employees review their own requirements, complete linked courses and submit documents for designated review.
+- Group managers inspect their current teams, assign an active job profile and see the actual gaps behind missing confirmations.
+- Designated verifiers review evidence for their assigned observation and document conditions, recognize prior qualifications and revoke confirmation with a reason.
+- Competency administrators inspect employees and their job profiles, make reasoned condition overrides, and maintain definitions, ordered levels, condition verifiers, job profiles in the organization's current catalog.
+
+## Feature Functions
+
+- Compare current confirmation with all of a job's required levels.
+- Combine course completion, observations and documents in one competency.
+- Confirm a level only when its conditions and all lower-level conditions are satisfied.
+- Retain attained levels and decision history when evidence expires, changes or is revoked.
+- Recognize specified current conditions through a documented decision, and let administrators override a condition outcome with a required comment and retained history.
+- Maintain the organization's current competency catalog and job profiles, and assign or remove a person's active job profile.
+
+## End-User Value
+
+Employees can see the remaining work behind a missing confirmation instead of repeating requirements that are still satisfied. Managers can distinguish missing job requirements from expiring evidence and act on the right gap. HR and L&D can reuse one competency across several positions while retaining evidence and the reasons for human decisions.
+
+## How It Works
+
+Administrators land on **Overview**. A four-step setup guide starts with creating a category, followed by creating competencies, building a job profile and assigning people. It marks each step complete from the organization’s current records and opens the next action directly: the category editor, competency editor, job profile editor, or people list for assignment. Creating the first category completes the first step and updates progress in both the guide and the setup navigation. Configuration lives in one **Setup** tab, which opens on categories by default and offers navigation for categories, competencies, job profiles and expiry reminders, each showing one section at a time; creating a job profile is offered only once a competency with a level exists. The organization maintains one current catalog directly. The competency editor offers category creation directly in its category picker, preserves the unfinished competency and selects the newly created category after saving. Saving updates the current definition while retaining historical evidence and achievements. Category, competency and job profile pickers search the organization's whole catalog, not only the first page. An administrator configures named levels and the evidence required for each level: levels are listed beside the selected level's conditions, and a level is met only when all of its conditions are met. In the job profile editor they add competencies one at a time from a searchable picker and choose the required level for each. Every selected competency is required. Saving creates or updates an active profile immediately, without a draft or publication step. An administrator assigns or clears one active profile from the people list on **Overview**. Changed requirements immediately update current comparisons. Administrators can delete an unassigned profile from its editor after confirmation; assigned profiles must first be unassigned. Deleting a job profile retains its revision history and existing evidence, achievements and development actions.
+
+Administrators permanently delete a competency from its editor after confirming that its requirements, confirmation history and attached documents will be removed. Deletion removes the competency from every current job profile, updates those profiles immediately and keeps people assigned to their existing profiles. Its definition revisions, evidence history, overrides, revocations and achievements are deleted together. Other competencies and core learning results remain unchanged. Attached documents become inaccessible immediately; background cleanup retries removal from private storage until it succeeds.
+
+Each distinct condition needs one fulfillment, such as completing its specific course or receiving one approved confirmation. Several different requirements are separate conditions. Course conditions are fulfilled automatically from course completion and have no verifiers. Administrators assign verifiers only to observation and document conditions; a verifier may review or revoke evidence only for those conditions assigned to them. Assigned employees see **Approval** without manager or administrator rights. A verifier who also manages a group can review designated evidence from outside that group. Verifiers can choose an active person and open their assigned competency details directly from a review item; they do not need earlier evidence about themselves to discover the person.
+
+Every role enters through **Competencies** in the main navigation. Employees see **My Competencies**, plus **Approvals** when they are designated verifiers. **My Competencies** shows their position, fulfilled requirements and the documents they still need to submit; an employee without a job profile sees a single explanation instead of empty sections. Competency details distinguish the current level and category, numbered level requirements, condition types and statuses. The employee's own competency details and documents section omit evidence history and previous submissions; authorized inspection views retain history. The documents section groups documents by competency, collapsed by default, with counts of documents still to submit and pending review; inside each competency it lists the documents to submit by level and, in authorized inspection views, the submitted documents with their status and reviewer reason. It covers missing required documents and documents for renewing expiring attained levels, including levels above the job requirement, with a visible submission action and pending status. A pending document prevents duplicate submission for the same condition. An employee or their current manager selects the document condition, writes a note and can attach a supporting file. The condition fixes the evidence type; the actor does not choose between observation and document. Documents remain pending until a designated verifier approves them. Only a verifier assigned to an observation condition can record and confirm it directly for another person; an employee does not submit an observation. Self-assessment is forbidden even when the employee is a designated verifier. Authorized administrators can still designate themselves to assess other people. Optional evidence dates use the same calendar and time controls as other Mentingo forms.
+
+Each confirmation starts at the latest fulfillment of its applicable conditions and ends at their earliest finite expiry. Without a finite condition expiry, no expiry date is calculated. Expiry of a lower condition invalidates dependent current levels while preserving the highest attained level. Renewing the missing condition restores the stack when its other conditions remain satisfied.
+
+Prior recognition covers the selected conditions as they exist at the time of the decision. It requires a note and can include an attachment. New or changed conditions require separate fulfillment. Revocation also requires a recorded reason.
+
+A submission covering several manual conditions requires a common designated verifier; incompatible selections are rejected without creating pending work. Verifier-only access to a peer's competency does not reveal that peer's assigned job profile. Archived or deleted employees retain their history, while new evidence reviews are blocked.
+
+Administrators use **Overview** to see every active employee in their organization, including people with no competency records yet. A status filter on the list shows how many people meet all requirements, have missing competencies, have expiring confirmations or have no job profile. Each row shows the job profile, readiness as met versus required competencies, and a status. When submissions await the viewer's approval, a notice links to **Approvals**. Opening a person shows their competency view and documents in place, with a way back to the list; the open tab, person and setup section are kept in the page address so they survive a reload and can be shared. Managers use the same layout, labelled **My team**, for their currently managed people. The competency selector opens condition details even when the person has no assigned profile. Managers cannot override condition outcomes. An administrator can mark any condition as met, including a course condition without completing the course, or restore automatic evaluation. Every change requires a comment and retains its author and time in history. The change affects competency assessment only; learning progress, course completion and certificates stay as recorded in Mentingo. A changed condition requires a new decision. The editor distinguishes the applicable decision from older history, and the highest attained level is retained even when a manual grant is restored to automatic evaluation before anyone reads the assessment.
+
+The people list can be searched and filtered by job profile, and switched between a list and a matrix. The matrix always shows one job profile; the summary tiles and the list use the same people. Changing a person or matrix position keeps the page header and filters visible while the data region loads. Submitted document history uses server pagination in authorized inspection views.
+
+Coverage counts satisfied profile requirements divided by all profile requirements. An empty or unassigned profile is not assessed. An organization can set an expiry-warning horizon; there is no default horizon. Position and manager changes preserve achievements, while access follows the current reporting relationship.
+
+The team view and matrix treat all selected competencies as requirements. Competencies outside the selected profile do not appear as matrix columns.
+
+The matrix shows employees assigned to the selected job profile, defaulting to the first profile with assigned people. The shared search and profile filter sit above a color legend. Each employee row shows their name and compact required-level tiles, with status markers showing whether current confirmation meets that requirement or is expiring. A short tooltip summarizes the requirement status and level. Accessible labels retain the actual and required levels.
+
+Administrators edit validation conditions directly in **Competencies**. **Settings** contains expiry-warning settings. Loading, unavailable and failed requests use the normal application page layout and feedback components, with a retry action after a failed read.
+
+The approval workspace is one table filtered by status (pending, approved, rejected, revoked), each status with its own count and server pagination; pending rows offer approve and reject directly, and any row opens the full evidence. Both lists use current condition-verifier assignments and exclude self-assessment. Evidence cards show their contents directly. Managers and administrators inspecting another employee see neutral next-step wording.
+
+## Key Technical Context
+
+- `/competencies` is a core workspace built from the generated API client and existing UI components. Browser input cannot supply an actor's permissions or reporting scope.
+- Core authenticates the user and sends current scope through the server-side SDK. The plugin additionally enforces its own competency-specific verifier lists and tenant entitlement.
+- Learning evidence is limited to course results: identifiers, source revisions, completion time and actual certificate expiry, never course content. Source events trigger retryable delivery, and opening a person's competencies refreshes their course results. Competencies do not scan tenants on a timer, so the people list and matrix can miss course results that predate the connection until one of those happens.
+- Catalog, evidence and revisions live in the private plugin's tenant-bound catalog storage. Attachments use private object storage and are authorized on each download.
+- Disabling the plugin preserves its records and blocks protected operations and automated processing.
+- Administrators with environment-management access can connect the competencies service from `/admin/envs` using its service URL and tenant API key. The existing secret fields require explicit reveal before editing, and saving refreshes competency availability. The platform must also grant competency access to the organization.
+
+## Test Evidence
+
+Plugin domain and API tests cover direct verifier observations, rejected self-assessment, document submission by employees and managers, rejected verifier-only document submission, cumulative conditions, condition-derived dates, retained achievements, recognition revisions, verifier designation, tenant boundaries, private attachments and reading only listed categories, competencies and profiles. Profile tests cover immediate activation and updates, deletion permissions, revision conflicts and assigned-profile protection.
+
+Core unit tests verify trusted actor context, current permissions, rejected references, course-reconciliation scope, source withdrawals from quiz and AI retakes and certificate resets, and retry recovery. Database integration tests verify stable completion and certificate dates, distinct course facts after a repeated completion, current manager membership and original attribution through account renaming, archive and soft deletion.
+
+Frontend unit tests cover renewal prompts limited to expiring documents and server-side picker search with selected values outside the loaded page. The rest of the competencies UI, including the category-first setup flow and the environment-settings connection, is supported by the implementation and static validation only; there is no automated browser coverage for competencies.

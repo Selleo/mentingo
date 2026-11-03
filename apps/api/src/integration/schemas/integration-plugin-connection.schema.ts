@@ -34,5 +34,15 @@ export type IntegrationPhishingConnection = Static<typeof integrationPhishingCon
 export type IntegrationContentMarketplaceConnection = Static<
   typeof integrationContentMarketplaceConnectionSchema
 >;
+export const integrationCompetenciesConnectionSchema = Type.Object(
+  {
+    baseUrl: Type.String({ minLength: 1, maxLength: 2000 }),
+    apiKey: Type.String({ minLength: 32, maxLength: 256, writeOnly: true }),
+  },
+  { additionalProperties: false },
+);
+export type IntegrationCompetenciesConnection = Static<
+  typeof integrationCompetenciesConnectionSchema
+>;
 export type IntegrationPluginConfigured = Static<typeof integrationPluginConfiguredSchema>;
 export type IntegrationPluginStatus = Static<typeof integrationPluginStatusSchema>;

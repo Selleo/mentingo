@@ -100,7 +100,7 @@ separate. Ordinary E2E factory defaults remain English outside the self-onboardi
 ## Short videos and explicit flow coverage
 
 The catalog assigns every required flow exactly once to a stable named video containing 1–3 related flows.
-The current registry contains 207 flows and 86 short videos per language across 29 app areas. Missing/unknown flow IDs, duplicate
+The current registry contains 222 flows and 91 short videos per language across 30 app areas. Missing/unknown flow IDs, duplicate
 memberships and duplicate video keys fail validation before recording. Semantic discovery of an additional
 flow requires an explicit grouping update; it cannot silently disappear or reshuffle existing videos.
 
@@ -117,13 +117,13 @@ They have not triggered a new hosted recording or production publication. Succes
 ## App-wide contextual guidance
 
 Contextual help uses one shared area registry across navigation, Core retrieval and assistant tools.
-The current recording catalog maps all 29 user-facing route areas to source-backed flow contracts,
+The current recording catalog maps all 30 user-facing route areas to source-backed flow contracts,
 including administration, personal tools, learning, AI features and account access. The canonical
 area registry also declares utility-route exclusions rather than silently treating them as missing
 features. Domain identifiers are stable open keys; adding a supported product area does not require
 shipping a closed SDK enum to each self-hosted installation.
 
-The app-wide inventory accounts for 58 app business specs, with release-film production explicitly
+The app-wide inventory accounts for 59 app business specs, with release-film production explicitly
 excluded as infrastructure. Every flow has one stable video-group assignment with at most three
 related flows. Existing flow contracts and video IDs are preserved. A deterministic audit checks
 public/private area parity, spec ownership, implementation evidence and canonical page mappings.

@@ -32,8 +32,7 @@ class Chapter(unittest.TestCase):
         result = metrics.captions_of(words, film(), 25.631, mode='tutorial')
         self.assertEqual(result[-1]['end'], 25.631)
         self.assertEqual(result[-1]['timing'], 'word_boundary_trimmed')
-        with self.assertRaises(ValueError):
-            metrics.captions_of(words, film(), 25.631)
+        self.assertEqual(metrics.captions_of(words, film(), 25.631), result)
 
     def test_a_caption_held_past_the_next_change_is_counted_by_what_the_picture_moved_to(self):
         captions = [{'start': 0.2, 'end': 9.0, 'text': 'one'},  # sentence 1, over the unnamed step at 8 s by 1 s

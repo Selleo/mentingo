@@ -1,50 +1,75 @@
 import { useNavigate } from "@remix-run/react";
-import { MailWarning } from "lucide-react";
+import { CalendarClock, GraduationCap, Mail, ShieldCheck, Tag, Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreatePhishingCampaign } from "~/api/mutations/useCreatePhishingCampaign";
-import { usePhishingOptions } from "~/api/queries/usePhishingOptions";
+import { usePhishingAudienceCount } from "~/api/queries/usePhishingAudienceCount";
 import { usePhishingScenarios } from "~/api/queries/usePhishingScenarios";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import MultipleSelector, { type Option } from "~/components/ui/multiselect";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
 import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
 import { PhishingGate } from "./PhishingGate";
-import { PhishingLoading, PhishingError, PhishingEmpty } from "./PhishingStates";
+import { PhishingOptionSelect } from "./PhishingOptionSelect";
+import { PhishingLoading, PhishingError, PhishingEmpty, PhishingHeader } from "./PhishingStates";
 
+import type { LucideIcon } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import type { ApiClient } from "~/api/api-client";
+import type { Option } from "~/components/ui/multiselect";
 type CampaignInput = Parameters<typeof ApiClient.api.phishingControllerCreatePhishingCampaign>[0];
 
-function ReviewItem({ label, children }: { label: string; children: ReactNode }) {
+function ReviewItem({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: LucideIcon;
+  label: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-sm text-neutral-600">{label}</dt>
-      <dd className="body-base text-neutral-950">{children}</dd>
+    <div className="grid gap-1 py-4 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:gap-6">
+      <dt className="flex items-center gap-2 text-sm text-neutral-600">
+        <Icon className="size-4 shrink-0 text-primary-600" aria-hidden />
+        {label}
+      </dt>
+      <dd className="text-sm text-neutral-950">{children}</dd>
     </div>
+  );
+}
+
+function FormSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-4 py-6 first:pt-0 last:pb-0">
+      <div className="flex flex-col gap-1">
+        <h3 className="h6 text-neutral-950">{title}</h3>
+        <p className="text-sm text-neutral-600">{description}</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">{children}</div>
+    </section>
   );
 }
 
 function CreateCampaign() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { data: options, isPending: loadingOptions, isError: optionsError } = usePhishingOptions();
   const {
     data: scenarios,
     isPending: loadingScenarios,
@@ -54,6 +79,14 @@ function CreateCampaign() {
   const [review, setReview] = useState<CampaignInput | null>(null),
     [scheduled, setScheduled] = useState(false),
     [error, setError] = useState("");
+  const [selectedScenario, setSelectedScenario] = useState<Option[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<Option[]>([]);
+  const {
+    data: audienceCount,
+    isPending: countingAudience,
+    isError: audienceError,
+    refetch: recountAudience,
+  } = usePhishingAudienceCount(review);
   const [selectedUsers, setSelectedUsers] = useState<Option[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<Option[]>([]);
   const [requestId] = useState(() => crypto.randomUUID());
@@ -76,8 +109,8 @@ function CreateCampaign() {
     const input: CampaignInput = {
       requestId,
       name: String(form.get("name")),
-      scenarioId: String(form.get("scenarioId")),
-      courseId: String(form.get("courseId")),
+      scenarioId: selectedScenario[0]?.value ?? "",
+      courseId: selectedCourse[0]?.value ?? "",
       userIds: selectedUsers.map(({ value }) => value),
       groupIds: selectedGroups.map(({ value }) => value),
       sendWindow: {
@@ -89,6 +122,14 @@ function CreateCampaign() {
           : now,
       },
     };
+    if (!input.scenarioId) {
+      setError(t("phishing.invalidCampaign"));
+      return;
+    }
+    if (!input.courseId) {
+      setError(t("phishing.invalidCourse"));
+      return;
+    }
     if (!input.userIds.length && !input.groupIds.length) {
       setError(t("phishing.invalidRecipients"));
       return;
@@ -100,14 +141,6 @@ function CreateCampaign() {
     setError("");
     setReview(input);
   }
-  const audienceCount = review
-    ? new Set([
-        ...review.userIds,
-        ...(options?.groups
-          .filter((group) => review.groupIds.includes(group.id))
-          .flatMap((group) => group.userIds) ?? []),
-      ]).size
-    : 0;
   async function launch() {
     if (!review) return;
     try {
@@ -117,123 +150,96 @@ function CreateCampaign() {
       /* Mutation hook displays the translated error. */
     }
   }
-  if (loadingOptions || loadingScenarios) return <PhishingLoading />;
-  if (optionsError || scenariosError) return <PhishingError />;
-  if (!scenarios?.length || !options?.courses.length)
-    return <PhishingEmpty message={t("phishing.noOptions")} />;
+  if (loadingScenarios) return <PhishingLoading />;
+  if (scenariosError) return <PhishingError />;
+  if (!scenarios?.length) return <PhishingEmpty message={t("phishing.noOptions")} />;
   return (
     <div className="flex flex-col gap-y-6">
-      <div className="rounded-xl border bg-gradient-to-r from-neutral-50 to-background p-5 shadow-sm">
-        <div className="flex items-center gap-2 text-neutral-900">
-          <MailWarning className="size-7 text-primary-700" aria-hidden="true" />
-          <h2 className="h4 text-neutral-950">{t("phishing.newCampaign")}</h2>
-        </div>
-        <p className="mt-2 text-sm text-neutral-600">{t("phishing.description")}</p>
-      </div>
+      <PhishingHeader title={t("phishing.newCampaign")} description={t("phishing.description")} />
       <Card className="rounded-xl shadow-sm" hidden={!!review}>
-        <CardContent className="p-5">
-          <form onSubmit={prepare} hidden={!!review}>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="h5 text-neutral-950">{t("phishing.details")}</h3>
-              <Button type="submit" className="min-w-28">
-                {t("phishing.review")}
-              </Button>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
+        <form onSubmit={prepare} hidden={!!review}>
+          <CardContent className="divide-y divide-neutral-200 p-6">
+            <FormSection
+              title={t("phishing.details")}
+              description={t("phishing.detailsDescription")}
+            >
               <div className="flex flex-col gap-2 md:col-span-2">
                 <Label htmlFor="name">{t("phishing.name")}</Label>
                 <Input id="name" name="name" required maxLength={150} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="scenarioId">{t("phishing.scenario")}</Label>
-                <Select name="scenarioId" required>
-                  <SelectTrigger id="scenarioId" aria-describedby="scenarioLanguage">
-                    <SelectValue placeholder={t("phishing.choose")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scenarios?.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name} — {s.description}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p id="scenarioLanguage" className="text-sm text-neutral-600">
-                  {t("phishing.scenarioLanguage")}
-                </p>
+                <PhishingOptionSelect
+                  id="scenarioId"
+                  label={t("phishing.scenario")}
+                  options={scenarios.map((scenario) => ({
+                    value: scenario.id,
+                    label: `${scenario.name} - ${scenario.description}`,
+                  }))}
+                  value={selectedScenario}
+                  onChange={setSelectedScenario}
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="courseId">{t("phishing.course")}</Label>
-                <Select name="courseId" required>
-                  <SelectTrigger id="courseId">
-                    <SelectValue placeholder={t("phishing.choose")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {options?.courses.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <PhishingOptionSelect
+                  id="courseId"
+                  label={t("phishing.course")}
+                  kind="courses"
+                  describedBy="courseHelp"
+                  value={selectedCourse}
+                  onChange={setSelectedCourse}
+                />
+                <p id="courseHelp" className="text-xs text-neutral-500">
+                  {t("phishing.courseHelp")}
+                </p>
               </div>
-            </div>
-            <section className="mt-6 border-t border-neutral-200 pt-5">
-              <h4 className="h6 mb-1 text-neutral-950">{t("phishing.audience")}</h4>
-              <p className="mb-4 text-sm text-neutral-600">{t("phishing.selectionHelp")}</p>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <Label asChild>
-                    <span>{t("phishing.people")}</span>
-                  </Label>
-                  <MultipleSelector
-                    value={selectedUsers}
-                    onChange={setSelectedUsers}
-                    options={options?.users.map((u) => ({ value: u.id, label: u.label }))}
-                    placeholder={t("phishing.choose")}
-                    commandProps={{ label: t("phishing.people") }}
-                    inputProps={{ "aria-label": t("phishing.people") }}
-                    emptyIndicator={t("phishing.noOptions")}
-                    checkbox={false}
-                    getRemoveLabel={(option) =>
-                      t("phishing.removeSelection", { label: option.label })
-                    }
-                    hideClearAllButton
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label asChild>
-                    <span>{t("phishing.groups")}</span>
-                  </Label>
-                  <MultipleSelector
-                    value={selectedGroups}
-                    onChange={setSelectedGroups}
-                    options={options?.groups.map((g) => ({ value: g.id, label: g.label }))}
-                    placeholder={t("phishing.choose")}
-                    commandProps={{ label: t("phishing.groups") }}
-                    inputProps={{ "aria-label": t("phishing.groups") }}
-                    emptyIndicator={t("phishing.noOptions")}
-                    checkbox={false}
-                    getRemoveLabel={(option) =>
-                      t("phishing.removeSelection", { label: option.label })
-                    }
-                    hideClearAllButton
-                  />
-                </div>
+            </FormSection>
+            <FormSection title={t("phishing.audience")} description={t("phishing.selectionHelp")}>
+              <div className="flex flex-col gap-2">
+                <Label asChild>
+                  <span>{t("phishing.people")}</span>
+                </Label>
+                <PhishingOptionSelect
+                  id="audienceUsers"
+                  label={t("phishing.people")}
+                  kind="users"
+                  value={selectedUsers}
+                  onChange={setSelectedUsers}
+                  multiple
+                />
               </div>
-            </section>
-            <section className="mt-6 border-t border-neutral-200 pt-5">
-              <div className="flex items-center gap-2">
-                <Checkbox
+              <div className="flex flex-col gap-2">
+                <Label asChild>
+                  <span>{t("phishing.groups")}</span>
+                </Label>
+                <PhishingOptionSelect
+                  id="audienceGroups"
+                  label={t("phishing.groups")}
+                  kind="groups"
+                  value={selectedGroups}
+                  onChange={setSelectedGroups}
+                  multiple
+                />
+              </div>
+            </FormSection>
+            <FormSection
+              title={t("phishing.sending")}
+              description={t("phishing.sendingDescription")}
+            >
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 md:col-span-2">
+                <Label htmlFor="scheduled" className="cursor-pointer">
+                  {t("phishing.schedule")}
+                </Label>
+                <Switch
                   id="scheduled"
                   checked={scheduled}
-                  onCheckedChange={(checked) => setScheduled(checked === true)}
+                  onCheckedChange={(checked) => setScheduled(checked)}
                 />
-                <Label htmlFor="scheduled">{t("phishing.schedule")}</Label>
               </div>
               {scheduled && (
                 <TooltipProvider delayDuration={0}>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2 md:col-span-2">
                     <CalendarDateTimeField
                       label={t("phishing.start")}
                       tooltip={t("phishing.startTooltip")}
@@ -253,51 +259,80 @@ function CreateCampaign() {
                   </div>
                 </TooltipProvider>
               )}
-            </section>
-            {error && (
-              <Alert variant="destructive" className="mt-6">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </form>
-        </CardContent>
+            </FormSection>
+          </CardContent>
+          <div className="flex flex-col gap-4 rounded-b-xl border-t border-neutral-200 bg-neutral-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+            <Button type="submit" className="min-w-28 self-end sm:self-auto">
+              {t("phishing.review")}
+            </Button>
+          </div>
+        </form>
       </Card>
       {review && (
         <Card className="rounded-xl shadow-sm">
-          <CardContent className="flex flex-col gap-5 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="h5 break-words text-neutral-950">{review.name}</h3>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" disabled={isPending} onClick={() => setReview(null)}>
-                  {t("phishing.edit")}
-                </Button>
-                <Button onClick={() => void launch()} disabled={isPending} className="min-w-28">
-                  {isPending ? t("phishing.loading") : t("phishing.launch")}
-                </Button>
-              </div>
+          <CardContent className="flex flex-col gap-4 p-6">
+            <div className="mb-2 flex flex-col gap-1">
+              <h3 className="h6 text-neutral-950">{t("phishing.review")}</h3>
+              <p className="text-sm text-neutral-600">{t("phishing.reviewDescription")}</p>
             </div>
-            <dl className="grid gap-4 md:grid-cols-2">
-              <ReviewItem label={t("phishing.scenario")}>
+            <dl className="flex flex-col divide-y divide-neutral-100">
+              <ReviewItem icon={Tag} label={t("phishing.name")}>
+                <span className="break-words font-medium">{review.name}</span>
+              </ReviewItem>
+              <ReviewItem icon={Mail} label={t("phishing.scenario")}>
                 {scenarios?.find((s) => s.id === review.scenarioId)?.name}
               </ReviewItem>
-              <ReviewItem label={t("phishing.course")}>
-                {options?.courses.find((c) => c.id === review.courseId)?.label}
+              <ReviewItem icon={GraduationCap} label={t("phishing.course")}>
+                {selectedCourse[0]?.label}
               </ReviewItem>
-              <ReviewItem label={t("phishing.audience")}>
-                {t("phishing.reviewAudience", {
-                  people: audienceCount,
-                  groups: review.groupIds.length,
-                })}
+              <ReviewItem icon={Users} label={t("phishing.audience")}>
+                {countingAudience && t("phishing.loading")}
+                {audienceError && (
+                  <Button type="button" variant="outline" onClick={() => void recountAudience()}>
+                    {t("phishing.retry")}
+                  </Button>
+                )}
+                {audienceCount !== undefined && (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium">
+                      {t("phishing.audienceCount", { count: audienceCount })}
+                    </span>
+                    <span className="text-neutral-600">{t("phishing.audienceRecheck")}</span>
+                  </div>
+                )}
               </ReviewItem>
-              <ReviewItem label={t("phishing.columns.sendWindow")}>
-                {formatLocalizedDate(i18n.language, review.sendWindow.start)} –{" "}
-                {formatLocalizedDate(i18n.language, review.sendWindow.end)}
+              <ReviewItem icon={CalendarClock} label={t("phishing.columns.sendWindow")}>
+                {formatLocalizedDate(i18n.language, review.sendWindow.start)}
+                {review.sendWindow.end !== review.sendWindow.start &&
+                  ` – ${formatLocalizedDate(i18n.language, review.sendWindow.end)}`}
               </ReviewItem>
             </dl>
-            <Alert>
-              <AlertDescription>{t("phishing.authorization")}</AlertDescription>
-            </Alert>
           </CardContent>
+          <div className="flex flex-col gap-4 rounded-b-xl border-t border-neutral-200 bg-neutral-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex min-w-0 flex-1 items-start gap-2 text-sm text-neutral-600">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-neutral-500" aria-hidden />
+              {t("phishing.authorization")}
+            </p>
+            <div className="flex shrink-0 gap-3 self-end sm:self-auto">
+              <Button variant="outline" disabled={isPending} onClick={() => setReview(null)}>
+                {t("phishing.edit")}
+              </Button>
+              <Button
+                onClick={() => void launch()}
+                disabled={isPending || countingAudience || audienceError || !audienceCount}
+                className="min-w-28"
+              >
+                {isPending ? t("phishing.loading") : t("phishing.launch")}
+              </Button>
+            </div>
+          </div>
         </Card>
       )}
     </div>

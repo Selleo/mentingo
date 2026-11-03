@@ -17,6 +17,10 @@ import { AI_CONVERSATIONS_HANDLES } from "../../../../e2e/data/ai-conversations/
 
 import { AI_CONVERSATIONS_PATH } from "./aiConversations.utils";
 import { ConversationDetails } from "./ConversationDetails";
+import {
+  ExternalConversationSource,
+  isExternalConversationSource,
+} from "./ExternalConversationSource";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -33,7 +37,9 @@ export function ConversationReader({
   const [evaluationOpen, setEvaluationOpen] = useState(false);
   const { data: thread, isPending, isError, refetch } = useAdminAiThread(threadId, language);
   const messages = useAdminAiThreadMessages(threadId);
-  const ownerName = thread ? `${thread.owner.firstName} ${thread.owner.lastName}`.trim() : "";
+  const ownerName = thread?.owner
+    ? `${thread.owner.firstName} ${thread.owner.lastName}`.trim()
+    : "";
   const rows = messages.data?.pages.flatMap((page) => page.data) ?? [];
   const isInitialLoading =
     (!thread && isPending) || (messages.isPending && rows.length === 0 && !isError);
@@ -74,11 +80,18 @@ export function ConversationReader({
                 </div>
               )}
               {thread && (
-                <h2 className="body-lg-md line-clamp-2 text-neutral-950">
-                  {thread.title || t("aiConversations.untitled")}
-                </h2>
+                <div className="flex items-center gap-2">
+                  {isExternalConversationSource(thread.source) && (
+                    <ExternalConversationSource source={thread.source} />
+                  )}
+                  <h2 className="body-lg-md line-clamp-2 text-neutral-950">
+                    {thread.title || t("aiConversations.untitled")}
+                  </h2>
+                </div>
               )}
-              {thread && <p className="body-sm mt-1 truncate text-neutral-600">{ownerName}</p>}
+              {thread && !isExternalConversationSource(thread.source) && (
+                <p className="body-sm mt-1 truncate text-neutral-600">{ownerName}</p>
+              )}
             </div>
           </div>
         </header>
@@ -119,38 +132,47 @@ export function ConversationReader({
                   </div>
                 )}
                 {thread &&
-                  rows.map((message) => (
-                    <div key={message.id} className="flex flex-col gap-2">
-                      <ChatMessage
-                        id={message.id}
-                        role={message.role}
-                        aiName={
-                          thread.type === AI_THREAD_TYPES.ASSISTANT
-                            ? t("aiConversations.types.assistant")
-                            : undefined
-                        }
-                        content={message.content}
-                        contentNode={
-                          thread.type === AI_THREAD_TYPES.ASSISTANT &&
-                          message.role === ASSISTANT_MESSAGE_ROLES.ASSISTANT ? (
-                            <AssistantMarkdown text={message.content} />
-                          ) : undefined
-                        }
-                        userName={ownerName}
-                        previewUser={{
-                          displayName: ownerName,
-                          profilePictureUrl: thread.owner.profilePictureUrl,
-                        }}
-                        messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
-                        testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
-                      />
-                      {message.status && message.status !== "complete" && (
-                        <p className="body-sm text-neutral-600">
-                          {t(`aiConversations.messageStatuses.${message.status}`)}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                  rows.map((message) => {
+                    const senderName = isExternalConversationSource(thread.source)
+                      ? message.participantName ||
+                        message.participantId ||
+                        t("aiConversations.externalParticipant")
+                      : ownerName;
+                    return (
+                      <div key={message.id} className="flex flex-col gap-2">
+                        <ChatMessage
+                          id={message.id}
+                          role={message.role}
+                          aiName={
+                            thread.type === AI_THREAD_TYPES.ASSISTANT
+                              ? t("aiConversations.types.assistant")
+                              : undefined
+                          }
+                          content={message.content}
+                          contentNode={
+                            thread.type === AI_THREAD_TYPES.ASSISTANT &&
+                            message.role === ASSISTANT_MESSAGE_ROLES.ASSISTANT ? (
+                              <AssistantMarkdown text={message.content} />
+                            ) : undefined
+                          }
+                          userName={senderName}
+                          previewUser={{
+                            displayName: senderName,
+                            profilePictureUrl: isExternalConversationSource(thread.source)
+                              ? null
+                              : thread.owner?.profilePictureUrl,
+                          }}
+                          messageMaxWidthClass="max-w-[92%] sm:max-w-[78%]"
+                          testId={AI_CONVERSATIONS_HANDLES.MESSAGE}
+                        />
+                        {message.status && message.status !== "complete" && (
+                          <p className="body-sm text-neutral-600">
+                            {t(`aiConversations.messageStatuses.${message.status}`)}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 {thread && !messages.isPending && !messages.isError && rows.length === 0 && (
                   <p className="text-sm text-neutral-500">{t("aiConversations.emptyTranscript")}</p>
                 )}

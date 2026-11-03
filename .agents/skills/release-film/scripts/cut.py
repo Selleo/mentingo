@@ -23,6 +23,7 @@ import montage
 import pronunciation
 import takes
 import voice as voice_provider
+import narrator_pool
 
 POLISH = 'ąćęłńóśźżĄĆĘŁŃÓŚŹŻ„”–'
 CHAPTER_TAIL = 1.5  # seconds of the test kept after a chapter's last narrated action
@@ -177,6 +178,13 @@ def spoken(run, story, addon=None):
 
 
 
+def narration_addon(run, addon, persist=False):
+    """Keep tutorial-owned voices intact; release films use their saved run narrator."""
+    if (core.load(Path(run) / 'sources.json') or {}).get('mode') == 'tutorial':
+        return addon
+    return narrator_pool.for_run(run, addon, persist=persist)
+
+
 def narration_jobs(run, story, addon, root):
     """Build the complete nonsecret cache identity for each chapter's speech and word captions."""
     said = language.texts(core.load(Path(run) / 'sources.json') or {})
@@ -184,7 +192,7 @@ def narration_jobs(run, story, addon, root):
     reference = VOXCPM / f"narrator-{said['code']}.wav"
     provider = {}
     if selected == 'elevenlabs':
-        provider = voice_provider.elevenlabs_config(addon, said['code'])
+        provider = voice_provider.elevenlabs_config(narration_addon(run, addon), said['code'])
         narrator = provider.pop('voice')
     elif selected == 'voxcpm':
         narrator = str(reference)
@@ -213,6 +221,8 @@ def narrate(run, story, addon, root=None):
     reference = VOXCPM / f"narrator-{said['code']}.wav"
     if voice == 'voxcpm' and not (voice_ready() and reference.is_file()):
         raise SystemExit(f"VoxCPM2 speaks, but its {said['name']} narrator is not set up here: film.py voice-setup")
+    if voice == 'elevenlabs':
+        narration_addon(run, addon, persist=True)
     jobs = narration_jobs(run, story, addon, root)
     done = root / 'done.json'
     cached = core.load(done) or {}
@@ -237,7 +247,7 @@ def narrate(run, story, addon, root=None):
             raise SystemExit(f'narration failed: {failed}')
         for job in todo:
             paced(core.tool('ffmpeg') or 'ffmpeg', job['out'], job['sentences'],
-                  lossless=job.get('audio_profile') == 'pcm-48000-v1')
+                  lossless=job.get('audio_profile') == 'pcm-48000-v1', clip_tail=voice == 'elevenlabs')
         before.update({job['out']: (job, result) for job, result in zip(todo, results)})
     results = [before[job['out']][1] for job in jobs]
     core.save(done, {'jobs': jobs, 'results': results})
@@ -334,10 +344,25 @@ def narration_audio(folder):
     return lossless if lossless.is_file() else Path(folder) / 'audio.mp3'
 
 
-def paced(ffmpeg, folder, sentences, lossless=False):
+def bound_voice_captions(folder):
+    """Keep provider caption tails inside actual audio without truncating speech or losing words."""
+    folder = Path(folder)
+    duration = int(audio_seconds(folder / 'audio.mp3') * 1000) / 1000
+    path = folder / 'subtitles.srt'
+    words = montage.words_from_srt(path.read_text(encoding='utf-8'))
+    if not words or any(start >= duration for start, _, _ in words):
+        raise ValueError('Narration has word captions entirely outside its audio')
+    bounded = [(start, min(end, duration), text) for start, end, text in words]
+    if words != bounded:
+        path.write_text(montage.shifted_srt(bounded, []), encoding='utf-8')
+
+
+def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
     """The narration in ``folder`` (audio.mp3 and its word SRT) with at least PAUSE between two sentences: the silence
     goes in halfway between one sentence's last word and the next one's first, and the words after it move."""
     folder = Path(folder)
+    if clip_tail:
+        bound_voice_captions(folder)
     words = montage.words_from_srt((folder / 'subtitles.srt').read_text(encoding='utf-8'))
     starts, ends = montage.sentence_starts(words, sentences), montage.sentence_ends(words, sentences)
     silences = [(round((ends[i - 1] + starts[i]) / 2, 3), round(PAUSE - (starts[i] - ends[i - 1]), 3))
@@ -362,6 +387,8 @@ def paced(ffmpeg, folder, sentences, lossless=False):
     (folder / 'paced.srt').write_text(montage.shifted_srt(words, silences), encoding='utf-8')
     (folder / 'paced.mp3').replace(folder / 'audio.mp3')
     (folder / 'paced.srt').replace(folder / 'subtitles.srt')
+    if clip_tail:
+        bound_voice_captions(folder)
 
 
 def retime(ffmpeg, audio, srt, words, silences, folder):

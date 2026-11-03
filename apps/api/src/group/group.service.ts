@@ -6,10 +6,18 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import {
+  AUTOMATION_EVENT_KINDS,
+  COURSE_ENROLLMENT,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { and, countDistinct, eq, getTableColumns, inArray, isNull, or, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
+import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import {
@@ -31,10 +39,11 @@ import {
 } from "src/events";
 import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { GroupSortFields } from "src/group/group.schema";
+import { GroupMembershipAssignmentRepository } from "src/group/repositories/group-membership-assignment.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
-import { groupCourses, groups, groupUsers, studentCourses, users } from "src/storage/schema";
+import { groupCourses, groups, groupUsers, studentCourses } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 
 import type { SQL } from "drizzle-orm";
@@ -66,6 +75,7 @@ export class GroupService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly permissionsService: PermissionsService,
     private readonly localizationService: LocalizationService,
+    private readonly groupMembershipAssignmentRepository: GroupMembershipAssignmentRepository,
   ) {}
 
   public async getAllGroups(
@@ -498,53 +508,68 @@ export class GroupService {
     trx: DatabasePg,
   ): Promise<UserGroupAssignmentResult> {
     const requestedGroupIds = [...new Set(groupIds)];
-
-    const userGroups = await trx
-      .select({ tenantId: users.tenantId, groupId: groupUsers.groupId })
-      .from(users)
-      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
-      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
-
-    const user = userGroups[0];
+    const userMemberships =
+      await this.groupMembershipAssignmentRepository.findUserWithGroupMemberships(userId, trx);
+    const user = userMemberships[0];
 
     if (!user) throw new NotFoundException("adminUserView.error.userNotFound");
 
-    if (requestedGroupIds.length) {
-      const existingGroups = await trx
-        .select({ id: groups.id })
-        .from(groups)
-        .where(inArray(groups.id, requestedGroupIds));
+    const language =
+      user.language && isSupportedLanguage(user.language) ? user.language : SUPPORTED_LANGUAGES.EN;
 
-      if (existingGroups.length !== requestedGroupIds.length) {
-        throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
-      }
+    const requestedGroups = await this.groupMembershipAssignmentRepository.findGroupsByIds(
+      requestedGroupIds,
+      user.tenantId,
+      language,
+      trx,
+    );
+
+    if (requestedGroups.length !== requestedGroupIds.length) {
+      throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
     }
 
     const currentGroupIds = new Set(
-      userGroups.flatMap(({ groupId }) => (groupId ? [groupId] : [])),
+      userMemberships.flatMap(({ groupId }) => (groupId ? [groupId] : [])),
     );
     const requestedGroupIdSet = new Set(requestedGroupIds);
-
-    const groupIdsToAssign = requestedGroupIds.filter((groupId) => !currentGroupIds.has(groupId));
+    const groupIdsToInsert = requestedGroupIds.filter((groupId) => !currentGroupIds.has(groupId));
     const groupIdsToRemove = [...currentGroupIds].filter(
       (groupId) => !requestedGroupIdSet.has(groupId),
     );
 
-    if (groupIdsToRemove.length) {
-      await trx
-        .delete(groupUsers)
-        .where(and(eq(groupUsers.userId, userId), inArray(groupUsers.groupId, groupIdsToRemove)));
-    }
+    await this.groupMembershipAssignmentRepository.deleteUserGroupMemberships(
+      userId,
+      groupIdsToRemove,
+      trx,
+    );
 
-    if (groupIdsToAssign.length) {
-      await trx
-        .insert(groupUsers)
-        .values(groupIdsToAssign.map((groupId) => ({ userId, groupId })))
-        .onConflictDoNothing();
+    const insertedMemberships =
+      await this.groupMembershipAssignmentRepository.insertUserGroupMemberships(
+        userId,
+        groupIdsToInsert,
+        user.tenantId,
+        trx,
+      );
+
+    const assignedGroupIds = insertedMemberships.map(({ groupId }) => groupId);
+    const newlyAssignedGroups = requestedGroups.filter((group) =>
+      assignedGroupIds.includes(group.id),
+    );
+
+    for (const group of newlyAssignedGroups) {
+      await this.outboxPublisher.publishDurable(
+        createUserNotificationEvent({
+          kind: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP,
+          user,
+          language,
+          eventFields: { group_id: group.id, group_name: group.name },
+        }),
+        trx,
+      );
     }
 
     return {
-      groupIdsToAssign,
+      groupIdsToAssign: assignedGroupIds,
       groupIdsToRemove,
     };
   }

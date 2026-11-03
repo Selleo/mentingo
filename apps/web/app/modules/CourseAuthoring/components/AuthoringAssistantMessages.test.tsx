@@ -9,6 +9,7 @@ import {
   authoringMessagesFromTurns,
   canonicalAuthoringTurns,
 } from "../authoringConversation";
+import { applyAuthoringEvent } from "../courseAuthoring.events";
 import { projectWorkspaceRecords } from "../courseAuthoring.records";
 
 import { AuthoringAssistantMessages } from "./AuthoringAssistantMessages";
@@ -55,6 +56,80 @@ const authoringPart = (
 });
 
 describe("AuthoringAssistantMessages", () => {
+  it("shows an autonomous application failure during live replay and after reopening", () => {
+    const requestId = "request-1";
+    const text = "The application status could not be confirmed. Check the course before retrying.";
+    const request: AuthoringRecord = {
+      id: "request-record",
+      kind: "request",
+      payload: { requestId, instruction: "Create a course", createdAt: "2026-10-28T20:00:00Z" },
+    };
+    const assistant: AuthoringRecord = {
+      id: "assistant-record",
+      kind: "assistant",
+      payload: { requestId, route: "generation", message: text, partId: "failure-part" },
+    };
+    const base = {
+      schemaVersion: 1 as const,
+      sessionId: "session-1",
+      courseId: "course-1",
+      language: "en" as const,
+      status: "active" as const,
+      snapshotSequence: 1,
+      workspaceRevision: 1,
+      records: [request],
+      tasks: [],
+    };
+    const live = applyAuthoringEvent(base, {
+      schemaVersion: 1,
+      eventId: "event-2",
+      sessionId: "session-1",
+      sequence: 2,
+      occurredAt: "2026-10-28T20:01:00Z",
+      type: "assistant.message",
+      payload: {
+        requestId,
+        message: text,
+        recordId: assistant.id,
+        turn: {
+          requestId,
+          messageId: `${requestId}-assistant`,
+          status: "completed",
+          taskIds: [],
+          firstSequence: 1,
+          updatedSequence: 2,
+          part: {
+            requestId,
+            messageId: `${requestId}-assistant`,
+            partId: "failure-part",
+            partKind: "text",
+            taskId: null,
+            status: "completed",
+            firstSequence: 2,
+            updatedSequence: 2,
+            text,
+          },
+        },
+      },
+    });
+    const renderMessages = (records: AuthoringRecord[], turns: AuthoringTurn[]) => {
+      const projection = projectWorkspaceRecords(records);
+      return authoringMessagesFromTurns(canonicalAuthoringTurns(turns, projection.conversation));
+    };
+    const rendered = renderWith().render(
+      <AuthoringAssistantMessages chatMessages={renderMessages(live.records, live.turns ?? [])} />,
+    );
+    expect(screen.getByText(text)).toBeVisible();
+    const reopenedRecords = [request, assistant];
+    expect(projectWorkspaceRecords(reopenedRecords).assistantMessages[0]?.message).toBe(text);
+    rendered.rerender(
+      <AuthoringAssistantMessages
+        chatMessages={renderMessages(reopenedRecords, live.turns ?? [])}
+      />,
+    );
+    expect(screen.getByText(text)).toBeVisible();
+  });
+
   it("keeps uploaded source chips on the exact durable user turn", () => {
     const source: SourceView = {
       id: "source-1",

@@ -1,9 +1,9 @@
 # App-wide self-onboarding coverage
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
-The catalog covers all 29 user-facing route areas and the 58 app business specifications currently
-in `docs/specs`. It contains 207 explicit flows, assigned exactly once to 86 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 172
+The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
+in `docs/specs`. It contains 222 explicit flows, assigned exactly once to 91 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 182
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -44,6 +44,8 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `activity-logs` | 2 | 1 | `activity-logs` |
 | `ai-conversations` | 2 | 1 | `ai-conversations` |
 | `tenants` | 5 | 2 | `tenant-administration` |
+
+| `competencies` | 15 | 5 | `competencies` |
 
 ## Evidence and boundaries
 
@@ -86,6 +88,8 @@ an isolated room service with fake media. Billing/promotion flows use test mode 
 real account. Environment settings and integration keys use disposable dummy values; raw keys and
 credentials must be masked or cut from public footage. Tenant, user and resource deletion operate
 only on explicitly disposable synthetic targets. Mail links use the isolated mail viewer.
+
+Competencies recordings require an entitled isolated tenant connected to the competencies plugin and synthetic evidence, with real permission and verifier boundaries.
 
 Missing prerequisites must produce an explicit failed/skipped flow in build reports, with other
 independent flows continuing. They must never produce fabricated browser success, omit the flow

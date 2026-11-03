@@ -1,5 +1,6 @@
 import {
   AI_THREAD_STATUSES,
+  AI_CONVERSATION_SOURCES,
   AI_THREAD_TYPES,
   ASSISTANT_MESSAGE_ROLES,
   ASSISTANT_MESSAGE_STATUSES,
@@ -30,6 +31,8 @@ export const adminAiThreadQuerySchema = Type.Object({
 export const adminAiThreadSummarySchema = Type.Object({
   id: UUIDSchema,
   type: adminAiThreadTypeSchema,
+  source: Type.Optional(Type.Enum(AI_CONVERSATION_SOURCES)),
+  integrationId: Type.Optional(nullableString),
   practiceSessionId: nullableId,
   aiMentorLessonId: nullableId,
   lessonId: nullableId,
@@ -37,12 +40,15 @@ export const adminAiThreadSummarySchema = Type.Object({
   courseTitle: nullableString,
   title: Type.String(),
   openingPreview: nullableString,
-  owner: Type.Object({
-    id: UUIDSchema,
-    firstName: Type.String(),
-    lastName: Type.String(),
-    profilePictureUrl: nullableString,
-  }),
+  owner: Type.Union([
+    Type.Null(),
+    Type.Object({
+      id: UUIDSchema,
+      firstName: Type.String(),
+      lastName: Type.String(),
+      profilePictureUrl: nullableString,
+    }),
+  ]),
   status: Type.Enum(AI_THREAD_STATUSES),
   language: Type.String(),
   createdAt: Type.String(),
@@ -79,6 +85,8 @@ export const adminAiThreadMessageSchema = Type.Object({
   id: UUIDSchema,
   role: Type.Enum(ASSISTANT_MESSAGE_ROLES),
   content: Type.String(),
+  participantId: Type.Optional(nullableString),
+  participantName: Type.Optional(nullableString),
   status: Type.Optional(Type.Enum(ASSISTANT_MESSAGE_STATUSES)),
   createdAt: Type.String(),
 });

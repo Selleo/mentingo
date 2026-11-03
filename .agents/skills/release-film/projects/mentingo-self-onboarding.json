@@ -8545,6 +8545,549 @@
           ]
         }
       ]
+    },
+    {
+      "key": "competencies.guide",
+      "domain": "competencies",
+      "title": "Competencies",
+      "description": "Maintain competency requirements, provide evidence and review readiness.",
+      "specPaths": [
+        "docs/specs/competencies-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Competencies/**",
+        "apps/api/src/competencies/**"
+      ],
+      "flows": [
+        {
+          "id": "categories",
+          "title": "Manage competency categories",
+          "description": "Manage competency categories in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Manage competency categories.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open Setup and create a synthetic category.",
+            "Rename the category and save it.",
+            "Delete only an unused disposable category after confirmation."
+          ],
+          "outcomes": [
+            "The category list reflects saved changes."
+          ]
+        },
+        {
+          "id": "competency-conditions",
+          "title": "Define competencies and level conditions",
+          "description": "Define competencies and level conditions in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Define competencies and level conditions.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Create a competency and select its category.",
+            "Add ordered named levels with course, document and observation conditions.",
+            "Assign designated verifiers to manual conditions and save."
+          ],
+          "outcomes": [
+            "Saved levels and their conditions are visible in the editor."
+          ]
+        },
+        {
+          "id": "delete-competency",
+          "title": "Delete a disposable competency",
+          "description": "Delete a disposable competency in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Delete a disposable competency.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open a synthetic disposable competency.",
+            "Read the permanent deletion warning and confirm deletion."
+          ],
+          "outcomes": [
+            "The deleted competency is absent from the current catalog."
+          ]
+        },
+        {
+          "id": "job-profiles",
+          "title": "Create and update job profiles",
+          "description": "Create and update job profiles in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Create and update job profiles.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Create a named job profile.",
+            "Add competencies with their required levels and save.",
+            "Edit a required level and save the active profile."
+          ],
+          "outcomes": [
+            "The saved profile displays its required competencies and levels."
+          ]
+        },
+        {
+          "id": "assign-profile",
+          "title": "Assign and clear a person’s job profile",
+          "description": "Assign and clear a person’s job profile in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Assign and clear a person’s job profile.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open a synthetic employee in Overview.",
+            "Assign an active job profile and inspect requirements.",
+            "Clear the profile assignment."
+          ],
+          "outcomes": [
+            "The person’s view reflects the current assignment or its absence."
+          ]
+        },
+        {
+          "id": "delete-profile",
+          "title": "Delete an unassigned job profile",
+          "description": "Delete an unassigned job profile in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Delete an unassigned job profile.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Select a disposable unassigned profile.",
+            "Confirm deletion from its editor."
+          ],
+          "outcomes": [
+            "The profile is removed without deleting unrelated employee evidence."
+          ]
+        },
+        {
+          "id": "my-competencies",
+          "title": "Inspect personal competency requirements",
+          "description": "Inspect personal competency requirements in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Inspect personal competency requirements.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open My Competencies.",
+            "Expand a competency and inspect level conditions.",
+            "Follow a linked course requirement."
+          ],
+          "outcomes": [
+            "The employee can distinguish fulfilled and missing requirements."
+          ]
+        },
+        {
+          "id": "submit-document",
+          "title": "Submit a document for designated review",
+          "description": "Submit a document for designated review in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Submit a document for designated review.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open a required document condition.",
+            "Write a note and optionally attach a synthetic document.",
+            "Submit the evidence and inspect its pending status."
+          ],
+          "outcomes": [
+            "The submission is pending and cannot be duplicated for the same condition."
+          ]
+        },
+        {
+          "id": "review-documents",
+          "title": "Approve or reject assigned evidence",
+          "description": "Approve or reject assigned evidence in Mentingo.",
+          "audiences": [
+            "verifier"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Approve or reject assigned evidence.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open Approvals as the designated verifier.",
+            "Inspect another synthetic employee’s pending document.",
+            "Approve or reject it with the required reason."
+          ],
+          "outcomes": [
+            "The reviewed submission shows the resulting decision."
+          ]
+        },
+        {
+          "id": "record-observation",
+          "title": "Confirm an assigned observation",
+          "description": "Confirm an assigned observation in Mentingo.",
+          "audiences": [
+            "verifier"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Confirm an assigned observation.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Choose another active person in Approvals.",
+            "Open an observation condition assigned to this verifier.",
+            "Record and confirm an observation with its date and note."
+          ],
+          "outcomes": [
+            "The observation decision is visible for the selected person."
+          ]
+        },
+        {
+          "id": "recognize-conditions",
+          "title": "Recognize prior qualifications",
+          "description": "Recognize prior qualifications in Mentingo.",
+          "audiences": [
+            "verifier"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Recognize prior qualifications.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Select current manual conditions within the verifier’s authority.",
+            "Record the recognition decision, evidence and dates.",
+            "Save the decision."
+          ],
+          "outcomes": [
+            "The recognized conditions display their confirmation and retained decision details."
+          ]
+        },
+        {
+          "id": "revoke-evidence",
+          "title": "Revoke an authorized confirmation",
+          "description": "Revoke an authorized confirmation in Mentingo.",
+          "audiences": [
+            "verifier"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Revoke an authorized confirmation.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open another person’s confirmation for an assigned condition.",
+            "Provide a revocation reason and confirm it."
+          ],
+          "outcomes": [
+            "The evidence history retains the revocation and reason."
+          ]
+        },
+        {
+          "id": "team-matrix",
+          "title": "Inspect team requirements and matrix",
+          "description": "Inspect team requirements and matrix in Mentingo.",
+          "audiences": [
+            "manager"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Inspect team requirements and matrix.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open My team and select a person.",
+            "Inspect the person’s missing and expiring requirements.",
+            "Open the matrix and compare selected competency requirements."
+          ],
+          "outcomes": [
+            "The manager sees only currently authorized people and their actual requirement gaps."
+          ]
+        },
+        {
+          "id": "override-condition",
+          "title": "Apply and restore an administrative condition override",
+          "description": "Apply and restore an administrative condition override in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Apply and restore an administrative condition override.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open a synthetic person’s competency condition.",
+            "Apply a reasoned met or unmet override.",
+            "Restore automatic evaluation with a comment."
+          ],
+          "outcomes": [
+            "The view distinguishes the current evaluation from retained decision history."
+          ]
+        },
+        {
+          "id": "expiry-reminders",
+          "title": "Configure expiry reminders",
+          "description": "Configure expiry reminders in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "competencies"
+          ],
+          "specPaths": [
+            "docs/specs/competencies-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Competencies/**",
+            "apps/api/src/competencies/**"
+          ],
+          "goal": "Configure expiry reminders.",
+          "preconditions": [
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
+          ],
+          "actions": [
+            "Open Settings and its expiry-warning section.",
+            "Configure the available reminder settings and save."
+          ],
+          "outcomes": [
+            "The saved configuration reflects the selected reminder options."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "competencies.catalog",
+          "title": "Maintain categories and competency definitions",
+          "description": "Maintain categories and competency definitions in Mentingo.",
+          "flowIds": [
+            "categories",
+            "competency-conditions",
+            "delete-competency"
+          ]
+        },
+        {
+          "key": "competencies.profiles",
+          "title": "Maintain and assign job profiles",
+          "description": "Maintain and assign job profiles in Mentingo.",
+          "flowIds": [
+            "job-profiles",
+            "assign-profile",
+            "delete-profile"
+          ]
+        },
+        {
+          "key": "competencies.documents",
+          "title": "Inspect requirements and submit or review documents",
+          "description": "Inspect requirements and submit or review documents in Mentingo.",
+          "flowIds": [
+            "my-competencies",
+            "submit-document",
+            "review-documents"
+          ]
+        },
+        {
+          "key": "competencies.verification",
+          "title": "Record, recognize and revoke confirmations",
+          "description": "Record, recognize and revoke confirmations in Mentingo.",
+          "flowIds": [
+            "record-observation",
+            "recognize-conditions",
+            "revoke-evidence"
+          ]
+        },
+        {
+          "key": "competencies.management",
+          "title": "Inspect teams and manage evaluation settings",
+          "description": "Inspect teams and manage evaluation settings in Mentingo.",
+          "flowIds": [
+            "team-matrix",
+            "override-condition",
+            "expiry-reminders"
+          ]
+        }
+      ]
     }
   ]
 }

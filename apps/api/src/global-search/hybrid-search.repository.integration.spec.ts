@@ -423,7 +423,123 @@ integration("HybridSearchRepository real PostgreSQL integration", () => {
     ]);
   });
 
-  it("searches only current safe learner chunks and excludes quiz, resource and raw HTML sources", async () => {
+  it("finds a learner lesson through its indexed attachment filename without a body match", async () => {
+    const resourceId = await attachment();
+    await fixtureDb.execute(sql`UPDATE search_chunks SET content = 'policy.pdf policy.pdf',
+      search_vector = to_tsvector('simple', 'policy.pdf policy.pdf')
+      WHERE metadata->>'resourceId' = ${resourceId}`);
+    await enterTenantRole();
+    const matches = await repository.findKeywordMatches(
+      SEARCH_ENTITY_TYPES.LESSON,
+      "policy",
+      actor,
+      false,
+      true,
+    );
+    expect(matches).toEqual([
+      expect.objectContaining({
+        entityId: lessonId,
+        matchedAttachmentFileName: "policy.pdf",
+        matchedPassage: "policy.pdf policy.pdf",
+      }),
+    ]);
+  });
+
+  it.each([
+    ["published", 0, false, true],
+    ["published", 2500, false, false],
+    ["published", 2500, true, true],
+    ["private", 0, false, false],
+    ["private", 0, true, true],
+    ["draft", 0, true, false],
+  ])(
+    "searches learner attachment passages only with course access (%s, price=%s, enrolled=%s)",
+    async (status, price, enrolled, allowed) => {
+      actor.permissions.push(PERMISSIONS.COURSE_READ_ASSIGNED);
+      await attachment();
+      await fixtureDb.execute(
+        sql`UPDATE courses SET status = ${status}, price_in_cents = ${price} WHERE id = ${courseId}`,
+      );
+      if (enrolled) {
+        await fixtureDb.execute(sql`INSERT INTO student_courses (tenant_id, student_id, course_id, status)
+        VALUES (${tenantId}, ${actor.userId}, ${courseId}, ${COURSE_ENROLLMENT.ENROLLED})`);
+      }
+      await enterTenantRole();
+      const keyword = await repository.findKeywordMatches(
+        SEARCH_ENTITY_TYPES.LESSON,
+        "travel",
+        actor,
+        false,
+        true,
+      );
+      const semantic = await repository.findSemanticMatches(
+        SEARCH_ENTITY_TYPES.LESSON,
+        queryVector,
+        actor,
+        false,
+        true,
+      );
+      for (const matches of [keyword, semantic]) {
+        expect(matches.map((match) => match.entityId)).toEqual(allowed ? [lessonId] : []);
+        if (allowed) {
+          expect(matches[0].matchedAttachmentFileName).toBe("policy.pdf");
+          expect(matches[0].matchedPassage).toContain("travel");
+        }
+      }
+    },
+  );
+
+  it.each([
+    "hidden",
+    "private",
+    "archived",
+    "detached",
+    "cover",
+    "foreign-binding",
+    "stale",
+    "archived-course",
+    "foreign-actor",
+  ])("excludes inaccessible or stale learner attachment sources (%s)", async (reason) => {
+    const resourceId = await attachment();
+    if (reason === "hidden" || reason === "private")
+      await fixtureDb.execute(
+        sql`UPDATE resources SET visibility = ${reason === "hidden" ? RESOURCE_VISIBILITY.HIDDEN : RESOURCE_VISIBILITY.PRIVATE} WHERE id = ${resourceId}`,
+      );
+    if (reason === "archived")
+      await fixtureDb.execute(sql`UPDATE resources SET archived = true WHERE id = ${resourceId}`);
+    if (reason === "detached")
+      await fixtureDb.execute(sql`DELETE FROM resource_entity WHERE resource_id = ${resourceId}`);
+    if (reason === "cover")
+      await fixtureDb.execute(
+        sql`UPDATE resource_entity SET relationship_type = 'cover' WHERE resource_id = ${resourceId}`,
+      );
+    if (reason === "foreign-binding")
+      await fixtureDb.execute(
+        sql`UPDATE resource_entity SET tenant_id = ${otherTenantId} WHERE resource_id = ${resourceId}`,
+      );
+    if (reason === "stale")
+      await fixtureDb.execute(
+        sql`UPDATE search_documents SET content = 'Changed source' WHERE metadata->>'resourceId' = ${resourceId}`,
+      );
+    if (reason === "archived-course")
+      await fixtureDb.execute(sql`UPDATE courses SET is_archived = true WHERE id = ${courseId}`);
+    if (reason === "foreign-actor") actor = { ...actor, tenantId: otherTenantId };
+    await enterTenantRole();
+    expect(
+      await repository.findKeywordMatches(SEARCH_ENTITY_TYPES.LESSON, "travel", actor, false, true),
+    ).toEqual([]);
+    expect(
+      await repository.findSemanticMatches(
+        SEARCH_ENTITY_TYPES.LESSON,
+        queryVector,
+        actor,
+        false,
+        true,
+      ),
+    ).toEqual([]);
+  });
+
+  it("searches only current safe learner chunks and excludes quiz, unbound resource and raw HTML sources", async () => {
     await fixtureDb.execute(
       sql`UPDATE lessons SET type = ${LESSON_TYPES.CONTENT} WHERE id = ${lessonId}`,
     );

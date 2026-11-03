@@ -32,6 +32,8 @@ export {
   Building,
   MailWarning,
   MessagesSquare,
+  ShieldCheck,
+  Milestone,
   Store,
   User,
   Users,
@@ -90,6 +92,7 @@ export { default as Timeline } from "./timeline.svg?react";
 export { default as Route } from "./route.svg?react";
 export { default as FileChartColumnIncreasing } from "./file-chart-column-increasing.svg?react";
 export { default as Categories } from "./categories.svg?react";
+export { Gem } from "lucide-react";
 
 export { SegmentedRing } from "./segmented-ring";
 

@@ -759,6 +759,7 @@ Base test:
   existing helper or UI can prepare real records, report the missing data setup and stop; do not reproduce the mock
   or improvise database writes. Only the film runner owns the runtime and database lifecycle.
 {fixture_instructions}
+{recording_instructions}
 - The viewer must see the change itself, not just its screen: create the data that makes it visible (a value with a
   fraction when the change rounds numbers, an entry over the limit when the change adds a limit, an old and a new state
   when the change hides something; the records a screen sums or lists, such as invoices, entries or tasks: a screen of
@@ -901,6 +902,7 @@ def briefs(run, gaps, sources, recipe, roots):
             label_example=said['label_example'], variety=said['variety'], screen_words=said['screen_words'],
             reloaded=said['quotes'][0] + said['reloaded'] + said['quotes'][1],
             fixture_instructions=fixture_instructions,
+            recording_instructions=recipe.get('recording_instructions', ''),
             base_source='\n'.join(source[:260]) + ('\n// … (shortened)' if len(source) > 260 else ''),
             knowledge=knowledge.recall(sources['repo'], gap),
             cover=f'`{picture}` is a 1280×720 cover you may use' if picture else 'the project\'s own test image',

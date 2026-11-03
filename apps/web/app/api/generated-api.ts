@@ -202,6 +202,8 @@ export interface CurrentUserResponse {
     profilePictureUrl: string | null;
     roleSlugs: string[];
     permissions: (
+      | "competencies.use"
+      | "competencies.manage"
       | "phishing.manage"
       | "phishing.report_read"
       | "content_marketplace.browse"
@@ -7793,6 +7795,8 @@ export interface GetAdminAiThreadSummariesResponse {
     /** @format uuid */
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
+    source?: "mentingo" | "slack" | "discord" | "whatsapp";
+    integrationId?: string | null;
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7800,7 +7804,7 @@ export interface GetAdminAiThreadSummariesResponse {
     courseTitle: string | null;
     title: string;
     openingPreview: string | null;
-    owner: {
+    owner: null | {
       /** @format uuid */
       id: string;
       firstName: string;
@@ -7825,6 +7829,8 @@ export interface GetAdminAiThreadDetailsResponse {
     /** @format uuid */
     id: string;
     type: "practice" | "ai-mentor" | "assistant";
+    source?: "mentingo" | "slack" | "discord" | "whatsapp";
+    integrationId?: string | null;
     practiceSessionId: string | null;
     aiMentorLessonId: string | null;
     lessonId: string | null;
@@ -7832,7 +7838,7 @@ export interface GetAdminAiThreadDetailsResponse {
     courseTitle: string | null;
     title: string;
     openingPreview: string | null;
-    owner: {
+    owner: null | {
       /** @format uuid */
       id: string;
       firstName: string;
@@ -7872,6 +7878,8 @@ export interface GetAdminAiThreadMessagesResponse {
     id: string;
     role: "user" | "assistant";
     content: string;
+    participantId?: string | null;
+    participantName?: string | null;
     status?: "pending" | "running" | "complete" | "failed" | "cancelled";
     createdAt: string;
   }[];
@@ -9133,6 +9141,7 @@ export interface ListEmailTemplateEventsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -10180,6 +10189,7 @@ export interface DuplicateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -11220,6 +11230,7 @@ export interface ListEmailTemplatesResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -12266,6 +12277,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -13306,6 +13318,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -14346,6 +14359,7 @@ export interface GetEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -15371,6 +15385,7 @@ export interface CreateEmailTemplateBody {
     | "user_invite"
     | "user_first_login"
     | "user_assigned_to_course"
+    | "user_assigned_to_group"
     | "user_short_inactivity"
     | "user_long_inactivity"
     | "user_finished_chapter"
@@ -16369,6 +16384,7 @@ export interface CreateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -17395,6 +17411,7 @@ export interface UpdateEmailTemplateBody {
         | "user_invite"
         | "user_first_login"
         | "user_assigned_to_course"
+        | "user_assigned_to_group"
         | "user_short_inactivity"
         | "user_long_inactivity"
         | "user_finished_chapter"
@@ -18392,6 +18409,7 @@ export interface UpdateEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -19437,6 +19455,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -20484,6 +20503,7 @@ export interface PublishEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -21524,6 +21544,7 @@ export interface ArchiveEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -22568,6 +22589,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -23608,6 +23630,7 @@ export interface RestoreEmailTemplateResponse {
           | "user_invite"
           | "user_first_login"
           | "user_assigned_to_course"
+          | "user_assigned_to_group"
           | "user_short_inactivity"
           | "user_long_inactivity"
           | "user_finished_chapter"
@@ -25642,6 +25665,11 @@ export interface ListAutomationsResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -25662,6 +25690,7 @@ export interface ListAutomationsResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -25793,6 +25822,11 @@ export interface ListAutomationsResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -25813,6 +25847,7 @@ export interface ListAutomationsResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -25948,6 +25983,7 @@ export interface ListAutomationEventsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -26110,6 +26146,11 @@ export interface ListBuiltInAutomationTemplatesResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26130,6 +26171,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -26255,6 +26297,11 @@ export interface SimulateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26275,6 +26322,7 @@ export interface SimulateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -26404,6 +26452,7 @@ export interface SimulateAutomationResponse {
         | "missing_action"
         | "missing_condition_field"
         | "missing_event"
+        | "missing_group"
         | "missing_mapping"
         | "missing_parent"
         | "missing_template"
@@ -26521,6 +26570,11 @@ export interface CreateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -26541,6 +26595,7 @@ export interface CreateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -26670,6 +26725,11 @@ export interface CreateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26690,6 +26750,7 @@ export interface CreateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -26821,6 +26882,11 @@ export interface CreateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -26841,6 +26907,7 @@ export interface CreateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -26974,6 +27041,11 @@ export interface CreateAutomationFromTemplateResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -26994,6 +27066,7 @@ export interface CreateAutomationFromTemplateResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -27125,6 +27198,11 @@ export interface CreateAutomationFromTemplateResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27145,6 +27223,7 @@ export interface CreateAutomationFromTemplateResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -27278,6 +27357,11 @@ export interface GetAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27298,6 +27382,7 @@ export interface GetAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -27429,6 +27514,11 @@ export interface GetAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27449,6 +27539,7 @@ export interface GetAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -27581,6 +27672,11 @@ export interface UpdateAutomationBody {
              * @maxLength 200
              */
             field?: string;
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            equals?: string;
           };
         }
       | {
@@ -27601,6 +27697,7 @@ export interface UpdateAutomationBody {
                   | "user_invite"
                   | "user_first_login"
                   | "user_assigned_to_course"
+                  | "user_assigned_to_group"
                   | "user_short_inactivity"
                   | "user_long_inactivity"
                   | "user_finished_chapter"
@@ -27730,6 +27827,11 @@ export interface UpdateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -27750,6 +27852,7 @@ export interface UpdateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -27881,6 +27984,11 @@ export interface UpdateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -27901,6 +28009,7 @@ export interface UpdateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28041,6 +28150,11 @@ export interface DuplicateAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28061,6 +28175,7 @@ export interface DuplicateAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28192,6 +28307,11 @@ export interface DuplicateAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28212,6 +28332,7 @@ export interface DuplicateAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28345,6 +28466,11 @@ export interface ApplyAutomationBody {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28365,6 +28491,7 @@ export interface ApplyAutomationBody {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28495,6 +28622,11 @@ export interface ApplyAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28515,6 +28647,7 @@ export interface ApplyAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28646,6 +28779,11 @@ export interface ApplyAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28666,6 +28804,7 @@ export interface ApplyAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -28799,6 +28938,11 @@ export interface EnableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -28819,6 +28963,7 @@ export interface EnableAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -28950,6 +29095,11 @@ export interface EnableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -28970,6 +29120,7 @@ export interface EnableAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -29103,6 +29254,11 @@ export interface DisableAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -29123,6 +29279,7 @@ export interface DisableAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -29254,6 +29411,11 @@ export interface DisableAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29274,6 +29436,7 @@ export interface DisableAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -29407,6 +29570,11 @@ export interface ArchiveAutomationResponse {
                * @maxLength 200
                */
               field?: string;
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              equals?: string;
             };
           }
         | {
@@ -29427,6 +29595,7 @@ export interface ArchiveAutomationResponse {
                     | "user_invite"
                     | "user_first_login"
                     | "user_assigned_to_course"
+                    | "user_assigned_to_group"
                     | "user_short_inactivity"
                     | "user_long_inactivity"
                     | "user_finished_chapter"
@@ -29558,6 +29727,11 @@ export interface ArchiveAutomationResponse {
                  * @maxLength 200
                  */
                 field?: string;
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                equals?: string;
               };
             }
           | {
@@ -29578,6 +29752,7 @@ export interface ArchiveAutomationResponse {
                       | "user_invite"
                       | "user_first_login"
                       | "user_assigned_to_course"
+                      | "user_assigned_to_group"
                       | "user_short_inactivity"
                       | "user_long_inactivity"
                       | "user_finished_chapter"
@@ -29715,6 +29890,7 @@ export interface ListAutomationRunsResponse {
       | "user_invite"
       | "user_first_login"
       | "user_assigned_to_course"
+      | "user_assigned_to_group"
       | "user_short_inactivity"
       | "user_long_inactivity"
       | "user_finished_chapter"
@@ -29779,6 +29955,7 @@ export interface GetAutomationRunResponse {
         | "user_invite"
         | "user_first_login"
         | "user_assigned_to_course"
+        | "user_assigned_to_group"
         | "user_short_inactivity"
         | "user_long_inactivity"
         | "user_finished_chapter"
@@ -31840,6 +32017,56 @@ export interface GetConsentResponse {
   };
 }
 
+export interface AppendBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  integrationId: string;
+  source: "slack" | "discord" | "whatsapp";
+  /**
+   * @minLength 1
+   * @maxLength 500
+   */
+  threadKey: string;
+  /** @maxLength 200 */
+  title?: string;
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @maxItems 100
+   * @minItems 1
+   */
+  messages: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    externalId: string;
+    role: "user" | "assistant";
+    /**
+     * @minLength 1
+     * @maxLength 50000
+     */
+    text: string;
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    participantId?: string;
+    /** @maxLength 200 */
+    participantName?: string;
+    /** @format date-time */
+    createdAt: string;
+  }[];
+}
+
+export interface AppendResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
 export interface CreateArticleSectionBody {
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -32666,6 +32893,60 @@ export interface PhishingConnectionStatusResponse {
   };
 }
 
+export interface ConfigureCompetenciesConnectionBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  baseUrl: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  apiKey: string;
+}
+
+export interface ConfigureCompetenciesConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface CompetenciesConnectionStatusResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    reachable: boolean;
+    enabled: boolean;
+  };
+}
+
+export interface GetIntegrationLearningFactsResponse {
+  data: {
+    /** @format uuid */
+    subjectId: string;
+    /** @format uuid */
+    courseId: string;
+    revision: number;
+    facts: {
+      /** @format uuid */
+      courseId: string;
+      id: string;
+      revision: number;
+      /** @format uuid */
+      subjectId: string;
+      kind: "course";
+      /** @format uuid */
+      resourceId: string;
+      learningStateId: string | null;
+      occurredAt: string;
+      validUntil: string | null;
+      outcome: "passed" | "failed" | "revoked";
+    }[];
+  };
+}
+
 export interface GetTenantsResponse {
   data: {
     /** @format uuid */
@@ -32726,6 +33007,8 @@ export interface UpdateTenantResponse {
 
 export interface UpdateTenantApiKeysBody {
   name:
+    | "COMPETENCIES_API_KEY"
+    | "COMPETENCIES_BASE_URL"
     | "PHISHING_API_KEY"
     | "PHISHING_BASE_URL"
     | "PHISHING_WEBHOOK_SECRET"
@@ -32762,6 +33045,8 @@ export interface UpdateTenantApiKeysResponse {
     /** @format uuid */
     tenantId: string;
     updatedKeys: (
+      | "COMPETENCIES_API_KEY"
+      | "COMPETENCIES_BASE_URL"
       | "PHISHING_API_KEY"
       | "PHISHING_BASE_URL"
       | "PHISHING_WEBHOOK_SECRET"
@@ -33703,6 +33988,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -34131,6 +34417,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -34558,6 +34845,7 @@ export type SendAuthoringCommandBody =
          */
         instruction: string;
         reasoningEffort?: "low" | "medium" | "high";
+        executionMode?: "review" | "autonomous";
         targets: {
           /** @format uuid */
           targetId: string;
@@ -35426,6 +35714,36 @@ export interface GetPhishingOptionsResponse {
   };
 }
 
+export interface SearchPhishingOptionsResponse {
+  data: {
+    items: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    hasNextPage: boolean;
+  };
+}
+
+export interface CountPhishingAudienceBody {
+  /**
+   * @maxItems 10000
+   * @uniqueItems true
+   */
+  userIds: string[];
+  /**
+   * @maxItems 1000
+   * @uniqueItems true
+   */
+  groupIds: string[];
+}
+
+export interface CountPhishingAudienceResponse {
+  data: {
+    count: number;
+  };
+}
+
 export interface ListPhishingCampaignsResponse {
   data: {
     /** @format uuid */
@@ -35534,19 +35852,7 @@ export interface GetPhishingReportResponse {
         end: string;
       };
     };
-    recipients: {
-      /** @format uuid */
-      userId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      groupIds: string[];
-      sentAt: string | null;
-      clickedAt: string | null;
-      submittedAt: string | null;
-      failed: boolean;
-      courseStatus: string;
-    }[];
+    riskyAction: "clicked" | "submitted";
     totals: {
       recipients: number;
       sent: number;
@@ -35568,7 +35874,37 @@ export interface GetPhishingReportResponse {
         riskRate: number;
       };
     }[];
+    activity: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      action: "clicked" | "submitted";
+      at: string;
+    }[];
   };
+}
+
+export interface GetPhishingReportRecipientsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    groupIds: string[];
+    sentAt: string | null;
+    clickedAt: string | null;
+    submittedAt: string | null;
+    failed: boolean;
+    courseStatus: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface ConnectionProbeBody {
@@ -35581,6 +35917,754 @@ export interface ConnectionProbeBody {
 export interface ConnectionProbeResponse {
   data: {
     nonce: string;
+  };
+}
+
+export interface GetCompetenciesConfigurationResponse {
+  data: {
+    enabled: boolean;
+    canManage: boolean;
+    canPlan: boolean;
+  };
+}
+
+export interface GetCompetenciesSummaryResponse {
+  data: {
+    warningDays: number | null;
+    isVerifier: boolean;
+    pendingReviewCount: number;
+    setup: {
+      competencies: number;
+      profiles: number;
+      assignments: number;
+    };
+  };
+}
+
+export interface GetCompetencyCategoriesResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      revision: number;
+      competencyCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyCatalogResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+      profileCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyProfilesResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+      assignedPeopleCount: number;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export interface GetCompetencyPeopleResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      profileId: string | null;
+      profileName: string | null;
+      profilePictureUrl: string | null;
+      metCount: number;
+      requirementCount: number;
+      readiness: "no_profile" | "missing" | "expiring" | "met";
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    counts: {
+      all: number;
+      no_profile: number;
+      missing: number;
+      expiring: number;
+      met: number;
+    };
+  };
+}
+
+export interface GetCompetencyMatrixResponse {
+  data: {
+    data: {
+      person: {
+        /** @format uuid */
+        id: string;
+        name: string;
+      };
+      cells: {
+        /** @format uuid */
+        competencyId: string;
+        requiredLevelId: string;
+        currentLevelId: string | null;
+        met: boolean;
+        expiring: boolean;
+        metUntil: string | null;
+      }[];
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    profile: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+    };
+    competencies: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+    }[];
+  };
+}
+
+export interface GetCompetencyReviewsResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: object;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+      subjectName: string | null;
+      subjectProfilePictureUrl: string | null;
+      competencyName: string;
+      conditions: {
+        id: string;
+        kind: "course" | "document" | "observation";
+        description: string;
+        levelId: string;
+        levelName: string;
+        levelNumber: number;
+      }[];
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    counts: {
+      pending: number;
+      approved: number;
+      rejected: number;
+      revoked: number;
+    };
+  };
+}
+
+export interface GetCompetencyOptionsResponse {
+  data: {
+    courses: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+    people: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+export interface GetCompetencySubjectResponse {
+  data: {
+    asOf: string;
+    warningDays: number | null;
+    person: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      profilePictureUrl: string | null;
+    } | null;
+    profile: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      name: string;
+      description: string;
+      requirements: {
+        /** @format uuid */
+        competencyId: string;
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        levelId: string;
+      }[];
+    } | null;
+    assessment: {
+      /** @format uuid */
+      subjectId: string;
+      profileId: string | null;
+      profileRevision: number | null;
+      asOf: string;
+      coverage: number | null;
+      metCount: number;
+      requirementCount: number;
+      readiness: "no_profile" | "missing" | "expiring" | "met";
+      requirements: {
+        requirement: {
+          /** @format uuid */
+          competencyId: string;
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          levelId: string;
+        };
+        met: boolean;
+        expiring: boolean;
+        standing: {
+          /** @format uuid */
+          competencyId: string;
+          attainedLevelId: string | null;
+          attainedLevelName: string | null;
+          currentLevelId: string | null;
+          effectiveFrom: string | null;
+          effectiveUntil: string | null;
+          expiring: boolean;
+          levels: {
+            levelId: string;
+            met: boolean;
+            metUntil: string | null;
+            conditions: {
+              conditionId: string;
+              met: boolean;
+              reason: ("missing" | "pending" | "expired" | "revoked" | "insufficient") | null;
+              evidenceIds: string[];
+              effectiveFrom: string | null;
+              effectiveUntil: string | null;
+            }[];
+          }[];
+        };
+      }[];
+    } | null;
+    competencies: {
+      /** @format uuid */
+      id: string;
+      revision: number;
+      archived: boolean;
+      name: string;
+      description: string;
+      categoryId: string | null;
+      levels: {
+        /**
+         * @minLength 1
+         * @maxLength 100
+         */
+        id: string;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        conditions: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          kind: "course" | "document" | "observation";
+          /**
+           * @minLength 1
+           * @maxLength 2000
+           */
+          description: string;
+          /** @format uuid */
+          resourceId?: string;
+          verifierIds?: string[];
+        }[];
+      }[];
+      categoryName: string | null;
+    }[];
+    standings: {
+      /** @format uuid */
+      competencyId: string;
+      attainedLevelId: string | null;
+      attainedLevelName: string | null;
+      currentLevelId: string | null;
+      effectiveFrom: string | null;
+      effectiveUntil: string | null;
+      expiring: boolean;
+      levels: {
+        levelId: string;
+        met: boolean;
+        metUntil: string | null;
+        conditions: {
+          conditionId: string;
+          met: boolean;
+          reason: ("missing" | "pending" | "expired" | "revoked" | "insufficient") | null;
+          evidenceIds: string[];
+          effectiveFrom: string | null;
+          effectiveUntil: string | null;
+        }[];
+      }[];
+    }[];
+    evidence: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: object;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    overrides: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      competencyRevision: number;
+      conditionId: string;
+      conditionRevision: string;
+      status: "met" | "automatic";
+      comment: string;
+      createdAt: string;
+      /** @format uuid */
+      createdBy: string;
+      isCurrent: boolean;
+    }[];
+    revocations: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      conditionIds: string[];
+      reason: string;
+      revokedAt: string;
+      /** @format uuid */
+      revokedBy: string;
+    }[];
+    canPlan: boolean;
+    people: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+export interface GetCompetencySubjectDocumentsResponse {
+  data: {
+    data: {
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @minItems 1 */
+      conditionIds: string[];
+      kind: "observation" | "document" | "recognition";
+      /** @format date-time */
+      occurredAt: string;
+      validUntil: string | null;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      note: string;
+      /** @format uuid */
+      attachmentId?: string;
+      /** @format uuid */
+      id: string;
+      version: number;
+      conditionRevisions: object;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      /** @format uuid */
+      createdBy: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+      reason: string | null;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+  };
+}
+
+export type ExecuteCompetenciesCommandBody =
+  | {
+      operation: "save_category";
+      /** @format uuid */
+      id?: string;
+      /** @min 1 */
+      revision?: number;
+      /**
+       * @minLength 1
+       * @maxLength 200
+       * @pattern \S
+       */
+      name: string;
+    }
+  | {
+      operation: "delete_category";
+      /** @format uuid */
+      id: string;
+      /** @min 1 */
+      revision: number;
+    }
+  | {
+      operation: "save_competency";
+      /** @format uuid */
+      id?: string;
+      /** @min 1 */
+      revision?: number;
+      value: {
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        /** @maxLength 10000 */
+        description: string;
+        categoryId: string | null;
+        levels: {
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          id: string;
+          /**
+           * @minLength 1
+           * @maxLength 200
+           */
+          name: string;
+          conditions: {
+            /**
+             * @minLength 1
+             * @maxLength 100
+             */
+            id: string;
+            kind: "course" | "document" | "observation";
+            /**
+             * @minLength 1
+             * @maxLength 2000
+             */
+            description: string;
+            /** @format uuid */
+            resourceId?: string;
+            verifierIds?: string[];
+          }[];
+        }[];
+      };
+    }
+  | {
+      operation: "delete_competency";
+      /** @format uuid */
+      id: string;
+      /** @min 1 */
+      revision: number;
+    }
+  | {
+      operation: "save_profile";
+      /** @format uuid */
+      id?: string;
+      /** @min 1 */
+      revision?: number;
+      value: {
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        name: string;
+        /** @maxLength 10000 */
+        description: string;
+        requirements: {
+          /** @format uuid */
+          competencyId: string;
+          /**
+           * @minLength 1
+           * @maxLength 100
+           */
+          levelId: string;
+        }[];
+      };
+    }
+  | {
+      operation: "delete_profile";
+      /** @format uuid */
+      id: string;
+      /** @min 1 */
+      revision: number;
+    }
+  | {
+      operation: "assign_profile";
+      /** @format uuid */
+      subjectId: string;
+      profileId: string | null;
+    }
+  | {
+      operation: "submit_evidence";
+      value: {
+        /** @format uuid */
+        requestId: string;
+        /** @format uuid */
+        subjectId: string;
+        /** @format uuid */
+        competencyId: string;
+        /** @minItems 1 */
+        conditionIds: string[];
+        kind: "observation" | "document" | "recognition";
+        /** @format date-time */
+        occurredAt: string;
+        validUntil: string | null;
+        /**
+         * @minLength 1
+         * @maxLength 10000
+         */
+        note: string;
+        /** @format uuid */
+        attachmentId?: string;
+      };
+    }
+  | {
+      operation: "review_evidence";
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @min 1 */
+      version: number;
+      decision: "approved" | "rejected" | "revoked";
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       * @pattern \S
+       */
+      reason: string;
+      /** @format uuid */
+      requestId: string;
+    }
+  | {
+      operation: "revoke_confirmation";
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @min 1 */
+      revision: number;
+      /** @minItems 1 */
+      conditionIds: string[];
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       * @pattern \S
+       */
+      reason: string;
+    }
+  | {
+      operation: "set_condition_override";
+      /** @format uuid */
+      requestId: string;
+      /** @format uuid */
+      subjectId: string;
+      /** @format uuid */
+      competencyId: string;
+      /** @min 1 */
+      revision: number;
+      conditionId: string;
+      status: "met" | "automatic";
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       * @pattern \S
+       */
+      comment: string;
+    }
+  | {
+      operation: "settings";
+      warningDays: number | null;
+    };
+
+export interface ExecuteCompetenciesCommandResponse {
+  data: {
+    id: string;
+  };
+}
+
+export interface UploadCompetenciesAttachmentResponse {
+  data: {
+    id: string;
   };
 }
 
@@ -44100,6 +45184,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ExternalConversationsControllerAppend
+     * @request POST:/api/mcp/external-conversations
+     */
+    externalConversationsControllerAppend: (data: AppendBody, params: RequestParams = {}) =>
+      this.request<AppendResponse, any>({
+        path: `/api/mcp/external-conversations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ArticlesControllerCreateArticleSection
      * @request POST:/api/articles/section
      */
@@ -45122,6 +46222,69 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<PhishingConnectionStatusResponse, void>({
         path: `/api/integration/tenants/${tenantId}/plugins/phishing`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerConfigureCompetenciesConnection
+     * @request PUT:/api/integration/tenants/{tenantId}/plugins/competencies
+     */
+    integrationControllerConfigureCompetenciesConnection: (
+      tenantId: string,
+      data: ConfigureCompetenciesConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ConfigureCompetenciesConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/competencies`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerCompetenciesConnectionStatus
+     * @request GET:/api/integration/tenants/{tenantId}/plugins/competencies
+     */
+    integrationControllerCompetenciesConnectionStatus: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CompetenciesConnectionStatusResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/competencies`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetIntegrationLearningFacts
+     * @request GET:/api/integration/learning-facts
+     */
+    integrationControllerGetIntegrationLearningFacts: (
+      query?: {
+        /** @format uuid */
+        subjectId?: string;
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetIntegrationLearningFactsResponse, void>({
+        path: `/api/integration/learning-facts`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -46409,6 +47572,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name PhishingControllerSearchPhishingOptions
+     * @request GET:/api/phishing/options/search
+     */
+    phishingControllerSearchPhishingOptions: (
+      query: {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page: number;
+        /** @maxLength 200 */
+        search?: string;
+        kind: "users" | "groups" | "courses";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SearchPhishingOptionsResponse, any>({
+        path: `/api/phishing/options/search`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerCountPhishingAudience
+     * @request POST:/api/phishing/audience/count
+     */
+    phishingControllerCountPhishingAudience: (
+      data: CountPhishingAudienceBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CountPhishingAudienceResponse, any>({
+        path: `/api/phishing/audience/count`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name PhishingControllerListPhishingCampaigns
      * @request GET:/api/phishing/campaigns
      */
@@ -46477,6 +47684,47 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name PhishingControllerGetPhishingReportRecipients
+     * @request GET:/api/phishing/campaigns/{id}/report/recipients
+     */
+    phishingControllerGetPhishingReportRecipients: (
+      id: string,
+      query?: {
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        groupId?: string;
+        filter?: "all" | "atRisk";
+        sort?:
+          | "name"
+          | "-name"
+          | "sentAt"
+          | "-sentAt"
+          | "clickedAt"
+          | "-clickedAt"
+          | "submittedAt"
+          | "-submittedAt";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetPhishingReportRecipientsResponse, any>({
+        path: `/api/phishing/campaigns/${id}/report/recipients`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name PhishingWebhookControllerConnectionProbe
      * @request POST:/api/phishing/webhook/probe
      */
@@ -46503,6 +47751,382 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/phishing/webhook`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetenciesConfiguration
+     * @request GET:/api/competencies/configuration
+     */
+    competenciesControllerGetCompetenciesConfiguration: (params: RequestParams = {}) =>
+      this.request<GetCompetenciesConfigurationResponse, any>({
+        path: `/api/competencies/configuration`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetenciesSummary
+     * @request GET:/api/competencies/summary
+     */
+    competenciesControllerGetCompetenciesSummary: (params: RequestParams = {}) =>
+      this.request<GetCompetenciesSummaryResponse, any>({
+        path: `/api/competencies/summary`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyCategories
+     * @request GET:/api/competencies/categories
+     */
+    competenciesControllerGetCompetencyCategories: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyCategoriesResponse, any>({
+        path: `/api/competencies/categories`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyCatalog
+     * @request GET:/api/competencies/catalog
+     */
+    competenciesControllerGetCompetencyCatalog: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        categoryId?: string | "none";
+        archived?: "true" | "false";
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyCatalogResponse, any>({
+        path: `/api/competencies/catalog`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyProfiles
+     * @request GET:/api/competencies/profiles
+     */
+    competenciesControllerGetCompetencyProfiles: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        competencyId?: string;
+        /**
+         * @maxItems 100
+         * @uniqueItems true
+         */
+        ids?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyProfilesResponse, any>({
+        path: `/api/competencies/profiles`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyPeople
+     * @request GET:/api/competencies/people
+     */
+    competenciesControllerGetCompetencyPeople: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        profileId?: string;
+        readiness?: "no_profile" | "missing" | "expiring" | "met";
+        teamOnly?: "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyPeopleResponse, any>({
+        path: `/api/competencies/people`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyMatrix
+     * @request GET:/api/competencies/matrix
+     */
+    competenciesControllerGetCompetencyMatrix: (
+      query?: {
+        /** @format uuid */
+        profileId?: string;
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        teamOnly?: "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyMatrixResponse, any>({
+        path: `/api/competencies/matrix`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyReviews
+     * @request GET:/api/competencies/reviews
+     */
+    competenciesControllerGetCompetencyReviews: (
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        status?: "pending" | "approved" | "rejected" | "revoked";
+        /** @format uuid */
+        competencyId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyReviewsResponse, any>({
+        path: `/api/competencies/reviews`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencyOptions
+     * @request GET:/api/competencies/options
+     */
+    competenciesControllerGetCompetencyOptions: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencyOptionsResponse, any>({
+        path: `/api/competencies/options`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencySubject
+     * @request GET:/api/competencies/subjects/{subjectId}
+     */
+    competenciesControllerGetCompetencySubject: (
+      subjectId: string,
+      query?: {
+        /** @format uuid */
+        profileId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencySubjectResponse, any>({
+        path: `/api/competencies/subjects/${subjectId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerGetCompetencySubjectDocuments
+     * @request GET:/api/competencies/subjects/{subjectId}/documents
+     */
+    competenciesControllerGetCompetencySubjectDocuments: (
+      subjectId: string,
+      query?: {
+        /**
+         * @min 1
+         * @max 1000000
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCompetencySubjectDocumentsResponse, any>({
+        path: `/api/competencies/subjects/${subjectId}/documents`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerExecuteCompetenciesCommand
+     * @request POST:/api/competencies/commands
+     */
+    competenciesControllerExecuteCompetenciesCommand: (
+      data: ExecuteCompetenciesCommandBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ExecuteCompetenciesCommandResponse, any>({
+        path: `/api/competencies/commands`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerUploadCompetenciesAttachment
+     * @request POST:/api/competencies/attachments
+     */
+    competenciesControllerUploadCompetenciesAttachment: (
+      data: {
+        /** @format binary */
+        file: File;
+        /** @format uuid */
+        subjectId: string;
+        /** @format uuid */
+        competencyId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadCompetenciesAttachmentResponse, any>({
+        path: `/api/competencies/attachments`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CompetenciesControllerDownloadCompetenciesAttachment
+     * @request GET:/api/competencies/attachments/{id}
+     */
+    competenciesControllerDownloadCompetenciesAttachment: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/competencies/attachments/${id}`,
+        method: "GET",
         ...params,
       }),
 

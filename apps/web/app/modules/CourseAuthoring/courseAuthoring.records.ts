@@ -765,6 +765,7 @@ const parseApplication = (record: AuthoringRecord): ApplicationView => {
   const status = stringValue(record.payload.status);
   return {
     id: record.id,
+    exportId: stringValue(record.payload.exportId),
     status: [
       AUTHORING_APPLICATION_STATUS.APPLIED,
       AUTHORING_APPLICATION_STATUS.CONFLICT,

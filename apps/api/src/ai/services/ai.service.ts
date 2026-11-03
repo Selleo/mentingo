@@ -50,6 +50,8 @@ import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
+import { LessonProgressChangedEvent } from "src/events/lesson/lesson-progress-changed.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { DB } from "src/storage/db/db.providers";
@@ -103,6 +105,7 @@ export class AiService {
     @Inject(DB)
     private readonly db: DatabasePg,
     private readonly courseRepetitionService: CourseRepetitionService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async getOrCreateLessonThread(data: CreateThreadBody) {
@@ -614,6 +617,15 @@ export class AiService {
     await this.db.transaction(async (trx) => {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
+      await this.outboxPublisher.publishDurable(
+        new LessonProgressChangedEvent({
+          userId,
+          courseId: lesson.courseId,
+          lessonId,
+          actor: currentUser,
+        }),
+        trx,
+      );
     });
   }
 

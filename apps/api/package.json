@@ -59,9 +59,9 @@
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
     "@mentingo/content-marketplace-sdk": "0.1.0",
-    "@mentingo/guide-sdk": "file:../../vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz",
+    "@mentingo/competencies-sdk": "0.1.0",
     "@mentingo/luma-sdk": "0.4.0",
-    "@mentingo/phishing-simulation-sdk": "0.1.1",
+    "@mentingo/phishing-simulation-sdk": "0.2.0",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "@modelcontextprotocol/node": "2.1.0",
     "@modelcontextprotocol/server": "2.1.0",
@@ -163,7 +163,8 @@
     "workflow": "5.2.3",
     "write-excel-file": "2.3.10",
     "xml2js": "0.6.2",
-    "yargs": "18.0.0"
+    "yargs": "18.0.0",
+    "@mentingo/guide-sdk": "file:../../vendor/mentingo-guide-sdk-0.2.0-2dd2250a5c1e.tgz"
   },
   "devDependencies": {
     "@aws-sdk/types": "3.696.0",

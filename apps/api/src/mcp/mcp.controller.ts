@@ -1,4 +1,4 @@
-import { All, Controller, Req, Res, UseGuards } from "@nestjs/common";
+import { All, Controller, Req, Res, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 import { Response } from "express";
 
@@ -17,6 +17,8 @@ export class McpController {
   @All()
   @UseGuards(McpAuthGuard)
   async handle(@Req() request: McpRequest, @Res() response: Response): Promise<void> {
-    await this.http.handle(request, response, request.mcpActor!);
+    const actor = request.mcpActor;
+    if (!actor) throw new UnauthorizedException("unauthorized");
+    await this.http.handle(request, response, actor);
   }
 }

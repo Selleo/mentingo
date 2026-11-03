@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render the film from an editing plan; Python 3 + FFmpeg/ffprobe with drawtext.
 
-A chapter is a title card, the chapter's footage and, optionally, a real still (a downloaded PDF page). Footage is
+The opening holds a real captured screen; later chapters begin with a title card, followed by the chapter's footage and, optionally, a real still (a downloaded PDF page). Footage is
 rendered in one pass over its take: the frames the montage keeps, re-timed to the film (a frame stays until the next
 one, so still pages hold), and a drawn pointer that glides and clicks over the whole page. Rendered segments are
 cached by content, so a changed chapter renders alone.
@@ -187,7 +187,8 @@ def load_plan(path, enforce_duration=True, strict=True):
         audio_duration = number(float(audio_info['format']['duration']), 'audio duration', .01)
         offset = number(chapter.get('audio_offset', 2), 'audio_offset', 0, 2)
         start = cursor
-        segments.append(dict(kind='card', title=title, start=cursor, duration=2))
+        card = dict(kind='card', title=title, start=cursor, duration=2)
+        segments.append(card)
         cursor += 2
         if not isinstance(chapter['clips'], list) or not chapter['clips']:
             raise ValueError('Chapter needs actual capture intervals')
@@ -211,6 +212,12 @@ def load_plan(path, enforce_duration=True, strict=True):
             duration = round(duration * 30) / 30
             segment.update(start=cursor, duration=duration)
             segments.append(segment)
+            if start == 0 and 'opening' not in card:
+                # Hold the first demonstrated screen under the title, fully visible from frame zero.
+                info = next(stream for stream in input_probe(source)['streams'] if stream['codec_type'] == 'video')
+                card['source'] = source
+                card['opening'] = {'at': segment['pieces'][0][0] if segment['kind'] == 'footage' else 0,
+                                   'crop': segment.get('crop', [0, 0, info['width'], info['height']])}
             cursor += duration
         chapter_duration = cursor - start
         if offset + audio_duration > chapter_duration + .04:
@@ -480,8 +487,25 @@ def footage_visual(segment, relative, length, pointer, colors=COLORS):
     return inputs, visual
 
 
+def opening_visual(segment, relative, length, colors=COLORS):
+    """A frozen, real captured screen from the first kept interval; no blank lead-in or fade."""
+    opening = segment['opening']
+    left, top, width, height = opening['crop']
+    inputs = ['-ss', f"{opening['at']:.9f}", '-i', segment['source']]
+    visual = (f'[0:v]trim=end_frame=1,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration={segment["duration"]:.9f},'
+              f'fps=30,crop={width}:{height}:{left}:{top},scale={OUTPUT[0]}:{OUTPUT[1]}:flags=lanczos,'
+              f"pad=1920:1080:(ow-iw)/2:30:color={colors['frame']},setsar=1,"
+              f"drawbox=x=0:y=0:w=iw:h=5:color={colors['accent']}:t=fill,"
+              f'trim=start={relative:.9f}:duration={length:.9f},setpts=PTS-STARTPTS[v0]')
+    return inputs, visual
+
+
 def card_visual(segment, relative, length, title_path, colors=COLORS):
     """Keep title, fades and frame timing identical in review and final render."""
+    if segment.get('opening'):
+        inputs, visual = opening_visual(segment, relative, length, colors)
+        # Negative start makes the title fully visible at frame zero, matching the captured screen.
+        return inputs, visual.replace("[v0]", "[screen]") + f";[screen]{step_filter(title_path, segment['title'], -1, length, colors)}[v0]"
     title_filter = text_filter(title_path, segment['title'], True)
     inputs = ['-f', 'lavfi', '-i', f"color=c={colors['frame']}:s=1920x1080:r=30"]
     visual = (f"[0:v]{title_filter},drawbox=x=90:y=420:w=190:h=7:color={colors['accent']}:t=fill,"

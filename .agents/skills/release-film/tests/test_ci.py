@@ -121,6 +121,13 @@ class FilmLength(unittest.TestCase):
 
 
 class Redact(unittest.TestCase):
+    def test_elevenlabs_key_is_removed_from_recording_reports(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'voice-error.json'
+            path.write_text(json.dumps({'error': TOKEN}))
+            redact.redact([folder], redact.values({'ELEVENLABS_API_KEY': TOKEN}))
+            self.assertEqual(json.loads(path.read_text()), {'error': '***'})
+
     def test_the_ci_secrets_are_hidden_in_the_runs_files_and_nowhere_else(self):
         with tempfile.TemporaryDirectory() as folder:
             run = Path(folder) / 'run'
@@ -165,9 +172,60 @@ class ReleaseNotes(unittest.TestCase):
         names = release_assets.asset_names('v1.2.0', 'en')
         links = {names['film']: 'https://example.test/film.mp4', names['poster']: 'https://example.test/poster.jpg'}
         section = release_assets.notes_section('v1.2.0', 'en', links)
-        self.assertIn('[![Watch the release film](https://example.test/poster.jpg)](https://example.test/film.mp4)', section)
-        self.assertIn('[film (MP4)](https://example.test/film.mp4)', section)
+        self.assertIn('[![Watch video](https://example.test/poster.jpg)](https://example.test/film.mp4)', section)
+        self.assertIn('[Download MP4](https://example.test/film.mp4)', section)
         self.assertNotIn('![', release_assets.notes_section('v1.2.0', 'en', {names['film']: links[names['film']]}))
+
+    def test_native_player_is_a_standalone_url_without_redundant_links(self):
+        names = release_assets.asset_names('v1.2.0', 'en')
+        links = {name: 'https://example.test/' + name for name in names.values()}
+        url = 'https://github.com/user-attachments/assets/1234-abcd'
+        section = release_assets.notes_section('v1.2.0', 'en', links, 'https://example.test/films/', url, 'a' * 64)
+        self.assertIn('\n\n' + url + '\n\n', section)
+        self.assertNotIn('[Watch video]', section)
+        self.assertNotIn('[Download MP4]', section)
+        for clutter in ('![', 'narrated demo', 'ZIP', 'VTT', 'subtitles'):
+            self.assertNotIn(clutter, section)
+
+    def test_fallback_thumbnail_opens_the_player_instead_of_downloading_the_video(self):
+        names = release_assets.asset_names('v1.2.0', 'en')
+        links = {names['film']: 'https://example.test/f.mp4', names['poster']: 'https://example.test/p.jpg'}
+        section = release_assets.notes_section('v1.2.0', 'en', links, 'https://example.test/films')
+        self.assertIn('[![Watch video](https://example.test/p.jpg)](https://example.test/films/v1.2.0/)', section)
+
+    def test_matching_video_attachment_is_reused_without_any_upload(self):
+        url = 'https://github.com/user-attachments/assets/1234-abcd'
+        checksum = 'a' * 64
+        body = f'<!-- release-film-video sha256={checksum} url={url} -->'
+        with mock.patch.object(release_assets, 'gh') as gh:
+            self.assertEqual(release_assets.upload_video('/no-file-needed.mp4', 'o/r', body, checksum), url)
+            gh.assert_not_called()
+
+    def test_untrusted_attachment_url_is_rejected(self):
+        with self.assertRaisesRegex(SystemExit, 'GitHub media attachment'):
+            release_assets.notes_section('v1.2.0', 'en', {}, video_url='https://evil.test/video', video_sha256='a' * 64)
+
+    def test_upload_targets_the_repository_and_sends_the_film_as_binary(self):
+        url = 'https://github.com/user-attachments/assets/1234-abcd'
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'release film.mp4'
+            path.write_bytes(b'video')
+            with mock.patch.object(release_assets, 'gh', side_effect=[json.dumps({'id': 42}), json.dumps({'url': url})]) as gh:
+                self.assertEqual(release_assets.upload_video(path, 'o/r', '', 'a' * 64), url)
+            request = gh.call_args.args
+            self.assertIn('repository_id=42', request[1])
+            self.assertIn('name=release+film.mp4', request[1])
+            self.assertEqual(request[-2:], ('--input', str(path)))
+            self.assertIn('Content-Type: application/octet-stream', request)
+
+    def test_oversized_inline_video_is_rejected_before_upload(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'big.mp4'
+            with path.open('wb') as stream:
+                stream.truncate(100 * 1024 * 1024 + 1)
+            with mock.patch.object(release_assets, 'gh') as gh, self.assertRaisesRegex(SystemExit, 'at most 100 MB'):
+                release_assets.upload_video(path, 'o/r', '', 'a' * 64)
+            gh.assert_not_called()
 
 
 class Publish(unittest.TestCase):
@@ -189,6 +247,10 @@ class Publish(unittest.TestCase):
 
         def gh(*args, input_text=None):
             calls.append(args)
+            if args[0] == 'api' and args[1].startswith('https://uploads.github.com/user-attachments/assets?'):
+                return json.dumps({'url': 'https://github.com/user-attachments/assets/1234-abcd'})
+            if args == ('api', 'repos/o/r'):
+                return json.dumps({'id': 123})
             if args[:2] == ('release', 'upload'):
                 for path in args[5:]:  # release upload <tag> --repo <repo> <files>
                     name = Path(path).name
@@ -226,14 +288,31 @@ class Publish(unittest.TestCase):
                 self.assertEqual(len(result['uploaded']), 4)
                 self.assertTrue(release['body'].startswith(release_assets.MARK_START))
                 self.assertTrue(release['body'].endswith('# Release Summary\n\nNotes.\n'))
-                poster = release_assets.asset_names(self.TAG, 'en')['poster']
-                self.assertIn(f'[![Watch the release film](https://example.test/{poster})](https://x/f)', release['body'])
-                self.assertIn('film (MP4)', release['body'])
-                self.assertIn('page with the film and every pull request (ZIP)', release['body'])
+                self.assertNotIn('![', release['body'])
+                self.assertNotIn('Download MP4', release['body'])
+                self.assertNotIn('(ZIP)', release['body'])
+                self.assertIn('https://github.com/user-attachments/assets/1234-abcd', release['body'])
                 again = release_assets.publish(folder, 'release', repo='o/r')  # a second publish changes nothing
             self.assertEqual((again['uploaded'], again['notes']), ([], 'unchanged'))
             self.assertEqual(release['body'].count(release_assets.MARK_START), 1)
+            self.assertEqual(len([c for c in calls if c[0] == 'api' and c[1].startswith('https://uploads.github.com/')]), 1)
             self.assertFalse([c for c in calls if 'delete' in c or '-X' in c and 'DELETE' in c])
+
+    def test_media_upload_rejection_keeps_release_assets_and_browser_player(self):
+        with tempfile.TemporaryDirectory() as folder:
+            self.staged(folder)
+            release = {'id': 5, 'tag_name': self.TAG, 'draft': False, 'body': '# Existing notes', 'assets': []}
+            gh, calls = self.fake_gh(release)
+            with mock.patch.object(release_assets, 'gh', gh), \
+                    mock.patch.object(release_assets, 'live_films', return_value={}), \
+                    mock.patch.object(release_assets, 'upload_video', side_effect=SystemExit('::error::permission denied')):
+                result = release_assets.publish(folder, 'release', repo='o/r', base_url='https://example.test/films')
+            self.assertIsNone(result['inline_player'])
+            self.assertEqual(result['inline_player_error'], 'permission denied')
+            self.assertIn('[Watch video](https://example.test/films/v1.2.0/)', release['body'])
+            self.assertEqual(len(release['assets']), 5)
+            self.assertIn('# Existing notes', release['body'])
+            self.assertFalse(any('DELETE' in call for call in calls))
 
     def test_an_asset_of_the_same_name_and_other_content_stops_the_publish(self):
         with tempfile.TemporaryDirectory() as folder:

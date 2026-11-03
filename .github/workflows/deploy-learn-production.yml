@@ -105,6 +105,7 @@ jobs:
             SLACK_CLIENT_ID
             SLACK_CLIENT_SECRET
             SLACK_OAUTH_ENABLED
+            EXTERNAL_TRANSCRIPT_SIGNING_PUBLIC_KEY
             MASTER_KEY
             LANGFUSE_HOST
             LANGFUSE_SECRET_KEY

@@ -210,6 +210,25 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
     ],
   },
   {
+    type: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.userAssignedToGroup",
+    providedVariables: [
+      variable(
+        "group_id",
+        "automationBuilder.variables.group_id",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "group_id",
+      ),
+      variable(
+        "group_name",
+        "automationBuilder.variables.group_name",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "group_name",
+      ),
+    ],
+  },
+  {
     type: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_COURSE,
     kind: AUTOMATION_NODE_KINDS.TRIGGER,
     labelKey: "automationBuilder.blocks.usersAssignedToCourse",

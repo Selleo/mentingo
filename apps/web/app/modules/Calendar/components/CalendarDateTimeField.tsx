@@ -17,10 +17,11 @@ type CalendarDateTimeFieldTimeInputVariant = "select" | "native";
 
 type CalendarDateTimeFieldProps = {
   label: string;
-  tooltip: string;
+  tooltip?: string;
   date: string;
   time: string;
   portalledDatePicker?: boolean;
+  datePickerPortalContainer?: HTMLElement | null;
   hideTime?: boolean;
   timeStepMinutes?: number;
   timeInputVariant?: CalendarDateTimeFieldTimeInputVariant;
@@ -43,6 +44,7 @@ export function CalendarDateTimeField({
   date,
   time,
   portalledDatePicker = true,
+  datePickerPortalContainer,
   hideTime = false,
   timeStepMinutes,
   timeInputVariant = "select",
@@ -71,8 +73,9 @@ export function CalendarDateTimeField({
               type="button"
               variant="outline"
               data-testid={dateButtonTestId}
+              aria-label={label}
               className={cn(
-                "w-full justify-start gap-2 border-neutral-300 bg-white font-normal shadow-none",
+                "h-[42px] w-full justify-start gap-2 rounded-lg border-neutral-300 bg-white font-normal shadow-none",
                 {
                   "text-neutral-950": selectedDate,
                   "text-neutral-500": !selectedDate,
@@ -87,7 +90,12 @@ export function CalendarDateTimeField({
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto p-2" portalled={portalledDatePicker}>
+          <PopoverContent
+            align="start"
+            className="w-auto p-2"
+            portalled={portalledDatePicker}
+            portalContainer={datePickerPortalContainer}
+          >
             <Calendar
               variant="default"
               mode="single"

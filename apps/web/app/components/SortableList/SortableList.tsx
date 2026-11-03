@@ -18,6 +18,7 @@ type SortableListProps<T extends BaseItem> = {
   onChange(items: T[], newChapterPosition: number, newDisplayOrder: number): void;
   renderItem(item: T, index: number): ReactNode;
   className?: string;
+  portalOverlay?: boolean;
 };
 
 export type Sortable<T> = T & { sortableId: string };
@@ -30,6 +31,7 @@ export type Sortable<T> = T & { sortableId: string };
  * @param {Function} onChange - Callback function invoked when the order of items changes.
  * @param {Function} renderItem - Function to render each item in the list. It receives an item as a parameter and should return a React node.
  * @param {string} [className] - Additional CSS classes for styling the container.
+ * @param {boolean} [portalOverlay] - Renders the drag preview in document.body (use inside dialogs).
  *
  */
 export function SortableList<T extends BaseItem>({
@@ -37,6 +39,7 @@ export function SortableList<T extends BaseItem>({
   onChange,
   renderItem,
   className,
+  portalOverlay = false,
 }: SortableListProps<T>) {
   const [active, setActive] = useState<Active | null>(null);
   const activeItem = useMemo(
@@ -88,7 +91,7 @@ export function SortableList<T extends BaseItem>({
         </ul>
       </SortableContext>
       <div className="list-none">
-        <SortableOverlay>
+        <SortableOverlay portalled={portalOverlay}>
           {activeItem ? renderItem(activeItem, items.indexOf(activeItem)) : null}
         </SortableOverlay>
       </div>

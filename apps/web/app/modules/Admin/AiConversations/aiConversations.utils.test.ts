@@ -47,8 +47,11 @@ describe("conversation URL state", () => {
   });
 
   it("includes selected end day using exclusive next local midnight", () => {
-    const start = new Date(dateBoundary("2026-09-10")!);
-    const end = new Date(dateBoundary("2026-09-10", true)!);
+    const startBoundary = dateBoundary("2026-09-10");
+    const endBoundary = dateBoundary("2026-09-10", true);
+    if (!startBoundary || !endBoundary) throw new Error("Expected valid date boundaries");
+    const start = new Date(startBoundary);
+    const end = new Date(endBoundary);
     expect([start.getHours(), start.getMinutes(), start.getSeconds()]).toEqual([0, 0, 0]);
     expect([end.getDate(), end.getHours(), end.getMinutes(), end.getSeconds()]).toEqual([
       11, 0, 0, 0,

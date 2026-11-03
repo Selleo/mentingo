@@ -36,7 +36,11 @@ import { LumaService } from "./luma.service";
 import { frozenAuthoringExportSchema } from "./schema/course-authoring-application.schema";
 
 import type { AuthoringMentorContextLesson } from "./course-authoring-context.types";
-import type { CourseAuthoringApplyJob, CourseAuthoringReceiptJob } from "./course-authoring.types";
+import type {
+  CourseAuthoringApplyJob,
+  CourseAuthoringAutonomousFence,
+  CourseAuthoringReceiptJob,
+} from "./course-authoring.types";
 import type { AuthoringApplyStatus } from "./schema/course-authoring-application.schema";
 import type {
   AuthoringCommandBody,
@@ -53,6 +57,7 @@ const selectionCommandId = (
   proposalIds: string[],
   omittedAssetIds: string[],
   terminalApplicationId: string | null = null,
+  autonomousFence?: CourseAuthoringAutonomousFence,
 ) =>
   uuidv5(
     JSON.stringify({
@@ -60,6 +65,7 @@ const selectionCommandId = (
       ...(terminalApplicationId ? { terminalApplicationId } : {}),
       proposalIds: [...new Set(proposalIds)].sort(),
       omittedAssetIds: [...new Set(omittedAssetIds)].sort(),
+      ...(autonomousFence ? { autonomousFence } : {}),
     }),
     AUTHORING_SELECTION_NAMESPACE,
   );
@@ -97,6 +103,7 @@ export class CourseAuthoringApplicationService {
     sessionId: string,
     input: PrepareAuthoringExportBody,
     actor: CurrentUserType,
+    autonomousFence?: CourseAuthoringAutonomousFence,
   ): Promise<AuthoringApplyStatus> {
     await this.sessions.get(courseId, sessionId, actor);
     const pendingReceipts = await this.receipts.pendingSessionReceipts(
@@ -132,17 +139,25 @@ export class CourseAuthoringApplicationService {
       sessionId,
       proposalIds,
       omitOptionalAssetIds,
-      terminal?.applicationId ?? null,
+      autonomousFence ? null : (terminal?.applicationId ?? null),
+      autonomousFence,
     );
+    const exportRequest = {
+      commandId,
+      proposalIds,
+      ...(omitOptionalAssetIds.length ? { omitOptionalAssetIds } : {}),
+      actorId: actor.userId,
+      ...(autonomousFence
+        ? {
+            autonomousRequestId: autonomousFence.requestId,
+            autonomousControlEpoch: autonomousFence.controlEpoch,
+          }
+        : {}),
+    };
     const exported = await client.authoring
       .prepareExport({
         sessionId,
-        request: {
-          commandId,
-          proposalIds,
-          ...(omitOptionalAssetIds.length ? { omitOptionalAssetIds } : {}),
-          actorId: actor.userId,
-        },
+        request: exportRequest,
       })
       .catch((error: unknown) => {
         if (isAxiosError(error) && error.response?.status === 409) {

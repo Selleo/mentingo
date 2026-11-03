@@ -56,10 +56,10 @@ export const routes: (
             "modules/SelfOnboarding/SelfOnboardingTutorial.page.tsx",
           );
           route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
+          route("competencies", "modules/Competencies/Competencies.page.tsx");
           route("phishing", "modules/Phishing/Phishing.page.tsx");
           route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
           route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");
-          route("phishing/:id/hall-of-shame", "modules/Phishing/PhishingHall.page.tsx");
           route("content-marketplace", "modules/ContentMarketplace/ContentMarketplace.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");

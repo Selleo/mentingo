@@ -5,8 +5,8 @@ of more than 0.8 s starts a new cue. A cue stays on screen through the pause bef
 flicker off between sentences, but never past the moment the picture leaves its sentence (``limits``, from the
 montage): a caption over the next picture reads as a caption behind it.
 Overlaps up to 60 ms advance the next word's start to the previous word's end; larger overlaps and words collapsed by
-it are rejected. Release captions allow a 1 ms tail. Tutorials use no tail cutoff: cues are clipped to
-measured audio, with entirely out-of-audio cues omitted. Clipped cues are marked in the preparation report.
+it are rejected. Provider timing tails are clamped to measured audio. Release captions reject words
+entirely outside audio; tutorials omit those unusable cues. Clipped cues are marked in the preparation report.
 """
 from decimal import Decimal
 import math
@@ -47,14 +47,15 @@ def words_of(srt, audio_seconds, end_tolerance_ms=1):
         if len(interval) != 2:
             raise ValueError('Malformed SRT interval')
         start, end = map(milliseconds, interval)
-        if (start < previous_start or end <= start
-                or (end_tolerance_ms is not None and end > audio_milliseconds + end_tolerance_ms)):
-            raise ValueError('SRT intervals must be ordered, positive and within audio '
-                             f'(cue {lines[0].strip()}: {start}–{end} ms; audio {audio_milliseconds} ms)')
+        if start < previous_start or end <= start:
+            raise ValueError(f'SRT intervals must be ordered and positive (cue {lines[0].strip()}: {start}–{end} ms)')
+        if end_tolerance_ms is not None and start >= audio_milliseconds:
+            raise ValueError(f'SRT cue {lines[0].strip()} starts outside playable audio '
+                             f'({start} ms; audio {audio_milliseconds} ms)')
         previous_start = start
         if end_tolerance_ms is None and start >= audio_milliseconds:
             continue  # Provider tail outside playable audio cannot be displayed.
-        trimmed = end > audio_milliseconds + 1
+        trimmed = end > audio_milliseconds
         end = min(end, audio_seconds * 1000)
         if previous_end - start > 60:
             raise ValueError('SRT overlap exceeds 60 ms')

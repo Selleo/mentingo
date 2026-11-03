@@ -166,13 +166,16 @@ export class McpUploadGrantService {
     input: Pick<McpPlatformAssetUploadGrant, "asset" | "filename" | "mimeType" | "size" | "name">,
   ) {
     const upload = PLATFORM_ASSET_UPLOADS[input.asset];
-    if (
-      !upload ||
-      (input.asset === "loginDocument"
-        ? typeof input.name !== "string" || !input.name.trim()
-        : input.name !== undefined)
-    )
+    if (!upload) throw new BadRequestException("Invalid platform asset upload");
+    let fields: { name: string } | Record<string, never> = {};
+    if (input.asset === "loginDocument") {
+      if (typeof input.name !== "string" || !input.name.trim()) {
+        throw new BadRequestException("Invalid platform asset upload");
+      }
+      fields = { name: input.name };
+    } else if (input.name !== undefined) {
       throw new BadRequestException("Invalid platform asset upload");
+    }
     this.validateNamedFile(input, upload.allowed, upload.maxSizeBytes);
     await this.validateActiveUploadPermission(actor, PERMISSIONS.SETTINGS_MANAGE);
     const token = createUploadToken();
@@ -194,7 +197,7 @@ export class McpUploadGrantService {
       expiresAt: new Date(grant.expiresAt).toISOString(),
       fileField: upload.fileField,
       maxSizeBytes: upload.maxSizeBytes,
-      fields: input.asset === "loginDocument" ? { name: input.name! } : {},
+      fields,
     };
   }
 
@@ -599,6 +602,10 @@ export class McpUploadGrantService {
     await this.validateScormInput(actor, input);
     let importRequest: InitScormImportBody;
     if (input.operation === SCORM_IMPORT_ACTION.CREATE_COURSE) {
+      const { description, categoryId } = input;
+      if (description === undefined || categoryId === undefined) {
+        throw new BadRequestException("Invalid SCORM upload target");
+      }
       importRequest = {
         action: input.operation,
         filename: input.filename,
@@ -606,8 +613,8 @@ export class McpUploadGrantService {
         mimeType: input.mimeType,
         metadata: {
           title: input.title,
-          description: input.description!,
-          categoryId: input.categoryId!,
+          description,
+          categoryId,
           language: input.language,
         },
       };

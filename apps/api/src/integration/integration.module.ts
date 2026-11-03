@@ -20,6 +20,7 @@ import { IntegrationController } from "./integration.controller";
 import { IntegrationRepository } from "./integration.repository";
 import { IntegrationService } from "./integration.service";
 import { IntegrationCourseRepository } from "./repositories/integration-course.repository";
+import { LearningFactsRepository } from "./repositories/learning-facts.repository";
 import { IntegrationContentMarketplaceConnectionService } from "./services/integration-content-marketplace-connection.service";
 import { IntegrationCourseCatalogService } from "./services/integration-course-catalog.service";
 import { IntegrationCourseExportService } from "./services/integration-course-export.service";
@@ -52,6 +53,7 @@ import { IntegrationCourseExportService } from "./services/integration-course-ex
     IntegrationCourseExportService,
     IntegrationContentMarketplaceConnectionService,
     IntegrationApiKeyGuard,
+    LearningFactsRepository,
   ],
 })
 export class IntegrationModule {}

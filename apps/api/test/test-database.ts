@@ -3,7 +3,12 @@ import postgres from "postgres";
 
 import * as schema from "../src/storage/schema";
 
+import { assertSeparateTestDatabase } from "./assert-test-database";
+
 import type { DatabasePg } from "../src/common";
+
+const applicationDatabaseUrl =
+  process.env.DATABASE_URL || "postgresql://postgres:guidebook@localhost:5432/guidebook";
 
 export async function setupTestDatabase(): Promise<{
   db: DatabasePg;
@@ -17,6 +22,7 @@ export async function setupTestDatabase(): Promise<{
     process.env.DATABASE_TEST_URL ||
     "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
   const redisUrl = process.env.REDIS_TEST_URL || "redis://localhost:6379/1";
+  assertSeparateTestDatabase(applicationDatabaseUrl, pgConnectionString);
 
   const sql = postgres(pgConnectionString, { max: 10 });
   const db = drizzle(sql, { schema }) as DatabasePg;

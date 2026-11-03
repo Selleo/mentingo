@@ -17,7 +17,8 @@ export class MagicFileTypeValidator extends FileValidator<MagicFileTypeValidator
 
     const { fileType, fallbackToMimetype = true } = this.validationOptions;
     const resolvedType = await FileGuard.getFileType(file as unknown as Express.Multer.File);
-    const resolvedMime = resolvedType?.mime ?? (fallbackToMimetype ? file.mimetype : undefined);
+    const detectedMime = resolvedType?.mime ?? (fallbackToMimetype ? file.mimetype : undefined);
+    const resolvedMime = detectedMime?.split(";")[0].trim();
 
     if (!resolvedMime) return false;
 

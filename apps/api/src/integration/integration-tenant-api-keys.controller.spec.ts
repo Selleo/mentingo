@@ -58,6 +58,7 @@ describe("IntegrationController.updateTenantApiKeys", () => {
         undefined as never,
         undefined as never,
         undefined as never,
+        undefined as never,
       ),
     };
   }

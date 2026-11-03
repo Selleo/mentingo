@@ -91,6 +91,7 @@ def facts(recipe=None):
     found['disk_free_gb'] = round(shutil.disk_usage(core.HOME if core.HOME.exists() else core.REPO).free / 2 ** 30, 1)
     found['voice'] = os.environ.get('RELEASE_FILM_VOICE') or None  # a narrator chosen (cut.engine)
     found['voice_ready'] = cut.voice_ready()
+    found['elevenlabs_key'] = bool(os.environ.get('ELEVENLABS_API_KEY'))
     found['ci'] = os.environ.get('RELEASE_FILM_CI') == '1'
     node = (recipe or {}).get('node')
     if node:  # harness.toolchain puts asdf's install of it first on PATH, installing it with asdf when missing
@@ -180,6 +181,9 @@ def judge(found):
         need('voice', 'RELEASE_FILM_VOICE chooses the narrator: edge, voxcpm or elevenlabs', detail=found['voice'])
     elif found.get('voice') == 'voxcpm' and not found.get('voice_ready'):
         need('voxcpm', 'RELEASE_FILM_VOICE=voxcpm asks for the VoxCPM2 narrator', command=VOICE_SETUP)
+    if found.get('voice') == 'elevenlabs' and not found.get('elevenlabs_key'):
+        need('elevenlabs key', 'ElevenLabs narration requires ELEVENLABS_API_KEY',
+             manual='Set ELEVENLABS_API_KEY in the recording environment')
     return missing, advised
 
 

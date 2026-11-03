@@ -104,6 +104,18 @@ export function deriveAutomationBranchFieldValues(
   return result;
 }
 
+/** Conditions on these fields compare the event value with a group picked in the builder. */
+export const AUTOMATION_GROUP_CONDITION_FIELDS: Partial<Record<AutomationEventKind, string>> = {
+  [EVENTS.USER_ASSIGNED_TO_GROUP]: "group_id",
+};
+
+export function isAutomationGroupConditionField(
+  eventKind: AutomationEventKind | null | undefined,
+  field: string | undefined,
+) {
+  return Boolean(eventKind && field && AUTOMATION_GROUP_CONDITION_FIELDS[eventKind] === field);
+}
+
 export function getCanonicalAutomationField(event: AutomationEventDefinition, field: string) {
   return resolveAutomationEventFieldSourceKey(event.kind, field);
 }

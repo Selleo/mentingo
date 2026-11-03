@@ -104,7 +104,12 @@ export const AuthoringBlockId = Extension.create<AuthoringBlockIdOptions>({
   onCreate() {
     if (!this.options.generateIds) return;
     const transaction = normalizeAuthoringBlockIds(this.editor.state.doc, this.editor.state.tr);
-    if (transaction) this.editor.view.dispatch(transaction);
+    // Initial ID assignment is not a user edit; emitting `update` here makes forms treat
+    // freshly mounted editors as dirty and overwrite loaded content with an empty value.
+    if (transaction)
+      this.editor.view.dispatch(
+        transaction.setMeta("preventUpdate", true).setMeta("addToHistory", false),
+      );
   },
 
   addProseMirrorPlugins() {

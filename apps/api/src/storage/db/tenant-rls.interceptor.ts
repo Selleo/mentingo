@@ -12,6 +12,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/healthcheck",
     "/api/phishing/webhook",
     "/api/phishing/webhook/probe",
+    "/api/phishing/webhook/email",
     "/api/integration/tenants",
     "/api/certificates/share",
     "/api/certificates/share-image",
@@ -23,6 +24,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/oauth/token",
     "/api/oauth/revoke",
     "/api/mcp",
+    "/api/mcp/external-conversations",
   ]);
 
   constructor(

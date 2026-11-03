@@ -401,8 +401,15 @@ export const CourseGenerationSession = ({
           : current,
       );
       authoringEventListenersRef.current.forEach((listener) => listener(event));
+      if (
+        event.type === "application.changed" &&
+        event.payload.status === AUTHORING_APPLICATION_STATUS.APPLIED &&
+        typeof event.payload.exportId === "string"
+      ) {
+        void refreshAfterConfirmedApply(event.payload.exportId).catch(() => undefined);
+      }
     },
-    [id, sessionId],
+    [id, refreshAfterConfirmedApply, sessionId],
   );
   const connection = useCourseAuthoringSocket({
     courseId: id,
@@ -416,6 +423,13 @@ export const CourseGenerationSession = ({
     () => projectWorkspaceRecords(visibleRecords, session?.tasks ?? []),
     [visibleRecords, session?.tasks],
   );
+  useEffect(() => {
+    const applied = [...projection.applications]
+      .reverse()
+      .find((application) => application.status === AUTHORING_APPLICATION_STATUS.APPLIED);
+    if (applied)
+      void refreshAfterConfirmedApply(applied.exportId ?? applied.id).catch(() => undefined);
+  }, [projection.applications, refreshAfterConfirmedApply]);
   const lastProjectionRecoveryRef = useRef<string | null>(null);
   useEffect(() => {
     if (projection.unsupportedRecordCount === 0) {

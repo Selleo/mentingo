@@ -100,7 +100,7 @@ function deserializeAutomationStep(step: AutomationStepRow): AutomationStep {
     return {
       ...identity,
       type: AUTOMATION_STEP_TYPES.CONDITION,
-      config: { field: step.configuration.field },
+      config: { field: step.configuration.field, equals: step.configuration.equals },
     };
   }
 

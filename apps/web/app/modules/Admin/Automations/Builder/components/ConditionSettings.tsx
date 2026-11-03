@@ -1,12 +1,18 @@
-import { getAncestorConditionOutcomes, getCanonicalAutomationField } from "@repo/shared";
+import {
+  AUTOMATION_RECIPIENT_TYPES,
+  getAncestorConditionOutcomes,
+  getCanonicalAutomationField,
+  isAutomationGroupConditionField,
+} from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 
-import { getBooleanConditionFieldOptions } from "../utils/conditionFields";
+import { getConditionFieldOptions } from "../utils/conditionFields";
 
+import { AutomationRecipientPicker } from "./AutomationRecipientPicker";
 import { AutomationSearchSelect } from "./AutomationSearchSelect";
 import { BranchVariables } from "./BranchVariables";
 
@@ -32,10 +38,11 @@ export function ConditionSettings({
   onChange: (node: AutomationConditionStep) => void;
 }) {
   const { t } = useTranslation();
-  const fields = getBooleanConditionFieldOptions(event);
+  const fields = getConditionFieldOptions(event);
   const [position, setPosition] = useState(branchPosition ?? 0);
+  const isGroupCondition = isAutomationGroupConditionField(event?.kind, node.config.field);
   const facts = event ? getAncestorConditionOutcomes(workflow, node.id, event) : {};
-  if (event && node.config.field)
+  if (event && node.config.field && !isGroupCondition)
     facts[getCanonicalAutomationField(event, node.config.field)] = position === 0;
   return (
     <div className="space-y-4">
@@ -66,12 +73,16 @@ export function ConditionSettings({
           ]}
         />
       </div>
+      {isGroupCondition && (
+        <AutomationRecipientPicker
+          type={AUTOMATION_RECIPIENT_TYPES.GROUP}
+          value={node.config.equals ?? ""}
+          disabled={disabled}
+          onChange={(equals) => onChange({ ...node, config: { ...node.config, equals } })}
+        />
+      )}
       <p className="text-xs leading-relaxed text-muted-foreground">
-        {t(
-          fields.length
-            ? "automationBuilder.condition.hint"
-            : "automationBuilder.condition.noFields",
-        )}
+        {t(getConditionHintKey(fields.length > 0, isGroupCondition))}
       </p>
       {event && node.config.field && (
         <Tabs
@@ -108,4 +119,11 @@ export function ConditionSettings({
       )}
     </div>
   );
+}
+
+function getConditionHintKey(hasFields: boolean, isGroupCondition: boolean) {
+  if (!hasFields) return "automationBuilder.condition.noFields";
+  if (isGroupCondition) return "automationBuilder.condition.groupHint";
+
+  return "automationBuilder.condition.hint";
 }

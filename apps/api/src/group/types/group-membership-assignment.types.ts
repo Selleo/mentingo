@@ -25,3 +25,8 @@ export type ChangeUsersGroupsOptions = {
   source: BulkAssignUsersToGroupsSource;
   db?: DatabasePg;
 };
+
+export type GroupMembershipAssignmentGroup = {
+  id: UUIDType;
+  name: string;
+};

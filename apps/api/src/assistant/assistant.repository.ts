@@ -74,6 +74,7 @@ export class AssistantRepository {
     return and(
       eq(assistantThreads.tenantId, user.tenantId),
       eq(assistantThreads.userId, user.userId),
+      eq(assistantThreads.source, "mentingo"),
       threadId ? eq(assistantThreads.id, threadId) : undefined,
     );
   }

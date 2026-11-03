@@ -1,3 +1,95 @@
+<a name="v4.28.0"></a>
+
+## [v4.28.0] - 02.11.2026
+
+### Features:
+
+- add audio player to content lessons ([#2100](https://github.com/Selleo/mentingo/issues/2100))
+
+- show signed external assistant conversations in Mentingo ([#2096](https://github.com/Selleo/mentingo/issues/2096))
+
+### Bug Fixes:
+
+- stabilize release film recording and narration ([#2103](https://github.com/Selleo/mentingo/issues/2103))
+
+- keep existing content when opening the article editor ([#2102](https://github.com/Selleo/mentingo/issues/2102))
+
+- ensure all document attachments are preserved in articles and news ([#2101](https://github.com/Selleo/mentingo/issues/2101))
+
+<a name="v4.27.0"></a>
+
+## [v4.27.0] - 30.10.2026
+
+### Features:
+
+- introduce competencies plugin to help manage and track learner skills ([#2090](https://github.com/Selleo/mentingo/issues/2090))
+
+- add course authoring Autopilot and multi-file uploads ([#2097](https://github.com/Selleo/mentingo/issues/2097))
+
+### Bug Fixes:
+
+- grant assistant runtime database access during migrations ([#2098](https://github.com/Selleo/mentingo/issues/2098))
+
+### Chores:
+
+- introduce a new workflow trigger for when users join groups ([#2092](https://github.com/Selleo/mentingo/issues/2092))
+
+- improve phishing plugin's views ([#2073](https://github.com/Selleo/mentingo/issues/2073))
+
+### Documentation:
+
+- update changelog for version v4.27.0
+
+- update changelog for version v4.26.0
+
+<a name="v4.26.0"></a>
+
+## [v4.26.0] - 29.10.2026
+
+### Features:
+
+- add permission-aware AI Assistant with persistent conversations ([#2078](https://github.com/Selleo/mentingo/issues/2078))
+
+- allow learners to optionally repeat courses to reinforce their knowledge and skills ([#2053](https://github.com/Selleo/mentingo/issues/2053))
+
+### Bug Fixes:
+
+- maintain better course hero quality and add thumbnail fallback ([#2094](https://github.com/Selleo/mentingo/issues/2094))
+
+- restore valid certificate downloads for authorized users ([#2093](https://github.com/Selleo/mentingo/issues/2093))
+
+- find lesson attachments through learner MCP search ([#2089](https://github.com/Selleo/mentingo/issues/2089))
+
+- preserve light-mode branding in email clients ([#2085](https://github.com/Selleo/mentingo/issues/2085))
+
+- ensure users can log in through their provider after a role change ([#2082](https://github.com/Selleo/mentingo/issues/2082))
+
+- keep database migrations independent of runtime roles ([#2083](https://github.com/Selleo/mentingo/issues/2083))
+
+- restore assistant deployment and browser test startup ([#2081](https://github.com/Selleo/mentingo/issues/2081))
+
+- preserve actionable course application failures ([#2079](https://github.com/Selleo/mentingo/issues/2079))
+
+- hide sign-up while registration settings load and remove stray zero render ([#2076](https://github.com/Selleo/mentingo/issues/2076))
+
+- prevent unauthorized access to protected pages ([#2075](https://github.com/Selleo/mentingo/issues/2075))
+
+### Chores:
+
+- improve environment configuration page ([#2095](https://github.com/Selleo/mentingo/issues/2095))
+
+- increase Learn API CPU and memory allocation ([#2086](https://github.com/Selleo/mentingo/issues/2086))
+
+- improve settings navigation with new tabs and highlight recommended courses layout ([#2074](https://github.com/Selleo/mentingo/issues/2074))
+
+### Code Refactoring:
+
+- course service for easier maintainability ([#2080](https://github.com/Selleo/mentingo/issues/2080))
+
+### Documentation:
+
+- update changelog for version v4.26.0
+
 <a name="v4.25.0"></a>
 
 ## [v4.25.0] - 23.10.2026
@@ -29,6 +121,10 @@
 ### Chores:
 
 - improve the learning paths view for more user-friendly experience ([#2071](https://github.com/Selleo/mentingo/issues/2071))
+
+### Documentation:
+
+- update changelog for version v4.25.0
 
 <a name="v4.24.0"></a>
 
@@ -3536,7 +3632,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.25.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.28.0...HEAD
+[v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
+[v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0
+[v4.26.0]: https://github.com/Selleo/mentingo/compare/v4.25.0...v4.26.0
 [v4.25.0]: https://github.com/Selleo/mentingo/compare/v4.24.0...v4.25.0
 [v4.24.0]: https://github.com/Selleo/mentingo/compare/v4.23.0...v4.24.0
 [v4.23.0]: https://github.com/Selleo/mentingo/compare/v4.22.0...v4.23.0

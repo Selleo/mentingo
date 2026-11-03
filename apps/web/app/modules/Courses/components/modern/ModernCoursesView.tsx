@@ -468,13 +468,13 @@ const ModernCoursesView = () => {
               />
             ))}
 
-          {!isCategoriesLoading && <ContentMarketplaceCoursesRow />}
-
           {canManageCategories && !isCategoriesLoading && (
             <div className="px-4 pb-6 md:px-8">
               <AddCategoryRow onCreated={handleCategoryCreated} />
             </div>
           )}
+
+          {!isCategoriesLoading && <ContentMarketplaceCoursesRow />}
 
           {isFetchingNextCategoriesPage &&
             Array.from({ length: CATEGORY_PAGE_SIZE }).map((_, index) => (

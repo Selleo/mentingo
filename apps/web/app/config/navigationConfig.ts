@@ -49,6 +49,7 @@ export const getNavigationConfig = (
   shouldShowLearningPaths = false,
   isPhishingEnabled = false,
   roleSlugs: readonly string[] = [],
+  isCompetenciesEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -119,6 +120,16 @@ export const getNavigationConfig = (
                 testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
               },
             ] as NavigationItem[])
+          : []),
+        ...(isCompetenciesEnabled
+          ? ([
+              {
+                label: t("competencies.title"),
+                path: "competencies",
+                iconName: "Milestone",
+                accessRequirement: routeAccessConfig.competencies,
+              },
+            ] satisfies NavigationItem[])
           : []),
         {
           label: t("navigationSideBar.reports"),
@@ -265,7 +276,7 @@ export const getNavigationConfig = (
               {
                 label: t("phishing.title"),
                 path: "phishing",
-                iconName: "MailWarning",
+                iconName: "ShieldCheck",
                 accessRequirement: routeAccessConfig.phishing,
               },
             ],

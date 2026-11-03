@@ -36,10 +36,7 @@ async function bootstrap(
   });
 }
 
-async function provisionRuntimeRole(connectionString: string, role?: string) {
-  const setup = role
-    ? `const { grantWorkflowRuntimeRole } = require('./src/storage/db/workflow-runtime-role'); await grantWorkflowRuntimeRole(db, process.env.TEST_RUNTIME_ROLE);`
-    : `const { seedUserRoleGrantSql } = require('./src/seed/database-role'); await seedUserRoleGrantSql(db);`;
+async function provisionRuntimeRole(connectionString: string) {
   await execute(
     "pnpm",
     [
@@ -50,10 +47,11 @@ async function provisionRuntimeRole(connectionString: string, role?: string) {
     const postgres = require('postgres');
     const { drizzle } = require('drizzle-orm/postgres-js');
     (async () => {
-      const client = postgres(process.env.TEST_MIGRATOR_URL, { max: 1 });
+      const client = postgres(process.env.DATABASE_URL, { max: 1 });
       try {
         const db = drizzle(client);
-        ${setup}
+        const { seedUserRoleGrantSql } = require('./src/seed/database-role');
+        await seedUserRoleGrantSql(db);
       } finally { await client.end(); }
     })().catch(error => { console.error(error); process.exitCode = 1; });
   `,
@@ -62,8 +60,7 @@ async function provisionRuntimeRole(connectionString: string, role?: string) {
       cwd: resolve(__dirname, "../../.."),
       env: {
         ...process.env,
-        TEST_MIGRATOR_URL: connectionString,
-        TEST_RUNTIME_ROLE: role,
+        DATABASE_URL: connectionString,
         SEED_MANAGE_DB_ROLE: "true",
       },
       timeout: 30000,
@@ -342,7 +339,6 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     await expect(
       runtimeSql.unsafe("ALTER TABLE public.core_records ADD COLUMN forbidden_runtime_write text"),
     ).rejects.toMatchObject({ code: "42501" });
-    await provisionRuntimeRole(connectionString, "workflow_runtime");
     await smokeQueue(runtimeUrl.href);
     expect(await outsideSnapshot(sql, "core_collision")).toEqual(before);
   });
@@ -358,20 +354,51 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
       SELECT has_database_privilege(current_database(), 'CREATE') AS can_create
     `;
     expect(privileges.can_create).toBe(false);
-    await bootstrap(connectionString, runtimeUrl.href);
-    await expect(runtimeSql`SELECT * FROM workflow.workflow_runs`).rejects.toMatchObject({
-      code: "42501",
-    });
-    await provisionRuntimeRole(connectionString, "fresh_workflow_runtime");
+    const invalidRuntimeUrl = new URL(runtimeUrl.href);
+    invalidRuntimeUrl.password = "invalid-unused-password";
+    await bootstrap(connectionString, invalidRuntimeUrl.href);
+    await bootstrap(connectionString, invalidRuntimeUrl.href, {}, "db:migrate:prod");
     await smokeQueue(runtimeUrl.href);
     await bootstrap(connectionString, runtimeUrl.href);
     await smokeQueue(runtimeUrl.href);
   });
 
-  it("migrates without an app URL or role, then provisions runtime access through the existing seed setup", async () => {
+  it("repairs missing runtime permissions on an existing migrator-owned production queue", async () => {
+    const { sql, connectionString } = await database("production_runtime_grants");
+    await bootstrap(connectionString);
+    await sql.unsafe("CREATE ROLE production_runtime LOGIN PASSWORD 'production_runtime_test'");
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "production_runtime";
+    runtimeUrl.password = "production_runtime_test";
+    const runtimeSql = postgres(runtimeUrl.href, { max: 1 });
+    connections.push(runtimeSql);
+    await expect(runtimeSql`SELECT * FROM graphile_worker._private_jobs`).rejects.toMatchObject({
+      code: "42501",
+    });
+    const invalidRuntimeUrl = new URL(runtimeUrl.href);
+    invalidRuntimeUrl.password = "invalid-unused-password";
+    await bootstrap(connectionString, invalidRuntimeUrl.href, {}, "db:migrate:prod");
+    await bootstrap(connectionString, invalidRuntimeUrl.href, {}, "db:migrate:prod");
+    const [owner] = await sql`
+      SELECT pg_get_userbyid(relowner) AS role FROM pg_class
+      WHERE oid = 'graphile_worker._private_jobs'::regclass
+    `;
+    expect(owner.role).toBe("production_runtime");
+    await smokeQueue(runtimeUrl.href);
+    const [privileges] = await runtimeSql`
+      SELECT rolsuper, rolcreatedb, rolbypassrls FROM pg_roles WHERE rolname = current_user
+    `;
+    expect(privileges).toEqual({ rolsuper: false, rolcreatedb: false, rolbypassrls: false });
+    await expect(runtimeSql`SELECT * FROM public.users`).rejects.toMatchObject({ code: "42501" });
+  });
+
+  it("migrates before the app role exists, then grants access through seed setup and subsequent migrations", async () => {
     const { sql, connectionString } = await database("unseeded_runtime");
-    await bootstrap(connectionString, "invalid-unused-app-url");
-    await bootstrap(connectionString, "invalid-unused-app-url", {}, "db:migrate:prod");
+    const runtimeUrl = new URL(connectionString);
+    runtimeUrl.username = "lms_app_user";
+    runtimeUrl.password = "replace_with_strong_password";
+    await bootstrap(connectionString, runtimeUrl.href);
+    await bootstrap(connectionString, runtimeUrl.href, {}, "db:migrate:prod");
     const [state] = await sql`
       SELECT to_regclass('public.assistant_threads') IS NOT NULL AS core_ready,
         to_regclass('workflow.workflow_runs') IS NOT NULL AS workflow_ready,
@@ -380,17 +407,21 @@ describe("Workflow PostgreSQL migrations in the Core database", () => {
     expect(state).toEqual({ core_ready: true, workflow_ready: true, app_role_exists: false });
     await provisionRuntimeRole(connectionString);
     await provisionRuntimeRole(connectionString);
-    const runtimeUrl = new URL(connectionString);
-    runtimeUrl.username = "lms_app_user";
-    runtimeUrl.password = "replace_with_strong_password";
     await smokeQueue(runtimeUrl.href);
     const [owner] = await sql`
       SELECT pg_get_userbyid(relowner) AS role FROM pg_class
       WHERE oid = 'graphile_worker._private_jobs'::regclass
     `;
     expect(owner.role).toBe("lms_app_user");
-    await bootstrap(connectionString, "invalid-unused-app-url");
+    await bootstrap(connectionString, runtimeUrl.href);
     await smokeQueue(runtimeUrl.href);
+  });
+
+  it("supports migrator-only schema setup without an application URL", async () => {
+    const { connectionString } = await database("migrator_only");
+    const environment = { DATABASE_URL: undefined, LMS_DATABASE_URL: undefined };
+    await bootstrap(connectionString, connectionString, environment);
+    await bootstrap(connectionString, connectionString, environment, "db:migrate:prod");
   });
 
   it("runs only Core migrations in browser E2E mode without connecting as the unseeded app role", async () => {

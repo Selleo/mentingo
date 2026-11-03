@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
+import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useLearningPaths } from "~/api/queries/useLearningPaths";
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
@@ -61,6 +62,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { data: isStripeConfigured } = useStripeConfigured();
   const { data: phishingConfiguration, isError: isPhishingConfigurationError } =
     usePhishingConfiguration(matchesRequirement(permissions, routeAccessConfig.phishing));
+  const { data: competenciesConfiguration, isError: isCompetenciesConfigurationError } =
+    useCompetenciesConfiguration(matchesRequirement(permissions, routeAccessConfig.competencies));
 
   const { data: globalSettings } = useGlobalSettings();
 
@@ -114,6 +117,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         shouldShowLearningPaths,
         phishingConfiguration?.enabled === true && !isPhishingConfigurationError,
         user?.roleSlugs ?? [],
+        competenciesConfiguration?.enabled === true && !isCompetenciesConfigurationError,
       ),
     );
   }

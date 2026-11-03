@@ -8,6 +8,7 @@
   "private": true,
   "scripts": {
     "build": "tsup",
+    "test": "pnpm --filter @repo/shared build && pnpm build && node --test test/*.test.cjs",
     "clean": "rm -rf dist",
     "dev": "email dev -p 3001 --dir ./src/templates",
     "export": "email export --dir ./src/templates"

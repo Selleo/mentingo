@@ -208,6 +208,13 @@ describe("Assistant authorization queries", () => {
     expect(runWithTenant).toHaveBeenCalledWith(actor.tenantId, expect.any(Function));
   });
 
+  it("keeps imported Slack transcripts out of the interactive assistant", async () => {
+    await expect(repository.getThread(actor as never, "slack-thread")).rejects.toThrow();
+    const statement = new PgDialect().sqlToQuery(query.where.mock.calls[0][0]);
+    expect(statement.params).toEqual([actor.tenantId, actor.userId, "mentingo", "slack-thread"]);
+    expect(statement.sql).toContain('"assistant_threads"."source" =');
+  });
+
   it("rechecks the active user with tenant, archival and deletion constraints", async () => {
     rows = [{ id: actor.userId }];
     await expect(repository.isAccountActive(actor)).resolves.toBe(true);

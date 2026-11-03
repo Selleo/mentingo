@@ -31,6 +31,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { learningFactSchema } from "src/competencies/schemas/competencies.schema";
 import { CourseService } from "src/courses/course.service";
 import { enrolledCourseGroupsPayload } from "src/courses/schemas/course.schema";
 import { createCoursesEnrollmentSchema } from "src/courses/schemas/createCoursesEnrollment";
@@ -90,7 +91,10 @@ import {
 import { UserService } from "src/user/user.service";
 import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 
+import { LearningFactsRepository } from "./repositories/learning-facts.repository";
 import {
+  integrationCompetenciesConnectionSchema,
+  type IntegrationCompetenciesConnection,
   integrationPluginDiscoverySchema,
   integrationPhishingConnectionSchema,
   integrationPluginConfiguredSchema,
@@ -125,6 +129,7 @@ export class IntegrationController {
     private readonly userService: UserService,
     private readonly groupService: GroupService,
     private readonly courseService: CourseService,
+    private readonly learningFactsRepository: LearningFactsRepository,
   ) {}
 
   @ApiEndpointDocs({
@@ -191,6 +196,72 @@ export class IntegrationController {
     return new BaseResponse(
       await this.integrationService.phishingConnectionStatus(tenantId, actor, keyTenant),
     );
+  }
+
+  @Put("tenants/:tenantId/plugins/competencies")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "body", schema: integrationCompetenciesConnectionSchema },
+    ],
+    response: baseResponse(integrationPluginConfiguredSchema),
+  })
+  async configureCompetenciesConnection(
+    @Param("tenantId") tenantId: UUIDType,
+    @Body() body: IntegrationCompetenciesConnection,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginConfigured>> {
+    return new BaseResponse(
+      await this.integrationService.configureCompetenciesConnection(
+        tenantId,
+        body,
+        actor,
+        keyTenant,
+      ),
+    );
+  }
+
+  @Get("tenants/:tenantId/plugins/competencies")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationPluginStatusSchema),
+  })
+  async competenciesConnectionStatus(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginStatus>> {
+    return new BaseResponse(
+      await this.integrationService.competenciesConnectionStatus(tenantId, actor, keyTenant),
+    );
+  }
+
+  @Get("learning-facts")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @Validate({
+    request: [
+      { type: "query", name: "subjectId", schema: UUIDSchema },
+      { type: "query", name: "courseId", schema: UUIDSchema },
+    ],
+    response: baseResponse(
+      Type.Object({
+        subjectId: UUIDSchema,
+        courseId: UUIDSchema,
+        revision: Type.Integer(),
+        facts: Type.Array(learningFactSchema),
+      }),
+    ),
+  })
+  async getIntegrationLearningFacts(
+    @Query("subjectId") subjectId: string,
+    @Query("courseId") courseId: string,
+  ) {
+    return new BaseResponse(await this.learningFactsRepository.snapshot(subjectId, courseId));
   }
 
   @Get("tenants")

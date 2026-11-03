@@ -26,7 +26,7 @@ TRANSIENT = ('rate limit', 'rate_limit', '429', 'overloaded', '529', '500', '502
              'request timed out', 'connection', 'temporarily')
 # every Claude Code call runs on the subscription: an API key would take precedence over it; no Bash in these calls,
 # so the CLI's subprocess scrub (which needs bubblewrap, and which GitHub Actions would turn on) stays off
-SUBSCRIPTION = {'ANTHROPIC_API_KEY': None, 'ANTHROPIC_AUTH_TOKEN': None, 'CLAUDE_CODE_SUBPROCESS_ENV_SCRUB': '0'}
+SUBSCRIPTION = {'ELEVENLABS_API_KEY': None, 'ANTHROPIC_API_KEY': None, 'ANTHROPIC_AUTH_TOKEN': None, 'CLAUDE_CODE_SUBPROCESS_ENV_SCRUB': '0'}
 SUBSCRIPTION_LOGINS = ('claude.ai', 'oauth_token')  # `claude auth status` authMethod of a /login and of a CI token
 # what no model reads (Read rules cover Grep and Glob too): the process environment (/proc: a CI token lives there), the
 # Claude Code login (~/.claude) and a checkout's git credentials (.git/config); checked with the CLI, 2026-09-28

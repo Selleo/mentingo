@@ -52,6 +52,7 @@ export type McpLearnerContentSearchResponse = McpContentSearchResponse & {
   lessons: Array<
     Pick<GlobalSearchResult["lessons"][number], "id" | "title" | "courseId"> & {
       matchedPassage?: string;
+      matchedAttachmentFileName?: string | null;
       url: string;
     }
   >;

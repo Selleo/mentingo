@@ -150,9 +150,13 @@ jobs:
           kill $APP_PID || true
 
   unit:
-    name: Jest unit tests
+    name: Jest unit tests (shard ${{ matrix.shard }}/2)
     needs: [lint, build]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
 
     services:
       postgres:
@@ -228,8 +232,13 @@ jobs:
       - name: Build packages
         run: pnpm -w packages:build
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Run unit tests
-        run: pnpm --filter=api test:ci
+        run: pnpm --filter=api test:ci --shard=${{ matrix.shard }}/2
 
       - name: Stop RustFS
         if: always()

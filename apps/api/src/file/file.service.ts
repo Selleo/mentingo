@@ -8,6 +8,8 @@ import {
   Inject,
   BadRequestException,
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -16,6 +18,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ENTITY_TYPES,
+  isAudioFile,
   MAX_COURSE_TRAILER_VIDEO_SIZE,
   RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
@@ -64,6 +67,7 @@ import {
   PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
+  VALIDATED_AUDIO_FILE_EXTENSIONS,
 } from "./file.constants";
 import { HostedVideoStatusService } from "./hosted-video-status.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
@@ -71,7 +75,9 @@ import { S3VideoProvider } from "./providers/s3-video.provider";
 import { ThumbnailService } from "./thumbnail.service";
 import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
+import { isStorageRangeNotSatisfiableError } from "./utils/storageErrors";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { validateAudioUpload } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
@@ -219,6 +225,10 @@ export class FileService {
     }
 
     if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
+
+    if (isAudioFile({ type: file.mimetype, name: file.originalname })) {
+      return this.uploadAudioFile(file, resource, tenantId);
+    }
 
     const isVideo = file.mimetype.startsWith("video/");
 
@@ -546,11 +556,44 @@ export class FileService {
     }
   }
 
+  /** Audio skips image variants and video providers; its content is verified before storage. */
+  private async uploadAudioFile(
+    file: Express.Multer.File,
+    resource: string,
+    tenantId: UUIDType,
+  ): Promise<UploadFileResult> {
+    const audioMimeType = await validateAudioUpload(file);
+
+    const fileKey = prefixTenantStorageKey(
+      `${resource}/${randomUUID()}${VALIDATED_AUDIO_FILE_EXTENSIONS[audioMimeType]}`,
+      tenantId,
+    );
+
+    try {
+      await this.s3Service.uploadFile(file.buffer, fileKey, audioMimeType);
+    } catch (s3Error) {
+      this.logFileOperationFailure("upload", fileKey, s3Error);
+      throw new ConflictException("richText.audio.uploadFailed");
+    }
+
+    return {
+      fileKey,
+      fileUrl: await this.s3Service.getSignedUrl(fileKey),
+      contentType: audioMimeType,
+    };
+  }
+
   async getFileStream(fileKey: string, range?: string, quality?: ImageQuality) {
     try {
       return await this.s3Service.getFileStream(this.getFileStorageKey(fileKey, quality), range);
     } catch (error) {
       this.logFileOperationFailure("retrieve", fileKey, error);
+      if (isStorageRangeNotSatisfiableError(error)) {
+        throw new HttpException(
+          "files.toast.rangeNotSatisfiable",
+          HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+        );
+      }
       throw new BadRequestException("Failed to retrieve file");
     }
   }

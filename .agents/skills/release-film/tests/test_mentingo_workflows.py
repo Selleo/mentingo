@@ -36,6 +36,20 @@ def uses(step, action):
 
 @unittest.skipUnless(yaml and RECORD.is_file() and PUBLISH.is_file(), "PyYAML and Mentingo's release film workflows")
 class Workflows(unittest.TestCase):
+    def test_elevenlabs_pool_and_credentials_reach_only_the_required_steps(self):
+        job = self.record['jobs']['film']
+        self.assertEqual(job['env']['RELEASE_FILM_VOICE'], 'elevenlabs')
+        for suffix in ['FEMALE_1', 'FEMALE_2', 'MALE_1', 'MALE_2']:
+            self.assertEqual(job['env']['ELEVENLABS_VOICE_ID_' + suffix],
+                             '${{ vars.ELEVENLABS_VOICE_ID_' + suffix + ' }}')
+        self.assertNotIn('ELEVENLABS_API_KEY', job['env'])
+        required = {'Check the machine', "Check the narrator's voice from this runner", 'Record the film',
+                    "Hide secrets in the run's files"}
+        for step in job['steps']:
+            self.assertEqual('ELEVENLABS_API_KEY' in step.get('env', {}), step.get('name') in required)
+        names = [step.get('name') for step in job['steps']]
+        self.assertLess(names.index('Validate the four narrator voices'), names.index('Check Claude Opus on the seat'))
+
     def setUp(self):
         self.record, self.publish = load(RECORD), load(PUBLISH)
         self.film = self.record['jobs']['film']
@@ -119,6 +133,13 @@ class Workflows(unittest.TestCase):
                          ('all-round-gothic', 'https://use.typekit.net/qqt7bjl.css'))
         self.assertEqual(brand['body_font']['family'], 'Open Sans')
         self.assertEqual(brand['colors'], {'accent': '#3f58b6', 'frame': '#222949'})  # primary-700, primary-950
+
+    def test_failed_render_reports_retain_the_audio_subtitles_and_authored_plan(self):
+        report = next(step for step in self.film['steps'] if step.get('name') == "Upload the run's report")
+        self.assertIn('always()', report['if'])
+        self.assertIn("steps.redact.outcome == 'success'", report['if'])
+        for suffix in ['/voice/*/*.mp3', '/voice/*/*.wav', '/voice/*/*.srt', '/film-plan/*.json']:
+            self.assertIn(suffix, report['with']['path'])
 
     def test_the_artifacts_hold_no_secret_and_the_knowledge_only_its_own_runs(self):
         steps = {s.get('name'): s for s in self.film['steps']}

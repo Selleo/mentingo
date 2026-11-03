@@ -1,5 +1,7 @@
 import {
   SUPPORTED_LANGUAGES,
+  AI_CONVERSATION_SOURCES,
+  type AiConversationSource,
   ASSISTANT_MESSAGE_STATUSES,
   ASSISTANT_RUN_STATUSES,
   type AssistantRunStatus,
@@ -38,17 +40,27 @@ export const assistantThreads = pgTable(
     ...id,
     ...timestamps,
     tenantId,
-    userId: uuid("user_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     title: text("title").notNull().default("New conversation"),
     language: text("language")
       .$type<SupportedLanguages>()
       .notNull()
       .default(SUPPORTED_LANGUAGES.EN),
+    source: text("source")
+      .$type<AiConversationSource>()
+      .notNull()
+      .default(AI_CONVERSATION_SOURCES.MENTINGO),
+    externalThreadKey: text("external_thread_key"),
+    externalIntegrationId: text("external_integration_id"),
     archived: boolean("archived").notNull().default(false),
   },
   withTenantIdIndex("assistant_threads", (table) => ({
+    externalThreadUnique: uniqueIndex("assistant_threads_external_unique").on(
+      table.tenantId,
+      table.externalIntegrationId,
+      table.source,
+      table.externalThreadKey,
+    ),
     ownerUpdatedIdx: index("assistant_threads_owner_updated_idx").on(
       table.tenantId,
       table.userId,
@@ -73,6 +85,9 @@ export const assistantMessages = pgTable(
       .notNull()
       .default(ASSISTANT_MESSAGE_STATUSES.COMPLETE),
     sources: jsonb("sources").$type<AssistantSource[]>().notNull().default([]),
+    externalMessageId: text("external_message_id"),
+    externalUserId: text("external_user_id"),
+    externalUserName: text("external_user_name"),
     clientMessageId: uuid("client_message_id"),
   },
   withTenantIdIndex("assistant_messages", (table) => ({
@@ -81,6 +96,11 @@ export const assistantMessages = pgTable(
       table.threadId,
       table.createdAt,
       table.id,
+    ),
+    externalMessageUnique: uniqueIndex("assistant_messages_external_unique").on(
+      table.tenantId,
+      table.threadId,
+      table.externalMessageId,
     ),
     clientIdUnique: uniqueIndex("assistant_messages_client_id_unique").on(
       table.tenantId,

@@ -75,6 +75,10 @@ export class AdminAiThreadsRepository {
         >`CASE WHEN ${aiMentorThreads.practiceSessionId} IS NOT NULL THEN ${AI_THREAD_TYPES.PRACTICE} ELSE ${AI_THREAD_TYPES.AI_MENTOR} END`.as(
           "source_type",
         ),
+        source: sql<NonNullable<AdminAiThreadSummary["source"]>>`'mentingo'`.as(
+          "conversation_source",
+        ),
+        integrationId: sql<string | null>`NULL`.as("integration_id"),
         practiceSessionId: aiMentorThreads.practiceSessionId,
         aiMentorLessonId: aiMentorThreads.aiMentorLessonId,
         lessonId: aiMentorLessons.lessonId,
@@ -133,6 +137,8 @@ export class AdminAiThreadsRepository {
       .select({
         id: assistantThreads.id,
         type: sql<AdminAiThreadSummary["type"]>`${AI_THREAD_TYPES.ASSISTANT}`.as("source_type"),
+        source: assistantThreads.source,
+        integrationId: assistantThreads.externalIntegrationId,
         practiceSessionId: sql<string | null>`NULL`.as("practice_session_id"),
         aiMentorLessonId: sql<string | null>`NULL`.as("ai_mentor_lesson_id"),
         lessonId: sql<string | null>`NULL`.as("lesson_id"),
@@ -144,7 +150,7 @@ export class AdminAiThreadsRepository {
           ),
         openingPreview: sql<string | null>`(${openingMessageQuery})`.as("opening_preview"),
         owner: {
-          id: sql<string>`${users.id}`.as("owner_id"),
+          id: sql<string | null>`${users.id}`.as("owner_id"),
           firstName: users.firstName,
           lastName: users.lastName,
           avatarReference: users.avatarReference,
@@ -154,7 +160,7 @@ export class AdminAiThreadsRepository {
         >`CASE WHEN ${assistantThreads.archived} THEN ${AI_THREAD_STATUSES.ARCHIVED} ELSE ${AI_THREAD_STATUSES.ACTIVE} END`.as(
           "thread_status",
         ),
-        language: assistantThreads.language,
+        language: sql<string>`${assistantThreads.language}`.as("thread_language"),
         createdAt: assistantThreads.createdAt,
         lastActivityAt:
           sql<string>`COALESCE((${lastMessageActivityQuery}), ${assistantThreads.createdAt})`.as(
@@ -162,13 +168,13 @@ export class AdminAiThreadsRepository {
           ),
       })
       .from(assistantThreads)
-      .innerJoin(users, eq(users.id, assistantThreads.userId));
+      .leftJoin(users, eq(users.id, assistantThreads.userId));
   }
 
   private buildThreadSummariesQuery(adminAiThreadQuery: AdminAiThreadQuery) {
     return unionAll(
-      this.buildMentorThreadSummariesQuery(adminAiThreadQuery),
       this.buildAssistantThreadSummariesQuery(),
+      this.buildMentorThreadSummariesQuery(adminAiThreadQuery),
     );
   }
 
@@ -264,6 +270,8 @@ export class AdminAiThreadsRepository {
             AdminAiThreadMessage["role"]
           >`CASE WHEN ${assistantMessages.role} = ${ASSISTANT_MESSAGE_ROLES.USER} THEN ${MESSAGE_ROLE.USER} ELSE ${MESSAGE_ROLE.MENTOR} END`,
           content: assistantMessages.text,
+          participantId: assistantMessages.externalUserId,
+          participantName: assistantMessages.externalUserName,
           status: assistantMessages.status,
           createdAt: assistantMessages.createdAt,
         })

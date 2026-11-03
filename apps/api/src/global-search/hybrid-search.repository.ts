@@ -307,18 +307,27 @@ export class HybridSearchRepository {
                   AND sc.tenant_id = ${actor.tenantId}
                   AND sc.status = ${COURSE_ENROLLMENT.ENROLLED})`
           : sql`false`;
-        return sql`s.metadata->>'resourceId' IS NULL
-          AND s.metadata->>'semanticResource' IS DISTINCT FROM 'true'
-          AND EXISTS (SELECT 1 FROM lessons l JOIN chapters ch ON ch.id = l.chapter_id
+        return sql`EXISTS (SELECT 1 FROM lessons l JOIN chapters ch ON ch.id = l.chapter_id
             JOIN courses e ON e.id = ch.course_id
             WHERE l.id = s.entity_id
               AND l.tenant_id = ${actor.tenantId} AND ch.tenant_id = ${actor.tenantId}
               AND e.tenant_id = ${actor.tenantId} AND e.is_archived = false
               AND ((${publicAccess}) OR (${enrolledAccess}))
               AND s.language = ANY(e.available_locales)
-              AND (s.document_type = ${SEARCH_DOCUMENT_TYPES.TITLE}
-                OR (s.document_type = ${SEARCH_DOCUMENT_TYPES.DESCRIPTION}
-                  AND l.type = ${LESSON_TYPES.CONTENT})))`;
+              AND (
+                (s.metadata->>'resourceId' IS NULL
+                  AND s.metadata->>'semanticResource' IS DISTINCT FROM 'true'
+                  AND (s.document_type = ${SEARCH_DOCUMENT_TYPES.TITLE}
+                    OR (s.document_type = ${SEARCH_DOCUMENT_TYPES.DESCRIPTION}
+                      AND l.type = ${LESSON_TYPES.CONTENT})))
+                OR (s.document_type = 'resource:' || (s.metadata->>'resourceId')
+                  AND EXISTS (SELECT 1 FROM resource_entity attachment
+                    WHERE attachment.resource_id::text = s.metadata->>'resourceId'
+                      AND attachment.tenant_id = s.tenant_id
+                      AND attachment.entity_id = l.id
+                      AND attachment.entity_type = ${SEARCH_ENTITY_TYPES.LESSON}
+                      AND attachment.relationship_type = 'attachment'))
+              ))`;
       }
       if (!can(PERMISSIONS.COURSE_READ)) return sql`false`;
       let scope: SQL = sql`EXISTS (SELECT 1 FROM student_courses sc WHERE sc.course_id = e.id

@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Course authors describe the course material or changes they need in AI course generation, then review the proposed result before it reaches the course. The interface is being simplified to one text-led interaction with a single plus menu for sources, curriculum scope, and AI behavior, replacing the earlier three-column workspace. Saved requests and results remain available after navigation or a live-update interruption.
+Course authors describe the course material or changes they need in AI course generation. They can review proposals before applying them, or opt into Autopilot for automatic outline/change approvals and application after clarifying their needs. The interface is being simplified to one text-led interaction with a single plus menu for sources, curriculum scope, and AI behavior, replacing the earlier three-column workspace. Saved requests and results remain available after navigation or a live-update interruption.
 
 ## Who Uses It
 
@@ -10,14 +10,16 @@ Course authors describe the course material or changes they need in AI course ge
 
 ## Feature Functions
 
+- Choose **Review changes** or **Autopilot** for each request. Autopilot still asks useful questions about missing audience, learning goals, and learner duration/depth. It then approves the proposed outline and applies completed course changes automatically.
 - Type or dictate a generation or editing request, with target scope, a Fast/Balanced/Thorough thinking control when Mentingo's own AI provider is active, and explicit source/research permissions.
 - Use the selected thinking effort for the first route and generation attempt as well as later retries when Mentingo's own AI provider is active.
 - Attach approved files from the composer, recover completed unsent attachments after a reload, and keep sent source chips on the exact request that used them. Send stays unavailable until every selected file has finished processing with usable text; the connected AI service also rejects a request that reaches it before processing finishes or without usable extracted text.
 - When a generated AI Mentor lesson uses approved company files, attach prepared lesson documents at application so its learner conversations can retrieve relevant company context.
 - Continue an existing conversation with a focused revision request, keeping the approved brief and outline while using only the selected lessons' current details.
+- Request a new lesson in several named or selected chapters as one grouped change; each chapter remains tied to its own proposed lesson, and Autopilot waits for the complete set.
 - Revise selected lesson blocks or quiz questions while preserving content outside the requested scope.
 - Follow generated outlines, saved assistant responses, reviewable results and author questions in one interaction. Actual task status stays visible, while the suggested plan is separate from completion progress. Outline-only proposals say **Review outline** and **Approve outline**; approval starts lesson writing, returns the author to the conversation, and does not claim to apply course changes. A later review remains available after an earlier application has finished.
-- Before an outline is drafted, check whether the allowed material supports the requested learning objectives and assessments. If product-specific facts are missing, ask the author for reliable source material or web research at that stage; a source catalog or general-knowledge permission alone does not justify a product quiz.
+- Before an outline is drafted, check whether the allowed material supports the requested learning objectives and assessments. If product-specific facts are missing, the review workflow asks the author for reliable source material or web research; Autopilot also waits for source and permission answers and cannot silently grant new source access; a source catalog or general-knowledge permission alone does not justify a product quiz.
 - Provide public page links in the request and let the assistant read them directly when web research is enabled. Page extraction uses the supplied links without requiring a search first; fetched text remains evidence to assess rather than instructions to follow.
 - See the actual topic-specific search queries beneath conversation search activity. Searches use the request and selected course topics, and follow-up queries address identified evidence gaps.
 - See web sources the assistant used as compact favicon chips; opening one shows the page title, description, address and an **Open source** link, fetched on demand through a guarded link-preview endpoint.
@@ -125,6 +127,8 @@ Generated lessons distinguish material for participants from production instruct
 
 ## Key Technical Context
 
+- Autopilot keeps the selected source permissions and course-edit scope; it does not publish a course or grant additional access. Core rechecks the request author and course permissions before applying changes.
+- The automatic application is queued in the background only after all required work succeeds. Stopping before its export is frozen prevents application; an already frozen application remains recoverable after a restart.
 - Quiz question titles preserve basic text formatting while removing unsafe HTML during persistence and learner rendering, including for previously saved questions.
 - Generated-image previews retry transient download failures twice, then show an error with a **Retry previews** action. Retrying the download does not regenerate the asset.
 - Durable course-authoring sessions are the only supported AI course-generation workflow. The earlier draft/chat interface and automatic whole-course import have been retired; opening the curriculum no longer creates an old-style draft or runs its sync worker. Historical sync records and migrations remain for data retention, without active routes or workers. Authors review and explicitly apply proposals through the current workspace.
@@ -138,6 +142,8 @@ Generated lessons distinguish material for participants from production instruct
 - Existing current course-edit access and `COURSE_AI_GENERATION` permission are both required.
 
 ## Test Evidence
+
+Autopilot has focused component, API and AI workflow coverage. Database-backed tests cover stop and replay, and a provider-mocked cross-service test applies an edit without a browser connection while invoking the server replay sweep explicitly. Live-provider, browser and deployment verification remain separate.
 
 When an author retries the same reviewed change, Mentingo retains the frozen selection instead of generating another version. Choosing to omit an optional image creates a distinct selection; an editor can also acknowledge assessment impact and retry a failed application without losing the reviewed content. After seven days, abandoned prepared material is eligible for cleanup, while material linked to a Mentor lesson or recorded in an applied change is retained. The focused code tests cover export identity, acknowledgement retry, and protected asset cleanup; live and authenticated end-to-end behavior remain unverified.
 
@@ -440,3 +446,7 @@ Validation for this slice: 32 Core application-service tests pass on Node 22.15.
 including the Python-produced export fixture and existing atomic-apply handoff guards.
 Touched-file ESLint/Prettier pass. The companion AI authoring suite passes 1,660 tests;
 its changed files add no BasedPyright diagnostics over the existing baseline.
+
+See the [capability matrix](course-authoring-capability-matrix.md) for supported reads, research, edits, unavailable actions and mode-specific approval behavior.
+
+The attachment picker accepts multiple files in one selection. Each valid file uses its own upload request and attachment progress state; invalid files or individual request failures do not cancel valid siblings. Sending remains blocked until selected attachments are ready. Focused interaction coverage verifies four independent uploads, failure isolation and mixed valid/invalid selections.

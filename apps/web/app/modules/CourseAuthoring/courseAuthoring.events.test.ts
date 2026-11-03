@@ -42,6 +42,18 @@ const event = (sequence: number, sessionId = "session-1"): AuthoringEvent => ({
 });
 
 describe("course authoring event cursor", () => {
+  it("projects an application receipt arriving without a browser-initiated apply", () => {
+    const next = applyAuthoringEvent(session, {
+      ...event(8),
+      type: "application.changed",
+      payload: { applicationId: "application-1", exportId: "export-1", status: "applied" },
+    });
+
+    expect(projectWorkspaceRecords(next.records, next.tasks).applications).toEqual([
+      expect.objectContaining({ exportId: "export-1", status: "applied" }),
+    ]);
+  });
+
   it("retains raw work progress for the live chapter view without a snapshot refresh", () => {
     const current: AuthoringSession = {
       ...session,
