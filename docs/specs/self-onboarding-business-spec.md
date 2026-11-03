@@ -100,7 +100,7 @@ separate. Ordinary E2E factory defaults remain English outside the self-onboardi
 ## Short videos and explicit flow coverage
 
 The catalog assigns every required flow exactly once to a stable named video containing 1–3 related flows.
-The current registry contains 222 flows and 91 short videos per language across 30 app areas. Missing/unknown flow IDs, duplicate
+The current registry contains 224 flows and 91 short videos per language across 30 app areas. Missing/unknown flow IDs, duplicate
 memberships and duplicate video keys fail validation before recording. Semantic discovery of an additional
 flow requires an explicit grouping update; it cannot silently disappear or reshuffle existing videos.
 

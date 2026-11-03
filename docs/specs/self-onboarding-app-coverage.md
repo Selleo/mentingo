@@ -2,7 +2,7 @@
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
 The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
-in `docs/specs`. It contains 222 explicit flows, assigned exactly once to 91 stable video groups per
+in `docs/specs`. It contains 224 explicit flows, assigned exactly once to 91 stable video groups per
 language. Groups contain one to three related flows. English and Polish therefore allow up to 182
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
@@ -38,7 +38,7 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `users` | 10 | 4 | `user-management`, `group-manager` |
 | `automations` | 5 | 2 | `automations` |
 | `email-templates` | 7 | 3 | `email-template-builder` |
-| `categories` | 4 | 2 | `category-management` |
+| `categories` | 6 | 2 | `category-management` |
 | `groups` | 5 | 2 | `group-management`, `group-manager` |
 | `promotion-codes` | 3 | 1 | `billing-promotion-codes` |
 | `activity-logs` | 2 | 1 | `activity-logs` |

@@ -468,7 +468,7 @@ class RegistryTests(unittest.TestCase):
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 222, 'videos': 91})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 224, 'videos': 91})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)

@@ -7706,7 +7706,10 @@
       ],
       "watchPaths": [
         "apps/web/app/modules/Admin/Categories/**",
-        "apps/api/src/category/**"
+        "apps/api/src/category/**",
+        "apps/web/app/modules/Courses/components/modern/admin/**",
+        "apps/web/app/components/Navigation/GlobalSearch/CategoryEntry.tsx",
+        "apps/api/src/search/**"
       ],
       "flows": [
         {
@@ -7830,6 +7833,73 @@
           "outcomes": [
             "The unused category is removed without deleting categories attached to courses."
           ]
+        },
+        {
+          "id": "add-category-from-catalogue",
+          "title": "Add a category from the course catalogue",
+          "description": "Add a category from the course catalogue in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "categories"
+          ],
+          "specPaths": [
+            "docs/specs/category-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Categories/**",
+            "apps/api/src/category/**",
+            "apps/web/app/modules/Courses/components/modern/admin/**",
+            "apps/web/app/components/Navigation/GlobalSearch/CategoryEntry.tsx",
+            "apps/api/src/search/**"
+          ],
+          "goal": "Add a category from the course catalogue.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera."
+          ],
+          "actions": [
+            "Open the modern course catalogue with category-management and course-create access.",
+            "Use the inline Add category row and save a localized synthetic category.",
+            "Inspect the newly created category row and use its course-create action to inspect the preselected category, then return without creating an unrelated course."
+          ],
+          "outcomes": [
+            "The new category remains visible to its creator and the course creation form uses the selected category."
+          ]
+        },
+        {
+          "id": "search-categories-globally",
+          "title": "Find categories through global search",
+          "description": "Find categories through global search in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "categories"
+          ],
+          "specPaths": [
+            "docs/specs/category-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Categories/**",
+            "apps/api/src/category/**",
+            "apps/web/app/modules/Courses/components/modern/admin/**",
+            "apps/web/app/components/Navigation/GlobalSearch/CategoryEntry.tsx",
+            "apps/api/src/search/**"
+          ],
+          "goal": "Find categories through global search.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera."
+          ],
+          "actions": [
+            "Open global search and enter a known localized category name.",
+            "Inspect the permitted category match and follow its navigation action."
+          ],
+          "outcomes": [
+            "The matching category can be found and its permitted destination opens."
+          ]
         }
       ],
       "videos": [
@@ -7845,9 +7915,11 @@
         },
         {
           "key": "categories.category-lifecycle",
-          "title": "Remove unused categories",
-          "description": "Remove unused categories in Mentingo.",
+          "title": "Use categories across the catalogue and search",
+          "description": "Add catalogue categories, find them through global search and remove unused labels.",
           "flowIds": [
+            "add-category-from-catalogue",
+            "search-categories-globally",
             "delete-category"
           ]
         }
