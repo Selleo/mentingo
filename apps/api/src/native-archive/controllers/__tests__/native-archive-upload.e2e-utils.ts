@@ -87,7 +87,13 @@ export function createNativeArchiveUploadE2EDoubles() {
     }),
     getArchiveJobStatus: jest.fn(async (id: string, actor: Actor) => {
       const job = ensureActor(id, actor);
-      return { jobId: id, state: job.state, result: job.result, failedReason: null };
+      return {
+        jobId: id,
+        state: job.state,
+        result: job.result,
+        failedReason: null,
+        progress: null,
+      };
     }),
     getArchiveDownloadStream: jest.fn(async (id: string, actor: Actor) => {
       const job = ensureActor(id, actor);

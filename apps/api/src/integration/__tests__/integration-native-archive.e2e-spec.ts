@@ -2,7 +2,10 @@ import request from "supertest";
 import { match } from "ts-pattern";
 
 import { getNativeArchiveExportPrefix } from "src/native-archive/native-archive-storage-paths";
-import { NATIVE_ARCHIVE_JOB_STATE } from "src/native-archive/native-archive.constants";
+import {
+  NATIVE_ARCHIVE_JOB_STAGES,
+  NATIVE_ARCHIVE_JOB_STATE,
+} from "src/native-archive/native-archive.constants";
 import {
   createNativeArchiveExportStorage,
   readNativeArchiveBytes,
@@ -189,6 +192,7 @@ describe("Integration native archive export (e2e)", () => {
       state: NATIVE_ARCHIVE_JOB_STATE.COMPLETED,
       result: { kind: "course", rootId: course.id },
       failedReason: null,
+      progress: expect.objectContaining({ stage: NATIVE_ARCHIVE_JOB_STAGES.PACKAGING }),
     });
     expect(downloaded.headers).toMatchObject({
       "content-type": expect.stringContaining("application/zip"),

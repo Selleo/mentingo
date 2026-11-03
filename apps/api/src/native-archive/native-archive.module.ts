@@ -1,8 +1,6 @@
 import { Module } from "@nestjs/common";
 
-import { RagRepository } from "src/ai/repositories/rag.repository";
-import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
-import { RagService } from "src/ai/services/rag.service";
+import { AiRuntimeModule } from "src/ai/ai-runtime.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
 import { MasterCourseRepository } from "src/courses/master-course/master-course.repository";
@@ -30,6 +28,7 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
 
 @Module({
   imports: [
+    AiRuntimeModule,
     CourseTransferModule,
     FileModule,
     BunnyStreamModule,
@@ -41,9 +40,6 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
   ],
   controllers: [NativeArchiveController],
   providers: [
-    AiRuntimeService,
-    RagRepository,
-    RagService,
     MasterCourseRepository,
     NativeArchiveImportRepository,
     NativeArchiveSnapshotRepository,
