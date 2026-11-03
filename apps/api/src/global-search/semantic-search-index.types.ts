@@ -25,3 +25,19 @@ export interface SemanticSearchReconcileOptions {
   offset?: number;
   limit?: number;
 }
+
+/** The embedding space a stored or query vector belongs to; vectors only compare within one. */
+export interface SemanticSearchEmbeddingIdentity {
+  model: string;
+  dimensions: number;
+}
+
+export interface SemanticSearchEmbeddings {
+  embeddings: number[][];
+  identity: SemanticSearchEmbeddingIdentity;
+}
+
+export interface SemanticSearchQueryEmbedding {
+  embedding: number[];
+  identity: SemanticSearchEmbeddingIdentity;
+}

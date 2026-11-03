@@ -16,6 +16,8 @@ const source = {
   resourceContentType: null,
 };
 
+const qwen = { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 };
+
 describe("semantic search indexing", () => {
   function setup() {
     const repository = {
@@ -23,7 +25,11 @@ describe("semantic search indexing", () => {
       deleteSource: jest.fn(),
       replace: jest.fn().mockResolvedValue(true),
     };
-    const embedding = { embedTexts: jest.fn().mockResolvedValue([Array(1536).fill(0.2)]) };
+    const embedding = {
+      embedTexts: jest
+        .fn()
+        .mockResolvedValue({ embeddings: [Array(1536).fill(0.2)], identity: qwen }),
+    };
     const s3 = { getFileSize: jest.fn(), getFileBuffer: jest.fn() };
     const extraction = { extractSearchText: jest.fn() };
     const service = new SemanticSearchIndexService(
@@ -67,15 +73,36 @@ describe("semantic search indexing", () => {
     expect(repository.replace).not.toHaveBeenCalled();
   });
 
-  it("passes the revision read at execution for atomic activation", async () => {
+  it("stores the revision read at execution with the model that produced its vectors", async () => {
     const { service, repository, embedding } = setup();
     await service.process({ ...source, tenantId: "tenant" } as never);
     expect(repository.replace).toHaveBeenCalledWith(
       source,
       [source.content],
       [Array(1536).fill(0.2)],
+      qwen,
     );
     expect(embedding.embedTexts).toHaveBeenCalledWith([source.content]);
+  });
+
+  it("never stores one source in two embedding spaces after a mid-source fallback", async () => {
+    const { service, repository, embedding } = setup();
+    repository.findSource.mockResolvedValue({
+      ...source,
+      content: Array.from({ length: 5000 }, (_, index) => `Policy sentence ${index}.`).join(" "),
+    });
+    embedding.embedTexts.mockImplementation(async (texts: string[]) => ({
+      embeddings: texts.map(() => Array(1536).fill(0.2)),
+      identity:
+        embedding.embedTexts.mock.calls.length === 1
+          ? qwen
+          : { model: "text-embedding-3-small", dimensions: 1536 },
+    }));
+
+    await expect(service.process({ ...source, tenantId: "tenant" } as never)).rejects.toThrow(
+      "Semantic search embedding model changed while indexing a source",
+    );
+    expect(repository.replace).not.toHaveBeenCalled();
   });
 
   it("cleans up deleted sources without embedding", async () => {

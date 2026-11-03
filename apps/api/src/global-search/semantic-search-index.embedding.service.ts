@@ -1,43 +1,43 @@
 import { Injectable } from "@nestjs/common";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
-import { loadAiSdk } from "src/ai/utils/ai-esm";
 
-import {
-  SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS,
-  SEMANTIC_SEARCH_MODEL,
-} from "./semantic-search-index.constants";
+import { getSemanticSearchEmbeddingDimensions } from "./semantic-search-index.config";
+import { SEMANTIC_SEARCH_MODEL } from "./semantic-search-index.constants";
+
+import type {
+  SemanticSearchEmbeddings,
+  SemanticSearchQueryEmbedding,
+} from "./semantic-search-index.types";
 
 @Injectable()
 export class SemanticSearchEmbeddingService {
   constructor(private readonly runtime: AiRuntimeService) {}
 
-  async embedQuery(text: string): Promise<number[]> {
-    const [embedding] = await this.embedTexts([text], 3000);
-    return embedding;
+  async embedQuery(text: string): Promise<SemanticSearchQueryEmbedding> {
+    const { embeddings, identity } = await this.embedTexts([text], 3000);
+    return { embedding: embeddings[0], identity };
   }
 
-  async embedTexts(texts: string[], timeoutMs = 30_000): Promise<number[][]> {
-    if (!texts.length) return [];
-    const provider = await this.runtime.getAISdkOpenAI();
-    const { embedMany } = await loadAiSdk();
-    const { embeddings } = await embedMany({
-      model: provider.embedding(SEMANTIC_SEARCH_MODEL),
+  /** Luma first with OpenAI fallback; the identity names the model that produced the vectors. */
+  async embedTexts(texts: string[], timeoutMs = 30_000): Promise<SemanticSearchEmbeddings> {
+    const dimensions = getSemanticSearchEmbeddingDimensions();
+    if (!texts.length)
+      return { embeddings: [], identity: { model: SEMANTIC_SEARCH_MODEL, dimensions } };
+    const { embeddings, model } = await this.runtime.createSemanticSearchEmbeddings({
       values: texts,
-      telemetry: { isEnabled: false },
-      maxRetries: 0,
-      abortSignal: AbortSignal.timeout(timeoutMs),
+      dimensions,
+      coreModel: SEMANTIC_SEARCH_MODEL,
+      timeoutMs,
     });
     if (
       embeddings.length !== texts.length ||
       embeddings.some(
-        (vector) =>
-          vector.length !== SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS ||
-          vector.some((value) => !Number.isFinite(value)),
+        (vector) => vector.length !== dimensions || vector.some((value) => !Number.isFinite(value)),
       )
     ) {
       throw new Error("Invalid semantic search embedding response");
     }
-    return embeddings;
+    return { embeddings, identity: { model, dimensions } };
   }
 }

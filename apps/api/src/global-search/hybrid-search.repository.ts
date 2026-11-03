@@ -16,8 +16,8 @@ import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-libr
 import { DB } from "src/storage/db/db.providers";
 
 import { SEARCH_DOCUMENT_TYPES, SEARCH_ENTITY_TYPES } from "./global-search.constants";
+import { getDefaultSemanticSearchEmbeddingIdentity } from "./semantic-search-index.config";
 import {
-  SEMANTIC_SEARCH_MODEL,
   SEMANTIC_SEARCH_INDEX_VERSION,
   SEMANTIC_SEARCH_ENTITY_LIMIT,
   SEMANTIC_SEARCH_INITIAL_CANDIDATES,
@@ -27,6 +27,7 @@ import {
 } from "./semantic-search-index.constants";
 
 import type { MatchRow, SearchEntityType, SemanticCandidateMatchRow } from "./global-search.types";
+import type { SemanticSearchEmbeddingIdentity } from "./semantic-search-index.types";
 import type { SQL } from "drizzle-orm";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -82,7 +83,11 @@ export class HybridSearchRepository {
     actor: CurrentUserType,
     metadataOnly = false,
     learnerLessons = false,
+    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
   ): Promise<MatchRow[]> {
+    if (embedding.length !== identity.dimensions) {
+      throw new Error("Query embedding does not match the configured semantic search space");
+    }
     return this.db.transaction(async (trx) => {
       // Transaction-local settings use the same connection as every candidate query.
       await trx.execute(sql`SELECT
@@ -99,9 +104,7 @@ export class HybridSearchRepository {
           [...matches.keys()],
           metadataOnly,
         ] as const;
-        const query = learnerLessons
-          ? this.buildSemanticCandidateQuery(...parameters, true)
-          : this.buildSemanticCandidateQuery(...parameters);
+        const query = this.buildSemanticCandidateQuery(...parameters, learnerLessons, identity);
         const result = await trx.execute(query);
         const rows = result as unknown as SemanticCandidateMatchRow[];
         const candidateCount = Number(rows[0]?.candidateCount ?? 0);
@@ -142,6 +145,7 @@ export class HybridSearchRepository {
     excludedEntityIds: readonly string[] = [],
     metadataOnly = false,
     learnerLessons = false,
+    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
   ): SQL {
     const vector = `[${embedding.join(",")}]`;
     const unseen = excludedEntityIds.length
@@ -156,8 +160,7 @@ export class HybridSearchRepository {
           left(c.content, 320) AS passage, c.metadata->>'fileName' AS filename
         FROM search_chunks c
         WHERE c.tenant_id = ${actor.tenantId} AND c.entity_type = ${entityType}
-          AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
-          AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}
+          AND ${this.currentEmbeddingSpace(identity)}
           AND ${unseen}
           AND ${metadataOnly ? sql`c.document_type IN (${SEARCH_DOCUMENT_TYPES.TITLE}, ${SEARCH_DOCUMENT_TYPES.DESCRIPTION})` : sql`true`}
           -- OFFSET 0 keeps the source/access check correlated, preserving the HNSW scan.
@@ -183,7 +186,18 @@ export class HybridSearchRepository {
     `;
   }
 
-  async hasCurrentChunks(actor: CurrentUserType): Promise<boolean> {
+  /** Only chunks from the query vector's own model, size and index version are compared. */
+  private currentEmbeddingSpace(identity: SemanticSearchEmbeddingIdentity): SQL {
+    return sql`c.embedding_model = ${identity.model}
+      AND c.embedding_dimensions = ${identity.dimensions}
+      AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}`;
+  }
+
+  async hasCurrentChunks(
+    actor: CurrentUserType,
+    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
+  ): Promise<boolean> {
+    const embeddingSpace = this.currentEmbeddingSpace(identity);
     const eligibility = sql.join(
       Object.values(SEARCH_ENTITY_TYPES).map(
         (type) => sql`(s.entity_type = ${type} AND ${this.eligibility(type, actor)})`,
@@ -194,8 +208,7 @@ export class HybridSearchRepository {
       SELECT EXISTS (
         SELECT 1 FROM search_chunks c JOIN search_documents s ON ${this.currentSource(actor)}
         WHERE s.tenant_id = ${actor.tenantId} AND (${eligibility})
-          AND c.embedding IS NOT NULL AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
-          AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION}
+          AND c.embedding IS NOT NULL AND ${embeddingSpace}
       ) AND NOT EXISTS (
         SELECT 1 FROM search_documents s
         WHERE s.tenant_id = ${actor.tenantId} AND (${eligibility})
@@ -203,8 +216,7 @@ export class HybridSearchRepository {
           AND s.document_type NOT LIKE 'question_solution_explanation:%'
           AND ${this.sourceAccess(actor)}
           AND NOT EXISTS (SELECT 1 FROM search_chunks c WHERE ${this.currentSource(actor)}
-            AND c.embedding IS NOT NULL AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
-            AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
+            AND c.embedding IS NOT NULL AND ${embeddingSpace})
       ) AS ready
     `);
     return result[0]?.ready === true;

@@ -2392,6 +2392,7 @@ export const searchChunks = pgTable(
     sourceHash: text("source_hash").notNull(),
     sourceRevision: text("source_revision").notNull().default(""),
     embeddingModel: text("embedding_model").notNull(),
+    embeddingDimensions: integer("embedding_dimensions").notNull().default(1536),
     indexVersion: integer("index_version").notNull(),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
   },

@@ -5,6 +5,7 @@ import {
   AiCapabilityProvider,
   createLumaClient,
   type AiRuntimeConfiguration,
+  type LumaClient,
   type GenerateAiJudgeConfigurationOptions,
   type GenerateAiMentorConfigurationOptions,
   type GenerateTranslationsOptions,
@@ -20,7 +21,12 @@ import { Injectable, Logger } from "@nestjs/common";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
-import { LUMA_CONFIGURATION_CACHE_TTL_MS } from "src/ai/ai-runtime.constants";
+import {
+  AI_MENTOR_RAG_EMBEDDING_DIMENSIONS,
+  LUMA_CONFIGURATION_CACHE_TTL_MS,
+  LUMA_OPENAI_COMPATIBLE_MODEL,
+  LUMA_OPENAI_COMPATIBLE_PATH,
+} from "src/ai/ai-runtime.constants";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import {
   aiJudgeConfigurationValidatorStructuredOutputSchema,
@@ -35,12 +41,18 @@ import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
 import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
 import { aiJudgeJudgementSchema, generateTranslationSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { FallbackLanguageModel } from "src/ai/utils/fallback-language-model";
 import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import type { OpenAIProvider } from "@ai-sdk/openai";
+import type { LanguageModelV4 } from "@ai-sdk/provider";
 import type { AiMentorChatStreamResult, AiCoreMentorStreamResult } from "src/ai/ai-chat.types";
-import type { AiRuntimeSource } from "src/ai/ai-runtime.types";
+import type {
+  AiRuntimeSource,
+  SemanticEmbeddingRequest,
+  SemanticEmbeddingResult,
+} from "src/ai/ai-runtime.types";
 import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-configuration.types";
 import type {
   AiJudgeConfigurationValidatorStructuredOutput,
@@ -87,24 +99,19 @@ export class AiRuntimeService {
     contents: string[],
     capability: AiCapability = AiCapability.AiMentorRagEmbeddings,
   ): Promise<number[][]> {
-    const source = await this.resolveSource(capability);
-
-    if (source === AI_RUNTIME_SOURCES.LUMA) {
-      try {
-        const luma = await this.getLumaClient();
-        const { embeddings } = await luma.ai.createEmbeddings({ texts: contents });
-
-        return embeddings;
-      } catch (error) {
-        this.logger.warn(
-          `Luma embeddings failed for ${capability}; falling back to core embeddings: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return this.createCoreEmbeddings(contents);
+    return this.runWithLumaFallback({
+      capability,
+      operation: `embeddings for ${capability}`,
+      runLuma: async () =>
+        (
+          await this.createLumaOpenAiCompatibleEmbeddings({
+            values: contents,
+            dimensions: AI_MENTOR_RAG_EMBEDDING_DIMENSIONS,
+            telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_RAG_EMBEDDINGS),
+          })
+        ).embeddings,
+      runCore: () => this.createCoreEmbeddings(contents),
+    });
   }
 
   async streamMentorChat(
@@ -112,97 +119,68 @@ export class AiRuntimeService {
     createCoreStream: () => Promise<AiCoreMentorStreamResult>,
     abortSignal?: AbortSignal,
   ): Promise<AiMentorChatStreamResult> {
-    const source = await this.resolveSource(AiCapability.AiMentorChat);
-
-    if (source === AI_RUNTIME_SOURCES.LUMA) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback<AiMentorChatStreamResult>({
+      capability: AiCapability.AiMentorChat,
+      operation: "mentor chat",
+      abortSignal,
+      runLuma: async (luma) => {
         const response = await luma.mentor.streamChat(input, { signal: abortSignal });
 
         return {
           source: AI_RUNTIME_SOURCES.LUMA,
           textStream: this.readLumaTextStream(response.data as unknown as AsyncIterable<Buffer>),
         };
-      } catch (error) {
-        if (abortSignal?.aborted) {
-          throw error;
-        }
-        this.logger.warn(
-          `Luma mentor chat failed; falling back to core mentor chat: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
+      },
+      runCore: async () => {
+        const coreStream = await createCoreStream();
 
-    const coreStream = await createCoreStream();
-
-    return {
-      source: AI_RUNTIME_SOURCES.CORE,
-      textStream: coreStream.textStream,
-      coreStream: coreStream.coreStream,
-    };
+        return {
+          source: AI_RUNTIME_SOURCES.CORE,
+          textStream: coreStream.textStream,
+          coreStream: coreStream.coreStream,
+        };
+      },
+    });
   }
 
   async generateMentorChat(
     input: MentorChatOptions,
     generateCoreMessage: () => Promise<string>,
   ): Promise<string> {
-    const source = await this.resolveSource(AiCapability.AiMentorChat);
-
-    if (source === AI_RUNTIME_SOURCES.LUMA) {
-      try {
-        const luma = await this.getLumaClient();
-        const { message } = await luma.mentor.generateChat(input);
-        return message;
-      } catch (error) {
-        this.logger.warn(
-          `Luma mentor generation failed; falling back to core mentor generation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return generateCoreMessage();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiMentorChat,
+      operation: "mentor generation",
+      runLuma: async (luma) => (await luma.mentor.generateChat(input)).message,
+      runCore: generateCoreMessage,
+    });
   }
 
   async judgeMentor(
     input: MentorJudgeOptions,
     judgeCore: () => Promise<AiJudgeModelResult>,
   ): Promise<AiJudgeModelResult> {
-    const source = await this.resolveSource(AiCapability.AiMentorJudge);
-
-    if (source === AI_RUNTIME_SOURCES.LUMA) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiMentorJudge,
+      operation: "mentor judge",
+      runLuma: async (luma) => {
         const result = await luma.mentor.judge(input);
         if (!Value.Check(aiJudgeJudgementSchema, result))
           throw new Error("Luma mentor Judge returned an invalid structured result");
 
         return result;
-      } catch (error) {
-        this.logger.warn(
-          `Luma mentor judge failed; falling back to core mentor judge: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return judgeCore();
+      },
+      runCore: judgeCore,
+    });
   }
 
   async generateTranslations(
     input: GenerateTranslationsOptions,
     generateCoreTranslations: () => Promise<GenerateTranslationsResponse>,
   ): Promise<GenerateTranslationsResponse> {
-    if (
-      (await this.resolveSource(AiCapability.TranslationGeneration)) === AI_RUNTIME_SOURCES.LUMA
-    ) {
-      try {
-        const luma = await this.getLumaClient();
-
+    return this.runWithLumaFallback({
+      capability: AiCapability.TranslationGeneration,
+      operation: "translation generation",
+      runLuma: async (luma) => {
         const result = await luma.ai.generateTranslations(input);
 
         if (!Value.Check(generateTranslationSchema, result)) {
@@ -210,55 +188,37 @@ export class AiRuntimeService {
         }
 
         return result;
-      } catch (error) {
-        this.logger.warn(
-          `Luma translation generation failed; falling back to core translation generation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return generateCoreTranslations();
+      },
+      runCore: generateCoreTranslations,
+    });
   }
 
   async generateJudgeConfiguration(
     input: GenerateAiJudgeConfigurationOptions,
     generateCoreConfiguration: () => Promise<ReferencedAiJudgeConfiguration>,
   ): Promise<ReferencedAiJudgeConfiguration> {
-    if (
-      (await this.resolveSource(AiCapability.AiJudgeConfigurationGenerator)) ===
-      AI_RUNTIME_SOURCES.LUMA
-    ) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiJudgeConfigurationGenerator,
+      operation: "AI Judge configuration generation",
+      runLuma: async (luma) => {
         const result = await luma.ai.generateJudgeConfiguration(input);
         if (!Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, result))
           throw new Error("Luma AI Judge configuration generator returned an invalid result");
 
         return result;
-      } catch (error) {
-        this.logger.warn(
-          `Luma AI Judge configuration generation failed; falling back to core generation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return generateCoreConfiguration();
+      },
+      runCore: generateCoreConfiguration,
+    });
   }
 
   async generateMentorConfiguration(
     input: GenerateAiMentorConfigurationOptions,
     generateCoreConfiguration: () => Promise<GeneratedAiMentorConfigurationFields>,
   ): Promise<GeneratedAiMentorConfigurationFields> {
-    if (
-      (await this.resolveSource(AiCapability.AiMentorConfigurationGenerator)) ===
-      AI_RUNTIME_SOURCES.LUMA
-    ) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiMentorConfigurationGenerator,
+      operation: "AI Mentor configuration generation",
+      runLuma: async (luma) => {
         const result = await luma.ai.generateMentorConfiguration(input);
         const schema =
           input.configurationType === AI_MENTOR_TYPE.TEACHER
@@ -269,92 +229,114 @@ export class AiRuntimeService {
           throw new Error("Luma AI Mentor configuration generator returned an invalid result");
 
         return result as GeneratedAiMentorConfigurationFields;
-      } catch (error) {
-        this.logger.warn(
-          `Luma AI Mentor configuration generation failed; falling back to core generation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return generateCoreConfiguration();
+      },
+      runCore: generateCoreConfiguration,
+    });
   }
 
   async validateJudgeConfiguration(
     input: ValidateAiJudgeConfigurationOptions,
     validateCoreConfiguration: () => Promise<AiJudgeConfigurationValidatorStructuredOutput>,
   ): Promise<AiJudgeConfigurationValidatorStructuredOutput> {
-    if (
-      (await this.resolveSource(AiCapability.AiJudgeConfigurationValidator)) ===
-      AI_RUNTIME_SOURCES.LUMA
-    ) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiJudgeConfigurationValidator,
+      operation: "AI Judge configuration validation",
+      runLuma: async (luma) => {
         const result = await luma.ai.validateJudgeConfiguration(input);
         if (!Value.Check(aiJudgeConfigurationValidatorStructuredOutputSchema, result))
           throw new Error("Luma AI Judge configuration validator returned an invalid result");
 
         return result;
-      } catch (error) {
-        this.logger.warn(
-          `Luma AI Judge configuration validation failed; falling back to core validation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return validateCoreConfiguration();
+      },
+      runCore: validateCoreConfiguration,
+    });
   }
 
   async validateMentorConfiguration(
     input: ValidateAiMentorConfigurationOptions,
     validateCoreConfiguration: () => Promise<AiMentorConfigurationValidatorModelResult>,
   ): Promise<AiMentorConfigurationValidatorModelResult> {
-    if (
-      (await this.resolveSource(AiCapability.AiJudgeConfigurationValidator)) ===
-      AI_RUNTIME_SOURCES.LUMA
-    ) {
-      try {
-        const luma = await this.getLumaClient();
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiJudgeConfigurationValidator,
+      operation: "AI Mentor configuration validation",
+      runLuma: async (luma) => {
         const result = await luma.ai.validateMentorConfiguration(input);
         if (!Value.Check(aiMentorConfigurationValidatorModelResultSchema, result))
           throw new Error("Luma AI Mentor configuration validator returned an invalid result");
 
         return result;
-      } catch (error) {
-        this.logger.warn(
-          `Luma AI Mentor configuration validation failed; falling back to core validation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return validateCoreConfiguration();
+      },
+      runCore: validateCoreConfiguration,
+    });
   }
 
   async transcribeDictation(
     input: TranscribeDictationOptions,
     transcribeCore: () => Promise<TranscribeDictationResponse | undefined>,
   ): Promise<TranscribeDictationResponse | undefined> {
-    const source = await this.resolveSource(AiCapability.DictationTranscription);
+    return this.runWithLumaFallback<TranscribeDictationResponse | undefined>({
+      capability: AiCapability.DictationTranscription,
+      operation: "dictation transcription",
+      runLuma: (luma) => luma.ai.transcribeDictation(input),
+      runCore: transcribeCore,
+    });
+  }
 
-    if (source === AI_RUNTIME_SOURCES.LUMA) {
-      try {
-        const luma = await this.getLumaClient();
-        return await luma.ai.transcribeDictation(input);
-      } catch (error) {
-        this.logger.warn(
-          `Luma dictation transcription failed; falling back to core transcription: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
+  /**
+   * The Core assistant needs OpenAI tool calling, so Luma is reached through its
+   * OpenAI-compatible relay, which runs the AI Mentor chat Custom profile.
+   */
+  async getAssistantLanguageModel(): Promise<LanguageModelV4> {
+    const createCoreModel = async () => (await this.getAISdkOpenAI())(OPENAI_MODELS.BASIC);
 
-    return transcribeCore();
+    return this.runWithLumaFallback<LanguageModelV4>({
+      capability: AiCapability.AiMentorChat,
+      operation: "Core assistant model",
+      runLuma: async () =>
+        new FallbackLanguageModel(
+          (await this.getLumaOpenAiCompatibleProvider()).chat(LUMA_OPENAI_COMPATIBLE_MODEL),
+          createCoreModel,
+          (error) => this.logFallback("Core assistant", error),
+        ),
+      runCore: createCoreModel,
+    });
+  }
+
+  /**
+   * Returns the model that actually produced the vectors, so callers never compare vectors from
+   * the Luma profile with vectors from the OpenAI fallback.
+   */
+  async createSemanticSearchEmbeddings({
+    values,
+    dimensions,
+    coreModel,
+    timeoutMs,
+  }: SemanticEmbeddingRequest): Promise<SemanticEmbeddingResult> {
+    const options = { maxRetries: 0, telemetry: { isEnabled: false } } as const;
+
+    return this.runWithLumaFallback({
+      capability: AiCapability.AiMentorRagEmbeddings,
+      operation: "semantic search embeddings",
+      runLuma: () =>
+        this.createLumaOpenAiCompatibleEmbeddings({
+          values,
+          dimensions,
+          abortSignal: AbortSignal.timeout(timeoutMs),
+          ...options,
+        }),
+      runCore: async () => {
+        const provider = await this.getAISdkOpenAI();
+        const { embedMany } = await loadAiSdk();
+        const { embeddings } = await embedMany({
+          model: provider.embedding(coreModel),
+          values,
+          abortSignal: AbortSignal.timeout(timeoutMs),
+          ...options,
+        });
+
+        return { embeddings, model: coreModel };
+      },
+    });
   }
 
   async resolveSource(capability: AiCapability): Promise<AiRuntimeSource> {
@@ -368,6 +350,40 @@ export class AiRuntimeService {
     return AI_RUNTIME_SOURCES.CORE;
   }
 
+  /** Every Luma call falls back to Mentingo Core unless the caller aborted it. */
+  private async runWithLumaFallback<T>({
+    capability,
+    operation,
+    runLuma,
+    runCore,
+    abortSignal,
+  }: {
+    capability: AiCapability;
+    operation: string;
+    runLuma: (luma: LumaClient) => Promise<T>;
+    runCore: () => Promise<T>;
+    abortSignal?: AbortSignal;
+  }): Promise<T> {
+    if ((await this.resolveSource(capability)) === AI_RUNTIME_SOURCES.LUMA) {
+      try {
+        return await runLuma(await this.getLumaClient());
+      } catch (error) {
+        if (abortSignal?.aborted) throw error;
+        this.logFallback(operation, error);
+      }
+    }
+
+    return runCore();
+  }
+
+  private logFallback(operation: string, error: unknown) {
+    this.logger.warn(
+      `Luma ${operation} failed; falling back to core ${operation}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+
   private async createCoreEmbeddings(contents: string[]): Promise<number[][]> {
     const provider = await this.getAISdkOpenAI();
     const { embedMany } = await loadAiSdk();
@@ -379,6 +395,38 @@ export class AiRuntimeService {
     });
 
     return embeddings;
+  }
+
+  /** An explicit size keeps MRL models from returning their native size; the reported model is required. */
+  private async createLumaOpenAiCompatibleEmbeddings({
+    values,
+    dimensions,
+    ...options
+  }: {
+    values: string[];
+    dimensions: number;
+    abortSignal?: AbortSignal;
+    maxRetries?: number;
+    telemetry: ReturnType<typeof buildAiTelemetry> | { isEnabled: false };
+  }): Promise<SemanticEmbeddingResult> {
+    const provider = await this.getLumaOpenAiCompatibleProvider();
+    const { embedMany } = await loadAiSdk();
+    const { embeddings, responses } = await embedMany({
+      model: provider.embedding(LUMA_OPENAI_COMPATIBLE_MODEL),
+      values,
+      providerOptions: { openai: { dimensions } },
+      ...options,
+    });
+    if (embeddings.length !== values.length || embeddings.some((v) => v.length !== dimensions)) {
+      throw new Error(`Luma embeddings did not return ${dimensions}-dimensional vectors`);
+    }
+    const models = new Set(responses?.map(readResponseModel));
+    const [model] = models;
+    if (models.size !== 1 || typeof model !== "string" || !model) {
+      throw new Error("Luma embeddings did not report one embedding model");
+    }
+
+    return { embeddings, model };
   }
 
   private async *readLumaTextStream(stream: AsyncIterable<Buffer>): AsyncIterable<string> {
@@ -432,6 +480,18 @@ export class AiRuntimeService {
     });
   }
 
+  private async getLumaOpenAiCompatibleProvider(): Promise<OpenAIProvider> {
+    const { apiKey, baseURL } = await this.getLumaCredentials();
+    if (!apiKey || !baseURL) throw new Error("Luma is not configured");
+
+    const { createOpenAI } = await loadOpenAiSdk();
+    return createOpenAI({
+      apiKey,
+      baseURL: `${baseURL.replace(/\/+$/, "")}${LUMA_OPENAI_COMPATIBLE_PATH}`,
+      headers: { "X-API-Key": apiKey },
+    });
+  }
+
   private async getLumaClient() {
     const client = await this.getLumaClientOrNull();
     if (!client) {
@@ -442,13 +502,7 @@ export class AiRuntimeService {
   }
 
   private async getLumaClientOrNull() {
-    const [apiKey, baseURL] = await Promise.all([
-      this.envService
-        .getEnv("LUMA_API_KEY")
-        .then((r) => r.value)
-        .catch(() => process.env.LUMA_API_KEY),
-      Promise.resolve(process.env.LUMA_BASE_URL),
-    ]);
+    const { apiKey, baseURL } = await this.getLumaCredentials();
 
     if (!apiKey || !baseURL) {
       return null;
@@ -456,4 +510,18 @@ export class AiRuntimeService {
 
     return createLumaClient({ apiKey, baseURL });
   }
+
+  private async getLumaCredentials() {
+    const apiKey = await this.envService
+      .getEnv("LUMA_API_KEY")
+      .then((r) => r.value)
+      .catch(() => process.env.LUMA_API_KEY);
+
+    return { apiKey, baseURL: process.env.LUMA_BASE_URL };
+  }
 }
+
+const readResponseModel = (response: { body?: unknown } | undefined) => {
+  const body = response?.body;
+  return body && typeof body === "object" ? Reflect.get(body, "model") : undefined;
+};

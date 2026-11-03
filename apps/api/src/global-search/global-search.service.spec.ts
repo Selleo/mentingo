@@ -27,7 +27,11 @@ describe("global search modes", () => {
     findSemanticMatches: jest.fn().mockResolvedValue([]),
     hasCurrentChunks: jest.fn().mockResolvedValue(true),
   };
-  const embeddings = { embedQuery: jest.fn().mockResolvedValue([1]) };
+  const queryEmbedding = {
+    embedding: [1],
+    identity: { model: "Qwen/Qwen3-Embedding-4B", dimensions: 1536 },
+  };
+  const embeddings = { embedQuery: jest.fn().mockResolvedValue(queryEmbedding) };
   const service = new GlobalSearchService(
     keyword as unknown as GlobalSearchRepository,
     {} as FileService,
@@ -37,7 +41,7 @@ describe("global search modes", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    embeddings.embedQuery.mockResolvedValue([1]);
+    embeddings.embedQuery.mockResolvedValue(queryEmbedding);
     hybrid.hasCurrentChunks.mockResolvedValue(true);
   });
 
@@ -164,6 +168,7 @@ describe("global search modes", () => {
           learner,
           false,
           true,
+          queryEmbedding.identity,
         );
       expect(getLearnerLessons).toHaveBeenCalledWith([], SUPPORTED_LANGUAGES.EN, learner);
       expect(result.lessons[0].id).toBe(actor.userId);

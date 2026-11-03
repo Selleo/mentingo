@@ -603,7 +603,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       await indexLesson(foreignLesson, foreign);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+        });
       try {
         for (const reader of await readers()) {
           for (const mode of ["keyword", "hybrid"]) {
@@ -849,7 +852,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       for (const fixture of [free, paid, privateCourse]) await indexLesson(fixture);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+        });
       try {
         const tools = (await rpc(reader, "tools/list")).result.tools.map(
           (tool: ToolResult) => tool.name,
@@ -934,7 +940,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       await indexLesson(fixture);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small", dimensions: 1536 },
+        });
       try {
         for (const reader of await readers()) {
           await assertUnavailable(fixture, reader);

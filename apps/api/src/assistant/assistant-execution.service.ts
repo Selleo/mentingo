@@ -9,7 +9,6 @@ import {
 } from "@repo/shared";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
-import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -104,8 +103,7 @@ export class AssistantExecutionService {
       await this.assistantRepository.updateRun(input, {
         activity: ASSISTANT_RUN_ACTIVITIES.THINKING,
       });
-      const openai = await this.aiRuntimeService.getAISdkOpenAI();
-      return openai(OPENAI_MODELS.BASIC);
+      return this.aiRuntimeService.getAssistantLanguageModel();
     });
   }
 

@@ -40,6 +40,28 @@ Each provider is enabled independently, and the corresponding flag must be set i
 
 Model choice and provider configuration are also exposed in the admin interface, so you do not need a redeploy to change them.
 
+### Luma first, OpenAI fallback
+
+Every AI feature calls Luma first when Luma runs that capability on a Custom profile, and falls back to `OPENAI_API_KEY` when Luma is not configured, reports the capability as Core or Disabled, or the call fails. This covers:
+
+- mentor chat, the judge, configuration generators and validators, translations, dictation and AI Mentor RAG embeddings
+- the Core assistant and global search embeddings
+
+The Core assistant and global search use Luma's OpenAI-compatible endpoint (`/api/public/v1/ai/openai`), which runs the AI Mentor chat and embeddings Custom profiles. The chat model must support tool calling.
+
+| Variable                               | Purpose                                                                                                                                                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SEMANTIC_SEARCH_EMBEDDING_MODEL`      | Optional. The embedding model global search should converge on, normally the Luma embeddings profile model (for example `Qwen/Qwen3-Embedding-4B`). Chunks from any other model are re-embedded. Unset: chunks from any model stay current. |
+| `SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS` | Vector size requested from Luma. Only `1536` is supported, because stored vectors use a fixed `vector(1536)` column. MRL models such as Qwen3-Embedding must be asked for 1536.                                                             |
+
+How global search avoids mixing embedding models:
+
+- Every stored chunk records the model that actually produced it, which may be the OpenAI fallback, along with its size.
+- A query vector is compared only with chunks from the same model, size and index version. When a query falls back to OpenAI against a Luma-indexed corpus, search returns keyword results and reports the semantic status as `pending`.
+- After setting or changing `SEMANTIC_SEARCH_EMBEDDING_MODEL`, the per-minute reconciliation job re-embeds every source through the semantic search queue.
+
+AI Mentor lesson documents do not record their embedding model. Re-upload them after the embedding model changes or after documents were embedded during a Luma outage.
+
 ## Storage and media
 
 | Variable                                                                                                                                      | Purpose                                                         |

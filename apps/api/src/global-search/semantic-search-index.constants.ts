@@ -1,6 +1,8 @@
 export const SEMANTIC_SEARCH_MODEL = "text-embedding-3-small";
 export const SEMANTIC_SEARCH_INDEX_VERSION = 1;
 export const SEMANTIC_SEARCH_EMBEDDING_DIMENSIONS = 1536;
+// search_chunks.embedding is vector(1536); another size needs a schema migration first.
+export const SEMANTIC_SEARCH_SUPPORTED_EMBEDDING_DIMENSIONS = [1536] as const;
 export const SEMANTIC_SEARCH_BATCH_SIZE = 50;
 export const SEMANTIC_SEARCH_MAX_EXTRACTED_CHARACTERS = 1_000_000;
 export const SEMANTIC_SEARCH_MAX_CHUNKS = 500;

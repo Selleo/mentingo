@@ -59,7 +59,7 @@ describe("AssistantExecutionService", () => {
     };
     activeAccount = jest.fn().mockResolvedValue(true);
     currentTenant = { status: TENANT_STATUSES.ACTIVE };
-    modelProvider = jest.fn(async () => () => ({ fixture: true }));
+    modelProvider = jest.fn(async () => ({ fixture: true }));
     mcpHttpService = {
       executeNativeReadTool: jest
         .fn()
@@ -74,7 +74,7 @@ describe("AssistantExecutionService", () => {
       assistantRepository as unknown as AssistantRepository,
       mcpHttpService as unknown as McpHttpService,
       tenantDbRunnerService as unknown as TenantDbRunnerService,
-      { getAISdkOpenAI: modelProvider } as unknown as AiRuntimeService,
+      { getAssistantLanguageModel: modelProvider } as unknown as AiRuntimeService,
     );
   });
 
@@ -330,13 +330,13 @@ describe("AssistantExecutionService", () => {
   });
   it("sets thinking before resolving a model for the actual model step", async () => {
     const model = { fixture: true };
-    const getAISdkOpenAI = jest.fn(async () => {
+    const getAssistantLanguageModel = jest.fn(async () => {
       expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
         activity: ASSISTANT_RUN_ACTIVITIES.THINKING,
       });
-      return () => model;
+      return model;
     });
-    Object.assign(service, { aiRuntimeService: { getAISdkOpenAI } });
+    Object.assign(service, { aiRuntimeService: { getAssistantLanguageModel } });
     await expect(service.getModel(identity)).resolves.toBe(model);
   });
 

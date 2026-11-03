@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { RESOURCE_VISIBILITY } from "@repo/shared";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, type SQL } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { RICH_TEXT_RELATIONSHIP_TYPES } from "src/resource-library/resource-library.constants";
@@ -10,12 +10,18 @@ import { DB } from "src/storage/db/db.providers";
 import { resourceEntity, resources, searchChunks, searchDocuments } from "src/storage/schema";
 
 import {
-  SEMANTIC_SEARCH_INDEX_VERSION,
-  SEMANTIC_SEARCH_MODEL,
-} from "./semantic-search-index.constants";
+  getDefaultSemanticSearchEmbeddingIdentity,
+  getPreferredSemanticSearchEmbeddingModel,
+  getSemanticSearchEmbeddingDimensions,
+} from "./semantic-search-index.config";
+import { SEMANTIC_SEARCH_INDEX_VERSION } from "./semantic-search-index.constants";
 import { semanticSearchResourceSources } from "./semantic-search-resource.utils";
 
-import type { SemanticSearchSource, SemanticSearchSourceKey } from "./semantic-search-index.types";
+import type {
+  SemanticSearchEmbeddingIdentity,
+  SemanticSearchSource,
+  SemanticSearchSourceKey,
+} from "./semantic-search-index.types";
 
 export function semanticSearchResourceRevision() {
   return sql<string>`md5(coalesce(${resources.reference}, '') || ':' || ${resources.updatedAt}::text || ':' || ${resources.contentType})`;
@@ -116,6 +122,14 @@ export class SemanticSearchIndexRepository {
     return source;
   }
 
+  /** Chunks count as current in any model unless a preferred model asks the index to converge. */
+  private currentEmbeddingSpace(chunks: { model: SQL; dimensions: SQL }) {
+    const preferredModel = getPreferredSemanticSearchEmbeddingModel();
+    return sql`${chunks.dimensions} = ${getSemanticSearchEmbeddingDimensions()} AND ${
+      preferredModel ? sql`${chunks.model} = ${preferredModel}` : sql`true`
+    }`;
+  }
+
   private pendingSourcesQuery() {
     return this.sourceQuery().where(
       and(
@@ -131,7 +145,10 @@ export class SemanticSearchIndexRepository {
         AND ${searchChunks.sourceRevision} = CASE WHEN ${
           resources.id
         } IS NULL THEN '' ELSE ${semanticSearchResourceRevision()} END
-        AND ${searchChunks.embeddingModel} = ${SEMANTIC_SEARCH_MODEL}
+        AND ${this.currentEmbeddingSpace({
+          model: sql`${searchChunks.embeddingModel}`,
+          dimensions: sql`${searchChunks.embeddingDimensions}`,
+        })}
         AND ${searchChunks.indexVersion} = ${SEMANTIC_SEARCH_INDEX_VERSION}
     )`,
       ),
@@ -164,7 +181,10 @@ export class SemanticSearchIndexRepository {
           AND c.entity_id = r.entity_id AND c.document_type = r.document_type
           AND c.language = r.language AND c.source_hash = md5(r.content)
           AND c.source_revision = md5(coalesce(file.reference, '') || ':' || file.updated_at::text || ':' || file.content_type)
-          AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
+          AND ${this.currentEmbeddingSpace({
+            model: sql`c.embedding_model`,
+            dimensions: sql`c.embedding_dimensions`,
+          })}
           AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
     )
     SELECT count(*)::integer AS pending FROM (
@@ -214,6 +234,7 @@ export class SemanticSearchIndexRepository {
     source: SemanticSearchSource,
     chunks: string[],
     embeddings: number[][],
+    identity: SemanticSearchEmbeddingIdentity = getDefaultSemanticSearchEmbeddingIdentity(),
   ): Promise<boolean> {
     const tenantId = this.tenantId();
     // Lock the committed source row while validating and replacing its entire revision.
@@ -277,7 +298,8 @@ export class SemanticSearchIndexRepository {
           embedding: embeddings[chunkIndex],
           sourceHash: source.sourceHash,
           sourceRevision: source.sourceRevision,
-          embeddingModel: SEMANTIC_SEARCH_MODEL,
+          embeddingModel: identity.model,
+          embeddingDimensions: identity.dimensions,
           indexVersion: SEMANTIC_SEARCH_INDEX_VERSION,
           metadata: sql`${JSON.stringify(source.metadata)}::text::jsonb`,
         })),
