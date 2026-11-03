@@ -247,7 +247,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     input: Pick<McpLessonUploadGrant, "lessonId" | "language" | "filename" | "mimeType" | "size">,
   ) {
-    this.validateUploadFile(input, MAX_VIDEO_SIZE);
+    this.validateUploadFile(input, MAX_FILE_SIZE);
 
     await this.lessonService.validateAccess(ENTITY_TYPES.LESSON, actor, input.lessonId);
 

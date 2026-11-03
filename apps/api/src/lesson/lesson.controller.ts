@@ -66,7 +66,7 @@ import {
 } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -576,7 +576,7 @@ export class LessonController {
           ...ALLOWED_PRESENTATION_FILE_TYPES,
           ...ALLOWED_AUDIO_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,

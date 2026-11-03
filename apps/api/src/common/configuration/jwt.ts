@@ -3,9 +3,11 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { configValidator } from "src/utils/configValidator";
 
+const secretSchema = Type.String({ minLength: 1, pattern: "\\S" });
+
 const schema = Type.Object({
-  secret: Type.String(),
-  refreshSecret: Type.String(),
+  secret: secretSchema,
+  refreshSecret: secretSchema,
   expirationTime: Type.String(),
 });
 

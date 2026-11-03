@@ -264,7 +264,7 @@ export const requestAuthoringUploadInputSchema = Type.Object(
     language: languageInputSchema,
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_VIDEO_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
   },
   { additionalProperties: false },
 );

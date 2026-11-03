@@ -74,6 +74,7 @@ import {
   scormRuntimeFinishResponseSchema,
   scormRuntimeFinishSchema,
 } from "./schemas/scormRuntime.schema";
+import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "./scorm-package-limits";
 import { SCORM_TUS_STATE_TTL } from "./scorm-tus-upload.constants";
 import { ScormTusUploadService } from "./scorm-tus-upload.service";
 import { ScormService } from "./scorm.service";
@@ -270,10 +271,13 @@ export class ScormController {
   @Post("course")
   @RequirePermission(PERMISSIONS.COURSE_CREATE)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -343,7 +347,11 @@ export class ScormController {
 
   @Post("lesson")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
-  @UseInterceptors(FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }]))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }], {
+      limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES },
+    }),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -389,10 +397,13 @@ export class ScormController {
 
   @Patch("lesson/:lessonId/package")
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @ApiConsumes("multipart/form-data")

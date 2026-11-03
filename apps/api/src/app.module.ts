@@ -12,6 +12,7 @@ import { AutomationExecutionModule } from "src/automation-execution/automation-e
 import { AutomationModule } from "src/automations/automation.module";
 import { CourseRepetitionModule } from "src/course-repetition/course-repetition.module";
 import { EnvModule } from "src/env/env.module";
+import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
@@ -99,11 +100,7 @@ import type { RedisClient } from "src/redis";
     DbModule,
     SupportModeModule,
     JwtModule.registerAsync(jwtModuleOptions),
-    MulterModule.register({
-      limits: {
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
-      },
-    }),
+    { ...MulterModule.register({ limits: { fileSize: MAX_FILE_SIZE } }), global: true },
     ThrottlerModule.forRootAsync({
       inject: [REDIS_CLIENT],
       useFactory: (redisClient: RedisClient) => ({

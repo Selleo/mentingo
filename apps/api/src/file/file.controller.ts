@@ -110,7 +110,6 @@ export class FileController {
     await FileGuard.validateFile(file, {
       allowedTypes: ALLOWED_MIME_TYPES,
       maxSize: MAX_FILE_SIZE,
-      maxVideoSize: MAX_VIDEO_SIZE,
     });
 
     const uploadResult = await this.fileService.uploadFile(file, resource, currentUser.tenantId);
