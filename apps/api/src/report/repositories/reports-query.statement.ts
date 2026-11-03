@@ -31,7 +31,7 @@ export function buildReportStatement(
     buildBreakdownCtes(context),
     buildPageRowsCte(context),
   ];
-  return sql`WITH ${sql.join(ctes, sql`, `)} ${buildResultProjection()}`;
+  return sql`WITH ${sql.join(ctes, sql`, `)} ${buildResultProjection(context)}`;
 }
 
 function buildLearnerPopulationCte(context: ReportStatementContext): SQL {
@@ -367,16 +367,33 @@ function buildBreakdownCtes(context: ReportStatementContext): SQL {
   `;
 }
 
+/** Share the exact ordering between pagination and JSON aggregation (also used by exports). */
+function buildRowOrder({ query }: ReportStatementContext): SQL {
+  const columns: Record<NonNullable<typeof query.sortBy>, SQL> = {
+    learner: sql`learner_name`,
+    course: sql`course_title`,
+    path: sql`path_title`,
+    status: sql`CASE status WHEN 'notStarted' THEN 0 WHEN 'inProgress' THEN 1 WHEN 'completed' THEN 2 END`,
+    progress: sql`progress`,
+    score: sql`score`,
+    attempts: sql`attempts`,
+    lastActivity: sql`last_activity_at`,
+  };
+  const column = columns[query.sortBy ?? "lastActivity"];
+  const direction = query.sortDirection === "asc" ? sql`ASC` : sql`DESC`;
+  return sql`${column} ${direction} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
+}
+
 function buildPageRowsCte(context: ReportStatementContext): SQL {
   return sql`
           page_rows AS (
-            SELECT * FROM filtered ORDER BY learner_name, COALESCE(course_title, path_title)
+            SELECT * FROM filtered ORDER BY ${buildRowOrder(context)}
             LIMIT ${context.pageLimit} OFFSET ${context.pageOffset}
           )
   `;
 }
 
-function buildResultProjection(): SQL {
+function buildResultProjection(context: ReportStatementContext): SQL {
   return sql`
           SELECT summary.*,
             COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
@@ -409,7 +426,7 @@ function buildResultProjection(): SQL {
               'lastActivityAt', CASE WHEN last_activity_at IS NULL THEN NULL ELSE
                 TO_CHAR(last_activity_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,
               'groupIds', group_ids, 'pathCourses', path_courses
-            ) ORDER BY learner_name, COALESCE(course_title, path_title)) FROM page_rows), '[]'::jsonb) AS rows
+            ) ORDER BY ${buildRowOrder(context)}) FROM page_rows), '[]'::jsonb) AS rows
           FROM summary
   `;
 }

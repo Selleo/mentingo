@@ -8392,7 +8392,9 @@
       "averageQuizScore": "Średni wynik quizów",
       "attempts": "Łączna liczba podejść do quizów",
       "lastActivity": "Ostatnia aktywność",
-      "pathCourseStatus": "Status kursu na ścieżce"
+      "pathCourseStatus": "Status kursu na ścieżce",
+      "sortAscending": "Sortuj rosnąco",
+      "sortDescending": "Sortuj malejąco"
     },
     "help": {
       "title": "Informacje o raporcie",

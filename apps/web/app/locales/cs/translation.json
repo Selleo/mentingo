@@ -7645,7 +7645,9 @@
       "averageQuizScore": "Průměrné skóre kvízů",
       "attempts": "Celkový počet pokusů",
       "lastActivity": "Poslední aktivita",
-      "pathCourseStatus": "Stav kurzu v rozvojové cestě"
+      "pathCourseStatus": "Stav kurzu v rozvojové cestě",
+      "sortAscending": "Seřadit vzestupně",
+      "sortDescending": "Seřadit sestupně"
     },
     "help": {
       "title": "O tomto přehledu",

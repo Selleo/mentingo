@@ -5,6 +5,7 @@ import type {
   ReportView,
 } from "./reports.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { RunReportBody } from "~/api/generated-api";
 
 /** What a report shows: its view, scope and conditions. Saved configurations store only this. */
 export type ReportDefinition = {
@@ -32,11 +33,14 @@ export type ReportDefinition = {
   };
 };
 
-export type ReportsQuery = ReportDefinition & {
-  language: SupportedLanguages;
-  page: number;
-  pageSize: number;
-};
+export type ReportSort = Required<Pick<RunReportBody, "sortBy" | "sortDirection">>;
+
+export type ReportsQuery = ReportDefinition &
+  Partial<ReportSort> & {
+    language: SupportedLanguages;
+    page: number;
+    pageSize: number;
+  };
 
 type ReportBuilderState = {
   view: ReportView;
@@ -87,8 +91,10 @@ export const toReportsQuery = (
   timezone: string,
   page = 1,
   pageSize = 25,
+  sort: ReportSort = { sortBy: "lastActivity", sortDirection: "desc" },
 ): ReportsQuery => ({
   ...toReportDefinition(config, timezone),
+  ...sort,
   language,
   page,
   pageSize,

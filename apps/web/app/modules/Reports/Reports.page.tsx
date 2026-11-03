@@ -59,6 +59,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 
 import { REPORTS_HANDLES } from "../../../e2e/data/reports/handles";
 
+import type { ReportSort } from "./reports-api.types";
 import type { MetaFunction } from "@remix-run/react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -281,6 +282,7 @@ export default function ReportsPage() {
     initialConfiguration === null,
   );
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<ReportSort>({ sortBy: "lastActivity", sortDirection: "desc" });
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [optionSearch, setOptionSearch] = useState("");
   const [saveName, setSaveName] = useState("");
@@ -303,8 +305,8 @@ export default function ReportsPage() {
   const configurationsQuery = useReportConfigurations();
   const currentTimezone = applied.timezone;
   const reportQuery = useMemo(
-    () => toReportsQuery(applied, language, currentTimezone, page, pageSize),
-    [applied, currentTimezone, language, page, pageSize],
+    () => toReportsQuery(applied, language, currentTimezone, page, pageSize, sort),
+    [applied, currentTimezone, language, page, pageSize, sort],
   );
   const isResultEnabled =
     canUseReports &&
@@ -485,7 +487,7 @@ export default function ReportsPage() {
     const exported = await createExport({
       format,
       language,
-      query: toReportsQuery(applied, language, currentTimezone, 1, 100),
+      query: toReportsQuery(applied, language, currentTimezone, 1, 100, sort),
     });
     setExportId(exported.id);
   };
@@ -592,6 +594,11 @@ export default function ReportsPage() {
           language={language}
           timezone={currentTimezone}
           isFetching={resultQuery.isFetching}
+          sort={sort}
+          onSortChange={(nextSort) => {
+            setSort(nextSort);
+            setPage(1);
+          }}
           onPageChange={setPage}
           onPageSizeChange={(nextPageSize) => {
             setPageSize(nextPageSize);
