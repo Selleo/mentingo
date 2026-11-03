@@ -521,10 +521,16 @@
           "id": "configure-path-certificates",
           "title": "Configure development-path certificates",
           "description": "Enable development-path certificates and maintain their signature image.",
-          "audiences": ["course-author"],
+          "audiences": [
+            "course-author"
+          ],
           "featureRequirements": [],
-          "pageKeys": ["development-paths"],
-          "specPaths": ["docs/specs/learning-paths-business-spec.md"],
+          "pageKeys": [
+            "development-paths"
+          ],
+          "specPaths": [
+            "docs/specs/learning-paths-business-spec.md"
+          ],
           "watchPaths": [
             "apps/web/app/modules/Admin/LearningPaths/components/LearningPathEditorDetailsSection.tsx",
             "apps/web/app/modules/Admin/LearningPaths/hooks/useLearningPathEditorForm.ts",
@@ -532,14 +538,18 @@
             "apps/api/src/learning-path/services/learning-path.service.ts"
           ],
           "goal": "Configure certificates and their signature image for a development path.",
-          "preconditions": ["The account can edit the development path."],
+          "preconditions": [
+            "The account can edit the development path."
+          ],
           "actions": [
             "Open the development-path editor and enable certificates.",
             "Upload a synthetic signature image and save the path.",
             "Reopen the editor and confirm the certificate setting and signature remain saved.",
             "Remove the signature image, save and verify it is removed."
           ],
-          "outcomes": ["The path's certificate setting and signature changes remain saved."]
+          "outcomes": [
+            "The path's certificate setting and signature changes remain saved."
+          ]
         },
         {
           "id": "path-certificates",
@@ -678,6 +688,77 @@
           ],
           "outcomes": [
             "The dialog completes and the destination owns draft copies with the preserved course order."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "development-paths.getting-started",
+          "title": "Find and follow a development path",
+          "description": "Find and follow a development path in Mentingo.",
+          "flowIds": [
+            "browse-paths",
+            "self-enroll",
+            "continue-path"
+          ]
+        },
+        {
+          "key": "development-paths.path-details",
+          "title": "Create and maintain path details",
+          "description": "Create and maintain path details in Mentingo.",
+          "flowIds": [
+            "create-path",
+            "edit-path",
+            "localize-path"
+          ]
+        },
+        {
+          "key": "development-paths.path-courses",
+          "title": "Manage courses in a path",
+          "description": "Manage courses in a path in Mentingo.",
+          "flowIds": [
+            "add-courses",
+            "reorder-courses",
+            "remove-courses"
+          ]
+        },
+        {
+          "key": "development-paths.availability",
+          "title": "Publish and configure a path",
+          "description": "Publish and configure a path in Mentingo.",
+          "flowIds": [
+            "publish-path",
+            "configure-sequence",
+            "share-path"
+          ]
+        },
+        {
+          "key": "development-paths.assignments",
+          "title": "Manage path assignments",
+          "description": "Manage path assignments in Mentingo.",
+          "flowIds": [
+            "assign-learners",
+            "assign-groups",
+            "remove-enrollment"
+          ]
+        },
+        {
+          "key": "development-paths.certificates",
+          "title": "Configure and download path certificates",
+          "description": "Configure and download path certificates in Mentingo.",
+          "flowIds": [
+            "configure-path-certificates",
+            "path-certificates"
+          ]
+        },
+        {
+          "key": "development-paths.packages",
+          "title": "Move and remove paths",
+          "description": "Move and remove paths in Mentingo.",
+          "flowIds": [
+            "export-package",
+            "import-package",
+            "delete-path"
           ]
         }
       ]
@@ -1613,6 +1694,95 @@
             "The SCORM ZIP contains the supported course content."
           ]
         }
+      ],
+      "videos": [
+        {
+          "key": "course-authoring.course-details",
+          "title": "Create and maintain course details",
+          "description": "Create and maintain course details in Mentingo.",
+          "flowIds": [
+            "browse-courses",
+            "create-course",
+            "edit-overview"
+          ]
+        },
+        {
+          "key": "course-authoring.media-languages",
+          "title": "Prepare course media and languages",
+          "description": "Prepare course media and languages in Mentingo.",
+          "flowIds": [
+            "course-media",
+            "localize-course"
+          ]
+        },
+        {
+          "key": "course-authoring.curriculum",
+          "title": "Build chapters and core lessons",
+          "description": "Build chapters and core lessons in Mentingo.",
+          "flowIds": [
+            "manage-chapters",
+            "content-lessons",
+            "quiz-lessons"
+          ]
+        },
+        {
+          "key": "course-authoring.lesson-formats",
+          "title": "Add packaged and specialized lessons",
+          "description": "Add packaged and specialized lessons in Mentingo.",
+          "flowIds": [
+            "scorm-course-lessons",
+            "other-lesson-types"
+          ]
+        },
+        {
+          "key": "course-authoring.course-lifecycle",
+          "title": "Publish and maintain the course catalog",
+          "description": "Publish and maintain the course catalog in Mentingo.",
+          "flowIds": [
+            "publish-course",
+            "archive-restore-delete",
+            "bulk-course-actions"
+          ]
+        },
+        {
+          "key": "course-authoring.settings-pricing",
+          "title": "Configure course access and ownership",
+          "description": "Configure course access and ownership in Mentingo.",
+          "flowIds": [
+            "course-settings",
+            "course-pricing",
+            "course-ownership"
+          ]
+        },
+        {
+          "key": "course-authoring.certificates",
+          "title": "Manage course certificates",
+          "description": "Manage course certificates in Mentingo.",
+          "flowIds": [
+            "course-certificates",
+            "reset-certificates"
+          ]
+        },
+        {
+          "key": "course-authoring.enrollments",
+          "title": "Assign courses and review participation",
+          "description": "Assign courses and review participation in Mentingo.",
+          "flowIds": [
+            "enroll-users",
+            "enroll-groups",
+            "course-statistics"
+          ]
+        },
+        {
+          "key": "course-authoring.sharing-packages",
+          "title": "Share and export course content",
+          "description": "Share and export course content in Mentingo.",
+          "flowIds": [
+            "share-course",
+            "export-import-package",
+            "export-scorm"
+          ]
+        }
       ]
     },
     {
@@ -2146,6 +2316,58 @@
             "Enrolled participants can discuss training with permission-scoped actions."
           ]
         }
+      ],
+      "videos": [
+        {
+          "key": "course-learning.getting-started",
+          "title": "Find and navigate a course",
+          "description": "Find and navigate a course in Mentingo.",
+          "flowIds": [
+            "browse-enroll",
+            "start-resume",
+            "lesson-navigation"
+          ]
+        },
+        {
+          "key": "course-learning.resources-video",
+          "title": "Read resources and watch videos",
+          "description": "Read resources and watch videos in Mentingo.",
+          "flowIds": [
+            "content-resources",
+            "video-controls",
+            "required-video-resume"
+          ]
+        },
+        {
+          "key": "course-learning.interactive-content",
+          "title": "Complete quizzes and embedded content",
+          "description": "Complete quizzes and embedded content in Mentingo.",
+          "flowIds": [
+            "quiz-submit-retake",
+            "embed-lesson",
+            "scorm-lesson"
+          ]
+        },
+        {
+          "key": "course-learning.guided-learning",
+          "title": "Learn with a mentor and other participants",
+          "description": "Learn with a mentor and other participants in Mentingo.",
+          "flowIds": [
+            "ai-mentor-lesson",
+            "live-training",
+            "course-discussion"
+          ]
+        },
+        {
+          "key": "course-learning.completion",
+          "title": "Complete and revisit learning",
+          "description": "Complete and revisit learning in Mentingo.",
+          "flowIds": [
+            "course-completion",
+            "learner-certificates",
+            "repeat-course"
+          ]
+        }
       ]
     },
     {
@@ -2529,6 +2751,47 @@
           ],
           "outcomes": [
             "The deleted section is absent from the table of contents."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "knowledge-base-articles.writing",
+          "title": "Create and edit articles",
+          "description": "Create and edit articles in Mentingo.",
+          "flowIds": [
+            "create-article",
+            "edit-article",
+            "preview-article"
+          ]
+        },
+        {
+          "key": "knowledge-base-articles.sections",
+          "title": "Organize article sections",
+          "description": "Organize article sections in Mentingo.",
+          "flowIds": [
+            "create-section",
+            "edit-section",
+            "delete-section"
+          ]
+        },
+        {
+          "key": "knowledge-base-articles.languages-covers",
+          "title": "Prepare article languages and covers",
+          "description": "Prepare article languages and covers in Mentingo.",
+          "flowIds": [
+            "localize-article",
+            "replace-article-cover"
+          ]
+        },
+        {
+          "key": "knowledge-base-articles.access-lifecycle",
+          "title": "Read and manage article availability",
+          "description": "Read and manage article availability in Mentingo.",
+          "flowIds": [
+            "browse-articles",
+            "configure-public-article",
+            "delete-article"
           ]
         }
       ]
@@ -2915,6 +3178,47 @@
           ],
           "outcomes": [
             "The deleted post is no longer listed."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "news.writing",
+          "title": "Create and edit news",
+          "description": "Create and edit news in Mentingo.",
+          "flowIds": [
+            "create-news-draft",
+            "edit-news",
+            "preview-news"
+          ]
+        },
+        {
+          "key": "news.publishing",
+          "title": "Publish news and control public access",
+          "description": "Publish news and control public access in Mentingo.",
+          "flowIds": [
+            "publish-news",
+            "unpublish-news",
+            "configure-public-news"
+          ]
+        },
+        {
+          "key": "news.languages-media",
+          "title": "Prepare news languages and media",
+          "description": "Prepare news languages and media in Mentingo.",
+          "flowIds": [
+            "localize-news",
+            "replace-news-cover",
+            "embed-news-resource"
+          ]
+        },
+        {
+          "key": "news.reading-lifecycle",
+          "title": "Read and remove news",
+          "description": "Read and remove news in Mentingo.",
+          "flowIds": [
+            "browse-news",
+            "delete-news"
           ]
         }
       ]

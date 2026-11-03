@@ -59,7 +59,16 @@ def analyze(args):
     try:
         report = self_onboarding_catalog.plan(Path(args.repo), args.target, visual_baseline(state), catalog,
             domains=selected, force=args.force, target_ref=target_ref)
+        for domain in report['domains']:
+            try:
+                self_onboarding_catalog.validate_video_groups(domain)
+            except ValueError as error:
+                domain['error'] = str(error)
+                report['ok'] = False
         reports = [dict(copy.deepcopy(report), language=code) for code in codes]
+        if not report['ok']:
+            raise ValueError('Update the video-group registry: ' + '; '.join(
+                d['error'] for d in report['domains'] if d.get('error')))
     except self_onboarding_catalog.ImpactUncertainError as error:
         reports = [dict(copy.deepcopy(error.plan), language=code) for code in codes]
         raise
@@ -115,7 +124,33 @@ def domain_identity(domain, flows):
     data['flows'] = [{k: flow[k] for k in ('id', 'title', 'description', 'audiences', 'pageKeys', 'featureRequirements')}
                      for flow in domain['flows']]
     data['segments'] = [flows[f['id']]['segment'] for f in domain['flows']]
+    data['voiceProfiles'] = [flows[f['id']].get('voiceProfile') for f in domain['flows']]
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+
+
+def video_registry_identity(reports):
+    selected = sorted((domain['key'], report['language'], domain['videos'])
+                      for report in reports for domain in report['domains'])
+    return hashlib.sha256(json.dumps(selected, sort_keys=True).encode()).hexdigest()
+
+
+def validate_output_coverage(reports, coverage, entries):
+    """Do not silently lose an entire group during assembly, including unchanged and failed groups."""
+    expected = {(domain['key'], video['key'], report['language']): video['flowIds']
+                for report in reports for domain in report['domains'] for video in domain['videos']}
+    seen, assembled = set(), set()
+    for row in coverage:
+        key = (row['featureKey'], row['key'], row['language'])
+        if key not in expected or key in seen or row['requiredFlowIds'] != expected[key]:
+            raise ValueError('Output video coverage duplicates or changes a registered group')
+        if row['status'] not in ('assembled', 'unchanged', 'failed'):
+            raise ValueError('Unknown video coverage status')
+        seen.add(key)
+        if row['status'] == 'assembled':
+            assembled.add(key)
+    actual = [(entry['featureKey'], entry['key'], entry['language']) for entry in entries]
+    if seen != set(expected) or len(actual) != len(set(actual)) or set(actual) != assembled:
+        raise ValueError('Output is missing or duplicates a registered video group')
 
 
 def generate(args):
@@ -136,6 +171,9 @@ def generate(args):
     if len(set(codes)) != len(codes) or any(code not in ('en', 'pl') for code in codes):
         raise ValueError('Plan languages must be unique supported recorder languages')
     for report in reports:
+        keys = [domain['key'] for domain in report['domains']]
+        if len(keys) != len(set(keys)):
+            raise ValueError('Duplicate feature in generation plan')
         for domain in report['domains']:
             if domain['key'] not in known:
                 raise ValueError('Unknown feature in generation plan')
@@ -143,6 +181,7 @@ def generate(args):
             self_onboarding_catalog.validate_planned_domain(domain, known[domain['key']],
                 repo=Path(args.repo) if discovered else None, commit=report['commit'] if discovered else None,
                 shared_watch_paths=registry.get('sharedWatchPaths', []))
+            self_onboarding_catalog.validate_video_groups(domain)
     commits = {p['commit'] for p in reports}
     if len(commits) != 1 or not self_onboarding_catalog.COMMIT.fullmatch(next(iter(commits))) or len({p['version'] for p in reports}) != 1:
         raise ValueError('All languages must record the same version')
@@ -152,6 +191,16 @@ def generate(args):
     if not out.is_relative_to(cache / 'bundles'):
         raise ValueError('Publication bundles must be inside the private build cache bundles directory')
     state = load_state(cache)
+    # A key migration must explicitly retire published monoliths/removed groups, never leave duplicates live.
+    for report in reports:
+        for domain in report['domains']:
+            keys = {v['key'] for v in domain['videos']}
+            old = state.get('languages', {}).get(report['language'], {}).get('domains', {}).get(domain['key'], {})
+            removed = set(old.get('videos', {})) - keys
+            legacy = f"{domain['key']}:{report['language']}" in state.get('published', {}) and domain['key'] not in keys
+            if removed or legacy:
+                raise ValueError('Video keys were retired; explicitly retire their published revisions before regrouping')
+    registry_identity = video_registry_identity(reports)
     pending = state.get('pendingBundle')
     if pending:
         bundle = (cache / pending).resolve()
@@ -160,14 +209,16 @@ def generate(args):
         existing = core.load(bundle / 'manifest.json')
         selections = {(p['language'], d['key']) for p in reports for d in p['domains']}
         if (not existing or existing.get('commit') != commit or existing.get('version') != reports[0]['version'] or
-                state.get('pendingSelection') != sorted([list(v) for v in selections])):
-            raise ValueError('An earlier publication is pending; resume it before generating another version')
+                state.get('pendingSelection') != sorted([list(v) for v in selections]) or
+                state.get('pendingRegistry') != registry_identity):
+            raise ValueError('An earlier publication is pending; resume it before changing versions or video groups')
         return {'ok': True, 'resumed': True, 'videos': len(existing['domains']), 'manifest': str(bundle / 'manifest.json')}
     # Capture and publication share no credential scope. Fail if accidentally configured together.
     if os.environ.get('GUIDE_PUBLISH_API_KEY') or os.environ.get('AWS_SECRET_ACCESS_KEY'):
         raise ValueError('Recording must run without publishing or storage credentials')
     entries, configured = [], False
     skipped = []
+    video_coverage = []
     quota_reason = None
 
     def skip_flow(domain, flow, stage, error, code=None):
@@ -276,6 +327,10 @@ def generate(args):
             visual['flows'] = {f['id']: visual['flows'][f['id']] for f in domain['flows'] if f['id'] in visual['flows']}
             visual['commit'] = commit
             if len(failed_captures) == len(domain['flows']):
+                for code in group['reports']:
+                    for video in domain['videos']:
+                        video_coverage.append({'key':video['key'], 'featureKey':domain_key, 'language':code,
+                            'requiredFlowIds':video['flowIds'], 'status':'failed', 'skippedFlowIds':video['flowIds']})
                 continue
             for code, report in group['reports'].items():
                 profile = hashlib.sha256(json.dumps({'provider': profiles[code],
@@ -284,14 +339,7 @@ def generate(args):
                 current = state['languages'].setdefault(code, {'schemaVersion': 1, 'domains': {}})
                 previous = current['domains'].get(domain_key, {})
                 previous.setdefault('commit', None)
-                try:
-                    localized_domain, localized_metadata = recording.localize_domain(
-                        domain, code, previous.get('localizedMetadata'), allow_model=quota_reason is None)
-                except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
-                    for flow in domain['flows']:
-                        if flow['id'] not in failed_captures:
-                            skip_flow(domain, flow, 'localization', error, code)
-                    continue
+                localized_metadata = previous.get('localizedMetadata')
                 flows = {}
                 for flow in domain['flows']:
                     if flow['id'] in failed_captures:
@@ -346,31 +394,69 @@ def generate(args):
                     current['domains'][domain_key] = previous
                     core.save(cache / 'state.json', state, mode=0o600)
                 if not flows:
+                    for video in domain['videos']:
+                        video_coverage.append({'key':video['key'], 'featureKey':domain_key, 'language':code,
+                            'requiredFlowIds':video['flowIds'], 'status':'failed', 'skippedFlowIds':video['flowIds']})
                     print(f"Self-onboarding: no usable flows for {domain_key}/{code}; no video generated", file=sys.stderr, flush=True)
                     continue
-                localized_domain['flows'] = [f for f in localized_domain['flows'] if f['id'] in flows]
-                identity = domain_identity(localized_domain, flows)
-                changed = previous.get('needsPublication') or previous.get('identity') != identity
-                if changed:
-                    destination = out / domain_key / code
-                    print(f"Self-onboarding [{domain_key}/{code}]: assembling {len(flows)} chapters", file=sys.stderr, flush=True)
-                    entry = recording.assemble(localized_domain, code, flows, cache, destination, commit,
-                                               report['version'], args.workflow_run_id)
-                    entry['video'] = str(Path(entry['video']).relative_to(out))
-                    entry['skippedFlowIds'] = [f['id'] for f in domain['flows'] if f['id'] not in flows]
-                    entries.append(entry)
-                current['domains'][domain_key] = {'commit': commit, 'identity': identity, 'flows': flows,
-                    'needsPublication': bool(changed), 'localizedMetadata': localized_metadata,
+                video_states = copy.deepcopy(previous.get('videos', {}))
+                members = {f['id']: f for f in domain['flows']}
+                for video in domain['videos']:
+                    available = [members[key] for key in video['flowIds'] if key in flows]
+                    coverage = {'key':video['key'], 'featureKey':domain_key, 'language':code,
+                                'requiredFlowIds':list(video['flowIds']),
+                                'skippedFlowIds':[key for key in video['flowIds'] if key not in flows]}
+                    if not available:
+                        video_coverage.append(dict(coverage, status='failed'))
+                        continue
+                    video_domain = dict(domain, key=video['key'], title=video['title'],
+                                        description=video['description'], flows=available)
+                    identity = domain_identity(video_domain, flows)
+                    old_video = video_states.get(video['key'], {})
+                    # Compatibility for a one-video legacy checkpoint whose public key is unchanged.
+                    if not old_video and len(domain['videos']) == 1 and video['key'] == domain_key:
+                        old_video = previous
+                    changed = old_video.get('needsPublication') or old_video.get('identity') != identity
+                    localized = old_video.get('localizedMetadata')
+                    if changed:
+                        try:
+                            localized_domain, localized = recording.localize_domain(
+                                video_domain, code, localized, allow_model=quota_reason is None)
+                        except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                            for flow in available:
+                                skip_flow(domain, flow, 'localization', error, code)
+                            video_coverage.append(dict(coverage, status='failed', skippedFlowIds=video['flowIds']))
+                            continue
+                        destination = out / video['key'] / code
+                        print(f"Self-onboarding [{video['key']}/{code}]: assembling {len(available)} chapters", file=sys.stderr, flush=True)
+                        entry = recording.assemble(localized_domain, code, flows, cache, destination, commit,
+                                                   report['version'], args.workflow_run_id)
+                        entry['video'] = str(Path(entry['video']).relative_to(out))
+                        entry['featureKey'] = domain_key
+                        entry['requiredFlowIds'] = list(video['flowIds'])
+                        entry['skippedFlowIds'] = [key for key in video['flowIds'] if key not in flows]
+                        entries.append(entry)
+                    video_coverage.append(dict(coverage, status='assembled' if changed else 'unchanged'))
+                    video_states[video['key']] = {'identity': identity, 'needsPublication': bool(changed),
+                        'localizedMetadata': localized, 'flowIds': list(video['flowIds'])}
+                    previous['videos'] = video_states
+                    current['domains'][domain_key] = previous
+                    core.save(cache / 'state.json', state, mode=0o600)
+                current['domains'][domain_key] = {'commit': commit, 'flows': flows, 'videos': video_states,
+                    'needsPublication': any(v.get('needsPublication') for v in video_states.values()),
+                    'localizedMetadata': localized_metadata,
                     'discoveredFlowIds': domain.get('discoveredFlowIds', []), 'retiredFlowIds': domain.get('retiredFlowIds', [])}
                 current['commit'] = commit
                 core.save(cache / 'state.json', state, mode=0o600)
+        validate_output_coverage(reports, video_coverage, entries)
         captures['commit'] = commit
         out.mkdir(parents=True, exist_ok=True)
         manifest = {'schemaVersion': 1, 'testMode': plan.get('testMode', False), 'commit': commit, 'version': reports[0]['version'],
                     'workflowRunId': args.workflow_run_id, 'domains': entries, 'complete': not skipped, 'skippedFlows': skipped,
-                    'textModelQuota': quota_reason}
+                    'textModelQuota': quota_reason, 'videoCoverage': video_coverage}
         core.save(out / 'manifest.json', manifest)
         if entries:
+            state['pendingRegistry'] = registry_identity
             state['pendingBundle'] = str(out.relative_to(cache))
             state['pendingSelection'] = sorted([[p['language'], d['key']] for p in reports for d in p['domains']])
         core.save(cache / 'state.json', state, mode=0o600)
@@ -386,6 +472,34 @@ def generate(args):
                     os.environ.pop(name, None)
                 else:
                     os.environ[name] = value
+
+
+def mark_published(args):
+    """Clear only groups confirmed published by the SDK publisher; feature capture baselines stay intact."""
+    cache = Path(args.cache)
+    state = load_state(cache)
+    pending = state.get('pendingBundle')
+    if not pending:
+        return {'ok': True, 'videos': 0}
+    bundle = (cache / pending).resolve()
+    if not bundle.is_relative_to(cache.resolve()):
+        raise ValueError('Invalid pending publication path')
+    manifest = core.load(bundle / 'manifest.json')
+    for entry in manifest['domains']:
+        published = state.get('published', {}).get(f"{entry['key']}:{entry['language']}", {})
+        if not published.get('revisionId') or published.get('commit') != manifest['commit'] or published.get('version') != manifest['version']:
+            raise ValueError('Video group has not been confirmed published')
+        feature = state['languages'][entry['language']]['domains'][entry.get('featureKey', entry['key'])]
+        if entry.get('featureKey'):
+            feature['videos'][entry['key']]['needsPublication'] = False
+            feature['needsPublication'] = any(v.get('needsPublication') for v in feature['videos'].values())
+        else:
+            feature['needsPublication'] = False
+    state.pop('pendingBundle', None)
+    state.pop('pendingSelection', None)
+    state.pop('pendingRegistry', None)
+    core.save(cache / 'state.json', state, mode=0o600)
+    return {'ok': True, 'videos': len(manifest['domains'])}
 
 
 def main():
@@ -411,11 +525,14 @@ def main():
     p.add_argument('--run', required=True)
     p.add_argument('--out', required=True)
     p.add_argument('--workflow-run-id', required=True)
+    p = commands.add_parser('published')
+    p.add_argument('--cache', required=True)
     args = parser.parse_args()
     if args.command == 'generate' and not re.fullmatch(r'[0-9]{1,32}', args.workflow_run_id):
         parser.error('workflow-run-id must identify the actual GitHub Actions run')
     try:
-        result = analyze(args) if args.command == 'plan' else generate(args)
+        handlers = {'plan': analyze, 'generate': generate, 'published': mark_published}
+        result = handlers[args.command](args)
         print(json.dumps(result))
     except (ValueError, RuntimeError) as error:
         # Provider and publication helpers sanitize errors; never dump subprocess environments.

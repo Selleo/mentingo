@@ -16,7 +16,7 @@ on:
         default: ''
         type: string
       languages:
-        description: Comma-separated recorded languages; share one capture and voice across en,pl
+        description: Comma-separated recorded languages; native EN/PL captures reuse one scenario and voice
         default: en,pl
         type: string
       force:
@@ -44,7 +44,7 @@ on:
         default: false
         type: boolean
       business_spec:
-        description: Exact business spec path; selects its complete feature video
+        description: Exact business spec path; selects all short videos for its feature
         default: ''
         type: string
       test_mode:
@@ -378,16 +378,7 @@ jobs:
             args=(--bundle "$bundle" --state "$CACHE/state.json" --output "$RUNNER_TEMP/self-onboarding-publication.json")
             if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
             node scripts/self-onboarding-publish/publisher.mjs "${args[@]}"
-            python3 - <<'PY'
-          import json, os, pathlib
-          path = pathlib.Path(os.environ['CACHE'])/'state.json'
-          state = json.loads(path.read_text())
-          manifest = json.loads((path.parent/state['pendingBundle']/'manifest.json').read_text())
-          for entry in manifest['domains']:
-              state['languages'][entry['language']]['domains'][entry['key']]['needsPublication'] = False
-          state.pop('pendingBundle', None)
-          path.write_text(json.dumps(state))
-          PY
+            python3 .agents/skills/release-film/scripts/self_onboarding.py published --cache "$CACHE"
           fi
       - name: Preserve resumable upload and finalization progress
         if: ${{ always() && steps.restore.outcome == 'success' }}

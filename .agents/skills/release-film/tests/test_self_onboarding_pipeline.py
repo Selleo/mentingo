@@ -104,7 +104,8 @@ class PipelineTest(unittest.TestCase):
         core.save(plan, {'schemaVersion': 1, 'reports': [{'ok': True, 'domains': [domain],
             'commit': self.commit, 'version': '1.2.0', 'language': 'en'}]})
         core.save(self.cache/'state.json', {'schemaVersion': 1, 'languages': {}, 'pendingBundle': 'bundles/test',
-                                          'pendingSelection': [['en', self.domain['key']]]})
+                                          'pendingSelection': [['en', self.domain['key']]],
+                                          'pendingRegistry': self_onboarding.video_registry_identity(core.load(plan)['reports'])})
         manifest = self.cache/'bundles/test/manifest.json'
         core.save(manifest, {'commit': self.commit, 'version': '1.2.0', 'domains': [1]})
         args = SimpleNamespace(plan=str(plan), run=str(self.root/'run'), cache=str(self.cache), out=str(self.cache/'bundles/new'))
@@ -150,6 +151,8 @@ class PipelineTest(unittest.TestCase):
         import hashlib
         domain = copy.deepcopy(self.domain)
         domain['flows'] = domain['flows'][:2]
+        domain['videos'] = [{'key':domain['key'], 'title':domain['title'], 'description':domain['description'],
+                             'flowIds':[f['id'] for f in domain['flows']]}]
         registry = {'domains': [copy.deepcopy(domain)]}
         profile = hashlib.sha256(json.dumps({'provider': {}, 'pronunciation': {}, 'brand': {}, 'renderer': 'tutorial-v5-full-viewport'}, sort_keys=True).encode()).hexdigest()
         states = {}
@@ -182,7 +185,7 @@ class PipelineTest(unittest.TestCase):
             # An earlier complete domain must still publish after a later domain
             # failed before the whole bundle was finished.
             checkpoint = core.load(self.cache/'state.json')
-            checkpoint['languages']['en']['domains'][domain['key']]['needsPublication'] = True
+            checkpoint['languages']['en']['domains'][domain['key']]['videos'][domain['key']]['needsPublication'] = True
             core.save(self.cache/'state.json', checkpoint)
             assemble.return_value = {'key': domain['key'], 'language': 'en',
                 'video': str(self.cache/'bundles/new/video.mp4')}

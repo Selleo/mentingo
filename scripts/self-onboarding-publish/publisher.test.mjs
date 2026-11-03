@@ -709,3 +709,34 @@ test("real vendored Guide SDK emits authenticated JSON controls and exact edit/i
   assert.equal(JSON.parse(media.data).contentType, "video/mp4");
   assert.ok(!readFileSync(f.statePath, "utf8").includes(key));
 });
+
+test("grouped videos account for every required flow and reject cross-video duplicates", async (t) => {
+  const f = fixture(t);
+  Object.assign(f.entry, {
+    featureKey: "development-paths.guide",
+    requiredFlowIds: ["create-path"],
+    skippedFlowIds: [],
+  });
+  f.write();
+  assert.equal((await readBundle(f.root)).entries.length, 1);
+  f.entry.requiredFlowIds.push("edit-path");
+  f.write();
+  await assert.rejects(readBundle(f.root), /missing or unexpected chapters/);
+  f.entry.skippedFlowIds.push("edit-path");
+  f.write();
+  await assert.rejects(readBundle(f.root), /explicitly reported as incomplete/);
+  f.manifest.complete = false;
+  f.manifest.skippedFlows = [
+    {
+      domain: "development-paths.guide",
+      flowId: "edit-path",
+      language: "en",
+      reason: "Capture failed",
+    },
+  ];
+  f.write();
+  assert.equal((await readBundle(f.root)).entries.length, 1);
+  f.manifest.domains.push({ ...f.entry, key: "development-paths.other-video" });
+  f.write();
+  await assert.rejects(readBundle(f.root), /duplicated across video groups/);
+});

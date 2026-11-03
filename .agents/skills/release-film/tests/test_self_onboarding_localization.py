@@ -253,6 +253,118 @@ class LocalizationTest(unittest.TestCase):
                 self.assertEqual(story, before)
                 model.assert_called_once()
 
+    def test_missing_whole_video_cannot_pass_output_coverage(self):
+        self.split_feature()
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        report = {'language':'en', 'domains':[self.domain]}
+        with self.assertRaisesRegex(ValueError, 'missing or duplicates'):
+            self_onboarding.validate_output_coverage([report], manifest['videoCoverage'][:1], manifest['domains'][:1])
+
+    def test_removing_a_published_video_key_requires_explicit_migration(self):
+        self.split_feature()
+        core.save(self.cache/'state.json', {'schemaVersion':1, 'languages':{}, 'published':{
+            self.domain['key']+':en':{'revisionId':'old-monolith'}}})
+        with self.assertRaisesRegex(ValueError, 'explicitly retire'):
+            self.generate(codes=('en',))
+        self.camera.assert_not_called()
+
+    def test_analyze_saves_unassigned_discovery_and_blocks_before_camera(self):
+        self.setup_generator()
+        domain = copy.deepcopy(self.domain)
+        domain['flows'].append(dict(copy.deepcopy(self.flow), id='discovered-new-flow', action='record'))
+        planned = {'ok':True, 'domains':[domain], 'commit':self.commit, 'version':'1.2.0'}
+        self.patch(self_onboarding_catalog, 'plan', return_value=planned)
+        args = SimpleNamespace(cache=str(self.cache), catalog='mock', repo=str(self.root), target='v1.2.0',
+            domains='', languages='en,pl', force=False, out=str(self.root/'blocked-analysis.json'))
+        with self.assertRaisesRegex(ValueError, 'Update the video-group registry'):
+            self_onboarding.analyze(args)
+        saved = core.load(args.out)
+        self.assertTrue(all(not report['ok'] for report in saved['reports']))
+        self.assertIn('discovered-new-flow', saved['reports'][0]['domains'][0]['error'])
+        self.camera.assert_not_called()
+
+    def test_publication_flags_are_not_cleared_when_a_group_is_unconfirmed(self):
+        self.split_feature()
+        self.generate(codes=('en',))
+        before = core.load(self.cache/'state.json')
+        with self.assertRaisesRegex(ValueError, 'not been confirmed published'):
+            self_onboarding.mark_published(SimpleNamespace(cache=str(self.cache)))
+        self.assertEqual(before, core.load(self.cache/'state.json'))
+
+    def test_pending_bundle_cannot_resume_under_a_different_group_registry(self):
+        self.split_feature()
+        self.generate(codes=('en',))
+        self.domain['videos'][0]['title'] = 'Changed editorial group'
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.camera.reset_mock()
+        with self.assertRaisesRegex(ValueError, 'publication is pending'):
+            self.generate(codes=('en',), name='regrouped')
+        self.camera.assert_not_called()
+
+    def split_feature(self):
+        self.domain['flows'] = [dict(copy.deepcopy(self.flow), id=f'flow-{index}') for index in range(6)]
+        self.domain['videos'] = [{'key':f'development-paths.video-{index}', 'title':f'Video {index}',
+            'description':f'Related steps {index}.', 'flowIds':[f'flow-{n}' for n in range(index*3, index*3+3)]}
+            for index in range(2)]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+
+    def test_one_changed_flow_rebuilds_only_its_stable_video_group(self):
+        self.split_feature()
+        first = self.generate(codes=('en',))
+        self.assertEqual(first['videos'], 2)
+        self.assertEqual([len(call.args[0]['flows']) for call in self.assemble.call_args_list], [3, 3])
+        self.published()
+        self.camera.reset_mock(); self.render.reset_mock(); self.assemble.reset_mock()
+        self.commit = 'b'*40
+        second = self.generate(codes=('en',), action={'flow-0':'record'}, name='one-change')
+        self.assertEqual(second['videos'], 1)
+        self.camera.assert_called_once(); self.render.assert_called_once(); self.assemble.assert_called_once()
+        self.assertEqual(self.assemble.call_args.args[0]['key'], 'development-paths.video-0')
+        manifest = core.load(second['manifest'])
+        self.assertEqual([v['status'] for v in manifest['videoCoverage']], ['assembled', 'unchanged'])
+        self.assertEqual(manifest['domains'][0]['requiredFlowIds'], ['flow-0','flow-1','flow-2'])
+
+    def test_failed_flow_is_explicit_and_does_not_discard_other_video_groups(self):
+        self.split_feature()
+        capture = self.camera.side_effect
+        def fail_one(run, flow, *args):
+            if flow['id'] == 'flow-1': raise RuntimeError('Drawer did not open')
+            return capture(run, flow, *args)
+        self.camera.side_effect = fail_one
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        self.assertEqual(result['videos'], 2)
+        self.assertFalse(manifest['complete'])
+        self.assertEqual(manifest['domains'][0]['skippedFlowIds'], ['flow-1'])
+        self.assertEqual(manifest['domains'][1]['skippedFlowIds'], [])
+        self.assertEqual(manifest['skippedFlows'][0]['flowId'], 'flow-1')
+
+    def test_new_unassigned_flow_is_rejected_before_any_recording(self):
+        self.domain['flows'].append(dict(copy.deepcopy(self.flow), id='new-flow'))
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        with self.assertRaisesRegex(ValueError, 'missing video-group assignments'):
+            self.generate()
+        self.camera.assert_not_called(); self.render.assert_not_called()
+
+    def test_publication_completion_clears_group_flags_and_retains_feature_baselines(self):
+        self.split_feature()
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        state = core.load(self.cache/'state.json')
+        for entry in manifest['domains']:
+            state['published'][entry['key']+':en'] = {'revisionId':'published-id', 'commit':self.commit, 'version':'1.2.0'}
+        core.save(self.cache/'state.json', state)
+        self_onboarding.mark_published(SimpleNamespace(cache=str(self.cache)))
+        state = core.load(self.cache/'state.json')
+        self.assertNotIn('pendingBundle', state)
+        feature = state['languages']['en']['domains'][self.domain['key']]
+        self.assertEqual(len(feature['flows']), 6)
+        self.assertFalse(feature['needsPublication'])
+        self.assertTrue(all(not v['needsPublication'] for v in feature['videos'].values()))
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -262,6 +374,8 @@ class LocalizationTest(unittest.TestCase):
         self.domain = copy.deepcopy(self_onboarding_catalog.load_catalog(SKILL/'projects/mentingo-self-onboarding.json')['domains'][0])
         self.domain['flows'] = self.domain['flows'][:1]
         self.flow = self.domain['flows'][0]
+        self.domain['videos'] = [{'key':self.domain['key'], 'title':self.domain['title'],
+                                  'description':self.domain['description'], 'flowIds':[self.flow['id']]}]
         self.chapter = {'film':'F1','title':'Create a path','prs':[1],'proofs':['Saved'], 'sentences':[
             {'action':i,'text':text,'line':i} for i,text in enumerate([
                 'Open the path editor.','Enter the path title.','Save the development path.'])]}
@@ -347,7 +461,7 @@ class LocalizationTest(unittest.TestCase):
     def generate(self,codes=('en','pl'),action='record',name='batch'):
         domain=copy.deepcopy(self.domain)
         domain['coverage']={'decision':'complete'}
-        domain['flows']=[dict(f,action=action,reason='Verified',evidence=[]) for f in domain['flows']]
+        domain['flows']=[dict(f,action=action.get(f['id'],'reuse') if isinstance(action,dict) else action,reason='Verified',evidence=[]) for f in domain['flows']]
         reports=[{'ok':True,'domains':[domain],'commit':self.commit,'version':'1.2.0','language':code} for code in codes]
         plan=self.root/(name+'-plan.json')
         core.save(plan,{'schemaVersion':1,'reports':reports})
@@ -362,6 +476,7 @@ class LocalizationTest(unittest.TestCase):
         for language in state['languages'].values():
             for domain in language['domains'].values():
                 domain['needsPublication']=False
+                for video in domain.get('videos', {}).values(): video['needsPublication']=False
         core.save(self.cache/'state.json',state)
 
     def test_one_agent_scenario_supports_two_native_language_captures(self):
@@ -383,6 +498,7 @@ class LocalizationTest(unittest.TestCase):
     def test_failed_capture_is_skipped_and_remaining_flows_are_assembled_in_both_languages(self):
         second = dict(copy.deepcopy(self.flow), id='next-flow')
         self.domain['flows'].append(second)
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
         self.registry['domains'] = [copy.deepcopy(self.domain)]
         self.setup_generator()
         def capture(run, flow, domain, commit, *args):
@@ -413,6 +529,7 @@ class LocalizationTest(unittest.TestCase):
 
     def test_model_quota_stops_new_workers_but_renders_available_english_captures(self):
         self.domain['flows'] += [dict(copy.deepcopy(self.flow), id=name) for name in ('second-flow', 'third-flow')]
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
         self.registry['domains'] = [copy.deepcopy(self.domain)]
         self.setup_generator()
         def capture(run, flow, domain, commit, *args):
@@ -429,7 +546,7 @@ class LocalizationTest(unittest.TestCase):
         manifest = core.load(result['manifest'])
         self.assertIn('session limit', manifest['textModelQuota'])
         self.assertEqual(manifest['domains'][0]['language'], 'en')
-        self.assertTrue(any(s['stage'] == 'localization' and s['language'] == 'pl' for s in result['skippedFlows']))
+        self.assertTrue(any(s['stage'] in ('localization', 'render') and s['language'] == 'pl' for s in result['skippedFlows']))
 
     def test_metadata_localization_failure_does_not_discard_generated_english_video(self):
         self.setup_generator()
@@ -611,6 +728,7 @@ class LocalizationTest(unittest.TestCase):
 
     def test_random_narrator_is_shared_by_chapters_languages_and_future_versions(self):
         self.domain['flows'].append(dict(copy.deepcopy(self.flow), id='second-flow'))
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
         self.registry['domains'] = [copy.deepcopy(self.domain)]
         choose = self.setup_voice_pool()
         rendered_voices = []

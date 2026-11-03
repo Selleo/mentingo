@@ -281,6 +281,7 @@ export async function readBundle(root) {
     "Invalid bundle domains.",
   );
   const slots = new Set();
+  const featureFlows = new Map();
   const entries = [];
   for (const entry of manifest.domains) {
     check(
@@ -295,6 +296,56 @@ export async function readBundle(root) {
     check(!slots.has(slot), "Duplicate tutorial and language.");
     slots.add(slot);
     validateMetadata(entry.metadata, manifest, entry);
+    if (entry.featureKey !== undefined) {
+      check(
+        typeof entry.featureKey === "string" && KEY.test(entry.featureKey),
+        "Invalid feature key for video group.",
+      );
+      const required = entry.requiredFlowIds;
+      const skipped = entry.skippedFlowIds;
+      check(
+        Array.isArray(required) &&
+          required.length >= 1 &&
+          required.length <= 3 &&
+          required.every((id) => typeof id === "string" && KEY.test(id)) &&
+          new Set(required).size === required.length,
+        "Invalid required flows for video group.",
+      );
+      check(
+        Array.isArray(skipped) &&
+          skipped.every((id) => required.includes(id)) &&
+          new Set(skipped).size === skipped.length,
+        "Invalid skipped flows for video group.",
+      );
+      check(
+        skipped.length === 0 ||
+          (manifest.complete === false &&
+            Array.isArray(manifest.skippedFlows) &&
+            skipped.every((id) =>
+              manifest.skippedFlows.some(
+                (failure) =>
+                  failure.domain === entry.featureKey &&
+                  failure.flowId === id &&
+                  (!failure.language || failure.language === entry.language),
+              ),
+            )),
+        "Skipped video flows must be explicitly reported as incomplete.",
+      );
+      const chapters = entry.metadata.chapters.map((chapter) => chapter.id);
+      check(
+        chapters.every((id) => required.includes(id) && !skipped.includes(id)) &&
+          required.every((id) => chapters.includes(id) || skipped.includes(id)),
+        "Video group has missing or unexpected chapters.",
+      );
+      const featureSlot = `${entry.featureKey}:${entry.language}`;
+      const seen = featureFlows.get(featureSlot) || new Set();
+      check(
+        required.every((id) => !seen.has(id)),
+        "Flow duplicated across video groups.",
+      );
+      required.forEach((id) => seen.add(id));
+      featureFlows.set(featureSlot, seen);
+    }
     const path = bundlePath(root, entry.video);
     check(
       lstatSync(path).size === entry.sizeBytes && (await fileHash(path)) === entry.sha256,

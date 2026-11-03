@@ -27,7 +27,7 @@ VERSION = re.compile(r"v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
 MAX_EVIDENCE_BYTES = 200_000
 FLOW_FIELDS = frozenset(("id", "title", "description", "audiences", "featureRequirements", "pageKeys", "specPaths",
                          "watchPaths", "goal", "preconditions", "actions", "outcomes"))
-DOMAIN_FIELDS = frozenset(("key", "domain", "title", "description", "specPaths", "watchPaths", "flows"))
+DOMAIN_FIELDS = frozenset(("key", "domain", "title", "description", "specPaths", "watchPaths", "flows", "videos"))
 
 
 class Evidence(TypedDict):
@@ -50,6 +50,13 @@ class Flow(TypedDict):
     outcomes: list[str]
 
 
+class VideoGroup(TypedDict):
+    key: str
+    title: str
+    description: str
+    flowIds: list[str]
+
+
 class Domain(TypedDict):
     key: str
     domain: str
@@ -58,6 +65,7 @@ class Domain(TypedDict):
     specPaths: list[str]
     watchPaths: list[str]
     flows: list[Flow]
+    videos: list[VideoGroup]
 
 
 class Catalog(TypedDict):
@@ -138,6 +146,37 @@ def _flow(value: object) -> Flow:
     return cast(Flow, copy.deepcopy(row))
 
 
+def validate_video_groups(domain):
+    """Every required flow belongs to exactly one stable, explicitly named short video."""
+    videos = domain.get('videos')
+    if not isinstance(videos, list) or not videos:
+        raise ValueError('Feature needs an explicit video-group registry')
+    required = {flow['id'] for flow in domain['flows']}
+    assigned, keys = set(), set()
+    for video in videos:
+        if not isinstance(video, dict) or set(video) != {'key', 'title', 'description', 'flowIds'}:
+            raise ValueError('Invalid video-group fields')
+        key = video['key']
+        if not isinstance(key, str) or not KEY.fullmatch(key) or key in keys:
+            raise ValueError('Invalid or duplicate stable video key')
+        keys.add(key)
+        _text(video['title'], 'video title', 200)
+        _text(video['description'], 'video description')
+        ids = video['flowIds']
+        if not isinstance(ids, list) or not 1 <= len(ids) <= 3 or any(not isinstance(v, str) for v in ids):
+            raise ValueError('A short video needs 1-3 explicitly assigned flows')
+        if len(set(ids)) != len(ids) or assigned.intersection(ids):
+            raise ValueError('Flow is assigned to multiple video groups')
+        unknown = set(ids) - required
+        if unknown:
+            raise ValueError('Video group references unknown or retired flows: ' + ', '.join(sorted(unknown)))
+        assigned.update(ids)
+    missing = required - assigned
+    if missing:
+        raise ValueError('Flows missing video-group assignments: ' + ', '.join(sorted(missing)))
+    return videos
+
+
 def validate_catalog(value: object) -> Catalog:
     """Validate trusted registry structure before its paths become Git arguments."""
     root = _object(value, "catalog")
@@ -150,6 +189,7 @@ def validate_catalog(value: object) -> Catalog:
         raise ValueError("Catalog must contain domains")
     keys: set[str] = set()
     domain_ids: set[str] = set()
+    video_keys: set[str] = set()
     for item in domains:
         domain = _object(item, "domain")
         if set(domain) != DOMAIN_FIELDS:
@@ -168,10 +208,15 @@ def validate_catalog(value: object) -> Catalog:
         _paths(domain["watchPaths"], "watchPaths")
         flows = domain["flows"]
         if not isinstance(flows, list) or not flows or len(flows) > 100:
-            raise ValueError("A video needs 1-100 explicitly registered flows")
+            raise ValueError("A feature needs 1-100 explicitly registered flows")
         ids = [_flow(flow)["id"] for flow in flows]
         if len(set(ids)) != len(ids):
             raise ValueError("Duplicate stable flow ID")
+        videos = validate_video_groups(domain)
+        current_keys = {v['key'] for v in videos}
+        if video_keys.intersection(current_keys):
+            raise ValueError('Duplicate video key across features')
+        video_keys.update(current_keys)
     return cast(Catalog, copy.deepcopy(root))
 
 
@@ -227,7 +272,7 @@ def validate_planned_domain(domain: object, seed: Domain, repo: Path | None = No
             raise ValueError("Plan changes trusted domain metadata")
     raw = row.get("flows")
     if not isinstance(raw, list) or not 1 <= len(raw) <= 100:
-        raise ValueError("Planned video needs 1-100 complete flows")
+        raise ValueError("Planned feature needs 1-100 complete flows")
     flows = [_flow_contract(item) for item in raw]
     ids = [flow["id"] for flow in flows]
     if len(set(ids)) != len(ids):

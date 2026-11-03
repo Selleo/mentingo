@@ -1,8 +1,7 @@
 # Self-onboarding workflow
 
 The Helpdesk branch adds a version-triggered recording/publishing path alongside the
-existing release recap. It creates one feature-area video per language, composed of
-independent complete flows. It does not run on GitHub Release publication.
+existing release recap. It creates stable short videos per language, each containing 1–3 related complete flows. It does not run on GitHub Release publication.
 
 ## Triggers and inputs
 
@@ -48,7 +47,7 @@ or credentials. The GitHub UI's Run workflow button may still require the file o
 the default branch; use the CLI for this pre-merge test.
 
 The selected spec must be an exact registered `docs/specs/*.md` path, not a glob.
-It selects complete feature video(s) whose declared sources include that spec; it
+It selects all registered short videos for features whose declared sources include that spec; it
 does not omit other required flows from the selected feature. An unknown spec fails
 before any model calls. The same Helpdesk entry accepts optional `domains` to narrow specs shared by more
 than one feature video. Its dedicated `pr-self-onboarding-ci.yml` tests generation
@@ -175,6 +174,37 @@ consistent. Adding/reordering pool entries does not change a retained narrator.
 Current Helpdesk DTOs accept prerequisites in chapter descriptions. Typed
 chapter-level audience/feature filtering is a separate service contract change;
 this workflow does not claim to enforce those restrictions in search.
+
+## Stable video registry and completeness
+
+Each feature in `mentingo-self-onboarding.json` has an explicit `videos` registry. Every entry has a stable key,
+editorial title/description and an ordered list of 1–3 `flowIds`. All 81 registered flows are assigned exactly
+once across 29 videos. Validation rejects unknown IDs, missing assignments, duplicate membership and duplicate
+video keys, including collisions across features. No grouping depends on array positions, automatic chunking
+or an LLM rewriting the grouping. Pending bundles are bound to the selected registry fingerprint;
+changing grouping while publication is pending requires an explicit migration/resume decision.
+
+Semantic coverage still reviews the entire feature. A discovered/retired flow that no longer matches the
+partition blocks before camera setup; update the explicit registry instead of silently appending or dropping
+it. Renaming/removing previously checkpointed video keys requires an explicit migration; known published
+monoliths must be retired before new group keys can publish, preventing parallel old/new catalog entries.
+
+Capture, narration and render caches remain per flow and language. Group identity includes its stable key,
+ordered membership, text, segment identities and voice/render profile. Changing one flow rebuilds only its
+segment and affected video in each language. Unchanged groups are not assembled or uploaded. Group metadata
+translations are cached independently. Scenes still target 20–40 seconds; durations are a target, never a reason
+to cut off an outcome.
+
+`manifest.json.videoCoverage` lists every selected video and language as assembled, unchanged or failed.
+Required flow IDs and explicit skipped IDs accompany each assembled video. A final producer gate rejects a
+missing/duplicated group; publisher validation rejects missing/unexpected chapters and cross-video duplicate
+flow IDs. Individual capture failures remain explicit partial output, never an unnoticed omission or a reason
+to discard other groups. Publication completion clears flags per video while preserving feature-level semantic
+baselines and portable capture caches.
+
+The current pinned Guide SDK/publisher supports the original development-paths, course-authoring and
+course-learning domains. Articles/News recording tests do not establish production publication support; align
+the service contract, SDK and publisher allowlist before enabling their production publishing.
 
 ## Publication and recovery
 

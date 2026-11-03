@@ -96,3 +96,20 @@ learner browsing, draft creation, editing, publication, returning to draft, mult
 cover replacement, supporting media, public visibility and confirmed deletion. The recorder enables News off
 camera using existing helpers, uses native-language synthetic prerequisites, and keeps EN and PL screen recordings
 separate. Ordinary E2E factory defaults remain English outside the self-onboarding demo environment.
+
+## Short videos and explicit flow coverage
+
+The catalog assigns every required flow exactly once to a stable named video containing 1–3 related flows.
+The current registry contains 81 flows and 29 short videos per language. Missing/unknown flow IDs, duplicate
+memberships and duplicate video keys fail validation before recording. Semantic discovery of an additional
+flow requires an explicit grouping update; it cannot silently disappear or reshuffle existing videos.
+
+Every selected video is reported as assembled, unchanged or failed. Failed recordings remain explicit omissions
+in partial-output reports; other groups can finish. Publishing checks required chapters and rejects duplicates
+across videos. A one-flow behavior change regenerates that flow's language-specific segments and republishes
+only its affected video; unchanged video groups retain their existing revisions. Previously known published
+monoliths or retired keys require a migration rather than leaving both old and new tutorials visible.
+
+These changes are locally verified with provider mocks, temporary Git histories and bundle validation.
+They have not triggered a new hosted recording or production publication. Articles/News publishing still needs
+an aligned service/SDK/domain contract; successful generation artifacts alone do not establish that support.

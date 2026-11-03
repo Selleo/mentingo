@@ -29,7 +29,7 @@ def flow(identifier='create'):
 def registry():
     return {'schemaVersion': 1, 'sharedWatchPaths': ['apps/web/nav.tsx'], 'domains': [
         {'key': 'development-paths.guide', 'domain': 'development-paths', 'title': 'Development Paths',
-         'description': 'Manage development paths.', 'specPaths': [SPEC], 'watchPaths': [CODE], 'flows': [flow()]}]}
+         'description': 'Manage development paths.', 'specPaths': [SPEC], 'watchPaths': [CODE], 'flows': [flow()], 'videos': [{'key':'development-paths.guide', 'title':'Create a path', 'description':'Create a path.', 'flowIds':['create']}]}]}
 
 
 def classifier(decision='unchanged'):
@@ -356,6 +356,7 @@ class PlannerTests(unittest.TestCase):
 
     def test_retirement_persists_without_resurrecting_a_seed_flow(self):
         self.catalog['domains'][0]['flows'].append(flow('delete'))
+        self.catalog['domains'][0]['videos'][0]['flowIds'].append('delete')
         self.previous['domains']['development-paths.guide']['retiredFlowIds'] = ['delete']
         self.write('internal/build', '2')
         self.commit('No flow changes', 'v1.1.0')
@@ -371,6 +372,7 @@ class PlannerTests(unittest.TestCase):
 
     def test_retired_seed_flow_can_be_restored_after_two_coverage_reviews(self):
         self.catalog['domains'][0]['flows'].append(flow('delete'))
+        self.catalog['domains'][0]['videos'][0]['flowIds'].append('delete')
         self.previous['domains']['development-paths.guide']['retiredFlowIds'] = ['delete']
         self.write(SPEC, '# Paths\nCreate and delete development paths.\n')
         self.commit('Restore deletion', 'v1.1.0')
@@ -486,6 +488,21 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual({'browse-news', 'create-news-draft', 'edit-news', 'publish-news', 'unpublish-news',
                           'localize-news', 'preview-news', 'replace-news-cover', 'embed-news-resource',
                           'configure-public-news', 'delete-news'}, {f['id'] for f in news['flows']})
+
+    def test_video_partition_rejects_missing_duplicate_unknown_and_oversized_membership(self):
+        path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
+        loaded = catalog.load_catalog(path)
+        mutations = (
+            lambda d: d['videos'][0]['flowIds'].pop(),
+            lambda d: d['videos'][1]['flowIds'].__setitem__(0,d['videos'][0]['flowIds'][0]),
+            lambda d: d['videos'][0]['flowIds'].__setitem__(0,'nonexistent-flow'),
+            lambda d: d['videos'][0]['flowIds'].append(d['videos'][1]['flowIds'][0]),
+        )
+        for mutate in mutations:
+            domain = copy.deepcopy(loaded['domains'][0])
+            mutate(domain)
+            with self.subTest(domain=domain), self.assertRaises(ValueError):
+                catalog.validate_video_groups(domain)
 
     def test_unsafe_paths_duplicate_ids_and_unknown_fields_are_rejected(self):
         mutations = (
