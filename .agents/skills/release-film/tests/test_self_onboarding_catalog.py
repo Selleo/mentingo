@@ -469,6 +469,12 @@ class RegistryTests(unittest.TestCase):
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
         self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 222, 'videos': 91})
+        original_glob = Path.glob
+        def python312_glob(path, pattern):
+            found = original_glob(path, pattern)
+            return (item for item in found if not pattern.endswith('/**') or item.is_dir())
+        with patch.object(Path, 'glob', python312_glob):
+            self.assertEqual(catalog.validate_app_coverage(loaded, public, repo), report)
         mutations = []
         missing_area = copy.deepcopy(loaded)
         missing_area['domains'].pop()

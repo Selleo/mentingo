@@ -267,7 +267,10 @@ def validate_app_coverage(catalog: Catalog, public_registry: object, repo: Path)
                 covered_specs.add(spec)
             # Legacy watches may intentionally retain removed paths for change detection.
             # Every contract still needs at least one actual implementation source.
-            if not any(path.is_file() for watch in contract["watchPaths"] for path in repo.glob(watch)):
+            # Python <=3.12 treats a terminal ** as directories only. Include
+            # the final wildcard explicitly so CI audits implementation files too.
+            patterns = [watch + "/*" if watch.endswith("/**") else watch for watch in contract["watchPaths"]]
+            if not any(path.is_file() for pattern in patterns for path in repo.glob(pattern)):
                 raise ValueError(f"App area {key} has no implementation evidence")
         if any(not set(flow["pageKeys"]) <= page_keys for flow in feature["flows"]):
             raise ValueError(f"App area {key} uses an unregistered page key")
