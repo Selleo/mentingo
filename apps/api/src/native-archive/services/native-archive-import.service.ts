@@ -23,10 +23,12 @@ import {
   NATIVE_ARCHIVE_DEFAULT_CURRENCY,
   NATIVE_ARCHIVE_IMPORT_MODES,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
+  NATIVE_ARCHIVE_JOB_STAGES,
   NATIVE_ARCHIVE_KIND,
   NATIVE_ARCHIVE_LIMITS,
 } from "../native-archive.constants";
 import { NativeArchiveImportRepository } from "../repositories/native-archive-import.repository";
+import { SILENT_NATIVE_ARCHIVE_PROGRESS } from "../utils/native-archive-job-progress.utils";
 
 import { NativeArchiveAssetsService } from "./native-archive-assets.service";
 import {
@@ -43,6 +45,7 @@ import type {
   NativeArchiveImportMode,
   NativeArchiveImportPlan,
   NativeArchiveImportResult,
+  NativeArchiveProgressReporter,
   NativeArchiveStagedAssets,
   NativeArchiveKind,
   NativeArchiveValidatedCourseSnapshot,
@@ -77,13 +80,18 @@ export class NativeArchiveImportService {
     actor: CurrentUserType,
     importMode: NativeArchiveImportMode = NATIVE_ARCHIVE_IMPORT_MODES.COPY,
     importFinishedReport?: NativeArchiveImportFinishedReport,
+    progress: NativeArchiveProgressReporter = SILENT_NATIVE_ARCHIVE_PROGRESS,
   ): Promise<NativeArchiveImportResult> {
-    const parsed = await readNativeArchive(zipPath);
+    progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.VERIFYING);
+    const parsed = await readNativeArchive(zipPath, {
+      onAssetVerified: (verifiedCount, totalCount) =>
+        progress.reportStageWork(NATIVE_ARCHIVE_JOB_STAGES.VERIFYING, verifiedCount, totalCount),
+    });
 
     try {
       await this.assertImportPermissions(parsed, actor);
       if (importMode === NATIVE_ARCHIVE_IMPORT_MODES.SYNC)
-        return await this.importSharedCourse(parsed, actor, importFinishedReport);
+        return await this.importSharedCourse(parsed, actor, importFinishedReport, progress);
 
       const plan = await this.prepareImportPlan(parsed, actor.tenantId);
       if (plan.alreadyExists) {
@@ -106,10 +114,13 @@ export class NativeArchiveImportService {
         actor,
         plan.missing,
         plan.learningPath,
+        progress,
       );
 
       try {
+        progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.INDEXING);
         await this.attachEmbeddings(staged.snapshots);
+        progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.SAVING);
         const createdCourseIds = await this.createImportedRecords(
           parsed,
           actor,
@@ -144,7 +155,8 @@ export class NativeArchiveImportService {
   private async importSharedCourse(
     parsed: ParsedNativeArchive,
     actor: CurrentUserType,
-    importFinishedReport?: NativeArchiveImportFinishedReport,
+    importFinishedReport: NativeArchiveImportFinishedReport | undefined,
+    progress: NativeArchiveProgressReporter,
   ): Promise<NativeArchiveImportResult> {
     if (parsed.manifest.kind !== NATIVE_ARCHIVE_KIND.COURSE)
       throw new BadRequestException("nativeArchive.error.invalidArchive");
@@ -169,9 +181,13 @@ export class NativeArchiveImportService {
     else await this.assertLiveTrainingAvailable([snapshot]);
     this.nativeArchiveValidationService.assertRequiredAssetsPresent(parsed, [snapshot]);
 
-    const staged = await this.nativeArchiveAssetsService.stageArchiveAssets(parsed, actor, [
-      snapshot,
-    ]);
+    const staged = await this.nativeArchiveAssetsService.stageArchiveAssets(
+      parsed,
+      actor,
+      [snapshot],
+      undefined,
+      progress,
+    );
 
     const [stagedSnapshot] = staged.snapshots;
     if (stagedSnapshot.course.authorMetadata)
@@ -181,7 +197,9 @@ export class NativeArchiveImportService {
       };
 
     try {
+      progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.INDEXING);
       await this.attachEmbeddings(staged.snapshots);
+      progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.SAVING);
       const preparedSync = await this.courseTransferService.prepareArchiveCourseSync({
         source: { tenantId: actor.tenantId, snapshot: stagedSnapshot },
         destination: { tenantId: actor.tenantId, courseId: targetCourseId },

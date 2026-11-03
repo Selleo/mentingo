@@ -8,13 +8,15 @@ import { useTusUpload } from "~/hooks/useTusUpload";
 
 import { NATIVE_ARCHIVE_TUS_FINGERPRINT_NAMESPACE } from "./nativeArchive.constants";
 
+import type { NativeArchiveImportRequest } from "./nativeArchive.types";
+
 export function useNativeArchiveImport() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const tusUpload = useTusUpload();
 
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, onUploadProgress }: NativeArchiveImportRequest) => {
       const init = await ApiClient.api.nativeArchiveControllerInitTusImport({
         sizeBytes: file.size,
       });
@@ -23,6 +25,7 @@ export function useNativeArchiveImport() {
         file,
         session,
         fingerprintNamespace: NATIVE_ARCHIVE_TUS_FINGERPRINT_NAMESPACE,
+        onProgress: onUploadProgress,
       });
       const response = await ApiClient.api.nativeArchiveControllerCompleteTusImport(
         session.uploadId,

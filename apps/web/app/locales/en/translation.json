@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "A Live Training linked to this course is incomplete and cannot be exported.",
       "courseNotFound": "The course to export was not found.",
       "categoryNotFound": "The course category was not found."
+    },
+    "progress": {
+      "waiting": "Waiting to start…",
+      "step": "Step {{current}} of {{total}}",
+      "uploadingPackage": "Uploading package",
+      "stages": {
+        "collecting-content": "Collecting course content",
+        "copying-files": "Copying files",
+        "packaging": "Packaging",
+        "downloading": "Downloading package",
+        "verifying": "Checking package",
+        "uploading-files": "Uploading files",
+        "indexing": "Preparing AI content",
+        "saving": "Saving course"
+      }
     }
   },
   "aiConversations": {
@@ -995,38 +1010,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Back",
-    "eyebrow": "Course setup",
     "title": "Create New Course",
     "subtitle": "Choose the standard editor, a SCORM package, or a Mentingo package.",
     "standard": {
       "title": "Standard",
-      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings.",
-      "features": {
-        "authoring": "Built with the native course editor",
-        "curriculum": "Chapters, lessons, and quizzes managed in Mentingo",
-        "translations": "Course languages and translations supported",
-        "settings": "Pricing, status, and certificates included"
-      }
+      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Create a course from a SCORM 1.2 package.",
-      "features": {
-        "import": "Built from a SCORM 1.2 .zip package",
-        "tracking": "SCO completion and runtime tracking supported",
-        "structure": "Imported package structure preserved",
-        "future": "Pricing, status, and certificates included"
-      }
+      "description": "Create a course from a SCORM 1.2 package."
     },
     "mentingoPackage": {
       "title": "Mentingo package",
-      "description": "Restore a course or learning path from a Mentingo package.",
-      "features": {
-        "structure": "Course structure and translations restored",
-        "settings": "Settings and metadata restored",
-        "assets": "Related files included",
-        "learningPath": "Learning paths and their courses supported"
-      }
+      "description": "Restore a course or learning path from a Mentingo package."
     }
   },
   "studentChapterCardView": {

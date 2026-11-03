@@ -87,12 +87,21 @@ export function createNativeArchiveUploadE2EDoubles() {
     }),
     getArchiveJobStatus: jest.fn(async (id: string, actor: Actor) => {
       const job = ensureActor(id, actor);
-      return { jobId: id, state: job.state, result: job.result, failedReason: null };
+      return {
+        jobId: id,
+        state: job.state,
+        result: job.result,
+        failedReason: null,
+        progress: null,
+      };
     }),
     getArchiveDownloadStream: jest.fn(async (id: string, actor: Actor) => {
       const job = ensureActor(id, actor);
       if (job.state !== "completed") throw new NotFoundException("nativeArchive.error.notReady");
-      return { stream: Readable.from(Buffer.from("archive")), contentLength: 7 };
+      return {
+        file: { stream: Readable.from(Buffer.from("archive")), contentLength: 7 },
+        filename: "mentingo-package.zip",
+      };
     }),
   };
 

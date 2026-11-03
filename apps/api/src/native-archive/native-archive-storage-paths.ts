@@ -23,3 +23,18 @@ export function getNativeArchiveExportKey(tenantId: UUIDType, exportId: UUIDType
 export function getNativeArchiveImportPrefix(tenantId: UUIDType, importId: UUIDType): string {
   return prefixTenantStorageKey(`${NATIVE_ARCHIVE_ROOT}/imports/${importId}`, tenantId);
 }
+
+/**
+ * Where imported files live, keyed by their verified content and source reference. Importing the
+ * same file again finds it here instead of uploading it, and keeps the keys copied from it stable.
+ */
+export function getNativeArchiveAssetKey(
+  tenantId: UUIDType,
+  assetIdentity: string,
+  extension: string,
+): string {
+  return prefixTenantStorageKey(
+    `${NATIVE_ARCHIVE_ROOT}/assets/${assetIdentity}${extension}`,
+    tenantId,
+  );
+}

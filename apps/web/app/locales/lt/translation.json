@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "Su šiuo kursu susieti tiesioginiai mokymai yra neišsamūs ir negali būti eksportuoti.",
       "courseNotFound": "Eksportuojamas kursas nerastas.",
       "categoryNotFound": "Kurso kategorija nerasta."
+    },
+    "progress": {
+      "waiting": "Laukiama pradžios…",
+      "step": "{{current}} žingsnis iš {{total}}",
+      "uploadingPackage": "Įkeliamas paketas",
+      "stages": {
+        "collecting-content": "Renkamas kurso turinys",
+        "copying-files": "Kopijuojami failai",
+        "packaging": "Pakuojama",
+        "downloading": "Atsisiunčiamas paketas",
+        "verifying": "Tikrinamas paketas",
+        "uploading-files": "Įkeliami failai",
+        "indexing": "Ruošiamas DI turinys",
+        "saving": "Išsaugomas kursas"
+      }
     }
   },
   "aiConversations": {
@@ -995,38 +1010,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Atgal",
-    "eyebrow": "Kurso nustatymas",
     "title": "Sukurti naują kursą",
     "subtitle": "Pasirinkite standartinį redaktorių, SCORM paketą arba Mentingo paketą.",
     "standard": {
       "title": "Standartinis",
-      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
-      "features": {
-        "authoring": "Kuriama vietiniame kursų redaktoriuje",
-        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
-        "translations": "Palaikomos kurso kalbos ir vertimai",
-        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "features": {
-        "import": "Kuriama iš SCORM 1.2 .zip paketo",
-        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
-        "structure": "Importuoto paketo struktūra išsaugoma",
-        "future": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo."
     },
     "mentingoPackage": {
       "title": "Mentingo paketas",
-      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo.",
-      "features": {
-        "structure": "Atkuriama kurso struktūra ir vertimai",
-        "settings": "Atkuriami nustatymai ir metaduomenys",
-        "assets": "Pridedami susiję failai",
-        "learningPath": "Palaikomi mokymosi keliai ir jų kursai"
-      }
+      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo."
     }
   },
   "studentChapterCardView": {

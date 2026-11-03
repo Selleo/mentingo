@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "Szkolenie na żywo powiązane z tym kursem jest niekompletne i nie może zostać wyeksportowane.",
       "courseNotFound": "Nie znaleziono kursu do eksportu.",
       "categoryNotFound": "Nie znaleziono kategorii kursu."
+    },
+    "progress": {
+      "waiting": "Oczekiwanie na rozpoczęcie…",
+      "step": "Krok {{current}} z {{total}}",
+      "uploadingPackage": "Przesyłanie pakietu",
+      "stages": {
+        "collecting-content": "Zbieranie zawartości kursu",
+        "copying-files": "Kopiowanie plików",
+        "packaging": "Pakowanie",
+        "downloading": "Pobieranie pakietu",
+        "verifying": "Sprawdzanie pakietu",
+        "uploading-files": "Przesyłanie plików",
+        "indexing": "Przygotowywanie treści AI",
+        "saving": "Zapisywanie kursu"
+      }
     }
   },
   "aiConversations": {
@@ -998,38 +1013,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Wstecz",
-    "eyebrow": "Konfiguracja kursu",
     "title": "Utwórz nowy kurs",
     "subtitle": "Wybierz edytor standardowy, pakiet SCORM lub pakiet Mentingo.",
     "standard": {
       "title": "Standardowy",
-      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami.",
-      "features": {
-        "authoring": "Tworzony w natywnym edytorze kursów",
-        "curriculum": "Rozdziały, lekcje i quizy zarządzane w Mentingo",
-        "translations": "Obsługa języków i tłumaczeń kursu",
-        "settings": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "features": {
-        "import": "Tworzony z pakietu SCORM 1.2 .zip",
-        "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
-        "structure": "Zachowana struktura importowanego pakietu",
-        "future": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z pakietu SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Pakiet Mentingo",
-      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo.",
-      "features": {
-        "structure": "Odtwarzanie struktury kursu i tłumaczeń",
-        "settings": "Odtwarzanie ustawień i metadanych",
-        "assets": "Dołączone powiązane pliki",
-        "learningPath": "Obsługa ścieżek i ich kursów"
-      }
+      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo."
     }
   },
   "studentChapterCardView": {
