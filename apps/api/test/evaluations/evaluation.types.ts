@@ -37,6 +37,11 @@ export type HttpFixture = {
   blockingErrorIds?: Record<string, string>;
   lessonId?: string;
   rubricCookieEnv?: string;
+  expectedSourceUrls?: string[];
+  forbiddenSourceUrls?: string[];
+  audioPath?: string;
+  audioSha256?: string;
+  audioSampleRate?: number;
   /** Exact UUIDs of distinct fixtures whose content was prepared for this case. */
   isolated: true;
 };

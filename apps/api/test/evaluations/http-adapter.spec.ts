@@ -183,6 +183,56 @@ describe("Core HTTP evaluation adapter with in-memory transport doubles", () => 
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("runs proposal-only authoring without accepting or applying native changes", async () => {
+    const original = findCase("authoring-title-only-native-roundtrip");
+    const item = { ...original, input: { ...original.input, proposalOnly: true } };
+    fixture(item.id, { courseId: "course-1" });
+    const context = {
+      baselineHash: "a".repeat(64),
+      course: { title: "Long original title", description: "Keep" },
+      chapters: [],
+    };
+    const fetchMock = jest.spyOn(global, "fetch");
+    for (const data of [
+      context,
+      { sessionId: "session-1" },
+      { taskIds: ["task-1"] },
+      {
+        records: [
+          {
+            kind: "proposal",
+            payload: {
+              id: "proposal-1",
+              revision: 1,
+              operations: [
+                {
+                  operationId: "operation-1",
+                  type: "course.metadata.update",
+                  targetId: "course-1",
+                  language: "en",
+                  payload: { title: "Short title" },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      context,
+    ])
+      fetchMock.mockResolvedValueOnce(reply(data));
+    const result = await runHttpCase(item, config);
+    expect(result.status).toBe("needs_review");
+    expect(result.checks.nativeCourseUnchanged).toBe(true);
+    expect(result.evidence.nativeApplyAttempted).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes("/applications"))).toBe(false);
+    expect(
+      fetchMock.mock.calls
+        .filter(([, init]) => init?.body)
+        .some(([, init]) => String(init?.body).includes("proposal.accept")),
+    ).toBe(false);
+  });
+
   it("rejects unavailable or malformed application results", async () => {
     const item = findCase("search-keyword-title");
     fixture(item.id, { expectedResultIds: ["readable"], forbiddenResultIds: [] });

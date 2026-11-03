@@ -296,6 +296,26 @@ export async function runHttpCase(
       Object.keys(proposal.operations[0].payload).some((key) => key !== "title")
     )
       throw new Error("Proposal exceeded the title-only target");
+    if (item.input.proposalOnly === true) {
+      const unchanged = await request(`${path}/context?language=${language}`);
+      return completeCase(
+        item,
+        {
+          scopedProposal:
+            typeof proposal.id === "string" &&
+            Number.isInteger(proposal.revision) &&
+            proposal.revision > 0,
+          nativeCourseUnchanged: isDeepStrictEqual(before, unchanged),
+        },
+        {
+          requestedInstruction: item.input.instruction,
+          beforeTitle: before.course.title,
+          proposedTitle: proposal.operations[0].payload.title,
+          proposal,
+          nativeApplyAttempted: false,
+        },
+      );
+    }
     await request(`${sessionPath}/commands`, {
       schemaVersion: 1,
       commandId: randomUUID(),
