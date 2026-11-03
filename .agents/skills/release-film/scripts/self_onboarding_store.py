@@ -57,7 +57,13 @@ def aws(arguments, missing_ok=False, namespace='s3api'):
     if result.returncode:
         if missing_ok and ('NoSuchKey' in result.stderr or '(404)' in result.stderr):
             return False
-        raise RuntimeError('Private build storage request failed; check access and endpoint configuration')
+        match = re.search(r'An error occurred \(([A-Za-z0-9]+)\)', result.stderr)
+        safe_codes = {'AccessDenied', 'InvalidAccessKeyId', 'SignatureDoesNotMatch',
+                      'AuthorizationHeaderMalformed', 'NoSuchBucket', 'NoSuchKey', '403', '404',
+                      'InvalidRequest', 'RequestTimeTooSkewed', 'InvalidToken', 'ExpiredToken',
+                      'PermanentRedirect', 'NotImplemented', 'XAmzContentSHA256Mismatch'}
+        code = match.group(1) if match and match.group(1) in safe_codes else 'CLI configuration or connection error'
+        raise RuntimeError(f'Private build storage request failed ({code}); check access and endpoint configuration')
     return True
 
 

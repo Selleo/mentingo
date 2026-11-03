@@ -250,6 +250,20 @@ class PipelineTest(unittest.TestCase):
                 store.pull('s3://bucket/helpdesk', self.cache)
         self.assertFalse((self.cache/'state.json').exists())
 
+    def test_storage_failure_reports_only_a_known_provider_code(self):
+        private = 'private-credential-and-endpoint-detail'
+        result = SimpleNamespace(returncode=1, stdout='', stderr=
+            f'An error occurred (SignatureDoesNotMatch) when calling GetObject: {private}')
+        with patch.object(store.subprocess, 'run', return_value=result):
+            with self.assertRaisesRegex(RuntimeError, 'SignatureDoesNotMatch') as caught:
+                store.pull('s3://bucket/self-onboarding', self.cache)
+        self.assertNotIn(private, str(caught.exception))
+        result.stderr = f'An error occurred ({private})'
+        with patch.object(store.subprocess, 'run', return_value=result):
+            with self.assertRaisesRegex(RuntimeError, 'CLI configuration or connection error') as caught:
+                store.pull('s3://bucket/self-onboarding', self.cache)
+        self.assertNotIn(private, str(caught.exception))
+
     @unittest.skipUnless(shutil.which('ffmpeg'), 'FFmpeg required')
     def test_real_assembly_keeps_ids_and_recalculates_offsets_without_rerecording(self):
         domain = copy.deepcopy(self.domain)
