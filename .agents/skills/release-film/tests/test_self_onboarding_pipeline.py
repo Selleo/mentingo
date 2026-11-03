@@ -250,6 +250,24 @@ class PipelineTest(unittest.TestCase):
                 store.pull('s3://bucket/helpdesk', self.cache)
         self.assertFalse((self.cache/'state.json').exists())
 
+    def test_hetzner_cli_error_formatter_does_not_hide_missing_cache_or_denied_access(self):
+        crash = SimpleNamespace(returncode=255, stdout='', stderr="aws: argument of type 'NoneType' is not a container or iterable")
+        for code in ['NoSuchKey', 'AccessDenied']:
+            with self.subTest(code=code):
+                cache = self.root/code
+                diagnostic = SimpleNamespace(returncode=255, stdout='',
+                    stderr=f'Authorization: private-signed-header <Error><Code>{code}</Code><Message/></Error>')
+                with patch.object(store.subprocess, 'run', side_effect=[crash, diagnostic]) as run:
+                    if code == 'NoSuchKey':
+                        self.assertFalse(store.pull('s3://bucket/self-onboarding', cache)['restored'])
+                        self.assertTrue((cache/'state.json').is_file())
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, 'AccessDenied') as caught:
+                            store.pull('s3://bucket/self-onboarding', cache)
+                        self.assertNotIn('private-signed-header', str(caught.exception))
+                        self.assertFalse((cache/'state.json').exists())
+                    self.assertIn('--debug', run.call_args.args[0])
+
     def test_storage_failure_reports_only_a_known_provider_code(self):
         private = 'private-credential-and-endpoint-detail'
         result = SimpleNamespace(returncode=1, stdout='', stderr=

@@ -54,6 +54,19 @@ def aws(arguments, missing_ok=False, namespace='s3api'):
     if not environment.get('AWS_ENDPOINT_URL'):
         environment.pop('AWS_ENDPOINT_URL', None)
     result = subprocess.run(['aws', namespace, *arguments], capture_output=True, text=True, timeout=3600, env=environment)
+    if (result.returncode and namespace == 's3api' and arguments[0] == 'get-object'
+            and 'NoneType' in result.stderr):
+        # aws/aws-cli#10161 hides empty-message S3 errors on Ceph/Hetzner.
+        # Reissue this read only with in-memory debug capture; never print/store
+        # debug output because it contains signed authentication headers.
+        diagnostic = subprocess.run(['aws', '--debug', namespace, *arguments],
+            capture_output=True, text=True, timeout=3600, env=environment)
+        found = re.search(r'<Code>([A-Za-z0-9]+)</Code>', diagnostic.stderr)
+        if found:
+            result = subprocess.CompletedProcess(['aws', namespace, *arguments],
+                result.returncode, '', f'An error occurred ({found.group(1)})')
+        elif diagnostic.returncode == 0:
+            return True
     if result.returncode:
         if missing_ok and ('NoSuchKey' in result.stderr or '(404)' in result.stderr):
             return False
