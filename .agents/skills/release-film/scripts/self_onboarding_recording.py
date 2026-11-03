@@ -34,6 +34,63 @@ import review
 import takes
 
 
+# Only the reviewed v4.27 seed is eligible for this pre-onboarding compatibility overlay.
+# Newer tagged versions already carry the opt-in seed and retain their own implementation.
+LEGACY_DEMO_SEEDS = {
+    'apps/api/src/seed/seed.ts': (
+        '10055deb3d46af2b3a739c7d14aa5a255ad3fd37fdf158a0d7b6d3177d41825c',
+        'f614bb4158af734f8ab26bd84ce09f636fff89a760626cab4e5ad557dc48bed8'),
+    'apps/api/src/seed/users-seed.ts': (
+        '6c91c9546f073f5c075f6289e51ea753dd3e06fe5755de15f0c2a9a8ca370c5f',
+        'ca63d687aac9246f4fe5ef5c04bb7a594fe53edd187aa0da0fe5622b34ebe520'),
+}
+DEMO_SCAFFOLD = (
+    'apps/api/src/seed/self-onboarding-data-seed.ts',
+    'packages/shared/src/constants/self-onboarding-demo.ts',
+    'packages/shared/src/utils/seedEmail.ts',
+    'apps/web/e2e/fixtures/self-onboarding.fixture.ts',
+    'apps/web/e2e/utils/self-onboarding-context.ts',
+    'apps/web/e2e/data/self-onboarding/cover.svg',
+)
+
+
+def prepare_demo_checkout(checkout, source_repo):
+    """Install trusted demo-only scaffolding in an isolated tag; never replace product UI/API code.
+
+    Legacy seed replacement requires both reviewed source and destination hashes.
+    Native opt-in seeds remain untouched. Validate all inputs before writing any file.
+    """
+    checkout, source_repo = Path(checkout).resolve(), Path(source_repo).resolve()
+    if checkout == source_repo:
+        raise ValueError('Demo scaffolding requires an isolated recording checkout')
+    copies = []
+    for name, (old_hash, source_hash) in LEGACY_DEMO_SEEDS.items():
+        target, source = checkout/name, source_repo/name
+        if not target.is_file() or target.is_symlink() or not target.resolve().is_relative_to(checkout):
+            raise ValueError('Recording version is missing its normal demo seed')
+        if 'SELF_ONBOARDING_DEMO' in target.read_text():
+            continue
+        if digest(target) != old_hash or digest(source) != source_hash:
+            raise ValueError('Recording version needs a reviewed demo-seed compatibility overlay')
+        copies.append((source, target))
+    for name in DEMO_SCAFFOLD:
+        source, target = source_repo/name, checkout/name
+        if (not source.is_file() or source.is_symlink() or not source.resolve().is_relative_to(source_repo)
+                or target.is_symlink() or not target.resolve().is_relative_to(checkout)):
+            raise ValueError('Invalid trusted demo scaffold path')
+        copies.append((source, target))
+    index = checkout/'packages/shared/src/index.ts'
+    if not index.is_file() or index.is_symlink() or not index.resolve().is_relative_to(checkout):
+        raise ValueError('Recording version is missing its shared exports')
+    for source, target in copies:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+    export = 'export * from "./constants/self-onboarding-demo";'
+    if export not in index.read_text():
+        with index.open('a') as output:
+            output.write('\n' + export + '\n')
+
+
 def digest(path):
     """Hash a media file without loading its bytes into memory."""
     value = hashlib.sha256()

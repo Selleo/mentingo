@@ -286,7 +286,11 @@ def build_images(run, recipe, log):
 def recording_files(run, recipe):
     """Apply trusted recording scaffolding only to this run's isolated release checkout."""
     root = (Path(run) / 'checkout').resolve()
-    for entry in recipe.get('recording_files') or []:
+    entries = list(recipe.get('recording_files') or [])
+    if recipe.get('env', {}).get('SELF_ONBOARDING_DEMO') == '1':
+        entries.append({'source': 'projects/mentingo-recording/self-onboarding.accounts.ts',
+                        'target': 'apps/web/e2e/fixtures/release-film.accounts.ts'})
+    for entry in entries:
         source = (core.SKILL / entry['source']).resolve()
         target = (root / entry['target']).resolve()
         if not source.is_relative_to(core.SKILL.resolve()) or not source.is_file():

@@ -284,6 +284,7 @@ def generate(args):
         checkout = harness.checkout(Path(args.repo), commit, run)
         if core.sh(['git', '-C', str(checkout), 'rev-parse', 'HEAD']).stdout.strip() != commit:
             raise ValueError('Existing recorder checkout is for a different version')
+        recording.prepare_demo_checkout(checkout, Path(args.repo))
         addon = core.addon(args.repository, checkout)
         addon['elevenlabs'] = trusted_addon.get('elevenlabs', {})
         addon['pronunciation'] = trusted_addon.get('pronunciation', {})

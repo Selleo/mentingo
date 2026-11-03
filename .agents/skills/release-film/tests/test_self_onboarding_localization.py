@@ -447,6 +447,7 @@ class LocalizationTest(unittest.TestCase):
         self.patch(self_onboarding_catalog,'load_catalog',return_value=self.registry)
         self.patch(self_onboarding.core,'addon',return_value={'harness':{}})
         self.patch(self_onboarding.voice_provider,'elevenlabs_config',return_value={'voice':'same-voice','model_id':'test'})
+        self.patch(recording, 'prepare_demo_checkout')
         self.setup = self.patch(self_onboarding.harness,'setup')
         self.patch(self_onboarding.harness,'keep_set')
         self.patch(self_onboarding.harness,'test_env',return_value={})

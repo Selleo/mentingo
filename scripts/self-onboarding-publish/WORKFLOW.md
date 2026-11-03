@@ -172,6 +172,13 @@ Each selected flow is filmed and narrated independently with the existing releas
 
 The authoring worker prepares one verified, locale-aware Playwright scenario. English and Polish replay it against their native application UI and synthetic examples. Use stable test IDs, real application translation keys through `recordingText`, and bilingual sample values through `recordingValue`. The fixture updates the seeded person's language and browser locale. Polish output requires Polish footage; failure to replay it is a `localized-capture` skip rather than an English-video fallback.
 
+Older tags need the trusted tutorial scaffolding before the normal harness setup.
+The isolated checkout receives browser fixtures, shared demo identities, localized
+seed inputs and the local cover. The pre-onboarding v4.27 seed overlay requires
+reviewed source and destination hashes; unknown legacy seeds fail explicitly.
+Native opt-in seeds retain their own implementation. Product UI/API feature files
+are never replaced, and release-film runs keep their separate account adapter.
+
 The passing scenario and base-spec location travel inside the checksum-verified private capture bundle. Adding a language requires browser replay but no new authoring worker. A same-contract refresh tries the saved scenario before requesting repair. Legacy English-only bundles need a fresh locale-aware recording once. Unchanged native flows skip camera and speech. Translation and paid speech caches are independent of visual settings; speech cache files are checksum-checked. PCM narration is mixed continuously across video cuts instead of encoding sentence fragments into each visual segment.
 
 Each language has its own localized title, narration, labels and captions, spoken by the same saved ElevenLabs voice. Narration requests explicitly use that language. Chapter offsets come from measured language-specific media durations. Changing voice/model settings rebuilds narration from retained native footage; changing branding can reuse existing speech.
