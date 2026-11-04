@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SCORM_CONTENT_PATHS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 import { v5 as uuidv5 } from "uuid";
@@ -13,6 +13,7 @@ import { chapters, courses, lessons, scormPackages, scormScos } from "src/storag
 
 import { createE2ETest } from "../../../../test/create-e2e-test";
 import { createUserFactory } from "../../../../test/factory/user.factory";
+import { DEFAULT_TEST_TENANT_HOST } from "../../../../test/helpers/tenant-helpers";
 import { cookieFor } from "../../../../test/helpers/test-helpers";
 import { COURSE_TRANSFER_SCORM_PACKAGE_UUID_NAMESPACE } from "../../../course-transfer/course-transfer.constants";
 import { NativeArchiveImportService } from "../native-archive-import.service";
@@ -50,7 +51,7 @@ describe("Native archive SCORM import (e2e)", () => {
       .withAdminSettings(db)
       .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
     actor = { userId: user.id, tenantId: testContext.defaultTenantId } as CurrentUserType;
-    cookie = await cookieFor(user, app);
+    cookie = await cookieFor(user, app, DEFAULT_TEST_TENANT_HOST);
   });
 
   afterAll(async () => {
@@ -156,16 +157,25 @@ describe("Native archive SCORM import (e2e)", () => {
     );
     expect(storage.has(fixture.snapshot.scormPackages[0]!.originalFileReference)).toBe(false);
 
-    const launchFile = await request(app.getHttpServer())
-      .get(`/api/scorm/content/${expectedPackageId}/index.html`)
+    const launched = await request(app.getHttpServer())
+      .get("/api/scorm/runtime/launch")
+      .query({ lessonId: targetLesson?.id, language: SUPPORTED_LANGUAGES.EN })
       .set("Cookie", cookie)
+      .expect(200);
+    expect(launched.body.data.packageId).toBe(expectedPackageId);
+    const launchUrl = new URL(launched.body.data.launchUrl);
+    const assetsUrl = new URL(`./${SCORM_CONTENT_PATHS.ASSETS}/`, launchUrl);
+
+    const launchFile = await request(app.getHttpServer())
+      .get(`${assetsUrl.pathname}index.html`)
+      .set("Host", assetsUrl.host)
       .expect(200);
     expect(launchFile.headers["content-type"]).toContain("text/html");
     expect(launchFile.text).toContain("Copied extracted SCO");
 
     const nestedFile = await request(app.getHttpServer())
-      .get(`/api/scorm/content/${expectedPackageId}/scripts/runtime.js`)
-      .set("Cookie", cookie)
+      .get(`${assetsUrl.pathname}scripts/runtime.js`)
+      .set("Host", assetsUrl.host)
       .expect(200);
     expect(nestedFile.headers["content-type"]).toContain("javascript");
     expect(nestedFile.text).toContain("window.archiveScormReady");
