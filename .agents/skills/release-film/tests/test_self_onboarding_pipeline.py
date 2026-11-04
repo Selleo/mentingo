@@ -320,6 +320,50 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(result['sha256'], recording.digest(self.root/'out/video.mp4'))
 
 
+    @unittest.skipUnless(shutil.which('ffmpeg'), 'FFmpeg required')
+    def test_assembly_preserves_fractional_final_captions_with_a_held_frame_tail(self):
+        domain = copy.deepcopy(self.domain)
+        domain['flows'] = domain['flows'][:1]
+        flow = domain['flows'][0]
+        self.cache.mkdir(parents=True)
+        video = self.cache/'segment.mp4'
+        render_demo.FFPROBE = core.tool('ffprobe') or 'ffprobe'
+        subprocess.run([core.tool('ffmpeg'), '-v', 'error', '-f', 'lavfi', '-i',
+            'color=c=blue:s=160x90:r=30:d=1.4', '-f', 'lavfi', '-i',
+            'sine=frequency=440:duration=1.4', '-c:v', 'libx264', '-threads', '1',
+            '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', str(video)], check=True, capture_output=True)
+        captions = self.cache/'captions.srt'
+        captions.write_text('1\n00:00:00,100 --> 00:00:01,300\nA complete result\n\n')
+        segment = {'path': video.name, 'sha256': recording.digest(video),
+            'captions': captions.name, 'captionsSha256': recording.digest(captions),
+            'title': flow['title'], 'transcript': 'A complete result'}
+        states = {flow['id']: self.state_flow(flow, segment)}
+        def audio_packets(path):
+            return subprocess.check_output([core.tool('ffmpeg'), '-v', 'error', '-i', str(path),
+                '-map', '0:a:0', '-c:a', 'copy', '-f', 'adts', '-'])
+        before_padding = []
+        actual_sh = core.sh
+        def observe_padding(command, **kwargs):
+            if 'tpad=stop_mode=clone:stop_duration=1' in command:
+                before_padding.append(audio_packets(command[command.index('-i') + 1]))
+            return actual_sh(command, **kwargs)
+        with patch.object(core, 'sh', side_effect=observe_padding), patch.object(recording, 'record_flow') as camera:
+            result = recording.assemble(domain, 'en', states, self.cache, self.root/'out',
+                                        self.commit, '1.2.0', '123')
+            camera.assert_not_called()
+        self.assertAlmostEqual(result['metadata']['expectedDurationMs'], 2400, delta=100)
+        self.assertEqual(result['metadata']['chapters'][0]['startMs'], 0)
+        self.assertEqual(result['metadata']['chapters'][0]['endMs'], 1400)
+        self.assertIn('00:00:01,300', (self.root/'out/captions-en.srt').read_text())
+        self.assertEqual(len(before_padding), 1)
+        self.assertEqual(before_padding[0], audio_packets(self.root/'out/video.mp4'))
+        captions.write_text('1\n00:00:00,100 --> 00:00:02,300\nInvalid result\n\n')
+        segment['captionsSha256'] = recording.digest(captions)
+        with self.assertRaisesRegex(ValueError, 'captions extend beyond'):
+            recording.assemble(domain, 'en', states, self.cache, self.root/'invalid',
+                               self.commit, '1.2.0', '123')
+
+
 @unittest.skipUnless(yaml, 'PyYAML required')
 class WorkflowsTest(unittest.TestCase):
     def load(self, filename):

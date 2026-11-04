@@ -736,15 +736,28 @@ def assemble(domain, code, flow_states, cache, out, commit, version, workflow_id
     else:  # Previously published/private segments remain readable; new renders always carry PCM narration.
         core.sh([ffmpeg, '-v', 'error', '-nostdin', '-y', '-f', 'concat', '-safe', '0', '-i', str(listing),
                  '-c:v', 'copy', '-c:a', 'aac', '-af', 'aresample=async=1:first_pts=0', '-movflags', '+faststart', str(video)], timeout=3600)
-    core.sh([ffmpeg, '-v', 'error', '-xerror', '-i', str(video), '-f', 'null', '-'], timeout=3600)
     duration = float(render_demo.probe(video)['format']['duration'])
     if abs(duration - cursor) > 0.15:
         raise ValueError('Assembled media does not match measured flow durations')
-    # Bunny reports duration in whole seconds. Keep the fractional quiet tail
-    # outside the searchable range rather than publishing a chapter it rejects.
+    if any(cue['end'] > duration + 0.001 for cue in cues):
+        raise ValueError('Assembled captions extend beyond the recorded media')
+    # Bunny reports whole seconds. Preserve every caption and action by holding
+    # the last frame for one extra second when flooring would exclude them.
+    # Copy the existing audio packets so adding a quiet tail cannot alter speech.
     searchable_end = math.floor(duration) * 1000
     if chapters[-1]['startMs'] >= searchable_end or any(cue['end'] * 1000 > searchable_end for cue in cues):
-        raise ValueError('Final narration needs a quiet tail before Bunny duration rounding')
+        padded = out / 'video-padded.mp4'
+        core.sh([ffmpeg, '-v', 'error', '-nostdin', '-y', '-i', str(video),
+                 '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'tpad=stop_mode=clone:stop_duration=1',
+                 '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p',
+                 '-c:a', 'copy', '-t', str(duration + 1), '-movflags', '+faststart', str(padded)], timeout=3600)
+        padded_duration = float(render_demo.probe(padded)['format']['duration'])
+        if abs(padded_duration - duration - 1) > 0.15:
+            raise ValueError('Final video padding does not match the requested quiet tail')
+        padded.replace(video)
+        duration = padded_duration
+        searchable_end = math.floor(duration) * 1000
+    core.sh([ffmpeg, '-v', 'error', '-xerror', '-i', str(video), '-f', 'null', '-'], timeout=3600)
     chapters[-1]['endMs'] = min(chapters[-1]['endMs'], searchable_end)
     render_demo.write_captions(cues, out, code)
     core.sh([ffmpeg, '-v', 'error', '-y', '-ss', str(min(3, duration / 2)), '-i', str(video),
