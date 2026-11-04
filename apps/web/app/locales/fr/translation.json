@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Lien de connexion",
     "password": "Mot de passe",
     "description": "Choisissez comment les membres de votre organisation peuvent se connecter.",
@@ -34,6 +35,8 @@
       "disabled": "Cette méthode de connexion est désactivée.",
       "missingConfiguration": "Ajoutez d'abord les identifiants du fournisseur dans les paramètres d'environnement.",
       "lastMethod": "Gardez au moins une méthode de connexion utilisable activée.",
+      "invalidDirectoryId": "Saisissez l'ID de l'annuaire (locataire) de votre inscription d'application Entra au format GUID.",
+      "untrustedDirectory": "Ce compte n'appartient pas à l'annuaire Entra ID de votre organisation.",
       "save": "Impossible d’enregistrer les méthodes de connexion.",
       "load": "Impossible de charger les méthodes de connexion."
     }
@@ -792,6 +795,7 @@
     "continueWithGoogle": "Continuer avec Google",
     "continueWithMicrosoft": "Continuer avec Microsoft",
     "continueWithSlack": "Continuer avec Slack",
+    "continueWithEntraId": "Continuer avec Entra ID",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "refreshPage": "Actualiser la page",
@@ -2564,6 +2568,10 @@
         "title": "Connexion avec Slack",
         "description": "Permettre aux utilisateurs de se connecter avec leur compte Slack."
       },
+      "entraIdSignIn": {
+        "title": "Connexion avec Entra ID",
+        "description": "Permettez aux utilisateurs de se connecter uniquement avec des comptes de l'annuaire Microsoft Entra ID de votre organisation."
+      },
       "microsoftCalendar": {
         "title": "Calendrier Microsoft",
         "description": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook."
@@ -2655,6 +2663,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secret client Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID de l'annuaire (locataire) Entra ID",
+        "description": "Le GUID de l'ID de l'annuaire (locataire) indiqué dans la vue d'ensemble de l'inscription d'application. Seuls les comptes de cet annuaire peuvent se connecter."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID client Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Secret client Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Clé API Luma"

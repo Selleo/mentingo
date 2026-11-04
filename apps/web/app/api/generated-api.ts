@@ -8658,6 +8658,7 @@ export interface GetLoginMethodsResponse {
     google: boolean;
     microsoft: boolean;
     slack: boolean;
+    entraId: boolean;
     magicLink: boolean;
     password: boolean;
   };
@@ -8669,6 +8670,7 @@ export interface GetLoginMethodSetupResponse {
       google: boolean;
       microsoft: boolean;
       slack: boolean;
+      entraId: boolean;
       magicLink: boolean;
       password: boolean;
     };
@@ -8676,12 +8678,13 @@ export interface GetLoginMethodSetupResponse {
       google: string[];
       microsoft: string[];
       slack: string[];
+      entraId: string[];
     };
   };
 }
 
 export interface UpdateLoginMethodBody {
-  method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+  method: "google" | "microsoft" | "slack" | "entraId" | "magicLink" | "password";
   enabled: boolean;
 }
 
@@ -8691,6 +8694,7 @@ export interface UpdateLoginMethodResponse {
       google: boolean;
       microsoft: boolean;
       slack: boolean;
+      entraId: boolean;
       magicLink: boolean;
       password: boolean;
     };
@@ -8698,6 +8702,7 @@ export interface UpdateLoginMethodResponse {
       google: string[];
       microsoft: string[];
       slack: string[];
+      entraId: string[];
     };
   };
 }
@@ -8712,6 +8717,7 @@ export interface GetFrontendSSOEnabledResponse {
     google?: string;
     microsoft?: string;
     slack?: string;
+    entraId?: string;
   };
 }
 
@@ -32879,6 +32885,9 @@ export interface UpdateTenantApiKeysBody {
     | "VITE_STRIPE_PUBLISHABLE_KEY"
     | "SLACK_CLIENT_ID"
     | "SLACK_CLIENT_SECRET"
+    | "ENTRA_ID_CLIENT_ID"
+    | "ENTRA_ID_CLIENT_SECRET"
+    | "ENTRA_ID_DIRECTORY_ID"
     | "LUMA_API_KEY"
     | "LIVEKIT_URL"
     | "LIVEKIT_API_KEY"
@@ -32917,6 +32926,9 @@ export interface UpdateTenantApiKeysResponse {
       | "VITE_STRIPE_PUBLISHABLE_KEY"
       | "SLACK_CLIENT_ID"
       | "SLACK_CLIENT_SECRET"
+      | "ENTRA_ID_CLIENT_ID"
+      | "ENTRA_ID_CLIENT_SECRET"
+      | "ENTRA_ID_DIRECTORY_ID"
       | "LUMA_API_KEY"
       | "LIVEKIT_URL"
       | "LIVEKIT_API_KEY"
@@ -37389,6 +37401,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     authControllerSlackAuthCallback: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/auth/slack/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerEntraIdAuth
+     * @request GET:/api/auth/entra-id
+     */
+    authControllerEntraIdAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/entra-id`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerEntraIdAuthCallback
+     * @request GET:/api/auth/entra-id/callback
+     */
+    authControllerEntraIdAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/entra-id/callback`,
         method: "GET",
         ...params,
       }),

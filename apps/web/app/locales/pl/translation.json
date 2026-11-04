@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Link do logowania",
     "password": "Hasło",
     "description": "Wybierz, w jaki sposób osoby w Twojej organizacji mogą się logować.",
@@ -34,6 +35,8 @@
       "disabled": "Ta metoda logowania jest wyłączona.",
       "missingConfiguration": "Najpierw dodaj dane uwierzytelniające dostawcy w ustawieniach środowiska.",
       "lastMethod": "Pozostaw co najmniej jedną działającą metodę logowania.",
+      "invalidDirectoryId": "Podaj identyfikator katalogu (dzierżawy) z rejestracji aplikacji Entra w formacie GUID.",
+      "untrustedDirectory": "To konto nie należy do katalogu Entra ID Twojej organizacji.",
       "save": "Nie udało się zapisać metod logowania.",
       "load": "Nie udało się pobrać metod logowania."
     }
@@ -796,6 +799,7 @@
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
     "continueWithSlack": "Kontynuuj z użyciem Slack",
+    "continueWithEntraId": "Kontynuuj z użyciem Entra ID",
     "enterFullscreen": "Pełny ekran",
     "exitFullscreen": "Wyjdź z pełnego ekranu",
     "refreshPage": "Odśwież stronę",
@@ -2822,6 +2826,10 @@
         "title": "Logowanie przez Slack",
         "description": "Pozwól użytkownikom logować się kontem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Logowanie przez Entra ID",
+        "description": "Pozwól użytkownikom logować się wyłącznie kontami z katalogu Microsoft Entra ID Twojej organizacji."
+      },
       "microsoftCalendar": {
         "title": "Kalendarz Microsoft",
         "description": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook."
@@ -2910,6 +2918,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Identyfikator katalogu (dzierżawy) Entra ID",
+        "description": "Identyfikator GUID katalogu (dzierżawy) z przeglądu rejestracji aplikacji. Zalogować się mogą tylko konta z tego katalogu."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Identyfikator klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Klucz tajny klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"

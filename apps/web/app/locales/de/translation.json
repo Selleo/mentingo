@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Anmeldelink",
     "password": "Passwort",
     "description": "Legen Sie fest, wie sich Personen in Ihrer Organisation anmelden können.",
@@ -34,6 +35,8 @@
       "disabled": "Diese Anmeldemethode ist deaktiviert.",
       "missingConfiguration": "Fügen Sie zuerst die Zugangsdaten des Anbieters in den Umgebungseinstellungen hinzu.",
       "lastMethod": "Lassen Sie mindestens eine nutzbare Anmeldemethode aktiviert.",
+      "invalidDirectoryId": "Geben Sie die Verzeichnis-ID (Mandanten-ID) aus Ihrer Entra-App-Registrierung als GUID ein.",
+      "untrustedDirectory": "Dieses Konto gehört nicht zum Entra-ID-Verzeichnis Ihrer Organisation.",
       "save": "Anmeldemethoden konnten nicht gespeichert werden.",
       "load": "Anmeldemethoden konnten nicht geladen werden."
     }
@@ -793,6 +796,7 @@
     "continueWithGoogle": "Weiter mit Google",
     "continueWithMicrosoft": "Weiter mit Microsoft",
     "continueWithSlack": "Fahren Sie mit Slack fort",
+    "continueWithEntraId": "Fahren Sie mit Entra ID fort",
     "enterFullscreen": "Vollbild",
     "exitFullscreen": "Beenden Sie den Vollbildmodus",
     "refreshPage": "Seite neu laden",
@@ -2569,6 +2573,10 @@
         "title": "Anmeldung mit Slack",
         "description": "Nutzer können sich mit ihrem Slack-Konto anmelden."
       },
+      "entraIdSignIn": {
+        "title": "Entra-ID-Anmeldung",
+        "description": "Erlauben Sie die Anmeldung nur mit Konten aus dem Microsoft-Entra-ID-Verzeichnis Ihrer Organisation."
+      },
       "microsoftCalendar": {
         "title": "Microsoft-Kalender",
         "description": "Live-Trainings mit Microsoft-Outlook-Kalendern synchronisieren."
@@ -2660,6 +2668,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack-Client-Geheimnis"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra-ID-Verzeichnis-ID (Mandanten-ID)",
+        "description": "Die GUID der Verzeichnis-ID (Mandanten-ID) aus der Übersicht Ihrer App-Registrierung. Nur Konten aus diesem Verzeichnis können sich anmelden."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra-ID-Client-ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra-ID-Clientschlüssel"
       },
       "LUMA_API_KEY": {
         "label": "Luma-API-Schlüssel"

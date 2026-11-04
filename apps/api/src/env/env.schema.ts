@@ -10,6 +10,11 @@ export const bulkUpsertEnvSchema = Type.Array(
   }),
 );
 
+/** Entra directories are addressed by their tenant GUID; aliases such as "common" would admit any directory. */
+export const entraDirectoryIdSchema = Type.String({
+  pattern: "^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+});
+
 export const getEnvResponseSchema = Type.Object({
   name: Type.String(),
   value: Type.String(),
@@ -23,6 +28,7 @@ export const loginMethodsResponseSchema = Type.Object({
   [LOGIN_METHODS.GOOGLE]: Type.Boolean(),
   [LOGIN_METHODS.MICROSOFT]: Type.Boolean(),
   [LOGIN_METHODS.SLACK]: Type.Boolean(),
+  [LOGIN_METHODS.ENTRA_ID]: Type.Boolean(),
   [LOGIN_METHODS.MAGIC_LINK]: Type.Boolean(),
   [LOGIN_METHODS.PASSWORD]: Type.Boolean(),
 });
@@ -33,6 +39,7 @@ export const loginMethodSetupResponseSchema = Type.Object({
     [LOGIN_METHODS.GOOGLE]: Type.Array(Type.String()),
     [LOGIN_METHODS.MICROSOFT]: Type.Array(Type.String()),
     [LOGIN_METHODS.SLACK]: Type.Array(Type.String()),
+    [LOGIN_METHODS.ENTRA_ID]: Type.Array(Type.String()),
   }),
 });
 
@@ -64,6 +71,7 @@ export const frontendSSOEnabledResponseSchema = Type.Object({
   google: Type.Optional(Type.String()),
   microsoft: Type.Optional(Type.String()),
   slack: Type.Optional(Type.String()),
+  entraId: Type.Optional(Type.String()),
 });
 
 export const frontendStripeConfiguredResponseSchema = Type.Object({

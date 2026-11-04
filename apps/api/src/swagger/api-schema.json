@@ -519,6 +519,28 @@
         }
       }
     },
+    "/api/auth/entra-id": {
+      "get": {
+        "operationId": "AuthController_entraIdAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/entra-id/callback": {
+      "get": {
+        "operationId": "AuthController_entraIdAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",
@@ -67595,6 +67617,9 @@
               "slack": {
                 "type": "boolean"
               },
+              "entraId": {
+                "type": "boolean"
+              },
               "magicLink": {
                 "type": "boolean"
               },
@@ -67606,6 +67631,7 @@
               "google",
               "microsoft",
               "slack",
+              "entraId",
               "magicLink",
               "password"
             ]
@@ -67633,6 +67659,9 @@
                   "slack": {
                     "type": "boolean"
                   },
+                  "entraId": {
+                    "type": "boolean"
+                  },
                   "magicLink": {
                     "type": "boolean"
                   },
@@ -67644,6 +67673,7 @@
                   "google",
                   "microsoft",
                   "slack",
+                  "entraId",
                   "magicLink",
                   "password"
                 ]
@@ -67668,12 +67698,19 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "entraId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
                   "google",
                   "microsoft",
-                  "slack"
+                  "slack",
+                  "entraId"
                 ]
               }
             },
@@ -67699,6 +67736,10 @@
               },
               {
                 "const": "microsoft",
+                "type": "string"
+              },
+              {
+                "const": "entraId",
                 "type": "string"
               },
               {
@@ -67742,6 +67783,9 @@
                   "slack": {
                     "type": "boolean"
                   },
+                  "entraId": {
+                    "type": "boolean"
+                  },
                   "magicLink": {
                     "type": "boolean"
                   },
@@ -67753,6 +67797,7 @@
                   "google",
                   "microsoft",
                   "slack",
+                  "entraId",
                   "magicLink",
                   "password"
                 ]
@@ -67777,12 +67822,19 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "entraId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
                   "google",
                   "microsoft",
-                  "slack"
+                  "slack",
+                  "entraId"
                 ]
               }
             },
@@ -67827,6 +67879,9 @@
                 "type": "string"
               },
               "slack": {
+                "type": "string"
+              },
+              "entraId": {
                 "type": "string"
               }
             }
@@ -169564,6 +169619,18 @@
                 "type": "string"
               },
               {
+                "const": "ENTRA_ID_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_DIRECTORY_ID",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -169693,6 +169760,18 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_DIRECTORY_ID",
                       "type": "string"
                     },
                     {
