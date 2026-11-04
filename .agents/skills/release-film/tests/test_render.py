@@ -51,8 +51,10 @@ class RenderTest(unittest.TestCase):
         return path
 
     def frame(self, video, at, vf='scale=192:108', fmt='gray'):
-        return subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', str(at), '-i', str(video), '-frames:v', '1',
+        frame = subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', str(at), '-i', str(video), '-frames:v', '1',
                                         '-vf', vf, '-pix_fmt', fmt, '-f', 'rawvideo', '-'])
+        self.assertTrue(frame, f'No frame decoded at {at} seconds')
+        return frame
 
     @staticmethod
     def difference(a, b):
@@ -196,10 +198,13 @@ class RenderTest(unittest.TestCase):
 
     def test_the_film_fades_out_at_its_end(self):
         out = self.root/'ending'
-        render(load_plan(self.plan(), enforce_duration=False), out)
+        result = render(load_plan(self.plan(), enforce_duration=False), out)
         grey = lambda at: sum(self.frame(out/'demo.mp4', at)) / (192 * 108)
-        self.assertGreater(abs(grey(3.0) - grey(3.97)), 5)  # the colour bars, then nearly the card's ground
-        self.assertLess(abs(grey(3.97) - 0x30), 12)
+        # The final frame's PTS precedes the container duration. Seeking beyond
+        # that PTS can yield no frame, especially on CI's FFmpeg build.
+        ending = grey(result['duration'] - 2 * render_demo.FRAME)
+        self.assertGreater(abs(grey(result['duration'] - 1) - ending), 5)
+        self.assertLess(abs(ending - 0x30), 12)
 
     def test_tutorial_prepare_keeps_brand_and_bounds_provider_caption_tail(self):
         data = copy.deepcopy(self.data)
