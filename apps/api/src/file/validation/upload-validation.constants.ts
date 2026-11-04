@@ -1,6 +1,6 @@
 export const MAX_UPLOAD_IMAGE_PIXELS = 16_777_216;
-export const MIN_SVG_RASTER_EDGE_PX = 1024;
-export const SVG_DEFAULT_DENSITY = 72;
+export const SVG_BASE_DENSITY = 72;
+export const SVG_MAX_DENSITY = 2400;
 export const UPLOAD_IMAGE_TIMEOUT_SECONDS = 5;
 
 export const TEXT_UPLOAD_MIME_TYPES_BY_EXTENSION: Record<string, string> = {

@@ -47,8 +47,8 @@ describe("normalizeUploadedFile", () => {
     expect(file.buffer.includes("script")).toBe(false);
     expect(await sharp(file.buffer).metadata()).toMatchObject({
       format: "webp",
-      width: 1024,
-      height: 1024,
+      width: 800,
+      height: 800,
     });
     expect(getDeclaredUpload(file)).toEqual({
       originalname: "logo.svg",

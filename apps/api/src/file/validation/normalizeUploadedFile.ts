@@ -3,11 +3,13 @@ import path from "node:path";
 import { MAX_IMAGE_FILE_SIZE_BYTES } from "@repo/shared";
 import sharp from "sharp";
 
+import { IMAGE_QUALITY, IMAGE_VARIANT_WIDTHS } from "../image-variants/image-variant.constants";
+
 import { detectFileType } from "./detectFileType";
 import {
   MAX_UPLOAD_IMAGE_PIXELS,
-  MIN_SVG_RASTER_EDGE_PX,
-  SVG_DEFAULT_DENSITY,
+  SVG_BASE_DENSITY,
+  SVG_MAX_DENSITY,
   TEXT_UPLOAD_MIME_TYPES_BY_EXTENSION,
   UPLOAD_CONTENT_SOURCE,
   UPLOAD_IMAGE_TIMEOUT_SECONDS,
@@ -53,11 +55,14 @@ const getSvgDensity = async (buffer: Buffer) => {
 
   if (format !== "svg" || !width || !height) throw new Error("Invalid SVG");
 
-  const longestEdge = Math.max(width, height);
-  if (longestEdge >= MIN_SVG_RASTER_EDGE_PX) return SVG_DEFAULT_DENSITY;
+  const targetWidthDensity = Math.min(
+    SVG_MAX_DENSITY,
+    Math.ceil((SVG_BASE_DENSITY * IMAGE_VARIANT_WIDTHS[IMAGE_QUALITY.XL]) / width),
+  );
+  const pixelBudgetDensity =
+    SVG_BASE_DENSITY * Math.sqrt(MAX_UPLOAD_IMAGE_PIXELS / (width * height));
 
-  const maxScale = Math.sqrt(MAX_UPLOAD_IMAGE_PIXELS / (width * height));
-  return SVG_DEFAULT_DENSITY * Math.min(MIN_SVG_RASTER_EDGE_PX / longestEdge, maxScale);
+  return Math.max(SVG_BASE_DENSITY, Math.min(targetWidthDensity, pixelBudgetDensity));
 };
 
 // SVG can carry scripts, so it is never stored as-is; it is rasterized to WebP instead.
