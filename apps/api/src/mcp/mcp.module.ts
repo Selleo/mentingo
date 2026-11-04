@@ -17,6 +17,7 @@ import { QuizModule } from "src/quiz/quiz.module";
 import { RedisClientsModule } from "src/redis";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { ScormModule } from "src/scorm/scorm.module";
+import { HelpdeskModule } from "src/self-onboarding/self-onboarding.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 
@@ -54,6 +55,7 @@ import { McpController } from "./mcp.controller";
     RedisClientsModule,
     SettingsModule,
     GlobalSearchModule,
+    HelpdeskModule,
     GroupModule,
     UserModule,
   ],

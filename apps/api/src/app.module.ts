@@ -73,6 +73,7 @@ import { ReportModule } from "./report/report.module";
 import { ResourceLibraryModule } from "./resource-library/resource-library.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
+import { HelpdeskModule } from "./self-onboarding/self-onboarding.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
 import { SettingsModule } from "./settings/settings.module";
 import { StatisticsModule } from "./statistics/statistics.module";
@@ -119,6 +120,7 @@ import type { RedisClient } from "src/redis";
     }),
     AuthModule,
     HealthModule,
+    HelpdeskModule,
     UserModule,
     EmailModule,
     EmailTemplateModule,

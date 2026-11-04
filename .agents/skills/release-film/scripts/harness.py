@@ -286,7 +286,11 @@ def build_images(run, recipe, log):
 def recording_files(run, recipe):
     """Apply trusted recording scaffolding only to this run's isolated release checkout."""
     root = (Path(run) / 'checkout').resolve()
-    for entry in recipe.get('recording_files') or []:
+    entries = list(recipe.get('recording_files') or [])
+    if recipe.get('env', {}).get('SELF_ONBOARDING_DEMO') == '1':
+        entries.append({'source': 'projects/mentingo-recording/self-onboarding.accounts.ts',
+                        'target': 'apps/web/e2e/fixtures/release-film.accounts.ts'})
+    for entry in entries:
         source = (core.SKILL / entry['source']).resolve()
         target = (root / entry['target']).resolve()
         if not source.is_relative_to(core.SKILL.resolve()) or not source.is_file():
@@ -471,7 +475,8 @@ import {{ defineConfig }} from "@playwright/test";
 import base from "./{stem}";
 
 const film = {{ viewport: {{ width: 1600, height: 900 }}, deviceScaleFactor: Number(process.env.DEMO_DEVICE_SCALE || 1.5), video: "off" as const,
-  trace: "off" as const, screenshot: "off" as const }};
+  trace: "off" as const, screenshot: process.env.DEMO_KEEPER_READY && process.env.DEMO_FAILURE_SCREENSHOTS === "1"
+    ? "only-on-failure" as const : "off" as const }};
 const requestedWorkers = process.env.DEMO_WORKERS ? Number(process.env.DEMO_WORKERS) : base.workers;
 const workerLimit = process.env.DEMO_WORKER_LIMIT ? Number(process.env.DEMO_WORKER_LIMIT) : undefined;
 const workerCount = typeof requestedWorkers === "string" && requestedWorkers.endsWith("%")
@@ -717,14 +722,32 @@ def server_urls(config_path):
     return re.findall(r'url\s*:\s*[`"\']((?:https?)://[^`"\']+)[`"\']', text) if 'webServer' in text else []
 
 
+READINESS_CHECK = '''const fs = require("node:fs");
+const http = require("node:http"), https = require("node:https");
+const caPath = process.argv[1];
+let ca;
+try { if (caPath) ca = fs.readFileSync(caPath); } catch { process.exit(1); }
+Promise.all(process.argv.slice(2).map(url => new Promise(resolve => {
+  const secure = new URL(url).protocol === "https:";
+  const request = (secure ? https : http).get(url, {
+    ...(secure && ca ? {ca} : {}), timeout: 5000
+  }, response => { response.resume(); resolve(response.statusCode < 500); });
+  request.on("timeout", () => request.destroy());
+  request.on("error", () => resolve(false));
+}))).then(results => process.exit(results.every(Boolean) ? 0 : 1));
+'''
+
+
 def servers_up(run, recipe, urls):
-    check = ('Promise.all(process.argv.slice(1).map(u=>fetch(u).then(r=>r.status<500).catch(()=>false)))'
-             '.then(a=>process.exit(a.every(Boolean)?0:1))')
+    # The browser already trusts the project's local HTTPS setup. Give the
+    # readiness probe its explicit CA too, retaining certificate/hostname checks.
+    check = READINESS_CHECK
+    ca = recipe.get('readiness_ca', '')
     if recipe.get('isolate'):
-        return core.sh(['docker', 'exec', runner_name(run), 'node', '-e', check, *urls], env=docker_env(run),
+        return core.sh(['docker', 'exec', runner_name(run), 'node', '-e', check, ca, *urls], env=docker_env(run),
                        check=False, timeout=30).returncode == 0
     # the recipe's Node (fetch needs 18+), not the one first on this process's PATH
-    return core.sh(['node', '-e', check, *urls], env={'PATH': test_env(run, recipe)['PATH']}, check=False,
+    return core.sh(['node', '-e', check, ca, *urls], env={'PATH': test_env(run, recipe)['PATH']}, check=False,
                    timeout=30).returncode == 0
 
 

@@ -149,7 +149,10 @@ def load_plan(path, enforce_duration=True, strict=True):
     path = Path(path).resolve()
     warnings = []
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
+    mode = data.get('mode', 'release')
+    if mode not in ('release', 'tutorial'):
+        raise ValueError('Unknown film mode')
     colors = colors_of(data.get('colors'))
     def asset(name):
         if not isinstance(name, str) or not name:
@@ -168,12 +171,15 @@ def load_plan(path, enforce_duration=True, strict=True):
         raise ValueError('Expected 1–20 chapters')
     segments, captions, steps, chapters, cursor, held = [], [], [], [], 0.0, 0.0
     for chapter in data['chapters']:
-        fields(chapter, ['title', 'prs', 'audio', 'audio_offset', 'clips', 'captions', 'review_points', 'steps'], ['title', 'prs', 'audio', 'clips', 'captions'])
+        fields(chapter, ['title', 'prs', 'audio', 'audio_offset', 'clips', 'captions', 'review_points', 'steps', 'id'], ['title', 'prs', 'audio', 'clips', 'captions'])
         title = chapter['title']
         if not isinstance(title, str) or not title.strip() or '\n' in title or len(title) > 85:
             raise ValueError('Chapter title must be one nonempty line, at most 85 characters')
-        if not isinstance(chapter['prs'], list) or not chapter['prs'] or any(not isinstance(p, str) or not p.startswith('https://github.com/') or '/pull/' not in p for p in chapter['prs']):
-            raise ValueError('Each chapter needs real GitHub PR URLs')
+        source_kind = '/blob/' if mode == 'tutorial' else '/pull/'
+        if not isinstance(chapter['prs'], list) or not chapter['prs'] or any(not isinstance(p, str) or not p.startswith('https://github.com/') or source_kind not in p for p in chapter['prs']):
+            raise ValueError('Each chapter needs real GitHub source URLs' if mode == 'tutorial' else 'Each chapter needs real GitHub PR URLs')
+        if mode == 'tutorial' and not re.fullmatch(r'[a-z0-9][a-z0-9._-]{0,127}', chapter.get('id', '')):
+            raise ValueError('Tutorial chapters need stable IDs')
         audio = asset(chapter['audio'])
         audio_info = input_probe(audio)
         if not any(s['codec_type'] == 'audio' for s in audio_info['streams']):
@@ -249,7 +255,8 @@ def load_plan(path, enforce_duration=True, strict=True):
         fields(points, ['action', 'result'], [])
         for label, value in points.items():
             number(value, f'review {label}', 2, chapter_duration - 1/30)
-        chapters.append(dict(review_points=points, title=title, prs=chapter['prs'], start=start, duration=chapter_duration, audio=audio, audio_offset=offset, audio_duration=audio_duration))
+        chapters.append(dict(review_points=points, title=title, prs=chapter['prs'], start=start, duration=chapter_duration, audio=audio, audio_offset=offset, audio_duration=audio_duration,
+                             **({'id': chapter['id']} if mode == 'tutorial' else {})))
     if held > cursor * .2:
         if strict:
             raise ValueError('Result images exceed 20% of film')
@@ -536,7 +543,6 @@ def segment_key(plan, segment, chapter, cues):
     this renderer."""
     content = {'segment': {k: v for k, v in segment.items() if k != 'start'}, 'offset': segment['start'] - chapter['start'],
                'ending': segment is plan['segments'][-1],
-               'audio': file_digest(chapter['audio']), 'audio_offset': chapter['audio_offset'],
                'cues': [(c['start'] - segment['start'], c['end'] - segment['start'], c['text']) for c in cues],
                'font': file_digest(plan['font']), 'colors': plan.get('colors') or COLORS, 'renderer': file_digest(__file__)}
     if 'source' in segment:
@@ -545,7 +551,7 @@ def segment_key(plan, segment, chapter, cues):
 
 
 def encode_segment(plan, segment, work, pointers, output):
-    """Encode one segment (visual, step labels, its slice of the chapter narration) to ``output``."""
+    """Encode one video-only segment (visual and step labels) to ``output``."""
     start, length = segment['start'], round(segment['duration'] * 30) / 30
     chapter = next(c for c in reversed(plan['chapters']) if c['start'] <= start + .001)
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-y', '-filter_complex_threads', '1']
@@ -562,12 +568,8 @@ def encode_segment(plan, segment, work, pointers, output):
             folder.mkdir(exist_ok=True)
             pointers[scale] = pointer_images(folder, scale)
         inputs, visual = footage_visual(segment, 0, length, pointers[scale], colors)
-    audio_index = inputs.count('-i')
-    args += inputs + ['-i', chapter['audio']]
-    delta = start - chapter['start'] - chapter['audio_offset']
-    # fixed-point numbers: a rounding residue such as 1.4e-14 printed in exponent form is not a time FFmpeg reads
-    graph = [visual, f'[{audio_index}:a]atrim=start={max(0, delta):.6f},asetpts=PTS-STARTPTS,'
-                     f'adelay={round(max(0, -delta) * 1000)}:all=1,apad,atrim=duration={length:.6f}[a]']
+    args += inputs
+    graph = [visual]
     layer = 'v0'
     for label_index, (label_start, label_end, text) in enumerate(segment.get('labels') or []):
         if label_end <= 0 or label_start >= length:
@@ -589,14 +591,12 @@ def encode_segment(plan, segment, work, pointers, output):
         next_layer = f'step{step_index}'
         graph.append(f"[{layer}]{step_filter(work / f'{name}-step{step_index}.txt', step['text'], step['start'] - start, min(length, step['end'] - start), colors)}[{next_layer}]")
         layer = next_layer
-    audio = 'a'
     if segment is plan['segments'][-1] and length > 2 * ENDING:  # the film's end fades out
         graph.append(f"[{layer}]fade=t=out:st={length - ENDING:.6f}:d={ENDING}:color={colors['frame']}[ending]")
-        graph.append(f'[a]afade=t=out:st={length - ENDING:.6f}:d={ENDING}[fade]')
-        layer, audio = 'ending', 'fade'
-    args += ['-filter_complex', ';'.join(graph), '-map', f'[{layer}]', '-map', f'[{audio}]', '-t', length, '-r', '30',
+        layer = 'ending'
+    args += ['-filter_complex', ';'.join(graph), '-map', f'[{layer}]', '-an', '-t', length, '-r', '30',
              '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', '-threads', '2', '-pix_fmt', 'yuv420p',
-             '-c:a', 'aac', '-ar', '48000', '-ac', '2', '-movflags', '+faststart', output]
+             '-movflags', '+faststart', output]
     run(args, cwd=work)
 
 
@@ -634,6 +634,25 @@ def render_segments(plan, cache, jobs=2):
             return list(pool.map(one, plan['segments']))
 
 
+def mux_narration(plan, listing, target, duration):
+    """Encode continuous chapter narration once, independently of visual cut/AAC packet boundaries."""
+    args = ['ffmpeg', '-v', 'error', '-nostdin', '-y', '-f', 'concat', '-safe', '0', '-i', listing]
+    graph, labels = [], []
+    for index, chapter in enumerate(plan['chapters'], 1):
+        args += ['-i', chapter['audio']]
+        delay = round((chapter['start'] + chapter['audio_offset']) * 48000)
+        label = f'voice{index}'
+        graph.append(f'[{index}:a]aresample=48000,asetpts=PTS-STARTPTS,adelay={delay}S:all=1,'
+                     f'apad,atrim=duration={duration:.6f}[{label}]')
+        labels.append(f'[{label}]')
+    graph.append(''.join(labels) + f'amix=inputs={len(labels)}:normalize=0:duration=longest,'
+                 f'atrim=duration={duration:.6f},afade=t=out:st={max(0, duration - ENDING):.6f}:d={ENDING}[audio]')
+    args += ['-filter_complex', ';'.join(graph), '-map', '0:v', '-map', '[audio]', '-c:v', 'copy',
+             '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2', '-t', duration,
+             '-movflags', '+faststart', target]
+    run(args)
+
+
 def render(plan, out, jobs=2, cache=None, plan_fingerprint=None):
     """The film: segments (cached), concatenated with the narration re-encoded once, decoded in full, with the
     caption files, the poster and checksums."""
@@ -652,9 +671,7 @@ def render(plan, out, jobs=2, cache=None, plan_fingerprint=None):
         listing = Path(scratch) / 'concat.txt'
         listing.write_text(''.join(f"file '{p}'\nduration {t['duration']}\n" for (p, _), t in zip(encoded, timeline)))
         concat_started = time.monotonic()
-        # Decode/re-encode audio once to remove packet-boundary accumulation between segments.
-        run(['ffmpeg', '-v', 'error', '-nostdin', '-f', 'concat', '-safe', '0', '-i', listing, '-c:v', 'copy', '-c:a', 'aac',
-             '-af', 'aresample=async=1:first_pts=0', '-t', sum(t['duration'] for t in timeline), '-movflags', '+faststart', target])
+        mux_narration(plan, listing, target, sum(t['duration'] for t in timeline))
         concat_seconds = time.monotonic() - concat_started
     decode_started = time.monotonic()
     run(['ffmpeg', '-v', 'error', '-i', target, '-f', 'null', '-'])
@@ -666,7 +683,8 @@ def render(plan, out, jobs=2, cache=None, plan_fingerprint=None):
     run(['ffmpeg', '-v', 'error', '-ss', min(3, plan['duration'] / 2), '-i', target, '-frames:v', '1', '-update', '1', out / 'poster.jpg'])
     card_starts = [t['start'] for t in timeline if t['kind'] == 'card']
     boundaries = card_starts + [sum(t['duration'] for t in timeline)]
-    result['chapters'] = [dict(title=c['title'], prs=c['prs'], start=boundaries[i], duration=boundaries[i+1]-boundaries[i]) for i, c in enumerate(plan['chapters'])]
+    result['chapters'] = [dict(title=c['title'], prs=c['prs'], start=boundaries[i], duration=boundaries[i+1]-boundaries[i],
+                               **({'id': c['id']} if 'id' in c else {})) for i, c in enumerate(plan['chapters'])]
     result['artifact_sha256'] = {name: file_digest(out / name, {}) for name in ('demo.mp4', 'poster.jpg', f"captions-{plan['language']}.srt",
                                                                            f"captions-{plan['language']}.vtt")}
     result['plan_fingerprint'] = plan_fingerprint or fingerprint(plan)
@@ -691,15 +709,17 @@ def prepare(path, out, enforce_duration=True, strict=True):
     started = time.monotonic()
     path, out = Path(path).resolve(), Path(out).resolve()
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
     if not isinstance(data['chapters'], list) or not data['chapters']:
         raise ValueError('Expected authored chapters')
     result = dict(font=str((path.parent / data['font']).resolve()), chapters=[], language=data.get('language') or 'pl')
+    if 'mode' in data:
+        result['mode'] = data['mode']
     if data.get('colors') is not None:
         result['colors'] = data['colors']
     caption_timing = []
     for chapter in data['chapters']:
-        fields(chapter, ['title', 'prs', 'audio', 'srt', 'audio_offset', 'clips', 'review_points', 'caption_limits', 'steps'],
+        fields(chapter, ['title', 'prs', 'audio', 'srt', 'audio_offset', 'clips', 'review_points', 'caption_limits', 'steps', 'id'],
                ['title', 'prs', 'audio', 'srt', 'clips'])
         copied = dict(chapter)
         limits = copied.pop('caption_limits', None)  # where the picture leaves each sentence (montage.caption_limits)
@@ -709,7 +729,8 @@ def prepare(path, out, enforce_duration=True, strict=True):
         if not any(s['codec_type'] == 'audio' for s in info['streams']):
             raise ValueError('Narration has no audio stream')
         prepared = prepare_captions(srt.read_text(encoding='utf-8-sig'),
-            float(info['format']['duration']), chapter.get('audio_offset', 2), limits=limits)
+            float(info['format']['duration']), chapter.get('audio_offset', 2), limits=limits,
+            end_tolerance_ms=None if data.get('mode') == 'tutorial' else 1)
         copied['captions'] = [{key: cue[key] for key in ['start', 'end', 'text']} for cue in prepared]
         caption_timing.append(dict(chapter=len(result['chapters'])+1, cues=[cue['timing'] for cue in prepared]))
         copied['clips'] = []

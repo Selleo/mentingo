@@ -2,6 +2,7 @@ import { ASSISTANT_RUN_ACTIVITIES, type AssistantRunActivity } from "@repo/share
 
 const searchTools = new Set([
   "global_search",
+  "search_helpdesk",
   "search_lessons",
   "list_courses",
   "list_categories",
@@ -16,6 +17,7 @@ const searchTools = new Set([
 ]);
 const readTools = new Set([
   "get_my_capabilities",
+  "get_helpdesk_tutorial",
   "get_course",
   "get_course_settings",
   "list_course_languages",

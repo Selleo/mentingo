@@ -59,6 +59,7 @@ import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { REDIS_CLIENT, RedisClient } from "src/redis";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { contentReferencesResource } from "src/resource-library/resource-library.utils";
+import { HelpdeskService } from "src/self-onboarding/self-onboarding.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -91,6 +92,12 @@ import {
   type NativeReadRegistration,
 } from "./mcp-native-read.types";
 import { MCP_CONTENT_SEARCH_PERMISSIONS, registerMcpSearchTools } from "./mcp-search-tools";
+import { registerMcpHelpdeskTools } from "./mcp-self-onboarding-tools";
+import {
+  isMcpHelpdeskTool,
+  MCP_HELPDESK_GUIDANCE_KIND,
+  MCP_HELPDESK_TOOL_NAMES,
+} from "./mcp-self-onboarding.constants";
 import {
   asMcpStudentUser,
   MCP_STUDENT_SEARCH_PERMISSIONS,
@@ -174,6 +181,7 @@ export class McpHttpService {
     private readonly groupService: GroupService,
     private readonly mcpStudentLessonRepository: McpStudentLessonRepository,
     private readonly mcpActorRepository: McpActorRepository,
+    private readonly helpdeskService: HelpdeskService,
   ) {}
 
   async handle(req: Request, res: Response, actor: McpToolActor): Promise<void> {
@@ -313,6 +321,8 @@ export class McpHttpService {
             hasAnyPermission(discoveryUser.permissions, studentPermissions) &&
             (!studentFeature || settings[FEATURE_SETTINGS_KEYS[studentFeature]]),
         );
+      } else if (isMcpHelpdeskTool(name)) {
+        permissionsAllow = true;
       } else if (studentOnly || (name === "global_search" && learnerSearch)) {
         permissionsAllow =
           name === "global_search" &&
@@ -432,6 +442,11 @@ export class McpHttpService {
               canDelete: false,
             },
             globalSearch: available("global_search"),
+            helpdesk: {
+              canSearch: available(MCP_HELPDESK_TOOL_NAMES.SEARCH),
+              canRead: available(MCP_HELPDESK_TOOL_NAMES.TUTORIAL),
+              guidanceKind: MCP_HELPDESK_GUIDANCE_KIND,
+            },
             categories: available("create_category") || available("list_categories"),
             articles:
               available("create_article") ||
@@ -3371,6 +3386,12 @@ export class McpHttpService {
       this.settingsService,
       this.uploadGrantService,
     );
+    registerMcpHelpdeskTools(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      this.helpdeskService,
+      binding.resource,
+    );
     registerMcpSearchTools(
       server,
       (permissions, operation) =>
@@ -3394,6 +3415,7 @@ export class McpHttpService {
 
   private actorAllowsTool(actor: BoundToolActor, name: string) {
     if ("native" in actor) return NATIVE_READ_TOOL_NAMES.has(name);
+    if (actor.grant.expiresAt <= Date.now()) return false;
     return canUseMcpToolWithScopes(name, actor.grant.scopes);
   }
 

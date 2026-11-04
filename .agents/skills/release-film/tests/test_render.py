@@ -51,8 +51,10 @@ class RenderTest(unittest.TestCase):
         return path
 
     def frame(self, video, at, vf='scale=192:108', fmt='gray'):
-        return subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', str(at), '-i', str(video), '-frames:v', '1',
+        frame = subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', str(at), '-i', str(video), '-frames:v', '1',
                                         '-vf', vf, '-pix_fmt', fmt, '-f', 'rawvideo', '-'])
+        self.assertTrue(frame, f'No frame decoded at {at} seconds')
+        return frame
 
     @staticmethod
     def difference(a, b):
@@ -70,6 +72,7 @@ class RenderTest(unittest.TestCase):
         pcm = subprocess.check_output([render_demo.FFMPEG, '-v', 'error', '-ss', '2.2', '-i', str(out/'demo.mp4'), '-t', '0.3', '-map', '0:a', '-f', 's16le', '-'])
         self.assertGreater(len(pcm), 1000)
         self.assertTrue(any(pcm))
+
         self.assertAlmostEqual(result['duration'], 4, delta=.08)
         self.assertIn('00:00:02,900 --> 00:00:03,900', (out/'captions-pl.srt').read_text())  # the player's subtitles
         self.assertIn('00:00:02.900 --> 00:00:03.900', (out/'captions-pl.vtt').read_text())
@@ -93,6 +96,19 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(set(result['artifact_sha256']), expected_artifacts)
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
+
+    def test_tutorial_mode_preserves_stable_ids_and_spec_provenance(self):
+        data = copy.deepcopy(self.data)
+        data['mode'] = 'tutorial'
+        chapter = data['chapters'][0]
+        chapter['id'] = 'create-path'
+        chapter['prs'] = ['https://github.com/Selleo/mentingo/blob/' + 'a' * 40 + '/docs/specs/learning-paths-business-spec.md']
+        prepared = load_plan(self.plan(data, 'tutorial-input.json'), enforce_duration=False)
+        self.assertEqual(prepared['chapters'][0]['id'], 'create-path')
+        # Tutorial provenance is explicit; a release plan still requires real PR URLs.
+        del data['mode']
+        with self.assertRaisesRegex(ValueError, 'real GitHub PR URLs'):
+            load_plan(self.plan(data, 'release-input.json'), enforce_duration=False)
 
     def test_footage_plays_its_pieces_and_holds_between_them(self):
         plan = load_plan(self.plan(), enforce_duration=False)
@@ -182,10 +198,26 @@ class RenderTest(unittest.TestCase):
 
     def test_the_film_fades_out_at_its_end(self):
         out = self.root/'ending'
-        render(load_plan(self.plan(), enforce_duration=False), out)
+        result = render(load_plan(self.plan(), enforce_duration=False), out)
         grey = lambda at: sum(self.frame(out/'demo.mp4', at)) / (192 * 108)
-        self.assertGreater(abs(grey(3.0) - grey(3.97)), 5)  # the colour bars, then nearly the card's ground
-        self.assertLess(abs(grey(3.97) - 0x30), 12)
+        # The final frame's PTS precedes the container duration. Seeking beyond
+        # that PTS can yield no frame, especially on CI's FFmpeg build.
+        ending = grey(result['duration'] - 2 * render_demo.FRAME)
+        self.assertGreater(abs(grey(result['duration'] - 1) - ending), 5)
+        self.assertLess(abs(ending - 0x30), 12)
+
+    def test_tutorial_prepare_keeps_brand_and_bounds_provider_caption_tail(self):
+        data = copy.deepcopy(self.data)
+        data.update(mode='tutorial', colors={'accent': '#3f58b6', 'frame': '#222949'})
+        chapter = data['chapters'][0]
+        chapter.update(id='browse-paths', prs=['https://github.com/example/project/blob/abc/spec.md'], srt='provider.srt')
+        chapter.pop('captions')
+        (self.root/'provider.srt').write_text('1\n00:00:00,100 --> 00:00:05,080\nResult.\n')
+        report = render_demo.prepare(self.plan(data, 'provider.json'), self.root/'provider-prepared', enforce_duration=False)
+        self.assertEqual(report['captions'][-1]['end'], 4.0)
+        self.assertEqual(report['caption_timing'][0]['cues'], ['word_boundary_trimmed'])
+        plan = load_plan(self.root/'provider-prepared/editing-plan.json', enforce_duration=False)
+        self.assertEqual(plan['colors'], {'accent': '0x3f58b6', 'frame': '0x222949'})
 
     def test_a_projects_brand_colours_the_cards_band_and_marks(self):
         data = dict(copy.deepcopy(self.data), colors={'frame': '#222949', 'accent': '#3f58b6'})

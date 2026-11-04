@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
-import { LEARNING_PATH_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { LEARNING_PATH_STATUSES, SELF_ONBOARDING_DEMO_COVER_KEY } from "@repo/shared";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type {
@@ -25,11 +26,14 @@ export class LearningPathFactory {
   async create(input: LearningPathFactoryCreateInput = {}): Promise<LearningPathFactoryRecord> {
     const title = input.title ?? createLearningPathTitle();
     const response = await this.apiClient.api.learningPathControllerCreateLearningPath({
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
       description: `${TEST_DATA.learningPath.descriptionPrefix} ${title}`,
       status: LEARNING_PATH_STATUSES.DRAFT,
       includesCertificate: false,
       sequenceEnabled: false,
+      ...(process.env.SELF_ONBOARDING_DEMO === "1"
+        ? { thumbnailS3Key: SELF_ONBOARDING_DEMO_COVER_KEY }
+        : {}),
       ...input,
       title,
     });
@@ -52,7 +56,7 @@ export class LearningPathFactory {
 
   async getById(id: string): Promise<LearningPathFactoryRecord> {
     const response = await this.apiClient.api.learningPathControllerGetLearningPathById(id, {
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
     });
 
     return response.data.data;
@@ -63,7 +67,7 @@ export class LearningPathFactory {
       searchQuery,
       page: 1,
       perPage: 100,
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
     });
 
     return response.data.data;
@@ -77,7 +81,7 @@ export class LearningPathFactory {
 
   async update(id: string, data: UpdateLearningPathBody): Promise<LearningPathFactoryRecord> {
     await this.apiClient.api.learningPathControllerUpdateLearningPath(id, {
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
       ...data,
     });
 

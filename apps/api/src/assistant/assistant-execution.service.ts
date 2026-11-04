@@ -124,7 +124,7 @@ export class AssistantExecutionService {
         },
       );
       if (!result.isError) {
-        const sources = collectAssistantSources(result.structuredContent, run.origin);
+        const sources = collectAssistantSources(result.structuredContent, run.origin, name);
         const latest = await this.assistantRepository.getRun(input);
         const all = [
           ...new Map(

@@ -8968,6 +8968,176 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface HelpdeskSearchRequest {
+  /**
+   * @maxLength 500
+   * @pattern ^[^\u0000]*$
+   */
+  query: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** Keyword uses FTS only; hybrid combines semantic and keyword retrieval. */
+  mode?: "keyword" | "hybrid";
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  pageKey?: string;
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  domain?: string;
+  /**
+   * @min 1
+   * @max 10
+   */
+  limit?: number;
+}
+
+export interface HelpdeskSearchResponse {
+  data: {
+    mode: "keyword" | "hybrid" | "keyword_fallback" | "browse";
+    /** @maxItems 10 */
+    results: {
+      tutorial: {
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        key: string;
+        /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+        revisionId: string;
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        domain: string;
+        domainLabel?: string | null;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        title: string;
+        /**
+         * @minLength 1
+         * @maxLength 8000
+         */
+        description: string;
+        /**
+         * @minLength 2
+         * @maxLength 35
+         * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+         */
+        language: string;
+        languageFallback: boolean;
+        /**
+         * @min 1
+         * @max 86400000
+         */
+        durationMs: number;
+        /** @maxLength 2048 */
+        videoUrl: string;
+        /** @maxLength 2048 */
+        posterUrl: string;
+        /**
+         * @maxItems 100
+         * @minItems 1
+         */
+        chapters: {
+          /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+          id: string;
+          /**
+           * @minLength 1
+           * @maxLength 200
+           */
+          title: string;
+          /**
+           * @minLength 1
+           * @maxLength 4000
+           */
+          description: string;
+          /** @min 0 */
+          startMs: number;
+          /** @min 0 */
+          endMs: number;
+        }[];
+        /** @maxItems 64 */
+        pageKeys: string[];
+      };
+      chapterId?: string | null;
+      /** @maxLength 10000 */
+      excerpt: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+      rankScore: number;
+    }[];
+  };
+}
+
+export interface HelpdeskTutorialResponse {
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+    revisionId: string;
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    domain: string;
+    domainLabel?: string | null;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 8000
+     */
+    description: string;
+    /**
+     * @minLength 2
+     * @maxLength 35
+     * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+     */
+    language: string;
+    languageFallback: boolean;
+    /**
+     * @min 1
+     * @max 86400000
+     */
+    durationMs: number;
+    /** @maxLength 2048 */
+    videoUrl: string;
+    /** @maxLength 2048 */
+    posterUrl: string;
+    /**
+     * @maxItems 100
+     * @minItems 1
+     */
+    chapters: {
+      /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+      id: string;
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      title: string;
+      /**
+       * @minLength 1
+       * @maxLength 4000
+       */
+      description: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+    }[];
+    /** @maxItems 64 */
+    pageKeys: string[];
+  };
+}
+
+export interface HelpdeskDomainsResponse {
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    label: string;
+  }[];
+}
+
 export interface ListEmailTemplateEventsResponse {
   data: {
     kind:
@@ -31706,7 +31876,8 @@ export interface ListMessagesResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31768,7 +31939,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31797,7 +31969,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -42804,6 +42977,66 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       >({
         path: `/api/healthcheck`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name SearchHelpdesk
+     * @request POST:/api/helpdesk/search
+     */
+    searchHelpdesk: (data: HelpdeskSearchRequest, params: RequestParams = {}) =>
+      this.request<HelpdeskSearchResponse, any>({
+        path: `/api/helpdesk/search`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskTutorial
+     * @request GET:/api/helpdesk/tutorials/{key}
+     */
+    getHelpdeskTutorial: (
+      key: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HelpdeskTutorialResponse, any>({
+        path: `/api/helpdesk/tutorials/${key}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskDomains
+     * @request GET:/api/helpdesk/domains
+     */
+    getHelpdeskDomains: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HelpdeskDomainsResponse, any>({
+        path: `/api/helpdesk/domains`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
