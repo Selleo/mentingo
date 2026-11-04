@@ -14,7 +14,7 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
-const VISIBLE_REWARDS = 3;
+const VISIBLE_REWARDS = 2;
 
 export function WidgetStudentGamification() {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export function WidgetStudentGamification() {
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
       />
-      <DashboardWidgetContent className="flex min-h-0 flex-col gap-4">
+      <DashboardWidgetContent className="flex min-h-0 flex-col gap-3 p-4">
         <DashboardWidgetQueryState
           isLoading={isLoading}
           isError={isError}
