@@ -17,6 +17,7 @@ import {
   RESOURCE_VISIBILITY,
   type EditableResourceVisibility,
   type SupportedLanguages,
+  isHttpsUrl,
 } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 
@@ -1003,6 +1004,7 @@ export class AdminLessonService {
     );
 
     await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
+    this.assertEmbedResourceUrlsAreHttps(data.resources);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -1083,6 +1085,7 @@ export class AdminLessonService {
     );
 
     await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
+    this.assertEmbedResourceUrlsAreHttps(data.resources);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -1476,5 +1479,13 @@ export class AdminLessonService {
     const [course] = await this.adminLessonRepository.getCourse(courseId);
 
     return course.chapterCount > 0;
+  }
+
+  private assertEmbedResourceUrlsAreHttps(resources: CreateEmbedLessonBody["resources"]) {
+    if (resources.some((resource) => !isHttpsUrl(resource.fileUrl))) {
+      throw new BadRequestException(
+        "adminCourseView.curriculum.lesson.validation.sourceUrlInvalid",
+      );
+    }
   }
 }

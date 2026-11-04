@@ -3167,7 +3167,8 @@
           "maxFileNumber_one": "Vous ne pouvez importer qu'un seul fichier",
           "maxFileNumber_other": "Vous ne pouvez pas importer plus de {{ count }} fichiers",
           "maxResources_five": "Vous ne pouvez pas ajouter plus de 5 ressources",
-          "sourceUrlRequired": "L'URL source est obligatoire"
+          "sourceUrlRequired": "L'URL source est obligatoire",
+          "sourceUrlInvalid": "Saisissez une URL HTTPS valide"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "L'ordre d'affichage des leçons a été mis à jour avec succès",

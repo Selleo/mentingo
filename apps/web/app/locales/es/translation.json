@@ -3166,7 +3166,8 @@
           "maxFileNumber_one": "No puedes subir más de 1 archivo",
           "maxFileNumber_other": "No puedes cargar más de archivos {{ count }}",
           "maxResources_five": "No puedes agregar más de 5 recursos.",
-          "sourceUrlRequired": "La URL de origen es obligatoria"
+          "sourceUrlRequired": "La URL de origen es obligatoria",
+          "sourceUrlInvalid": "Introduce una URL HTTPS válida"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",

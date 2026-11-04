@@ -47,6 +47,7 @@ export const CourseTrailerUploadField = ({
           <div className="absolute inset-0 bg-neutral-950">
             {trailerEmbedUrl ? (
               <iframe
+                sandbox="allow-scripts allow-presentation"
                 src={trailerEmbedUrl}
                 title={t("adminCourseView.settings.trailerPreview", {
                   defaultValue: "Trailer preview",

@@ -15,6 +15,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes } from "@nestjs/swagger";
@@ -45,6 +46,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import {
   courseRepetitionSchema,
@@ -197,6 +199,7 @@ import type {
   CommonShowCourse,
 } from "src/courses/schemas/showCourseCommon.schema";
 
+@UsePipes(SanitizeRichTextPipe)
 @Controller("course")
 export class CourseController {
   constructor(

@@ -3173,7 +3173,8 @@
           "maxFileNumber_one": "Negalite įkelti daugiau nei 1 failo",
           "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
           "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
-          "sourceUrlRequired": "Būtinas šaltinio URL"
+          "sourceUrlRequired": "Būtinas šaltinio URL",
+          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",

@@ -3179,7 +3179,8 @@
           "maxFileNumber_one": "Nemůžete nahrát více než 1 soubor",
           "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
           "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
-          "sourceUrlRequired": "Adresa URL zdroje je povinná"
+          "sourceUrlRequired": "Adresa URL zdroje je povinná",
+          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",

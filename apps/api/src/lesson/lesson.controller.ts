@@ -17,6 +17,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
@@ -54,6 +55,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
 import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import {
@@ -115,6 +117,7 @@ import type {
   LessonsFilters,
   LessonShow,
 } from "./lesson.schema";
+@UsePipes(SanitizeRichTextPipe)
 @Controller("lesson")
 export class LessonController {
   constructor(

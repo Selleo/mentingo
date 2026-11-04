@@ -3174,7 +3174,8 @@
           "maxFileNumber_one": "You cannot upload more than 1 file",
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
-          "sourceUrlRequired": "Source URL is required"
+          "sourceUrlRequired": "Source URL is required",
+          "sourceUrlInvalid": "Enter a valid HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",

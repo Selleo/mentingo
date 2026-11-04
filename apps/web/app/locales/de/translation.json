@@ -3173,7 +3173,8 @@
           "maxFileNumber_one": "Sie können nicht mehr als eine Datei hochladen",
           "maxFileNumber_other": "Sie können nicht mehr als {{ count }} Dateien hochladen",
           "maxResources_five": "Sie können nicht mehr als 5 Ressourcen hinzufügen",
-          "sourceUrlRequired": "Quell-URL ist erforderlich"
+          "sourceUrlRequired": "Quell-URL ist erforderlich",
+          "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",

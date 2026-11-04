@@ -3428,7 +3428,8 @@
           "maxFileNumber_many": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxResources": "Nie możesz dodać więcej niż {{ count }} zasobów do lekcji",
-          "sourceUrlRequired": "Adres URL źródła jest wymagany"
+          "sourceUrlRequired": "Adres URL źródła jest wymagany",
+          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
