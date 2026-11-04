@@ -11,6 +11,7 @@ export type NativeArchiveCourseInsert = Pick<
   | "courseType"
   | "authorId"
   | "categoryId"
+  | "learningOutcomes"
   | "settings"
   | "baseLanguage"
   | "availableLocales"
