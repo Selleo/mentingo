@@ -2,8 +2,8 @@
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
 The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
-in `docs/specs`. It contains 225 explicit flows, assigned exactly once to 92 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 184
+in `docs/specs`. It contains 227 explicit flows, assigned exactly once to 93 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 186
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -18,7 +18,7 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `development-paths` | 20 | 7 | `learning-paths` |
 | `course-authoring` | 32 | 13 | `course-authoring-management`, `course-overview-management`, `curriculum-lesson-builder`, `ai-course-generation`, `ai-course-translation`, `course-duplication`, `course-sharing`, `course-authoring`, `resource-library`, `course-duration-estimates`, `learning-time-tracking` |
 | `course-learning` | 16 | 6 | `lesson-delivery-learning-mode`, `course-enrollment`, `course-repetition`, `quiz-assessment-engine`, `scorm-support`, `course-discussions`, `certificates`, `learning-time-tracking`, `course-duration-estimates` |
-| `knowledge-base-articles` | 11 | 4 | `knowledge-base-articles`, `knowledge-base` |
+| `knowledge-base-articles` | 13 | 5 | `knowledge-base-articles`, `knowledge-base` |
 | `news` | 11 | 4 | `news-hub` |
 | `authentication` | 7 | 3 | `authentication-account-access`, `mentingo-mcp` |
 | `dashboard` | 9 | 4 | `personal-dashboard`, `featured-course`, `global-search`, `onboarding-tours`, `self-onboarding` |

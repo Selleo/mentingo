@@ -478,6 +478,13 @@ class RegistryTests(unittest.TestCase):
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
 
+    def test_section_language_removal_is_registered_once_without_changing_existing_groups(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
+        groups = [v['key'] for v in domain['videos'] if 'remove-section-language' in v['flowIds']]
+        self.assertEqual(groups, ['knowledge-base-articles.language-removal'])
+
     def test_failed_daily_practice_retry_has_an_explicit_short_video(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
@@ -492,7 +499,7 @@ class RegistryTests(unittest.TestCase):
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 225, 'videos': 92})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 227, 'videos': 93})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)
@@ -653,13 +660,13 @@ class RegistryTests(unittest.TestCase):
         articles = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
         spec = 'docs/specs/knowledge-base-articles-business-spec.md'
         self.assertEqual(articles['specPaths'], [spec, 'docs/specs/knowledge-base-business-spec.md'])
-        self.assertEqual(len(articles['flows']), 11)
+        self.assertEqual(len(articles['flows']), 13)
         for flow in articles['flows']:
             self.assertEqual(flow['specPaths'], [spec])
             self.assertEqual(flow['pageKeys'], ['articles'])
         self.assertTrue({'create-section', 'edit-section', 'delete-section', 'create-article', 'edit-article',
                          'localize-article', 'preview-article', 'replace-article-cover', 'configure-public-article',
-                         'delete-article', 'browse-articles'} == {f['id'] for f in articles['flows']})
+                         'delete-article', 'browse-articles', 'remove-section-language', 'remove-article-language'} == {f['id'] for f in articles['flows']})
 
     def test_news_spec_selects_explicit_editorial_and_learner_flows(self):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'

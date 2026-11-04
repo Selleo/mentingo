@@ -3236,6 +3236,74 @@
           "outcomes": [
             "The deleted section is absent from the table of contents."
           ]
+        },
+        {
+          "id": "remove-section-language",
+          "title": "Remove an article section translation",
+          "description": "Remove a non-base article section language while retaining its base version.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Remove an unused translation of an article section.",
+          "preconditions": [
+            "The Articles module is enabled and the recording administrator can manage article sections.",
+            "A disposable section has a base language and one additional saved translation, prepared off camera with the existing fixtures."
+          ],
+          "actions": [
+            "Open the section editor from the table of contents.",
+            "Open the section language selector and remove the non-base language using its visible removal action.",
+            "Reopen the section and inspect its remaining language choices and base-language title."
+          ],
+          "outcomes": [
+            "The removed translation is no longer offered and the base-language section remains available."
+          ]
+        },
+        {
+          "id": "remove-article-language",
+          "title": "Remove an article translation",
+          "description": "Remove a non-base article language while retaining its base version.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Remove an unused translation of an article.",
+          "preconditions": [
+            "The Articles module is enabled and the recording author can manage the selected article.",
+            "A disposable article has populated base-language content and one additional saved translation, prepared off camera with the existing fixtures."
+          ],
+          "actions": [
+            "Open the article editor through its section.",
+            "Open the article language selector and remove the non-base language using its visible removal action.",
+            "Reopen the article and inspect its remaining language choices and base-language content."
+          ],
+          "outcomes": [
+            "The removed article translation is no longer offered and the base-language article remains readable."
+          ]
         }
       ],
       "videos": [
@@ -3277,12 +3345,22 @@
             "configure-public-article",
             "delete-article"
           ]
+        },
+        {
+          "key": "knowledge-base-articles.language-removal",
+          "title": "Remove unused article and section translations",
+          "description": "Remove unused translations while preserving base-language articles and sections.",
+          "flowIds": [
+            "remove-article-language",
+            "remove-section-language"
+          ]
         }
       ],
       "evidencePaths": [
         "apps/web/app/modules/Articles/components/ArticlesTOC/ArticlesTOC.tsx",
         "apps/web/app/modules/Articles/ArticleForm.page.tsx",
-        "apps/api/src/articles/repositories/articles.repository.ts"
+        "apps/api/src/articles/repositories/articles.repository.ts",
+        "apps/web/app/modules/Articles/components/ArticlesTOC/EditArticleSectionSheet.tsx"
       ]
     },
     {
