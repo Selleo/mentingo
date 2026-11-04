@@ -499,7 +499,7 @@ class RegistryTests(unittest.TestCase):
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 227, 'videos': 93})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 228, 'videos': 94})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)
@@ -660,13 +660,13 @@ class RegistryTests(unittest.TestCase):
         articles = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
         spec = 'docs/specs/knowledge-base-articles-business-spec.md'
         self.assertEqual(articles['specPaths'], [spec, 'docs/specs/knowledge-base-business-spec.md'])
-        self.assertEqual(len(articles['flows']), 13)
+        self.assertEqual(len(articles['flows']), 14)
         for flow in articles['flows']:
             self.assertEqual(flow['specPaths'], [spec])
             self.assertEqual(flow['pageKeys'], ['articles'])
         self.assertTrue({'create-section', 'edit-section', 'delete-section', 'create-article', 'edit-article',
                          'localize-article', 'preview-article', 'replace-article-cover', 'configure-public-article',
-                         'delete-article', 'browse-articles', 'remove-section-language', 'remove-article-language'} == {f['id'] for f in articles['flows']})
+                         'delete-article', 'browse-articles', 'remove-section-language', 'remove-article-language', 'upload-article-resource'} == {f['id'] for f in articles['flows']})
 
     def test_news_spec_selects_explicit_editorial_and_learner_flows(self):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'

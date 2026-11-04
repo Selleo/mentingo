@@ -3304,6 +3304,41 @@
           "outcomes": [
             "The removed article translation is no longer offered and the base-language article remains readable."
           ]
+        },
+        {
+          "id": "upload-article-resource",
+          "title": "Add a resource to article content",
+          "description": "Upload and insert a resource through the article rich-content editor.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Add a visible resource to an article and verify it survives saving.",
+          "preconditions": [
+            "The Articles module is enabled and the recording author can edit the selected article.",
+            "A populated article and a neutral committed image fixture are available; use localized example labels and no written English in the image for Polish footage."
+          ],
+          "actions": [
+            "Open the article editor through its section.",
+            "Use the rich-content resource insertion control and select the committed image fixture through its visible upload control.",
+            "Complete any visible resource fields, insert the uploaded resource and save the article.",
+            "Open the saved article through navigation and inspect the inserted resource."
+          ],
+          "outcomes": [
+            "The uploaded resource renders within the saved article content in the selected language."
+          ]
         }
       ],
       "videos": [
@@ -3353,6 +3388,14 @@
           "flowIds": [
             "remove-article-language",
             "remove-section-language"
+          ]
+        },
+        {
+          "key": "knowledge-base-articles.resources",
+          "title": "Add resources to article content",
+          "description": "Upload a resource, insert it into an article and verify the saved result.",
+          "flowIds": [
+            "upload-article-resource"
           ]
         }
       ],
