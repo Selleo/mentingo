@@ -957,7 +957,8 @@
         "invalidAttempt": "La tentative SCORM n'est pas valide.",
         "invalidCmiValue": "Les données d'exécution SCORM ne sont pas valides.",
         "contentNotFound": "Le contenu SCORM est introuvable.",
-        "contentForbidden": "Vous n'avez pas accès à ce contenu SCORM."
+        "contentForbidden": "Vous n'avez pas accès à ce contenu SCORM.",
+        "contentUnavailable": "Le contenu SCORM est temporairement indisponible. Contactez votre administrateur."
       }
     },
     "coursePlaceholder": {
@@ -4084,6 +4085,7 @@
       "loading": "Chargement du contenu SCORM...",
       "launchFailed": "Le contenu SCORM n'a pas pu être lancé.",
       "launchFailedBody": "Veuillez réessayer. Si le problème persiste, le package SCORM devra peut-être être rechargé.",
+      "contentAccessExpired": "L’accès au contenu SCORM n’a pas pu être renouvelé. Rouvrez la leçon pour continuer.",
       "saveFailed": "La progression de SCORM n'a pas pu être enregistrée.",
       "saving": "Sauvegarde de la progression",
       "previousSco": "Section précédente",
@@ -5749,6 +5751,7 @@
       "hostAlreadyExists": "L'hôte de l'organisation existe déjà",
       "notFound": "Organisation introuvable",
       "invalidHost": "URL d'hôte de l'organisation non valide",
+      "reservedHost": "Cet hôte d'organisation est réservé et ne peut pas être utilisé",
       "managingTenantRequired": "Administrateur de l'organisation requis",
       "currentTenantSupportNotAllowed": "Le mode support n'est pas disponible pour l'organisation actuelle",
       "currentTenantDeleteNotAllowed": "L'organisation gestionnaire actuelle ne peut pas être supprimée"

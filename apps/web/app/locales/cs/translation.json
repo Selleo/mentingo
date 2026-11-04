@@ -964,7 +964,8 @@
         "invalidAttempt": "Pokus SCORM je neplatný.",
         "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
         "contentNotFound": "Obsah SCORM nebyl nalezen.",
-        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup.",
+        "contentUnavailable": "Obsah SCORM je dočasně nedostupný. Obraťte se na správce."
       }
     },
     "coursePlaceholder": {
@@ -4338,6 +4339,7 @@
       "loading": "Načítání obsahu SCORM...",
       "launchFailed": "Obsah SCORM se nepodařilo spustit.",
       "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "contentAccessExpired": "Přístup k obsahu SCORM se nepodařilo obnovit. Chcete-li pokračovat, znovu otevřete lekci.",
       "saveFailed": "Postup SCORM se nepodařilo uložit.",
       "saving": "Ukládání postupu",
       "previousSco": "Předchozí část",
@@ -6213,6 +6215,7 @@
       "hostAlreadyExists": "Hostitel organizace již existuje",
       "notFound": "Organizace nenalezena",
       "invalidHost": "Neplatná adresa URL hostitele organizace",
+      "reservedHost": "Tento hostitel organizace je rezervován a nelze jej použít",
       "managingTenantRequired": "Je vyžadován správce spravující organizaci",
       "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici",
       "currentTenantDeleteNotAllowed": "Aktuální spravující organizaci nelze odstranit"

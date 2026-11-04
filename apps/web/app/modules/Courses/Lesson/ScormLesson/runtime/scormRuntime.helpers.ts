@@ -1,15 +1,7 @@
+import { SCORM_12_RUNTIME_SETTINGS } from "@repo/shared";
 import { Scorm12API } from "scorm-again";
 
-import type { ScormRuntimeValues } from "./ScormLesson.types";
-
-type ScormWindow = Window & {
-  API?: Scorm12API;
-};
-
-export const SCORM_RUNTIME_ERROR_KEY = "studentLessonView.scorm.saveFailed";
-export const SCORM_SET_VALUE_EVENT = "LMSSetValue.cmi.*";
-export const SCORM_COMMIT_EVENT = "LMSCommit";
-export const SCORM_FINISH_EVENT = "LMSFinish";
+import type { ScormRuntimeValues } from "../ScormLesson.types";
 
 const SCORM_1_2_WRITABLE_RUNTIME_KEY_PATTERNS = [
   /^cmi\.core\.(lesson_status|score\.(raw|min|max)|lesson_location|session_time|exit)$/u,
@@ -22,28 +14,7 @@ const SCORM_1_2_WRITABLE_RUNTIME_KEY_PATTERNS = [
 ] as const;
 
 export function createScorm12Api() {
-  return new Scorm12API({
-    autocommit: false,
-    dataCommitFormat: "flattened",
-    logLevel: "ERROR",
-    sendFullCommit: false,
-  });
-}
-
-export function exposeScormApi(api: Scorm12API) {
-  const scormWindow = window as ScormWindow;
-
-  scormWindow.API = api;
-}
-
-export function removeScormApi(api: Scorm12API) {
-  const scormWindow = window as ScormWindow;
-
-  if (scormWindow.API !== api) {
-    return;
-  }
-
-  delete scormWindow.API;
+  return new Scorm12API(SCORM_12_RUNTIME_SETTINGS);
 }
 
 export function hasRuntimeValues(values: ScormRuntimeValues) {

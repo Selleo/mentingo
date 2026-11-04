@@ -62,7 +62,7 @@ export class AppThrottlerGuard extends ThrottlerGuard {
       }
     }
 
-    const userId = req.user?.userId;
+    const userId = req.user?.userId ?? req.scormGrant?.actor?.userId;
     if (typeof userId === "string" && userId.length > 0) {
       return `user:${userId}`;
     }

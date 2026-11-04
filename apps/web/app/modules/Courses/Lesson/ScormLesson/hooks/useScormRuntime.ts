@@ -6,21 +6,19 @@ import { useCommitScormRuntime, useFinishScormRuntime } from "~/api/mutations";
 import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
 import { toast } from "~/components/ui/use-toast";
 
+import { attachScormBridge } from "../runtime/scormBridge";
+import { SCORM_RUNTIME_EVENTS } from "../runtime/scormRuntime.constants";
 import {
   createScorm12Api,
-  exposeScormApi,
   filterWritableRuntimeValues,
   hasRuntimeValues,
   readRenderedRuntimeValues,
-  removeScormApi,
-  SCORM_COMMIT_EVENT,
-  SCORM_FINISH_EVENT,
-  SCORM_SET_VALUE_EVENT,
   asRuntimeValues,
-} from "./scormRuntime.helpers";
+} from "../runtime/scormRuntime.helpers";
 
-import type { ScormLaunchData, ScormRuntimeValues } from "./ScormLesson.types";
+import type { ScormLaunchData, ScormRuntimeValues } from "../ScormLesson.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { RefObject } from "react";
 import type { Scorm12API } from "scorm-again";
 import type { LaunchScormAttemptResponse } from "~/api/generated-api";
 
@@ -28,9 +26,15 @@ type UseScormRuntimeParams = {
   launch: ScormLaunchData;
   language: SupportedLanguages;
   onSavingChange?: (isSaving: boolean) => void;
+  contentFrameRef: RefObject<HTMLIFrameElement>;
 };
 
-export function useScormRuntime({ launch, language, onSavingChange }: UseScormRuntimeParams) {
+export function useScormRuntime({
+  launch,
+  language,
+  onSavingChange,
+  contentFrameRef,
+}: UseScormRuntimeParams) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { mutateAsync: commitRuntime } = useCommitScormRuntime();
@@ -42,8 +46,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   const pendingSavesRef = useRef(0);
   const onSavingChangeRef = useRef(onSavingChange);
   const tRef = useRef(t);
-  // Cache writes happen after every commit and finish. Keep the initial runtime
-  // stable until the learner changes SCOs so saving cannot recreate the API.
+
   const launchRuntimeRef = useRef({
     key: `${launch.attemptId}:${launch.scoId}`,
     runtime: launch.runtime,
@@ -181,24 +184,28 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     };
 
     api.loadFromFlattenedJSON(runtimeValues);
-    api.on(SCORM_SET_VALUE_EVENT, (element: string, value: unknown) => {
+    api.on(SCORM_RUNTIME_EVENTS.SET_VALUE, (element: string, value: unknown) => {
       dirtyValuesRef.current[element] = String(value ?? "");
     });
-    api.on(SCORM_COMMIT_EVENT, () => {
+    api.on(SCORM_RUNTIME_EVENTS.COMMIT, () => {
       void commitDirtyValues();
     });
-    api.on(SCORM_FINISH_EVENT, () => {
+    api.on(SCORM_RUNTIME_EVENTS.FINISH, () => {
       void finishRuntimeSession({ showToast: true });
     });
 
     apiRef.current = api;
-    exposeScormApi(api);
+    const detachBridge = attachScormBridge({
+      api,
+      launchUrl: launch.launchUrl,
+      getFrame: () => contentFrameRef.current?.contentWindow,
+    });
 
     return () => {
       if (api.isInitialized()) {
         void finishRuntimeSession({ showToast: false });
       }
-      removeScormApi(api);
+      detachBridge();
       apiRef.current = null;
       dirtyValuesRef.current = {};
     };
@@ -210,6 +217,8 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     launch.lessonId,
     launch.packageId,
     launch.scoId,
+    launch.launchUrl,
+    contentFrameRef,
     queryClient,
   ]);
 }

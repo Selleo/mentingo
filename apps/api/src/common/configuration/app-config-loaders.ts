@@ -9,6 +9,7 @@ import phishingConfig from "./phishing";
 import redisConfig from "./redis";
 import s3Config from "./s3";
 import stripeConfig from "./stripe";
+import tenantsConfig from "./tenants";
 
 /** Configuration namespaces loaded by every Nest context of the API, including queue sandboxes. */
 export function getAppConfigLoaders() {
@@ -23,6 +24,7 @@ export function getAppConfigLoaders() {
     callbackUrlConfig,
     bunnyConfig,
     livekitConfig,
+    tenantsConfig,
     ...getOptionalConfigs(),
   ];
 }

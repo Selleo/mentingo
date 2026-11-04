@@ -2,6 +2,7 @@ import { HttpException, type ExecutionContext } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 import { AppThrottlerGuard } from "../app-throttler.guard";
+import { RATE_LIMITS } from "../rate-limit.constants";
 
 class AuthController {}
 const login = () => undefined;
@@ -106,5 +107,61 @@ describe("authentication rate limits", () => {
         ),
       ).resolves.toBe(true);
     }
+  });
+});
+
+describe("SCORM delivery rate limits", () => {
+  class ScormContentController {}
+  const serveContentAsset = () => undefined;
+
+  const deliveryContextFor = (ip: string, userId: string): ExecutionContext =>
+    ({
+      getClass: () => ScormContentController,
+      getHandler: () => serveContentAsset,
+      switchToHttp: () => ({
+        getRequest: () => ({
+          method: "GET",
+          originalUrl: "/api/scorm/delivery/token/assets/index.html",
+          headers: {},
+          ip,
+          user: null,
+          scormGrant: { actor: { userId } },
+        }),
+        getResponse: () => ({ header: jest.fn() }),
+      }),
+    }) as unknown as ExecutionContext;
+
+  let guard: AppThrottlerGuard;
+
+  beforeEach(async () => {
+    delete process.env.DISABLE_RATE_LIMITING;
+    const counts = new Map<string, number>();
+    const storage = {
+      increment: jest.fn(async (key: string, _ttl: number, limit: number) => {
+        const totalHits = (counts.get(key) ?? 0) + 1;
+        counts.set(key, totalHits);
+        return { totalHits, timeToExpire: 60, isBlocked: totalHits > limit, timeToBlockExpire: 60 };
+      }),
+    };
+    guard = new AppThrottlerGuard(
+      [{ name: "global", ttl: 60000, limit: 100 }],
+      storage,
+      new Reflector(),
+    );
+    await guard.onModuleInit();
+  });
+
+  it("gives learners behind one IP separate budgets keyed by the grant owner", async () => {
+    const { SCORM_DELIVERY_REQUESTS_PER_MINUTE } = RATE_LIMITS;
+
+    for (const userId of ["learner-1", "learner-2"]) {
+      for (let i = 0; i < SCORM_DELIVERY_REQUESTS_PER_MINUTE; i++) {
+        await guard.canActivate(deliveryContextFor("192.0.2.1", userId));
+      }
+    }
+
+    await expect(
+      guard.canActivate(deliveryContextFor("192.0.2.99", "learner-1")),
+    ).rejects.toMatchObject({ status: 429 });
   });
 });

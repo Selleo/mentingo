@@ -958,7 +958,8 @@
         "invalidAttempt": "SCORM bandymas neteisingas.",
         "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
         "contentNotFound": "SCORM turinys nerastas.",
-        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio.",
+        "contentUnavailable": "SCORM turinys laikinai nepasiekiamas. Kreipkitės į administratorių."
       }
     },
     "coursePlaceholder": {
@@ -4333,6 +4334,7 @@
       "loading": "Įkeliamas SCORM turinys...",
       "launchFailed": "Nepavyko paleisti SCORM turinio.",
       "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "contentAccessExpired": "Nepavyko atnaujinti prieigos prie SCORM turinio. Norėdami tęsti, iš naujo atidarykite pamoką.",
       "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
       "saving": "Išsaugoma pažanga",
       "previousSco": "Ankstesnė dalis",
@@ -6209,6 +6211,7 @@
       "hostAlreadyExists": "Organizacijos priegloba jau egzistuoja",
       "notFound": "Organizacija nerasta",
       "invalidHost": "Netinkamas organizacijos prieglobos URL",
+      "reservedHost": "Ši organizacijos priegloba yra rezervuota ir negali būti naudojama",
       "managingTenantRequired": "Reikalingas valdančios organizacijos administratorius",
       "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas",
       "currentTenantDeleteNotAllowed": "Dabartinės valdančiosios organizacijos ištrinti negalima"
