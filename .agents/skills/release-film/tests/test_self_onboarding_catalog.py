@@ -98,6 +98,21 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(result['version'], '1.1.0')
         self.assertEqual(self.first_flow(result)['action'], 'record')
 
+    def test_reviewed_source_evidence_is_read_from_target_commit_not_working_tree(self):
+        self.catalog['domains'][0]['evidencePaths'] = [CODE]
+        catalog.validate_catalog(self.catalog)
+        self.git('tag', 'v1.1.0')
+        self.write(CODE, 'uncommitted implementation must not be evidence')
+        def classify(context):
+            self.assertEqual(context['currentSource'][CODE], 'export const save = () => create();\n')
+            return classifier()(context)
+        self.assertTrue(catalog.plan(self.repo, 'v1.1.0', None, self.catalog, classify=classify)['ok'])
+        for path in ['.env', 'apps/web/**', 'apps/api/unrelated.ts']:
+            invalid = copy.deepcopy(self.catalog)
+            invalid['domains'][0]['evidencePaths'] = [path]
+            with self.assertRaisesRegex(ValueError, 'Evidence paths'):
+                catalog.validate_catalog(invalid)
+
     def test_initial_coverage_receives_actual_target_files_for_discovered_flow_paths(self):
         self.write('apps/web/not-watched.tsx', 'not part of this feature')
         self.commit('Version', 'v1.1.0')

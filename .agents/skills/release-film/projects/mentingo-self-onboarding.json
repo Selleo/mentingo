@@ -3278,6 +3278,11 @@
             "delete-article"
           ]
         }
+      ],
+      "evidencePaths": [
+        "apps/web/app/modules/Articles/components/ArticlesTOC/ArticlesTOC.tsx",
+        "apps/web/app/modules/Articles/ArticleForm.page.tsx",
+        "apps/api/src/articles/repositories/articles.repository.ts"
       ]
     },
     {
