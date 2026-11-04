@@ -21,6 +21,7 @@ export function buildNativeArchiveCourseInsert(
     originalId: source.originalId ?? source.id,
     title: source.title,
     description: source.description,
+    learningOutcomes: source.learningOutcomes ?? {},
     status: COURSE_STATUSES.DRAFT,
     priceInCents: 0,
     currency: NATIVE_ARCHIVE_DEFAULT_CURRENCY,
