@@ -490,6 +490,10 @@ def cut(spec, capture, words, audio_duration=None, tail=None):
     narration would wait for the actions before a beat, those steps get shorter glides and views first.
     """
     tight = set()
+    if spec.get('preserve_actions'):
+        film = _cut(spec, capture, words, audio_duration, tail, tight)
+        film['tight'] = []
+        return film
     for _ in range(4):
         film = _cut(spec, capture, words, audio_duration, tail, tight)
         anchored = sorted(a['step'] for a in film['anchors'])
@@ -629,7 +633,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
                         at = tuple(target_point)
                 begins = max(cutter.film, lands - CHAIN_MARGIN - needed, said + max(MOVE_SECONDS, lead or 0.0))
                 # The first glide is already allowed for by begins; budget the remaining moves once.
-                if chain >= JUMP_MIN or begins + needed + glides - (lead or 0.0) - lands > CHAIN_WAIT:
+                if not spec.get('preserve_actions') and (chain >= JUMP_MIN or begins + needed + glides - (lead or 0.0) - lands > CHAIN_WAIT):
                     # they take a while (another page, a form filled): cut them, so the picture the sentence talks about
                     # stays until the next sentence and the page that one talks about is shown, whole, from just before it
                     cutter.film = max(cutter.film, lands - JUMP_LEAD, said)  # the cut, too, waits for the sentence before
@@ -740,7 +744,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
             # while the sentence says it, instead of playing on as the toast fades
             cutter.film += max(0.0, min(LOOK_HOLD, starts[beat] + shift - cutter.film))
         if acting:
-            pending_view = VIEW
+            pending_view = 0.7 if spec.get('preserve_actions') else VIEW
     cutter.play(end)
     last_motion = cutter.film
     spoken_length = speech + shift

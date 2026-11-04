@@ -20,6 +20,7 @@ import editor
 import language
 import metrics
 import montage
+import tutorial_focus
 import pronunciation
 import takes
 import voice as voice_provider
@@ -449,7 +450,7 @@ def document_still(doc, crop=(0, 0.02, 1, 0.45), cached_only=False):
     return target if target.is_file() else None
 
 
-def chapter_setup(chapter, folder, cached_only=False, language=None):
+def chapter_setup(chapter, folder, cached_only=False, language=None, tutorial=False):
     """(spec, capture) of a chapter for the montage: the test up to shortly after its last narrated action (earlier
     steps run off film), each sentence a beat on the action it is pinned to (``language``: the film's, for the labels
     the montage adds)."""
@@ -457,6 +458,8 @@ def chapter_setup(chapter, folder, cached_only=False, language=None):
     beats = [s.get('action') for s in chapter['sentences']]
     pinned = [b for b in beats if b is not None]
     first, last = (min(pinned), max(pinned)) if pinned else (0, len(capture['steps']) - 1)
+    if tutorial:
+        first, last = 0, len(capture['steps']) - 1
     steps = capture['steps'][:last + 1]
     end = min(capture['end'], steps[-1]['b'] + CHAPTER_TAIL)
     following = next((s for s in capture['steps'][last + 1:] if s.get('acting') or s.get('navigate')), None)
@@ -479,7 +482,8 @@ def chapter_setup(chapter, folder, cached_only=False, language=None):
             # capital, np. Excel, ends no sentence)
             'sentences': [s['text'] for s in chapter['sentences']],
             # a scene's test.step titles name its windows (a project's own tests may title them in English)
-            'sections': ((chapter.get('source') or {}).get('file') or '').startswith('gaps/'), 'language': language}
+            'sections': ((chapter.get('source') or {}).get('file') or '').startswith('gaps/'), 'language': language,
+            **({'preserve_actions': True} if tutorial else {})}
     doc, beat = document(chapter, capture)
     if doc and document_still(doc, cached_only=cached_only):  # the downloaded PDF's first page covers the chapter's end
         spec['insert'] = {'from_beat': beat}
@@ -502,10 +506,10 @@ def steps_of(chapter, film, offset, said=None):
     return steps
 
 
-def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, language=None):
+def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, language=None, tutorial=False):
     """(spec, capture, words, speech seconds, film, camera spans) of a chapter: its montage on its spoken voice
     (``last``: the film's last chapter, whose last picture stays a little longer before the film fades out)."""
-    spec, capture = chapter_setup(chapter, folder, cached_only=cached_only, language=language)
+    spec, capture = chapter_setup(chapter, folder, cached_only=cached_only, language=language, tutorial=tutorial)
     words = montage.words_from_srt((Path(voice_dir) / 'subtitles.srt').read_text(encoding='utf-8'))
     speech = audio_seconds(narration_audio(voice_dir))
     film = montage.cut(spec, capture, words, audio_duration=speech, tail=montage.FINAL_TAIL if last else None)
@@ -524,7 +528,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
     """``retimed``: the folder for the voice retimed around its waits (default the voice's own)."""
     said = language.texts(sources)
     spec, capture, words, speech, film, spans = chapter_film(chapter, folder, voice_dir, last, cached_only=cached_only,
-                                                             language=said['code'])
+                                                             language=said['code'], tutorial=sources.get('mode') == 'tutorial')
     camera = []
     for span in spans:
         entry = {'start': span['start'], 'end': span['end']}
@@ -543,7 +547,8 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
                                          'duration': film['footage'], 'pieces': pieces, 'camera': camera,
                                          'pointer': film['pointer']},
                                         **({'labels': film['labels']} if film.get('labels') else {}),
-                                        **({'keys': film['keys']} if film.get('keys') else {}))}],
+                                        **({'keys': film['keys']} if film.get('keys') else {}),
+                                        **({'focus': tutorial_focus.from_film(film, capture)} if sources.get('mode') == 'tutorial' else {}))}],
              'review_points': {}}
     if film['insert_from'] is not None:
         doc, _ = document(chapter, capture)

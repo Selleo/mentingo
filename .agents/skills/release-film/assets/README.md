@@ -9,4 +9,4 @@ rsvg-convert mentingo-tutorial-banner.svg -o mentingo-tutorial-banner.png
 rsvg-convert mentingo-tutorial-mask.svg -o mentingo-tutorial-mask.png
 ```
 
-The mask rounds only the outermost 20 pixels of the full application viewport. The app is uniformly scaled, with no camera crop. Release films retain their existing renderer. Captures, localized narration and speech caches remain reusable when the frame changes.
+The mask rounds only the outermost 20 pixels of the full application viewport. The base view uniformly scales the complete app. Tutorials may briefly zoom up to 12% toward at most two recorded interior controls, with cubic subpixel interpolation and a return to the full view. Dialogs, drawers and edge controls use outlines without zooming. Captions have no accent bar or extra corner heading. Release films retain their existing renderer. Captures, localized narration and speech caches remain reusable when the frame changes.

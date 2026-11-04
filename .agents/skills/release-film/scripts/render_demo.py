@@ -21,6 +21,7 @@ import zlib
 
 from prepare_captions import prepare_captions
 import mentingo_frame
+import tutorial_focus
 
 FFMPEG = "ffmpeg"
 FFPROBE = "ffprobe"
@@ -88,7 +89,7 @@ def checked_crop(crop, frame):
 
 def footage_segment(footage, source, info):
     """Validate a footage clip against its take."""
-    fields(footage, ['source', 'duration', 'pieces', 'camera', 'pointer', 'scale', 'labels', 'keys'],
+    fields(footage, ['source', 'duration', 'pieces', 'camera', 'pointer', 'scale', 'labels', 'keys', 'focus'],
            ['source', 'duration', 'pieces', 'camera', 'pointer'])
     video = next((s for s in info['streams'] if s['codec_type'] == 'video'), None)
     if not video:
@@ -138,7 +139,9 @@ def footage_segment(footage, source, info):
         if end <= start:
             raise ValueError('A key needs an end after its start')
         keys.append([start, end, key[2]])
+    focus = tutorial_focus.validate(footage.get('focus', []), frame, duration)
     return dict(kind='footage', source=source, pieces=pieces, crop=crop, frame=frame,
+                **({'focus': focus} if focus else {}),
                 pointer={'start': list(pointer['start']), 'moves': pointer['moves'], 'clicks': pointer['clicks']},
                 scale=number(footage.get('scale', 1), 'capture scale', 0.1, 3), footage_duration=duration,
                 **({'labels': labels} if labels else {}), **({'keys': keys} if keys else {}))
@@ -354,8 +357,8 @@ def step_filter(path, text, start, end, colors=COLORS, branded=False):
     top, height = (STEP_Y, 58) if len(lines) < 2 else (STEP_Y - 28, 108)
     if branded:
         top = STEP_Y  # Both lines stay below the taller rounded application panel.
-    return (f"drawbox=x={STEP_X - 26}:y={top - 8}:w=8:h={height}:color={colors['accent']}:t=fill:{shown},"
-            f"drawtext=fontfile=font.ttf:textfile={path.name}:expansion=none:fontsize=40:line_spacing=6:"
+    mark = '' if branded else f"drawbox=x={STEP_X - 26}:y={top - 8}:w=8:h={height}:color={colors['accent']}:t=fill:{shown},"
+    return (mark + f"drawtext=fontfile=font.ttf:textfile={path.name}:expansion=none:fontsize=40:line_spacing=6:"
             f"fontcolor={'0x222949' if branded else 'white'}:x={STEP_X}:y={top}:alpha='min(1,max(0,(t-({start:.6f}))/0.25))':{shown}")
 
 
@@ -486,7 +489,7 @@ def footage_visual(segment, relative, length, pointer, colors=COLORS):
               f"trim=duration={total:.4f}[base];[1:v]format=rgba[p1];[2:v]format=rgba[p2];"
               f"[base][p1]overlay=x='{x}-{hx:.1f}':y='{y}-{hy:.1f}':eval=frame:shortest=1:enable='not({clicked})'[c1];"
               f"[c1][p2]overlay=x='{x}-{hx:.1f}':y='{y}-{hy:.1f}':eval=frame:shortest=1:enable='{clicked}'[c2];"
-              f"[c2]crop={width}:{height}:{left}:{top},scale={OUTPUT[0]}:{OUTPUT[1]}:flags=lanczos,"
+              f"[c2]{tutorial_focus.filters(segment.get('focus', []))}crop={width}:{height}:{left}:{top},scale={OUTPUT[0]}:{OUTPUT[1]}:flags=lanczos,"
               f'trim=start={relative:.9f}:duration={length:.9f},setpts=PTS-STARTPTS,'
               f"pad=1920:1080:(ow-iw)/2:30:color={colors['frame']},setsar=1,"
               f"drawbox=x=0:y=0:w=iw:h=5:color={colors['accent']}:t=fill[v0]")

@@ -597,13 +597,17 @@ export async function publishBundle({
   sleep,
   deadlineMs = DEFAULT_DEADLINE_MS,
   retryFailed = false,
+  concurrency = 3,
   signal,
 }) {
   check(integer(deadlineMs, 1, 6 * 60 * 60_000), "Invalid publication deadline.");
+  check(integer(concurrency, 1, 8), "Publication concurrency must be between 1 and 8.");
   const { manifest, entries } = await readBundle(bundle);
   const state = stateFile(statePath);
   const deadline = now() + deadlineMs;
   const results = [];
+  const prepared = [];
+  const failures = [];
   const save = () => saveJson(statePath, state);
   const available = () => {
     if (signal?.aborted || now() >= deadline) throw new PublicationPendingError();
@@ -663,8 +667,25 @@ export async function publishBundle({
       await delay(POLL_INTERVAL_MS);
     }
   }
+  // Saves are synchronous and atomic; all workers share this in-memory checkpoint.
+  // Drain every worker before returning, including on failure, so later progress is durable.
+  async function pool(items, handle) {
+    let next = 0;
+    await Promise.all(
+      Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+        while (next < items.length) {
+          const index = next++;
+          try {
+            await handle(items[index], index);
+          } catch (error) {
+            failures.push({ index, error });
+          }
+        }
+      }),
+    );
+  }
   try {
-    for (const entry of entries) {
+    await pool(entries, async (entry, index) => {
       available();
       const previous = state.published[entry.slot];
       if (previous) {
@@ -721,13 +742,13 @@ export async function publishBundle({
       check(validId(progress.draftId), "Invalid revision checkpoint.");
       if (progress.publishedRevisionId) {
         check(progress.publishedRevisionId === progress.draftId, "Invalid published checkpoint.");
-        results.push({
+        results[index] = {
           key: entry.key,
           language: entry.language,
           revisionId: progress.draftId,
           status: "already-published",
-        });
-        continue;
+        };
+        return;
       }
       if (!progress.mediaOperationId) {
         if (!progress.prepareVersion) {
@@ -786,6 +807,11 @@ export async function publishBundle({
         save();
       }
       check(validId(progress.finalizationOperationId), "Invalid finalization checkpoint.");
+      prepared.push({ entry, progress, index });
+    });
+    // Every upload has been attempted before waiting for Bunny encoding/indexing.
+    // Ready videos may publish even when a different video fails or remains pending.
+    await pool(prepared, async ({ entry, progress, index }) => {
       const finalized = await poll(
         progress.finalizationOperationId,
         progress.draftId,
@@ -811,14 +837,15 @@ export async function publishBundle({
         version: manifest.version,
       };
       save();
-      results.push({
+      results[index] = {
         key: entry.key,
         language: entry.language,
         revisionId: published.id,
         status: "published",
-      });
-    }
-    const summary = { ok: true, version: manifest.version, tutorials: results };
+      };
+    });
+    if (failures.length) throw failures[0].error;
+    const summary = { ok: true, version: manifest.version, tutorials: results.filter(Boolean) };
     if (outputPath) saveJson(outputPath, summary);
     return summary;
   } catch (error) {
@@ -829,7 +856,7 @@ export async function publishBundle({
         ok: false,
         pending: failure instanceof PublicationPendingError,
         version: manifest.version,
-        tutorials: results,
+        tutorials: results.filter(Boolean),
       });
     throw failure;
   }
@@ -844,8 +871,9 @@ function argumentsOf(args) {
       continue;
     }
     check(
-      ["--bundle", "--state", "--output", "--deadline-ms"].includes(key) && index + 1 < args.length,
-      "Usage: publisher.mjs --bundle DIR --state FILE --output FILE [--deadline-ms MS] [--retry-failed]",
+      ["--bundle", "--state", "--output", "--deadline-ms", "--concurrency"].includes(key) &&
+        index + 1 < args.length,
+      "Usage: publisher.mjs --bundle DIR --state FILE --output FILE [--deadline-ms MS] [--concurrency 1-8] [--retry-failed]",
     );
     check(!Object.hasOwn(options, key), "Duplicate publisher option.");
     options[key] = args[++index];
@@ -860,7 +888,7 @@ function argumentsOf(args) {
 async function main() {
   if (process.argv.length === 3 && process.argv[2] === "--help") {
     console.log(
-      "Usage: node scripts/self-onboarding-publish/publisher.mjs --bundle DIR --state FILE --output FILE [--deadline-ms MS] [--retry-failed]",
+      "Usage: node scripts/self-onboarding-publish/publisher.mjs --bundle DIR --state FILE --output FILE [--deadline-ms MS] [--concurrency 1-8] [--retry-failed]",
     );
     return;
   }
@@ -888,6 +916,7 @@ async function main() {
     client,
     deadlineMs: options["--deadline-ms"] ? Number(options["--deadline-ms"]) : DEFAULT_DEADLINE_MS,
     retryFailed: options.retryFailed === true,
+    concurrency: options["--concurrency"] ? Number(options["--concurrency"]) : 3,
     signal: controller.signal,
     upload: (args) => uploadToBunny({ ...args, Upload }),
   });

@@ -10,7 +10,7 @@ MASK = ASSETS / 'mentingo-tutorial-mask.png'
 def fingerprint():
     """Re-render visual segments when code or branding changes; retain camera and speech caches."""
     digest = hashlib.sha256()
-    for path in (Path(__file__), BANNER, MASK):
+    for path in (Path(__file__), Path(__file__).with_name("tutorial_focus.py"), BANNER, MASK):
         digest.update(path.read_bytes())
     return digest.hexdigest()
 
@@ -24,13 +24,9 @@ def compose(inputs, visual, segment, language, work, name):
     # The existing camera already preserves every viewport edge. Remove only its
     # surrounding frame before fitting it into this equally proportioned panel.
     crop = '1840:880:40:30' if segment['kind'] == 'image' else '1564:880:178:30'
-    heading = work / f'{name}-brand.txt'
-    heading.write_text('Przewodniki Mentingo' if language == 'pl' else 'Mentingo guides')
     graph = (visual + f';[v0]crop={crop},scale=1536:864:force_original_aspect_ratio=decrease,'
              'pad=1536:864:(ow-iw)/2:(oh-ih)/2:color=white,setsar=1,format=rgb24[app];'
              f'[{mask_index}:v]format=gray[mask];[app][mask]alphamerge[rounded];'
              f'[{banner_index}:v]setsar=1[brand];'
-             '[brand][rounded]overlay=x=192:y=76:shortest=1[framed];'
-             f'[framed]drawtext=fontfile=font.ttf:textfile={heading.name}:expansion=none:'
-             'fontsize=22:fontcolor=0x3f58b6:x=1728-tw:y=25[branded]')
+             '[brand][rounded]overlay=x=192:y=76:shortest=1[branded]')
     return inputs, graph, 'branded'

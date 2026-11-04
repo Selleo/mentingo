@@ -97,6 +97,12 @@ class RenderTest(unittest.TestCase):
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
 
+    def test_mentingo_captions_have_no_accent_bar(self):
+        branded = render_demo.step_filter(self.root/'branded-label.txt','One visible step.',0,2,branded=True)
+        self.assertNotIn('drawbox',branded)
+        self.assertIn('fontcolor=0x222949',branded)
+        self.assertIn('drawbox',render_demo.step_filter(self.root/'release-label.txt','Release step.',0,2))
+
     def test_mentingo_frame_preserves_full_viewport_and_rounded_corners(self):
         data = copy.deepcopy(self.data)
         data.update(mode='tutorial', frameTheme='mentingo', colors={'frame':'#222949','accent':'#4796fd'})

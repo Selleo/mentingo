@@ -160,17 +160,28 @@ class Cut(unittest.TestCase):
         self.assertLess(film['anchors'][2]['late'], 0.6)
         self.assertEqual(film['silences'], [])
 
-    def chained(self, words):
+    def chained(self, words, preserve=False):
         """A save (sentence 2) then a close no sentence names, before the result (sentence 3); sentence 2 has
         ``words`` words, 0.3 s apart."""
         spec = {'steps': [{'cmd': ['click', '#open'], 'beat': 1}, {'cmd': ['click', '#save'], 'beat': 2},
                           {'cmd': ['click', '#close']}, {'cmd': ['hover', '#result'], 'beat': 3}]}
+        if preserve:
+            spec['preserve_actions'] = True
         take = capture([step(0, 0.2, 0.4, 0.9, (100, 100)), step(1, 1.0, 1.2, 1.9, (500, 300)),
                         step(2, 2.0, 2.2, 2.9, (700, 400)), step(3, 3.0, 3.2, 3.7, (900, 600), click=False)],
                        active=[(0.45, 0.8), (1.25, 1.8), (2.25, 2.8), (3.25, 3.6)])
         spoken = words_at((0.1, 'Otwieramy stronę.'), (4.0, ' '.join(['Klikamy'] * (words - 1) + ['zapis.'])),
                           (8.0, 'Wynik jest widoczny.'))
         return montage.cut(spec, take, spoken, audio_duration=10.5), spoken
+
+    def test_tutorial_keeps_intermediate_actions_even_when_the_voice_must_wait(self):
+        film, spoken = self.chained(12, preserve=True)
+        actions = {action['step']: action for action in film['actions']}
+        self.assertEqual(set(actions), {0, 1, 2, 3})
+        self.assertFalse(actions[2].get('navigate'))
+        self.assertTrue(film['silences'])
+        self.assertEqual(film['tight'], [])
+        self.assertGreater(actions[2]['t_pre'], montage.sentence_ends(spoken)[1])
 
     def test_the_page_answering_a_sentences_action_plays_under_it_before_any_wait(self):
         film, _ = self.chained(2)
