@@ -539,19 +539,22 @@ export class NativeArchiveImportService {
       throw new BadRequestException("nativeArchive.error.invalidCategory");
     }
 
-    const existingCategory = await this.courseTransferGraphRepository.findCategoryByBaseTitle(
-      categoryTitle,
-      snapshot.category.baseLanguage,
-    );
+    const existingCategory =
+      (await this.courseTransferGraphRepository.findCategoryByBaseTitle(
+        categoryTitle,
+        snapshot.category.baseLanguage,
+      )) ?? (await this.courseTransferGraphRepository.findCategoryByStoredBaseTitle(categoryTitle));
+    if (existingCategory?.id) return existingCategory.id;
+
+    const createdCategory = await this.courseTransferGraphRepository.createCategoryFromSource({
+      title: buildJsonbFieldWithMultipleEntries(snapshot.category.title),
+      baseLanguage: snapshot.category.baseLanguage,
+      availableLocales: snapshot.category.availableLocales,
+    });
+    // A concurrent import can win the unique insert after the initial lookup.
     const categoryId =
-      existingCategory?.id ??
-      (
-        await this.courseTransferGraphRepository.createCategoryFromSource({
-          title: buildJsonbFieldWithMultipleEntries(snapshot.category.title),
-          baseLanguage: snapshot.category.baseLanguage,
-          availableLocales: snapshot.category.availableLocales,
-        })
-      )?.id;
+      createdCategory?.id ??
+      (await this.courseTransferGraphRepository.findCategoryByStoredBaseTitle(categoryTitle))?.id;
     if (!categoryId) throw new BadRequestException("nativeArchive.error.categoryCreationFailed");
 
     return categoryId;

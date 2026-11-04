@@ -301,3 +301,111 @@ describe("NativeArchiveImportService", () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("NativeArchiveImportService category identity", () => {
+  const snapshot = {
+    category: {
+      title: { pl: "Shared category" },
+      baseLanguage: "pl",
+      availableLocales: ["pl"],
+    },
+  };
+
+  function resolver() {
+    const courseTransferGraphRepository = {
+      findCategoryByBaseTitle: jest.fn().mockResolvedValue(undefined),
+      findCategoryByStoredBaseTitle: jest.fn().mockResolvedValue(undefined),
+      createCategoryFromSource: jest.fn().mockResolvedValue({ id: "created-category" }),
+    };
+    const service = new NativeArchiveImportService(
+      {} as never,
+      {} as never,
+      courseTransferGraphRepository as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    return { courseTransferGraphRepository, service };
+  }
+
+  it("keeps the existing localized category without creating or rewriting it", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+    courseTransferGraphRepository.findCategoryByBaseTitle.mockResolvedValue({ id: "localized" });
+
+    await expect(service["resolveImportedCategoryId"](snapshot as never)).resolves.toBe(
+      "localized",
+    );
+    expect(courseTransferGraphRepository.findCategoryByStoredBaseTitle).not.toHaveBeenCalled();
+    expect(courseTransferGraphRepository.createCategoryFromSource).not.toHaveBeenCalled();
+  });
+
+  it("reuses a different-locale category with the same indexed base title", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+    courseTransferGraphRepository.findCategoryByStoredBaseTitle.mockResolvedValue({
+      id: "english",
+    });
+
+    await expect(service["resolveImportedCategoryId"](snapshot as never)).resolves.toBe("english");
+    expect(courseTransferGraphRepository.findCategoryByBaseTitle).toHaveBeenCalledWith(
+      "Shared category",
+      "pl",
+    );
+    expect(courseTransferGraphRepository.findCategoryByStoredBaseTitle).toHaveBeenCalledWith(
+      "Shared category",
+    );
+    expect(courseTransferGraphRepository.createCategoryFromSource).not.toHaveBeenCalled();
+  });
+
+  it("creates a genuinely new category with the authored locales", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+
+    await expect(service["resolveImportedCategoryId"](snapshot as never)).resolves.toBe(
+      "created-category",
+    );
+    expect(courseTransferGraphRepository.createCategoryFromSource).toHaveBeenCalledWith(
+      expect.objectContaining({ baseLanguage: "pl", availableLocales: ["pl"] }),
+    );
+    expect(courseTransferGraphRepository.findCategoryByStoredBaseTitle).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the winner when a concurrent insert returns no row", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+    courseTransferGraphRepository.findCategoryByStoredBaseTitle
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ id: "concurrent-winner" });
+    courseTransferGraphRepository.createCategoryFromSource.mockResolvedValue(undefined);
+
+    await expect(service["resolveImportedCategoryId"](snapshot as never)).resolves.toBe(
+      "concurrent-winner",
+    );
+    expect(courseTransferGraphRepository.createCategoryFromSource).toHaveBeenCalledTimes(1);
+    expect(courseTransferGraphRepository.findCategoryByStoredBaseTitle).toHaveBeenCalledTimes(2);
+  });
+
+  it("still rejects when creation and the conflict lookup produce no category", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+    courseTransferGraphRepository.createCategoryFromSource.mockResolvedValue(undefined);
+
+    await expect(service["resolveImportedCategoryId"](snapshot as never)).rejects.toThrow(
+      "nativeArchive.error.categoryCreationFailed",
+    );
+  });
+
+  it("rejects a missing base-language title before accessing the repository", async () => {
+    const { service, courseTransferGraphRepository } = resolver();
+
+    await expect(
+      service["resolveImportedCategoryId"]({
+        category: { title: {}, baseLanguage: "pl" },
+      } as never),
+    ).rejects.toThrow("nativeArchive.error.invalidCategory");
+    expect(courseTransferGraphRepository.findCategoryByBaseTitle).not.toHaveBeenCalled();
+    expect(courseTransferGraphRepository.findCategoryByStoredBaseTitle).not.toHaveBeenCalled();
+    expect(courseTransferGraphRepository.createCategoryFromSource).not.toHaveBeenCalled();
+  });
+});
