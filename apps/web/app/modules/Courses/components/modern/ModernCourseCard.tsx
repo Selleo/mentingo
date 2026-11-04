@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { PERMISSIONS, isAllowedIframeUrl } from "@repo/shared";
+import { PERMISSIONS, isAllowedIframeUrl, stripHtmlTags } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { isEqual } from "lodash-es";
 import { BookOpen, Clock, Play } from "lucide-react";
@@ -12,7 +12,6 @@ import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { formatDuration } from "./utils";
 

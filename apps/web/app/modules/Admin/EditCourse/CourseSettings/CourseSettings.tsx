@@ -1,4 +1,4 @@
-import { COURSE_TYPE, ENTITY_TYPES, isAllowedIframeUrl } from "@repo/shared";
+import { COURSE_TYPE, ENTITY_TYPES, isAllowedIframeUrl, stripHtmlTags } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +28,6 @@ import {
 } from "~/components/ui/select";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import {

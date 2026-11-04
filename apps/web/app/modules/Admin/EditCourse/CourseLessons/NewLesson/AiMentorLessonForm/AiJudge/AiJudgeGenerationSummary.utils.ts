@@ -1,6 +1,4 @@
-import { AI_JUDGE_DRAFT_CHANGE_FIELD } from "@repo/shared";
-
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
+import { AI_JUDGE_DRAFT_CHANGE_FIELD, stripHtmlTags } from "@repo/shared";
 
 import type { AiJudgeGenerationCheck, AiJudgeGenerationChange } from "./aiJudgeConfiguration.types";
 

@@ -4,6 +4,7 @@ import {
   MAX_INGESTION_FILE_COUNT,
   MAX_INGESTION_FILE_SIZE_BYTES,
   formatFileSize,
+  stripHtmlTags,
 } from "@repo/shared";
 import { z } from "zod";
 
@@ -13,13 +14,10 @@ import { MAX_AI_MENTOR_TEXT_LENGTH } from "../AiMentorLesson.constants";
 
 import type { TFunction } from "i18next";
 
-export const stripHtmlTags = (str: string): string => {
-  return str
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&[a-zA-Z0-9#]+;/g, "")
+export const toTrimmedPlainText = (html: string): string =>
+  stripHtmlTags(html)
+    .replace(/\u00a0/g, " ")
     .trim();
-};
 
 export const aiMentorLessonFormSchema = (t: TFunction, requireAiMentorConfiguration = false) => {
   const mentorConfigurationField = requireAiMentorConfiguration
@@ -34,7 +32,7 @@ export const aiMentorLessonFormSchema = (t: TFunction, requireAiMentorConfigurat
         .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
       description: z
         .string()
-        .refine((val) => stripHtmlTags(val).length <= MAX_AI_MENTOR_TEXT_LENGTH, {
+        .refine((val) => toTrimmedPlainText(val).length <= MAX_AI_MENTOR_TEXT_LENGTH, {
           message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength", {
             count: MAX_AI_MENTOR_TEXT_LENGTH,
           }),
