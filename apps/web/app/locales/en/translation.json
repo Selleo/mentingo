@@ -5049,7 +5049,8 @@
       "fileTooLarge": "The file is too large. The maximum size is {{maxSize}}.",
       "uploadTooLarge": "The file is too large to upload.",
       "imageResolutionTooLarge": "The image is too large. The maximum resolution is {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "The image must have a {{aspectRatio}} aspect ratio."
+      "imageAspectRatioMismatch": "The image must have a {{aspectRatio}} aspect ratio.",
+      "invalidImageReference": "The selected image isn't available. Upload the image again."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -9173,6 +9174,24 @@
       "disabled": "Help tutorials are not enabled on this installation.",
       "notFound": "This tutorial is not available for your version of Mentingo.",
       "invalidRequest": "Choose a valid tutorial or search phrase and try again."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Development path not found.",
+      "createError": "Couldn't create the development path.",
+      "updateError": "Couldn't update the development path.",
+      "updateMissingLanguage": "This development path isn't available in the selected language.",
+      "languageNotSupported": "This language isn't supported.",
+      "courseNotFound": "Course not found.",
+      "courseAlreadyExists": "This course is already in the development path.",
+      "courseIdsMustBeUnique": "Each course can be added only once.",
+      "courseIdsEmpty": "Select at least one course.",
+      "courseIdsMismatch": "The course order doesn't match the courses in this development path.",
+      "courseLinkNotFound": "This course isn't part of the development path.",
+      "studentIdsEmpty": "Select at least one learner.",
+      "groupIdsEmpty": "Select at least one group.",
+      "featureDisabled": "Development paths are turned off on this platform."
     }
   }
 }

@@ -4775,7 +4775,8 @@
       "fileTooLarge": "Le fichier est trop volumineux. La taille maximale est de {{maxSize}}.",
       "uploadTooLarge": "Le fichier est trop volumineux pour être téléversé.",
       "imageResolutionTooLarge": "L'image est trop grande. La résolution maximale est de {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "L'image doit avoir un rapport hauteur/largeur de {{aspectRatio}}."
+      "imageAspectRatioMismatch": "L'image doit avoir un rapport hauteur/largeur de {{aspectRatio}}.",
+      "invalidImageReference": "L'image sélectionnée n'est pas disponible. Téléversez à nouveau l'image."
     },
     "import": {
       "noFileUploaded": "Aucun fichier téléchargé",
@@ -8661,6 +8662,24 @@
       "disabled": "Les tutoriels d’aide ne sont pas activés sur cette installation.",
       "notFound": "Ce tutoriel n’est pas disponible pour votre version de Mentingo.",
       "invalidRequest": "Choisissez un tutoriel disponible ou modifiez votre recherche et réessayez."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Parcours de développement introuvable.",
+      "createError": "Impossible de créer le parcours de développement.",
+      "updateError": "Impossible de mettre à jour le parcours de développement.",
+      "updateMissingLanguage": "Ce parcours de développement n'est pas disponible dans la langue sélectionnée.",
+      "languageNotSupported": "Cette langue n'est pas prise en charge.",
+      "courseNotFound": "Cours introuvable.",
+      "courseAlreadyExists": "Ce cours fait déjà partie du parcours de développement.",
+      "courseIdsMustBeUnique": "Chaque cours ne peut être ajouté qu'une seule fois.",
+      "courseIdsEmpty": "Sélectionnez au moins un cours.",
+      "courseIdsMismatch": "L'ordre des cours ne correspond pas aux cours de ce parcours de développement.",
+      "courseLinkNotFound": "Ce cours ne fait pas partie du parcours de développement.",
+      "studentIdsEmpty": "Sélectionnez au moins un apprenant.",
+      "groupIdsEmpty": "Sélectionnez au moins un groupe.",
+      "featureDisabled": "Les parcours de développement sont désactivés sur cette plateforme."
     }
   }
 }

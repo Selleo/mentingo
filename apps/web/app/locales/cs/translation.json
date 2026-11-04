@@ -5038,7 +5038,8 @@
       "fileTooLarge": "Soubor je příliš velký. Maximální velikost je {{maxSize}}.",
       "uploadTooLarge": "Soubor je příliš velký na nahrání.",
       "imageResolutionTooLarge": "Obrázek je příliš velký. Maximální rozlišení je {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "Obrázek musí mít poměr stran {{aspectRatio}}."
+      "imageAspectRatioMismatch": "Obrázek musí mít poměr stran {{aspectRatio}}.",
+      "invalidImageReference": "Vybraný obrázek není k dispozici. Nahrajte obrázek znovu."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",
@@ -9196,6 +9197,24 @@
       "disabled": "Návody nápovědy nejsou v této instalaci zapnuté.",
       "notFound": "Tento návod není pro vaši verzi Mentingo dostupný.",
       "invalidRequest": "Vyberte dostupný návod nebo upravte vyhledávání a zkuste to znovu."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Rozvojová cesta nebyla nalezena.",
+      "createError": "Rozvojovou cestu se nepodařilo vytvořit.",
+      "updateError": "Rozvojovou cestu se nepodařilo aktualizovat.",
+      "updateMissingLanguage": "Tato rozvojová cesta není dostupná ve vybraném jazyce.",
+      "languageNotSupported": "Tento jazyk není podporován.",
+      "courseNotFound": "Kurz nebyl nalezen.",
+      "courseAlreadyExists": "Tento kurz už v rozvojové cestě je.",
+      "courseIdsMustBeUnique": "Každý kurz lze přidat pouze jednou.",
+      "courseIdsEmpty": "Vyberte alespoň jeden kurz.",
+      "courseIdsMismatch": "Pořadí kurzů neodpovídá kurzům v této rozvojové cestě.",
+      "courseLinkNotFound": "Tento kurz není součástí rozvojové cesty.",
+      "studentIdsEmpty": "Vyberte alespoň jednoho studenta.",
+      "groupIdsEmpty": "Vyberte alespoň jednu skupinu.",
+      "featureDisabled": "Rozvojové cesty jsou na této platformě vypnuté."
     }
   }
 }

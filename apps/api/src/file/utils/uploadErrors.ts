@@ -5,6 +5,7 @@ import { formatFileSize } from "@repo/shared";
 export const UPLOAD_ERROR_KEYS = {
   EMPTY: "files.toast.fileEmpty",
   INVALID_TYPE: "files.toast.invalidFileType",
+  INVALID_IMAGE_REFERENCE: "files.toast.invalidImageReference",
   TOO_LARGE: "files.toast.fileTooLarge",
   UPLOAD_TOO_LARGE: "files.toast.uploadTooLarge",
   IMAGE_RESOLUTION_TOO_LARGE: "files.toast.imageResolutionTooLarge",

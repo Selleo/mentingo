@@ -5347,7 +5347,8 @@
       "fileTooLarge": "Plik jest za duży. Maksymalny rozmiar to {{maxSize}}.",
       "uploadTooLarge": "Plik jest za duży, aby go przesłać.",
       "imageResolutionTooLarge": "Obraz jest za duży. Maksymalna rozdzielczość to {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "Obraz musi mieć proporcje {{aspectRatio}}."
+      "imageAspectRatioMismatch": "Obraz musi mieć proporcje {{aspectRatio}}.",
+      "invalidImageReference": "Wybrany obraz jest niedostępny. Prześlij obraz ponownie."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
@@ -9280,6 +9281,24 @@
       "disabled": "Samouczki pomocy nie są włączone w tej instalacji.",
       "notFound": "Ten samouczek nie jest dostępny dla Twojej wersji Mentingo.",
       "invalidRequest": "Wybierz dostępny samouczek lub popraw wyszukiwanie i spróbuj ponownie."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Nie znaleziono Ścieżki Rozwoju.",
+      "createError": "Nie udało się utworzyć Ścieżki Rozwoju.",
+      "updateError": "Nie udało się zaktualizować Ścieżki Rozwoju.",
+      "updateMissingLanguage": "Ta Ścieżka Rozwoju nie jest dostępna w wybranym języku.",
+      "languageNotSupported": "Ten język nie jest obsługiwany.",
+      "courseNotFound": "Nie znaleziono kursu.",
+      "courseAlreadyExists": "Ten kurs jest już w Ścieżce Rozwoju.",
+      "courseIdsMustBeUnique": "Każdy kurs można dodać tylko raz.",
+      "courseIdsEmpty": "Wybierz co najmniej jeden kurs.",
+      "courseIdsMismatch": "Kolejność kursów nie odpowiada kursom w tej Ścieżce Rozwoju.",
+      "courseLinkNotFound": "Ten kurs nie należy do Ścieżki Rozwoju.",
+      "studentIdsEmpty": "Wybierz co najmniej jednego uczestnika.",
+      "groupIdsEmpty": "Wybierz co najmniej jedną grupę.",
+      "featureDisabled": "Ścieżki Rozwoju są wyłączone na tej platformie."
     }
   }
 }

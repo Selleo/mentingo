@@ -58,6 +58,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
+import { dbAls } from "src/storage/db/db-als.store";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { resources, resourceEntity } from "src/storage/schema";
@@ -76,7 +77,8 @@ import { ThumbnailService } from "./thumbnail.service";
 import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { isStorageRangeNotSatisfiableError } from "./utils/storageErrors";
-import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { findStorageKeyTenantId, prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { UPLOAD_ERROR_KEYS } from "./utils/uploadErrors";
 import { validateAudioUpload } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
@@ -141,20 +143,48 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
 
-    if (isImageVariantReference(fileKey)) {
-      return this.getImageUrlByQuality(fileKey, options.quality);
-    }
-
-    return this.s3Service.getSignedUrl(fileKey);
+    return this.getImageUrlByQuality(fileKey, options.quality);
   }
 
   async getImageUrlByQuality(
     reference: string,
     quality: ImageQuality = IMAGE_QUALITY.XL,
   ): Promise<string> {
+    const tenantId = dbAls.getStore()?.tenantId;
+
+    if (tenantId && this.isForeignTenantStorageReference(reference, tenantId)) return "";
+
     if (!isImageVariantReference(reference)) return this.s3Service.getSignedUrl(reference);
 
     return this.s3Service.getSignedUrl(this.getFileStorageKeyByQuality(reference, quality));
+  }
+
+  /**
+   * Accepts an image reference sent by a client only if it is an already stored image of the
+   * caller's tenant, whatever its format (legacy uploads included); external URLs and other
+   * tenants' keys are rejected before reaching storage.
+   */
+  async assertImageReference(fileKey: string | null | undefined, tenantId: UUIDType) {
+    if (!fileKey) return;
+
+    if (findStorageKeyTenantId(fileKey) !== tenantId) {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_IMAGE_REFERENCE);
+    }
+
+    const contentType = await this.s3Service
+      .getFileContentType(this.getFileStorageKey(fileKey))
+      .catch(() => null);
+
+    if (!contentType?.toLowerCase().startsWith("image/")) {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_IMAGE_REFERENCE);
+    }
+  }
+
+  /** Keys namespaced under another tenant are never signed; legacy unprefixed keys still are. */
+  private isForeignTenantStorageReference(reference: string, tenantId: UUIDType) {
+    const ownerTenantId = findStorageKeyTenantId(reference);
+
+    return Boolean(ownerTenantId && ownerTenantId !== tenantId);
   }
 
   async getFileContentType(fileKey: string): Promise<string | null> {

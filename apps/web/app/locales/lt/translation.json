@@ -5033,7 +5033,8 @@
       "fileTooLarge": "Failas per didelis. Didžiausias dydis – {{maxSize}}.",
       "uploadTooLarge": "Failas per didelis, kad būtų įkeltas.",
       "imageResolutionTooLarge": "Vaizdas per didelis. Didžiausia raiška – {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "Vaizdo kraštinių santykis turi būti {{aspectRatio}}."
+      "imageAspectRatioMismatch": "Vaizdo kraštinių santykis turi būti {{aspectRatio}}.",
+      "invalidImageReference": "Pasirinktas vaizdas nepasiekiamas. Įkelkite vaizdą dar kartą."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -9194,6 +9195,24 @@
       "disabled": "Šioje sistemoje pagalbos pamokos neįjungtos.",
       "notFound": "Ši pamoka nepasiekiama jūsų Mentingo versijai.",
       "invalidRequest": "Pasirinkite pasiekiamą pamoką arba pakeiskite paieškos frazę ir bandykite dar kartą."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Tobulėjimo kelias nerastas.",
+      "createError": "Nepavyko sukurti tobulėjimo kelio.",
+      "updateError": "Nepavyko atnaujinti tobulėjimo kelio.",
+      "updateMissingLanguage": "Šis tobulėjimo kelias nepasiekiamas pasirinkta kalba.",
+      "languageNotSupported": "Ši kalba nepalaikoma.",
+      "courseNotFound": "Kursas nerastas.",
+      "courseAlreadyExists": "Šis kursas jau yra tobulėjimo kelyje.",
+      "courseIdsMustBeUnique": "Kiekvieną kursą galima pridėti tik vieną kartą.",
+      "courseIdsEmpty": "Pasirinkite bent vieną kursą.",
+      "courseIdsMismatch": "Kursų tvarka neatitinka šio tobulėjimo kelio kursų.",
+      "courseLinkNotFound": "Šis kursas nepriklauso tobulėjimo keliui.",
+      "studentIdsEmpty": "Pasirinkite bent vieną besimokantįjį.",
+      "groupIdsEmpty": "Pasirinkite bent vieną grupę.",
+      "featureDisabled": "Tobulėjimo keliai šioje platformoje išjungti."
     }
   }
 }

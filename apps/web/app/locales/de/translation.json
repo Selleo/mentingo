@@ -5029,7 +5029,8 @@
       "fileTooLarge": "Die Datei ist zu groß. Die maximale Größe beträgt {{maxSize}}.",
       "uploadTooLarge": "Die Datei ist zu groß zum Hochladen.",
       "imageResolutionTooLarge": "Das Bild ist zu groß. Die maximale Auflösung beträgt {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "Das Bild muss ein Seitenverhältnis von {{aspectRatio}} haben."
+      "imageAspectRatioMismatch": "Das Bild muss ein Seitenverhältnis von {{aspectRatio}} haben.",
+      "invalidImageReference": "Das ausgewählte Bild ist nicht verfügbar. Laden Sie das Bild erneut hoch."
     },
     "import": {
       "noFileUploaded": "Keine Datei hochgeladen",
@@ -9131,6 +9132,24 @@
       "disabled": "Hilfeanleitungen sind in dieser Installation nicht aktiviert.",
       "notFound": "Diese Anleitung ist für deine Version von Mentingo nicht verfügbar.",
       "invalidRequest": "Wähle eine verfügbare Anleitung oder ändere den Suchbegriff und versuche es erneut."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Entwicklungspfad nicht gefunden.",
+      "createError": "Der Entwicklungspfad konnte nicht erstellt werden.",
+      "updateError": "Der Entwicklungspfad konnte nicht aktualisiert werden.",
+      "updateMissingLanguage": "Dieser Entwicklungspfad ist in der ausgewählten Sprache nicht verfügbar.",
+      "languageNotSupported": "Diese Sprache wird nicht unterstützt.",
+      "courseNotFound": "Kurs nicht gefunden.",
+      "courseAlreadyExists": "Dieser Kurs ist bereits im Entwicklungspfad enthalten.",
+      "courseIdsMustBeUnique": "Jeder Kurs kann nur einmal hinzugefügt werden.",
+      "courseIdsEmpty": "Wählen Sie mindestens einen Kurs aus.",
+      "courseIdsMismatch": "Die Kursreihenfolge stimmt nicht mit den Kursen in diesem Entwicklungspfad überein.",
+      "courseLinkNotFound": "Dieser Kurs ist nicht Teil des Entwicklungspfads.",
+      "studentIdsEmpty": "Wählen Sie mindestens einen Lernenden aus.",
+      "groupIdsEmpty": "Wählen Sie mindestens eine Gruppe aus.",
+      "featureDisabled": "Entwicklungspfade sind auf dieser Plattform deaktiviert."
     }
   }
 }

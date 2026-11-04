@@ -4986,7 +4986,8 @@
       "fileTooLarge": "El archivo es demasiado grande. El tamaño máximo es {{maxSize}}.",
       "uploadTooLarge": "El archivo es demasiado grande para subirlo.",
       "imageResolutionTooLarge": "La imagen es demasiado grande. La resolución máxima es {{width}}×{{height}} px.",
-      "imageAspectRatioMismatch": "La imagen debe tener una relación de aspecto de {{aspectRatio}}."
+      "imageAspectRatioMismatch": "La imagen debe tener una relación de aspecto de {{aspectRatio}}.",
+      "invalidImageReference": "La imagen seleccionada no está disponible. Vuelve a subir la imagen."
     },
     "import": {
       "noFileUploaded": "No se ha subido ningún archivo",
@@ -9081,6 +9082,24 @@
       "disabled": "Los tutoriales de ayuda no están activados en esta instalación.",
       "notFound": "Este tutorial no está disponible para tu versión de Mentingo.",
       "invalidRequest": "Elige un tutorial disponible o cambia la búsqueda y vuelve a intentarlo."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "No se encontró la ruta de desarrollo.",
+      "createError": "No se pudo crear la ruta de desarrollo.",
+      "updateError": "No se pudo actualizar la ruta de desarrollo.",
+      "updateMissingLanguage": "Esta ruta de desarrollo no está disponible en el idioma seleccionado.",
+      "languageNotSupported": "Este idioma no es compatible.",
+      "courseNotFound": "No se encontró el curso.",
+      "courseAlreadyExists": "Este curso ya está en la ruta de desarrollo.",
+      "courseIdsMustBeUnique": "Cada curso solo se puede añadir una vez.",
+      "courseIdsEmpty": "Selecciona al menos un curso.",
+      "courseIdsMismatch": "El orden de los cursos no coincide con los cursos de esta ruta de desarrollo.",
+      "courseLinkNotFound": "Este curso no forma parte de la ruta de desarrollo.",
+      "studentIdsEmpty": "Selecciona al menos un estudiante.",
+      "groupIdsEmpty": "Selecciona al menos un grupo.",
+      "featureDisabled": "Las rutas de desarrollo están desactivadas en esta plataforma."
     }
   }
 }
