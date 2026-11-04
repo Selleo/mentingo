@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
+import { GamificationSetupService } from "src/gamification/gamification-setup.service";
 import { PermissionsBackfillService } from "src/permissions/permissions-backfill.service";
 import { DatabaseMigrationService } from "src/storage/db/database-migration.service";
 
@@ -12,6 +13,7 @@ export class AppStartupService implements OnModuleInit {
     private readonly databaseMigrationService: DatabaseMigrationService,
     private readonly permissionsBackfillService: PermissionsBackfillService,
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
+    private readonly gamificationSetupService: GamificationSetupService,
   ) {}
 
   async onModuleInit() {
@@ -25,6 +27,9 @@ export class AppStartupService implements OnModuleInit {
 
     const { insertedCount, tenantCount } =
       await this.permissionsBackfillService.backfillMissingPermissionsForAllTenants();
+
+    // After the backfill, so the recalculation sees the hidden-achievement permission.
+    await this.gamificationSetupService.ensurePredefinedAchievementsForAllTenants();
 
     if (insertedCount > 0) {
       this.logger.warn(

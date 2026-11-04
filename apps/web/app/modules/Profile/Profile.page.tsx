@@ -23,6 +23,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { LOGIN_REDIRECT_URL } from "../Auth/constants";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
+import { ProfileAchievements } from "../Gamification/ProfileAchievements";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentProfileSteps } from "../Onboarding/routes/student";
 
@@ -302,6 +303,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
             </Button>
           </section>
         )}
+        {isProfileOwner && <ProfileAchievements userId={id} />}
         <Certificates onOpenCertificatePreview={handleOpenCertificatePreview} />
       </div>
     </PageWrapper>

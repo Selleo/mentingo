@@ -499,6 +499,7 @@ export class LessonService {
             correctAnswers: evaluationResult.correctAnswerCount,
             wrongAnswers: evaluationResult.wrongAnswerCount,
             score: evaluationResult.score,
+            isSupportMode: Boolean(currentUser.isSupportMode),
           }),
           trx,
         );

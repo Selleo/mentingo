@@ -8,6 +8,7 @@ import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 import { resolvePostAuthRedirectPath } from "../Auth/utils/resolvePostAuthRedirectPath";
+import { GamificationRewardToasts } from "../Gamification/GamificationRewardToasts";
 
 export default function UserDashboardLayout() {
   return (
@@ -62,7 +63,10 @@ function UserDashboardContent() {
 
   return (
     <MFAGuard mode="app">
-      <Dashboard isAuthenticated={isAuthenticated} />
+      <>
+        {isAuthenticated && <GamificationRewardToasts />}
+        <Dashboard isAuthenticated={isAuthenticated} />
+      </>
     </MFAGuard>
   );
 }

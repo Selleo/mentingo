@@ -516,6 +516,11 @@
             "ready": "Dnešní trénink je připraven.",
             "failed": "Generování selhalo. Otevřete jej a zkuste to znovu."
           }
+        },
+        "gamification": {
+          "description": "Vaše úroveň, XP a nejnovější úspěchy",
+          "empty": "Dokončete lekce a kurzy a získejte svůj první úspěch.",
+          "recentRewards": "Nejnovější úspěchy"
         }
       },
       "commonDescription": "Klíčové informace na první pohled",
@@ -621,6 +626,9 @@
           "reorderSuccess": "Pořadí úkolů bylo uloženo.",
           "reorderError": "Pořadí úkolů se nepodařilo uložit."
         }
+      },
+      "gamification": {
+        "title": "Úroveň a úspěchy"
       }
     }
   },
@@ -2317,7 +2325,8 @@
         "live_training": "živá školení",
         "activity_log": "protokol aktivit",
         "competencies": "kompetence",
-        "other": "funkce platformy"
+        "other": "funkce platformy",
+        "gamification": "gamifikaci"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -2411,7 +2420,9 @@
         "live_training_end": "Může ukončovat relace živého školení.",
         "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
         "ai_thread_read": "Může zobrazit všechny konverzace s AI a jejich uložená hodnocení.",
-        "activity_log_read": "Může zobrazit protokoly aktivit."
+        "activity_log_read": "Může zobrazit protokoly aktivit.",
+        "gamification_read": "Zobrazit úrovně, XP a úspěchy.",
+        "gamification_earn_hidden": "Získávat skryté úspěchy."
       }
     },
     "dropdown": {
@@ -9228,5 +9239,22 @@
       "groupIdsEmpty": "Vyberte alespoň jednu skupinu.",
       "featureDisabled": "Rozvojové cesty jsou na této platformě vypnuté."
     }
+  },
+  "gamification": {
+    "level": "Úroveň {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP do úrovně {{level}}",
+    "levelOf": "Úroveň {{level}} z {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Získáno {{date}}",
+    "achievements": "Úspěchy",
+    "achievementsEmpty": "Zatím nejsou k dispozici žádné úspěchy.",
+    "toast": {
+      "title": "Úspěch odemčen!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Úspěchy se nepodařilo načíst.",
+    "retry": "Zkusit znovu"
   }
 }

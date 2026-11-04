@@ -22071,6 +22071,71 @@
         }
       }
     },
+    "/api/gamification/users/{userId}": {
+      "get": {
+        "operationId": "GamificationController_getUserGamificationProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserGamificationProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/content-marketplace/configuration": {
       "get": {
         "operationId": "ContentMarketplaceController_getContentMarketplaceAvailability",
@@ -26306,6 +26371,14 @@
                     {
                       "const": "activity_log.read",
                       "type": "string"
+                    },
+                    {
+                      "const": "gamification.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamification.earn_hidden",
+                      "type": "string"
                     }
                   ]
                 }
@@ -27766,6 +27839,10 @@
                             {
                               "const": "certificates",
                               "type": "string"
+                            },
+                            {
+                              "const": "gamification",
+                              "type": "string"
                             }
                           ]
                         },
@@ -27864,6 +27941,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -28016,6 +28097,10 @@
                     {
                       "const": "certificates",
                       "type": "string"
+                    },
+                    {
+                      "const": "gamification",
+                      "type": "string"
                     }
                   ]
                 },
@@ -28131,6 +28216,10 @@
                             {
                               "const": "certificates",
                               "type": "string"
+                            },
+                            {
+                              "const": "gamification",
+                              "type": "string"
                             }
                           ]
                         },
@@ -28229,6 +28318,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -28403,6 +28496,10 @@
                             {
                               "const": "certificates",
                               "type": "string"
+                            },
+                            {
+                              "const": "gamification",
+                              "type": "string"
                             }
                           ]
                         },
@@ -28501,6 +28598,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -172786,6 +172887,207 @@
             "required": [
               "redirectUrl",
               "expiresAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserGamificationProfileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lifetimeXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "spendableXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "level": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "currentLevelXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "nextLevelXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "achievements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "eventType": {
+                      "anyOf": [
+                        {
+                          "const": "login",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lesson_completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "course_completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_completed",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "requirementType": {
+                      "anyOf": [
+                        {
+                          "const": "first_time",
+                          "type": "string"
+                        },
+                        {
+                          "const": "count",
+                          "type": "string"
+                        },
+                        {
+                          "const": "streak",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "visibility": {
+                      "anyOf": [
+                        {
+                          "const": "visible",
+                          "type": "string"
+                        },
+                        {
+                          "const": "hidden",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "progress": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "level": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "threshold": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "xpReward": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "earnedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "level",
+                          "threshold",
+                          "xpReward",
+                          "earnedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "eventType",
+                    "requirementType",
+                    "visibility",
+                    "progress",
+                    "levels"
+                  ]
+                }
+              },
+              "recentRewards": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "achievementId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "achievementTitle": {
+                      "type": "string"
+                    },
+                    "level": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "xpReward": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "earnedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "achievementId",
+                    "achievementTitle",
+                    "level",
+                    "xpReward",
+                    "earnedAt"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "userId",
+              "lifetimeXp",
+              "spendableXp",
+              "level",
+              "currentLevelXp",
+              "nextLevelXp",
+              "achievements",
+              "recentRewards"
             ]
           }
         },

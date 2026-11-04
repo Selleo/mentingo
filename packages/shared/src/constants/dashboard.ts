@@ -17,6 +17,7 @@ export const DASHBOARD_WIDGET_TYPES = {
   REQUIRED_COURSES: "required_courses",
   COURSE_COMPLETION: "course_completion",
   CERTIFICATES: "certificates",
+  GAMIFICATION: "gamification",
 } as const;
 
 export type DashboardWidgetType =
@@ -148,6 +149,13 @@ export const DASHBOARD_WIDGET_CATALOG = {
     defaultSize: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
     requiredPermissions: [PERMISSIONS.CERTIFICATE_READ],
   },
+  [DASHBOARD_WIDGET_TYPES.GAMIFICATION]: {
+    type: DASHBOARD_WIDGET_TYPES.GAMIFICATION,
+    alwaysVisible: false,
+    allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_ONE, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO],
+    defaultSize: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+    requiredPermissions: [PERMISSIONS.GAMIFICATION_READ],
+  },
 } satisfies Record<DashboardWidgetType, DashboardWidgetDefinition>;
 
 export type DashboardCatalog = typeof DASHBOARD_WIDGET_CATALOG;
@@ -221,6 +229,7 @@ export const DASHBOARD_DEFAULT_LAYOUTS: Record<
       size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
     },
     { type: DASHBOARD_WIDGET_TYPES.CERTIFICATES, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+    { type: DASHBOARD_WIDGET_TYPES.GAMIFICATION, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
   ],
 };
 

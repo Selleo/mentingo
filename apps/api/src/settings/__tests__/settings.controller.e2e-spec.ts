@@ -242,6 +242,7 @@ describe("SettingsController (e2e)", () => {
           DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES,
           DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION,
           DASHBOARD_WIDGET_TYPES.CERTIFICATES,
+          DASHBOARD_WIDGET_TYPES.GAMIFICATION,
         ]);
       });
 

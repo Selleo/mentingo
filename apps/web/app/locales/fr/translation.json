@@ -527,6 +527,11 @@
             "ready": "La pratique du jour est prête.",
             "failed": "La préparation du scénario a échoué."
           }
+        },
+        "gamification": {
+          "description": "Votre niveau, vos XP et vos derniers succès",
+          "empty": "Terminez des leçons et des cours pour obtenir votre premier succès.",
+          "recentRewards": "Succès récents"
         }
       },
       "commonDescription": "Les informations clés en un coup d'œil",
@@ -615,6 +620,9 @@
           "reorderSuccess": "Ordre des tâches enregistré.",
           "reorderError": "Impossible d’enregistrer l’ordre des tâches."
         }
+      },
+      "gamification": {
+        "title": "Niveau et succès"
       }
     }
   },
@@ -2306,7 +2314,8 @@
         "live_training": "formations en direct",
         "activity_log": "journal d'activité",
         "competencies": "compétences",
-        "other": "capacités de la plateforme"
+        "other": "capacités de la plateforme",
+        "gamification": "gamification"
       },
       "descriptions": {
         "phishing_manage": "Créer et gérer des simulations de phishing.",
@@ -2400,7 +2409,9 @@
         "activity_log_read": "Afficher les journaux d'activité.",
         "competencies_use": "Utiliser les compétences dans le périmètre autorisé.",
         "competencies_manage": "Gérer les définitions de compétences et les profils de poste.",
-        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA."
+        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
+        "gamification_read": "Afficher les niveaux, XP et succès.",
+        "gamification_earn_hidden": "Obtenir des succès cachés."
       }
     },
     "dropdown": {
@@ -8693,5 +8704,22 @@
       "groupIdsEmpty": "Sélectionnez au moins un groupe.",
       "featureDisabled": "Les parcours de développement sont désactivés sur cette plateforme."
     }
+  },
+  "gamification": {
+    "level": "Niveau {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP avant le niveau {{level}}",
+    "levelOf": "Niveau {{level}} sur {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Obtenu le {{date}}",
+    "achievements": "Succès",
+    "achievementsEmpty": "Aucun succès disponible pour le moment.",
+    "toast": {
+      "title": "Succès débloqué !",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Impossible de charger les succès.",
+    "retry": "Réessayer"
   }
 }

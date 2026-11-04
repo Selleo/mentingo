@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   GraduationCap,
   ListTodo,
+  Trophy,
   TrendingUp,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ import { WidgetStudentAiMentorPractice } from "./widgets/student-ai-mentor-pract
 import { WidgetStudentCertificates } from "./widgets/student-certificates";
 import { WidgetStudentContinueLearning } from "./widgets/student-continue-learning";
 import { WidgetStudentCourseCompletion } from "./widgets/student-course-completion";
+import { WidgetStudentGamification } from "./widgets/student-gamification";
 import { WidgetStudentRequiredCourse } from "./widgets/student-required-course";
 import { WidgetTodoTasks } from "./widgets/todo-tasks";
 
@@ -91,6 +93,14 @@ export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetRegistry = {
     icon: AiMentor,
     iconClassName: "text-primary-700",
     component: WidgetStudentAiMentorPractice,
+  },
+  [DASHBOARD_WIDGET_TYPES.GAMIFICATION]: {
+    titleKey: "dashboardHome.widgets.gamification.title",
+    descriptionKey: "dashboardHome.widgets.studentTiles.gamification.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
+    icon: Trophy,
+    iconClassName: "text-primary-700",
+    component: WidgetStudentGamification,
   },
   [TODO_TASKS_WIDGET_ID]: {
     titleKey: "dashboardHome.widgets.todoTasks.title",

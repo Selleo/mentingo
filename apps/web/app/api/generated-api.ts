@@ -293,6 +293,8 @@ export interface CurrentUserResponse {
       | "tenant.manage"
       | "course.ai_generation"
       | "activity_log.read"
+      | "gamification.read"
+      | "gamification.earn_hidden"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -594,7 +596,8 @@ export interface GetDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -609,7 +612,8 @@ export interface GetDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -631,7 +635,8 @@ export interface UpdateDashboardSettingsBody {
       | "continue_learning"
       | "required_courses"
       | "course_completion"
-      | "certificates";
+      | "certificates"
+      | "gamification";
     size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
     visible: boolean;
   }[];
@@ -653,7 +658,8 @@ export interface UpdateDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -668,7 +674,8 @@ export interface UpdateDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -698,7 +705,8 @@ export interface ResetDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -713,7 +721,8 @@ export interface ResetDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -33629,6 +33638,55 @@ export interface CreateSupportSessionResponse {
   };
 }
 
+export interface GetUserGamificationProfileResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    /** @min 0 */
+    lifetimeXp: number;
+    /** @min 0 */
+    spendableXp: number;
+    /** @min 1 */
+    level: number;
+    /** @min 0 */
+    currentLevelXp: number;
+    /** @min 0 */
+    nextLevelXp: number;
+    achievements: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      description: string;
+      eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+      requirementType: "first_time" | "count" | "streak";
+      visibility: "visible" | "hidden";
+      /** @min 0 */
+      progress: number;
+      levels: {
+        /** @min 1 */
+        level: number;
+        /** @min 1 */
+        threshold: number;
+        /** @min 0 */
+        xpReward: number;
+        earnedAt: string | null;
+      }[];
+    }[];
+    recentRewards: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      achievementId: string;
+      achievementTitle: string;
+      /** @min 1 */
+      level: number;
+      /** @min 0 */
+      xpReward: number;
+      earnedAt: string;
+    }[];
+  };
+}
+
 export interface GetContentMarketplaceAvailabilityResponse {
   data: {
     enabled: boolean;
@@ -47260,6 +47318,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GamificationControllerGetUserGamificationProfile
+     * @request GET:/api/gamification/users/{userId}
+     */
+    gamificationControllerGetUserGamificationProfile: (
+      userId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserGamificationProfileResponse, any>({
+        path: `/api/gamification/users/${userId}`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
