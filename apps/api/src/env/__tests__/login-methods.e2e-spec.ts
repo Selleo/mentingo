@@ -150,6 +150,7 @@ describe("Organization login methods (e2e)", () => {
       expect(loginMethods).toEqual({
         google: false,
         microsoft: false,
+        entraId: false,
         slack: false,
         magicLink: true,
         password: true,
@@ -171,6 +172,7 @@ describe("Organization login methods (e2e)", () => {
       expect(response.body.data.missingCredentials).toEqual({
         google: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
         microsoft: ["MICROSOFT_CLIENT_SECRET"],
+        entraId: ["ENTRA_ID_CLIENT_ID", "ENTRA_ID_CLIENT_SECRET", "ENTRA_ID_DIRECTORY_ID"],
         slack: ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"],
       });
       expect(JSON.stringify(response.body)).not.toContain("existing-id");
