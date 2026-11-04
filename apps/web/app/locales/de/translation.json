@@ -8289,7 +8289,9 @@
       "averageQuizScore": "Durchschnittliche Quizpunktzahl",
       "attempts": "Quizversuche insgesamt",
       "lastActivity": "Letzte Aktivität",
-      "pathCourseStatus": "Kursstatus im Entwicklungspfad"
+      "pathCourseStatus": "Kursstatus im Entwicklungspfad",
+      "sortAscending": "Aufsteigend sortieren",
+      "sortDescending": "Absteigend sortieren"
     },
     "help": {
       "title": "Informationen zum Bericht",

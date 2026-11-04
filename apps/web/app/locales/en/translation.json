@@ -7646,7 +7646,9 @@
       "averageQuizScore": "Average quiz score",
       "attempts": "Total quiz attempts",
       "lastActivity": "Last activity",
-      "pathCourseStatus": "Path course status"
+      "pathCourseStatus": "Path course status",
+      "sortAscending": "Sort ascending",
+      "sortDescending": "Sort descending"
     },
     "help": {
       "title": "About this report",

@@ -7373,7 +7373,9 @@
       "averageQuizScore": "Score moyen aux quiz",
       "attempts": "Nombre total de tentatives",
       "lastActivity": "Dernière activité",
-      "pathCourseStatus": "État du cours dans le parcours"
+      "pathCourseStatus": "État du cours dans le parcours",
+      "sortAscending": "Trier par ordre croissant",
+      "sortDescending": "Trier par ordre décroissant"
     },
     "help": {
       "title": "À propos du rapport",

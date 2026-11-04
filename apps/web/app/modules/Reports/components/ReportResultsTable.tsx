@@ -1,5 +1,5 @@
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { TableProperties } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, TableProperties } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,7 @@ import { cn } from "~/lib/utils";
 
 import { getReportResultColumns } from "./ReportResultsTable.columns";
 
+import type { ReportSort } from "../reports-api.types";
 import type { RunReportResponse } from "~/api/generated-api";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { ReportView } from "~/modules/Reports/reports.types";
@@ -26,6 +27,8 @@ type ReportResultsTableProps = {
   language: string;
   timezone: string;
   isFetching: boolean;
+  sort: ReportSort;
+  onSortChange: (sort: ReportSort) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
 };
@@ -36,6 +39,8 @@ export function ReportResultsTable({
   language,
   timezone,
   isFetching,
+  sort,
+  onSortChange,
   onPageChange,
   onPageSizeChange,
 }: ReportResultsTableProps) {
@@ -48,6 +53,7 @@ export function ReportResultsTable({
     getRowId: (row) => row.id,
     data: result.rows,
     columns,
+    manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -71,11 +77,55 @@ export function ReportResultsTable({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="whitespace-nowrap">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const sortable = !header.id.startsWith("pathCourse-");
+                const active = sort.sortBy === header.id;
+                const nextDirection = active && sort.sortDirection === "asc" ? "desc" : "asc";
+                const SortIcon = active
+                  ? sort.sortDirection === "asc"
+                    ? ArrowUp
+                    : ArrowDown
+                  : ArrowUpDown;
+                const label = flexRender(header.column.columnDef.header, header.getContext());
+                return (
+                  <TableHead
+                    key={header.id}
+                    className="whitespace-nowrap"
+                    aria-sort={
+                      sortable
+                        ? active
+                          ? sort.sortDirection === "asc"
+                            ? "ascending"
+                            : "descending"
+                          : "none"
+                        : undefined
+                    }
+                  >
+                    {sortable ? (
+                      <button
+                        type="button"
+                        className="flex min-h-11 w-full items-center gap-2 rounded-sm text-left hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+                        onClick={() =>
+                          onSortChange({
+                            sortBy: header.id as ReportSort["sortBy"],
+                            sortDirection: nextDirection,
+                          })
+                        }
+                      >
+                        {label}
+                        <SortIcon className="size-4 shrink-0" aria-hidden="true" />
+                        <span className="sr-only">
+                          {t(
+                            `reports.table.sort${nextDirection === "asc" ? "Ascending" : "Descending"}`,
+                          )}
+                        </span>
+                      </button>
+                    ) : (
+                      label
+                    )}
+                  </TableHead>
+                );
+              })}
             </TableRow>
           ))}
         </TableHeader>
