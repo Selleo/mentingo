@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +41,7 @@ export const PdfPreviewViewer = ({ src, loadingMessage, errorMessage }: PdfPrevi
       .then((module) => {
         if (!isMounted) return;
 
-        module.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${module.pdfjs.version}/build/pdf.worker.min.mjs`;
+        module.pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
         setReactPdf(module);
       })
