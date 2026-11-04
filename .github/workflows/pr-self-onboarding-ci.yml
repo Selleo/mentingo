@@ -5,6 +5,7 @@ on:
       - .github/workflows/self-onboarding.yml
       - .github/workflows/self-onboarding-on-version.yml
       - .github/workflows/pr-self-onboarding-ci.yml
+      - .agents/skills/release-film/assets/**
       - .agents/skills/release-film/scripts/**
       - .agents/skills/release-film/projects/mentingo-self-onboarding.json
       - .agents/skills/release-film/tests/test_self_onboarding*.py

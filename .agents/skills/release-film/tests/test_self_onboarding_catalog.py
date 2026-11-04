@@ -463,12 +463,21 @@ class RegistryTests(unittest.TestCase):
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
 
+    def test_failed_daily_practice_retry_has_an_explicit_short_video(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain = next(d for d in loaded['domains'] if d['domain'] == 'ai-mentor')
+        assignments = [v['key'] for v in domain['videos'] if 'retry-practice-generation' in v['flowIds']]
+        self.assertEqual(assignments, ['ai-mentor.recovery'])
+        flow = next(f for f in domain['flows'] if f['id'] == 'retry-practice-generation')
+        self.assertIn('same daily practice', flow['outcomes'][0])
+
     def test_app_coverage_audit_requires_every_area_spec_and_real_source(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 224, 'videos': 91})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 225, 'videos': 92})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)

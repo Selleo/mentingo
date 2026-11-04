@@ -4746,6 +4746,38 @@
           "outcomes": [
             "Voice exchange and transcript are visible without losing the practice."
           ]
+        },
+        {
+          "id": "retry-practice-generation",
+          "title": "Retry failed practice generation",
+          "description": "Retry generation of the same daily AI Mentor practice after a recoverable failure.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "ai-mentor"
+          ],
+          "specPaths": [
+            "docs/specs/ai-mentor-lessons-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/AiMentorPractice/**",
+            "apps/api/src/ai/**"
+          ],
+          "goal": "Recover a failed daily practice without creating another session.",
+          "preconditions": [
+            "A synthetic daily practice has been staged in the failed generation state through the existing isolated test fixtures.",
+            "The isolated practice-generation provider can complete the retry; no real learner data or live failure injection."
+          ],
+          "actions": [
+            "Open the existing failed daily practice and inspect its failure message.",
+            "Select Retry and observe the generation state.",
+            "Wait for the prepared practice and open its task."
+          ],
+          "outcomes": [
+            "The same daily practice becomes ready without creating another daily session."
+          ]
         }
       ],
       "videos": [
@@ -4765,6 +4797,14 @@
           "description": "Practice with voice in Mentingo.",
           "flowIds": [
             "use-practice-voice"
+          ]
+        },
+        {
+          "key": "ai-mentor.recovery",
+          "title": "Recover a failed practice",
+          "description": "Retry a failed daily practice and continue once it is ready.",
+          "flowIds": [
+            "retry-practice-generation"
           ]
         }
       ]

@@ -20,6 +20,7 @@ import time
 import zlib
 
 from prepare_captions import prepare_captions
+import mentingo_frame
 
 FFMPEG = "ffmpeg"
 FFPROBE = "ffprobe"
@@ -149,11 +150,14 @@ def load_plan(path, enforce_duration=True, strict=True):
     path = Path(path).resolve()
     warnings = []
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme'], ['font', 'chapters'])
     mode = data.get('mode', 'release')
     if mode not in ('release', 'tutorial'):
         raise ValueError('Unknown film mode')
     colors = colors_of(data.get('colors'))
+    theme = data.get('frameTheme')
+    if theme not in (None, 'mentingo') or theme and mode != 'tutorial':
+        raise ValueError('Mentingo frame theme is supported only for tutorial films')
     def asset(name):
         if not isinstance(name, str) or not name:
             raise ValueError('Input path must be a nonempty string')
@@ -264,7 +268,7 @@ def load_plan(path, enforce_duration=True, strict=True):
     if enforce_duration and not 180 <= cursor <= 300:
         raise ValueError(f'Meaningful story must last 180–300 seconds; planned {cursor:.3f}')
     return dict(font=font, segments=segments, captions=captions, steps=steps, chapters=chapters, duration=cursor,
-                warnings=warnings, language=data.get('language') or 'pl', colors=colors)
+                warnings=warnings, language=data.get('language') or 'pl', colors=colors, frame_theme=theme)
 
 
 def lacks(ffmpeg):
@@ -319,11 +323,11 @@ def key_filter(path, text, colors=COLORS):
             f"box=1:boxcolor={colors['accent']}@0.95:boxborderw=16:x={right}-tw-44:y={bottom}-th-44")
 
 
-def label_filter(path, text, colors=COLORS):
+def label_filter(path, text, colors=COLORS, branded=False):
     """A transition's label in the picture's top left corner, on a dark tab."""
     path.write_text(text.translate(LOOKALIKES))
     return ('drawtext=fontfile=font.ttf:textfile=' + path.name + ':expansion=none:fontsize=30:fontcolor=white:'
-            f"box=1:boxcolor={colors['frame']}@0.88:boxborderw=14:x=206:y=58")
+            f"box=1:boxcolor={colors['frame']}@0.88:boxborderw=14:x={216 if branded else 206}:y={104 if branded else 58}")
 
 
 STEP_X, STEP_Y = 206, 958  # a step label's text in the bottom band under the picture; its accent sits left of it
@@ -340,7 +344,7 @@ def step_lines(text):
     return [first, text[len(first):].strip()]
 
 
-def step_filter(path, text, start, end, colors=COLORS):
+def step_filter(path, text, start, end, colors=COLORS, branded=False):
     """A step label in the film's bottom band, one or two lines saying what happens: an orange accent and the text,
     which fades in (times in the segment's own seconds). A label begun in an earlier segment (``start`` below 0: the
     footage before a PDF page) goes on as it was there, never fading in again."""
@@ -348,9 +352,11 @@ def step_filter(path, text, start, end, colors=COLORS):
     path.write_text('\n'.join(lines).translate(LOOKALIKES))
     shown = f"enable='gte(t,{max(0.0, start):.6f})*lt(t,{end:.6f})'"
     top, height = (STEP_Y, 58) if len(lines) < 2 else (STEP_Y - 28, 108)
+    if branded:
+        top = STEP_Y  # Both lines stay below the taller rounded application panel.
     return (f"drawbox=x={STEP_X - 26}:y={top - 8}:w=8:h={height}:color={colors['accent']}:t=fill:{shown},"
             f"drawtext=fontfile=font.ttf:textfile={path.name}:expansion=none:fontsize=40:line_spacing=6:"
-            f"fontcolor=white:x={STEP_X}:y={top}:alpha='min(1,max(0,(t-({start:.6f}))/0.25))':{shown}")
+            f"fontcolor={'0x222949' if branded else 'white'}:x={STEP_X}:y={top}:alpha='min(1,max(0,(t-({start:.6f}))/0.25))':{shown}")
 
 
 def timestamp(seconds, separator):
@@ -544,7 +550,8 @@ def segment_key(plan, segment, chapter, cues):
     content = {'segment': {k: v for k, v in segment.items() if k != 'start'}, 'offset': segment['start'] - chapter['start'],
                'ending': segment is plan['segments'][-1],
                'cues': [(c['start'] - segment['start'], c['end'] - segment['start'], c['text']) for c in cues],
-               'font': file_digest(plan['font']), 'colors': plan.get('colors') or COLORS, 'renderer': file_digest(__file__)}
+               'font': file_digest(plan['font']), 'colors': plan.get('colors') or COLORS, 'renderer': file_digest(__file__),
+               'frame': mentingo_frame.fingerprint() if plan.get('frame_theme') == 'mentingo' else None}
     if 'source' in segment:
         content['source'] = file_digest(segment['source'])
     return hashlib.sha256(json.dumps(content, sort_keys=True, default=str).encode()).hexdigest()[:24]
@@ -568,14 +575,20 @@ def encode_segment(plan, segment, work, pointers, output):
             folder.mkdir(exist_ok=True)
             pointers[scale] = pointer_images(folder, scale)
         inputs, visual = footage_visual(segment, 0, length, pointers[scale], colors)
+    branded = plan.get('frame_theme') == 'mentingo'
+    layer = 'v0'
+    if branded:
+        inputs, visual, layer = mentingo_frame.compose(inputs, visual, segment, plan['language'], work, name)
+        if segment['kind'] == 'card':
+            visual += f";[{layer}]{step_filter(work / f'{name}-title.txt', segment['title'], -1, length, colors, True)}[brandedtitle]"
+            layer = 'brandedtitle'
     args += inputs
     graph = [visual]
-    layer = 'v0'
     for label_index, (label_start, label_end, text) in enumerate(segment.get('labels') or []):
         if label_end <= 0 or label_start >= length:
             continue
         next_layer = f'label{label_index}'
-        graph.append(f"[{layer}]{label_filter(work / f'{name}-label{label_index}.txt', text, colors)}:"
+        graph.append(f"[{layer}]{label_filter(work / f'{name}-label{label_index}.txt', text, colors, branded)}:"
                      f"enable='gte(t,{max(0, label_start):.6f})*lt(t,{min(length, label_end):.6f})'[{next_layer}]")
         layer = next_layer
     for key_index, (key_start, key_end, text) in enumerate(segment.get('keys') or []):
@@ -589,9 +602,9 @@ def encode_segment(plan, segment, work, pointers, output):
         if segment['kind'] == 'card' or step['end'] <= start or step['start'] >= start + length:
             continue
         next_layer = f'step{step_index}'
-        graph.append(f"[{layer}]{step_filter(work / f'{name}-step{step_index}.txt', step['text'], step['start'] - start, min(length, step['end'] - start), colors)}[{next_layer}]")
+        graph.append(f"[{layer}]{step_filter(work / f'{name}-step{step_index}.txt', step['text'], step['start'] - start, min(length, step['end'] - start), colors, branded)}[{next_layer}]")
         layer = next_layer
-    if segment is plan['segments'][-1] and length > 2 * ENDING:  # the film's end fades out
+    if not branded and segment is plan['segments'][-1] and length > 2 * ENDING:  # the film's end fades out
         graph.append(f"[{layer}]fade=t=out:st={length - ENDING:.6f}:d={ENDING}:color={colors['frame']}[ending]")
         layer = 'ending'
     args += ['-filter_complex', ';'.join(graph), '-map', f'[{layer}]', '-an', '-t', length, '-r', '30',
@@ -709,12 +722,14 @@ def prepare(path, out, enforce_duration=True, strict=True):
     started = time.monotonic()
     path, out = Path(path).resolve(), Path(out).resolve()
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors', 'mode'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme'], ['font', 'chapters'])
     if not isinstance(data['chapters'], list) or not data['chapters']:
         raise ValueError('Expected authored chapters')
     result = dict(font=str((path.parent / data['font']).resolve()), chapters=[], language=data.get('language') or 'pl')
     if 'mode' in data:
         result['mode'] = data['mode']
+    if 'frameTheme' in data:
+        result['frameTheme'] = data['frameTheme']
     if data.get('colors') is not None:
         result['colors'] = data['colors']
     caption_timing = []

@@ -2,8 +2,8 @@
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
 The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
-in `docs/specs`. It contains 224 explicit flows, assigned exactly once to 91 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 182
+in `docs/specs`. It contains 225 explicit flows, assigned exactly once to 92 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 184
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -23,7 +23,7 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `authentication` | 7 | 3 | `authentication-account-access`, `mentingo-mcp` |
 | `dashboard` | 9 | 4 | `personal-dashboard`, `featured-course`, `global-search`, `onboarding-tours`, `self-onboarding` |
 | `assistant` | 5 | 3 | `assistant` |
-| `ai-mentor` | 4 | 2 | `ai-mentor-lessons` |
+| `ai-mentor` | 5 | 3 | `ai-mentor-lessons` |
 | `phishing` | 4 | 2 | `phishing-simulation` |
 | `content-marketplace` | 4 | 2 | `content-marketplace` |
 | `notifications` | 4 | 2 | `announcements-notifications` |
