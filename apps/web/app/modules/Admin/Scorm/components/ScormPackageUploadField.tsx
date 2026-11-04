@@ -40,7 +40,7 @@ type ScormPackageUploadFieldProps = {
   onClear: () => void;
 };
 
-const formatFileSize = (size: number) => {
+export const formatFileSize = (size: number) => {
   const sizeInMb = size / (1024 * 1024);
 
   return `${sizeInMb.toFixed(sizeInMb >= 10 ? 0 : 1)} MB`;

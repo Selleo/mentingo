@@ -17,6 +17,14 @@ const courseSchema = Type.Object(
     originalId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
     title: nativeArchiveLocalizedTextSchema,
     description: nativeArchiveLocalizedTextSchema,
+    // Archives restore existing data, including outcomes beyond the current authoring limit.
+    learningOutcomes: Type.Optional(
+      Type.Partial(
+        Type.Record(nativeArchiveLanguageSchema, Type.Array(Type.String()), {
+          additionalProperties: false,
+        }),
+      ),
+    ),
     authorMetadata: Type.Optional(
       Type.Union([
         Type.Object(

@@ -11,13 +11,15 @@ import {
   HeadObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 
-import { S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
+import { S3_MULTIPART_UPLOAD_CONCURRENCY, S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
 
+import type { S3StreamUploadOptions } from "./s3.types";
 import type { FileStreamPayload } from "src/file/types/file-stream.type";
 import type { PassThrough, Readable } from "stream";
 
@@ -161,10 +163,18 @@ export class S3Service {
     );
   }
 
-  async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  /** With a download filename, the URL makes browsers save the object instead of opening it. */
+  async getSignedUrl(
+    key: string,
+    expiresIn: number = 3600,
+    { downloadFilename }: { downloadFilename?: string } = {},
+  ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
+      ...(downloadFilename && {
+        ResponseContentDisposition: `attachment; filename="${downloadFilename}"`,
+      }),
     });
 
     return getSignedUrl(this.s3Client, command, { expiresIn });
@@ -346,59 +356,59 @@ export class S3Service {
     );
   }
 
+  /**
+   * Streams into storage with the SDK's managed upload: parts are buffered without re-copying and
+   * up to S3_MULTIPART_UPLOAD_CONCURRENCY of them upload while the stream keeps being read. Like
+   * every other S3 call, the upload is aborted when no part finishes within the operation timeout.
+   */
   async uploadStreamMultipart(
     stream: Readable,
     key: string,
     contentType: string,
-    partSize = DEFAULT_TUS_CHUNK_SIZE,
+    { partSize = DEFAULT_TUS_CHUNK_SIZE, onUploadedBytes }: S3StreamUploadOptions = {},
   ): Promise<void> {
-    try {
-      await this.writeMultipartStream(stream, key, contentType, partSize);
-    } finally {
-      stream.destroy();
-    }
-  }
+    const upload = new Upload({
+      client: this.s3Client,
+      params: { Bucket: this.bucketName, Key: key, Body: stream, ContentType: contentType },
+      partSize,
+      queueSize: S3_MULTIPART_UPLOAD_CONCURRENCY,
+      leavePartsOnError: false,
+    });
 
-  private async writeMultipartStream(
-    stream: Readable,
-    key: string,
-    contentType: string,
-    partSize: number,
-  ): Promise<void> {
-    const { uploadId } = await this.createMultipartUpload(key, contentType);
-    const parts: Array<{ ETag: string; PartNumber: number }> = [];
-    let buffered = Buffer.alloc(0);
+    let timedOut = false;
+    let stallTimeout: NodeJS.Timeout | undefined;
 
-    const uploadPart = async (part: Buffer) => {
-      const partNumber = parts.length + 1;
-      const etag = await this.uploadMultipartPart(key, uploadId, partNumber, part);
-      parts.push({ ETag: etag, PartNumber: partNumber });
+    const restartStallTimeout = () => {
+      clearTimeout(stallTimeout);
+      stallTimeout = setTimeout(() => {
+        timedOut = true;
+        void upload.abort();
+      }, S3_OPERATION_TIMEOUT_MS);
     };
 
+    upload.on("httpUploadProgress", ({ loaded }) => {
+      restartStallTimeout();
+      if (loaded !== undefined) onUploadedBytes?.(loaded);
+    });
+    restartStallTimeout();
+
     try {
-      for await (const chunk of stream) {
-        const nextChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-        buffered = Buffer.concat([buffered, nextChunk]);
-
-        while (buffered.length >= partSize) {
-          await uploadPart(buffered.subarray(0, partSize));
-          buffered = buffered.subarray(partSize);
-        }
-      }
-
-      if (buffered.length > 0) {
-        await uploadPart(buffered);
-      }
-
-      if (!parts.length) {
-        throw new Error("Cannot upload empty stream");
-      }
-
-      await this.completeMultipartUpload(key, uploadId, parts);
+      await upload.done();
     } catch (error) {
-      stream.destroy(error instanceof Error ? error : undefined);
-      await this.abortMultipartUpload(key, uploadId).catch(() => undefined);
+      if (timedOut) {
+        const timeoutMessage = `S3 uploadStreamMultipart for key "${key}" timed out after ${S3_OPERATION_TIMEOUT_MS}ms`;
+        this.logger.error(timeoutMessage);
+        throw new Error(timeoutMessage);
+      }
+
+      this.logger.error(
+        `S3 uploadStreamMultipart for key "${key}" failed: ${this.getErrorMessage(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
+    } finally {
+      clearTimeout(stallTimeout);
+      stream.destroy();
     }
   }
 

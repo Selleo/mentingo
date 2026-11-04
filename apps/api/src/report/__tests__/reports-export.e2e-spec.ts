@@ -289,13 +289,25 @@ describe("Report exports (e2e)", () => {
   );
 
   it("denies a manager's completed export after their group membership scope narrows", async () => {
+    // Browser/PDF rendering is covered by ReportsExportRenderer tests.
     const created = await request(app.getHttpServer())
       .post("/api/report/exports")
       .set("Cookie", managerCookie)
-      .send({ format: "pdf", language: "en", query: baseQuery([groupId]) })
+      .send({ format: "xlsx", language: "en", query: baseQuery([groupId]) })
       .expect(201);
     const job = jobs[jobs.length - 1];
     await app.get(ReportsExportsService).processExportGenerationJob(job);
+
+    const completed = await request(app.getHttpServer())
+      .get(`/api/report/exports/${created.body.data.id}`)
+      .set("Cookie", managerCookie)
+      .expect(200);
+    expect(completed.body.data.status).toBe("completed");
+    await request(app.getHttpServer())
+      .get(`/api/report/exports/${created.body.data.id}/download`)
+      .set("Cookie", managerCookie)
+      .expect("Content-Type", /spreadsheetml.sheet/)
+      .expect(200);
 
     // The manager remains assigned to the group; only the report population changes.
     await db.delete(groupUsers).where(eq(groupUsers.userId, learner.id));

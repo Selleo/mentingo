@@ -30130,7 +30130,7 @@ export interface DeleteManyCategoriesResponse {
 export interface InitTusImportBody {
   /**
    * @min 1
-   * @max 524288000
+   * @max 838860800
    */
   sizeBytes: number;
 }
@@ -30182,6 +30182,29 @@ export interface GetNativeArchiveStatusResponse {
       reusedCourseIds?: string[];
     };
     failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetNativeArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -33272,6 +33295,29 @@ export interface GetCourseArchiveExportStatusResponse {
       reusedCourseIds?: string[];
     };
     failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetCourseArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -44192,6 +44238,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
+     * @request GET:/api/native-archives/jobs/{id}/download-url
+     */
+    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveDownloadUrlResponse, any>({
+        path: `/api/native-archives/jobs/${id}/download-url`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name NativeArchiveControllerDownloadNativeArchive
      * @request GET:/api/native-archives/jobs/{id}/download
      */
@@ -46760,6 +46820,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, void>({
         path: `/api/integration/native-archive/jobs/${jobId}/download`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Returns a short-lived storage URL for the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. Fetch the URL without API headers; the download itself does not pass through the API. The URL must be used before it expires; ask for a new one if it does.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerGetCourseArchiveDownloadUrl
+     * @summary Get a download URL for a native archive
+     * @request GET:/api/integration/native-archive/jobs/{jobId}/download-url
+     */
+    integrationNativeArchiveControllerGetCourseArchiveDownloadUrl: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseArchiveDownloadUrlResponse, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}/download-url`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

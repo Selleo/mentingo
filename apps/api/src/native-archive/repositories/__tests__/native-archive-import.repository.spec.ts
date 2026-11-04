@@ -17,6 +17,7 @@ describe("NativeArchiveImportRepository", () => {
       id: "course-id",
       title: { en: "Course" },
       description: { en: "Description" },
+      learningOutcomes: { en: ["Recognize risk"], pl: ["Rozpoznaj ryzyko"] },
       status: "draft",
       priceInCents: 0,
       currency: "usd",
@@ -32,6 +33,10 @@ describe("NativeArchiveImportRepository", () => {
     expect(insertedValues).toEqual(
       expect.objectContaining({ id: "course-id", authorId: "actor-id", categoryId: "category-id" }),
     );
+    expect(insertedValues.learningOutcomes).toEqual({
+      en: ["Recognize risk"],
+      pl: ["Rozpoznaj ryzyko"],
+    });
     expect(insertedValues.title).not.toEqual({ en: "Course" });
     expect(insertedValues.description).not.toEqual({ en: "Description" });
   });

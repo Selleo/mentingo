@@ -11,8 +11,9 @@ import { assertCanExportTenantCourses } from "../utils/integration-course-access
 import type { IntegrationKeyTenantContext } from "../integration.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { FileStreamPayload } from "src/file/types/file-stream.type";
 import type {
+  NativeArchiveDownload,
+  NativeArchiveDownloadUrl,
   NativeArchiveJobReceipt,
   NativeArchiveJobStatus,
 } from "src/native-archive/native-archive.types";
@@ -55,9 +56,19 @@ export class IntegrationCourseExportService {
     jobId: string,
     actor: CurrentUserType,
     keyTenant: IntegrationKeyTenantContext,
-  ): Promise<FileStreamPayload> {
+  ): Promise<NativeArchiveDownload> {
     assertCanExportTenantCourses(actor, keyTenant);
 
     return this.nativeArchiveJobService.getArchiveDownloadStream(jobId, actor);
+  }
+
+  async getCourseArchiveDownloadUrl(
+    jobId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<NativeArchiveDownloadUrl> {
+    assertCanExportTenantCourses(actor, keyTenant);
+
+    return this.nativeArchiveJobService.getArchiveDownloadUrl(jobId, actor);
   }
 }

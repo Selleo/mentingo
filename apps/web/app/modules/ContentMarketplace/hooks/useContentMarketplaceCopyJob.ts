@@ -66,6 +66,7 @@ export function useContentMarketplaceCopyJob(listingId: string) {
   return {
     startCopy,
     isCopying: isStartingCopy || Boolean(jobId),
+    copyProgress: jobId ? job?.progress : undefined,
     lastCopiedCourseId,
   };
 }

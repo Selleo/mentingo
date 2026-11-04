@@ -31,6 +31,7 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 import {
+  nativeArchiveDownloadUrlResponseSchema,
   nativeArchiveJobResponseSchema,
   nativeArchiveStatusResponseSchema,
   nativeArchiveTusInitRequestSchema,
@@ -260,13 +261,22 @@ export class NativeArchiveController {
     return new BaseResponse(await this.nativeArchiveJobService.getArchiveJobStatus(id, actor));
   }
 
+  @Get("jobs/:id/download-url")
+  @Validate({ response: baseResponse(nativeArchiveDownloadUrlResponseSchema) })
+  async getNativeArchiveDownloadUrl(
+    @Param("id") id: string,
+    @CurrentUser() actor: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.nativeArchiveJobService.getArchiveDownloadUrl(id, actor));
+  }
+
   @Get("jobs/:id/download")
   async downloadNativeArchive(
     @Param("id") id: string,
     @CurrentUser() actor: CurrentUserType,
     @Res() response: Response,
   ) {
-    const file = await this.nativeArchiveJobService.getArchiveDownloadStream(id, actor);
-    streamNativeArchiveDownload(file, response);
+    const download = await this.nativeArchiveJobService.getArchiveDownloadStream(id, actor);
+    streamNativeArchiveDownload(download, response);
   }
 }

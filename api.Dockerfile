@@ -37,7 +37,8 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    UV_THREADPOOL_SIZE=16
 
 RUN chmod +x /app/entrypoint.sh
 

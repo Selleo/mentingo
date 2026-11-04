@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "Una formación en vivo vinculada a este curso está incompleta y no se puede exportar.",
       "courseNotFound": "No se encontró el curso que se va a exportar.",
       "categoryNotFound": "No se encontró la categoría del curso."
+    },
+    "progress": {
+      "waiting": "Esperando para empezar…",
+      "step": "Paso {{current}} de {{total}}",
+      "uploadingPackage": "Subiendo el paquete",
+      "stages": {
+        "collecting-content": "Recopilando el contenido del curso",
+        "copying-files": "Copiando archivos",
+        "packaging": "Empaquetando",
+        "downloading": "Descargando el paquete",
+        "verifying": "Comprobando el paquete",
+        "uploading-files": "Subiendo archivos",
+        "indexing": "Preparando el contenido de IA",
+        "saving": "Guardando el curso"
+      }
     }
   },
   "aiConversations": {
@@ -998,38 +1013,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Atrás",
-    "eyebrow": "Configuración del curso",
     "title": "Crear nuevo curso",
     "subtitle": "Elige el editor estándar, un paquete SCORM o un paquete de Mentingo.",
     "standard": {
       "title": "Estándar",
-      "description": "Cree un curso con el plan de estudios, las lecciones, los cuestionarios y la configuración integrados.",
-      "features": {
-        "authoring": "Construido con el editor de cursos nativo",
-        "curriculum": "Capítulos, lecciones y cuestionarios administrados en Mentingo",
-        "translations": "Idiomas del curso y traducciones compatibles.",
-        "settings": "Precios, estado y certificados incluidos"
-      }
+      "description": "Cree un curso con el plan de estudios, las lecciones, los cuestionarios y la configuración integrados."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Cree un curso a partir de un paquete SCORM 1.2.",
-      "features": {
-        "import": "Construido a partir de un paquete .zip SCORM 1.2",
-        "tracking": "Se admite la finalización de SCO y el seguimiento del tiempo de ejecución",
-        "structure": "Se conserva la estructura del paquete importado.",
-        "future": "Precios, estado y certificados incluidos"
-      }
+      "description": "Cree un curso a partir de un paquete SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Paquete de Mentingo",
-      "description": "Restaura un curso o una ruta de aprendizaje desde un paquete de Mentingo.",
-      "features": {
-        "structure": "Se restauran la estructura y las traducciones",
-        "settings": "Se restauran los ajustes y metadatos",
-        "assets": "Se incluyen los archivos relacionados",
-        "learningPath": "Se admiten rutas y sus cursos"
-      }
+      "description": "Restaura un curso o una ruta de aprendizaje desde un paquete de Mentingo."
     }
   },
   "studentChapterCardView": {

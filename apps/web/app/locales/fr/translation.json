@@ -95,6 +95,21 @@
       "liveTrainingIncomplete": "Une formation en direct liée à ce cours est incomplète et ne peut pas être exportée.",
       "courseNotFound": "Le cours à exporter est introuvable.",
       "categoryNotFound": "La catégorie du cours est introuvable."
+    },
+    "progress": {
+      "waiting": "En attente de démarrage…",
+      "step": "Étape {{current}} sur {{total}}",
+      "uploadingPackage": "Envoi du paquet",
+      "stages": {
+        "collecting-content": "Collecte du contenu du cours",
+        "copying-files": "Copie des fichiers",
+        "packaging": "Création du paquet",
+        "downloading": "Téléchargement du paquet",
+        "verifying": "Vérification du paquet",
+        "uploading-files": "Envoi des fichiers",
+        "indexing": "Préparation du contenu IA",
+        "saving": "Enregistrement du cours"
+      }
     }
   },
   "aiConversations": {
@@ -994,38 +1009,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Retour",
-    "eyebrow": "Configuration du cours",
     "title": "Créer un nouveau cours",
     "subtitle": "Choisissez l’éditeur standard, un package SCORM ou un package Mentingo.",
     "standard": {
       "title": "Norme",
-      "description": "Créez un cours avec le programme d'études, les leçons, les quiz et les paramètres intégrés.",
-      "features": {
-        "authoring": "Construit avec l'éditeur de cours natif",
-        "curriculum": "Chapitres, leçons et quiz gérés dans Mentingo",
-        "translations": "Langues du cours et traductions prises en charge",
-        "settings": "Prix, statut et certificats inclus"
-      }
+      "description": "Créez un cours avec le programme d'études, les leçons, les quiz et les paramètres intégrés."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Créez un cours à partir d'un package SCORM 1.2.",
-      "features": {
-        "import": "Construit à partir d'un package SCORM 1.2 .zip",
-        "tracking": "Achèvement SCO et suivi de l'exécution pris en charge",
-        "structure": "Structure du package importé préservée",
-        "future": "Prix, statut et certificats inclus"
-      }
+      "description": "Créez un cours à partir d'un package SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Package Mentingo",
-      "description": "Restaurez un cours ou un parcours à partir d’un package Mentingo.",
-      "features": {
-        "structure": "Structure et traductions du cours restaurées",
-        "settings": "Réglages et métadonnées restaurés",
-        "assets": "Fichiers associés inclus",
-        "learningPath": "Parcours et leurs cours pris en charge"
-      }
+      "description": "Restaurez un cours ou un parcours à partir d’un package Mentingo."
     }
   },
   "studentChapterCardView": {

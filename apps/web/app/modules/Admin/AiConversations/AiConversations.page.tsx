@@ -30,7 +30,6 @@ import {
   updateConversationFilters,
 } from "./aiConversations.utils";
 import { ConversationReader } from "./ConversationReader";
-import { ConversationStatus } from "./ConversationStatus";
 import {
   ExternalConversationSource,
   isExternalConversationSource,
@@ -213,12 +212,12 @@ export default function AiConversationsPage() {
                 )}
               >
                 <div className="flex min-w-0 items-center gap-2">
+                  <h2 className="min-w-0 flex-1 truncate text-sm font-medium leading-5 text-neutral-900">
+                    {thread.title || t("aiConversations.untitled")}
+                  </h2>
                   {isExternalConversationSource(thread.source) && (
                     <ExternalConversationSource source={thread.source} />
                   )}
-                  <h2 className="truncate text-sm font-medium leading-5 text-neutral-900">
-                    {thread.title || t("aiConversations.untitled")}
-                  </h2>
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="min-w-0 flex-1 truncate text-xs leading-5 text-neutral-700">
@@ -226,7 +225,6 @@ export default function AiConversationsPage() {
                       ? t("aiConversations.integration")
                       : `${thread.owner?.firstName ?? ""} ${thread.owner?.lastName ?? ""}`.trim()}
                   </span>
-                  <ConversationStatus status={thread.status} compact />
                   <time
                     dateTime={thread.lastActivityAt}
                     className="shrink-0 text-xs text-neutral-500"
