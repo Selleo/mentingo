@@ -61,6 +61,6 @@ import { TokenService } from "./token.service";
     SlackOAuthGuard,
     SettingsService,
   ],
-  exports: [CreatePasswordService],
+  exports: [CreatePasswordService, AuthService, TokenService],
 })
 export class AuthModule {}
