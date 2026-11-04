@@ -9,7 +9,6 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_PROGRESS_STATUSES,
@@ -17,6 +16,7 @@ import {
   PERMISSIONS,
   type PermissionKey,
   type SupportedLanguages,
+  MAX_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import { match } from "ts-pattern";
@@ -38,8 +38,8 @@ import {
   DeleteLearningPathEvent,
   EnrollLearningPathEvent,
 } from "src/events";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
@@ -293,15 +293,13 @@ export class LearningPathService {
     return updateData;
   }
 
-  private validateUploadFile(
+  private async validateUploadFile(
     file: Express.Multer.File | null | undefined,
     allowedTypes: readonly string[],
   ) {
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE || !allowedTypes.includes(file.mimetype)) {
-      throw new BadRequestException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
-    }
+    await FileGuard.validateFile(file, { allowedTypes, maxSize: MAX_IMAGE_FILE_SIZE_BYTES });
   }
 
   private async publishLearningPathCourseSyncEvent(
@@ -367,8 +365,8 @@ export class LearningPathService {
       certificateSignature?: string;
     };
 
-    this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
-    this.validateUploadFile(certificateSignature, ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES);
+    await this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
+    await this.validateUploadFile(certificateSignature, ALLOWED_LESSON_IMAGE_FILE_TYPES);
 
     if (thumbnail) {
       const { fileKey } = await this.fileService.uploadFile(
@@ -579,8 +577,8 @@ export class LearningPathService {
       certificateSignature?: string | null;
     };
 
-    this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
-    this.validateUploadFile(certificateSignature, ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES);
+    await this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
+    await this.validateUploadFile(certificateSignature, ALLOWED_LESSON_IMAGE_FILE_TYPES);
 
     if (thumbnail) {
       const { fileKey } = await this.fileService.uploadFile(

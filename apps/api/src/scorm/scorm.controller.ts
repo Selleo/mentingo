@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   SCORM_IMPORT_ACTION,
   type SupportedLanguages,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -74,7 +75,6 @@ import {
   scormRuntimeFinishResponseSchema,
   scormRuntimeFinishSchema,
 } from "./schemas/scormRuntime.schema";
-import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "./scorm-package-limits";
 import { SCORM_TUS_STATE_TTL } from "./scorm-tus-upload.constants";
 import { ScormTusUploadService } from "./scorm-tus-upload.service";
 import { ScormService } from "./scorm.service";
@@ -544,6 +544,6 @@ export class ScormController {
       currentUser,
     });
 
-    streamFileToResponse(response, file);
+    streamFileToResponse(response, { ...file, contentDisposition: "inline" });
   }
 }

@@ -52,6 +52,19 @@ describe("SettingsController - login page files (e2e)", () => {
     });
   });
 
+  describe("GET /api/settings/login-page-files/:id/content", () => {
+    beforeEach(async () => {
+      await truncateTables(baseDb, ["settings"]);
+      await globalSettingsFactory.create({ userId: null });
+    });
+
+    it("should not serve resources that are not registered login page files", async () => {
+      await request(app.getHttpServer())
+        .get("/api/settings/login-page-files/00000000-0000-4000-8000-000000000000/content")
+        .expect(404);
+    });
+  });
+
   describe("PATCH /api/settings/admin/login-page-files", () => {
     let adminUser: UserWithCredentials;
     let adminCookies: string[] | string;

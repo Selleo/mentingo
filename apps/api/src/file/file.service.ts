@@ -19,7 +19,6 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ENTITY_TYPES,
   isAudioFile,
-  MAX_COURSE_TRAILER_VIDEO_SIZE,
   RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
   VIDEO_PROVIDERS,
@@ -27,6 +26,11 @@ import {
   type ResourceVisibility,
   type SupportedLanguages,
   type EntityType,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  MAX_PRESENTATION_FILE_SIZE_BYTES,
+  MAX_PRESENTATION_FILE_SIZE_MB,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+  MEGABYTE_UNIT,
 } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
@@ -61,12 +65,8 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   ALLOWED_EXCEL_MIME_TYPES_MAP,
-  MAX_PRESENTATION_FILE_SIZE,
-  MAX_PRESENTATION_FILE_SIZE_UNIT,
-  MAX_PRESENTATION_FILE_SIZE_VALUE,
   PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
   RESOURCE_RELATIONSHIP_TYPES,
-  MAX_VIDEO_SIZE,
   VALIDATED_AUDIO_FILE_EXTENSIONS,
 } from "./file.constants";
 import { HostedVideoStatusService } from "./hosted-video-status.service";
@@ -238,13 +238,13 @@ export class FileService {
 
     if (
       ALLOWED_PRESENTATION_FILE_TYPES.includes(file.mimetype) &&
-      file.size > MAX_PRESENTATION_FILE_SIZE
+      file.size > MAX_PRESENTATION_FILE_SIZE_BYTES
     ) {
       throw new BadRequestException({
         message: "files.toast.presentationFileTooLarge",
         translationParams: {
-          size: MAX_PRESENTATION_FILE_SIZE_VALUE,
-          unit: MAX_PRESENTATION_FILE_SIZE_UNIT,
+          size: MAX_PRESENTATION_FILE_SIZE_MB,
+          unit: MEGABYTE_UNIT,
         },
       });
     }
@@ -436,7 +436,9 @@ export class FileService {
       entityType === ENTITY_TYPES.COURSE &&
       relationshipType === RESOURCE_RELATIONSHIP_TYPES.TRAILER;
 
-    const maxUploadSize = isCourseTrailer ? MAX_COURSE_TRAILER_VIDEO_SIZE : MAX_VIDEO_SIZE;
+    const maxUploadSize = isCourseTrailer
+      ? MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES
+      : MAX_VIDEO_FILE_SIZE_BYTES;
 
     if (sizeBytes > maxUploadSize) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");

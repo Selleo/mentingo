@@ -830,9 +830,9 @@
       "uploadForbidden": "This upload does not belong to the current user."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG or SVG",
-      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
-      "presentation": "PPT/PPTX (max. to 100MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
+      "presentation": "PPTX or ODP (max. {{maxSize}})"
     },
     "processing": {
       "title": "Video is processing",
@@ -889,7 +889,7 @@
       "setUpCourse": "Set up course",
       "provideDetails": "Provide the details to set up a new course",
       "uploadFileHeader": "Click to upload or drag and drop",
-      "uploadFileBody": "SCORM .zip file (max. to 500MB)",
+      "uploadFileBody": "SCORM .zip file (max. {{maxSize}})",
       "pricing": "Pricing",
       "status": "Status",
       "setUpPricing": "Set pricing for the course",
@@ -976,7 +976,7 @@
       "requirements": {
         "title": "Package requirements",
         "version": "SCORM 1.2 package",
-        "archive": ".zip archive up to 500MB",
+        "archive": ".zip archive up to {{maxSize}}",
         "metadata": "Course metadata can be edited before import"
       },
       "packageSection": "SCORM package",
@@ -991,11 +991,22 @@
       "replacePackage": "Replace package",
       "removePackage": "Remove package",
       "uploadThumbnail": "Upload thumbnail",
-      "uploadThumbnailDescription": "PNG, JPG or JPEG up to 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
       "thumbnailPreviewAlt": "Course thumbnail preview",
       "submit": "Create SCORM course",
       "creating": "Creating SCORM course...",
-      "toastDraftReady": "SCORM course form is ready for API integration"
+      "toastDraftReady": "SCORM course form is ready for API integration",
+      "categoryRequired": "Category is required.",
+      "descriptionMaxLength": "Description must contain at most {{maxLength}} characters.",
+      "descriptionMinLength": "Description must be at least 2 characters.",
+      "languageInvalid": "Select a supported language.",
+      "packageInvalidType": "SCORM package must be a .zip file",
+      "packageRequired": "SCORM package is required.",
+      "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
+      "thumbnailInvalid": "Thumbnail must be a valid image file",
+      "thumbnailInvalidType": "Thumbnail must be PNG, JPG/JPEG, WEBP, or SVG",
+      "thumbnailTooLarge": "Thumbnail must be smaller than {{maxSize}}",
+      "titleMinLength": "Title must be at least 2 characters."
     },
     "lesson": {
       "packageSection": "SCORM package",
@@ -1007,7 +1018,7 @@
       "validation": {
         "titleRequired": "Title is required",
         "packageRequired": "SCORM package is required",
-        "packageTooLarge": "SCORM package must be less than 500MB",
+        "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
         "packageInvalidType": "SCORM package must be a .zip file"
       }
     }
@@ -2975,7 +2986,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
@@ -3010,7 +3021,7 @@
           "groups": "Groups",
           "users": "Users"
         },
-        "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}; transparent background recommended)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",
         "certificatePreviewButton": "Preview",
@@ -3159,7 +3170,7 @@
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",
           "titleMaxLength": "Title is too long (max 250 characters)",
-          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "File size must be below {{maxSize}}",
           "maxFileNumber_one": "You cannot upload more than 1 file",
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
@@ -3237,8 +3248,8 @@
           "voiceMode": "Voice Mode",
           "ttsPreset": "TTS Preset",
           "customTTSReference": "Custom TTS Reference",
-          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
-          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
+          "includeFiles_one": "Attach up to 1 file below {{maxSize}} to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -3778,7 +3789,7 @@
           "leaveContentCancel": "Keep editing",
           "leaveContentDiscard": "Leave without saving",
           "dropOrClick": "Drop image here or click to upload",
-          "allowedFormats": "PNG, JPG or SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
           "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
           "updateAiMentorAvatar": "Update AI mentor avatar",
@@ -4670,7 +4681,7 @@
       "preview": "Preview"
     },
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "other": {
       "uploading": "Uploading...",
@@ -4969,10 +4980,10 @@
   },
   "platformLogo": {
     "header": "Platform Logo",
-    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform logo"
@@ -4985,10 +4996,10 @@
   },
   "platformSimpleLogo": {
     "header": "Platform Simple Logo (icon)",
-    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform icon logo"
@@ -5007,7 +5018,7 @@
     "title": "Login Background Image Upload",
     "description": "Upload a custom background image for the organization login page.",
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Delete login background image"
@@ -5030,11 +5041,15 @@
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type.",
+      "invalidFileType": "The file is invalid or its format is not supported.",
       "missingTenantContext": "Missing tenant context for file upload",
       "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}.",
-      "audioFileTooLarge": "Audio file is too large. Upload audio up to 200 MB.",
-      "rangeNotSatisfiable": "The requested byte range is not available."
+      "audioFileTooLarge": "Audio file is too large. Upload audio up to {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "The requested byte range is not available.",
+      "fileTooLarge": "The file is too large. The maximum size is {{maxSize}}.",
+      "uploadTooLarge": "The file is too large to upload.",
+      "imageResolutionTooLarge": "The image is too large. The maximum resolution is {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "The image must have a {{aspectRatio}} aspect ratio."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -5575,7 +5590,7 @@
       "titlePlaceholder": "Name the development path",
       "description": "Description",
       "descriptionPlaceholder": "Describe what students will complete in this path",
-      "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
+      "imageHint": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}, recommended 1200x1200 or higher)",
       "sequenceEnabled": "Sequential learning",
       "sequenceEnabledDescription": "Students must complete courses in display order.",
       "includesCertificate": "Certificate",
@@ -6388,11 +6403,11 @@
       "uploadImage": "Upload new hero image",
       "dropImage": "Drop hero image here",
       "browse": "or click to browse",
-      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageLimit": "PNG, JPG up to {{maxSize}}",
       "imageRecommendation": "Recommended: 1920x820 px (21:9)",
       "trailer": "Course trailer (optional)",
       "dropVideo": "Drop trailer video here",
-      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoLimit": "MP4, MOV up to {{maxSize}}",
       "videoRecommendation": "Recommended: 30-90 seconds",
       "save": "Upload media"
     },

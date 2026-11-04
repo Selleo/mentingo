@@ -1,3 +1,8 @@
+import {
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -95,7 +100,7 @@ export function CourseDetailsStep({ handleBack, handleNext }: StepComponentProps
         <Label className="text-sm font-medium">{t("adminScorm.field.thumbnail")}</Label>
         <input
           type="file"
-          accept=".svg,.png,.jpg"
+          accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) setValue("details.thumbnail", file);
@@ -111,7 +116,11 @@ export function CourseDetailsStep({ handleBack, handleNext }: StepComponentProps
             <p className="font-medium">
               {t("uploadFile.header")} {t("uploadFile.subHeader")}
             </p>
-            <p className="text-sm text-muted-foreground">SVG, PNG, JPG (max. to 50MB)</p>
+            <p className="text-sm text-muted-foreground">
+              {t("adminScorm.create.uploadThumbnailDescription", {
+                maxSize: formatFileSize(MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES),
+              })}
+            </p>
           </div>
         </Label>
       </div>

@@ -1,4 +1,7 @@
-import { COURSE_AUTHORING_SOURCE_FILE_TYPES, MAX_COURSE_AUTHORING_SOURCE_SIZE } from "@repo/shared";
+import {
+  COURSE_AUTHORING_SOURCE_FILE_TYPES,
+  MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
+} from "@repo/shared";
 import {
   ArrowLeft,
   Bot,
@@ -70,7 +73,7 @@ const AUTHORING_SOURCE_ACCEPT = [
 ].join(",");
 
 const sourceError = (file: File): string | null => {
-  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE) return "courseAuthoring.sources.tooLarge";
+  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES) return "courseAuthoring.sources.tooLarge";
   const lowerName = file.name.toLowerCase();
   const validMime = COURSE_AUTHORING_SOURCE_FILE_TYPES.some((type) => type === file.type);
   const validExtension = AUTHORING_SOURCE_EXTENSIONS.some((extension) =>

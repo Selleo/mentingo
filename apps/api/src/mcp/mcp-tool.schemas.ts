@@ -12,6 +12,10 @@ import {
   ALLOWED_WORD_FILE_TYPES,
   ALLOWED_PRESENTATION_FILE_TYPES,
   SUPPORTED_LANGUAGES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
+  MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
@@ -22,7 +26,7 @@ import { categoryCreateSchema } from "src/category/schemas/createCategorySchema"
 import { createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import { updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import { certificateValiditySchema } from "src/courses/types/settings";
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { ALLOWED_MIME_TYPES } from "src/file/file.constants";
 import { createLearningPathSchema } from "src/learning-path/learning-path.schema";
 import { updateLearningPathSettingsSchema } from "src/learning-path/types/learning-path-settings.types";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
@@ -32,11 +36,7 @@ import {
   attachLiveTrainingLessonSchema,
   createLiveTrainingLessonSchema,
 } from "src/lesson/lesson.schema";
-import { MAX_SCORM_THUMBNAIL_SIZE } from "src/scorm/pipes/validate-scorm-course-files.pipe";
-import {
-  MAX_SCORM_PACKAGE_SIZE_BYTES,
-  SCORM_PACKAGE_MIME_TYPES,
-} from "src/scorm/scorm-package-limits";
+import { SCORM_PACKAGE_MIME_TYPES } from "src/scorm/scorm-package-limits";
 
 import { MCP_RESOURCE_DISPLAY_MODES } from "./mcp-content-resource";
 
@@ -264,7 +264,7 @@ export const requestAuthoringUploadInputSchema = Type.Object(
     language: languageInputSchema,
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );
@@ -281,7 +281,7 @@ export const requestCourseUploadInputSchema = Type.Object(
     kind: Type.Union([Type.Literal("thumbnail"), Type.Literal("certificateSignature")]),
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
     thumbnailPositionY: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
   },
   { additionalProperties: false },
@@ -293,7 +293,7 @@ export const requestDevelopmentPathUploadInputSchema = Type.Object(
     kind: Type.Union([Type.Literal("thumbnail"), Type.Literal("certificateSignature")]),
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );
@@ -305,7 +305,7 @@ export const requestEditorialCoverUploadInputSchema = Type.Object(
     language: languageInputSchema,
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
     translations: Type.Array(updateArticleTranslationSchema, { minItems: 1 }),
   },
   { additionalProperties: false },
@@ -316,7 +316,7 @@ export const requestAiMentorAvatarUploadInputSchema = Type.Object(
     lessonId: uuidInputSchema,
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );
@@ -333,7 +333,7 @@ export const initVideoUploadInputSchema = Type.Object(
     language: languageInputSchema,
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.String({ minLength: 3, maxLength: 200 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_VIDEO_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_VIDEO_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );
@@ -385,7 +385,7 @@ export const requestGenericFileUploadInputSchema = Type.Object(
         ]),
       ].map((type) => Type.Literal(type)),
     ),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );
@@ -394,7 +394,7 @@ const scormThumbnailInputSchema = Type.Object(
   {
     filename: Type.String({ minLength: 1, maxLength: 255 }),
     mimeType: Type.Union(ALLOWED_LESSON_IMAGE_FILE_TYPES.map((type) => Type.Literal(type))),
-    size: Type.Integer({ minimum: 1, maximum: MAX_SCORM_THUMBNAIL_SIZE }),
+    size: Type.Integer({ minimum: 1, maximum: MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES }),
   },
   { additionalProperties: false },
 );

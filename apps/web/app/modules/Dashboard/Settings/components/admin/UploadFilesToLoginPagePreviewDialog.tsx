@@ -1,26 +1,32 @@
 import { X } from "lucide-react";
 import { useMemo } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
+import { PdfPreviewViewer } from "~/components/RichText/extensions/pdfPreview/PdfPreviewViewer";
 import { Button } from "~/components/ui/button";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 
+import { buildLoginPageFilePreviewUrl } from "./buildLoginPageFilePreviewUrl";
+
 interface UploadFilesToLoginPagePreviewDialogProps {
   open: boolean;
   resourceName: string;
-  resourceUrl: string;
+  resourceId: string | null;
   onClose: () => void;
 }
 
 export const UploadFilesToLoginPagePreviewDialog = ({
   open,
   resourceName,
-  resourceUrl,
+  resourceId,
   onClose,
 }: UploadFilesToLoginPagePreviewDialogProps) => {
+  const { t } = useTranslation();
+
   const modal = useMemo(() => {
-    if (!open) return null;
+    if (!open || !resourceId) return null;
 
     return (
       <div
@@ -44,18 +50,19 @@ export const UploadFilesToLoginPagePreviewDialog = ({
             </div>
           </div>
           <div className="box-border flex flex-1 justify-center overflow-auto rounded-b-lg bg-neutral-50 p-4">
-            <div className="flex size-full rounded-md bg-white shadow-sm">
-              <iframe
-                title={resourceName}
-                src={`${resourceUrl}#toolbar=0`}
-                className="size-full rounded border-0"
+            <div className="w-full max-w-4xl">
+              <PdfPreviewViewer
+                src={buildLoginPageFilePreviewUrl(resourceId)}
+                name={resourceName}
+                loadingMessage={t("loginFilesUpload.previewDialog.loading")}
+                errorMessage={t("loginFilesUpload.previewDialog.error")}
               />
             </div>
           </div>
         </div>
       </div>
     );
-  }, [onClose, open, resourceName, resourceUrl]);
+  }, [onClose, open, resourceId, resourceName, t]);
 
   if (!modal) return null;
 

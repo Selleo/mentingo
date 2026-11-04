@@ -1,5 +1,8 @@
 /** Keeps source authority, uploads, and replacement review behind one compact control. */
-import { COURSE_AUTHORING_SOURCE_FILE_TYPES, MAX_COURSE_AUTHORING_SOURCE_SIZE } from "@repo/shared";
+import {
+  COURSE_AUTHORING_SOURCE_FILE_TYPES,
+  MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
+} from "@repo/shared";
 import { FileUp, Globe2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,7 +48,7 @@ const AUTHORING_SOURCE_ACCEPT = [
 
 /** Returns a translation key so source validation follows the current interface language. */
 export const getCourseAuthoringSourceError = (file: File): string | null => {
-  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE) return "courseAuthoring.sources.tooLarge";
+  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES) return "courseAuthoring.sources.tooLarge";
   const lowerName = file.name.toLowerCase();
   const permittedMime = COURSE_AUTHORING_SOURCE_FILE_TYPES.some((type) => type === file.type);
   const permittedExtension = AUTHORING_SOURCE_EXTENSIONS.some((extension) =>

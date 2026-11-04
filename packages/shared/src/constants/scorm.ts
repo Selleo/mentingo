@@ -58,3 +58,10 @@ export const SCORM_SUCCESS_STATUS = {
 } as const;
 
 export type ScormSuccessStatus = (typeof SCORM_SUCCESS_STATUS)[keyof typeof SCORM_SUCCESS_STATUS];
+
+export const ALLOWED_SCORM_PACKAGE_MIME_TYPES = [
+  "application/zip",
+  "application/x-zip-compressed",
+] as const;
+
+export const ALLOWED_SCORM_PACKAGE_FILE_EXTENSIONS = [".zip"] as const;

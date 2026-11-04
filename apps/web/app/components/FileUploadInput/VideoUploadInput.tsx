@@ -1,4 +1,4 @@
-import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, MAX_VIDEO_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -64,7 +64,8 @@ const VideoUploadInput = ({
         </div>
 
         <div className="mt-2 w-fit rounded-md border bg-white px-2 py-1 text-[13px] font-medium leading-5 text-neutral-900">
-          {detailsText ?? t("uploadFile.details.video")}
+          {detailsText ??
+            t("uploadFile.details.video", { maxSize: formatFileSize(MAX_VIDEO_FILE_SIZE_BYTES) })}
         </div>
       </div>
 

@@ -10,7 +10,7 @@ import { initialPdfViewerState, pdfViewerReducer } from "./reducer";
 
 import type { PdfPreviewViewerProps, ReactPdfModule } from "./types";
 
-export const PdfPreviewViewer = ({ src }: PdfPreviewViewerProps) => {
+export const PdfPreviewViewer = ({ src, loadingMessage, errorMessage }: PdfPreviewViewerProps) => {
   const { t } = useTranslation();
   const [{ pageCount, currentPage, visiblePage, isPageRendering }, dispatch] = useReducer(
     pdfViewerReducer,
@@ -245,17 +245,23 @@ export const PdfPreviewViewer = ({ src }: PdfPreviewViewerProps) => {
             dispatch({ type: PDF_VIEWER_ACTION.DOCUMENT_LOADED, pageCount: numPages });
           }}
           loading={
-            <div className="p-4 text-sm text-neutral-600">{t("richText.pdfPreview.loading")}</div>
+            <div className="p-4 text-sm text-neutral-600">
+              {loadingMessage ?? t("richText.pdfPreview.loading")}
+            </div>
           }
           error={
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 text-sm text-primary-700 underline"
-            >
-              {t("richText.pdfPreview.openFile")}
-            </a>
+            errorMessage ? (
+              <p className="p-4 text-sm text-neutral-600">{errorMessage}</p>
+            ) : (
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 text-sm text-primary-700 underline"
+              >
+                {t("richText.pdfPreview.openFile")}
+              </a>
+            )
           }
         >
           <div

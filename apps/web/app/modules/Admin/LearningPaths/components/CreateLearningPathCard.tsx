@@ -1,4 +1,8 @@
-import { LEARNING_PATH_STATUSES, type SupportedLanguages } from "@repo/shared";
+import {
+  LEARNING_PATH_STATUSES,
+  type SupportedLanguages,
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+} from "@repo/shared";
 import { Camera, ImagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -126,7 +130,7 @@ export function CreateLearningPathCard({
           )}
           <input
             type="file"
-            accept=".png, .jpg, .jpeg"
+            accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
             className="sr-only"
             disabled={isPending}
             onChange={(event) => {

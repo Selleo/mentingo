@@ -1,4 +1,4 @@
-import { MAX_COURSE_AUTHORING_SOURCE_SIZE } from "@repo/shared";
+import { MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildAuthoringTargets, getCourseAuthoringSourceError } from "./AuthoringBriefPanel";
@@ -32,7 +32,7 @@ describe("course authoring source upload validation", () => {
     ).toBe("courseAuthoring.sources.unsupportedFile");
 
     const oversized = new File(["x"], "course.pdf", { type: "application/pdf" });
-    Object.defineProperty(oversized, "size", { value: MAX_COURSE_AUTHORING_SOURCE_SIZE + 1 });
+    Object.defineProperty(oversized, "size", { value: MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES + 1 });
     expect(getCourseAuthoringSourceError(oversized)).toBe("courseAuthoring.sources.tooLarge");
   });
 
