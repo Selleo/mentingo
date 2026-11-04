@@ -1,7 +1,7 @@
 # Helpdesk bundle publisher
 
 This trusted publishing step consumes the reviewed tutorial bundle. It uses the
-existing vendored `@mentingo/guide-sdk` for all Helpdesk JSON/control requests and
+published `@mentingo/guide-sdk` pinned by Core for all Helpdesk JSON/control requests and
 the existing `tus-js-client` for direct, streamed Bunny uploads. It installs no
 additional dependencies and has no separate package or lockfile.
 
@@ -22,7 +22,7 @@ Required environment:
 
 The publisher resolves the Guide SDK through `apps/api/package.json` and TUS
 through `apps/web/package.json`, so its versions follow the root lockfile and
-vendored SDK already used by Core. Tests use the same SDK through an Axios adapter.
+published SDK already used by Core. Tests use the same SDK through an Axios adapter.
 
 ## Bundle contract
 
@@ -126,7 +126,7 @@ node scripts/self-onboarding-publish/publisher.mjs --help
 ```
 
 The deterministic tests cover integrity/provenance/path validation, complete
-publication ordering, the actual vendored SDK's HTTP contract, lost responses,
+publication ordering, the actual published SDK's HTTP contract, lost responses,
 interrupted/expired upload resumes, pending deadlines, explicit recoverable retries,
 Retry-After, stale publication conflicts, older-version rejection, private state
 permissions and Bunny upload URL/streaming limits. They make no provider calls.

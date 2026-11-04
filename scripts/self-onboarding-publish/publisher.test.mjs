@@ -664,7 +664,7 @@ test("fresh resource attempt is bounded and no media is reuploaded after finaliz
   }
 });
 
-test("real vendored Guide SDK emits authenticated JSON controls and exact edit/idempotency headers", async (t) => {
+test("real published Guide SDK emits authenticated JSON controls and exact edit/idempotency headers", async (t) => {
   const f = fixture(t);
   const apiRequire = createRequire(new URL("../../apps/api/package.json", import.meta.url));
   const { createGuideClient } = apiRequire("@mentingo/guide-sdk");
