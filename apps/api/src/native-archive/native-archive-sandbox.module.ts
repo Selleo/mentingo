@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 
+import { SessionModule } from "src/auth/session/session.module";
 import { CacheModule } from "src/cache/cache.module";
 import { getAppConfigLoaders } from "src/common/configuration/app-config-loaders";
 import { jwtModuleOptions } from "src/common/configuration/jwt-module-options";
@@ -27,6 +28,7 @@ import { NativeArchiveModule } from "./native-archive.module";
     JwtModule.registerAsync(jwtModuleOptions),
     DbModule,
     RedisClientsModule,
+    SessionModule,
     CacheModule,
     EnvModule,
     QueueModule,

@@ -30,6 +30,7 @@ import { ArticlesModule } from "./articles/articles.module";
 import { AssistantModule } from "./assistant/assistant.module";
 import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
+import { SessionModule } from "./auth/session/session.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
@@ -94,6 +95,7 @@ import type { RedisClient } from "src/redis";
 
 @Module({
   imports: [
+    SessionModule,
     ConfigModule.forRoot({
       load: getAppConfigLoaders(),
       isGlobal: true,

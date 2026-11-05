@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { randomUUID, createHmac } from "node:crypto";
 
 import {
   BadRequestException,
@@ -10,6 +10,7 @@ import { ConfigService } from "@nestjs/config";
 import { SUPPORT_SESSION_STATUSES, SUPPORT_USER_SCOPES, TENANT_STATUSES } from "@repo/shared";
 import { nanoid } from "nanoid";
 
+import { SessionService } from "src/auth/session/session.service";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
@@ -34,6 +35,7 @@ export class SupportModeService {
   private static readonly SESSION_TTL_MS = 60 * 60 * 1000;
 
   constructor(
+    private readonly sessionService: SessionService,
     private readonly supportModeRepository: SupportModeRepository,
     private readonly configService: ConfigService,
     private readonly fileService: FileService,
@@ -120,7 +122,9 @@ export class SupportModeService {
       nowIso,
     );
 
+    const sessionId = randomUUID();
     await this.supportModeRepository.createSupportSession({
+      id: sessionId,
       originalUserId: requestingUser.userId,
       originalTenantId: requestingUser.tenantId,
       targetTenantId,
@@ -131,6 +135,11 @@ export class SupportModeService {
       returnUrl,
       status: SUPPORT_SESSION_STATUSES.PENDING,
     });
+    await this.sessionService.storeSupportSessionMfaAssurance(
+      sessionId,
+      sessionExpiresAt,
+      requestingUser,
+    );
 
     const redirectUrl = `${targetTenant.host}/api/auth/support/callback?grant=${encodeURIComponent(
       grantToken,

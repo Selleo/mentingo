@@ -360,7 +360,7 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await inTenant(() =>
+      await inTenant(() =>
         authService.register({
           email: user.email,
           firstName: user.firstName,
@@ -374,7 +374,12 @@ describe("AuthController (e2e)", () => {
         companyName: "Acme Corp",
       });
 
-      const { otpauth } = await authService.generateMFASecret(registeredUser.id);
+      const login = await inTenant(() => authService.login({ email: user.email, password }));
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/mfa/setup")
+        .set("Authorization", `Bearer ${login.accessToken}`)
+        .expect(201);
+      const { otpauth } = response.body.data;
 
       expect(otpauth).toContain("issuer=Acme%20Corp");
       expect(otpauth).toContain("Acme%20Corp%3A");
@@ -384,7 +389,7 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await inTenant(() =>
+      await inTenant(() =>
         authService.register({
           email: user.email,
           firstName: user.firstName,
@@ -394,7 +399,12 @@ describe("AuthController (e2e)", () => {
         }),
       );
 
-      const { otpauth } = await authService.generateMFASecret(registeredUser.id);
+      const login = await inTenant(() => authService.login({ email: user.email, password }));
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/mfa/setup")
+        .set("Authorization", `Bearer ${login.accessToken}`)
+        .expect(201);
+      const { otpauth } = response.body.data;
 
       expect(otpauth).toContain("issuer=Mentingo");
       expect(otpauth).toContain("Mentingo%3A");

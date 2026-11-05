@@ -22,7 +22,7 @@ export class McpTokenService {
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly resources: McpResourceService,
-    private readonly revocation: SessionRevocationService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {}
 
   async issue(grant: Omit<McpAccessGrant, "expiresAt">): Promise<string> {
@@ -64,12 +64,26 @@ export class McpTokenService {
       return null;
     const resource = await this.resources.forTenant(grant.tenantId);
     if (grant.resource !== resource.url) return null;
-    const email = await this.resolveIdentity(grant.userId, grant.tenantId);
+    const email = await this.resolveIdentity(grant.userId, grant.tenantId, grant.sessionVersion);
     return email ? { grant, email } : null;
   }
 
-  async resolveIdentity(userId: string, tenantId: string): Promise<string | null> {
-    if (await this.revocation.isUserRevoked(userId)) return null;
+  /**
+   * Resolves the email of an MCP credential's owner while the account is active and the credential
+   * belongs to their current session version, so revoking their sessions also voids MCP access.
+   */
+  async resolveIdentity(
+    userId: string,
+    tenantId: string,
+    sessionVersion: string | undefined,
+  ): Promise<string | null> {
+    const isCurrentSession = await this.sessionRevocationService
+      .assertUserSessionVersion(userId, sessionVersion)
+      .then(
+        () => true,
+        () => false,
+      );
+    if (!isCurrentSession) return null;
 
     const [identity] = await this.dbAdmin
       .select({

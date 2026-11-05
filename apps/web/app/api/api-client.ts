@@ -2,6 +2,9 @@ import { API } from "./generated-api";
 import {
   API_ERROR_MESSAGE_KEYS,
   hasApiErrorMessage,
+  isExpiredMfaChallenge,
+  redirectToLoginAfterMfaExpiry,
+  redirectToMfaVerification,
   redirectToTenantInactivePage,
   showMissingPermissionToast,
   translateRateLimitMessage,
@@ -31,6 +34,18 @@ ApiClient.instance.interceptors.response.use(
 
     if (hasApiErrorMessage(error, 403, API_ERROR_MESSAGE_KEYS.TENANT_INACTIVE)) {
       redirectToTenantInactivePage();
+    }
+
+    if (hasApiErrorMessage(error, 403, API_ERROR_MESSAGE_KEYS.MFA_REQUIRED)) {
+      redirectToMfaVerification(error);
+
+      return Promise.reject(error);
+    }
+
+    if (isExpiredMfaChallenge(error)) {
+      redirectToLoginAfterMfaExpiry();
+
+      return Promise.reject(error);
     }
 
     if (canRetryWithRefreshedTokens(error)) {

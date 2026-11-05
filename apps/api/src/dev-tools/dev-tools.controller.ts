@@ -64,8 +64,13 @@ export class DevToolsController {
 
     if (!user) throw new NotFoundException("User not found");
 
-    const { accessToken, refreshToken } = await this.authService.issueSessionTokens(user);
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken);
+    const { accessToken, refreshToken, shouldVerifyMFA } = await this.authService.getTokens(user);
+
+    if (shouldVerifyMFA) {
+      this.tokenService.setTemporaryTokenCookies(response, accessToken);
+    } else {
+      this.tokenService.setTokenCookies(response, accessToken, refreshToken);
+    }
 
     return null;
   }

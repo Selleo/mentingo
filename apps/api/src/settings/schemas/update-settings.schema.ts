@@ -17,7 +17,16 @@ export type AllowedCurrency = (typeof ALLOWED_CURRENCIES)[number];
 export type AllowedAgeLimit = (typeof ALLOWED_AGE_LIMITS)[number];
 
 export const updateSettingsBodySchema = Type.Partial(
-  Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
+  Type.Object(
+    {
+      language: studentSettingsJSONContentSchema.properties.language,
+      adminNewUserNotification: adminSettingsJSONContentSchema.properties.adminNewUserNotification,
+      adminFinishedCourseNotification:
+        adminSettingsJSONContentSchema.properties.adminFinishedCourseNotification,
+      configWarningDismissed: adminSettingsJSONContentSchema.properties.configWarningDismissed,
+    },
+    { additionalProperties: false },
+  ),
 );
 
 export const updateDashboardSettingsBodySchema = Type.Object({

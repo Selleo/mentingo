@@ -4834,6 +4834,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA vykdymo nustatymai sėkmingai atnaujinti.",
+      "mfaVerificationRequired": "Jūsų vaidmeniui dabar reikalingas MFA. Norėdami tęsti, nustatykite arba patvirtinkite jį.",
       "mfaEnforcementUpdateFailed": "Nepavyko atnaujinti MFA vykdymo nustatymų."
     }
   },
@@ -6224,7 +6225,13 @@
       "invalidRefreshToken": "Netinkamas atnaujinimo prieigos raktas",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
       "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
-      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."
+      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją.",
+      "mfaRequired": "Norėdami tęsti, užbaikite dviejų veiksnių autentifikavimą.",
+      "sessionExpired": "Prisijungimo sesija baigėsi. Prisijunkite iš naujo.",
+      "mfaAlreadyEnabled": "Dviejų veiksnių autentifikavimas jau įjungtas.",
+      "mfaCodeAlreadyUsed": "Šis kodas jau panaudotas. Palaukite naujo kodo autentifikavimo programėlėje ir bandykite dar kartą.",
+      "invalidMfaCode": "Įveskite galiojantį šešių skaitmenų autentifikavimo kodą.",
+      "invalidSettingsUpdate": "Šių saugumo nustatymų čia keisti negalima."
     }
   },
   "sessionRevocation": {

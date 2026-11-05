@@ -114,6 +114,7 @@ import {
   MCP_STUDENT_TOOL_FEATURES,
 } from "./mcp-student-tools";
 import { canListMcpTool } from "./mcp-tool-access";
+import { toMcpToolFailure } from "./mcp-tool-failure";
 import { canUseMcpToolWithScopes, MCP_SCOPES } from "./mcp-tool-scope";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 import * as McpToolSchemas from "./mcp-tool.schemas";
@@ -3505,6 +3506,7 @@ export class McpHttpService {
     let auditUser: CurrentUserType = {
       userId: binding.userId,
       tenantId: binding.tenantId,
+      sessionVersion: binding.sessionVersion,
       email: binding.email,
       roleSlugs: [],
       permissions: [],
@@ -3517,6 +3519,7 @@ export class McpHttpService {
       const account: CurrentUserType = {
         userId: binding.userId,
         tenantId: binding.tenantId,
+        sessionVersion: binding.sessionVersion,
         email: binding.email,
         roleSlugs: access.roleSlugs,
         permissions: access.permissions,
@@ -3563,21 +3566,7 @@ export class McpHttpService {
       };
     } catch (error) {
       await this.auditCall(auditUser, actor, call, "failure");
-      const status = error instanceof HttpException ? error.getStatus() : 500;
-      const code =
-        status === 400
-          ? "INVALID_ARGUMENT"
-          : status === 401
-            ? "UNAUTHENTICATED"
-            : status === 403
-              ? "PERMISSION_DENIED"
-              : status === 404
-                ? "NOT_FOUND"
-                : status === 409
-                  ? "CONFLICT"
-                  : "INTERNAL";
-      const message = error instanceof HttpException ? error.message : "Operation failed";
-      const failure = { code, status, message, requestId: call?.requestId };
+      const failure = toMcpToolFailure(error, call?.requestId);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(failure) }],
         isError: true,

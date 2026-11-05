@@ -4557,6 +4557,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Les paramètres d’application de MFA ont été mis à jour avec succès.",
+      "mfaVerificationRequired": "L'authentification multifacteur est désormais requise pour votre rôle. Configurez-la ou vérifiez-la pour continuer.",
       "mfaEnforcementUpdateFailed": "Échec de la mise à jour des paramètres d’application MFA."
     }
   },
@@ -5764,7 +5765,13 @@
       "invalidRefreshToken": "Jeton d'actualisation invalide",
       "adminRoleRequired": "Rôle d'administrateur requis",
       "missingPermission": "Vous n'êtes pas autorisé à accéder à cette ressource",
-      "sessionRevoked": "Votre session a été révoquée. Veuillez actualiser votre session."
+      "sessionRevoked": "Votre session a été révoquée. Veuillez actualiser votre session.",
+      "mfaRequired": "Terminez l'authentification à deux facteurs pour continuer.",
+      "sessionExpired": "Votre session de connexion a expiré. Veuillez vous reconnecter.",
+      "mfaAlreadyEnabled": "L'authentification à deux facteurs est déjà activée.",
+      "mfaCodeAlreadyUsed": "Ce code a déjà été utilisé. Attendez un nouveau code dans votre application d'authentification et réessayez.",
+      "invalidMfaCode": "Saisissez un code d'authentification valide à six chiffres.",
+      "invalidSettingsUpdate": "Ces paramètres de sécurité ne peuvent pas être modifiés ici."
     }
   },
   "sessionRevocation": {

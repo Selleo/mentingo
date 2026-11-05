@@ -11,7 +11,7 @@ import { generateTotpToken } from "../../utils/totp";
 
 const INITIAL_PASSWORD = "Password123@";
 
-test("admin can enable MFA and verify it on login", async ({
+test("user can enroll in enforced MFA and verify it on login", async ({
   cleanup,
   createIsolatedWorkspace,
 }) => {
@@ -31,13 +31,12 @@ test("admin can enable MFA and verify it on login", async ({
   });
   cleanup.add(async () => {
     await workspace.apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
-      [SYSTEM_ROLE_SLUGS.ADMIN]: false,
+      [SYSTEM_ROLE_SLUGS.STUDENT]: false,
     });
   });
 
-  await userFactory.update(user.id, { roleSlugs: [USER_ROLE.admin] });
   await workspace.apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
-    [SYSTEM_ROLE_SLUGS.ADMIN]: true,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: true,
   });
 
   await logout(workspace.page, { origin: workspace.origin });
@@ -50,7 +49,18 @@ test("admin can enable MFA and verify it on login", async ({
 
   if (!secret) throw new Error("Expected MFA setup secret to be visible");
 
-  await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
+  await workspace.page.reload();
+  await expect(workspace.page.getByTestId(MFA_PAGE_HANDLES.SECRET)).toHaveText(secret);
+  await workspace.page.evaluate(() => {
+    localStorage.setItem(
+      "current-user-storage",
+      JSON.stringify({ state: { hasVerifiedMFA: true } }),
+    );
+  });
+  await workspace.page.goto(`${workspace.origin}/courses`);
+  await expect(workspace.page).toHaveURL(`${workspace.origin}/auth/mfa`);
+  const enrollmentCode = generateTotpToken(secret);
+  await fillMfaTokenFlow(workspace.page, enrollmentCode);
   await submitMfaTokenFlow(workspace.page);
 
   await expect(workspace.page).toHaveURL(`${workspace.origin}/dashboard`);
@@ -60,6 +70,7 @@ test("admin can enable MFA and verify it on login", async ({
   await expect(workspace.page).toHaveURL(`${workspace.origin}/auth/mfa`);
   await expect(workspace.page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
 
+  await expect.poll(() => generateTotpToken(secret), { timeout: 35_000 }).not.toBe(enrollmentCode);
   await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
   await submitMfaTokenFlow(workspace.page);
 

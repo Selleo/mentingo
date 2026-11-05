@@ -55,6 +55,7 @@ export type McpResource = { tenantId: UUIDType; origin: string; url: string };
 export type McpAccessGrant = {
   userId: UUIDType;
   tenantId: UUIDType;
+  sessionVersion?: string;
   clientId: string;
   resource: string;
   scopes: string[];
@@ -245,6 +246,9 @@ export type McpUploadGrant =
   | McpVideoTusGrant
   | McpScormUploadGrant
   | McpScormTusGrant;
+
+/** An upload grant as stored, bound to the session version of the user who requested it. */
+export type McpStoredUploadGrant = McpUploadGrant & { sessionVersion?: string };
 
 export type McpRequest = Request & {
   mcpUploadGrant?: McpUploadGrant;

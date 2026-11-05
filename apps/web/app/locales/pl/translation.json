@@ -5145,6 +5145,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Ustawienia wymuszenia MFA zostały pomyślnie zaktualizowane.",
+      "mfaVerificationRequired": "MFA jest teraz wymagane dla Twojej roli. Skonfiguruj je lub potwierdź, aby kontynuować.",
       "mfaEnforcementUpdateFailed": "Nie udało się zaktualizować ustawień wymuszenia MFA."
     }
   },
@@ -6087,7 +6088,13 @@
       "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
-      "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
+      "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję.",
+      "mfaRequired": "Dokończ uwierzytelnianie dwuskładnikowe, aby kontynuować.",
+      "sessionExpired": "Sesja logowania wygasła. Zaloguj się ponownie.",
+      "mfaAlreadyEnabled": "Uwierzytelnianie dwuskładnikowe jest już włączone.",
+      "mfaCodeAlreadyUsed": "Ten kod został już użyty. Poczekaj na nowy kod w aplikacji uwierzytelniającej i spróbuj ponownie.",
+      "invalidMfaCode": "Wprowadź poprawny sześciocyfrowy kod uwierzytelniający.",
+      "invalidSettingsUpdate": "Tych ustawień bezpieczeństwa nie można tutaj zmienić."
     }
   },
   "sessionRevocation": {

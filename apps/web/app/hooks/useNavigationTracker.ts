@@ -8,7 +8,6 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 export function useNavigationTracker() {
   const location = useLocation();
   const currentUser = useCurrentUserStore((state) => state.currentUser);
-  const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
   const addLastUnauthorizedEntry = useNavigationHistoryStore(
     (state) => state.addLastUnauthorizedEntry,
@@ -36,22 +35,11 @@ export function useNavigationTracker() {
   ]);
 
   useEffect(() => {
-    const session = useCurrentUserStore.getState();
-    const user = session.currentUser;
+    const user = useCurrentUserStore.getState().currentUser;
     if (!user || isAuthRoute || !lastEntry) return;
-    if (user.requiresPasswordChange || (user.shouldVerifyMFA && !session.hasVerifiedMFA)) {
-      return;
-    }
+    if (user.requiresPasswordChange) return;
     if (lastEntry.pathname !== `${location.pathname}${location.search}`) return;
 
     clearHistory();
-  }, [
-    clearHistory,
-    currentUser,
-    hasVerifiedMFA,
-    isAuthRoute,
-    lastEntry,
-    location.pathname,
-    location.search,
-  ]);
+  }, [clearHistory, currentUser, isAuthRoute, lastEntry, location.pathname, location.search]);
 }

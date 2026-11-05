@@ -25,7 +25,9 @@ describe("SCORM content grants", () => {
       set: jest.fn(async (key: string, value: string) => data.set(key, value)),
     } as unknown as RedisClient;
     scormContentGrantsService = new ScormContentGrantsService(redis, {
-      isUserRevoked: async () => revoked,
+      assertSessionActive: async () => {
+        if (revoked) throw new UnauthorizedException();
+      },
     } as unknown as SessionRevocationService);
   });
 

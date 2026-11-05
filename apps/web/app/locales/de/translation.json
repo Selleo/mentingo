@@ -4830,6 +4830,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Die MFA-Erzwingungseinstellungen wurden erfolgreich aktualisiert.",
+      "mfaVerificationRequired": "MFA ist jetzt für deine Rolle erforderlich. Richte sie ein oder bestätige sie, um fortzufahren.",
       "mfaEnforcementUpdateFailed": "Die MFA-Erzwingungseinstellungen konnten nicht aktualisiert werden."
     }
   },
@@ -6215,7 +6216,13 @@
       "invalidRefreshToken": "Ungültiges Aktualisierungstoken",
       "adminRoleRequired": "Administratorrolle erforderlich",
       "missingPermission": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
-      "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung."
+      "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung.",
+      "mfaRequired": "Schließe die Zwei-Faktor-Authentifizierung ab, um fortzufahren.",
+      "sessionExpired": "Deine Anmeldesitzung ist abgelaufen. Bitte melde dich erneut an.",
+      "mfaAlreadyEnabled": "Die Zwei-Faktor-Authentifizierung ist bereits aktiviert.",
+      "mfaCodeAlreadyUsed": "Dieser Code wurde bereits verwendet. Warte auf einen neuen Code in deiner Authenticator-App und versuche es erneut.",
+      "invalidMfaCode": "Gib einen gültigen sechsstelligen Authentifizierungscode ein.",
+      "invalidSettingsUpdate": "Diese Sicherheitseinstellungen können hier nicht geändert werden."
     }
   },
   "sessionRevocation": {

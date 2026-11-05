@@ -10,17 +10,18 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  AUTH_ERROR_KEYS,
   COURSE_STATUSES,
   DASHBOARD_DEFAULT_LAYOUTS,
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_CATALOG,
   ENTITY_TYPES,
+  FEATURE_SETTINGS_KEYS,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
-  FEATURE_SETTINGS_KEYS,
 } from "@repo/shared";
 import { and, asc, count, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -73,6 +74,7 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "./constants/settings.constants";
+import { updateSettingsBodySchema } from "./schemas/update-settings.schema";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type { PwaManifest } from "./schemas/pwa-manifest.schema";
@@ -996,6 +998,12 @@ export class SettingsService {
 
     if (!currentSettings) {
       throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
+    }
+
+    const allowedKeys = Object.keys(updateSettingsBodySchema.properties);
+
+    if (Object.keys(updatedSettings).some((key) => !allowedKeys.includes(key))) {
+      throw new BadRequestException(AUTH_ERROR_KEYS.INVALID_SETTINGS_UPDATE);
     }
 
     const mergedSettings = {

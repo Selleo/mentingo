@@ -1,3 +1,4 @@
+import { AUTH_SESSION_STATUS } from "@repo/shared";
 import { http, HttpResponse } from "msw";
 
 import { currentUser } from "../data/currentUser";
@@ -8,6 +9,9 @@ interface Credentials {
 }
 
 export const handlers = [
+  http.get("/api/auth/session", () =>
+    HttpResponse.json({ data: { status: AUTH_SESSION_STATUS.AUTHENTICATED } }),
+  ),
   http.post("/api/auth/login", async ({ request }) => {
     const credentials = (await request.json()) as Credentials;
 

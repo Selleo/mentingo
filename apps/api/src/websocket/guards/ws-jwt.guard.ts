@@ -1,10 +1,9 @@
 import { type CanActivate, type ExecutionContext, Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
 import { WsException } from "@nestjs/websockets";
+import { AUTH_SOCKET_EVENTS, AUTH_TOKEN_PURPOSE } from "@repo/shared";
 import { parse } from "cookie";
 
-import { SessionRevocationService } from "src/redis";
+import { SessionService } from "src/auth/session/session.service";
 
 import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types";
 
@@ -12,23 +11,15 @@ import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types"
 export class WsJwtGuard implements CanActivate {
   private readonly logger = new Logger(WsJwtGuard.name);
 
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly sessionRevocationService: SessionRevocationService,
-  ) {}
+  constructor(private readonly sessionService: SessionService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<AuthenticatedSocket>();
 
-    if (client.data?.user) {
-      return true;
-    }
-
     return this.authenticateCurrent(client);
   }
 
-  /** Revalidate long-lived subscriptions instead of trusting cached socket claims. */
+  /** Revalidates the session on every message so revoked sessions lose live subscriptions. */
   async authenticateCurrent(client: AuthenticatedSocket): Promise<boolean> {
     const token = this.extractToken(client);
 
@@ -38,13 +29,10 @@ export class WsJwtGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>("jwt.secret"),
-      });
-
-      const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
-
-      if (isRevoked) throw new WsException("auth.error.sessionRevoked");
+      const payload = await this.sessionService.verifySessionToken(
+        token,
+        AUTH_TOKEN_PURPOSE.ACCESS,
+      );
 
       const user: WsUser = {
         userId: payload.userId,
@@ -62,6 +50,10 @@ export class WsJwtGuard implements CanActivate {
 
       return true;
     } catch (error) {
+      if (error instanceof Error && error.name === "TokenExpiredError") {
+        client.emit(AUTH_SOCKET_EVENTS.SESSION_EXPIRED);
+      }
+      client.disconnect(true);
       if (error instanceof WsException) throw error;
 
       this.logger.debug(`WebSocket authentication failed: ${error}`);

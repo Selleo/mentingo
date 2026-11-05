@@ -6,6 +6,7 @@ import { match } from "ts-pattern";
 import { EnvService } from "src/env/services/env.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSecretFactory } from "../../../test/factory/secret.factory";
@@ -53,7 +54,12 @@ describe("Organization login methods (e2e)", () => {
 
       await db
         .update(settings)
-        .set({ settings: { ...(globalSettings.settings as GlobalSettings), enforceSSO: true } })
+        .set({
+          settings: settingsToJSONBuildObject({
+            ...(globalSettings.settings as GlobalSettings),
+            enforceSSO: true,
+          }),
+        })
         .where(isNull(settings.userId));
     });
 

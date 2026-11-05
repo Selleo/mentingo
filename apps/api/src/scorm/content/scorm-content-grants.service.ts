@@ -40,12 +40,11 @@ export class ScormContentGrantsService {
     if (!storedGrant) throw new UnauthorizedException(SCORM_CONTENT_ERROR_KEYS.ACCESS_EXPIRED);
 
     const grant = JSON.parse(storedGrant) as ScormContentGrant;
-    const isRevoked = await this.sessionRevocationService.isUserRevoked(grant.actor.userId);
-
-    if (grant.expiresAt <= Date.now() || isRevoked) {
+    if (grant.expiresAt <= Date.now()) {
       throw new UnauthorizedException(SCORM_CONTENT_ERROR_KEYS.ACCESS_EXPIRED);
     }
 
+    await this.sessionRevocationService.assertSessionActive(grant.actor);
     return grant;
   }
 
