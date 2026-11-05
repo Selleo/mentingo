@@ -65,6 +65,6 @@ import { TokenService } from "./token.service";
     EntraIdOAuthGuard,
     SettingsService,
   ],
-  exports: [CreatePasswordService],
+  exports: [CreatePasswordService, AuthService, TokenService],
 })
 export class AuthModule {}

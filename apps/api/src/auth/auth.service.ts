@@ -466,7 +466,7 @@ export class AuthService {
    * revocation (for example after a role change), so the revocation is cleared for every login
    * method; otherwise the guard would reject the tokens that were just issued.
    */
-  private async issueSessionTokens(user: TokenUser) {
+  public async issueSessionTokens(user: Pick<TokenUser, "id" | "email" | "tenantId">) {
     const { id: userId, email, tenantId } = user;
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(userId);
 
