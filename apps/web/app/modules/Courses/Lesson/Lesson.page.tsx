@@ -12,7 +12,10 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
-import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import {
+  CourseAccessProvider,
+  useCourseAccessProvider,
+} from "~/modules/Courses/context/CourseAccessProvider";
 import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -88,13 +91,6 @@ export default function LessonPage() {
 
     queryClient.invalidateQueries(courseQueryOptions(courseId, language));
   }, [courseId, language, lesson?.id]);
-
-  useLearningTimeTracker({
-    lessonId,
-    learningStateId: lesson?.learningStateId,
-    courseId,
-    enabled: !!user && !!lesson && !!course && !course.isManagerPreview,
-  });
 
   useEffect(() => {
     if (lessonError) {
@@ -219,6 +215,7 @@ export default function LessonPage() {
 
   return (
     <CourseAccessProvider course={course}>
+      <LessonLearningTimeTracker lessonId={lesson.id} learningStateId={lesson.learningStateId} />
       <PageWrapper
         className="h-auto"
         breadcrumbs={breadcrumbs}
@@ -252,4 +249,21 @@ export default function LessonPage() {
       </PageWrapper>
     </CourseAccessProvider>
   );
+}
+
+function LessonLearningTimeTracker({
+  lessonId,
+  learningStateId,
+}: {
+  lessonId: string;
+  learningStateId?: string | null;
+}) {
+  const { course, isEffectiveStudentExperience } = useCourseAccessProvider();
+  useLearningTimeTracker({
+    lessonId,
+    learningStateId,
+    courseId: course.id,
+    enabled: isEffectiveStudentExperience && !course.isManagerPreview,
+  });
+  return null;
 }

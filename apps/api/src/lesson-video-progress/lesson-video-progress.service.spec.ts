@@ -106,6 +106,7 @@ const createService = () => {
     getLessonProgressAccess: jest.fn().mockResolvedValue({
       canTrackProgress: true,
       isFreemium: false,
+      isPublicCoursePreview: false,
     }),
     markLessonAsCompleted: jest.fn().mockResolvedValue(undefined),
   };
@@ -422,6 +423,35 @@ describe("LessonVideoProgressService", () => {
     expect(result.lessonCompleted).toBe(true);
   });
 
+  it("preserves video progress for the existing freemium experience outside public-course preview", async () => {
+    const { service, repository, studentLessonProgressService } = createService();
+    studentLessonProgressService.getLessonProgressAccess.mockResolvedValue({
+      canTrackProgress: false,
+      isFreemium: true,
+      isPublicCoursePreview: false,
+    });
+
+    await service.upsertProgress(body(), currentUser);
+
+    expect(repository.ensureProgressRow).toHaveBeenCalled();
+    expect(repository.mergeWatchedRanges).toHaveBeenCalled();
+  });
+
+  it("rejects writes for an unenrolled public-course preview even in a freemium chapter", async () => {
+    const { service, repository, studentLessonProgressService } = createService();
+    studentLessonProgressService.getLessonProgressAccess.mockResolvedValue({
+      canTrackProgress: false,
+      isFreemium: true,
+      isPublicCoursePreview: true,
+    });
+
+    await expect(service.upsertProgress(body(), currentUser)).rejects.toThrow(ForbiddenException);
+
+    expect(repository.ensureProgressRow).not.toHaveBeenCalled();
+    expect(repository.mergeWatchedRanges).not.toHaveBeenCalled();
+    expect(studentLessonProgressService.markLessonAsCompleted).not.toHaveBeenCalled();
+  });
+
   it("rejects unsupported access and resource states with translation keys", async () => {
     const { service, repository, studentLessonProgressService } = createService();
 
@@ -444,6 +474,7 @@ describe("LessonVideoProgressService", () => {
     studentLessonProgressService.getLessonProgressAccess.mockResolvedValue({
       canTrackProgress: false,
       isFreemium: false,
+      isPublicCoursePreview: false,
     });
 
     await expect(service.upsertProgress(body(), currentUser)).rejects.toThrow(ForbiddenException);

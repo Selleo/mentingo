@@ -907,6 +907,23 @@
         }
       }
     },
+    "/api/settings/admin/public-course-preview": {
+      "patch": {
+        "operationId": "SettingsController_updatePublicCoursePreviewEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePublicCoursePreviewEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/featured-course": {
       "patch": {
         "operationId": "SettingsController_updateFeaturedCourse",
@@ -26718,6 +26735,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -26907,6 +26927,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28513,6 +28534,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -28702,6 +28726,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28745,6 +28770,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -28934,6 +28962,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28977,6 +29006,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29166,6 +29198,243 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdatePublicCoursePreviewEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29228,6 +29497,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29417,6 +29689,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29460,6 +29733,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29649,6 +29925,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29692,6 +29969,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29881,6 +30161,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29924,6 +30205,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30113,6 +30397,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -30168,6 +30453,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30357,6 +30645,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -30400,6 +30689,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30589,6 +30881,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -30803,6 +31096,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30992,6 +31288,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",

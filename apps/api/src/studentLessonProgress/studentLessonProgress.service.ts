@@ -49,6 +49,7 @@ import {
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  settings,
   users,
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -117,6 +118,8 @@ export class StudentLessonProgressService {
       ...accessCourseLessonWithDetails,
       isLearningModeActive,
       canTrackProgress,
+      isPublicCoursePreview:
+        accessCourseLessonWithDetails.isPublicCoursePreview && !isLearningModeActive,
     };
   }
 
@@ -155,6 +158,14 @@ export class StudentLessonProgressService {
       userPermissions,
       dbInstance,
     );
+
+    if (
+      accessCourseLessonWithDetails.isPublicCoursePreview &&
+      !isLearningModeActive &&
+      !hasPermission(userPermissions, PERMISSIONS.LEARNING_MODE_USE)
+    ) {
+      throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+    }
 
     this.ensureDraftCourseProgressAllowed({
       courseStatus: accessCourseLessonWithDetails.courseStatus,
@@ -394,6 +405,14 @@ export class StudentLessonProgressService {
       dbInstance,
     );
 
+    if (
+      accessCourseLessonWithDetails.isPublicCoursePreview &&
+      !isLearningModeActive &&
+      !hasPermission(userPermissions, PERMISSIONS.LEARNING_MODE_USE)
+    ) {
+      throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+    }
+
     this.ensureDraftCourseProgressAllowed({
       courseStatus: accessCourseLessonWithDetails.courseStatus,
       isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
@@ -495,7 +514,11 @@ export class StudentLessonProgressService {
     userPermissions: PermissionKey[] = [],
     dbInstance: DatabasePg = this.db,
   ) {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(
+      id,
+      studentId,
+      dbInstance,
+    );
 
     const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
       id,
@@ -503,6 +526,14 @@ export class StudentLessonProgressService {
       userPermissions,
       dbInstance,
     );
+
+    if (
+      accessCourseLessonWithDetails.isPublicCoursePreview &&
+      !isLearningModeActive &&
+      !hasPermission(userPermissions, PERMISSIONS.LEARNING_MODE_USE)
+    ) {
+      throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+    }
 
     this.ensureDraftCourseProgressAllowed({
       courseStatus: accessCourseLessonWithDetails.courseStatus,
@@ -1058,6 +1089,17 @@ export class StudentLessonProgressService {
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
         courseStatus: courses.status,
+        isPublicCoursePreview: sql<boolean>`
+          ${courses.status} = ${COURSE_STATUSES.PUBLISHED}
+          AND ${courses.isArchived} = FALSE
+          AND ${courses.priceInCents} = 0
+          AND COALESCE(${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}, FALSE) = FALSE
+          AND EXISTS (
+            SELECT 1 FROM ${settings}
+            WHERE ${settings.userId} IS NULL
+              AND ${settings.tenantId} = ${courses.tenantId}
+              AND COALESCE((${settings.settings}->>'publicCoursePreviewEnabled')::boolean, FALSE)
+          )`,
         isCourseAuthor: sql<boolean>`${courses.authorId} = ${userId}`,
       })
       .from(lessons)

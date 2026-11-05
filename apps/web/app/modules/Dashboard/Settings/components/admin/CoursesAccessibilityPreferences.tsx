@@ -4,6 +4,7 @@ import { match } from "ts-pattern";
 import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCourseDiscussions";
 import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
+import { useTogglePublicCoursePreview } from "~/api/mutations/admin/useTogglePublicCoursePreview";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 import { Badge } from "~/components/ui/badge";
 import { Label } from "~/components/ui/label";
@@ -30,6 +31,8 @@ export default function CoursesAccessibilityPreferences({
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
+  const { mutate: togglePublicCoursePreview, isPending: isTogglingPublicCoursePreview } =
+    useTogglePublicCoursePreview();
   const { mutate: toggleCourseDiscussions } = useToggleCourseDiscussions();
   const { mutate: toggleLiveTraining } = useToggleLiveTraining();
   const trainerRoleUserCount = globalSettings.trainerRoleUserCount ?? 0;
@@ -53,6 +56,15 @@ export default function CoursesAccessibilityPreferences({
         checked={globalSettings.unregisteredUserCoursesAccessibility}
         onCheckedChange={handleCoursesAccessibilityChange}
         testId={SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH}
+      />
+      <SettingItem
+        id="publicCoursePreview"
+        label={t("adminPreferences.field.publicCoursePreview")}
+        description={t("adminPreferences.field.publicCoursePreviewDescription")}
+        checked={globalSettings.publicCoursePreviewEnabled}
+        onCheckedChange={() => togglePublicCoursePreview()}
+        disabled={isTogglingPublicCoursePreview}
+        testId={SETTINGS_PAGE_HANDLES.PUBLIC_COURSE_PREVIEW_SWITCH}
       />
       <SettingItem
         id="courseDiscussions"

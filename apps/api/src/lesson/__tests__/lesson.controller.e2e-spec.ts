@@ -12,6 +12,7 @@ import {
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   ENTITY_TYPES,
   SCORM_PACKAGE_ENTITY_TYPE,
   SCORM_PACKAGE_STATUS,
@@ -202,6 +203,152 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     return lesson;
   };
+
+  describe("public course preview", () => {
+    const createPreview = async (
+      enabled = true,
+      lessonType: LessonTypes = LESSON_TYPES.CONTENT,
+    ) => {
+      await db
+        .update(settings)
+        .set({
+          settings: setJsonbField(settings.settings, "publicCoursePreviewEnabled", enabled),
+        })
+        .where(isNull(settings.userId));
+      const lesson = await createLessonForPublicAccess({ isFreemium: false, lessonType });
+      const [chapter] = await db.select().from(chapters).where(eq(chapters.id, lesson.chapterId));
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      return { lesson, courseId: chapter.courseId, student, cookies };
+    };
+
+    it("allows a student to read a free public lesson without creating progress or enrollment", async () => {
+      const { lesson, student, cookies } = await createPreview();
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(eq(studentLessonProgress.studentId, student.id));
+      const enrollment = await db
+        .select()
+        .from(studentCourses)
+        .where(eq(studentCourses.studentId, student.id));
+      expect(progress).toHaveLength(0);
+      expect(enrollment).toHaveLength(0);
+    });
+
+    it.each([
+      {
+        name: "disabled flag",
+        enabled: false,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "private course",
+        enabled: true,
+        status: COURSE_STATUSES.PRIVATE,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "draft course",
+        enabled: true,
+        status: COURSE_STATUSES.DRAFT,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "archived course",
+        enabled: true,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: true,
+        priceInCents: 0,
+      },
+      {
+        name: "paid course",
+        enabled: true,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: false,
+        priceInCents: 1000,
+      },
+    ])("does not preview a $name", async ({ enabled, status, isArchived, priceInCents }) => {
+      const { lesson, courseId, cookies } = await createPreview(enabled);
+      await db
+        .update(courses)
+        .set({ status, isArchived, priceInCents })
+        .where(eq(courses.id, courseId));
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(401);
+    });
+
+    it("keeps enrolled users in the normal learning experience", async () => {
+      const { lesson, courseId, student, cookies } = await createPreview();
+      await db.insert(studentCourses).values({
+        courseId,
+        studentId: student.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      });
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(eq(studentLessonProgress.studentId, student.id));
+      expect(progress).toHaveLength(1);
+      expect(progress[0].isStarted).toBe(true);
+    });
+
+    it("does not grant anonymous access", async () => {
+      const { lesson } = await createPreview();
+      await request(app.getHttpServer()).get(`/api/lesson/${lesson.id}?language=en`).expect(401);
+    });
+
+    it("rejects unenrolled quiz submission even for an otherwise free preview chapter", async () => {
+      const { lesson, cookies } = await createPreview(true, LESSON_TYPES.QUIZ);
+      await db.update(chapters).set({ isFreemium: true }).where(eq(chapters.id, lesson.chapterId));
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId: lesson.id, language: SUPPORTED_LANGUAGES.EN, questionsAnswers: [] })
+        .expect(403);
+    });
+
+    it("restricts the organization preview toggle to settings managers", async () => {
+      const { cookies } = await createPreview();
+      await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", cookies)
+        .expect(403);
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const disabled = await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(disabled.body.data.publicCoursePreviewEnabled).toBe(false);
+      const enabled = await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(enabled.body.data.publicCoursePreviewEnabled).toBe(true);
+    });
+  });
 
   describe("public lesson access", () => {
     it("allows guests to view a content lesson in a public chapter", async () => {

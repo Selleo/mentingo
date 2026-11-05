@@ -4691,6 +4691,11 @@
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
       "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
+    },
+    "preview": {
+      "title": "Przeglądasz podgląd kursu",
+      "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy, uczestniczyć w aktywnościach i zapisywać postępy.",
+      "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy, uczestniczyć w aktywnościach i śledzić postępy."
     }
   },
   "studentCourseView": {
@@ -5027,7 +5032,9 @@
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
-      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy"
+      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
+      "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
+      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne publiczne kursy bez zapisu. Quizy, aktywności i zapisywanie postępów wymagają zapisu. Zasady dostępu do płatnych kursów pozostają bez zmian."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5040,7 +5047,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
-      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
+      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach",
+      "publicCoursePreviewPreferenceChangeSuccess": "Zaktualizowano ustawienie podglądu kursów"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },

@@ -4422,6 +4422,11 @@
       "courseEnrollmentRequired": "You are not enrolled in this course.",
       "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
       "quizResetFailed": "Failed to reset quiz answers. Please try again."
+    },
+    "preview": {
+      "title": "You are previewing this course",
+      "enrollmentDescription": "Enroll to take quizzes, join activities and save your progress.",
+      "learningModeDescription": "Enable Learn mode to take quizzes, join activities and track your progress."
     }
   },
   "studentCourseView": {
@@ -4714,7 +4719,9 @@
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
-      "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses"
+      "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
+      "publicCoursePreview": "Preview public courses before enrollment",
+      "publicCoursePreviewDescription": "Let signed-in users browse free public courses without enrolling. Quizzes, activities and progress require enrollment. Paid courses keep their existing access rules."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -4727,7 +4734,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
-      "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences"
+      "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences",
+      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated"
     }
   },
   "registrationFormBuilder": {

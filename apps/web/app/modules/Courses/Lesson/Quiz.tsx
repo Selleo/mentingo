@@ -107,6 +107,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   if (!questions.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
+    if (isPreviewMode) return;
     const parsedQuestionsAnswers = parseQuizFormData(data);
 
     submitQuiz.mutate({
@@ -118,6 +119,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   };
 
   const handleRetake = () => {
+    if (isPreviewMode) return;
     retakeQuiz.mutate(lesson.learningStateId);
   };
 
@@ -160,11 +162,13 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
             </div>
           )}
 
-          <Questions
-            questions={questions}
-            isQuizCompleted={isUserSubmittedAnswer}
-            lessonId={lesson.id}
-          />
+          <fieldset disabled={isPreviewMode} className="flex flex-col gap-y-4">
+            <Questions
+              questions={questions}
+              isQuizCompleted={isUserSubmittedAnswer}
+              lessonId={lesson.id}
+            />
+          </fieldset>
           {!isPreviewMode && (
             <div className="flex gap-x-2 self-end">
               <div className="group relative">

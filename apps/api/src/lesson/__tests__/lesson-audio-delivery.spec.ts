@@ -38,6 +38,7 @@ describe("authorized lesson audio delivery", () => {
     getResource: jest.Mock;
     getAudioResourceLessons: jest.Mock;
     getHasLessonAccess: jest.Mock;
+    getHasPublicCoursePreviewAccess: jest.Mock;
     checkLessonAssignment: jest.Mock;
     getHasPublicContentResourceAccess: jest.Mock;
   };
@@ -48,6 +49,7 @@ describe("authorized lesson audio delivery", () => {
       getResource: jest.fn(async () => resource),
       getAudioResourceLessons: jest.fn(async () => [relation]),
       getHasLessonAccess: jest.fn(async () => true),
+      getHasPublicCoursePreviewAccess: jest.fn(async () => false),
       checkLessonAssignment: jest.fn(async () => [{ isAssigned: true }]),
       getHasPublicContentResourceAccess: jest.fn(async () => true),
     };

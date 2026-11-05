@@ -442,6 +442,7 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -730,6 +731,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -772,6 +774,7 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -814,6 +817,50 @@ export interface UpdateModernCourseListEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdatePublicCoursePreviewEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -860,6 +907,7 @@ export interface UpdateFeaturedCourseResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -902,6 +950,7 @@ export interface UpdateCourseDiscussionsEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -944,6 +993,7 @@ export interface UpdateCalendarEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -986,6 +1036,7 @@ export interface UpdateLiveTrainingEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1033,6 +1084,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1075,6 +1127,7 @@ export interface UpdateLearningPathsEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1148,6 +1201,7 @@ export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -37855,6 +37909,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
       this.request<UpdateModernCourseListEnabledResponse, any>({
         path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePublicCoursePreviewEnabled
+     * @request PATCH:/api/settings/admin/public-course-preview
+     */
+    settingsControllerUpdatePublicCoursePreviewEnabled: (params: RequestParams = {}) =>
+      this.request<UpdatePublicCoursePreviewEnabledResponse, any>({
+        path: `/api/settings/admin/public-course-preview`,
         method: "PATCH",
         format: "json",
         ...params,

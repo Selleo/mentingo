@@ -133,11 +133,18 @@ export class CourseDetailService {
     }
     const learningState = await this.courseRepetitionService.getInfo(id, userId);
 
+    const canPreviewPublicCourse =
+      !!currentUser &&
+      course.status === COURSE_STATUSES.PUBLISHED &&
+      !course.isArchived &&
+      course.priceInCents === 0 &&
+      (await this.settingsService.getGlobalSettings()).publicCoursePreviewEnabled;
+
     const courseChapterList = await this.courseDetailRepository.findCourseChaptersWithProgress(
       id,
       userId,
       language,
-      isEnrolled,
+      isEnrolled || canPreviewPublicCourse,
     );
 
     const durationHierarchy = await this.courseDurationService.getCourseDurationHierarchy(

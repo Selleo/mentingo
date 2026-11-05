@@ -14,6 +14,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 
+import { CoursePreviewNotice } from "./CoursePreviewNotice";
 import { LessonContentRenderer } from "./LessonContentRenderer";
 import { LessonVideoProgressStrip } from "./LessonVideoProgressStrip";
 import { createLessonVideoProgressStore } from "./LessonVideoProgressStrip.utils";
@@ -118,7 +119,7 @@ export const LessonContent = ({
   );
 
   useEffect(() => {
-    if (isPreviewMode) return;
+    if (isPreviewMode || !isEffectiveStudentExperience) return;
 
     const nextLessonId =
       currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
@@ -153,6 +154,7 @@ export const LessonContent = ({
     prevChapter,
     course.enrolled,
     isPreviewMode,
+    isEffectiveStudentExperience,
     queryClient,
     course.id,
     nextLessonIndex,
@@ -161,7 +163,7 @@ export const LessonContent = ({
   ]);
 
   useEffect(() => {
-    if (isPreviewMode) return;
+    if (isPreviewMode || !isEffectiveStudentExperience) return;
 
     if (
       (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) &&
@@ -194,6 +196,7 @@ export const LessonContent = ({
     course,
     isLastLesson,
     isPreviewMode,
+    isEffectiveStudentExperience,
     lesson.id,
     lesson.learningStateId,
     lesson.type,
@@ -278,6 +281,8 @@ export const LessonContent = ({
             </div>
           )}
         </div>
+
+        <CoursePreviewNotice />
 
         <LessonVideoProgressStrip
           lessonId={lesson.id}

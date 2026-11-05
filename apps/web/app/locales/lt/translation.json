@@ -4423,6 +4423,11 @@
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
       "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
+    },
+    "preview": {
+      "title": "Peržiūrite kurso turinį",
+      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus, dalyvauti veiklose ir išsaugoti pažangą.",
+      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus, dalyvauti veiklose ir stebėti pažangą."
     }
   },
   "studentCourseView": {
@@ -4717,7 +4722,9 @@
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
-      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis"
+      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
+      "publicCoursePreview": "Viešų kursų peržiūra prieš registraciją",
+      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus neužsiregistravus. Testams, veikloms ir pažangos išsaugojimui reikia registracijos. Mokamų kursų prieigos taisyklės nesikeičia."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -4730,7 +4737,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
-      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų"
+      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų",
+      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas"
     }
   },
   "registrationFormBuilder": {

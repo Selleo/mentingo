@@ -4421,6 +4421,11 @@
       "courseEnrollmentRequired": "Sie sind nicht in diesen Kurs eingeschrieben.",
       "quizRetakeUnavailable": "Die Quizantworten können wegen des Versuchslimits oder der Wartezeit nicht zurückgesetzt werden.",
       "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+    },
+    "preview": {
+      "title": "Sie sehen eine Kursvorschau",
+      "enrollmentDescription": "Schreiben Sie sich ein, um Quizze zu beantworten, an Aktivitäten teilzunehmen und Ihren Fortschritt zu speichern.",
+      "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten, an Aktivitäten teilzunehmen und Ihren Fortschritt zu verfolgen."
     }
   },
   "studentCourseView": {
@@ -4713,7 +4718,9 @@
       "finishedCourseNotification": "Benachrichtigungen über abgeschlossene Kurse",
       "finishedCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn ein Benutzer einen Kurs beendet",
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
-      "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben"
+      "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
+      "publicCoursePreview": "Öffentliche Kurse vor der Anmeldung ansehen",
+      "publicCoursePreviewDescription": "Angemeldete Nutzer können kostenlose öffentliche Kurse ohne Einschreibung ansehen. Quizze, Aktivitäten und Lernfortschritt erfordern eine Einschreibung. Für kostenpflichtige Kurse gelten die bisherigen Zugangsregeln."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
@@ -4726,7 +4733,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse wurden erfolgreich aktualisiert",
       "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
-      "overdueCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für überfällige Kurse konnten nicht aktualisiert werden"
+      "overdueCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für überfällige Kurse konnten nicht aktualisiert werden",
+      "publicCoursePreviewPreferenceChangeSuccess": "Einstellung zur Kursvorschau aktualisiert"
     }
   },
   "registrationFormBuilder": {
