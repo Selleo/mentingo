@@ -252,6 +252,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/public-course-preview")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({ response: baseResponse(globalSettingsJSONSchema) })
+  async updatePublicCoursePreviewEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    return new BaseResponse(
+      await this.settingsService.updateGlobalPublicCoursePreviewEnabled(currentUser),
+    );
+  }
+
   @Patch("admin/featured-course")
   @UseGuards(DisallowInSupportModeGuard)
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)

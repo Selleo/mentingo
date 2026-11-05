@@ -1198,6 +1198,33 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalPublicCoursePreviewEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(
+          ${settings.settings},
+          '{publicCoursePreviewEnabled}',
+          to_jsonb(NOT COALESCE((${settings.settings}->>'publicCoursePreviewEnabled')::boolean, false)),
+          true
+        )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+    const updatedRecord = await this.getGlobalSettingsRecord();
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalFeaturedCourse(
     featuredCourseId: UUIDType | null,
     actor?: CurrentUserType,
@@ -2365,6 +2392,8 @@ export class SettingsService {
     Reflect.deleteProperty(publicSettings, "userEmailTriggers");
     return {
       ...publicSettings,
+      publicCoursePreviewEnabled:
+        settings.publicCoursePreviewEnabled ?? DEFAULT_GLOBAL_SETTINGS.publicCoursePreviewEnabled,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:

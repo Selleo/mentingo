@@ -4428,6 +4428,11 @@
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
       "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu."
+    },
+    "preview": {
+      "title": "Prohlížíte si náhled kurzu",
+      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy, účastnit se aktivit a ukládat svůj postup.",
+      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy, účastnit se aktivit a sledovat svůj postup."
     }
   },
   "studentCourseView": {
@@ -4722,7 +4727,9 @@
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
-      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy"
+      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
+      "publicCoursePreview": "Náhled veřejných kurzů před zápisem",
+      "publicCoursePreviewDescription": "Přihlášení uživatelé si mohou prohlížet bezplatné veřejné kurzy bez zápisu. Kvízy, aktivity a ukládání postupu vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -4735,7 +4742,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
-      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila"
+      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila",
+      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno"
     }
   },
   "registrationFormBuilder": {

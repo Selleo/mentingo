@@ -109,7 +109,10 @@ export class LessonVideoProgressService {
         trx,
       );
 
-      if (!lessonProgressAccess?.canTrackProgress && !lessonProgressAccess?.isFreemium) {
+      if (
+        lessonProgressAccess?.isPublicCoursePreview ||
+        (!lessonProgressAccess?.canTrackProgress && !lessonProgressAccess?.isFreemium)
+      ) {
         throw new ForbiddenException(LESSON_VIDEO_PROGRESS_ERROR_KEYS.ACCESS_DENIED);
       }
 

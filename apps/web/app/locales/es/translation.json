@@ -4366,6 +4366,11 @@
       "courseEnrollmentRequired": "No estás inscrito en este curso.",
       "quizRetakeUnavailable": "Las respuestas del cuestionario no se pueden restablecer debido al límite de intentos o al tiempo de reutilización.",
       "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo."
+    },
+    "preview": {
+      "title": "Estás viendo una vista previa del curso",
+      "enrollmentDescription": "Inscríbete para responder cuestionarios, participar en actividades y guardar tu progreso.",
+      "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios, participar en actividades y registrar tu progreso."
     }
   },
   "studentCourseView": {
@@ -4652,7 +4657,9 @@
       "finishedCourseNotification": "Notificaciones de cursos terminados",
       "finishedCourseNotificationDescription": "Recibir notificaciones cuando un usuario finalice un curso.",
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
-      "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados"
+      "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
+      "publicCoursePreview": "Vista previa de cursos públicos antes de inscribirse",
+      "publicCoursePreviewDescription": "Permite a los usuarios conectados explorar cursos públicos gratuitos sin inscribirse. Los cuestionarios, las actividades y el progreso requieren inscripción. Los cursos de pago mantienen sus reglas de acceso."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",
@@ -4665,7 +4672,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos finalizados se han actualizado correctamente.",
       "finishedCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación del curso terminado",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos vencidos se han actualizado correctamente",
-      "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos"
+      "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos",
+      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada"
     }
   },
   "registrationFormBuilder": {

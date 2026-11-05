@@ -6,6 +6,7 @@ export const SETTINGS_PAGE_SELECTORS = {
 export const SETTINGS_PAGE_HANDLES = {
   ACCOUNT_TAB: "settings-account-tab",
   INTEGRATIONS_TAB: "settings-integrations-tab",
+  PUBLIC_COURSE_PREVIEW_SWITCH: "settings-public-course-preview-switch",
   ORGANIZATION_TAB: "settings-organization-tab",
   PLATFORM_CUSTOMIZATION_TAB: "settings-platform-customization-tab",
   ACCOUNT_CONTENT: "settings-account-content",

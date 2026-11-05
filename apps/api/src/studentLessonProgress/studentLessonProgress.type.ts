@@ -43,4 +43,5 @@ export type LessonProgressAccessResult = {
   isCourseAuthor: boolean;
   isLearningModeActive: boolean;
   canTrackProgress: boolean;
+  isPublicCoursePreview: boolean;
 };

@@ -13,6 +13,7 @@ import {
   studentCoursesQueryOptions,
   useCourse,
 } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -57,6 +58,7 @@ const HeroBanner = ({
   const navigate = useNavigate();
 
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
   const { hasAccess: canUseLearningMode } = usePermissions({
     required: PERMISSIONS.LEARNING_MODE_USE,
   });
@@ -94,11 +96,13 @@ const HeroBanner = ({
       canUseLearningMode,
       canUpdateLearningProgress,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
+      publicCoursePreviewEnabled: globalSettings?.publicCoursePreviewEnabled,
     });
   }, [
     heroCourseData,
     currentUser?.id,
     currentUser?.studentModeCourseIds,
+    globalSettings?.publicCoursePreviewEnabled,
     canUseLearningMode,
     canUpdateLearningProgress,
   ]);
@@ -117,7 +121,7 @@ const HeroBanner = ({
     .exhaustive();
 
   const handleNavigateToLesson = useCallback(async () => {
-    if (!heroCourseData) return;
+    if (!heroCourseData || (!globalSettings && !heroCourseData.enrolled)) return;
 
     if (isGroupManager) {
       navigate(`/course/${heroCourseData.id}`);
@@ -147,6 +151,7 @@ const HeroBanner = ({
     });
   }, [
     heroCourseData,
+    globalSettings,
     isGroupManager,
     isPreviewMode,
     navigate,
@@ -238,7 +243,10 @@ const HeroBanner = ({
           )}
 
           <div className="pointer-events-auto flex flex-wrap gap-2 pt-1 md:gap-3 md:pt-2">
-            <Button onClick={handleNavigateToLesson}>
+            <Button
+              onClick={handleNavigateToLesson}
+              disabled={!heroCourseData || (!globalSettings && !heroCourseData.enrolled)}
+            >
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(primaryActionLabel)}
             </Button>

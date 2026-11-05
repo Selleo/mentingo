@@ -1,3 +1,6 @@
+import { ForbiddenException } from "@nestjs/common";
+import { PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
 
 import type { DatabasePg } from "src/common";
@@ -75,6 +78,39 @@ describe("StudentLessonProgressService.markLessonAsIncomplete", () => {
     methods.checkCourseIsCompletedForUser = jest.fn();
     return { db, transaction, outboxPublisher, methods, service };
   }
+
+  it.each(["start", "complete", "reset"])(
+    "rejects preview %s requests before any progress or outbox writes",
+    async (operation) => {
+      const { db, transaction, outboxPublisher, methods, service } = setup();
+      methods.checkLessonAssignment.mockResolvedValue([
+        {
+          courseStatus: "published",
+          isCourseAuthor: false,
+          isAssigned: false,
+          isFreemium: true,
+          isPublicCoursePreview: true,
+        },
+      ]);
+      const userPermissions = [PERMISSIONS.LEARNING_PROGRESS_UPDATE];
+      let request: Promise<unknown>;
+      if (operation === "start") {
+        request = service.markLessonAsStarted("lesson", "student", userPermissions);
+      } else if (operation === "complete") {
+        request = service.markLessonAsCompleted({
+          ...params,
+          userPermissions,
+          language: SUPPORTED_LANGUAGES.EN,
+        });
+      } else {
+        request = service.markLessonAsIncomplete({ ...params, userPermissions });
+      }
+      await expect(request).rejects.toBeInstanceOf(ForbiddenException);
+      expect(db.update).not.toHaveBeenCalled();
+      expect(transaction.update).not.toHaveBeenCalled();
+      expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+    },
+  );
 
   it("rolls progress changes and durable invalidation into one transaction", async () => {
     const { db, transaction, outboxPublisher, methods, service } = setup();
