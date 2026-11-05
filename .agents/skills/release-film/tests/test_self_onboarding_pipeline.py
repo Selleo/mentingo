@@ -154,7 +154,7 @@ class PipelineTest(unittest.TestCase):
         domain['videos'] = [{'key':domain['key'], 'title':domain['title'], 'description':domain['description'],
                              'flowIds':[f['id'] for f in domain['flows']]}]
         registry = {'domains': [copy.deepcopy(domain)]}
-        profile = hashlib.sha256(json.dumps({'provider': {}, 'pronunciation': {}, 'brand': {}, 'renderer': 'tutorial-v10-action-result-rhythm', 'frame': recording.render_demo.mentingo_frame.fingerprint()}, sort_keys=True).encode()).hexdigest()
+        profile = hashlib.sha256(json.dumps({'provider': {}, 'pronunciation': {}, 'brand': {}, 'renderer': 'tutorial-v11-continuous-sentence-audio', 'frame': recording.render_demo.mentingo_frame.fingerprint()}, sort_keys=True).encode()).hexdigest()
         states = {}
         for flow in domain['flows']:
             video = self.cache/'segments'/flow['id']/'demo.mp4'

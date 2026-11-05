@@ -46,49 +46,12 @@ def word_landings(chapter, capture, words):
 
 
 def align_actions(spec, chapter, capture, words):
-    """Cue narrated interactions before their existing result pin, without discarding proof.
+    """Keep one narration pin per sentence; word cues never split its speech.
 
-    A sentence can be pinned to a saved heading while naming the Save click
-    before it. The click belongs on 'Save'; its result belongs at the sentence's
-    end. Previously only the result pin was timed and that click ran early.
+    Compound sentences retain their reviewed outcome pin. Their setup actions
+    must not create additional audio edits inside the sentence.
     """
-    sentences = chapter.get('sentences', [])
-    firsts = montage.first_words(words, [s['text'] for s in sentences])
     spec['word_landings'] = word_landings(chapter, capture, words)
-    spec['result_landings'] = {}
-    if firsts is None:
-        return
-    records = {r['step']: r for r in capture.get('steps', [])}
-    steps = {r['step']: step for r, step in zip(capture.get('steps', []), spec['steps'])}
-    previous = -1
-    for beat, sentence in enumerate(sentences, 1):
-        pinned = sentence.get('action')
-        if pinned not in records or pinned <= previous:
-            continue
-        end = firsts[beat] if beat < len(firsts) else len(words)
-        matches = {}
-        for index, record in records.items():
-            if not previous < index < pinned or not record.get('acting') or record.get('navigate'):
-                continue
-            at = label_time(record, words, firsts[beat - 1], end)
-            if at is not None:
-                primary_at = spec['word_landings'].get(beat)
-                if not records[pinned].get('look') and (primary_at is None or at >= primary_at):
-                    continue  # Do not force setup words past their already narrated interaction.
-                matches.setdefault(at, []).append(index)
-        cued = []
-        last_at = -1
-        for at, indexes in sorted(matches.items(), key=lambda item: min(item[1])):
-            if len(indexes) != 1 or at < last_at:
-                continue  # Repeated controls or reversed wording cannot establish a safe action order.
-            steps[indexes[0]].update(at=at, word_cue=True)
-            cued.append(at)
-            last_at = at
-        if cued and records[pinned].get('look'):
-            # Keep the asserted outcome after its narrated interaction, rather
-            # than pulling the whole sentence back onto the old screen.
-            spec['result_landings'][beat] = max(cued + [words[end - 1][0]])
-        previous = pinned
 
 
 def from_film(film, capture):

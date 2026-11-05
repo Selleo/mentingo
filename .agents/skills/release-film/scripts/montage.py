@@ -541,7 +541,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
     starts, finished = sentence_starts(words, known), sentence_ends(words, known)
     speech = float(audio_duration if audio_duration is not None else (words[-1][1] + 0.3 if words else 0.0))
 
-    cue_times = {**(spec.get('word_landings') or {}), **(spec.get('result_landings') or {})}
+    cue_times = spec.get('word_landings') or {}
 
     def landing(beat, shift):
         """A measured tutorial cue lands on its word; other actions keep their sentence pin.
@@ -681,7 +681,10 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
         if beat is not None and beat not in beats and 1 <= beat <= len(starts):
             beats.add(beat)
             last_beat = beat
-            spoken = cue_times.get(beat, starts[beat - 1])
+            spoken = starts[beat - 1]
+            if spec.get('preserve_actions'):
+                default_pause = (finished[beat - 2] + spoken) / 2 if beat > 1 else 0.0
+                spoken = spec.get('pause_points', {}).get(beat, default_pause)
             target = landing(beat, shift)
         elif step.get('at') is not None and float(step['at']) >= 0:
             spoken = float(step['at'])
@@ -704,14 +707,13 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
         if target is not None:
             late = moment - target
             tolerance = LATE_TOLERANCE_LATER if beat is not None and beat > 1 else LATE_TOLERANCE
-            if late > tolerance:  # the narration waits at this measured cue, preserving earlier words and actions
+            if late > tolerance and spoken is not None:  # extend only a verified inter-sentence pause in tutorials
                 silences.append((round(spoken, 3), round(late, 3)))
                 shift += late
             anchors.append({'step': index, 'beat': beat, 'at': step.get('at'), 'target': round(target, 3),
                             'action': round(moment, 3), 'late': round(late, 3),
-                            'waits': round(late, 3) if late > tolerance else 0.0,
-                            'named': bool(step.get('word_cue')) or (beat in (spec.get('word_landings') or {})
-                                                                   and beat not in (spec.get('result_landings') or {}))})
+                            'waits': round(late, 3) if late > tolerance and spoken is not None else 0.0,
+                            'named': beat in (spec.get('word_landings') or {})})
         verb = (record.get('cmd') or [''])[0]
         if point:
             if glide:

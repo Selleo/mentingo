@@ -666,13 +666,13 @@ def render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, captur
     voice = narrate_cached(cache, run, story, addon)
     entry, _ = cut.chapter_cut(core.tool('ffmpeg'), chapter, keys[key], voice / 'c1', data, last=True)
     entry['id'] = flow['id']
-    font, _, _ = cut.film_font(addon, cut.drawn_text([entry]))
+    font = cut.tutorial_font(addon, cut.drawn_text([entry]), repo_slug)
     colors, _ = cut.film_colors(addon)
     work = run / 'rendered' / domain['key'] / code / flow['id']
     if work.exists():
         shutil.rmtree(work)
     core.save(work / 'authored.json', {'mode': 'tutorial', 'language': code, 'font': font, 'chapters': [entry],
-                                     **({'frameTheme': 'mentingo', 'captionFont': str(render_demo.mentingo_frame.CAPTION_FONT)}
+                                     **({'frameTheme': 'mentingo', 'captionFont': font}
                                         if repo_slug == 'Selleo/mentingo' else {}),
                                      **({'colors': colors} if colors else {})})
     render_demo.FFMPEG, render_demo.FFPROBE = core.tool('ffmpeg'), core.tool('ffprobe') or 'ffprobe'

@@ -97,10 +97,10 @@ class RenderTest(unittest.TestCase):
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
 
-    def test_tutorial_caption_font_is_independent_from_heading_font(self):
+    def test_tutorial_caption_uses_the_configured_display_face(self):
         data=copy.deepcopy(self.data)
         data.update(mode='tutorial',frameTheme='mentingo',
-                    captionFont=str(render_demo.mentingo_frame.ASSETS/'open-sans.ttf'))
+                    captionFont=self.data['font'])
         data['chapters'][0]['id']='fixture'
         data['chapters'][0]['prs']=['https://github.com/Selleo/mentingo/blob/'+'a'*40+'/docs/specs/category-management-business-spec.md']
         data['chapters'][0].pop('captions')
@@ -110,8 +110,7 @@ class RenderTest(unittest.TestCase):
         prepared=self.root/'caption-prepared'
         render_demo.prepare(authored,prepared,enforce_duration=False)
         plan=load_plan(prepared/'editing-plan.json',enforce_duration=False)
-        self.assertEqual(Path(plan['caption_font']).name,'open-sans.ttf')
-        self.assertNotEqual(plan['font'],plan['caption_font'])
+        self.assertEqual(plan['caption_font'],plan['font'])
         output=self.root/'caption-font-render'
         render(plan,output)
         self.assertTrue((output/'demo.mp4').is_file())

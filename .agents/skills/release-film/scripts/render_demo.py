@@ -659,7 +659,8 @@ def render_segments(plan, cache, jobs=2):
 
 def mux_narration(plan, listing, target, duration):
     """Encode continuous chapter narration once, independently of visual cut/AAC packet boundaries."""
-    args = ['ffmpeg', '-v', 'error', '-nostdin', '-y', '-f', 'concat', '-safe', '0', '-i', listing]
+    args = ['ffmpeg', '-v', 'error', '-nostdin', '-y', '-filter_complex_threads', '1',
+            '-f', 'concat', '-safe', '0', '-i', listing]
     graph, labels, speech_end = [], [], 0.0
     for index, chapter in enumerate(plan['chapters'], 1):
         args += ['-i', chapter['audio']]

@@ -852,7 +852,7 @@ class LocalizationTest(unittest.TestCase):
             entries.append((sources['language'],copy.deepcopy(entry)))
             return entry,{}
         self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
-        self.patch(recording.cut,'film_font',return_value=('unused-font','Test',None))
+        self.patch(recording.cut,'film_font',return_value=('unused-font','all-round-gothic',None))
         prepared = self.patch(recording.render_demo,'prepare')
         run=self.root/'render-run'
         self.patch(recording.render_demo,'load_plan',side_effect=lambda *args,**kwargs:{'language':core.load(run/'sources.json')['language']})

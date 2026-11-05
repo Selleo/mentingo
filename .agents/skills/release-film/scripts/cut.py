@@ -7,6 +7,7 @@ moves an eased camera and leaves out loading, blank pages and redirect hops.
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -115,6 +116,15 @@ def film_font(addon, text=''):
     if not checked:
         return fallback, plain, f'{family} lacks the glyphs {missing!r}: {plain} used'
     return str(target), family, None
+
+
+def tutorial_font(addon, text, repo_slug):
+    """Use the clips reference's display face for Mentingo captions; never silently fall back."""
+    font, family, warning = film_font(addon, text)
+    if repo_slug == 'Selleo/mentingo' and (family != 'all-round-gothic' or warning):
+        raise ValueError('Mentingo tutorials require All Round Gothic 600 from the configured Adobe kit; ' +
+                         (warning or 'incorrect configured font family'))
+    return font
 
 
 def film_colors(addon):
@@ -359,8 +369,10 @@ def bound_voice_captions(folder):
 
 
 def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
-    """The narration in ``folder`` (audio.mp3 and its word SRT) with at least PAUSE between two sentences: the silence
-    goes in halfway between one sentence's last word and the next one's first, and the words after it move."""
+    """Tutorial PCM preserves provider delivery. Other modes retain their existing sentence pacing.
+
+    UI-driven tutorial waits are applied later, only in acoustically verified gaps.
+    """
     folder = Path(folder)
     if clip_tail:
         bound_voice_captions(folder)
@@ -370,11 +382,9 @@ def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
                 for i in range(1, len(starts)) if starts[i] - ends[i - 1] < PAUSE - 0.05]
     if lossless:
         target = folder / 'paced.wav'
-        if silences:
-            splice(ffmpeg, folder / 'audio.mp3', silences, target, ['-c:a', 'pcm_s16le'])
-        else:
-            core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(folder / 'audio.mp3'), '-ar', '48000',
-                     '-ac', '1', '-c:a', 'pcm_s16le', str(target)], timeout=300)
+        silences = []  # Preserve the provider's natural delivery within the entire chapter.
+        core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(folder / 'audio.mp3'), '-ar', '48000',
+                 '-ac', '1', '-c:a', 'pcm_s16le', str(target)], timeout=300)
         duration = audio_seconds(target)
         shifted = montage.words_from_srt(montage.shifted_srt(words, silences))
         if any(start >= duration for start, _, _ in shifted):
@@ -390,6 +400,36 @@ def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
     (folder / 'paced.srt').replace(folder / 'subtitles.srt')
     if clip_tail:
         bound_voice_captions(folder)
+
+
+def sentence_pause_points(ffmpeg, audio, words, sentences):
+    """Audio waits may extend acoustic silence between sentences, never a word cue.
+
+    If the waveform has no suitable quiet gap, leave that sentence continuous;
+    its existing late-action diagnostics remain available for review.
+    """
+    starts = montage.sentence_starts(words, sentences)
+    ends = montage.sentence_ends(words, sentences)
+    result = {1: 0.0}
+    detected = subprocess.run([str(ffmpeg), '-hide_banner', '-nostdin', '-i', str(audio),
+        '-af', 'silencedetect=noise=-48dB:d=0.025', '-f', 'null', '-'],
+        capture_output=True, text=True, timeout=120, check=True).stderr
+    quiet, opened = [], None
+    for kind, value in re.findall(r'silence_(start|end): ([0-9.]+)', detected):
+        if kind == 'start':
+            opened = float(value)
+        elif opened is not None:
+            quiet.append((opened, float(value)))
+            opened = None
+    for i in range(1, len(starts)):
+        # Require the cut to be between the provider's words as well as inside
+        # measured silence. A timestamp alone is not acoustic evidence.
+        low, high = ends[i - 1], starts[i]
+        candidates = [(max(low, a) + min(high, b)) / 2 for a,b in quiet
+                      if min(high, b) - max(low, a) >= .02]
+        midpoint = (low + high) / 2
+        result[i + 1] = min(candidates, key=lambda t: abs(t - midpoint)) if candidates else None
+    return result
 
 
 def retime(ffmpeg, audio, srt, words, silences, folder):
@@ -514,6 +554,7 @@ def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, lang
     speech = audio_seconds(narration_audio(voice_dir))
     if tutorial:
         tutorial_focus.align_actions(spec, chapter, capture, words)
+        spec['pause_points'] = sentence_pause_points(core.tool('ffmpeg'), narration_audio(voice_dir), words, spec['sentences'])
     film = montage.cut(spec, capture, words, audio_duration=speech, tail=montage.FINAL_TAIL if last else None)
     _, spans = montage.camera(spec, capture, film, capture['scale'])
     return spec, capture, words, speech, film, spans

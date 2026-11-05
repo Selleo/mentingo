@@ -156,7 +156,7 @@ class TutorialMedia(unittest.TestCase):
         for start, end in [(.7, .9), (2.7, 2.9)]:
             self.assertGreater(self.rms(samples, start, end), .04)
 
-    def test_tutorial_pause_insertion_preserves_the_original_mp3_and_uses_pcm_for_rendering(self):
+    def test_tutorial_keeps_provider_delivery_and_uses_pcm_without_artificial_pauses(self):
         mp3 = self.root / 'audio.mp3'
         self.command('-i', self.voice, '-c:a', 'libmp3lame', mp3)
         original = mp3.read_bytes()
@@ -167,7 +167,28 @@ class TutorialMedia(unittest.TestCase):
         self.assertEqual(cut.narration_audio(self.root), self.root / 'paced.wav')
         self.assertEqual(render_demo.probe(self.root / 'paced.wav')['streams'][0]['codec_name'], 'pcm_s16le')
         paced = montage.words_from_srt((self.root / 'subtitles.srt').read_text())
-        self.assertAlmostEqual(paced[1][0] - paced[0][1], cut.PAUSE, places=2)
+        self.assertEqual(paced,words)
+        self.assertEqual(self.samples(mp3),self.samples(self.root/'paced.wav'))
+
+
+    def test_audio_waits_use_measured_silence_between_sentences(self):
+        voice=self.root/'sentence-audio.wav'
+        self.command('-f','lavfi','-i','sine=frequency=440:sample_rate=48000:duration=3',
+                     '-af',"volume=enable='between(t,1,1.5)':volume=0",voice)
+        words=[(.1,.9,'First.'),(1.6,2.7,'Second.')]
+        points=cut.sentence_pause_points(self.ffmpeg,voice,words,['First.','Second.'])
+        self.assertEqual(points[1],0)
+        self.assertGreater(points[2],1)
+        self.assertLess(points[2],1.5)
+        no_gap=cut.sentence_pause_points(self.ffmpeg,self.voice,words,['First.','Second.'])
+        self.assertIsNone(no_gap[2], 'never insert dead air into a spoken waveform')
+
+    def test_mentingo_captions_require_the_reference_face_without_a_fallback(self):
+        with mock.patch.object(cut,'film_font',return_value=('other.ttf','DejaVu Sans','fallback')):
+            with self.assertRaisesRegex(ValueError,'All Round Gothic 600'):
+                cut.tutorial_font({},'Caption','Selleo/mentingo')
+        with mock.patch.object(cut,'film_font',return_value=('brand.otf','all-round-gothic',None)):
+            self.assertEqual(cut.tutorial_font({},'Caption','Selleo/mentingo'),'brand.otf')
 
 
 if __name__ == '__main__':

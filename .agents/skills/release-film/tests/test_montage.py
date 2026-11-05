@@ -329,26 +329,20 @@ class Cut(unittest.TestCase):
             self.assertGreaterEqual(actions[2].get('t_pre',actions[2]['t'])-actions[1]['t'],
                                     montage.TUTORIAL_RESULT_DWELL-.01)
 
-    def test_a_save_click_is_timed_to_its_word_even_when_sentence_is_pinned_to_the_result(self):
-        records=[step(0,.1,.2,.4,(600,350),cmd=['click','Save'],text={'target':'Save'}),
-                 step(1,.5,.6,.8,acting=False,look=True,box=[500,300,300,60],cmd=['look','Saved'])]
-        take=capture(records)
-        words=words_at((.1,'Now click Save and see the updated heading.'))
-        chapter={'sentences':[{'text':'Now click Save and see the updated heading.','action':1}]}
-        spec={'preserve_actions':True,'sentences':[chapter['sentences'][0]['text']],
-              'steps':[{'cmd':['click','Save']},{'cmd':['look','Saved'],'beat':1}]}
-        tutorial_focus.align_actions(spec,chapter,take,words)
-        self.assertAlmostEqual(spec['steps'][0]['at'],.7)
-        self.assertGreater(spec['result_landings'][1],.7)
-        film=montage.cut(spec,take,words,audio_duration=3)
-        click,proof=film['anchors']
-        self.assertTrue(click['named'])
-        self.assertFalse(proof['named'])
-        self.assertGreater(proof['action'],click['action'])
-        # Delays before the proof do not move the already-spoken Save word.
+    def test_ui_delays_do_not_insert_a_pause_inside_the_narrated_instruction(self):
+        take=capture([step(0,.1,.5,.7,(600,350),cmd=['click','Save'],text={'target':'Save'})])
+        sentence='Now click the Save button.'
+        words=words_at((.1,sentence))
+        spec={'preserve_actions':True,'word_landings':{1:1},'pause_points':{1:0},
+              'sentences':[sentence],'steps':[{'cmd':['click','Save'],'beat':1}]}
+        film=montage.cut(spec,take,words,audio_duration=2)
+        self.assertTrue(all(at==0 for at,_ in film['silences']))
         shifted=montage.words_from_srt(montage.shifted_srt(words,film['silences']))
-        save=next(start for start,_,word in shifted if word=='Save')
-        self.assertAlmostEqual(click['action'],save,delta=.04)
+        self.assertEqual([round(shifted[i][0]-shifted[0][0],3) for i in range(len(words))],
+                         [round(w[0]-words[0][0],3) for w in words])
+        compound={'sentences':[{'text':sentence,'action':0}]}
+        tutorial_focus.align_actions(spec,compound,take,words)
+        self.assertNotIn('word_cue',spec['steps'][0])
 
     def test_tutorial_does_not_display_navigation_key_badges(self):
         spec={'preserve_actions':True,'steps':[{'cmd':['press','field'],'beat':1}]}
