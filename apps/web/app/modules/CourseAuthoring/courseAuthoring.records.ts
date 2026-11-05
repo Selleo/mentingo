@@ -687,12 +687,15 @@ const parseSource = (record: AuthoringRecord): SourceView => {
   ].some((value) => value === status)
     ? (status as SourceView["status"])
     : AUTHORING_SOURCE_STATUS.UNKNOWN;
-  const completedStatus =
-    knownStatus === AUTHORING_SOURCE_STATUS.PARTIAL
-      ? readableSections > 0
-        ? AUTHORING_SOURCE_STATUS.READY
-        : AUTHORING_SOURCE_STATUS.FAILED
-      : knownStatus;
+  const pendingVision = isObject(record.payload.vision)
+    ? (numberValue(record.payload.vision.pending) ?? 0)
+    : 0;
+  let completedStatus = knownStatus;
+  if (knownStatus === AUTHORING_SOURCE_STATUS.PARTIAL) {
+    if (readableSections > 0) completedStatus = AUTHORING_SOURCE_STATUS.READY;
+    else if (pendingVision > 0) completedStatus = AUTHORING_SOURCE_STATUS.PROCESSING;
+    else completedStatus = AUTHORING_SOURCE_STATUS.FAILED;
+  }
   return {
     id: stringValue(record.payload.sourceVersionId) ?? record.id,
     taskId: stringValue(record.payload.taskId),

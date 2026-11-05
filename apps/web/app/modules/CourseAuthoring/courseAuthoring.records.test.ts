@@ -746,6 +746,33 @@ describe("course authoring record projection", () => {
     expect(result.sources[0]).toMatchObject({ status: "ready", readableSections: 1 });
   });
 
+  it.each([
+    { sectionStatus: "unprocessed", pending: 1, expectedStatus: "processing" },
+    { sectionStatus: "ready", pending: 0, expectedStatus: "ready" },
+    { sectionStatus: "unreadable", pending: 0, expectedStatus: "failed" },
+    { sectionStatus: "ready", pending: 1, expectedStatus: "ready" },
+  ])(
+    "projects visual attachment $sectionStatus with $pending pending jobs as $expectedStatus",
+    ({ sectionStatus, pending, expectedStatus }) => {
+      const result = projectWorkspaceRecords([
+        {
+          id: "image-source",
+          kind: "source",
+          payload: {
+            sourceVersionId: "image-source",
+            filename: "cover.jpg",
+            mediaType: "image/jpeg",
+            status: "partial",
+            vision: { total: 1, pending },
+            sections: [{ id: "image", kind: "visual", sequence: 0, status: sectionStatus }],
+          },
+        },
+      ]);
+
+      expect(result.sources[0].status).toBe(expectedStatus);
+    },
+  );
+
   it("keeps only the latest provisional preview per task and renders content as text", () => {
     const result = projectWorkspaceRecords(
       [

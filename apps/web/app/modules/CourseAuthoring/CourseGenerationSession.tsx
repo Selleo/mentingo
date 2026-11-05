@@ -1269,9 +1269,17 @@ export const CourseGenerationSession = ({
     );
   }
 
-  const sourceTaskIds = new Set(
-    projection.sources.flatMap((source) => (source.taskId ? [source.taskId] : [])),
-  );
+  // Ingestion and its vision children belong to attachment chips, not agent work.
+  const sourceTaskIds = new Set([
+    ...projection.sources.flatMap((source) => (source.taskId ? [source.taskId] : [])),
+    ...(session?.tasks ?? [])
+      .filter((task) =>
+        [AUTHORING_TASK_KIND.SOURCE, AUTHORING_TASK_KIND.SOURCE_VISION].some(
+          (kind) => kind === task.kind,
+        ),
+      )
+      .map((task) => task.taskId),
+  ]);
   const agentTasks = attachAuthoringWorkProgress(
     session?.tasks.filter(
       (task) =>

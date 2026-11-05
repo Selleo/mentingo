@@ -151,6 +151,7 @@ export const AUTHORING_WORK_OUTCOME = {
 export const AUTHORING_TASK_KIND = {
   ROUTE: "route",
   SOURCE: "source",
+  SOURCE_VISION: "source_vision",
   SOURCE_REFRESH: "source_refresh",
   SOURCE_SELECTION: "source_selection",
   RESEARCH: "research",
