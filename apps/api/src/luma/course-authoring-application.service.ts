@@ -147,6 +147,7 @@ export class CourseAuthoringApplicationService {
       proposalIds,
       ...(omitOptionalAssetIds.length ? { omitOptionalAssetIds } : {}),
       actorId: actor.userId,
+      ...(!autonomousFence ? { manualApply: true } : {}),
       ...(autonomousFence
         ? {
             autonomousRequestId: autonomousFence.requestId,
