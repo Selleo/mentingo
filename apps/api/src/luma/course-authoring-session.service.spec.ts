@@ -126,17 +126,14 @@ describe("CourseAuthoringSessionService source refresh", () => {
     const createSession = jest.fn().mockResolvedValue(snapshot);
     const getSession = jest.fn().mockResolvedValue(snapshot);
     const sendCommand = jest.fn().mockResolvedValue(receipt);
+    const context = { authorize, getContext, prepareBlockIdentities: jest.fn() };
     const service = new CourseAuthoringSessionService(
       {
         getLumaClient: jest
           .fn()
           .mockResolvedValue({ authoring: { createSession, getSession, sendCommand } }),
       } as unknown as LumaService,
-      {
-        authorize,
-        getContext,
-        prepareBlockIdentities: jest.fn(),
-      } as unknown as CourseAuthoringContextService,
+      context as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
     );
     const input: AuthoringCommandBody = {
@@ -146,7 +143,17 @@ describe("CourseAuthoringSessionService source refresh", () => {
       targetId: oldVersion,
       replacementSourceVersionId: newVersion,
     };
-    return { service, authorize, snapshot, receipt, createSession, getSession, sendCommand, input };
+    return {
+      service,
+      context,
+      authorize,
+      snapshot,
+      receipt,
+      createSession,
+      getSession,
+      sendCommand,
+      input,
+    };
   }
 
   it("omits legacy upstream accounting while preserving the reasoning control", async () => {
@@ -222,6 +229,15 @@ describe("CourseAuthoringSessionService source refresh", () => {
 
     await test.service.command(courseId, sessionId, input, actor);
 
+    expect(test.context.prepareBlockIdentities).toHaveBeenCalledWith(
+      courseId,
+      SUPPORTED_LANGUAGES.EN,
+      actor,
+      undefined,
+    );
+    expect(test.context.prepareBlockIdentities.mock.invocationCallOrder[0]).toBeLessThan(
+      test.context.getContext.mock.invocationCallOrder[0],
+    );
     expect(test.sendCommand).toHaveBeenCalledWith({
       sessionId,
       command: expect.objectContaining({
