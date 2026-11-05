@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   toast: vi.fn(),
   profile: undefined as unknown,
   isSupportMode: false,
+  gamificationEnabled: true,
   useProfile: vi.fn(),
 }));
 
@@ -17,6 +18,9 @@ vi.mock("~/components/ui/use-toast", () => ({ useToast: () => ({ toast: mocks.to
 vi.mock("~/hooks/usePermissions", () => ({ usePermissions: () => ({ hasAccess: true }) }));
 vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUserSuspense: () => ({ data: { id: "user-1", isSupportMode: mocks.isSupportMode } }),
+}));
+vi.mock("~/api/queries/useGlobalSettings", () => ({
+  useGlobalSettings: () => ({ data: { gamificationEnabled: mocks.gamificationEnabled } }),
 }));
 vi.mock("~/api/queries/useUserGamificationProfile", () => ({
   useUserGamificationProfile: mocks.useProfile,
@@ -38,6 +42,7 @@ describe("GamificationRewardToasts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.isSupportMode = false;
+    mocks.gamificationEnabled = true;
     mocks.useProfile.mockImplementation(() => ({ data: mocks.profile }));
   });
 
@@ -56,6 +61,16 @@ describe("GamificationRewardToasts", () => {
     rerender(<GamificationRewardToasts />);
 
     expect(mocks.toast).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not poll while gamification is disabled for the tenant", () => {
+    mocks.gamificationEnabled = false;
+    render(<GamificationRewardToasts />);
+
+    expect(mocks.useProfile).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ enabled: false }),
+    );
   });
 
   it("does not poll in support mode", () => {

@@ -8,6 +8,8 @@ Learners see their own level, XP and achievements on their profile and in a dash
 
 Every organization gets gamification with a ready-made set of achievements, translated into all supported languages. When a new default achievement is added, learners receive credit for past activity recorded in the platform's event history.
 
+For now the gamification UI is hidden by default and is switched on per organization by the Mentingo team; there is no admin toggle yet. Progress is calculated in the background either way, so learners see everything they have already earned as soon as it is switched on.
+
 ## Who Uses It
 
 - Learners complete lessons, courses and quizzes as usual. They watch their level grow, track progress toward the next achievement level, and get notified when they unlock a reward.
@@ -55,6 +57,7 @@ The user's own profile shows their level and XP, then each achievement with its 
 - There are two permissions. "View levels, XP and achievements" is granted to every role, and the API only returns the requesting user's own profile. "Earn hidden achievements" is granted to learners, content creators and trainers. All data is isolated per organization.
 - Achievement titles and descriptions follow the user's selected language and fall back to the achievement's base language.
 - XP is tracked as lifetime XP, which drives levels, and as spendable XP, kept for a future rewards store.
+- A per-organization setting (`gamificationEnabled`, off by default) shows or hides the profile section, the dashboard widget and the reward toasts. It has no UI or API toggle yet and is set directly in the organization's global settings. Reward calculation and the gamification API do not depend on it.
 - Main sources: `apps/api/src/gamification/`, `apps/web/app/modules/Gamification/` and `packages/shared/src/constants/gamification.ts`.
 - Not included yet: achievements for chat, likes and mentions; scores from reviewer-graded quizzes; admin management of achievements (planned in #1720, in a separate gamification settings tab); showing achievements on other users' profiles (#2131 asks for it, deferred for now).
 

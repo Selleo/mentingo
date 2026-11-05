@@ -27102,6 +27102,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -27280,6 +27283,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -28799,6 +28803,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -28977,6 +28984,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29035,6 +29043,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29213,6 +29224,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29271,6 +29283,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29449,6 +29464,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29507,6 +29523,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29685,6 +29704,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29762,6 +29782,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29940,6 +29963,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29998,6 +30022,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30176,6 +30203,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30234,6 +30262,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30412,6 +30443,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30470,6 +30502,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30648,6 +30683,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30718,6 +30754,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30896,6 +30935,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30954,6 +30994,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -31132,6 +31175,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -31337,6 +31381,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -31515,6 +31562,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",

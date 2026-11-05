@@ -2443,6 +2443,8 @@ export class SettingsService {
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:
         settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
+      gamificationEnabled:
+        settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled,
       learningPathsEnabled:
         settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       calendarEnabled: true,

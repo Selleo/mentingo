@@ -155,6 +155,7 @@ export const DASHBOARD_WIDGET_CATALOG = {
     allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_ONE, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO],
     defaultSize: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
     requiredPermissions: [PERMISSIONS.GAMIFICATION_READ],
+    requiredFeature: FEATURES.GAMIFICATION,
   },
 } satisfies Record<DashboardWidgetType, DashboardWidgetDefinition>;
 

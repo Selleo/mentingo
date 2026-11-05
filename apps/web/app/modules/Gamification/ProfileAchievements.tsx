@@ -1,6 +1,7 @@
 import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserGamificationProfile } from "~/api/queries/useUserGamificationProfile";
 import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -19,11 +20,14 @@ const SECTION_CLASS_NAME =
 export function ProfileAchievements({ userId }: ProfileAchievementsProps) {
   const { t } = useTranslation();
   const { hasAccess } = usePermissions({ required: PERMISSIONS.GAMIFICATION_READ });
+  const { data: globalSettings } = useGlobalSettings();
   const {
     data: profile,
     isError,
     refetch,
-  } = useUserGamificationProfile(userId, { enabled: hasAccess });
+  } = useUserGamificationProfile(userId, {
+    enabled: hasAccess && Boolean(globalSettings?.gamificationEnabled),
+  });
 
   if (isError) {
     return (

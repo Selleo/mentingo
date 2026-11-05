@@ -468,6 +468,7 @@ export interface GetPublicGlobalSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -749,6 +750,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -792,6 +794,7 @@ export interface UpdateEnforceSSOResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -835,6 +838,7 @@ export interface UpdateModernCourseListEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -878,6 +882,7 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -925,6 +930,7 @@ export interface UpdateFeaturedCourseResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -968,6 +974,7 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1011,6 +1018,7 @@ export interface UpdateCalendarEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1054,6 +1062,7 @@ export interface UpdateLiveTrainingEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1102,6 +1111,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1145,6 +1155,7 @@ export interface UpdateLearningPathsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1217,6 +1228,7 @@ export interface UpdateColorSchemaResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserGamificationProfile } from "~/api/queries/useUserGamificationProfile";
 import { useToast } from "~/components/ui/use-toast";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -16,8 +17,10 @@ export function GamificationRewardToasts() {
   const { toast } = useToast();
   const { data: currentUser } = useCurrentUserSuspense();
   const { hasAccess } = usePermissions({ required: PERMISSIONS.GAMIFICATION_READ });
+  const { data: globalSettings } = useGlobalSettings();
   const { data: profile } = useUserGamificationProfile(currentUser?.id, {
-    enabled: hasAccess && !currentUser?.isSupportMode,
+    enabled:
+      hasAccess && Boolean(globalSettings?.gamificationEnabled) && !currentUser?.isSupportMode,
     refetchInterval: REWARD_POLL_INTERVAL_MS,
   });
   const seenRewardIds = useRef<Set<string> | null>(null);

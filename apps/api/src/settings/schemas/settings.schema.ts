@@ -28,6 +28,7 @@ export const globalSettingsJSONSchema = Type.Object({
   publicCoursePreviewEnabled: Type.Boolean(),
   featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
   courseDiscussionsEnabled: Type.Boolean(),
+  gamificationEnabled: Type.Boolean(),
   calendarEnabled: Type.Boolean(),
   liveTrainingEnabled: Type.Boolean(),
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),
