@@ -255,7 +255,7 @@ def narrate(run, story, addon, root=None):
         results = json.loads(out.strip().splitlines()[-1])
         failed = [r for r in results if r.get('error')]
         if failed:
-            raise SystemExit(f'narration failed: {failed}')
+            raise SystemExit('narration failed: ' + '; '.join(str(item['error']) for item in failed))
         for job in todo:
             paced(core.tool('ffmpeg') or 'ffmpeg', job['out'], job['sentences'],
                   lossless=job.get('audio_profile') == 'pcm-48000-v1', clip_tail=voice == 'elevenlabs')
