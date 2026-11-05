@@ -6,6 +6,7 @@ import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
   AUTHORING_APPLICATION_STATUS,
+  AUTHORING_ASSET_SOURCE_TYPE,
   AUTHORING_LESSON_KIND,
   AUTHORING_SOURCE_REFRESH_STATUS,
   AUTHORING_SOURCE_STATUS,
@@ -83,7 +84,7 @@ const assetPurposes = new Set<AssetRequestView["purpose"]>([
   "signature",
 ]);
 
-/** Projects one generated visual request from a durable record. */
+/** Projects one generated or source-image visual request from a durable record. */
 const parseAssetRequest = (value: unknown): AssetRequestView | null => {
   if (!isObject(value)) return null;
   const assetId = stringValue(value.assetId);
@@ -102,7 +103,7 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
   ) {
     return null;
   }
-  if (source.type === "generated") {
+  if (source.type === AUTHORING_ASSET_SOURCE_TYPE.GENERATED) {
     const content = stringValue(source.content);
     const visualQuery = stringValue(source.visualQuery);
     return content && visualQuery
@@ -112,11 +113,11 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
           purpose: purpose as AssetRequestView["purpose"],
           required: value.required,
           altText,
-          source: { type: "generated", content, visualQuery },
+          source: { type: AUTHORING_ASSET_SOURCE_TYPE.GENERATED, content, visualQuery },
         }
       : null;
   }
-  if (source.type === "source_image" && isObject(value.placement)) {
+  if (source.type === AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE && isObject(value.placement)) {
     const sourceVersionId = stringValue(source.sourceVersionId);
     const sectionId = stringValue(source.sectionId);
     const interpretationId = stringValue(source.interpretationId);
@@ -140,7 +141,12 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
       purpose: purpose as AssetRequestView["purpose"],
       required: value.required,
       altText,
-      source: { type: "source_image", sourceVersionId, sectionId, interpretationId },
+      source: {
+        type: AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE,
+        sourceVersionId,
+        sectionId,
+        interpretationId,
+      },
       placement: { anchorBlockId, position, caption, relevance },
     };
   }

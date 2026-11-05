@@ -119,6 +119,12 @@ export const AUTHORING_SOURCE_REFRESH_STATUS = {
   NEEDS_MAPPING: "needs_mapping",
 } as const;
 
+/** Visual source discriminators used by asset projections and review details. */
+export const AUTHORING_ASSET_SOURCE_TYPE = {
+  GENERATED: "generated",
+  SOURCE_IMAGE: "source_image",
+} as const;
+
 export const AUTHORING_APPLICATION_STATUS = {
   APPLIED: "applied",
   CONFLICT: "conflict",

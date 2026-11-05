@@ -2,6 +2,7 @@
 import type {
   AUTHORING_APPLICATION_STATUS,
   AUTHORING_ARTIFACT_KIND,
+  AUTHORING_ASSET_SOURCE_TYPE,
   AUTHORING_CHAPTER_PROGRESS_STATUS,
   AUTHORING_CONNECTION_STATE,
   AUTHORING_FAILURE_CATEGORY,
@@ -382,9 +383,13 @@ export type AssetRequestView = {
   required: boolean;
   altText: string;
   source:
-    | { type: "generated"; content: string; visualQuery: string }
     | {
-        type: "source_image";
+        type: typeof AUTHORING_ASSET_SOURCE_TYPE.GENERATED;
+        content: string;
+        visualQuery: string;
+      }
+    | {
+        type: typeof AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE;
         sourceVersionId: string;
         sectionId: string;
         interpretationId: string;
