@@ -4,9 +4,7 @@
     {
       "key": "development-paths",
       "title": "Development paths",
-      "specPaths": [
-        "docs/specs/learning-paths-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/learning-paths-business-spec.md"],
       "routes": [
         {
           "prefix": "/development-paths",
@@ -85,9 +83,7 @@
     {
       "key": "news",
       "title": "News",
-      "specPaths": [
-        "docs/specs/news-hub-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/news-hub-business-spec.md"],
       "routes": [
         {
           "prefix": "/news",
@@ -137,9 +133,7 @@
     {
       "key": "assistant",
       "title": "AI assistant",
-      "specPaths": [
-        "docs/specs/assistant-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/assistant-business-spec.md"],
       "routes": [
         {
           "prefix": "/assistant",
@@ -150,9 +144,7 @@
     {
       "key": "ai-mentor",
       "title": "AI mentor practice",
-      "specPaths": [
-        "docs/specs/ai-mentor-lessons-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/ai-mentor-lessons-business-spec.md"],
       "routes": [
         {
           "prefix": "/ai-mentor/practice",
@@ -163,9 +155,7 @@
     {
       "key": "phishing",
       "title": "Phishing simulations",
-      "specPaths": [
-        "docs/specs/phishing-simulation-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/phishing-simulation-business-spec.md"],
       "routes": [
         {
           "prefix": "/phishing",
@@ -176,9 +166,7 @@
     {
       "key": "content-marketplace",
       "title": "Content marketplace",
-      "specPaths": [
-        "docs/specs/content-marketplace-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/content-marketplace-business-spec.md"],
       "routes": [
         {
           "prefix": "/content-marketplace",
@@ -189,9 +177,7 @@
     {
       "key": "notifications",
       "title": "Announcements and notifications",
-      "specPaths": [
-        "docs/specs/announcements-notifications-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/announcements-notifications-business-spec.md"],
       "routes": [
         {
           "prefix": "/notifications",
@@ -221,9 +207,7 @@
     {
       "key": "provider-information",
       "title": "Provider information",
-      "specPaths": [
-        "docs/specs/provider-information-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/provider-information-business-spec.md"],
       "routes": [
         {
           "prefix": "/provider-information",
@@ -249,9 +233,7 @@
     {
       "key": "calendar",
       "title": "Calendar",
-      "specPaths": [
-        "docs/specs/calendar-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/calendar-business-spec.md"],
       "routes": [
         {
           "prefix": "/calendar",
@@ -276,9 +258,7 @@
     {
       "key": "qa",
       "title": "Questions and answers",
-      "specPaths": [
-        "docs/specs/qa-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/qa-business-spec.md"],
       "routes": [
         {
           "prefix": "/qa",
@@ -289,9 +269,7 @@
     {
       "key": "live-training",
       "title": "Live training",
-      "specPaths": [
-        "docs/specs/live-training-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/live-training-business-spec.md"],
       "routes": [
         {
           "prefix": "/live-training",
@@ -302,9 +280,7 @@
     {
       "key": "environment-configuration",
       "title": "Environment and integrations",
-      "specPaths": [
-        "docs/specs/environment-integration-configuration-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/environment-integration-configuration-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/envs",
@@ -329,9 +305,7 @@
     {
       "key": "automations",
       "title": "Automations",
-      "specPaths": [
-        "docs/specs/automations-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/automations-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/automations",
@@ -346,9 +320,7 @@
     {
       "key": "email-templates",
       "title": "Email templates",
-      "specPaths": [
-        "docs/specs/email-template-builder-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/email-template-builder-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/email-templates",
@@ -359,9 +331,7 @@
     {
       "key": "categories",
       "title": "Course categories",
-      "specPaths": [
-        "docs/specs/category-management-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/category-management-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/categories",
@@ -386,9 +356,7 @@
     {
       "key": "promotion-codes",
       "title": "Billing and promotion codes",
-      "specPaths": [
-        "docs/specs/billing-promotion-codes-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/billing-promotion-codes-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/promotion-codes",
@@ -399,9 +367,7 @@
     {
       "key": "activity-logs",
       "title": "Activity logs",
-      "specPaths": [
-        "docs/specs/activity-logs-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/activity-logs-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/activity-logs",
@@ -412,9 +378,7 @@
     {
       "key": "ai-conversations",
       "title": "AI conversations",
-      "specPaths": [
-        "docs/specs/ai-conversations-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/ai-conversations-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/ai-conversations",
@@ -425,9 +389,7 @@
     {
       "key": "tenants",
       "title": "Tenant administration",
-      "specPaths": [
-        "docs/specs/tenant-administration-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/tenant-administration-business-spec.md"],
       "routes": [
         {
           "prefix": "/super-admin/tenants",
@@ -438,9 +400,7 @@
     {
       "key": "competencies",
       "title": "Competencies",
-      "specPaths": [
-        "docs/specs/competencies-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/competencies-business-spec.md"],
       "routes": [
         {
           "prefix": "/competencies",

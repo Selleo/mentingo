@@ -804,7 +804,8 @@
     "exitFullscreen": "Salir de pantalla completa",
     "refreshPage": "Actualizar página",
     "validation": {
-      "messageRequired": "El mensaje es obligatorio."
+      "messageRequired": "El mensaje es obligatorio.",
+      "nameMaxLength": "Debe tener como máximo {{max}} caracteres."
     }
   },
   "lessons": {
@@ -3036,7 +3037,7 @@
       },
       "validation": {
         "titleMinLength": "El título debe tener al menos 2 caracteres.",
-        "titleMaxLength": "El título debe tener como máximo 250 caracteres.",
+        "titleMaxLength": "El título debe tener como máximo {{max}} caracteres.",
         "descriptionMinLength": "La descripción debe tener al menos 2 caracteres.",
         "categoryRequired": "Se requiere categoría",
         "certificateManageDenied": "No puedes gestionar certificados para este curso.",

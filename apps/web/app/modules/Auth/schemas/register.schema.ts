@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { MAX_USER_NAME_LENGTH, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { z } from "zod";
 
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
@@ -14,8 +14,18 @@ export const makeRegisterSchema = (
 ) =>
   z
     .object({
-      firstName: z.string().min(2, { message: t("registerView.validation.firstName") }),
-      lastName: z.string().min(2, { message: t("registerView.validation.lastName") }),
+      firstName: z
+        .string()
+        .min(2, { message: t("registerView.validation.firstName") })
+        .max(MAX_USER_NAME_LENGTH, {
+          message: t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+        }),
+      lastName: z
+        .string()
+        .min(2, { message: t("registerView.validation.lastName") })
+        .max(MAX_USER_NAME_LENGTH, {
+          message: t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+        }),
       email: z.string().email({ message: t("registerView.validation.email") }),
       password: passwordSchema,
       language: z.nativeEnum(SUPPORTED_LANGUAGES),

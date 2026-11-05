@@ -807,7 +807,8 @@
     "exitFullscreen": "Ukončete celou obrazovku",
     "refreshPage": "Obnovit stránku",
     "validation": {
-      "messageRequired": "Zpráva je povinná."
+      "messageRequired": "Zpráva je povinná.",
+      "nameMaxLength": "Může mít nejvýše {{max}} znaků."
     }
   },
   "lessons": {
@@ -3049,7 +3050,7 @@
       },
       "validation": {
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
-        "titleMaxLength": "Název musí mít maximálně 250 znaků.",
+        "titleMaxLength": "Název musí mít maximálně {{max}} znaků.",
         "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
         "categoryRequired": "Kategorie je povinná",
         "certificateManageDenied": "Nemůžete spravovat certifikáty pro tento kurz.",

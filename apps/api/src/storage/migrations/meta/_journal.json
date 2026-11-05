@@ -1604,6 +1604,13 @@
       "when": 1793278990402,
       "tag": "0228_external_conversation_transcripts",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1793879230342,
+      "tag": "0229_certificate_share_tokens",
+      "breakpoints": true
     }
   ]
 }

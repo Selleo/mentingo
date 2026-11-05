@@ -70,3 +70,5 @@ export const isCourseFeatureEnabledForCourseType = (
 
   return !disabledFeatures.includes(feature);
 };
+
+export const MAX_COURSE_TITLE_LENGTH = 255;

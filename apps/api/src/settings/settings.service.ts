@@ -235,7 +235,22 @@ export class SettingsService {
       throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  public async getImageS3KeysByTenantId(tenantId: UUIDType): Promise<SettingsImageS3Keys> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
+
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  private toImageS3Keys(settings: GlobalSettingsJSONContentSchema): SettingsImageS3Keys {
+    const parsedSettings = this.parseGlobalSettings(settings);
 
     return {
       platformLogoS3Key: parsedSettings.platformLogoS3Key ?? null,

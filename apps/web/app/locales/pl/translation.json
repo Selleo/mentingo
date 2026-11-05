@@ -804,7 +804,8 @@
     "exitFullscreen": "Wyjdź z pełnego ekranu",
     "refreshPage": "Odśwież stronę",
     "validation": {
-      "messageRequired": "Wiadomość jest wymagana."
+      "messageRequired": "Wiadomość jest wymagana.",
+      "nameMaxLength": "Może mieć maksymalnie {{max}} znaków."
     }
   },
   "lessons": {
@@ -3296,7 +3297,7 @@
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
-        "titleMaxLength": "Tytuł może mieć maksymalnie 250 znaków.",
+        "titleMaxLength": "Tytuł może mieć maksymalnie {{max}} znaków.",
         "descriptionMinLength": "Opis musi mieć co najmniej 2 znaki.",
         "categoryRequired": "Kategoria jest wymagana",
         "certificateManageDenied": "Nie możesz zarządzać certyfikatami tego kursu.",

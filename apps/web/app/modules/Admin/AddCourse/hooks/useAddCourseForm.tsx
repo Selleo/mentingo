@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { useCreateCourse } from "~/api/mutations/useCreateCourse";
 import { ADD_COURSE_PARAMS } from "~/modules/Admin/AddCourse/utils/addCourseOrigin";
@@ -12,6 +13,7 @@ import { MAX_COURSE_DESCRIPTION_HTML_LENGTH } from "../constants";
 import type { AddCourseFormValues } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 
 export const useAddCourseForm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -19,7 +21,7 @@ export const useAddCourseForm = () => {
 
   const { mutateAsync: createCourse } = useCreateCourse();
   const form = useForm<AddCourseFormValues>({
-    resolver: zodResolver(addCourseFormSchema),
+    resolver: zodResolver(addCourseFormSchema(t)),
     defaultValues: {
       title: "",
       description: "",

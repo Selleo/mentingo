@@ -1661,7 +1661,9 @@ export interface GetUserDetailsResponse {
 }
 
 export interface UpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -1702,7 +1704,9 @@ export interface UpsertUserDetailsResponse {
 }
 
 export interface AdminUpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -2634,6 +2638,7 @@ export interface HasMissingTranslationsResponse {
 }
 
 export type CreateCourseBody = {
+  /** @maxLength 255 */
   title: string;
   description: string;
   status?: "draft" | "published" | "private";
@@ -2740,6 +2745,7 @@ export interface UpdateCourseMediaResponse {
 }
 
 export interface UpdateCourseBody {
+  /** @maxLength 255 */
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
@@ -41761,8 +41767,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -41781,8 +41789,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -45003,8 +45013,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -45023,8 +45035,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>

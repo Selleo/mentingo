@@ -1,10 +1,11 @@
+import { MAX_USER_NAME_LENGTH } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
 export const updateUserSchema = Type.Object({
-  firstName: Type.Optional(Type.String()),
-  lastName: Type.Optional(Type.String()),
+  firstName: Type.Optional(Type.String({ maxLength: MAX_USER_NAME_LENGTH })),
+  lastName: Type.Optional(Type.String({ maxLength: MAX_USER_NAME_LENGTH })),
   groups: Type.Optional(Type.Union([Type.Array(Type.String()), Type.Null()])),
   managedGroupIds: Type.Optional(Type.Array(UUIDSchema)),
   email: Type.Optional(Type.String({ format: "email" })),
@@ -19,8 +20,8 @@ export const upsertUserDetailsSchema = Type.Object({
 });
 
 export const updateUserProfileSchema = Type.Object({
-  firstName: Type.Optional(Type.String()),
-  lastName: Type.Optional(Type.String()),
+  firstName: Type.Optional(Type.String({ maxLength: MAX_USER_NAME_LENGTH })),
+  lastName: Type.Optional(Type.String({ maxLength: MAX_USER_NAME_LENGTH })),
   userAvatar: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   description: Type.Optional(Type.String()),
   contactEmail: Type.Optional(Type.String({ format: "email" })),

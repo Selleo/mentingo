@@ -2004,6 +2004,7 @@ export const certificates = pgTable(
     archivedAt: timestampWithTimezone({ name: "archived_at" }),
     archiveReason: text("archive_reason").$type<CertificateArchiveReason>(),
     expirationWarningSentAt: timestampWithTimezone({ name: "expiration_warning_sent_at" }),
+    shareToken: uuid("share_token").unique(),
     tenantId,
   },
   withTenantIdIndex("certificates", (table) => ({
@@ -3098,6 +3099,7 @@ export const learningPathCertificates = pgTable(
     learningPathId: uuid("learning_path_id")
       .references(() => learningPaths.id, { onDelete: "cascade" })
       .notNull(),
+    shareToken: uuid("share_token").unique(),
     status: text("status")
       .notNull()
       .$type<LearningPathCertificateStatus>()

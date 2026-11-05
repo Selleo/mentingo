@@ -1,3 +1,4 @@
+import { MAX_COURSE_TITLE_LENGTH } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
@@ -7,7 +8,7 @@ import { coursesStatusOptions } from "./courseQuery";
 
 export const updateCourseSchema = Type.Partial(
   Type.Object({
-    title: Type.String(),
+    title: Type.String({ maxLength: MAX_COURSE_TITLE_LENGTH }),
     description: Type.String(),
     thumbnailS3Key: Type.String(),
     thumbnailPositionY: Type.Integer({
