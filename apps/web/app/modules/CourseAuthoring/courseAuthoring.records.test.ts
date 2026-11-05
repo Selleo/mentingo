@@ -1291,66 +1291,76 @@ describe("course authoring record projection", () => {
     ]);
   });
 
-  it("preserves explicit source-image interpretation and placement through proposal and asset task projection", () => {
-    const request = {
-      assetId: "source-figure-asset",
-      operationId: "lesson-operation",
-      purpose: "lesson",
-      required: false,
-      altText: "Revenue increased in the second quarter",
-      source: {
-        type: "source_image",
-        sourceVersionId: "source-version",
-        sectionId: "source-figure-section",
-        interpretationId: "source-interpretation-v2",
-      },
-      placement: {
-        anchorBlockId: "revenue-explanation",
-        position: "after",
-        caption: "Quarterly revenue",
-        relevance: "Shows the trend discussed in this lesson example",
-      },
-    };
-    const result = projectWorkspaceRecords(
-      [
-        {
-          id: "source-image-proposal",
-          kind: "proposal",
-          payload: { revision: 1, assetRequests: [request], assetIds: [request.assetId] },
+  it.each(["Quarterly revenue", null, undefined])(
+    "preserves a required ready source image with caption %j through proposal and task projection",
+    (caption) => {
+      const request = {
+        assetId: "source-figure-asset",
+        operationId: "lesson-operation",
+        purpose: "lesson",
+        required: true,
+        altText: "Revenue increased in the second quarter",
+        source: {
+          type: "source_image",
+          sourceVersionId: "source-version",
+          sectionId: "source-figure-section",
+          interpretationId: "source-interpretation-v2",
         },
-        {
-          id: "source-image-task-record",
-          kind: "asset_task",
-          payload: { taskId: "source-image-task", request },
+        placement: {
+          anchorBlockId: "revenue-explanation",
+          position: "after",
+          ...(caption === undefined ? {} : { caption }),
+          relevance: "Shows the trend discussed in this lesson example",
         },
-        {
-          id: "source-image-ready",
-          kind: "asset",
-          payload: {
-            status: "ready",
-            manifest: { assetId: request.assetId, mimeType: "image/png" },
+      };
+      const result = projectWorkspaceRecords(
+        [
+          {
+            id: "source-image-proposal",
+            kind: "proposal",
+            payload: { revision: 1, assetRequests: [request], assetIds: [request.assetId] },
           },
-        },
-      ],
-      [
-        {
-          taskId: "source-image-task",
-          requestId: "request-1",
-          status: "succeeded",
-          errorCode: null,
-          outputId: request.assetId,
-        },
-      ],
-    );
+          {
+            id: "source-image-task-record",
+            kind: "asset_task",
+            payload: { taskId: "source-image-task", request },
+          },
+          {
+            id: "source-image-ready",
+            kind: "asset",
+            payload: {
+              status: "ready",
+              manifest: { assetId: request.assetId, mimeType: "image/png" },
+            },
+          },
+        ],
+        [
+          {
+            taskId: "source-image-task",
+            requestId: "request-1",
+            status: "succeeded",
+            errorCode: null,
+            outputId: request.assetId,
+          },
+        ],
+      );
 
-    expect(result.proposals[0].assetRequests).toEqual([request]);
-    expect(result.assetTasks[0]).toMatchObject({ request, ready: true });
-    expect(result.readyAssetIds).toContain(request.assetId);
-    expect(result.unsupportedRecordCount).toBe(0);
-  });
+      const expectedRequest = {
+        ...request,
+        placement: { ...request.placement, caption: caption ?? null },
+      };
+      expect(result.proposals[0].assetRequests).toEqual([expectedRequest]);
+      expect(result.assetTasks[0]).toMatchObject({ request: expectedRequest, ready: true });
+      expect(result.readyAssetIds).toContain(request.assetId);
+      expect(result.unsupportedRecordCount).toBe(0);
+    },
+  );
 
   it.each([
     { placement: null },
+    ...["", " ", 42, "x".repeat(1001)].map((caption) => ({
+      placement: { anchorBlockId: "intro", position: "after", caption, relevance: "Relevant" },
+    })),
     {
       placement: {
         anchorBlockId: "intro",

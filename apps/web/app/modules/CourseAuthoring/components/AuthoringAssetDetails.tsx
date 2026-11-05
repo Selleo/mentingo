@@ -44,7 +44,7 @@ export function AuthoringAssetDetails({
         )}
         {asset.source.type === AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE && asset.placement && (
           <>
-            <p>{asset.placement.caption}</p>
+            {asset.placement.caption && <p>{asset.placement.caption}</p>}
             <p>{asset.placement.relevance}</p>
           </>
         )}

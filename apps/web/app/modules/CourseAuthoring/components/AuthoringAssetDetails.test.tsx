@@ -29,6 +29,23 @@ const sourceImage: AssetRequestView = {
 };
 
 describe("source-image asset details", () => {
+  it("keeps source-image details without an empty caption label when the caption is omitted", async () => {
+    if (!sourceImage.placement) throw new Error("Source placement fixture missing");
+    const { container } = renderWith().render(
+      <AuthoringAssetDetails
+        asset={{
+          ...sourceImage,
+          required: true,
+          placement: { ...sourceImage.placement, caption: null },
+        }}
+      />,
+    );
+    await userEvent.click(screen.getByText("Details"));
+    expect(screen.getByText(sourceImage.altText)).toBeVisible();
+    expect(screen.getByText(sourceImage.placement.relevance)).toBeVisible();
+    expect(container.querySelectorAll("details p")).toHaveLength(2);
+    expect(screen.queryByText(/Generated visual:/)).not.toBeInTheDocument();
+  });
   it("shows the source caption and placement rationale without calling it generated", async () => {
     const user = userEvent.setup();
     renderWith().render(<AuthoringAssetDetails asset={sourceImage} />);

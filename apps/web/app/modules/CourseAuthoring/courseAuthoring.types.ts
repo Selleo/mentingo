@@ -397,7 +397,7 @@ export type AssetRequestView = {
   placement?: {
     anchorBlockId: string;
     position: "before" | "after";
-    caption: string;
+    caption: string | null;
     relevance: string;
   };
 };

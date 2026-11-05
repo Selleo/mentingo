@@ -122,7 +122,9 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
     const sectionId = stringValue(source.sectionId);
     const interpretationId = stringValue(source.interpretationId);
     const anchorBlockId = stringValue(value.placement.anchorBlockId);
-    const caption = stringValue(value.placement.caption);
+    const rawCaption = value.placement.caption;
+    const caption =
+      rawCaption === null || rawCaption === undefined ? null : stringValue(rawCaption);
     const relevance = stringValue(value.placement.relevance);
     const position = value.placement.position;
     if (
@@ -130,7 +132,9 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
       !sectionId ||
       !interpretationId ||
       !anchorBlockId ||
-      !caption ||
+      (rawCaption !== null &&
+        rawCaption !== undefined &&
+        (!caption || !caption.trim() || caption.length > 1000)) ||
       !relevance ||
       (position !== "before" && position !== "after")
     )
