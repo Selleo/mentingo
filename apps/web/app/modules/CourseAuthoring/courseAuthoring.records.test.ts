@@ -17,6 +17,80 @@ import type {
 } from "./courseAuthoring.types";
 
 describe("course authoring record projection", () => {
+  it("includes image-only lesson edits in the curriculum without requiring rewritten title or prose", () => {
+    const proposal: ProposalView = {
+      id: "image-only",
+      revision: 1,
+      taskId: "image-task",
+      summary: "Insert image",
+      rationale: "",
+      warnings: [],
+      blockedQuality: false,
+      qualityConcernsAccepted: false,
+      evidenceCount: 1,
+      outline: null,
+      decision: "pending",
+      parentProposalId: null,
+      manual: false,
+      protectedEdits: [],
+      operations: [
+        {
+          operationId: "image-op",
+          type: "lesson.image.insert",
+          targetId: "lesson",
+          dependencies: [],
+          payload: {
+            assetId: "asset",
+            anchorBlockId: "anchor",
+            position: "after",
+            caption: null,
+            altText: "Chart",
+          },
+        },
+      ],
+    };
+    const context: CourseContext = {
+      courseId: "course",
+      language: "en",
+      title: "Course",
+      description: "",
+      baselineHash: "course-hash",
+      fieldHashes: {},
+      chapters: [
+        {
+          id: "chapter",
+          title: "Chapter",
+          baselineHash: "chapter-hash",
+          displayOrder: 1,
+          lessons: [
+            {
+              id: "lesson",
+              title: "Unchanged lesson title",
+              lessonType: "content",
+              displayOrder: 2,
+              baselineHash: "lesson-hash",
+            },
+          ],
+        },
+      ],
+    };
+    expect(curriculumPreviewFromProposal(proposal, context)).toMatchObject({
+      operations: proposal.operations,
+      outline: [
+        {
+          id: "chapter",
+          lessons: [
+            {
+              id: "lesson",
+              title: "Unchanged lesson title",
+              lessonType: "content",
+              displayOrder: 2,
+            },
+          ],
+        },
+      ],
+    });
+  });
   it("opens an operation-only curriculum preview for removals", () => {
     const preview = curriculumPreviewFromProposal({
       id: "delete-preview",

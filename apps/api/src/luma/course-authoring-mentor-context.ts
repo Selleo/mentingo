@@ -3,10 +3,12 @@ import { load } from "cheerio";
 
 import {
   normalizeCourseAuthoringContent,
+  insertCourseAuthoringBlock,
   replaceCourseAuthoringBlock,
 } from "src/common/utils/courseAuthoringBlocks";
 
 import { stripAuthoringHtmlStyles } from "./course-authoring-html";
+import { authoringImageFigure } from "./course-authoring-image-insertion";
 import { orderCourseAuthoringOperations } from "./course-authoring-ordering";
 
 import type { AuthoringMentorContextLesson } from "./course-authoring-context.types";
@@ -121,6 +123,21 @@ export function buildMentorCourseContextDocument(
           }),
         });
         replacedBodies.delete(lesson.id);
+        break;
+      }
+      case "lesson.image.insert": {
+        const lesson = projected.get(operation.targetId);
+        if (!lesson || !sameLanguage) break;
+        projected.set(lesson.id, {
+          ...lesson,
+          description: insertCourseAuthoringBlock({
+            content: lesson.description ?? "",
+            anchorBlockId: operation.payload.anchorBlockId,
+            blockId: operation.payload.assetId,
+            position: operation.payload.position,
+            html: authoringImageFigure(operation.payload),
+          }),
+        });
         break;
       }
       default:

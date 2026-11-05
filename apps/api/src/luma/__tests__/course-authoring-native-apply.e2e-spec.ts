@@ -1,16 +1,25 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
+import { load } from "cheerio";
 import { eq } from "drizzle-orm";
 
+import { getCourseAuthoringContentFingerprint } from "src/common/utils/courseAuthoringBlocks";
+import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { CourseAuthoringApplicationRepository } from "src/luma/course-authoring-application.repository";
+import { CourseAuthoringApplicationService } from "src/luma/course-authoring-application.service";
 import { CourseAuthoringApplyService } from "src/luma/course-authoring-apply.service";
 import { CourseAuthoringContextService } from "src/luma/course-authoring-context.service";
+import { courseAuthoringExportHash } from "src/luma/course-authoring-export-hash";
+import { CourseAuthoringSessionService } from "src/luma/course-authoring-session.service";
+import { LumaService } from "src/luma/luma.service";
 import { authoringOperationSchema } from "src/luma/schema/course-authoring-operations.schema";
 import * as outboxConstants from "src/outbox/outbox.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { S3Service } from "src/s3/s3.service";
 import { DB, DB_APP } from "src/storage/db/db.providers";
 import { createTenantAwareDb } from "src/storage/db/tenant-aware-session";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -25,6 +34,7 @@ import {
   lessons,
   outboxEvents,
   resourceEntity,
+  resources,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -37,6 +47,7 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { PreparedCourseAuthoringApplication } from "src/luma/course-authoring.types";
+import type { FrozenAuthoringExport } from "src/luma/schema/course-authoring-application.schema";
 import type { AuthoringOperation } from "src/luma/schema/course-authoring-operations.schema";
 
 const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
@@ -189,13 +200,17 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
               title: "Verifies the request",
               expectedBehavior: "Checks the sender and destination.",
               maxScore: 5,
-              scoreGuidance: [{ score: 5, description: "Verifies both details.", example: null }],
+              scoreGuidance: Array.from({ length: 6 }, (_, score) => ({
+                score,
+                description: `Demonstrates ${score} of the five verification steps.`,
+                example: null,
+              })),
             },
           ],
           blockingErrors: [{ ref: "B1", description: "Shares credentials." }],
         },
         sourceVersionIds: [],
-        avatarAssetId: "mentor-avatar",
+        avatarAssetId: "00000000-0000-4000-8000-000000000901",
         voiceMode: "preset",
         ttsPreset: "female",
         customTtsReference: null,
@@ -210,12 +225,12 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
       operations: [content, quiz, mentor],
       assetMappings: {
         "quiz-image": `${actor.tenantId}/course-authoring/quiz-image.png`,
-        "mentor-avatar": `${actor.tenantId}/course-authoring/mentor-avatar.png`,
+        "00000000-0000-4000-8000-000000000901": `${actor.tenantId}/course-authoring/mentor-avatar.png`,
         "lesson-image": `${actor.tenantId}/course-authoring/lesson-image.png`,
       },
       assetMimeTypes: {
         "quiz-image": "image/png",
-        "mentor-avatar": "image/png",
+        "00000000-0000-4000-8000-000000000901": "image/png",
         "lesson-image": "image/png",
       },
       preparedDocumentIds: {},
@@ -225,6 +240,10 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
   it("rolls back real content, resource/search effects, chapter counts and durable events when a later quiz is invalid", async () => {
     const prepared = input(false);
     await runner.runWithTenant(actor.tenantId, async () => {
+      for (const key of Object.values(prepared.assetMappings))
+        await app
+          .get(CourseAuthoringApplicationRepository)
+          .recordStagedAsset(actor.tenantId, prepared.sessionId, prepared.exportId, key);
       const eventsBefore = await db.select({ id: outboxEvents.id }).from(outboxEvents);
       await expect(apply.applyPreparedExport(prepared, actor)).rejects.toThrow();
       expect(await db.select().from(lessons).where(eq(lessons.chapterId, chapterId))).toHaveLength(
@@ -244,6 +263,10 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
   it("persists canonical quiz children, stable content blocks and exact ordering through native services, then deduplicates retry", async () => {
     const prepared = input(true);
     await runner.runWithTenant(actor.tenantId, async () => {
+      for (const key of Object.values(prepared.assetMappings))
+        await app
+          .get(CourseAuthoringApplicationRepository)
+          .recordStagedAsset(actor.tenantId, prepared.sessionId, prepared.exportId, key);
       const result = await apply.applyPreparedExport(prepared, actor);
       const stored = await db
         .select()
@@ -273,7 +296,7 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
       expect(await apply.applyPreparedExport(prepared, actor)).toEqual(result);
       expect(await db.select().from(courseAuthoringApplications)).toHaveLength(1);
       expect(await db.select().from(lessons).where(eq(lessons.chapterId, chapterId))).toHaveLength(
-        2,
+        3,
       );
       const contextService = app.get(CourseAuthoringContextService);
       const overview = await contextService.getContext(
@@ -330,6 +353,149 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
           randomUUID(),
         ]),
       ).rejects.toThrow("courseAuthoring.errors.targetOutsideCourse");
+    });
+  });
+
+  it("applies a frozen image insertion through byte verification and native persistence without changing original lesson content", async () => {
+    await runner.runWithTenant(actor.tenantId, async () => {
+      const anchor = randomUUID();
+      const sibling = randomUUID();
+      const assetId = randomUUID();
+      const original = `<h2 data-authoring-block-id="${anchor}">Approved original heading</h2><p data-authoring-block-id="${sibling}"><strong>Every</strong> original sentence stays.</p>`;
+      const lessonId = await app
+        .get(AdminLessonService)
+        .createLessonForChapter(
+          { chapterId, type: "content", title: "Image-only edit", description: original },
+          actor,
+          "en",
+        );
+      const context = await app
+        .get(CourseAuthoringContextService)
+        .getContext(courseId, { language: SUPPORTED_LANGUAGES.EN }, actor, [chapterId]);
+      const baseline = context.chapters
+        .flatMap((chapter) => chapter.lessons)
+        .find((lesson) => lesson.id === lessonId);
+      if (!baseline) throw new Error("Image insertion baseline missing");
+      const [beforeLesson] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
+      if (!beforeLesson) throw new Error("Persisted baseline missing");
+      const bytes = Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7XkAAAAASUVORK5CYII=",
+        "base64",
+      );
+      const sha256 = createHash("sha256").update(bytes).digest("hex");
+      const exported: FrozenAuthoringExport = {
+        schemaVersion: 1,
+        courseId,
+        sessionId: randomUUID(),
+        exportId: randomUUID(),
+        language: "en",
+        exportHash: "0".repeat(64),
+        proposalIds: [randomUUID()],
+        createdAt: new Date().toISOString(),
+        operations: [
+          {
+            type: "lesson.image.insert",
+            operationId: randomUUID(),
+            targetId: lessonId,
+            baselineHash: baseline.baselineHash,
+            language: "en",
+            dependencies: [],
+            payload: {
+              assetId,
+              anchorBlockId: anchor,
+              position: "after",
+              caption: "Actual source image",
+              altText: "Single pixel source",
+            },
+          },
+        ],
+        assets: [
+          {
+            assetId,
+            sha256,
+            byteSize: bytes.length,
+            mimeType: "image/png",
+            revision: 1,
+            required: true,
+          },
+        ],
+      };
+      exported.exportHash = courseAuthoringExportHash(exported);
+      const downloadAsset = jest.fn().mockResolvedValue({ assetId, revision: 1, bytes });
+      const client = {
+        authoring: {
+          getExport: jest.fn().mockResolvedValue(exported),
+          downloadAsset,
+          recordReceipt: jest.fn().mockResolvedValue(undefined),
+        },
+      };
+      const stagedBytes = new Map<string, Buffer>();
+      const spies = [
+        jest
+          .spyOn(app.get(LumaService), "getLumaClient")
+          .mockResolvedValue(
+            client as unknown as Awaited<ReturnType<LumaService["getLumaClient"]>>,
+          ),
+        jest
+          .spyOn(app.get(CourseAuthoringSessionService), "get")
+          .mockResolvedValue({} as Awaited<ReturnType<CourseAuthoringSessionService["get"]>>),
+        jest.spyOn(S3Service.prototype, "uploadFile").mockImplementation(async (buffer, key) => {
+          if (!Buffer.isBuffer(buffer)) throw new Error("Expected verified asset bytes");
+          stagedBytes.set(key, Buffer.from(buffer));
+        }),
+      ];
+      try {
+        const job = { courseId, sessionId: exported.sessionId, exportId: exported.exportId, actor };
+        const service = app.get(CourseAuthoringApplicationService);
+        await service.process(job);
+        const [saved] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
+        if (!saved) throw new Error("Saved image lesson missing");
+        const $ = load(saved.description?.en ?? "");
+        expect($("h2").next().is("figure")).toBe(true);
+        const resourceId = $("figure [data-node-type=image]").attr("data-resource-id");
+        if (!resourceId) throw new Error("Native image resource missing");
+        const [resource] = await db.select().from(resources).where(eq(resources.id, resourceId));
+        if (!resource) throw new Error("Resource row missing");
+        expect(resource.contentType).toBe("image/png");
+        const uploaded = stagedBytes.get(resource.reference);
+        expect(uploaded).toEqual(bytes);
+        expect(
+          createHash("sha256")
+            .update(uploaded ?? Buffer.alloc(0))
+            .digest("hex"),
+        ).toBe(sha256);
+        $("figure").remove();
+        // Native lesson writes recalculate derived block indexes; the existing baseline
+        // fingerprint excludes only those positional attributes, preserving all authored HTML.
+        expect(getCourseAuthoringContentFingerprint($("body").html() ?? "")).toBe(
+          getCourseAuthoringContentFingerprint(beforeLesson.description?.en ?? original),
+        );
+        const {
+          description: _beforeDescription,
+          updatedAt: _beforeUpdated,
+          ...beforeSettings
+        } = beforeLesson;
+        const {
+          description: _afterDescription,
+          updatedAt: _afterUpdated,
+          ...afterSettings
+        } = saved;
+        expect(afterSettings).toEqual(beforeSettings);
+        expect(
+          await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
+        ).toHaveLength(1);
+        await service.process(job);
+        expect(downloadAsset).toHaveBeenCalledTimes(1);
+        expect(stagedBytes.size).toBe(1);
+        expect(
+          await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
+        ).toHaveLength(1);
+        expect(
+          (await db.select().from(lessons).where(eq(lessons.id, lessonId)))[0]?.description,
+        ).toEqual(saved.description);
+      } finally {
+        spies.forEach((spy) => spy.mockRestore());
+      }
     });
   });
 });

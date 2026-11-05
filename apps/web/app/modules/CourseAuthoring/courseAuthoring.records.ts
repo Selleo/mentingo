@@ -199,6 +199,7 @@ const curriculumOperationTypes = new Set<string>([
   AUTHORING_OPERATION_TYPE.LESSON_CREATE,
   AUTHORING_OPERATION_TYPE.LESSON_UPDATE,
   AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+  AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT,
 ]);
 
 const normalizePreviewProposal = (
@@ -300,7 +301,10 @@ export const curriculumPreviewFromProposal = (
       return;
     }
 
-    if (operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) {
+    if (
+      operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE ||
+      operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT
+    ) {
       const parent = [...contextChapters.values()].find((chapter) =>
         chapter.lessons.some((lesson) => lesson.id === operation.targetId),
       );

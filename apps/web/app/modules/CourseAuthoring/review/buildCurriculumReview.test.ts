@@ -55,6 +55,28 @@ describe("movedIds", () => {
 });
 
 describe("buildCurriculumReview", () => {
+  it("marks only the target lesson edited for an image insertion without moving siblings", () => {
+    const model = buildCurriculumReview({
+      chapters: course(),
+      preview: preview([
+        operation({
+          type: "lesson.image.insert",
+          targetId: "l1",
+          payload: {
+            assetId: "image",
+            anchorBlockId: "anchor",
+            position: "after",
+            caption: null,
+            altText: "Chart",
+          },
+        }),
+      ]),
+    });
+    expect(model.chapters[0].lessons.map((item) => [item.id, item.kind])).toEqual([
+      ["l1", "edited"],
+      ["l2", "unchanged"],
+    ]);
+  });
   it("keeps removed lessons visible at their original position", () => {
     const model = buildCurriculumReview({
       chapters: course(),

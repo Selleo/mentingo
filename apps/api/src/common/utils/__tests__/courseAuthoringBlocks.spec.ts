@@ -10,6 +10,7 @@ import {
   normalizeCourseAuthoringHtml,
   normalizeCourseAuthoringBlocks,
   replaceCourseAuthoringBlock,
+  insertCourseAuthoringBlock,
 } from "../courseAuthoringBlocks";
 
 const BLOCK_IDS = [
@@ -34,6 +35,53 @@ const expectBlockError = (callback: () => unknown, code: string) => {
 };
 
 describe("course authoring blocks", () => {
+  it.each(["before", "after"] as const)(
+    "inserts one image %s its anchor preserving every original block",
+    (position) => {
+      const content = `<h2 data-authoring-block-id="${BLOCK_IDS[0]}">Original title</h2><p data-authoring-block-id="${BLOCK_IDS[1]}"><strong>Original</strong> lesson prose.</p>`;
+      const html = `<figure data-authoring-block-id="${BLOCK_IDS[2]}"><img alt="Chart"></figure>`;
+      const inserted = insertCourseAuthoringBlock({
+        content,
+        anchorBlockId: BLOCK_IDS[1],
+        blockId: BLOCK_IDS[2],
+        position,
+        html,
+      });
+      const $ = loadHtml(inserted);
+      $("figure").remove();
+      expect($("body").html()).toBe(content);
+      expect(
+        loadHtml(inserted)("body")
+          .children()
+          .map((_, node) => loadHtml(inserted)(node).attr(AUTHORING_BLOCK_ID_ATTRIBUTE))
+          .get(),
+      ).toEqual(
+        position === "before" ? [BLOCK_IDS[0], BLOCK_IDS[2], BLOCK_IDS[1]] : [...BLOCK_IDS],
+      );
+      expectBlockError(
+        () =>
+          insertCourseAuthoringBlock({
+            content: inserted,
+            anchorBlockId: BLOCK_IDS[1],
+            blockId: BLOCK_IDS[2],
+            position,
+            html,
+          }),
+        COURSE_AUTHORING_BLOCK_ERROR.DUPLICATE_ID,
+      );
+      expectBlockError(
+        () =>
+          insertCourseAuthoringBlock({
+            content,
+            anchorBlockId: BLOCK_IDS[2],
+            blockId: BLOCK_IDS[2],
+            position,
+            html,
+          }),
+        COURSE_AUTHORING_BLOCK_ERROR.MISSING_TARGET,
+      );
+    },
+  );
   it("preserves validated semantic lesson HTML and image captions", () => {
     const normalized = normalizeCourseAuthoringHtml(
       '<h2>Architecture</h2><figure><div data-node-type="image" data-src="/image.png"></div><figcaption>Data flow</figcaption></figure><p>Explanation</p>',
