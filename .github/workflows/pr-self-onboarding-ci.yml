@@ -5,6 +5,7 @@ on:
       - .github/workflows/self-onboarding.yml
       - .github/workflows/self-onboarding-on-version.yml
       - .github/workflows/pr-self-onboarding-ci.yml
+      - .agents/skills/release-film/assets/**
       - .agents/skills/release-film/scripts/**
       - .agents/skills/release-film/projects/mentingo-self-onboarding.json
       - .agents/skills/release-film/tests/test_self_onboarding*.py
@@ -16,6 +17,7 @@ on:
       - apps/web/e2e/fixtures/self-onboarding.fixture.ts
       - apps/api/src/seed/self-onboarding-data-seed*
       - packages/shared/src/constants/self-onboarding-demo.ts
+      - .agents/skills/release-film/tests/test_tutorial_focus.py
       - .agents/skills/release-film/tests/test_tutorial_media.py
       - apps/web/playwright.self-onboarding-checks.config.ts
 permissions:
@@ -46,7 +48,7 @@ jobs:
       - name: Test Self-onboarding flow planning and assembly
         working-directory: .agents/skills/release-film/tests
         run: |
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media test_viewport_edges
+          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media test_tutorial_focus test_viewport_edges
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
       - name: Build the shared recording contracts

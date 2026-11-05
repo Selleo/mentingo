@@ -852,7 +852,7 @@ class LocalizationTest(unittest.TestCase):
             entries.append((sources['language'],copy.deepcopy(entry)))
             return entry,{}
         self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
-        self.patch(recording.cut,'film_font',return_value=('unused-font','Test',None))
+        self.patch(recording.cut,'film_font',return_value=('unused-font','all-round-gothic',None))
         prepared = self.patch(recording.render_demo,'prepare')
         run=self.root/'render-run'
         self.patch(recording.render_demo,'load_plan',side_effect=lambda *args,**kwargs:{'language':core.load(run/'sources.json')['language']})
@@ -868,6 +868,7 @@ class LocalizationTest(unittest.TestCase):
         english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',brand,self.cache,reference)
         authored = core.load(prepared.call_args.args[0])
         self.assertEqual(authored['colors'], brand['brand']['colors'])
+        self.assertEqual(authored['frameTheme'], 'mentingo')
         polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,self.raw(code='pl'))
         self.assertEqual((english['duration'],polish['duration']),(6,8))
         self.assertNotEqual(polish['captureId'],english['captureId'])

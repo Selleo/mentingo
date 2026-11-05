@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 
 import language  # noqa: E402
 import montage  # noqa: E402
+import tutorial_focus
 import render_demo  # noqa: E402
 
 FPS = montage.FPS
@@ -160,17 +161,28 @@ class Cut(unittest.TestCase):
         self.assertLess(film['anchors'][2]['late'], 0.6)
         self.assertEqual(film['silences'], [])
 
-    def chained(self, words):
+    def chained(self, words, preserve=False):
         """A save (sentence 2) then a close no sentence names, before the result (sentence 3); sentence 2 has
         ``words`` words, 0.3 s apart."""
         spec = {'steps': [{'cmd': ['click', '#open'], 'beat': 1}, {'cmd': ['click', '#save'], 'beat': 2},
                           {'cmd': ['click', '#close']}, {'cmd': ['hover', '#result'], 'beat': 3}]}
+        if preserve:
+            spec['preserve_actions'] = True
         take = capture([step(0, 0.2, 0.4, 0.9, (100, 100)), step(1, 1.0, 1.2, 1.9, (500, 300)),
                         step(2, 2.0, 2.2, 2.9, (700, 400)), step(3, 3.0, 3.2, 3.7, (900, 600), click=False)],
                        active=[(0.45, 0.8), (1.25, 1.8), (2.25, 2.8), (3.25, 3.6)])
         spoken = words_at((0.1, 'Otwieramy stronę.'), (4.0, ' '.join(['Klikamy'] * (words - 1) + ['zapis.'])),
                           (8.0, 'Wynik jest widoczny.'))
         return montage.cut(spec, take, spoken, audio_duration=10.5), spoken
+
+    def test_tutorial_keeps_intermediate_actions_even_when_the_voice_must_wait(self):
+        film, spoken = self.chained(12, preserve=True)
+        actions = {action['step']: action for action in film['actions']}
+        self.assertEqual(set(actions), {0, 1, 2, 3})
+        self.assertFalse(actions[2].get('navigate'))
+        self.assertTrue(film['silences'])
+        self.assertEqual(film['tight'], [])
+        self.assertGreater(actions[2]['t_pre'], montage.sentence_ends(spoken)[1])
 
     def test_the_page_answering_a_sentences_action_plays_under_it_before_any_wait(self):
         film, _ = self.chained(2)
@@ -302,6 +314,53 @@ class Cut(unittest.TestCase):
                    'camera': [{'start': 0.0, 'end': None, 'crop': [8, 0, 1584, 890]}], 'pointer': film['pointer']}
         info = {'streams': [{'codec_type': 'video', 'width': 1600, 'height': 900}], 'format': {'duration': '1'}}
         self.assertEqual(render_demo.footage_segment(footage, 'take.mp4', info)['footage_duration'], 0.5)
+
+    def test_tutorial_waits_for_the_result_before_the_next_click_or_navigation(self):
+        for navigate in (False,True):
+            records=[step(0,.1,.2,.4,(600,350)),
+                     step(1,.5,.6,.8,acting=False,look=True,box=[500,300,300,60]),
+                     step(2,.9,1,1.2,(900,350),acting=not navigate,navigate=navigate)]
+            take=capture(records)
+            spec={'preserve_actions':True,'steps':[{'cmd':['click','Save'],'beat':1},
+                  {'cmd':['look','Saved'],'beat':2},{'cmd':['click','Next'],'beat':3}]}
+            words=words_at((.1,'Save.'),(.5,'Saved.'),(.9,'Next.'))
+            film=montage.cut(spec,take,words,audio_duration=2)
+            actions={a['step']:a for a in film['actions']}
+            self.assertGreaterEqual(actions[2].get('t_pre',actions[2]['t'])-actions[1]['t'],
+                                    montage.TUTORIAL_RESULT_DWELL-.01)
+
+    def test_ui_delays_do_not_insert_a_pause_inside_the_narrated_instruction(self):
+        take=capture([step(0,.1,.5,.7,(600,350),cmd=['click','Save'],text={'target':'Save'})])
+        sentence='Now click the Save button.'
+        words=words_at((.1,sentence))
+        spec={'preserve_actions':True,'word_landings':{1:1},'pause_points':{1:0},
+              'sentences':[sentence],'steps':[{'cmd':['click','Save'],'beat':1}]}
+        film=montage.cut(spec,take,words,audio_duration=2)
+        self.assertTrue(all(at==0 for at,_ in film['silences']))
+        shifted=montage.words_from_srt(montage.shifted_srt(words,film['silences']))
+        self.assertEqual([round(shifted[i][0]-shifted[0][0],3) for i in range(len(words))],
+                         [round(w[0]-words[0][0],3) for w in words])
+        compound={'sentences':[{'text':sentence,'action':0}]}
+        tutorial_focus.align_actions(spec,compound,take,words)
+        self.assertNotIn('word_cue',spec['steps'][0])
+
+    def test_tutorial_does_not_display_navigation_key_badges(self):
+        spec={'preserve_actions':True,'steps':[{'cmd':['press','field'],'beat':1}]}
+        take=capture([step(0,.1,.2,.5,(300,300),click=False,cmd=['press','field'],value='End')])
+        film=montage.cut(spec,take,words_at((.5,'Type the title.')),audio_duration=2)
+        self.assertEqual(film['keys'],[])
+        self.assertTrue(montage.cut(dict(spec,preserve_actions=False),take,
+                                   words_at((.5,'Type the title.')),audio_duration=2)['keys'])
+
+    def test_a_measured_named_control_can_land_after_the_sentence_begins(self):
+        spec={'preserve_actions':True,'word_landings':{1:1.5},
+              'steps':[{'cmd':['click','Save'],'beat':1}]}
+        take=capture([step(0,.1,.2,.5,(600,350))])
+        film=montage.cut(spec,take,words_at((.1,'Now click the Save button.')),audio_duration=3)
+        anchor=film['anchors'][0]
+        self.assertTrue(anchor['named'])
+        self.assertAlmostEqual(anchor['target'],1.5,delta=.001)
+        self.assertGreaterEqual(anchor['action'],1.5-.04)
 
     def test_every_key_badge_is_one_the_renderer_draws(self):  # over 30 characters, empty or two lines: film lost
         pl, en = language.texts('pl'), language.texts('en')

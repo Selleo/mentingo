@@ -98,6 +98,21 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(result['version'], '1.1.0')
         self.assertEqual(self.first_flow(result)['action'], 'record')
 
+    def test_reviewed_source_evidence_is_read_from_target_commit_not_working_tree(self):
+        self.catalog['domains'][0]['evidencePaths'] = [CODE]
+        catalog.validate_catalog(self.catalog)
+        self.git('tag', 'v1.1.0')
+        self.write(CODE, 'uncommitted implementation must not be evidence')
+        def classify(context):
+            self.assertEqual(context['currentSource'][CODE], 'export const save = () => create();\n')
+            return classifier()(context)
+        self.assertTrue(catalog.plan(self.repo, 'v1.1.0', None, self.catalog, classify=classify)['ok'])
+        for path in ['.env', 'apps/web/**', 'apps/api/unrelated.ts']:
+            invalid = copy.deepcopy(self.catalog)
+            invalid['domains'][0]['evidencePaths'] = [path]
+            with self.assertRaisesRegex(ValueError, 'Evidence paths'):
+                catalog.validate_catalog(invalid)
+
     def test_initial_coverage_receives_actual_target_files_for_discovered_flow_paths(self):
         self.write('apps/web/not-watched.tsx', 'not part of this feature')
         self.commit('Version', 'v1.1.0')
@@ -463,12 +478,42 @@ class RegistryTests(unittest.TestCase):
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
 
+    def test_section_language_removal_is_registered_once_without_changing_existing_groups(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
+        groups = [v['key'] for v in domain['videos'] if 'remove-section-language' in v['flowIds']]
+        self.assertEqual(groups, ['knowledge-base-articles.language-removal'])
+
+    def test_category_base_language_has_one_assignment_without_repartitioning_existing_videos(self):
+        repo=Path(__file__).resolve().parents[4]
+        loaded=catalog.load_catalog(repo/'.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain=next(d for d in loaded['domains'] if d['domain']=='categories')
+        flow=next(f for f in domain['flows'] if f['id']=='set-category-base-language')
+        self.assertIn('category-management-business-spec.md',flow['specPaths'][0])
+        self.assertIn('confirm',flow['actions'][1])
+        groups={v['key']:v['flowIds'] for v in domain['videos']}
+        self.assertEqual([key for key,ids in groups.items() if flow['id'] in ids],['categories.language-defaults'])
+        self.assertEqual(groups['categories.category-authoring'],
+                         ['browse-categories','create-category','localize-category'])
+        self.assertEqual(groups['categories.category-lifecycle'],
+                         ['add-category-from-catalogue','search-categories-globally','delete-category'])
+
+    def test_failed_daily_practice_retry_has_an_explicit_short_video(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain = next(d for d in loaded['domains'] if d['domain'] == 'ai-mentor')
+        assignments = [v['key'] for v in domain['videos'] if 'retry-practice-generation' in v['flowIds']]
+        self.assertEqual(assignments, ['ai-mentor.recovery'])
+        flow = next(f for f in domain['flows'] if f['id'] == 'retry-practice-generation')
+        self.assertIn('same daily practice', flow['outcomes'][0])
+
     def test_app_coverage_audit_requires_every_area_spec_and_real_source(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 224, 'videos': 91})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 229, 'videos': 95})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)
@@ -629,13 +674,13 @@ class RegistryTests(unittest.TestCase):
         articles = next(d for d in loaded['domains'] if d['domain'] == 'knowledge-base-articles')
         spec = 'docs/specs/knowledge-base-articles-business-spec.md'
         self.assertEqual(articles['specPaths'], [spec, 'docs/specs/knowledge-base-business-spec.md'])
-        self.assertEqual(len(articles['flows']), 11)
+        self.assertEqual(len(articles['flows']), 14)
         for flow in articles['flows']:
             self.assertEqual(flow['specPaths'], [spec])
             self.assertEqual(flow['pageKeys'], ['articles'])
         self.assertTrue({'create-section', 'edit-section', 'delete-section', 'create-article', 'edit-article',
                          'localize-article', 'preview-article', 'replace-article-cover', 'configure-public-article',
-                         'delete-article', 'browse-articles'} == {f['id'] for f in articles['flows']})
+                         'delete-article', 'browse-articles', 'remove-section-language', 'remove-article-language', 'upload-article-resource'} == {f['id'] for f in articles['flows']})
 
     def test_news_spec_selects_explicit_editorial_and_learner_flows(self):
         path = Path(__file__).resolve().parents[1] / 'projects' / 'mentingo-self-onboarding.json'
