@@ -50,7 +50,10 @@ export const UploadFilesToLoginPagePreviewDialog = ({
             </div>
           </div>
           <div className="box-border flex flex-1 justify-center overflow-auto rounded-b-lg bg-neutral-50 p-4">
-            <div className="w-full max-w-4xl">
+            <div
+              className="w-full max-w-4xl"
+              data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_PREVIEW_DOCUMENT}
+            >
               <PdfPreviewViewer
                 src={buildLoginPageFilePreviewUrl(resourceId)}
                 name={resourceName}
