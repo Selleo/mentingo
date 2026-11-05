@@ -381,7 +381,20 @@ export type AssetRequestView = {
   purpose: "thumbnail" | "lesson" | "diagram" | "avatar" | "signature";
   required: boolean;
   altText: string;
-  source: { type: "generated"; content: string; visualQuery: string };
+  source:
+    | { type: "generated"; content: string; visualQuery: string }
+    | {
+        type: "source_image";
+        sourceVersionId: string;
+        sectionId: string;
+        interpretationId: string;
+      };
+  placement?: {
+    anchorBlockId: string;
+    position: "before" | "after";
+    caption: string;
+    relevance: string;
+  };
 };
 
 export type AssetTaskView = {

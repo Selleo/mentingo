@@ -666,6 +666,58 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(validate(savedImage.attr("data-authoring-block-id") ?? "")).toBe(true);
   });
 
+  it("imports an explicitly placed source figure at its anchor with its caption and no staging URI", async () => {
+    const test = setup();
+    const figureId = "00000000-0000-4000-8000-000000000099";
+    const anchorId = "00000000-0000-4000-8000-000000000098";
+    test.input.operations = [
+      {
+        type: "lesson.create",
+        operationId,
+        targetId: operationId,
+        chapterId,
+        displayOrder: 0,
+        baselineHash: null,
+        language: "en",
+        dependencies: [],
+        payload: {
+          lessonType: "content",
+          title: "Quarterly revenue",
+          description:
+            `<p data-authoring-block-id="${anchorId}">Explain the revenue trend.</p>` +
+            `<figure data-authoring-block-id="${figureId}"><img src="authoring-asset:${figureId}" data-authoring-asset-id="${figureId}" alt="Revenue increases in Q2"><figcaption>Quarterly revenue from the source report</figcaption></figure>` +
+            "<p>Apply the comparison to the example.</p>",
+        },
+      },
+    ];
+    test.input.assetMappings = { [figureId]: `${chapterId}/source-figure.png` };
+    test.input.assetMimeTypes = { [figureId]: "image/png" };
+
+    await test.service.applyPreparedExport(test.input, actor);
+
+    expect(test.createLessonResources).toHaveBeenCalledTimes(1);
+    expect(test.createLessonResources).toHaveBeenCalledWith(operationId, [
+      expect.objectContaining({
+        reference: `${chapterId}/source-figure.png`,
+        contentType: "image/png",
+      }),
+    ]);
+    const savedDescription = test.updateLesson.mock.calls[0][1].description as string;
+    const $ = loadHtml(savedDescription);
+    const figure = $("figure");
+    expect(figure).toHaveLength(1);
+    expect(figure.prev("p").text()).toBe("Explain the revenue trend.");
+    expect(figure.next("p").text()).toBe("Apply the comparison to the example.");
+    expect(figure.find("figcaption").text()).toBe("Quarterly revenue from the source report");
+    const resource = figure.find('div[data-node-type="image"]');
+    expect(resource).toHaveLength(1);
+    expect(resource.attr("data-src")).toBe(`/api/lesson/lesson-resource/${lessonId}`);
+    expect(resource.attr("data-alt")).toBe("Revenue increases in Q2");
+    expect(savedDescription).not.toContain("authoring-asset:");
+    expect(savedDescription).not.toContain("data-authoring-asset-id");
+    expect(savedDescription).not.toContain(`${chapterId}/source-figure.png`);
+  });
+
   it("applies an exported zero-hour quiz cooldown as no native cooldown", async () => {
     const test = setup();
     const fixture = JSON.parse(

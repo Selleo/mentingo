@@ -14,6 +14,8 @@ Course authors describe the course material or changes they need in AI course ge
 - Type or dictate a generation or editing request, with target scope, a Fast/Balanced/Thorough thinking control when Mentingo's own AI provider is active, and explicit source/research permissions.
 - Use the selected thinking effort for the first route and generation attempt as well as later retries when Mentingo's own AI provider is active.
 - Attach approved files from the composer, recover completed unsent attachments after a reload, and keep sent source chips on the exact request that used them. Send stays unavailable until every selected file has finished processing with usable text; the connected AI service also rejects a request that reaches it before processing finishes or without usable extracted text.
+- Attach static PNG, JPEG or WebP images alongside supported documents. With the connected image-source extension enabled, their saved OCR/visual interpretation can support subsequent questions and course writing.
+- Reuse relevant uploaded images or PDF figures inside content lessons. Proposals bind each image to an exact paragraph/block position, explanatory caption and educational purpose; unrelated figures are not automatically scattered through a course. Applied images become native lesson resources in that position, and source-image captions/relevance remain available during review.
 - When a generated AI Mentor lesson uses approved company files, attach prepared lesson documents at application so its learner conversations can retrieve relevant company context.
 - Continue an existing conversation with a focused revision request, keeping the approved brief and outline while using only the selected lessons' current details.
 - Request a new lesson in several named or selected chapters as one grouped change; each chapter remains tied to its own proposed lesson, and Autopilot waits for the complete set.
@@ -142,6 +144,8 @@ Generated lessons distinguish material for participants from production instruct
 - Existing current course-edit access and `COURSE_AI_GENERATION` permission are both required.
 
 ## Test Evidence
+
+The image-source companion has focused frontend validation/projection/details tests and a native application regression that checks the resource appears between the declared paragraphs with its caption. The connected AI service separately tests image decoding, source exclusions, PDF crops, interpretation revisions and export retention. These controlled tests do not establish live-provider quality or a fresh authenticated learner/browser run.
 
 Autopilot has focused component, API and AI workflow coverage. Database-backed tests cover stop and replay, and a provider-mocked cross-service test applies an edit without a browser connection while invoking the server replay sweep explicitly. Live-provider, browser and deployment verification remain separate.
 

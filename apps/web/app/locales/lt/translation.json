@@ -6809,13 +6809,13 @@
       "uploading": "Įkeliamas {{name}}...",
       "description": "Pasirinkite patvirtintą medžiagą arba aiškiai leiskite viešuosius šaltinius.",
       "library": "Kurso šaltiniai",
-      "fileHint": "PDF, DOCX, paprastas tekstas arba Markdown · iki 25 MiB",
+      "fileHint": "PDF, DOCX, tekstas, Markdown, PNG, JPEG arba WebP · iki 25 MiB",
       "use": "Naudoti šaltinį {{name}}",
       "required": "Privaloma",
       "exclude": "Neįtraukti",
       "emptyLibrary": "Pridėkite patvirtintą medžiagą arba įjunkite šaltinio leidimą.",
       "tooLarge": "Šaltinis viršija 25 MiB įkėlimo limitą.",
-      "unsupportedFile": "Pasirinkite PDF, DOCX, paprasto teksto arba Markdown failą.",
+      "unsupportedFile": "Pasirinkite PDF, DOCX, teksto, Markdown, PNG, JPEG arba WebP failą.",
       "status": {
         "queued": "Eilėje",
         "processing": "Apdorojama",
@@ -6951,6 +6951,7 @@
       "assetDecisionFallback": "Šiam turtui reikia aiškaus sprendimo.",
       "generatedVisualTitle": "Generuojama iliustracija",
       "restoreAsset": "Atšaukti praleidimą",
+      "sourceImageTitle": "Šaltinio paveikslėlis",
       "assetDetails": "Išsami informacija",
       "retryApprovalExplanation": "Ankstesnė užklausa galėjo būti priimta. Pakartojus gali būti taikomas papildomas mokestis.",
       "assetStatus": {

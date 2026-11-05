@@ -7,11 +7,13 @@ import type { AssetRequestView } from "../courseAuthoring.types";
 export function AuthoringAssetTitle({ asset }: { asset: AssetRequestView }) {
   const { t } = useTranslation();
   const title = asset.altText.trim();
+  const fallbackTitleKey =
+    asset.source.type === "source_image"
+      ? "courseAuthoring.activityRail.sourceImageTitle"
+      : "courseAuthoring.activityRail.generatedVisualTitle";
   return (
     <p className="line-clamp-2 min-w-0 break-words text-sm font-medium">
-      {title && title.length <= 100
-        ? title
-        : t("courseAuthoring.activityRail.generatedVisualTitle")}
+      {title && title.length <= 100 ? title : t(fallbackTitleKey)}
     </p>
   );
 }
@@ -33,9 +35,17 @@ export function AuthoringAssetDetails({
       <div className="mt-2 max-h-48 space-y-2 overflow-y-auto whitespace-pre-wrap break-words border-l border-neutral-200 pl-3 text-xs leading-5">
         {asset.altText && <p>{asset.altText}</p>}
         {diagnostic && <p>{diagnostic}</p>}
-        <p>
-          {t("courseAuthoring.activityRail.generatedVisual", { content: asset.source.content })}
-        </p>
+        {asset.source.type === "generated" && (
+          <p>
+            {t("courseAuthoring.activityRail.generatedVisual", { content: asset.source.content })}
+          </p>
+        )}
+        {asset.source.type === "source_image" && asset.placement && (
+          <>
+            <p>{asset.placement.caption}</p>
+            <p>{asset.placement.relevance}</p>
+          </>
+        )}
       </div>
     </details>
   );

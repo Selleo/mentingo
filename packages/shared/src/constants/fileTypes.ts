@@ -91,9 +91,22 @@ export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = [
 /** File ingestion supported by the durable course-authoring source pipeline. */
 export const COURSE_AUTHORING_SOURCE_FILE_TYPES = [
   ...ALLOWED_PDF_FILE_TYPES,
+  ...SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
   ...ALLOWED_WORD_FILE_TYPES.filter((type) => type !== "application/msword"),
   "text/plain",
   "text/markdown",
   "text/x-markdown",
 ] as const;
 export const MAX_COURSE_AUTHORING_SOURCE_SIZE = 25 * 1024 * 1024;
+
+/** File picker extensions matching the source ingestion MIME allowlist. */
+export const COURSE_AUTHORING_SOURCE_FILE_EXTENSIONS = [
+  ".pdf",
+  ".docx",
+  ".txt",
+  ".md",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+] as const;

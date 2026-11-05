@@ -1190,6 +1190,117 @@ describe("course authoring record projection", () => {
     ]);
   });
 
+  it("preserves explicit source-image interpretation and placement through proposal and asset task projection", () => {
+    const request = {
+      assetId: "source-figure-asset",
+      operationId: "lesson-operation",
+      purpose: "lesson",
+      required: false,
+      altText: "Revenue increased in the second quarter",
+      source: {
+        type: "source_image",
+        sourceVersionId: "source-version",
+        sectionId: "source-figure-section",
+        interpretationId: "source-interpretation-v2",
+      },
+      placement: {
+        anchorBlockId: "revenue-explanation",
+        position: "after",
+        caption: "Quarterly revenue",
+        relevance: "Shows the trend discussed in this lesson example",
+      },
+    };
+    const result = projectWorkspaceRecords(
+      [
+        {
+          id: "source-image-proposal",
+          kind: "proposal",
+          payload: { revision: 1, assetRequests: [request], assetIds: [request.assetId] },
+        },
+        {
+          id: "source-image-task-record",
+          kind: "asset_task",
+          payload: { taskId: "source-image-task", request },
+        },
+        {
+          id: "source-image-ready",
+          kind: "asset",
+          payload: {
+            status: "ready",
+            manifest: { assetId: request.assetId, mimeType: "image/png" },
+          },
+        },
+      ],
+      [
+        {
+          taskId: "source-image-task",
+          requestId: "request-1",
+          status: "succeeded",
+          errorCode: null,
+          outputId: request.assetId,
+        },
+      ],
+    );
+
+    expect(result.proposals[0].assetRequests).toEqual([request]);
+    expect(result.assetTasks[0]).toMatchObject({ request, ready: true });
+    expect(result.readyAssetIds).toContain(request.assetId);
+    expect(result.unsupportedRecordCount).toBe(0);
+  });
+
+  it.each([
+    { placement: null },
+    {
+      placement: {
+        anchorBlockId: "intro",
+        position: "somewhere",
+        caption: "Caption",
+        relevance: "Relevant",
+      },
+    },
+    {
+      placement: {
+        anchorBlockId: "",
+        position: "after",
+        caption: "Caption",
+        relevance: "Relevant",
+      },
+    },
+    { source: { type: "source_image", sourceVersionId: "source", sectionId: "section" } },
+  ])("does not project an incomplete or ambiguous source-image request: %j", (override) => {
+    const result = projectWorkspaceRecords([
+      {
+        id: "invalid-source-image-task",
+        kind: "asset_task",
+        payload: {
+          taskId: "task-image",
+          request: {
+            assetId: "asset-image",
+            operationId: "operation-1",
+            purpose: "lesson",
+            required: false,
+            altText: "Source figure",
+            source: {
+              type: "source_image",
+              sourceVersionId: "source",
+              sectionId: "section",
+              interpretationId: "interpretation",
+            },
+            placement: {
+              anchorBlockId: "intro",
+              position: "after",
+              caption: "Caption",
+              relevance: "Relevant",
+            },
+            ...override,
+          },
+        },
+      },
+    ]);
+    expect(result.assetTasks).toHaveLength(0);
+    expect(result.unsupportedRecordCount).toBe(1);
+  });
+
   it("rejects retired web-image assets instead of rendering them", () => {
     const result = projectWorkspaceRecords([
       {

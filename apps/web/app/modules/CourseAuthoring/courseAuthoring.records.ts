@@ -116,6 +116,34 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
         }
       : null;
   }
+  if (source.type === "source_image" && isObject(value.placement)) {
+    const sourceVersionId = stringValue(source.sourceVersionId);
+    const sectionId = stringValue(source.sectionId);
+    const interpretationId = stringValue(source.interpretationId);
+    const anchorBlockId = stringValue(value.placement.anchorBlockId);
+    const caption = stringValue(value.placement.caption);
+    const relevance = stringValue(value.placement.relevance);
+    const position = value.placement.position;
+    if (
+      !sourceVersionId ||
+      !sectionId ||
+      !interpretationId ||
+      !anchorBlockId ||
+      !caption ||
+      !relevance ||
+      (position !== "before" && position !== "after")
+    )
+      return null;
+    return {
+      assetId,
+      operationId,
+      purpose: purpose as AssetRequestView["purpose"],
+      required: value.required,
+      altText,
+      source: { type: "source_image", sourceVersionId, sectionId, interpretationId },
+      placement: { anchorBlockId, position, caption, relevance },
+    };
+  }
   return null;
 };
 

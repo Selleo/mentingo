@@ -6813,13 +6813,13 @@
       "uploading": "Nahrávání {{name}}...",
       "description": "Vyberte schválené materiály nebo výslovně povolte veřejné zdroje.",
       "library": "Zdroje kurzu",
-      "fileHint": "PDF, DOCX, prostý text nebo Markdown · do 25 MiB",
+      "fileHint": "PDF, DOCX, text, Markdown, PNG, JPEG nebo WebP · do 25 MiB",
       "use": "Použít zdroj {{name}}",
       "required": "Povinné",
       "exclude": "Vyloučit",
       "emptyLibrary": "Připojte schválený materiál nebo povolte zdroj.",
       "tooLarge": "Zdroj překračuje limit nahrávání 25 MiB.",
-      "unsupportedFile": "Vyberte soubor PDF, DOCX, prostý text nebo Markdown.",
+      "unsupportedFile": "Vyberte soubor PDF, DOCX, text, Markdown, PNG, JPEG nebo WebP.",
       "status": {
         "queued": "Ve frontě",
         "processing": "Zpracování",
@@ -6956,6 +6956,7 @@
       "assetDecisionFallback": "Tento prvek vyžaduje explicitní rozhodnutí.",
       "generatedVisualTitle": "Generovaný obrázek",
       "restoreAsset": "Vrátit přeskočení",
+      "sourceImageTitle": "Obrázek ze zdrojových materiálů",
       "assetDetails": "Podrobnosti",
       "retryApprovalExplanation": "Předchozí požadavek už mohl být přijat. Opakování může být znovu zpoplatněno.",
       "assetStatus": {

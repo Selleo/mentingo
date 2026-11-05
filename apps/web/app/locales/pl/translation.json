@@ -6872,13 +6872,13 @@
       "uploading": "Przesyłanie {{name}}...",
       "description": "Wybierz zatwierdzone materiały lub jawnie zezwól na źródła publiczne.",
       "library": "Źródła kursu",
-      "fileHint": "PDF, DOCX, tekst lub Markdown · maks. 25 MiB",
+      "fileHint": "PDF, DOCX, tekst, Markdown, PNG, JPEG lub WebP · maks. 25 MiB",
       "use": "Użyj źródła {{name}}",
       "required": "Wymagane",
       "exclude": "Wyklucz",
       "emptyLibrary": "Dołącz zatwierdzone materiały lub włącz zgodę na źródło.",
       "tooLarge": "Źródło przekracza limit przesyłania 25 MiB.",
-      "unsupportedFile": "Wybierz plik PDF, DOCX, tekstowy lub Markdown.",
+      "unsupportedFile": "Wybierz plik PDF, DOCX, tekstowy, Markdown, PNG, JPEG lub WebP.",
       "status": {
         "queued": "W kolejce",
         "processing": "Przetwarzanie",
@@ -7016,6 +7016,7 @@
       "assetDecisionFallback": "Ten materiał wymaga Twojej decyzji.",
       "generatedVisualTitle": "Generowana grafika",
       "restoreAsset": "Cofnij pominięcie",
+      "sourceImageTitle": "Obraz z materiałów źródłowych",
       "assetDetails": "Szczegóły",
       "retryApprovalExplanation": "Poprzednie zlecenie mogło zostać przyjęte. Ponowienie może naliczyć kolejną opłatę.",
       "assetStatus": {

@@ -88,7 +88,7 @@ describe("AuthoringActivityRail asset decisions", () => {
             request: {
               ...assetTask.request,
               altText: longTitle,
-              source: { ...assetTask.request.source, content: prompt },
+              source: { type: "generated", visualQuery: "safety", content: prompt },
             },
           },
         ]}
