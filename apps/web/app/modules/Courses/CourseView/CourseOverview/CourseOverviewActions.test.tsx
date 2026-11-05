@@ -104,17 +104,17 @@ describe("CourseOverviewActions", () => {
     isPreviewMode = false;
   });
 
-  it("offers a preview action without enrolling a learner", async () => {
+  it("keeps enrollment and details actions without an extra preview button", () => {
     currentUser = { id: "student-1", permissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE] };
     isPreviewMode = true;
     const onContinueLearning = vi.fn();
     renderActions({ onContinueLearning });
 
-    await userEvent.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(onContinueLearning).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "Preview" })).not.toBeInTheDocument();
+    expect(onContinueLearning).not.toHaveBeenCalled();
     expect(enrollCourse).not.toHaveBeenCalled();
     expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON)).toBeInTheDocument();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeInTheDocument();
   });
 
   it("links unauthenticated users to registration when registration is open", () => {

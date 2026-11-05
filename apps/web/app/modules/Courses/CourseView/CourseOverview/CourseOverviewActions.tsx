@@ -50,7 +50,6 @@ export default function CourseOverviewActions({
     canEditCourse,
     isCourseStudentModeActive,
     isEffectiveStudentExperience,
-    isPreviewMode,
   } = useCourseAccessProvider();
 
   const isGroupManager = hasPermission(
@@ -170,12 +169,6 @@ export default function CourseOverviewActions({
       className="flex flex-wrap items-center gap-2 sm:gap-3"
     >
       {renderPrimaryAction()}
-      {isPreviewMode && currentUser && !isAdminExperience && !course.enrolled && (
-        <Button variant="outline" onClick={onContinueLearning} className="gap-2">
-          <Play className="size-4" />
-          {t("adminCourseView.common.preview")}
-        </Button>
-      )}
       {isEffectiveStudentExperience && !course.learningState?.repetition && (
         <CourseRepetition course={course} />
       )}
