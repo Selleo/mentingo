@@ -66,6 +66,7 @@ describe("CourseAuthoringContextBridgeWorker", () => {
       description: "Selected description",
     };
     const context = {
+      prepareBlockIdentities: jest.fn().mockResolvedValue(undefined),
       getContext: jest.fn().mockResolvedValue({
         courseId,
         language: "en",
@@ -126,6 +127,15 @@ describe("CourseAuthoringContextBridgeWorker", () => {
     await test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner as never);
 
     expect(test.tenantRunner.runWithTenant).toHaveBeenCalledWith(tenantId, expect.any(Function));
+    expect(test.context.prepareBlockIdentities).toHaveBeenCalledWith(
+      courseId,
+      "en",
+      expect.objectContaining({ userId: actorId, tenantId }),
+      [lessonId],
+    );
+    expect(test.context.prepareBlockIdentities.mock.invocationCallOrder[0]).toBeLessThan(
+      test.context.getContext.mock.invocationCallOrder[0],
+    );
     expect(test.context.getSelectedLessonDetails).toHaveBeenCalledWith(
       courseId,
       "en",

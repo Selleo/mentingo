@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { load } from "cheerio";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { getCourseAuthoringContentFingerprint } from "src/common/utils/courseAuthoringBlocks";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -100,7 +100,10 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
         permissions: SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.ADMIN],
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
       };
-      const course = await createCourseFactory(db).create({ authorId: user.id });
+      const course = await createCourseFactory(db).create({
+        authorId: user.id,
+        availableLocales: ["en", "pl"],
+      });
       courseId = course.id;
       chapterId = (
         await createChapterFactory(db).create({
@@ -356,146 +359,188 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
     });
   });
 
-  it("applies a frozen image insertion through byte verification and native persistence without changing original lesson content", async () => {
-    await runner.runWithTenant(actor.tenantId, async () => {
-      const anchor = randomUUID();
-      const sibling = randomUUID();
-      const assetId = randomUUID();
-      const original = `<h2 data-authoring-block-id="${anchor}">Approved original heading</h2><p data-authoring-block-id="${sibling}"><strong>Every</strong> original sentence stays.</p>`;
-      const lessonId = await app
-        .get(AdminLessonService)
-        .createLessonForChapter(
-          { chapterId, type: "content", title: "Image-only edit", description: original },
+  it.each(["html", "plain", "empty"] as const)(
+    "applies a frozen image insertion to %s content through verified native persistence",
+    async (shape) => {
+      await runner.runWithTenant(actor.tenantId, async () => {
+        const anchor = randomUUID();
+        const sibling = randomUUID();
+        const assetId = randomUUID();
+        const richOriginal = `<h2 data-authoring-block-id="${anchor}">Approved original heading</h2><p data-authoring-block-id="${sibling}"><strong>Every</strong> original sentence stays.</p>`;
+        let original = "";
+        if (shape === "html") original = richOriginal;
+        if (shape === "plain") original = "Legacy plain text & comparison < 3 stays unchanged.";
+        const lessonId = await app
+          .get(AdminLessonService)
+          .createLessonForChapter(
+            { chapterId, type: "content", title: "Image-only edit", description: original },
+            actor,
+            "en",
+          );
+        // Reproduce old imported/seeded rows that bypassed native HTML normalization.
+        if (shape !== "html") {
+          await db
+            .update(lessons)
+            .set({
+              description: sql`jsonb_build_object(${
+                SUPPORTED_LANGUAGES.EN
+              }::text, ${original}::text, ${SUPPORTED_LANGUAGES.PL}::text, ${"Inny język"}::text)`,
+            })
+            .where(eq(lessons.id, lessonId));
+        }
+        const contextService = app.get(CourseAuthoringContextService);
+        await contextService.prepareBlockIdentities(courseId, "en", actor, [lessonId]);
+        const context = await contextService.getContext(
+          courseId,
+          { language: SUPPORTED_LANGUAGES.EN, lessonIds: [lessonId] },
           actor,
-          "en",
         );
-      const context = await app
-        .get(CourseAuthoringContextService)
-        .getContext(courseId, { language: SUPPORTED_LANGUAGES.EN }, actor, [chapterId]);
-      const baseline = context.chapters
-        .flatMap((chapter) => chapter.lessons)
-        .find((lesson) => lesson.id === lessonId);
-      if (!baseline) throw new Error("Image insertion baseline missing");
-      const [beforeLesson] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
-      if (!beforeLesson) throw new Error("Persisted baseline missing");
-      const bytes = Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7XkAAAAASUVORK5CYII=",
-        "base64",
-      );
-      const sha256 = createHash("sha256").update(bytes).digest("hex");
-      const exported: FrozenAuthoringExport = {
-        schemaVersion: 1,
-        courseId,
-        sessionId: randomUUID(),
-        exportId: randomUUID(),
-        language: "en",
-        exportHash: "0".repeat(64),
-        proposalIds: [randomUUID()],
-        createdAt: new Date().toISOString(),
-        operations: [
-          {
-            type: "lesson.image.insert",
-            operationId: randomUUID(),
-            targetId: lessonId,
-            baselineHash: baseline.baselineHash,
-            language: "en",
-            dependencies: [],
-            payload: {
-              assetId,
-              anchorBlockId: anchor,
-              position: "after",
-              caption: "Actual source image",
-              altText: "Single pixel source",
+        const baseline = context.chapters
+          .flatMap((chapter) => chapter.lessons)
+          .find((lesson) => lesson.id === lessonId);
+        if (!baseline) throw new Error("Image insertion baseline missing");
+        const targetBlock = baseline.blocks?.[0];
+        if (!targetBlock) throw new Error("Prepared image insertion anchor missing");
+        if (shape !== "html") expect(load(baseline.description ?? "").text()).toBe(original);
+        const preparedBaseline = baseline.baselineHash;
+        await contextService.prepareBlockIdentities(courseId, "en", actor, [lessonId]);
+        const repeatedContext = await contextService.getContext(
+          courseId,
+          { language: "en", lessonIds: [lessonId] },
+          actor,
+        );
+        expect(
+          repeatedContext.chapters
+            .flatMap((chapter) => chapter.lessons)
+            .find((lesson) => lesson.id === lessonId)?.baselineHash,
+        ).toBe(preparedBaseline);
+        const [beforeLesson] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
+        if (!beforeLesson) throw new Error("Persisted baseline missing");
+        const bytes = Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7XkAAAAASUVORK5CYII=",
+          "base64",
+        );
+        const sha256 = createHash("sha256").update(bytes).digest("hex");
+        const exported: FrozenAuthoringExport = {
+          schemaVersion: 1,
+          courseId,
+          sessionId: randomUUID(),
+          exportId: randomUUID(),
+          language: "en",
+          exportHash: "0".repeat(64),
+          proposalIds: [randomUUID()],
+          createdAt: new Date().toISOString(),
+          operations: [
+            {
+              type: "lesson.image.insert",
+              operationId: randomUUID(),
+              targetId: lessonId,
+              baselineHash: baseline.baselineHash,
+              language: "en",
+              dependencies: [],
+              payload: {
+                assetId,
+                anchorBlockId: targetBlock.id,
+                position: "after",
+                caption: "Actual source image",
+                altText: "Single pixel source",
+              },
             },
+          ],
+          assets: [
+            {
+              assetId,
+              sha256,
+              byteSize: bytes.length,
+              mimeType: "image/png",
+              revision: 1,
+              required: true,
+            },
+          ],
+        };
+        exported.exportHash = courseAuthoringExportHash(exported);
+        const downloadAsset = jest.fn().mockResolvedValue({ assetId, revision: 1, bytes });
+        const client = {
+          authoring: {
+            getExport: jest.fn().mockResolvedValue(exported),
+            downloadAsset,
+            recordReceipt: jest.fn().mockResolvedValue(undefined),
           },
-        ],
-        assets: [
-          {
-            assetId,
-            sha256,
-            byteSize: bytes.length,
-            mimeType: "image/png",
-            revision: 1,
-            required: true,
-          },
-        ],
-      };
-      exported.exportHash = courseAuthoringExportHash(exported);
-      const downloadAsset = jest.fn().mockResolvedValue({ assetId, revision: 1, bytes });
-      const client = {
-        authoring: {
-          getExport: jest.fn().mockResolvedValue(exported),
-          downloadAsset,
-          recordReceipt: jest.fn().mockResolvedValue(undefined),
-        },
-      };
-      const stagedBytes = new Map<string, Buffer>();
-      const spies = [
-        jest
-          .spyOn(app.get(LumaService), "getLumaClient")
-          .mockResolvedValue(
-            client as unknown as Awaited<ReturnType<LumaService["getLumaClient"]>>,
-          ),
-        jest
-          .spyOn(app.get(CourseAuthoringSessionService), "get")
-          .mockResolvedValue({} as Awaited<ReturnType<CourseAuthoringSessionService["get"]>>),
-        jest.spyOn(S3Service.prototype, "uploadFile").mockImplementation(async (buffer, key) => {
-          if (!Buffer.isBuffer(buffer)) throw new Error("Expected verified asset bytes");
-          stagedBytes.set(key, Buffer.from(buffer));
-        }),
-      ];
-      try {
-        const job = { courseId, sessionId: exported.sessionId, exportId: exported.exportId, actor };
-        const service = app.get(CourseAuthoringApplicationService);
-        await service.process(job);
-        const [saved] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
-        if (!saved) throw new Error("Saved image lesson missing");
-        const $ = load(saved.description?.en ?? "");
-        expect($("h2").next().is("figure")).toBe(true);
-        const resourceId = $("figure [data-node-type=image]").attr("data-resource-id");
-        if (!resourceId) throw new Error("Native image resource missing");
-        const [resource] = await db.select().from(resources).where(eq(resources.id, resourceId));
-        if (!resource) throw new Error("Resource row missing");
-        expect(resource.contentType).toBe("image/png");
-        const uploaded = stagedBytes.get(resource.reference);
-        expect(uploaded).toEqual(bytes);
-        expect(
-          createHash("sha256")
-            .update(uploaded ?? Buffer.alloc(0))
-            .digest("hex"),
-        ).toBe(sha256);
-        $("figure").remove();
-        // Native lesson writes recalculate derived block indexes; the existing baseline
-        // fingerprint excludes only those positional attributes, preserving all authored HTML.
-        expect(getCourseAuthoringContentFingerprint($("body").html() ?? "")).toBe(
-          getCourseAuthoringContentFingerprint(beforeLesson.description?.en ?? original),
-        );
-        const {
-          description: _beforeDescription,
-          updatedAt: _beforeUpdated,
-          ...beforeSettings
-        } = beforeLesson;
-        const {
-          description: _afterDescription,
-          updatedAt: _afterUpdated,
-          ...afterSettings
-        } = saved;
-        expect(afterSettings).toEqual(beforeSettings);
-        expect(
-          await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
-        ).toHaveLength(1);
-        await service.process(job);
-        expect(downloadAsset).toHaveBeenCalledTimes(1);
-        expect(stagedBytes.size).toBe(1);
-        expect(
-          await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
-        ).toHaveLength(1);
-        expect(
-          (await db.select().from(lessons).where(eq(lessons.id, lessonId)))[0]?.description,
-        ).toEqual(saved.description);
-      } finally {
-        spies.forEach((spy) => spy.mockRestore());
-      }
-    });
-  });
+        };
+        const stagedBytes = new Map<string, Buffer>();
+        const spies = [
+          jest
+            .spyOn(app.get(LumaService), "getLumaClient")
+            .mockResolvedValue(
+              client as unknown as Awaited<ReturnType<LumaService["getLumaClient"]>>,
+            ),
+          jest
+            .spyOn(app.get(CourseAuthoringSessionService), "get")
+            .mockResolvedValue({} as Awaited<ReturnType<CourseAuthoringSessionService["get"]>>),
+          jest.spyOn(S3Service.prototype, "uploadFile").mockImplementation(async (buffer, key) => {
+            if (!Buffer.isBuffer(buffer)) throw new Error("Expected verified asset bytes");
+            stagedBytes.set(key, Buffer.from(buffer));
+          }),
+        ];
+        try {
+          const job = {
+            courseId,
+            sessionId: exported.sessionId,
+            exportId: exported.exportId,
+            actor,
+          };
+          const service = app.get(CourseAuthoringApplicationService);
+          await service.process(job);
+          const [saved] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
+          if (!saved) throw new Error("Saved image lesson missing");
+          const $ = load(saved.description?.en ?? "");
+          expect($(`[data-authoring-block-id="${targetBlock.id}"]`).next().is("figure")).toBe(true);
+          const resourceId = $("figure [data-node-type=image]").attr("data-resource-id");
+          if (!resourceId) throw new Error("Native image resource missing");
+          const [resource] = await db.select().from(resources).where(eq(resources.id, resourceId));
+          if (!resource) throw new Error("Resource row missing");
+          expect(resource.contentType).toBe("image/png");
+          const uploaded = stagedBytes.get(resource.reference);
+          expect(uploaded).toEqual(bytes);
+          expect(
+            createHash("sha256")
+              .update(uploaded ?? Buffer.alloc(0))
+              .digest("hex"),
+          ).toBe(sha256);
+          $("figure").remove();
+          // Native lesson writes recalculate derived block indexes; the existing baseline
+          // fingerprint excludes only those positional attributes, preserving all authored HTML.
+          expect(getCourseAuthoringContentFingerprint($("body").html() ?? "")).toBe(
+            getCourseAuthoringContentFingerprint(beforeLesson.description?.en ?? original),
+          );
+          const {
+            description: _beforeDescription,
+            updatedAt: _beforeUpdated,
+            ...beforeSettings
+          } = beforeLesson;
+          const {
+            description: _afterDescription,
+            updatedAt: _afterUpdated,
+            ...afterSettings
+          } = saved;
+          expect(afterSettings).toEqual(beforeSettings);
+          if (shape !== "html") expect(saved.description?.pl).toBe("Inny język");
+          expect(
+            await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
+          ).toHaveLength(1);
+          await service.process(job);
+          expect(downloadAsset).toHaveBeenCalledTimes(1);
+          expect(stagedBytes.size).toBe(1);
+          expect(
+            await db.select().from(resourceEntity).where(eq(resourceEntity.entityId, lessonId)),
+          ).toHaveLength(1);
+          expect(
+            (await db.select().from(lessons).where(eq(lessons.id, lessonId)))[0]?.description,
+          ).toEqual(saved.description);
+        } finally {
+          spies.forEach((spy) => spy.mockRestore());
+        }
+      });
+    },
+  );
 });

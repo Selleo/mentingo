@@ -169,6 +169,14 @@ export class CourseAuthoringSessionService {
         })
       | undefined = undefined;
     if ("request" in input && input.request) {
+      await this.context.prepareBlockIdentities(
+        courseId,
+        snapshot.language,
+        actor,
+        input.request.targets
+          .filter((target) => ["lesson", "block", "question"].includes(target.kind))
+          .map((target) => target.targetId),
+      );
       const context = await this.context.getContext(
         courseId,
         {
