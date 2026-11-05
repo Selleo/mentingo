@@ -61,6 +61,8 @@ class TutorialFocus(unittest.TestCase):
             outline=pixel(1.4,646,450)
             self.assertGreater(outline[2],150)
             self.assertLess(outline[0],130)
+            self.assertLess(sum(abs(a-b) for a,b in zip(pixel(1,646,450),pixel(2.2,646,450))),15,
+                            'the focus must remain steady while the viewer reads it')
 
     def test_camera_keeps_context_inside_frame_and_does_not_upscale_excessively(self):
         for box in ([600,350,200,60], [180,100,50,30], [1320,730,100,60]):
@@ -144,3 +146,15 @@ class TutorialFocus(unittest.TestCase):
         self.assertTrue(values[0]['zoom'])
         film['anchors'][0]['named']=False
         self.assertFalse(focus.from_film(film,capture)[0]['zoom'])
+
+
+    def test_zoom_requires_a_real_reading_hold_and_clear_exit_before_the_next_action(self):
+        short={'start':0,'end':2.4,'box':[600,350,200,60],'zoom':True}
+        self.assertFalse(focus.zoom_enabled(short))
+        self.assertGreaterEqual(focus.ZOOM_WINDOW-2*focus.ZOOM_MOVE,1.8)
+        film={'footage':8,'anchors':[{'step':0,'beat':1,'action':1,'named':True}],
+              'actions':[{'step':0,'t_pre':1,'t':1},{'step':1,'t_pre':5,'t':5.2}]}
+        capture={'steps':[{'step':0,'look':True,'box':[600,350,200,60]}]}
+        values=focus.from_film(film,capture)
+        self.assertTrue(values[0]['zoom'])
+        self.assertLessEqual(values[0]['end'],5-focus.CAMERA_EXIT_GAP)

@@ -513,7 +513,7 @@ def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, lang
     words = montage.words_from_srt((Path(voice_dir) / 'subtitles.srt').read_text(encoding='utf-8'))
     speech = audio_seconds(narration_audio(voice_dir))
     if tutorial:
-        spec['word_landings'] = tutorial_focus.word_landings(chapter, capture, words)
+        tutorial_focus.align_actions(spec, chapter, capture, words)
     film = montage.cut(spec, capture, words, audio_duration=speech, tail=montage.FINAL_TAIL if last else None)
     _, spans = montage.camera(spec, capture, film, capture['scale'])
     return spec, capture, words, speech, film, spans

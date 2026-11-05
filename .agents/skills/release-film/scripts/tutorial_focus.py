@@ -4,43 +4,97 @@ import unicodedata
 
 import montage
 
+ZOOM_MOVE = .35
+ZOOM_READ = 1.8
+ZOOM_WINDOW = 2 * ZOOM_MOVE + ZOOM_READ
+CAMERA_EXIT_GAP = .35
+
+
+def tokens(text):
+    return [montage.lexical(unicodedata.normalize('NFC', token)) for token in str(text).split()
+            if montage.lexical(token)]
+
+
+def label_time(record, words, first, end):
+    """A unique exact accessible-label match in one measured sentence, otherwise no cue."""
+    text = record.get('text') or {}
+    label = text.get('target') if isinstance(text, dict) else None
+    phrase = tokens(label) if isinstance(label, str) else []
+    if not phrase or len(phrase) > 12:
+        return None
+    candidates = [(i, tokens(words[i][2])) for i in range(first, end)]
+    candidates = [(i, t[0]) for i, t in candidates if len(t) == 1]
+    matches = [candidates[i][0] for i in range(len(candidates) - len(phrase) + 1)
+               if [t for _, t in candidates[i:i+len(phrase)]] == phrase]
+    return words[matches[0]][0] if len(matches) == 1 else None
+
 
 def word_landings(chapter, capture, words):
-    """Match a recorded accessible label inside its pinned narrated sentence.
-
-    Exact, Unicode-normalized word sequences only. Ambiguous or untranslated
-    labels keep the existing action pin; a camera must never guess its word.
-    """
+    """Measured control words within their pinned sentence; unknown labels retain their proof pin."""
     sentences = chapter.get('sentences', [])
     firsts = montage.first_words(words, [s['text'] for s in sentences])
     if firsts is None:
         return {}
     records = {r['step']: r for r in capture.get('steps', [])}
-    def tokens(text):
-        return [montage.lexical(unicodedata.normalize('NFC', token)) for token in str(text).split()
-                if montage.lexical(token)]
     result = {}
     for beat, sentence in enumerate(sentences, 1):
-        record = records.get(sentence.get('action'), {})
-        text = record.get('text') or {}
-        label = text.get('target') if isinstance(text, dict) else None
-        phrase = tokens(label) if isinstance(label, str) else []
-        if not phrase or len(phrase) > 12:
+        end = firsts[beat] if beat < len(firsts) else len(words)
+        at = label_time(records.get(sentence.get('action'), {}), words, firsts[beat - 1], end)
+        if at is not None:
+            result[beat] = at
+    return result
+
+
+def align_actions(spec, chapter, capture, words):
+    """Cue narrated interactions before their existing result pin, without discarding proof.
+
+    A sentence can be pinned to a saved heading while naming the Save click
+    before it. The click belongs on 'Save'; its result belongs at the sentence's
+    end. Previously only the result pin was timed and that click ran early.
+    """
+    sentences = chapter.get('sentences', [])
+    firsts = montage.first_words(words, [s['text'] for s in sentences])
+    spec['word_landings'] = word_landings(chapter, capture, words)
+    spec['result_landings'] = {}
+    if firsts is None:
+        return
+    records = {r['step']: r for r in capture.get('steps', [])}
+    steps = {r['step']: step for r, step in zip(capture.get('steps', []), spec['steps'])}
+    previous = -1
+    for beat, sentence in enumerate(sentences, 1):
+        pinned = sentence.get('action')
+        if pinned not in records or pinned <= previous:
             continue
         end = firsts[beat] if beat < len(firsts) else len(words)
-        candidates = [(i, tokens(words[i][2])) for i in range(firsts[beat - 1], end)]
-        candidates = [(i, t[0]) for i,t in candidates if len(t) == 1]
-        matches = [candidates[i][0] for i in range(len(candidates) - len(phrase) + 1)
-                   if [t for _,t in candidates[i:i+len(phrase)]] == phrase]
-        if len(matches) == 1:
-            result[beat] = words[matches[0]][0]
-    return result
+        matches = {}
+        for index, record in records.items():
+            if not previous < index < pinned or not record.get('acting') or record.get('navigate'):
+                continue
+            at = label_time(record, words, firsts[beat - 1], end)
+            if at is not None:
+                primary_at = spec['word_landings'].get(beat)
+                if not records[pinned].get('look') and (primary_at is None or at >= primary_at):
+                    continue  # Do not force setup words past their already narrated interaction.
+                matches.setdefault(at, []).append(index)
+        cued = []
+        last_at = -1
+        for at, indexes in sorted(matches.items(), key=lambda item: min(item[1])):
+            if len(indexes) != 1 or at < last_at:
+                continue  # Repeated controls or reversed wording cannot establish a safe action order.
+            steps[indexes[0]].update(at=at, word_cue=True)
+            cued.append(at)
+            last_at = at
+        if cued and records[pinned].get('look'):
+            # Keep the asserted outcome after its narrated interaction, rather
+            # than pulling the whole sentence back onto the old screen.
+            spec['result_landings'][beat] = max(cued + [words[end - 1][0]])
+        previous = pinned
 
 
 def from_film(film, capture):
     records = {record['step']: record for record in capture.get('steps', [])}
     actions = film.get('actions', [])
-    anchors = {a['step']: a for a in film.get('anchors', []) if a.get('beat')}
+    anchors = {a['step']: a for a in film.get('anchors', []) if a.get('beat') or a.get('named')}
     result, zooms = [], 0
     scale = capture.get('scale', 1)
     for index, action in enumerate(actions):
@@ -68,19 +122,20 @@ def from_film(film, capture):
         post = (record.get('post') or {}).get('target')
         if isinstance(post, dict):
             post = [post.get(k) for k in ('x', 'y', 'width', 'height')]
-        stationary = bool(record.get('look')) or (isinstance(post, (list, tuple)) and len(post) == 4
+        same_page = (record.get('pre') or {}).get('url') == (record.get('post') or {}).get('url')
+        stationary = bool(record.get('look')) or (same_page and isinstance(post, (list, tuple)) and len(post) == 4
             and all(type(a) in (int, float) and abs(a - b) <= 4 for a, b in zip(post, box)))
         if stationary and anchor:
             start = max(start, anchor['action'])  # Begin moving on the spoken control, never an arbitrary early pulse.
         # A click may remove its button or navigate. Stop outlining that target
         # as it changes, rather than drawing over unrelated content afterward.
-        hold = 2.4 if stationary else -.03
-        end = min(action['t'] + hold, following - .05, film['footage'])
+        hold = 3.2 if stationary else -.03
+        end = min(action['t'] + hold, following - CAMERA_EXIT_GAP, film['footage'])
         if end - start < .35:
             continue
         interior = x >= 180 and y >= 100 and x + width <= 1420 and y + height <= 800
         overlay = (record.get('pre') or {}).get('overlay') or (record.get('post') or {}).get('overlay')
-        zoom = (anchor is None or anchor.get('named', False)) and not overlay and stationary and zooms < 2 and end - start >= 2.2 and interior and width < 600 and height < 240
+        zoom = (anchor is None or anchor.get('named', False)) and not overlay and stationary and zooms < 2 and end - start >= ZOOM_WINDOW and interior and width < 600 and height < 240
         zooms += int(zoom)
         result.append({'start': round(start, 3), 'end': round(end, 3),
                        'box': [round(v * scale, 3) for v in box], 'zoom': zoom})
@@ -132,11 +187,11 @@ def camera(box, frame):
 def zoom_enabled(value):
     # Older authored plans remain renderable, but a short legacy zoom becomes
     # a highlight rather than a rushed camera pulse.
-    return value['zoom'] and value['end'] - value['start'] >= 2.2
+    return value['zoom'] and value['end'] - value['start'] >= ZOOM_WINDOW
 
 
 def filters(values, frame=(1600, 900)):
-    """A .7s smoothstep camera move, a readable hold, then a .7s return.
+    """A short eased camera move, at least 1.8s steady reading, then a short return.
 
     Fractional perspective coordinates avoid the integer crop jitter that made
     earlier zoompan cameras unusable. The pointer and ring move with the page.
@@ -146,7 +201,7 @@ def filters(values, frame=(1600, 900)):
         if not zoom_enabled(value):
             continue
         start, end = value['start'], value['end']
-        ramp = f'min(clip((on/30-{start:.3f})/.7,0,1),clip(({end:.3f}-on/30)/.7,0,1))'
+        ramp = f'min(clip((on/30-{start:.3f})/{ZOOM_MOVE},0,1),clip(({end:.3f}-on/30)/{ZOOM_MOVE},0,1))'
         ease = f'(({ramp})*({ramp})*(3-2*({ramp})))'
         zoom, left, top = camera(value['box'], frame)
         zooms.append((ease, zoom, left, top))
@@ -197,7 +252,7 @@ def overlays(inputs, values, work, write_png):
         source = inputs.count('-i')
         inputs += ['-loop', '1', '-framerate', '30', '-threads', '1', '-i', asset]
         start, end = value['start'], value['end']
-        reveal = start + (.7 if zoom_enabled(value) else 0)
+        reveal = start + (ZOOM_MOVE if zoom_enabled(value) else 0)
         fade = min(.25, (end - reveal) / 3)
         graph.append(f'[{source}:v]format=rgba,fade=t=in:st={reveal:.3f}:d={fade:.3f}:alpha=1,'
                      f'fade=t=out:st={end - fade:.3f}:d={fade:.3f}:alpha=1[ring{index}]')

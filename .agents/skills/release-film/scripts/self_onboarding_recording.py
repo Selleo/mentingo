@@ -160,6 +160,11 @@ def tutorial_brief(original, flow, spec_text, code):
             'Use the film language named above, present tense, explain the visible actions and result. '
             'Use concise sentences pinned to each meaningful visible action; at least three action pins. '
             'do not describe it as new or mention a release. Pin every sentence to its verified action. '
+            'Write concise second-person instructions using the actual localized control labels in quotes. '
+            'Use one meaningful interaction per sentence, followed by a separate sentence explaining its visible result. '
+            'Pin interaction sentences to the interaction and result sentences to their passed visible check. '
+            'Do not call the viewer the administrator or describe the recording language. '
+            'Let the viewer locate the control, follow the action, and read the settled result before the next instruction. '
             'Keep setup and authentication outside narration. No unfilmed promises.\n' + narration +
             '\nProof labels are optional hints for review; concise descriptions of the demonstrated outcome are fine.\n' +
             '\nSave no memories. Reply `ok <film key>` or `failed: <reason>`.\n')

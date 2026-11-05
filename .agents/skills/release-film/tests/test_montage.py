@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 
 import language  # noqa: E402
 import montage  # noqa: E402
+import tutorial_focus
 import render_demo  # noqa: E402
 
 FPS = montage.FPS
@@ -313,6 +314,41 @@ class Cut(unittest.TestCase):
                    'camera': [{'start': 0.0, 'end': None, 'crop': [8, 0, 1584, 890]}], 'pointer': film['pointer']}
         info = {'streams': [{'codec_type': 'video', 'width': 1600, 'height': 900}], 'format': {'duration': '1'}}
         self.assertEqual(render_demo.footage_segment(footage, 'take.mp4', info)['footage_duration'], 0.5)
+
+    def test_tutorial_waits_for_the_result_before_the_next_click_or_navigation(self):
+        for navigate in (False,True):
+            records=[step(0,.1,.2,.4,(600,350)),
+                     step(1,.5,.6,.8,acting=False,look=True,box=[500,300,300,60]),
+                     step(2,.9,1,1.2,(900,350),acting=not navigate,navigate=navigate)]
+            take=capture(records)
+            spec={'preserve_actions':True,'steps':[{'cmd':['click','Save'],'beat':1},
+                  {'cmd':['look','Saved'],'beat':2},{'cmd':['click','Next'],'beat':3}]}
+            words=words_at((.1,'Save.'),(.5,'Saved.'),(.9,'Next.'))
+            film=montage.cut(spec,take,words,audio_duration=2)
+            actions={a['step']:a for a in film['actions']}
+            self.assertGreaterEqual(actions[2].get('t_pre',actions[2]['t'])-actions[1]['t'],
+                                    montage.TUTORIAL_RESULT_DWELL-.01)
+
+    def test_a_save_click_is_timed_to_its_word_even_when_sentence_is_pinned_to_the_result(self):
+        records=[step(0,.1,.2,.4,(600,350),cmd=['click','Save'],text={'target':'Save'}),
+                 step(1,.5,.6,.8,acting=False,look=True,box=[500,300,300,60],cmd=['look','Saved'])]
+        take=capture(records)
+        words=words_at((.1,'Now click Save and see the updated heading.'))
+        chapter={'sentences':[{'text':'Now click Save and see the updated heading.','action':1}]}
+        spec={'preserve_actions':True,'sentences':[chapter['sentences'][0]['text']],
+              'steps':[{'cmd':['click','Save']},{'cmd':['look','Saved'],'beat':1}]}
+        tutorial_focus.align_actions(spec,chapter,take,words)
+        self.assertAlmostEqual(spec['steps'][0]['at'],.7)
+        self.assertGreater(spec['result_landings'][1],.7)
+        film=montage.cut(spec,take,words,audio_duration=3)
+        click,proof=film['anchors']
+        self.assertTrue(click['named'])
+        self.assertFalse(proof['named'])
+        self.assertGreater(proof['action'],click['action'])
+        # Delays before the proof do not move the already-spoken Save word.
+        shifted=montage.words_from_srt(montage.shifted_srt(words,film['silences']))
+        save=next(start for start,_,word in shifted if word=='Save')
+        self.assertAlmostEqual(click['action'],save,delta=.04)
 
     def test_tutorial_does_not_display_navigation_key_badges(self):
         spec={'preserve_actions':True,'steps':[{'cmd':['press','field'],'beat':1}]}

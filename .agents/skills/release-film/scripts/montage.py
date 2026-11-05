@@ -64,6 +64,9 @@ ACTIVE_PAD = 2  # frames kept around page motion
 MAX_STILL = 5.9  # a still image (a downloaded PDF page) covers at most this much of a chapter's end
 POINTER_REST = (800, 450)  # where the pointer waits before the first action (CSS pixels)
 CLICK_SECONDS = 0.3  # the click ring stays this long
+TUTORIAL_RESULT_DWELL = 1.8  # read a settled outcome before moving to the next interaction
+TUTORIAL_ACTION_DWELL = .9
+
 DEFAULT_TAIL = 0.6  # footage after the narration ends
 # A transition the picture cannot show (the page reloaded, another window: the montage cuts the blank reload, and one
 # app window looks like another) gets a short label in the corner, this long, from the moment the picture changes
@@ -538,10 +541,12 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
     starts, finished = sentence_starts(words, known), sentence_ends(words, known)
     speech = float(audio_duration if audio_duration is not None else (words[-1][1] + 0.3 if words else 0.0))
 
+    cue_times = {**(spec.get('word_landings') or {}), **(spec.get('result_landings') or {})}
+
     def landing(beat, shift):
-        """When the sentence's action lands: a little before its first word (LAND), never before the last word of
-        the sentence before."""
-        named = (spec.get('word_landings') or {}).get(beat)
+        """A measured tutorial cue lands on its word; other actions keep their sentence pin.
+        Never start the next sentence's action before the previous sentence finishes."""
+        named = cue_times.get(beat)
         target = named + shift if named is not None else starts[beat - 1] + shift + LAND
         return max(target, finished[beat - 2] + shift + SAID if beat > 1 else float('-inf'))
     off = off_film(steps)
@@ -621,7 +626,8 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
                 chain = covered(rigid, cutter.c, arrival)
                 needed = covered(rigid, cutter.c, records[following]['a'])
                 beat = steps[following]['beat']
-                said = finished[beat - 2] + shift + SAID if beat > 1 else 0.0  # the sentence before, said
+                pause = .25 if spec.get('preserve_actions') else SAID
+                said = finished[beat - 2] + shift + pause if beat > 1 else 0.0  # the sentence before, said
                 # These steps set up the next proof. Even filling a field on the same page must wait
                 # for the current sentence; its pointer and camera approach must wait too.
                 at, glides, lead = here, 0.0, None
@@ -667,14 +673,15 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
             switched.append((record.get('enter') if record.get('enter') is not None else record['m'],
                              titled or texts['another_window']))
         last_page = record.get('page', last_page)
-        if acting and pending_view is not None:
+        moving = acting or (spec.get('preserve_actions') and record.get('navigate'))
+        if moving and pending_view is not None:
             view = min(pending_view, max(TIGHT_VIEW, pending_view * 0.4)) if tighter else pending_view
-            view_until, pending_view = cutter.film + view, None
+            view_until, pending_view = max(view_until, cutter.film + view), None
         beat, target, spoken = step.get('beat'), None, None
         if beat is not None and beat not in beats and 1 <= beat <= len(starts):
             beats.add(beat)
             last_beat = beat
-            spoken = starts[beat - 1]
+            spoken = cue_times.get(beat, starts[beat - 1])
             target = landing(beat, shift)
         elif step.get('at') is not None and float(step['at']) >= 0:
             spoken = float(step['at'])
@@ -688,7 +695,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
         if tighter and glide:
             glide = max(TIGHT_GLIDE, glide * 0.5)
         hold = 0.0
-        if acting:
+        if moving:
             hold = max(hold, view_until + glide - (cutter.film + to_arrival))
         if target is not None:
             hold = max(hold, target - (cutter.film + to_action))
@@ -697,13 +704,14 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
         if target is not None:
             late = moment - target
             tolerance = LATE_TOLERANCE_LATER if beat is not None and beat > 1 else LATE_TOLERANCE
-            if late > tolerance:  # the narration waits for the action: silence before its sentence
+            if late > tolerance:  # the narration waits at this measured cue, preserving earlier words and actions
                 silences.append((round(spoken, 3), round(late, 3)))
                 shift += late
             anchors.append({'step': index, 'beat': beat, 'at': step.get('at'), 'target': round(target, 3),
                             'action': round(moment, 3), 'late': round(late, 3),
                             'waits': round(late, 3) if late > tolerance else 0.0,
-                            'named': beat in (spec.get('word_landings') or {})})
+                            'named': bool(step.get('word_cue')) or (beat in (spec.get('word_landings') or {})
+                                                                   and beat not in (spec.get('result_landings') or {}))})
         verb = (record.get('cmd') or [''])[0]
         if point:
             if glide:
@@ -720,9 +728,15 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
             cutter.play(record['a'], first_idle=False)
         if record.get('look'):  # the element painting in (a dialog fading in), then its painted state
             proof = painted(capture, record, cuts)
-            if proof > cutter.c + 1e-6:
+            advance = proof > cutter.c + 1e-6
+            if advance:
                 cutter.play(proof, first_idle=False)
+            # A tutorial must show the proved picture even if play() advanced
+            # its capture clock through an idle span without keeping that frame.
+            if advance or spec.get('preserve_actions'):
                 cutter.land(proof)
+            if spec.get('preserve_actions'):
+                view_until = max(view_until, cutter.film + TUTORIAL_RESULT_DWELL)
         if turning is not None and index not in pinned and (acting or record.get('navigate')):
             # The previous caption ends when the setup's camera or pointer starts moving.
             leave_at.setdefault(turning, round(arrival - max(glide, MOVE_SECONDS) if acting else moment, 3))
@@ -747,7 +761,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
             # while the sentence says it, instead of playing on as the toast fades
             cutter.film += max(0.0, min(LOOK_HOLD, starts[beat] + shift - cutter.film))
         if acting:
-            pending_view = 0.7 if spec.get('preserve_actions') else VIEW
+            pending_view = TUTORIAL_ACTION_DWELL if spec.get('preserve_actions') else VIEW
     cutter.play(end)
     last_motion = cutter.film
     spoken_length = speech + shift
