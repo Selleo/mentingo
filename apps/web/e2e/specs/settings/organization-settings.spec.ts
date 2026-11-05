@@ -5,6 +5,8 @@ import { USER_ROLE } from "~/config/userRoles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { saveMfaEnforcementFlow } from "../../flows/settings/save-mfa-enforcement.flow";
+import { toggleMfaEnforcementRoleFlow } from "../../flows/settings/toggle-mfa-enforcement-role.flow";
 
 import type { FixtureApiClient } from "../../utils/api-client";
 import type { Locator, Page } from "@playwright/test";
@@ -117,7 +119,7 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
     const originalSettings = await getGlobalSettings(apiClient);
     const originalRoles = new Set(originalSettings.MFAEnforcedRoles);
     const targetRoles = {
-      admin: !originalRoles.has(USER_ROLE.admin),
+      admin: originalRoles.has(USER_ROLE.admin),
       student: !originalRoles.has(USER_ROLE.student),
       content_creator: !originalRoles.has(USER_ROLE.contentCreator),
       trainer: !originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
@@ -136,12 +138,11 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeDisabled();
 
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.admin)).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.student)).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.contentCreator)).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(SYSTEM_ROLE_SLUGS.TRAINER)).click();
+    for (const role of [USER_ROLE.student, USER_ROLE.contentCreator, SYSTEM_ROLE_SLUGS.TRAINER]) {
+      await toggleMfaEnforcementRoleFlow(page, role);
+    }
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeEnabled();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE).click();
+    await saveMfaEnforcementFlow(page);
 
     await expect
       .poll(async () => {
