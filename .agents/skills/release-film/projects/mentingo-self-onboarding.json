@@ -7971,6 +7971,38 @@
           ]
         },
         {
+          "id": "set-category-base-language",
+          "title": "Change a category base language",
+          "description": "Choose which saved category translation is used as its base language.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "categories"
+          ],
+          "specPaths": [
+            "docs/specs/category-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Categories/**",
+            "apps/api/src/category/**"
+          ],
+          "goal": "Change the base language of a category and verify that the choice remains saved.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera.",
+            "Use a disposable category with saved English and Polish translations; keep both translations available."
+          ],
+          "actions": [
+            "Open the disposable category and select its existing non-base translation.",
+            "Choose Set as base language and confirm the change.",
+            "Reopen the category and inspect the base-language indicator."
+          ],
+          "outcomes": [
+            "The selected saved translation becomes the category base language and remains marked as the base after reopening."
+          ]
+        },
+        {
           "id": "delete-category",
           "title": "Remove an unused category",
           "description": "Remove an unused category in Mentingo.",
@@ -8087,6 +8119,14 @@
             "add-category-from-catalogue",
             "search-categories-globally",
             "delete-category"
+          ]
+        },
+        {
+          "key": "categories.language-defaults",
+          "title": "Choose the category base language",
+          "description": "Change the base language of an existing translated category.",
+          "flowIds": [
+            "set-category-base-language"
           ]
         }
       ]

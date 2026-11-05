@@ -485,6 +485,20 @@ class RegistryTests(unittest.TestCase):
         groups = [v['key'] for v in domain['videos'] if 'remove-section-language' in v['flowIds']]
         self.assertEqual(groups, ['knowledge-base-articles.language-removal'])
 
+    def test_category_base_language_has_one_assignment_without_repartitioning_existing_videos(self):
+        repo=Path(__file__).resolve().parents[4]
+        loaded=catalog.load_catalog(repo/'.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain=next(d for d in loaded['domains'] if d['domain']=='categories')
+        flow=next(f for f in domain['flows'] if f['id']=='set-category-base-language')
+        self.assertIn('category-management-business-spec.md',flow['specPaths'][0])
+        self.assertIn('confirm',flow['actions'][1])
+        groups={v['key']:v['flowIds'] for v in domain['videos']}
+        self.assertEqual([key for key,ids in groups.items() if flow['id'] in ids],['categories.language-defaults'])
+        self.assertEqual(groups['categories.category-authoring'],
+                         ['browse-categories','create-category','localize-category'])
+        self.assertEqual(groups['categories.category-lifecycle'],
+                         ['add-category-from-catalogue','search-categories-globally','delete-category'])
+
     def test_failed_daily_practice_retry_has_an_explicit_short_video(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
@@ -499,7 +513,7 @@ class RegistryTests(unittest.TestCase):
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 228, 'videos': 94})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 229, 'videos': 95})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)
