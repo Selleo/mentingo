@@ -1,4 +1,4 @@
-"""Recorded control outlines and restrained, subpixel tutorial zooms; never guessed screen targets."""
+"""Measured tutorial focus, eased context framing and rounded control rings."""
 import math
 
 
@@ -23,7 +23,7 @@ def from_film(film, capture):
             continue  # A pre-scroll or offscreen rectangle cannot identify the visible control.
         if width > 1000 or height > 600:
             continue  # Large containers do not need an outline around the whole page.
-        start = max(result[-1]['end'] if result else 0, action.get('t_pre', action['t']) - .5)
+        start = max(result[-1]['end'] if result else 0, action.get('t_pre', action['t']) - .7)
         following = actions[index + 1].get('t_pre', actions[index + 1]['t']) if index + 1 < len(actions) else film['footage']
         post = (record.get('post') or {}).get('target')
         if isinstance(post, dict):
@@ -32,13 +32,13 @@ def from_film(film, capture):
             and all(type(a) in (int, float) and abs(a - b) <= 4 for a, b in zip(post, box)))
         # A click may remove its button or navigate. Stop outlining that target
         # as it changes, rather than drawing over unrelated content afterward.
-        hold = 1.8 if stationary else .12
+        hold = 2.4 if stationary else -.03
         end = min(action['t'] + hold, following - .05, film['footage'])
         if end - start < .35:
             continue
         interior = x >= 180 and y >= 100 and x + width <= 1420 and y + height <= 800
         overlay = (record.get('pre') or {}).get('overlay') or (record.get('post') or {}).get('overlay')
-        zoom = not overlay and stationary and zooms < 2 and end - start >= 1.2 and interior and width < 600 and height < 240
+        zoom = not overlay and stationary and zooms < 2 and end - start >= 2.2 and interior and width < 600 and height < 240
         zooms += int(zoom)
         result.append({'start': round(start, 3), 'end': round(end, 3),
                        'box': [round(v * scale, 3) for v in box], 'zoom': zoom})
@@ -73,24 +73,93 @@ def validate(values, frame, duration):
     return values
 
 
-def filters(values):
-    """Stable frame dimensions; cubic perspective interpolates fractional coordinates, avoiding integer crop shake."""
-    parts, zooms = [], []
+def camera(box, frame):
+    """Fit measured context, like the clips skill; clamp translation to avoid blank edges.
+
+    A recording is a bitmap: cap magnification at 1.45, keep at least 32% of
+    the viewport as context, and never treat a button's tiny bounds as a shot.
+    """
+    x, y, width, height = box
+    fw, fh = frame
+    zoom = max(1, min(1.45, fw / (width + fw * .32), fh / (height + fh * .32)))
+    left = min(0, max(fw * (1 - zoom), fw / 2 - (x + width / 2) * zoom))
+    top = min(0, max(fh * (1 - zoom), fh / 2 - (y + height / 2) * zoom))
+    return zoom, left, top
+
+
+def zoom_enabled(value):
+    # Older authored plans remain renderable, but a short legacy zoom becomes
+    # a highlight rather than a rushed camera pulse.
+    return value['zoom'] and value['end'] - value['start'] >= 2.2
+
+
+def filters(values, frame=(1600, 900)):
+    """A .7s smoothstep camera move, a readable hold, then a .7s return.
+
+    Fractional perspective coordinates avoid the integer crop jitter that made
+    earlier zoompan cameras unusable. The pointer and ring move with the page.
+    """
+    zooms = []
     for value in values:
+        if not zoom_enabled(value):
+            continue
         start, end = value['start'], value['end']
+        ramp = f'min(clip((on/30-{start:.3f})/.7,0,1),clip(({end:.3f}-on/30)/.7,0,1))'
+        ease = f'(({ramp})*({ramp})*(3-2*({ramp})))'
+        zoom, left, top = camera(value['box'], frame)
+        zooms.append((ease, zoom, left, top))
+    if not zooms:
+        return ''
+    left = '+'.join(f'({ease})*{x:.6f}' for ease, _, x, _ in zooms)
+    top = '+'.join(f'({ease})*{y:.6f}' for ease, _, _, y in zooms)
+    right = '+'.join(f'({ease})*{(zoom - 1) * frame[0] + x:.6f}' for ease, zoom, x, _ in zooms)
+    bottom = '+'.join(f'({ease})*{(zoom - 1) * frame[1] + y:.6f}' for ease, zoom, _, y in zooms)
+    return (f"perspective=x0='{left}':y0='{top}':x1='W+({right})':y1='{top}':"
+            f"x2='{left}':y2='H+({bottom})':x3='W+({right})':y3='H+({bottom})':"
+            'sense=destination:eval=frame:interpolation=cubic,')
+
+
+def ring(width, height):
+    """Antialiased rounded Mentingo ring + soft halo; transparent inside, no dimming.
+
+    Returns an RGBA bitmap with 14px padding. Analytic distance keeps this
+    offline and dependency-free; rasterize once, not once per video frame.
+    """
+    width, height = math.ceil(width), math.ceil(height)
+    padding, radius = 14, min(14, height / 2 + 5)
+    size = width + padding * 2, height + padding * 2
+    rows = []
+    for y in range(size[1]):
+        row = bytearray()
+        for x in range(size[0]):
+            qx = abs(x + .5 - size[0] / 2) - (width / 2 + 6 - radius)
+            qy = abs(y + .5 - size[1] / 2) - (height / 2 + 6 - radius)
+            distance = math.hypot(max(qx, 0), max(qy, 0)) + min(max(qx, qy), 0) - radius
+            stroke = max(0, min(1, 2 - abs(distance)))
+            halo = max(0, min(1, 7 - abs(distance))) * .16
+            alpha = round(255 * max(stroke, halo))
+            row.extend((71, 150, 253, alpha))
+        rows.append(row)
+    return size, rows
+
+
+def overlays(inputs, values, work, write_png):
+    """Ring only a recorded target, fade after the camera settles, before the next action."""
+    graph, layer = [], 'c2'
+    for index, value in enumerate(values):
         x, y, width, height = value['box']
-        parts.append(f'drawbox=x={x:.3f}:y={y:.3f}:w={width:.3f}:h={height:.3f}:'
-                     f"color=0x4796fd@0.9:t=3:enable='between(t,{start:.3f},{end:.3f})'")
-        if value['zoom']:
-            ramp = f'min(clip((on/30-{start:.3f})/0.3,0,1),clip(({end:.3f}-on/30)/0.3,0,1))'
-            amount = f'(0.12*(1-cos(PI*({ramp})))/2)'
-            zooms.append((amount, x + width / 2, y + height / 2))
-    if zooms:
-        left = '+'.join(f'({amount})*{x:.3f}' for amount, x, _ in zooms)
-        top = '+'.join(f'({amount})*{y:.3f}' for amount, _, y in zooms)
-        right = '+'.join(f'({amount})*(W-{x:.3f})' for amount, x, _ in zooms)
-        bottom = '+'.join(f'({amount})*(H-{y:.3f})' for amount, _, y in zooms)
-        parts.append(f"perspective=x0='-({left})':y0='-({top})':x1='W+({right})':y1='-({top})':"
-                     f"x2='-({left})':y2='H+({bottom})':x3='W+({right})':y3='H+({bottom})':"
-                     'sense=destination:eval=frame:interpolation=cubic')
-    return ','.join(parts) + (',' if parts else '')
+        asset = work / f'tutorial-ring-{math.ceil(width)}-{math.ceil(height)}.png'
+        if not asset.exists():
+            (w, h), rows = ring(width, height)
+            write_png(asset, w, h, rows)
+        source = inputs.count('-i')
+        inputs += ['-loop', '1', '-framerate', '30', '-threads', '1', '-i', asset]
+        start, end = value['start'], value['end']
+        reveal = start + (.7 if zoom_enabled(value) else 0)
+        fade = min(.25, (end - reveal) / 3)
+        graph.append(f'[{source}:v]format=rgba,fade=t=in:st={reveal:.3f}:d={fade:.3f}:alpha=1,'
+                     f'fade=t=out:st={end - fade:.3f}:d={fade:.3f}:alpha=1[ring{index}]')
+        graph.append(f'[{layer}][ring{index}]overlay=x={x - 14:.3f}:y={y - 14:.3f}:shortest=1:'
+                     f"enable='between(t,{reveal:.3f},{end:.3f})'[focus{index}]")
+        layer = f'focus{index}'
+    return ';'.join(graph), layer

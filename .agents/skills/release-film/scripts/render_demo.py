@@ -467,7 +467,7 @@ def track(start, moves, time_var, index):
     return sum_terms(terms)
 
 
-def footage_visual(segment, relative, length, pointer, colors=COLORS):
+def footage_visual(segment, relative, length, pointer, colors=COLORS, work=None):
     """One pass over the take: kept frames re-timed to the film (a frame holds until the next one), the pointer drawn
     on the page, then the page's film area scaled into the graphite frame."""
     half = FRAME / 2
@@ -485,11 +485,13 @@ def footage_visual(segment, relative, length, pointer, colors=COLORS):
     left, top, width, height = segment['crop']
     inputs = ['-i', segment['source'], '-loop', '1', '-framerate', '30', '-i', normal,
               '-loop', '1', '-framerate', '30', '-i', pressed]
+    focus = segment.get('focus', [])
+    rings, layer = tutorial_focus.overlays(inputs, focus, work, png) if focus else ('', 'c2')
     visual = (f"[0:v]select='{keep}',setpts='({retime})/TB',fps=30,tpad=stop_mode=clone:stop_duration={total:.3f},"
               f"trim=duration={total:.4f}[base];[1:v]format=rgba[p1];[2:v]format=rgba[p2];"
               f"[base][p1]overlay=x='{x}-{hx:.1f}':y='{y}-{hy:.1f}':eval=frame:shortest=1:enable='not({clicked})'[c1];"
               f"[c1][p2]overlay=x='{x}-{hx:.1f}':y='{y}-{hy:.1f}':eval=frame:shortest=1:enable='{clicked}'[c2];"
-              f"[c2]{tutorial_focus.filters(segment.get('focus', []))}crop={width}:{height}:{left}:{top},scale={OUTPUT[0]}:{OUTPUT[1]}:flags=lanczos,"
+              f"{rings + ';' if rings else ''}[{layer}]{tutorial_focus.filters(focus, segment.get('frame', (1600 * scale, 900 * scale)))}crop={width}:{height}:{left}:{top},scale={OUTPUT[0]}:{OUTPUT[1]}:flags=lanczos,"
               f'trim=start={relative:.9f}:duration={length:.9f},setpts=PTS-STARTPTS,'
               f"pad=1920:1080:(ow-iw)/2:30:color={colors['frame']},setsar=1,"
               f"drawbox=x=0:y=0:w=iw:h=5:color={colors['accent']}:t=fill[v0]")
@@ -577,7 +579,10 @@ def encode_segment(plan, segment, work, pointers, output):
             folder = work / f'pointer-{scale}'
             folder.mkdir(exist_ok=True)
             pointers[scale] = pointer_images(folder, scale)
-        inputs, visual = footage_visual(segment, 0, length, pointers[scale], colors)
+        focus_work = work / f'{name}-focus'
+        if segment.get('focus'):
+            focus_work.mkdir(exist_ok=True)
+        inputs, visual = footage_visual(segment, 0, length, pointers[scale], colors, focus_work)
     branded = plan.get('frame_theme') == 'mentingo'
     layer = 'v0'
     if branded:
