@@ -15,6 +15,7 @@ const state = vi.hoisted(() => ({
   questionCapability: "web_search",
   questionAnswer: "allow",
   accepted: false,
+  proposalRevision: 1,
   outlineOnly: false,
   groupedReview: false,
   additionalRequestProposals: 0,
@@ -60,7 +61,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
         payload: {
           id: "content-proposal",
           ...(state.groupedReview ? { taskId: "task-1" } : {}),
-          revision: 1,
+          revision: state.proposalRevision,
           summary: "Add the content lesson",
           assetRequests: state.assetRequests,
           assetIds: state.assetRequests.map((asset) => asset.assetId),
@@ -381,6 +382,7 @@ vi.mock("./components/ProposalReview", () => ({
 
 describe("CourseGenerationSession proposal decisions", () => {
   beforeEach(() => {
+    state.proposalRevision = 1;
     state.questionCapability = "web_search";
     state.questionAnswer = "allow";
     state.assetRequests = [];
@@ -875,6 +877,66 @@ describe("CourseGenerationSession proposal decisions", () => {
     ).rejects.toThrow();
     expect(state.applyCalls).toHaveLength(0);
     expect(state.commandCalls).toHaveLength(0);
+  });
+
+  it("retries an open review using the current accepted decision without accepting twice", async () => {
+    state.groupedReview = true;
+    const preview = vi.fn();
+    const element = () => (
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={preview}
+      />
+    );
+    const rendered = renderWith().render(element());
+    await userEvent
+      .setup()
+      .click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    const actions = preview.mock.calls[0]?.[1] as CurriculumPreviewActions;
+    state.accepted = true;
+    rendered.rerender(element());
+    await act(async () => {
+      await actions.applyReview?.({
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      });
+    });
+    expect(state.commandCalls).toHaveLength(0);
+    expect(state.applyCalls).toHaveLength(1);
+  });
+
+  it("requires another review when an open preview's proposal revision changes", async () => {
+    state.groupedReview = true;
+    const preview = vi.fn();
+    const element = () => (
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={preview}
+      />
+    );
+    const rendered = renderWith().render(element());
+    await userEvent
+      .setup()
+      .click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    const actions = preview.mock.calls[0]?.[1] as CurriculumPreviewActions;
+    state.proposalRevision = 2;
+    rendered.rerender(element());
+    await expect(
+      actions.applyReview?.({
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      }),
+    ).rejects.toThrow();
+    expect(state.commandCalls).toHaveLength(0);
+    expect(state.applyCalls).toHaveLength(0);
   });
 
   it("submits staged proposal feedback in one batch command with revision fencing", async () => {

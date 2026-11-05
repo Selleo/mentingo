@@ -474,6 +474,27 @@ describe("CourseAuthoringSessionService source refresh", () => {
       "courseAuthoring.errors.sourceReplacementNotReady",
     );
   });
+
+  it.each([
+    ["AUTHORING_STALE_PROPOSAL", "revisionChanged"],
+    ["AUTHORING_PROPOSAL_ALREADY_ACCEPTED", "proposalNotReady"],
+    ["AUTHORING_PROPOSAL_TERMINAL", "proposalNotReady"],
+    ["AUTHORING_TASK_REQUIRES_SERVICE_FIX", "invalidCommand"],
+  ])("maps %s without inventing a draft revision change", async (detail, key) => {
+    const test = setup();
+    const error = new AxiosError("conflict");
+    error.response = {
+      status: 409,
+      statusText: "Conflict",
+      data: { detail },
+      headers: {},
+      config: { headers: new AxiosHeaders() },
+    };
+    test.sendCommand.mockRejectedValue(error);
+    await expect(test.service.command(courseId, sessionId, test.input, actor)).rejects.toThrow(
+      `courseAuthoring.errors.${key}`,
+    );
+  });
 });
 
 describe("CourseAuthoringSessionService list", () => {
