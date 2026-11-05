@@ -1,14 +1,53 @@
 """Measured tutorial focus, eased context framing and rounded control rings."""
 import math
+import unicodedata
+
+import montage
+
+
+def word_landings(chapter, capture, words):
+    """Match a recorded accessible label inside its pinned narrated sentence.
+
+    Exact, Unicode-normalized word sequences only. Ambiguous or untranslated
+    labels keep the existing action pin; a camera must never guess its word.
+    """
+    sentences = chapter.get('sentences', [])
+    firsts = montage.first_words(words, [s['text'] for s in sentences])
+    if firsts is None:
+        return {}
+    records = {r['step']: r for r in capture.get('steps', [])}
+    def tokens(text):
+        return [montage.lexical(unicodedata.normalize('NFC', token)) for token in str(text).split()
+                if montage.lexical(token)]
+    result = {}
+    for beat, sentence in enumerate(sentences, 1):
+        record = records.get(sentence.get('action'), {})
+        text = record.get('text') or {}
+        label = text.get('target') if isinstance(text, dict) else None
+        phrase = tokens(label) if isinstance(label, str) else []
+        if not phrase or len(phrase) > 12:
+            continue
+        end = firsts[beat] if beat < len(firsts) else len(words)
+        candidates = [(i, tokens(words[i][2])) for i in range(firsts[beat - 1], end)]
+        candidates = [(i, t[0]) for i,t in candidates if len(t) == 1]
+        matches = [candidates[i][0] for i in range(len(candidates) - len(phrase) + 1)
+                   if [t for _,t in candidates[i:i+len(phrase)]] == phrase]
+        if len(matches) == 1:
+            result[beat] = words[matches[0]][0]
+    return result
 
 
 def from_film(film, capture):
     records = {record['step']: record for record in capture.get('steps', [])}
     actions = film.get('actions', [])
+    anchors = {a['step']: a for a in film.get('anchors', []) if a.get('beat')}
     result, zooms = [], 0
     scale = capture.get('scale', 1)
     for index, action in enumerate(actions):
         record = records.get(action['step'], {})
+        anchor = anchors.get(action['step'])
+        if 'anchors' in film and anchor is None:
+            continue  # Internal helper actions have no spoken cue and do not drive the camera.
         if action.get('navigate') or record.get('scroll'):
             continue
         box = record.get('box') or (action.get('pre') or {}).get('target')
@@ -23,13 +62,16 @@ def from_film(film, capture):
             continue  # A pre-scroll or offscreen rectangle cannot identify the visible control.
         if width > 1000 or height > 600:
             continue  # Large containers do not need an outline around the whole page.
-        start = max(result[-1]['end'] if result else 0, action.get('t_pre', action['t']) - .7)
+        previous = actions[index - 1]['t'] if index else 0
+        start = max(result[-1]['end'] if result else 0, previous, action.get('t_pre', action['t']) - .35)
         following = actions[index + 1].get('t_pre', actions[index + 1]['t']) if index + 1 < len(actions) else film['footage']
         post = (record.get('post') or {}).get('target')
         if isinstance(post, dict):
             post = [post.get(k) for k in ('x', 'y', 'width', 'height')]
         stationary = bool(record.get('look')) or (isinstance(post, (list, tuple)) and len(post) == 4
             and all(type(a) in (int, float) and abs(a - b) <= 4 for a, b in zip(post, box)))
+        if stationary and anchor:
+            start = max(start, anchor['action'])  # Begin moving on the spoken control, never an arbitrary early pulse.
         # A click may remove its button or navigate. Stop outlining that target
         # as it changes, rather than drawing over unrelated content afterward.
         hold = 2.4 if stationary else -.03
@@ -38,7 +80,7 @@ def from_film(film, capture):
             continue
         interior = x >= 180 and y >= 100 and x + width <= 1420 and y + height <= 800
         overlay = (record.get('pre') or {}).get('overlay') or (record.get('post') or {}).get('overlay')
-        zoom = not overlay and stationary and zooms < 2 and end - start >= 2.2 and interior and width < 600 and height < 240
+        zoom = (anchor is None or anchor.get('named', False)) and not overlay and stationary and zooms < 2 and end - start >= 2.2 and interior and width < 600 and height < 240
         zooms += int(zoom)
         result.append({'start': round(start, 3), 'end': round(end, 3),
                        'box': [round(v * scale, 3) for v in box], 'zoom': zoom})

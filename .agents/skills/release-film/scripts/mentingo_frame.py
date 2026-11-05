@@ -6,11 +6,13 @@ ASSETS = Path(__file__).resolve().parents[1] / 'assets'
 BANNER = ASSETS / 'mentingo-tutorial-banner.png'
 MASK = ASSETS / 'mentingo-tutorial-mask.png'
 
+CAPTION_FONT = ASSETS / 'open-sans.ttf'
+
 
 def fingerprint():
     """Re-render visual segments when code or branding changes; retain camera and speech caches."""
     digest = hashlib.sha256()
-    for path in (Path(__file__), Path(__file__).with_name("tutorial_focus.py"), BANNER, MASK):
+    for path in (Path(__file__), Path(__file__).with_name("tutorial_focus.py"), BANNER, MASK, CAPTION_FONT):
         digest.update(path.read_bytes())
     return digest.hexdigest()
 

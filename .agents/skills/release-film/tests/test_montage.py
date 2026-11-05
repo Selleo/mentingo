@@ -314,6 +314,24 @@ class Cut(unittest.TestCase):
         info = {'streams': [{'codec_type': 'video', 'width': 1600, 'height': 900}], 'format': {'duration': '1'}}
         self.assertEqual(render_demo.footage_segment(footage, 'take.mp4', info)['footage_duration'], 0.5)
 
+    def test_tutorial_does_not_display_navigation_key_badges(self):
+        spec={'preserve_actions':True,'steps':[{'cmd':['press','field'],'beat':1}]}
+        take=capture([step(0,.1,.2,.5,(300,300),click=False,cmd=['press','field'],value='End')])
+        film=montage.cut(spec,take,words_at((.5,'Type the title.')),audio_duration=2)
+        self.assertEqual(film['keys'],[])
+        self.assertTrue(montage.cut(dict(spec,preserve_actions=False),take,
+                                   words_at((.5,'Type the title.')),audio_duration=2)['keys'])
+
+    def test_a_measured_named_control_can_land_after_the_sentence_begins(self):
+        spec={'preserve_actions':True,'word_landings':{1:1.5},
+              'steps':[{'cmd':['click','Save'],'beat':1}]}
+        take=capture([step(0,.1,.2,.5,(600,350))])
+        film=montage.cut(spec,take,words_at((.1,'Now click the Save button.')),audio_duration=3)
+        anchor=film['anchors'][0]
+        self.assertTrue(anchor['named'])
+        self.assertAlmostEqual(anchor['target'],1.5,delta=.001)
+        self.assertGreaterEqual(anchor['action'],1.5-.04)
+
     def test_every_key_badge_is_one_the_renderer_draws(self):  # over 30 characters, empty or two lines: film lost
         pl, en = language.texts('pl'), language.texts('en')
         self.assertEqual(montage.key_name('Control+Shift+ArrowRight', pl), 'Ctrl+Shift+Strzałka w prawo')

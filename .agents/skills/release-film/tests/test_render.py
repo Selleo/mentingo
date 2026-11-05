@@ -97,6 +97,27 @@ class RenderTest(unittest.TestCase):
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
 
+    def test_tutorial_caption_font_is_independent_from_heading_font(self):
+        data=copy.deepcopy(self.data)
+        data.update(mode='tutorial',frameTheme='mentingo',
+                    captionFont=str(render_demo.mentingo_frame.ASSETS/'open-sans.ttf'))
+        data['chapters'][0]['id']='fixture'
+        data['chapters'][0]['prs']=['https://github.com/Selleo/mentingo/blob/'+'a'*40+'/docs/specs/category-management-business-spec.md']
+        data['chapters'][0].pop('captions')
+        data['chapters'][0]['srt']='caption-words.srt'
+        (self.root/'caption-words.srt').write_text('1\n00:00:00,100 --> 00:00:00,800\nCaption.\n')
+        authored=self.plan(data,'caption-font.json')
+        prepared=self.root/'caption-prepared'
+        render_demo.prepare(authored,prepared,enforce_duration=False)
+        plan=load_plan(prepared/'editing-plan.json',enforce_duration=False)
+        self.assertEqual(Path(plan['caption_font']).name,'open-sans.ttf')
+        self.assertNotEqual(plan['font'],plan['caption_font'])
+        output=self.root/'caption-font-render'
+        render(plan,output)
+        self.assertTrue((output/'demo.mp4').is_file())
+        self.assertIn('fontfile=caption.ttf',render_demo.step_filter(
+            self.root/'body.txt','A clear caption.',0,2,branded=True,font='caption.ttf'))
+
     def test_mentingo_captions_have_no_accent_bar(self):
         branded = render_demo.step_filter(self.root/'branded-label.txt','One visible step.',0,2,branded=True)
         self.assertNotIn('drawbox',branded)

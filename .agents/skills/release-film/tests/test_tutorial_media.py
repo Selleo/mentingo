@@ -98,6 +98,15 @@ class TutorialMedia(unittest.TestCase):
             self.assertGreater(self.rms(samples, boundary - .02, boundary + .02), middle * .85)
         self.assertAlmostEqual(len(samples) / 48000, 3, delta=.04)
 
+    def test_final_syllable_keeps_its_level_even_when_there_is_no_quiet_tail(self):
+        listing = self.root / 'end.txt'
+        listing.write_text(f"file '{self.video}'\n" * 3)
+        output = self.root / 'complete-speech.mp4'
+        render_demo.mux_narration({'chapters': [{'audio':str(self.voice),'start':0,'audio_offset':0}]},
+                                  listing, output, 3)
+        samples = self.samples(output)
+        self.assertGreater(self.rms(samples,2.8,2.95), self.rms(samples,.4,.6)*.9)
+
     def test_chapter_audio_starts_at_its_own_offset_and_does_not_bleed_into_the_gap(self):
         short = self.root / 'short.wav'
         self.command('-i', self.voice, '-t', 1, short)

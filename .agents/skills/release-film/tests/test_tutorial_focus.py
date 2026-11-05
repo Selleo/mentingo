@@ -120,3 +120,27 @@ class TutorialFocus(unittest.TestCase):
         values=[{'start':.2,'end':1.8,'box':[600,350,200,60],'zoom':True}]
         self.assertEqual(focus.validate(values,[1600,900],2),values)
         self.assertEqual(focus.filters(values),'')
+
+
+    def test_word_landing_uses_the_recorded_label_in_its_own_sentence(self):
+        words=[(0,.2,'Click'),(.3,.6,'Save,'),(.7,.9,'then'),(1,1.3,'continue.')]
+        chapter={'sentences':[{'text':'Click Save, then continue.','action':3}]}
+        capture={'steps':[{'step':3,'text':{'target':'Save'}}]}
+        self.assertEqual(focus.word_landings(chapter,capture,words),{1:.3})
+        capture['steps'][0]['text']['target']='Create'
+        self.assertEqual(focus.word_landings(chapter,capture,words),{})
+        words=[(0,.2,'Save'),(.3,.6,'Save')]
+        chapter['sentences'][0]['text']='Save Save'
+        capture['steps'][0]['text']['target']='Save'
+        self.assertEqual(focus.word_landings(chapter,capture,words),{})
+
+    def test_helper_actions_do_not_zoom_and_named_action_starts_on_its_word(self):
+        film={'footage':8,'anchors':[{'step':1,'beat':1,'action':3,'named':True}],
+              'actions':[{'step':0,'t_pre':0,'t':.2},{'step':1,'t_pre':2.8,'t':3}]}
+        capture={'steps':[{'step':i,'look':True,'box':[600,350,200,60]} for i in (0,1)]}
+        values=focus.from_film(film,capture)
+        self.assertEqual(len(values),1)
+        self.assertEqual(values[0]['start'],3)
+        self.assertTrue(values[0]['zoom'])
+        film['anchors'][0]['named']=False
+        self.assertFalse(focus.from_film(film,capture)[0]['zoom'])

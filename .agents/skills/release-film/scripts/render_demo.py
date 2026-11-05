@@ -153,7 +153,7 @@ def load_plan(path, enforce_duration=True, strict=True):
     path = Path(path).resolve()
     warnings = []
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme', 'captionFont'], ['font', 'chapters'])
     mode = data.get('mode', 'release')
     if mode not in ('release', 'tutorial'):
         raise ValueError('Unknown film mode')
@@ -174,6 +174,7 @@ def load_plan(path, enforce_duration=True, strict=True):
             probe_cache[source] = probe(source)
         return probe_cache[source]
     font = asset(data['font'])
+    caption_font = asset(data['captionFont']) if data.get('captionFont') else font
     if not isinstance(data['chapters'], list) or not 1 <= len(data['chapters']) <= 20:
         raise ValueError('Expected 1–20 chapters')
     segments, captions, steps, chapters, cursor, held = [], [], [], [], 0.0, 0.0
@@ -270,7 +271,7 @@ def load_plan(path, enforce_duration=True, strict=True):
         warnings.append(f'result images take {held / cursor:.0%} of the film')
     if enforce_duration and not 180 <= cursor <= 300:
         raise ValueError(f'Meaningful story must last 180–300 seconds; planned {cursor:.3f}')
-    return dict(font=font, segments=segments, captions=captions, steps=steps, chapters=chapters, duration=cursor,
+    return dict(font=font, caption_font=caption_font, segments=segments, captions=captions, steps=steps, chapters=chapters, duration=cursor,
                 warnings=warnings, language=data.get('language') or 'pl', colors=colors, frame_theme=theme)
 
 
@@ -347,7 +348,7 @@ def step_lines(text):
     return [first, text[len(first):].strip()]
 
 
-def step_filter(path, text, start, end, colors=COLORS, branded=False):
+def step_filter(path, text, start, end, colors=COLORS, branded=False, font='font.ttf'):
     """A step label in the film's bottom band, one or two lines saying what happens: an orange accent and the text,
     which fades in (times in the segment's own seconds). A label begun in an earlier segment (``start`` below 0: the
     footage before a PDF page) goes on as it was there, never fading in again."""
@@ -358,7 +359,7 @@ def step_filter(path, text, start, end, colors=COLORS, branded=False):
     if branded:
         top = STEP_Y  # Both lines stay below the taller rounded application panel.
     mark = '' if branded else f"drawbox=x={STEP_X - 26}:y={top - 8}:w=8:h={height}:color={colors['accent']}:t=fill:{shown},"
-    return (mark + f"drawtext=fontfile=font.ttf:textfile={path.name}:expansion=none:fontsize=40:line_spacing=6:"
+    return (mark + f"drawtext=fontfile={font}:textfile={path.name}:expansion=none:fontsize=40:line_spacing=6:"
             f"fontcolor={'0x222949' if branded else 'white'}:x={STEP_X}:y={top}:alpha='min(1,max(0,(t-({start:.6f}))/0.25))':{shown}")
 
 
@@ -555,7 +556,7 @@ def segment_key(plan, segment, chapter, cues):
     content = {'segment': {k: v for k, v in segment.items() if k != 'start'}, 'offset': segment['start'] - chapter['start'],
                'ending': segment is plan['segments'][-1],
                'cues': [(c['start'] - segment['start'], c['end'] - segment['start'], c['text']) for c in cues],
-               'font': file_digest(plan['font']), 'colors': plan.get('colors') or COLORS, 'renderer': file_digest(__file__),
+               'font': file_digest(plan['font']), 'caption_font': file_digest(plan.get('caption_font', plan['font'])), 'colors': plan.get('colors') or COLORS, 'renderer': file_digest(__file__),
                'frame': mentingo_frame.fingerprint() if plan.get('frame_theme') == 'mentingo' else None}
     if 'source' in segment:
         content['source'] = file_digest(segment['source'])
@@ -610,7 +611,7 @@ def encode_segment(plan, segment, work, pointers, output):
         if segment['kind'] == 'card' or step['end'] <= start or step['start'] >= start + length:
             continue
         next_layer = f'step{step_index}'
-        graph.append(f"[{layer}]{step_filter(work / f'{name}-step{step_index}.txt', step['text'], step['start'] - start, min(length, step['end'] - start), colors, branded)}[{next_layer}]")
+        graph.append(f"[{layer}]{step_filter(work / f'{name}-step{step_index}.txt', step['text'], step['start'] - start, min(length, step['end'] - start), colors, branded, font='caption.ttf' if branded else 'font.ttf')}[{next_layer}]")
         layer = next_layer
     if not branded and segment is plan['segments'][-1] and length > 2 * ENDING:  # the film's end fades out
         graph.append(f"[{layer}]fade=t=out:st={length - ENDING:.6f}:d={ENDING}:color={colors['frame']}[ending]")
@@ -631,6 +632,7 @@ def render_segments(plan, cache, jobs=2):
     with tempfile.TemporaryDirectory(prefix='demo-render-') as scratch:
         work = Path(scratch)
         shutil.copyfile(plan['font'], work / 'font.ttf')
+        shutil.copyfile(plan.get('caption_font', plan['font']), work / 'caption.ttf')
         pointers = {}
 
         def one(segment):
@@ -658,16 +660,24 @@ def render_segments(plan, cache, jobs=2):
 def mux_narration(plan, listing, target, duration):
     """Encode continuous chapter narration once, independently of visual cut/AAC packet boundaries."""
     args = ['ffmpeg', '-v', 'error', '-nostdin', '-y', '-f', 'concat', '-safe', '0', '-i', listing]
-    graph, labels = [], []
+    graph, labels, speech_end = [], [], 0.0
     for index, chapter in enumerate(plan['chapters'], 1):
         args += ['-i', chapter['audio']]
         delay = round((chapter['start'] + chapter['audio_offset']) * 48000)
+        seconds = chapter.get('audio_duration')
+        if seconds is None:
+            seconds = float(probe(chapter['audio'])['format']['duration'])
+        speech_end = max(speech_end, chapter['start'] + chapter['audio_offset'] + seconds)
         label = f'voice{index}'
         graph.append(f'[{index}:a]aresample=48000,asetpts=PTS-STARTPTS,adelay={delay}S:all=1,'
                      f'apad,atrim=duration={duration:.6f}[{label}]')
         labels.append(f'[{label}]')
+    # Never fade a syllable: a visual tail may be shorter than ENDING. The
+    # fade belongs entirely in measured post-narration silence, if any.
+    fade_start = max(speech_end, duration - ENDING)
+    fade = f',afade=t=out:st={fade_start:.6f}:d={duration - fade_start:.6f}' if duration - fade_start > .001 else ''
     graph.append(''.join(labels) + f'amix=inputs={len(labels)}:normalize=0:duration=longest,'
-                 f'atrim=duration={duration:.6f},afade=t=out:st={max(0, duration - ENDING):.6f}:d={ENDING}[audio]')
+                 f'atrim=duration={duration:.6f}{fade}[audio]')
     args += ['-filter_complex', ';'.join(graph), '-map', '0:v', '-map', '[audio]', '-c:v', 'copy',
              '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2', '-t', duration,
              '-movflags', '+faststart', target]
@@ -708,6 +718,15 @@ def render(plan, out, jobs=2, cache=None, plan_fingerprint=None):
                                **({'id': c['id']} if 'id' in c else {})) for i, c in enumerate(plan['chapters'])]
     result['artifact_sha256'] = {name: file_digest(out / name, {}) for name in ('demo.mp4', 'poster.jpg', f"captions-{plan['language']}.srt",
                                                                            f"captions-{plan['language']}.vtt")}
+    result['rendering'] = {
+        'headingFont': Path(plan['font']).name,
+        'captionFont': Path(plan.get('caption_font', plan['font'])).name,
+        'captionFontSha256': file_digest(plan.get('caption_font', plan['font']), {}),
+        'focus': [dict(value, start=round(timeline[i]['start'] + value['start'], 3),
+                       end=round(timeline[i]['start'] + value['end'], 3),
+                       zoom=tutorial_focus.zoom_enabled(value))
+                  for i, segment in enumerate(plan['segments']) for value in segment.get('focus', [])],
+    }
     result['plan_fingerprint'] = plan_fingerprint or fingerprint(plan)
     result['elapsed_seconds'] = round(time.monotonic() - started, 3)
     (out / 'timeline.json').write_text(json.dumps(result, indent=2) + '\n')
@@ -718,7 +737,7 @@ def fingerprint(plan):
     """Bind reusable evidence to this renderer, the plan and all source bytes."""
     digest = hashlib.sha256(json.dumps(plan, sort_keys=True, default=str).encode())
     digest.update(Path(__file__).read_bytes())
-    assets = {plan['font']} | {c['audio'] for c in plan['chapters']} | {
+    assets = {plan['font'], plan.get('caption_font', plan['font'])} | {c['audio'] for c in plan['chapters']} | {
         s['source'] for s in plan['segments'] if 'source' in s}
     for asset in sorted(assets, key=str):
         digest.update(file_digest(asset).encode())
@@ -730,10 +749,12 @@ def prepare(path, out, enforce_duration=True, strict=True):
     started = time.monotonic()
     path, out = Path(path).resolve(), Path(out).resolve()
     data = json.loads(path.read_text())
-    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme'], ['font', 'chapters'])
+    fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme', 'captionFont'], ['font', 'chapters'])
     if not isinstance(data['chapters'], list) or not data['chapters']:
         raise ValueError('Expected authored chapters')
     result = dict(font=str((path.parent / data['font']).resolve()), chapters=[], language=data.get('language') or 'pl')
+    if data.get('captionFont'):
+        result['captionFont'] = str((path.parent / data['captionFont']).resolve())
     if 'mode' in data:
         result['mode'] = data['mode']
     if 'frameTheme' in data:

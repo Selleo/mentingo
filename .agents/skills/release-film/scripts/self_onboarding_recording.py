@@ -659,7 +659,7 @@ def render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, captur
     verify_story(run, flow, data, story, allow_model=allow_model)
     core.save(run / 'sources.json', data)  # Narration must use this language, not the last camera run's English locale.
     voice = narrate_cached(cache, run, story, addon)
-    entry, _ = cut.chapter_cut(core.tool('ffmpeg'), chapter, keys[key], voice / 'c1', data, last=False)
+    entry, _ = cut.chapter_cut(core.tool('ffmpeg'), chapter, keys[key], voice / 'c1', data, last=True)
     entry['id'] = flow['id']
     font, _, _ = cut.film_font(addon, cut.drawn_text([entry]))
     colors, _ = cut.film_colors(addon)
@@ -667,7 +667,8 @@ def render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, captur
     if work.exists():
         shutil.rmtree(work)
     core.save(work / 'authored.json', {'mode': 'tutorial', 'language': code, 'font': font, 'chapters': [entry],
-                                     **({'frameTheme': 'mentingo'} if repo_slug == 'Selleo/mentingo' else {}),
+                                     **({'frameTheme': 'mentingo', 'captionFont': str(render_demo.mentingo_frame.CAPTION_FONT)}
+                                        if repo_slug == 'Selleo/mentingo' else {}),
                                      **({'colors': colors} if colors else {})})
     render_demo.FFMPEG, render_demo.FFPROBE = core.tool('ffmpeg'), core.tool('ffprobe') or 'ffprobe'
     render_demo.prepare(work / 'authored.json', work / 'prepared', enforce_duration=False, strict=True)

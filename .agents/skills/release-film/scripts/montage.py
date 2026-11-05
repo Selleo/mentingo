@@ -541,7 +541,9 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
     def landing(beat, shift):
         """When the sentence's action lands: a little before its first word (LAND), never before the last word of
         the sentence before."""
-        return max(starts[beat - 1] + shift + LAND, finished[beat - 2] + shift + SAID if beat > 1 else float('-inf'))
+        named = (spec.get('word_landings') or {}).get(beat)
+        target = named + shift if named is not None else starts[beat - 1] + shift + LAND
+        return max(target, finished[beat - 2] + shift + SAID if beat > 1 else float('-inf'))
     off = off_film(steps)
     begin = max([records[i]['b'] for i in off if i in records] + [float(capture.get('start', 0.0))])
     shown = [i for i in range(len(steps)) if i not in off and i in records]
@@ -700,7 +702,8 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
                 shift += late
             anchors.append({'step': index, 'beat': beat, 'at': step.get('at'), 'target': round(target, 3),
                             'action': round(moment, 3), 'late': round(late, 3),
-                            'waits': round(late, 3) if late > tolerance else 0.0})
+                            'waits': round(late, 3) if late > tolerance else 0.0,
+                            'named': beat in (spec.get('word_landings') or {})})
         verb = (record.get('cmd') or [''])[0]
         if point:
             if glide:
@@ -708,7 +711,7 @@ def _cut(spec, capture, words, audio_duration, tail, tight):
             here = point
             if record.get('click') or verb in TYPING and glide:  # a field clicked before typing in it
                 clicks.append(round(moment, 3))
-        pressed = key_name(record['value'], texts) if verb == 'press' and record.get('value') else ''
+        pressed = key_name(record['value'], texts) if not spec.get('preserve_actions') and verb == 'press' and record.get('value') else ''
         if pressed:  # a combination no badge can hold has none
             keys.append((round(moment, 3), pressed))
         if opens:
