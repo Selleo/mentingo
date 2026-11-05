@@ -628,7 +628,7 @@ export class CourseEnrollmentRepository {
     return [
       eq(users.archived, false),
       isNull(users.deletedAt),
-      ne(users.id, courses.authorId),
+      or(ne(users.id, courses.authorId), eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED)),
       searchKeyword
         ? or(
             ilike(users.firstName, `%${searchKeyword}%`),
