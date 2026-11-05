@@ -102,14 +102,9 @@ export class AiRuntimeService {
     return this.runWithLumaFallback({
       capability,
       operation: `embeddings for ${capability}`,
-      runLuma: async () =>
-        (
-          await this.createLumaOpenAiCompatibleEmbeddings({
-            values: contents,
-            dimensions: AI_MENTOR_RAG_EMBEDDING_DIMENSIONS,
-            telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_RAG_EMBEDDINGS),
-          })
-        ).embeddings,
+      runLuma: async (luma) =>
+        (await this.createLumaEmbeddings(luma, contents, AI_MENTOR_RAG_EMBEDDING_DIMENSIONS))
+          .embeddings,
       runCore: () => this.createCoreEmbeddings(contents),
     });
   }
@@ -317,13 +312,7 @@ export class AiRuntimeService {
     return this.runWithLumaFallback({
       capability: AiCapability.AiMentorRagEmbeddings,
       operation: "semantic search embeddings",
-      runLuma: () =>
-        this.createLumaOpenAiCompatibleEmbeddings({
-          values,
-          dimensions,
-          abortSignal: AbortSignal.timeout(timeoutMs),
-          ...options,
-        }),
+      runLuma: (luma) => this.createLumaEmbeddings(luma, values, dimensions, timeoutMs),
       runCore: async () => {
         const provider = await this.getAISdkOpenAI();
         const { embedMany } = await loadAiSdk();
@@ -397,36 +386,49 @@ export class AiRuntimeService {
     return embeddings;
   }
 
-  /** An explicit size keeps MRL models from returning their native size; the reported model is required. */
-  private async createLumaOpenAiCompatibleEmbeddings({
-    values,
-    dimensions,
-    ...options
-  }: {
-    values: string[];
-    dimensions: number;
-    abortSignal?: AbortSignal;
-    maxRetries?: number;
-    telemetry: ReturnType<typeof buildAiTelemetry> | { isEnabled: false };
-  }): Promise<SemanticEmbeddingResult> {
-    const provider = await this.getLumaOpenAiCompatibleProvider();
-    const { embedMany } = await loadAiSdk();
-    const { embeddings, responses } = await embedMany({
-      model: provider.embedding(LUMA_OPENAI_COMPATIBLE_MODEL),
-      values,
-      providerOptions: { openai: { dimensions } },
-      ...options,
-    });
-    if (embeddings.length !== values.length || embeddings.some((v) => v.length !== dimensions)) {
-      throw new Error(`Luma embeddings did not return ${dimensions}-dimensional vectors`);
+  /** Use the native SDK contract; require vector size and actual model before storing search data. */
+  private async createLumaEmbeddings(
+    luma: LumaClient,
+    values: string[],
+    dimensions: number,
+    timeoutMs?: number,
+  ): Promise<SemanticEmbeddingResult> {
+    // SDK 0.4 forwards this additive native request field unchanged. The SDK contract
+    // update exposes it publicly without requiring an unpublished package to run Core.
+    const request = { texts: values, dimensions };
+    const pending = luma.ai.createEmbeddings(request);
+    const response =
+      timeoutMs === undefined ? await pending : await this.waitForEmbeddings(pending, timeoutMs);
+    const { embeddings } = response;
+    if (
+      embeddings.length !== values.length ||
+      embeddings.some(
+        (vector) => vector.length !== dimensions || vector.some((value) => !Number.isFinite(value)),
+      )
+    ) {
+      throw new Error(`Luma embeddings did not return finite ${dimensions}-dimensional vectors`);
     }
-    const models = new Set(responses?.map(readResponseModel));
-    const [model] = models;
-    if (models.size !== 1 || typeof model !== "string" || !model) {
-      throw new Error("Luma embeddings did not report one embedding model");
+    // Older Luma servers omit model metadata: fall back rather than guessing a vector space.
+    const model: unknown = Reflect.get(response, "model");
+    if (typeof model !== "string" || !model.trim()) {
+      throw new Error("Luma embeddings did not report their embedding model");
     }
-
     return { embeddings, model };
+  }
+
+  /** Bound a read-only SDK 0.4 request; its transport has no per-call cancellation option. */
+  private async waitForEmbeddings<T>(pending: Promise<T>, timeoutMs: number): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        pending,
+        new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error("Luma embeddings timed out")), timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
   }
 
   private async *readLumaTextStream(stream: AsyncIterable<Buffer>): AsyncIterable<string> {
@@ -520,8 +522,3 @@ export class AiRuntimeService {
     return { apiKey, baseURL: process.env.LUMA_BASE_URL };
   }
 }
-
-const readResponseModel = (response: { body?: unknown } | undefined) => {
-  const body = response?.body;
-  return body && typeof body === "object" ? Reflect.get(body, "model") : undefined;
-};

@@ -23,18 +23,17 @@ const openAiChatModel = {
   doGenerate: jest.fn(),
   doStream: jest.fn(),
 };
-const lumaEmbedding = { id: "luma-embedding" };
 const openAiEmbedding = { id: "openai-embedding" };
 
 const createLumaProvider = jest.fn().mockReturnValue({
   chat: jest.fn().mockReturnValue(lumaChatModel),
-  embedding: jest.fn().mockReturnValue(lumaEmbedding),
 });
 const openAiProvider = Object.assign(jest.fn().mockReturnValue(openAiChatModel), {
   embedding: jest.fn().mockReturnValue(openAiEmbedding),
   embeddingModel: jest.fn().mockReturnValue(openAiEmbedding),
 });
 const embedMany = jest.fn();
+const createEmbeddings = jest.fn();
 
 const createService = (source: (typeof AI_RUNTIME_SOURCES)[keyof typeof AI_RUNTIME_SOURCES]) => {
   const service = new AiRuntimeService({
@@ -44,7 +43,7 @@ const createService = (source: (typeof AI_RUNTIME_SOURCES)[keyof typeof AI_RUNTI
   jest.spyOn(service, "getAISdkOpenAI").mockResolvedValue(openAiProvider as never);
   Object.defineProperty(service, "getLumaClient", {
     configurable: true,
-    value: jest.fn().mockResolvedValue({}),
+    value: jest.fn().mockResolvedValue({ ai: { createEmbeddings } }),
   });
   return service;
 };
@@ -60,7 +59,11 @@ describe("AiRuntimeService Luma-first paths", () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    createLumaProvider.mockReturnValue({ chat: jest.fn().mockReturnValue(lumaChatModel) });
+    openAiProvider.mockReturnValue(openAiChatModel);
+    openAiProvider.embedding.mockReturnValue(openAiEmbedding);
+    openAiProvider.embeddingModel.mockReturnValue(openAiEmbedding);
     process.env.LUMA_BASE_URL = "https://luma.internal/";
     jest.mocked(loadOpenAiSdk).mockResolvedValue({ createOpenAI: createLumaProvider } as never);
     jest.mocked(loadAiSdk).mockResolvedValue({ embedMany } as never);
@@ -114,9 +117,9 @@ describe("AiRuntimeService Luma-first paths", () => {
   });
 
   it("reports the Luma profile model for search embeddings", async () => {
-    embedMany.mockResolvedValue({
+    createEmbeddings.mockResolvedValue({
       embeddings: [Array(1536).fill(0.1)],
-      responses: [{ body: { model: "Qwen/Qwen3-Embedding-4B" } }],
+      model: "Qwen/Qwen3-Embedding-4B",
     });
 
     await expect(
@@ -125,26 +128,23 @@ describe("AiRuntimeService Luma-first paths", () => {
       embeddings: [Array(1536).fill(0.1)],
       model: "Qwen/Qwen3-Embedding-4B",
     });
-    expect(embedMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        model: lumaEmbedding,
-        providerOptions: { openai: { dimensions: 1536 } },
-      }),
-    );
+    expect(createEmbeddings).toHaveBeenCalledWith({ texts: ["policy"], dimensions: 1536 });
+    expect(createLumaProvider).not.toHaveBeenCalled();
+    expect(embedMany).not.toHaveBeenCalled();
   });
 
   it.each([
-    ["fails", () => embedMany.mockRejectedValueOnce(new Error("Luma down"))],
+    ["fails", () => createEmbeddings.mockRejectedValueOnce(new Error("Luma down"))],
     [
       "does not report its model",
-      () => embedMany.mockResolvedValueOnce({ embeddings: [Array(1536).fill(0.1)] }),
+      () => createEmbeddings.mockResolvedValueOnce({ embeddings: [Array(1536).fill(0.1)] }),
     ],
     [
       "returns another size",
       () =>
-        embedMany.mockResolvedValueOnce({
+        createEmbeddings.mockResolvedValueOnce({
           embeddings: [Array(2560).fill(0.1)],
-          responses: [{ body: { model: "Qwen/Qwen3-Embedding-4B" } }],
+          model: "Qwen/Qwen3-Embedding-4B",
         }),
     ],
   ])("labels search vectors with the OpenAI model when Luma %s", async (_case, arrange) => {
@@ -160,17 +160,44 @@ describe("AiRuntimeService Luma-first paths", () => {
   });
 
   it("requests 1536-dimensional AI Mentor RAG embeddings from Luma", async () => {
-    embedMany.mockResolvedValue({
+    createEmbeddings.mockResolvedValue({
       embeddings: [Array(1536).fill(0.1)],
-      responses: [{ body: { model: "Qwen/Qwen3-Embedding-4B" } }],
+      model: "Qwen/Qwen3-Embedding-4B",
     });
 
     await expect(
       createService(AI_RUNTIME_SOURCES.LUMA).createEmbeddings(["policy"]),
     ).resolves.toEqual([Array(1536).fill(0.1)]);
-    expect(embedMany).toHaveBeenCalledWith(
-      expect.objectContaining({ providerOptions: { openai: { dimensions: 1536 } } }),
-    );
+    expect(createEmbeddings).toHaveBeenCalledWith({ texts: ["policy"], dimensions: 1536 });
+  });
+
+  it.each([
+    ["returns a non-finite vector", [[Number.NaN, ...Array(1535).fill(0.1)]]],
+    ["returns the wrong vector count", []],
+  ])("falls back when the native SDK %s", async (_label, embeddings) => {
+    createEmbeddings.mockResolvedValue({ embeddings, model: "local" });
+    embedMany.mockResolvedValue({ embeddings: [Array(1536).fill(0.2)] });
+    await expect(
+      createService(AI_RUNTIME_SOURCES.LUMA).createSemanticSearchEmbeddings(embeddingRequest),
+    ).resolves.toEqual({ embeddings: [Array(1536).fill(0.2)], model: "text-embedding-3-small" });
+  });
+
+  it("bounds a stalled SDK embedding read before using the Core fallback", async () => {
+    jest.useFakeTimers();
+    try {
+      createEmbeddings.mockReturnValue(new Promise(() => undefined));
+      embedMany.mockResolvedValue({ embeddings: [Array(1536).fill(0.2)] });
+      const pending = createService(AI_RUNTIME_SOURCES.LUMA).createSemanticSearchEmbeddings(
+        embeddingRequest,
+      );
+      await jest.advanceTimersByTimeAsync(3000);
+      await expect(pending).resolves.toEqual({
+        embeddings: [Array(1536).fill(0.2)],
+        model: "text-embedding-3-small",
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("keeps resolving through Luma configuration for the RAG capability", async () => {

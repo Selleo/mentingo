@@ -47,7 +47,11 @@ Every AI feature calls Luma first when Luma runs that capability on a Custom pro
 - mentor chat, the judge, configuration generators and validators, translations, dictation and AI Mentor RAG embeddings
 - the Core assistant and global search embeddings
 
-The Core assistant and global search use Luma's OpenAI-compatible endpoint (`/api/public/v1/ai/openai`), which runs the AI Mentor chat and embeddings Custom profiles. The chat model must support tool calling.
+Embeddings use the existing `luma.ai.createEmbeddings({ texts, dimensions })` SDK method and native `/api/public/v1/ai/embeddings` endpoint. Luma returns the model from the same resolved profile that produced the vectors. Core validates vector count, finite values, dimensions and model identity before using the result; an older Luma response without model metadata falls back safely. SDK 0.4 forwards the additive request/response fields unchanged, so this does not require an unpublished SDK dependency. The companion SDK update exposes those fields in its generated public types.
+
+The Core assistant alone uses Luma's OpenAI-compatible chat endpoint (`/api/public/v1/ai/openai/chat/completions`) because its tool-calling loop needs the provider chat contract rather than the Mentor text-only SDK methods. The chat model must support tool calling.
+
+Global search bounds its wait for the SDK response. SDK 0.4 cannot cancel an in-flight HTTP request, so a timed-out embedding request can finish remotely after Core has used its fallback. It cannot mutate application state; its late response is ignored.
 
 Global search records which model embedded each chunk and compares a query only with chunks from the same model. When a query falls back to OpenAI against a Luma-indexed corpus, search returns keyword results instead of mixing vector spaces.
 
