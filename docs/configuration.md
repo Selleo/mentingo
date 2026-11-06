@@ -164,3 +164,14 @@ actually starts, including delayed fallback credential lookup. The model capture
 authorized tenant ID and runner, not an AsyncLocalStorage snapshot or transaction handle.
 The existing runner rejects a switch from another tenant's active transaction and opens no
 transaction across provider I/O.
+
+Final native alignment validation merged the PR's actual `staging` target at `de2371f92`,
+preserving its managed tutorial prompts and current source-size limits. All 122 focused
+runtime, native SDK transport, tenant, assistant, search and telemetry regressions passed
+across 12 suites. The combined actual Core/SDK/Luma tool-loop checks remain provider-free;
+their authentication and model outputs are controlled local fixtures.
+
+The final merged-state `pnpm lint-tsc-api` gate also passed (API TypeScript,
+workflow TypeScript and full API ESLint). Focused Prettier and PR-diff whitespace
+checks passed. No live provider, PostgreSQL workflow, authenticated browser or
+production deployment validation is claimed.

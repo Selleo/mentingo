@@ -1,6 +1,5 @@
 /** Re-enter trusted tenant context when a deferred assistant model is actually invoked. */
-import {
-  LanguageModelV4} from "@ai-sdk/provider";
+import { LanguageModelV4 } from "@ai-sdk/provider";
 
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
