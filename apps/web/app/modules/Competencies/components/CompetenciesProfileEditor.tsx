@@ -16,6 +16,7 @@ import { useCompetenciesProfileEditor } from "../hooks/useCompetenciesProfileEdi
 
 import { CompetenciesCompetencyPicker } from "./CompetenciesCompetencyPicker";
 import { CompetenciesProfileRequirementList } from "./CompetenciesProfileRequirementList";
+import { CompetencyEditor } from "./CompetencyEditor";
 
 import type { CompetenciesProfileEditorOptions } from "../hooks/competencies-hooks.types";
 
@@ -23,6 +24,9 @@ export type CompetenciesProfileEditorProps = CompetenciesProfileEditorOptions;
 
 export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfileEditorProps) {
   const {
+    competencyEditorOpen,
+    setCompetencyEditorOpen,
+    saveCompetency,
     addRequirement,
     removeRequirement,
     updateRequirementLevel,
@@ -46,7 +50,10 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
         if (!open && !isPending) close();
       }}
     >
-      <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+      <DialogContent
+        className="flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0"
+        aria-describedby={undefined}
+      >
         <DialogHeader className="shrink-0 border-b border-neutral-200 px-6 py-5">
           <DialogTitle>
             {t(profile ? "competencies.editProfile" : "competencies.newProfile")}
@@ -90,6 +97,10 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
                     placeholder={t("competencies.profileEditor.addCompetency")}
                     isAvailable={isAvailableCompetency}
                     onChange={addRequirement}
+                    createAction={{
+                      label: t("competencies.newCompetency"),
+                      onSelect: () => setCompetencyEditorOpen(true),
+                    }}
                   />
                 </div>
                 {value.requirements.length === 0 ? (
@@ -128,6 +139,14 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
             </Button>
           </DialogFooter>
         </form>
+        {competencyEditorOpen && (
+          <CompetencyEditor
+            requireLevel
+            pending={isPending}
+            onSave={saveCompetency}
+            onClose={() => setCompetencyEditorOpen(false)}
+          />
+        )}
         <Dialog
           open={confirmDelete}
           onOpenChange={(open) => {

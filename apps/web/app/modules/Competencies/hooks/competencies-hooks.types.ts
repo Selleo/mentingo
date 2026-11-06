@@ -60,6 +60,7 @@ export type CompetencyEditorOptions = {
   onSave: (value: CompetencyInput) => Promise<unknown>;
   onClose: () => void;
   pending: boolean;
+  requireLevel?: boolean;
   onDelete?: () => Promise<unknown>;
 };
 

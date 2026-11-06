@@ -28,6 +28,7 @@ export function CompetencyEditor({
   onSave,
   onClose,
   pending,
+  requireLevel = false,
   onDelete,
 }: CompetencyEditorProps) {
   const {
@@ -47,7 +48,7 @@ export function CompetencyEditor({
     activeLevelId,
     updateLevel,
     updateCondition,
-  } = useCompetencyEditor({ value, onSave, onClose, pending, onDelete });
+  } = useCompetencyEditor({ value, onSave, onClose, pending, requireLevel, onDelete });
   return (
     <Dialog
       open
@@ -153,7 +154,11 @@ export function CompetencyEditor({
             <Button type="button" variant="outline" disabled={pending} onClick={onClose}>
               {t("competencies.cancel")}
             </Button>
-            <Button type="submit" disabled={pending} aria-busy={pending}>
+            <Button
+              type="submit"
+              disabled={pending || (requireLevel && draft.levels.length === 0)}
+              aria-busy={pending}
+            >
               {t(pending ? "competencies.saving" : "competencies.save")}
             </Button>
           </DialogFooter>
