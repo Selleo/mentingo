@@ -204,7 +204,10 @@ describe("Achievement admin (e2e)", () => {
     await completeQuiz(student.id, 50);
     await completeQuiz(student.id, 85);
 
-    expect(await evaluate(student.id)).toBe(40);
+    // Creating the achievement queues a tenant recalculation that may grant the level first, so assert state, not the returned XP.
+    await evaluate(student.id);
+
+    expect(await getProgress(student.id, achievementId)).toBe(2);
 
     const details = await request(app.getHttpServer())
       .get(`${ADMIN_ACHIEVEMENTS_URL}/${achievementId}?language=en`)
