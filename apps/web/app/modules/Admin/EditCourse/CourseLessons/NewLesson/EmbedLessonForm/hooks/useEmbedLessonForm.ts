@@ -53,7 +53,11 @@ export const useEmbedLessonForm = ({
   const { reset } = form;
 
   useEffect(() => {
-    if (lessonToEdit) reset();
+    reset({
+      title: lessonToEdit?.title ?? "",
+      type: "embed",
+      resources: lessonToEdit?.lessonResources ?? [],
+    });
   }, [lessonToEdit, reset]);
 
   const onSubmit = async (values: EmbedLessonFormValues) => {
