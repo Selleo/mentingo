@@ -2,13 +2,28 @@
 
 All commands run from the repository root on the evaluation PR branch, using the repository's Node 22.15+ and pnpm environment. Normal dependencies/shared packages must already be installed/built. This runbook adds no workflow, webhook, schedule or remote execution. See the [matrix](core-test-case-matrix.md) for which cases each runner owns.
 
+## Package commands for local use
+
+| Command                           | Purpose                                                                             | Running services / credentials                                                                                                           |
+| --------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test:ai:regression`         | Run 131 deterministic evaluation harness tests and 16 configuration/recording tests | Node/pnpm dependencies and Python 3; no launched Core/Luma, model keys or Langfuse                                                       |
+| `pnpm eval:ai --mode list`        | List available feature datasets and case counts                                     | No services or credentials                                                                                                               |
+| `pnpm eval:ai --mode prepare ...` | Prepare selected prompt/application tasks offline                                   | Pinned prompt snapshot or explicit local prompt source; no providers                                                                     |
+| `pnpm eval:ai --mode run ...`     | Explicitly execute selected model/application cases                                 | Model cases: provider config/key. Native cases: running local Core, supporting services/workers, disposable fixtures and cookie env vars |
+| `pnpm eval:ai:record ...`         | Normalize a real report locally; add `--apply` to upload                            | Dry run needs no services. Upload needs Core Langfuse keys and Python OTLP dependencies                                                  |
+
+`AGENTS.md` requires the first command after meaningful AI changes, plus the narrowest affected product tests. Model/application runs remain explicit via case selection and runner flags, respecting task restrictions. Langfuse uploads are not part of the default regression command.
+
+These are package aliases for the existing tested runners, not another implementation. They do not start services, migrate databases, seed fixtures, log in, copy dotenv secrets or create/modify Langfuse configuration. Use absolute configuration/report paths; `eval:ai` executes inside `apps/api`, whereas `eval:ai:record` executes at the repository root. Missing services/fixtures produce failed/not-run results, never a simulated pass.
+
+For native application experiments, launch the local test environment with the repository's normal setup/dev recipe first, including database/Redis/storage/workers required by the selected flow. The local Core application's configuration determines whether Luma itself is local or a hosted test endpoint. A hosted Luma API key alone does not supply Core's database, authenticated users, fresh threads/courses or workers. The experiment command remains loopback-only for Core and requires explicitly disposable fixtures. Prompt-only evaluations need no running Core/Luma app.
+
 ## 1. Run ordinary deterministic checks
 
 No model or Langfuse credentials are required:
 
 ```sh
-pnpm --filter=api test --runInBand test/evaluations
-python3 -m unittest discover -s scripts/langfuse -p 'test_*.py'
+pnpm test:ai:regression
 pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode validate
 mkdir -p /tmp/core-evals
 pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode offline --out /tmp/core-evals/grading.json
@@ -38,8 +53,8 @@ These tests cover HTTP request/proposal/application receipts, native persistence
 ## 3. List or prepare feature experiments offline
 
 ```sh
-pnpm --filter=api exec node --import tsx test/evaluations/run-feature.ts --mode list
-pnpm --filter=api exec node --import tsx test/evaluations/run-feature.ts --mode prepare --feature mentor-teacher-chat --prompt-source local --out /tmp/core-evals/teacher-prepared.json
+pnpm eval:ai --mode list
+pnpm eval:ai --mode prepare --feature mentor-teacher-chat --prompt-source local --out /tmp/core-evals/teacher-prepared.json
 ```
 
 Local source is explicitly nonproduction. For comparison against managed production prompts, replace `--prompt-source local` with `--prompt-snapshots /tmp/core-evals/production-prompts.json`. Supply all required fragments in the [documented snapshot format](core-ai-feature-coverage.md#prepare-without-provider-or-application-calls). Snapshots pin prompt names, versions and hashes. Preparation performs no model, application or Langfuse requests; it cannot pass a quality case.
@@ -55,7 +70,7 @@ Create `/tmp/core-evals/provider.json` with nonsecret configuration:
 Set that named credential through normal secret tooling; it is not read from dotenv. Optional `baseURL` must be HTTPS. The provider must support the selected production output schema. Embeddings require a separate embedding model configuration.
 
 ```sh
-pnpm --filter=api exec node --import tsx test/evaluations/run-feature.ts --mode run --feature mentor-teacher-chat --case mentor-teacher-chat-grounded-v1 --prompt-snapshots /tmp/core-evals/production-prompts.json --provider-config /tmp/core-evals/provider.json --allow-model-requests --out /tmp/core-evals/teacher-result.json
+pnpm eval:ai --mode run --feature mentor-teacher-chat --case mentor-teacher-chat-grounded-v1 --prompt-snapshots /tmp/core-evals/production-prompts.json --provider-config /tmp/core-evals/provider.json --allow-model-requests --out /tmp/core-evals/teacher-result.json
 ```
 
 This calls the model. It does not start the native Mentor application, save a conversation, or upload to Langfuse. Exit 2 means output exists but quality review is pending, not a transport failure. Omit the opt-in flag and no model is invoked; missing prerequisites fail or remain not run.
@@ -65,7 +80,7 @@ This calls the model. It does not start the native Mentor application, save a co
 Provision a local disposable Core/Luma environment with workers and owned fixtures. The runner does not seed fixtures. Use an app config matching [the feature fixture contract](core-ai-feature-coverage.md#run-native-application-tasks-with-disposable-fixtures): loopback base URL, `disposableTenant: true`, fresh isolated resources, cookies referenced only by environment-variable name, and fixtures keyed by feature item ID. Authoring needs `allowAuthoringWrites: true` and a distinct disposable course per case.
 
 ```sh
-pnpm --filter=api exec node --import tsx test/evaluations/run-feature.ts --mode run --feature core-luma-authoring-apply --case core-luma-authoring-apply-grounded-v1 --prompt-source local --app-config /tmp/core-evals/app-fixtures.json --allow-app-requests --out /tmp/core-evals/apply-result.json
+pnpm eval:ai --mode run --feature core-luma-authoring-apply --case core-luma-authoring-apply-grounded-v1 --prompt-source local --app-config /tmp/core-evals/app-fixtures.json --allow-app-requests --out /tmp/core-evals/apply-result.json
 ```
 
 This can call Luma's configured provider and write to the disposable course. For proposal-only checking select `core-luma-authoring-proposal` and its item ID instead. The stale-edit adversarial apply case remains `not_run`: no concurrent-edit driver is implemented.
@@ -79,13 +94,13 @@ First run the model/application and retain its real report. Then upload it separ
 Dry-run report normalization, without network calls:
 
 ```sh
-python3 scripts/langfuse/record.py --setup docs/langfuse/remote-setup.json --manifest apps/api/test/evaluations/feature-catalogue.v1.json --report /tmp/core-evals/teacher-result.json --run-name teacher-baseline-v1 --receipt /tmp/core-evals/record-preview.json
+pnpm eval:ai:record --report /tmp/core-evals/teacher-result.json --run-name teacher-baseline-v1 --receipt /tmp/core-evals/record-preview.json
 ```
 
 Explicit remote upload:
 
 ```sh
-python3 scripts/langfuse/record.py --setup docs/langfuse/remote-setup.json --manifest apps/api/test/evaluations/feature-catalogue.v1.json --report /tmp/core-evals/teacher-result.json --run-name teacher-baseline-v1 --receipt /tmp/core-evals/record-receipt.json --apply
+pnpm eval:ai:record --report /tmp/core-evals/teacher-result.json --run-name teacher-baseline-v1 --receipt /tmp/core-evals/record-receipt.json --apply
 ```
 
 Prepared/reference data cannot be submitted as successful execution. Use a new run name for an intended new capture; do not re-upload identical spans to update them. Recording duration is ingestion time, not model latency. Existing per-dataset Langfuse rules evaluate new submitted experiment items asynchronously. Their scores do not override failed deterministic workflow checks.

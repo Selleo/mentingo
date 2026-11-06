@@ -400,7 +400,7 @@ These synthetic candidates test the judge itself, not Core application execution
 
 - 2026-11-06: feature list command and pinned-snapshot offline preparation verified; all 103 prepared, zero failed/not-run in preparation. This includes preparing the unsupported-case descriptor, not executing its missing driver.
 - 2026-11-06: legacy catalogue validation verified (54 cases); offline production grading executed (12 passed). These results do not cover application/model quality.
-- Previously recorded implementation checks: 131 Core evaluation harness tests passed. The 16 Python configuration/recording tests were rerun successfully on 2026-11-06. They are controlled tests, not 103 live experiments.
+- 2026-11-06: `pnpm test:ai:regression` verified the package entry point; 131 Core evaluation harness tests and 16 Python configuration/recording tests passed. They are controlled tests, not 103 live experiments.
 - Existing product voice/E2E tests are inventoried here; no full product voice suite, application E2E, provider, microphone, TTS listening or calibration run was invoked for this docs-only change.
 - No concurrent-edit driver for stale-baseline application. No listening/perceptual TTS benchmark. Three identical input pairs need diversification. Synthetic labels and judge accuracy remain unvalidated.
 - Online rules cannot evaluate uninstrumented calls. Core global-search embedding telemetry is intentionally disabled. Model-only prompt cases do not establish Core permissions or Luma production prompt behavior.

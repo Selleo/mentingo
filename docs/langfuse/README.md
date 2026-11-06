@@ -9,6 +9,10 @@ Start here to decide what to run and how to interpret the result. These document
 - [Historical regressions](regression-history.md): issue-to-expectation mapping.
 - [Published configuration](published-setup.md): Langfuse project, evaluator/rule IDs and setup snapshot.
 
+## Local package entry points
+
+Run `pnpm test:ai:regression` after meaningful AI changes, as required by `AGENTS.md`. It runs the deterministic checks without a launched application or provider/Langfuse credentials. Use `pnpm eval:ai --mode list` for experiment selection; actual execution needs the explicit run mode, opt-in flags and supplied config. `pnpm eval:ai:record` normalizes a captured report, with remote upload only when `--apply` is supplied. See the [local runbook](core-evaluation-runbook.md#package-commands-for-local-use) for prerequisites and examples.
+
 ## Which layer owns the check?
 
 | Layer                              | Responsibility                                                                                                                                                    | Execution                                                                              |
@@ -37,4 +41,4 @@ Core owns the integration boundary: tenant/permission checks, session/course bin
 
 The feature catalogue contains 31 datasets and 103 entries; three input pairs are identical (translation and the two embedding datasets), so those pairs do not provide additional independent input coverage. The matrix flags them. All 103 entries were prepared offline with pinned snapshots on 2026-11-06. The 12 production grading cases also passed offline on that date. Neither command executed a model or native application.
 
-The previously recorded implementation checks were 131 Core evaluation harness tests. The 16 Python configuration/recording tests were rerun successfully on 2026-11-06. Those verify runner/scorer behavior with controlled evidence. There is no recorded live Core feature experiment result: do not mark the 103 entries as passed. Normal product test presence is shown separately and is not a substitute for a current test run. Reference labels and LLM judges remain uncalibrated, and the stale-baseline concurrent-edit scenario has no driver.
+The local package command `pnpm test:ai:regression` was verified on 2026-11-06: 131 Core evaluation harness tests and 16 Python configuration/recording tests passed. Those verify runner/scorer behavior with controlled evidence. There is no recorded live Core feature experiment result: do not mark the 103 entries as passed. Normal product test presence is shown separately and is not a substitute for a current test run. Reference labels and LLM judges remain uncalibrated, and the stale-baseline concurrent-edit scenario has no driver.
