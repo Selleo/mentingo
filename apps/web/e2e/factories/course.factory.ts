@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
-import { COURSE_STATUSES, type CourseStatus } from "@repo/shared";
+import { COURSE_STATUSES, SELF_ONBOARDING_DEMO_COVER_KEY, type CourseStatus } from "@repo/shared";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type {
@@ -35,9 +36,11 @@ export class CourseFactory {
       title,
       description: input.description ?? `${TEST_DATA.course.descriptionPrefix} ${title}`,
       categoryId: input.categoryId,
-      language: input.language ?? "en",
+      language: input.language ?? getSelfOnboardingLanguage(),
       status: input.status ?? "draft",
-      thumbnailS3Key: input.thumbnailS3Key,
+      thumbnailS3Key:
+        input.thumbnailS3Key ??
+        (process.env.SELF_ONBOARDING_DEMO === "1" ? SELF_ONBOARDING_DEMO_COVER_KEY : undefined),
       learningOutcomes: input.learningOutcomes,
       priceInCents: input.priceInCents,
       currency: input.currency,
@@ -46,7 +49,7 @@ export class CourseFactory {
       chapters: input.chapters,
     });
 
-    return this.getById(response.data.data.id, input.language ?? "en");
+    return this.getById(response.data.data.id, input.language ?? getSelfOnboardingLanguage());
   }
 
   async createMany(
@@ -56,13 +59,16 @@ export class CourseFactory {
     return Promise.all(Array.from({ length: count }, (_, index) => this.create(build(index))));
   }
 
-  async getById(id: string, language: CreateCourseBody["language"] = "en") {
+  async getById(id: string, language: CreateCourseBody["language"] = getSelfOnboardingLanguage()) {
     const response = await this.apiClient.api.courseControllerGetBetaCourseById({ id, language });
 
     return response.data.data;
   }
 
-  async findByTitle(title: string, language: CreateCourseBody["language"] = "en") {
+  async findByTitle(
+    title: string,
+    language: CreateCourseBody["language"] = getSelfOnboardingLanguage(),
+  ) {
     const response = await this.apiClient.api.courseControllerGetAllCourses({
       title,
       language,

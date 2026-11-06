@@ -165,13 +165,20 @@ export class LessonService {
     const effectiveUserId = userId ?? currentUser.userId;
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
+    const isPublicCoursePreview =
+      !isManagerPreview &&
+      isStudent &&
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(id, effectiveUserId));
+
     const hasLessonAccess =
+      isPublicCoursePreview ||
       isManagerPreview ||
       (await this.lessonRepository.getHasLessonAccess(id, effectiveUserId, isStudent));
 
     if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
     const learningContext = courseLearningContext.getStore();
-    if (learningContext?.readOnly) isManagerPreview = true;
+    if (learningContext?.readOnly || isPublicCoursePreview) isManagerPreview = true;
     if (isManagerPreview && learningContext) learningContext.readOnly = true;
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
@@ -185,13 +192,27 @@ export class LessonService {
       isNotNull(studentLessonProgress.completedAt),
     ]);
 
-    const lesson = await this.lessonRepository.getLessonDetails(
+    const lessonDetails = await this.lessonRepository.getLessonDetails(
       id,
       effectiveUserId,
       actualLanguage,
     );
 
-    if (!lesson) throw new NotFoundException("common.toast.notFound");
+    if (!lessonDetails) throw new NotFoundException("common.toast.notFound");
+
+    const lesson = isPublicCoursePreview
+      ? {
+          ...lessonDetails,
+          lessonCompleted: false,
+          quizScore: null,
+          updatedAt: null,
+          isQuizPassed: null,
+          attempts: null,
+          aiMentorDetails: null,
+          studentCourses: null,
+          nextLessonId: null,
+        }
+      : lessonDetails;
 
     if (!isManagerPreview && isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("common.toast.lessonAccessDenied");
@@ -210,7 +231,13 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.CONTENT) {
-      return this.getContentLessonWithResources(lesson, id, actualLanguage, effectiveUserId);
+      return this.getContentLessonWithResources(
+        lesson,
+        id,
+        actualLanguage,
+        isPublicCoursePreview ? undefined : effectiveUserId,
+        !isPublicCoursePreview,
+      );
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && !isManagerPreview) {
@@ -242,7 +269,9 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR) {
-      const existingThread = await this.aiService.getExistingThreadForLesson(id, effectiveUserId);
+      const existingThread = isPublicCoursePreview
+        ? undefined
+        : await this.aiService.getExistingThreadForLesson(id, effectiveUserId);
       let avatarUrl = undefined;
 
       if (lesson.aiMentor?.avatarReferenceUrl) {
@@ -292,18 +321,21 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.LIVE_TRAINING) {
-      const liveTraining = lesson.liveTrainingId
-        ? await this.liveTrainingService.getLiveTraining(
-            lesson.liveTrainingId,
-            actualLanguage,
-            currentUser,
-          )
-        : null;
+      const liveTraining =
+        !isPublicCoursePreview && lesson.liveTrainingId
+          ? await this.liveTrainingService.getLiveTraining(
+              lesson.liveTrainingId,
+              actualLanguage,
+              currentUser,
+            )
+          : null;
 
       return { ...lesson, liveTraining };
     }
 
-    const questionLanguage = basicInfo?.languageAnswered ?? actualLanguage;
+    const questionLanguage = isPublicCoursePreview
+      ? actualLanguage
+      : (basicInfo?.languageAnswered ?? actualLanguage);
 
     const questionList =
       lesson.type === LESSON_TYPES.QUIZ
@@ -311,13 +343,13 @@ export class LessonService {
             await this.quizRuntimeService.getQuizForDelivery(
               lesson.id,
               questionLanguage,
-              effectiveUserId,
-              lesson.lessonCompleted,
+              isPublicCoursePreview ? undefined : effectiveUserId,
+              !isPublicCoursePreview && lesson.lessonCompleted,
             )
           ).questions
         : [];
 
-    const isQuizFeedbackRedacted = !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -555,6 +587,13 @@ export class LessonService {
     lessonId: UUIDType,
     currentUser: CurrentUserType,
   ) {
+    if (
+      this.isLearnerOnly(currentUser.permissions) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(lessonId, currentUser.userId))
+    ) {
+      throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+    }
+
     const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
 
     const [access] = await this.db
@@ -677,7 +716,15 @@ export class LessonService {
       throw new NotFoundException("common.toast.notFound");
     }
 
-    if (!lesson.isAssigned && isStudent && !lesson.isFreemium) {
+    if (
+      !lesson.isAssigned &&
+      isStudent &&
+      !lesson.isFreemium &&
+      !(await this.lessonRepository.getHasPublicCoursePreviewAccess(
+        lessonResource.entityId,
+        currentUser.userId,
+      ))
+    ) {
       throw new ForbiddenException("common.toast.lessonAccessDenied");
     }
 
@@ -744,6 +791,13 @@ export class LessonService {
       !audioLesson.isArchived &&
       (audioLesson.isEnrolled || audioLesson.isFreemium);
 
+    if (
+      !audioLesson.isEnrolled &&
+      hasPermission(permissions, PERMISSIONS.COURSE_READ) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(audioLesson.lessonId, userId))
+    )
+      return true;
+
     if (!isLearnerReachable) return false;
 
     return this.lessonRepository.getHasLessonAccess(audioLesson.lessonId, userId, true);
@@ -785,6 +839,7 @@ export class LessonService {
     id: UUIDType,
     actualLanguage: SupportedLanguages,
     userId?: UUIDType | null,
+    repairAssetRelations = true,
   ): Promise<LessonShow> {
     let lessonResources = await this.fileService.getResourcesForEntity(
       id,
@@ -801,7 +856,7 @@ export class LessonService {
       (resourceId) => !attachedResourceReferences.has(resourceId),
     );
 
-    if (hasMissingResourceRelation) {
+    if (hasMissingResourceRelation && repairAssetRelations) {
       await this.resourceLibraryService.syncLessonAssetRelations(id);
       lessonResources = await this.fileService.getResourcesForEntity(
         id,

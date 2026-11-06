@@ -519,6 +519,28 @@
         }
       }
     },
+    "/api/auth/entra-id": {
+      "get": {
+        "operationId": "AuthController_entraIdAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/entra-id/callback": {
+      "get": {
+        "operationId": "AuthController_entraIdAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",
@@ -878,6 +900,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateModernCourseListEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/public-course-preview": {
+      "patch": {
+        "operationId": "SettingsController_updatePublicCoursePreviewEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePublicCoursePreviewEnabledResponse"
                 }
               }
             }
@@ -12217,6 +12256,164 @@
         }
       }
     },
+    "/api/helpdesk/search": {
+      "post": {
+        "operationId": "searchHelpdesk",
+        "summary": "",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelpdeskSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskSearchResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
+    "/api/helpdesk/tutorials/{key}": {
+      "get": {
+        "operationId": "getHelpdeskTutorial",
+        "summary": "",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskTutorialResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
+    "/api/helpdesk/domains": {
+      "get": {
+        "operationId": "getHelpdeskDomains",
+        "summary": "",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelpdeskDomainsResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Helpdesk"
+        ]
+      }
+    },
     "/api/email-templates/events": {
       "get": {
         "operationId": "EmailTemplateManagementController_listEmailTemplateEvents",
@@ -15106,6 +15303,32 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download-url": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveDownloadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveDownloadUrlResponse"
                 }
               }
             }
@@ -21099,6 +21322,61 @@
         ]
       }
     },
+    "/api/integration/native-archive/jobs/{jobId}/download-url": {
+      "get": {
+        "operationId": "IntegrationNativeArchiveController_getCourseArchiveDownloadUrl",
+        "summary": "Get a download URL for a native archive",
+        "description": "Returns a short-lived storage URL for the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. Fetch the URL without API headers; the download itself does not pass through the API. The URL must be used before it expires; ask for a new one if it does.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseArchiveDownloadUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/plugins/content-marketplace": {
       "put": {
         "operationId": "IntegrationContentMarketplaceController_saveContentMarketplaceConnection",
@@ -26457,6 +26735,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -26646,6 +26927,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28252,6 +28534,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -28441,6 +28726,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28484,6 +28770,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -28673,6 +28962,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28716,6 +29006,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -28905,6 +29198,243 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdatePublicCoursePreviewEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -28967,6 +29497,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29156,6 +29689,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29199,6 +29733,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29388,6 +29925,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29431,6 +29969,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29620,6 +30161,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29663,6 +30205,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -29852,6 +30397,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -29907,6 +30453,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30096,6 +30645,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -30139,6 +30689,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30328,6 +30881,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -30542,6 +31096,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -30731,6 +31288,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "calendarEnabled",
@@ -67514,6 +68072,9 @@
               "slack": {
                 "type": "boolean"
               },
+              "entraId": {
+                "type": "boolean"
+              },
               "magicLink": {
                 "type": "boolean"
               },
@@ -67525,6 +68086,7 @@
               "google",
               "microsoft",
               "slack",
+              "entraId",
               "magicLink",
               "password"
             ]
@@ -67552,6 +68114,9 @@
                   "slack": {
                     "type": "boolean"
                   },
+                  "entraId": {
+                    "type": "boolean"
+                  },
                   "magicLink": {
                     "type": "boolean"
                   },
@@ -67563,6 +68128,7 @@
                   "google",
                   "microsoft",
                   "slack",
+                  "entraId",
                   "magicLink",
                   "password"
                 ]
@@ -67587,12 +68153,19 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "entraId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
                   "google",
                   "microsoft",
-                  "slack"
+                  "slack",
+                  "entraId"
                 ]
               }
             },
@@ -67618,6 +68191,10 @@
               },
               {
                 "const": "microsoft",
+                "type": "string"
+              },
+              {
+                "const": "entraId",
                 "type": "string"
               },
               {
@@ -67661,6 +68238,9 @@
                   "slack": {
                     "type": "boolean"
                   },
+                  "entraId": {
+                    "type": "boolean"
+                  },
                   "magicLink": {
                     "type": "boolean"
                   },
@@ -67672,6 +68252,7 @@
                   "google",
                   "microsoft",
                   "slack",
+                  "entraId",
                   "magicLink",
                   "password"
                 ]
@@ -67696,12 +68277,19 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "entraId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
                   "google",
                   "microsoft",
-                  "slack"
+                  "slack",
+                  "entraId"
                 ]
               }
             },
@@ -67746,6 +68334,9 @@
                 "type": "string"
               },
               "slack": {
+                "type": "string"
+              },
+              "entraId": {
                 "type": "string"
               }
             }
@@ -68991,6 +69582,446 @@
               "restrictions",
               "timesRedeemed"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskSearchRequest": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "query": {
+            "maxLength": 500,
+            "pattern": "^[^\\u0000]*$",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "mode": {
+            "description": "Keyword uses FTS only; hybrid combines semantic and keyword retrieval.",
+            "anyOf": [
+              {
+                "const": "keyword",
+                "type": "string"
+              },
+              {
+                "const": "hybrid",
+                "type": "string"
+              }
+            ]
+          },
+          "pageKey": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+            "type": "string"
+          },
+          "domain": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+            "type": "string"
+          },
+          "limit": {
+            "minimum": 1,
+            "maximum": 10,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "language"
+        ]
+      },
+      "HelpdeskSearchResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "const": "keyword",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hybrid",
+                    "type": "string"
+                  },
+                  {
+                    "const": "keyword_fallback",
+                    "type": "string"
+                  },
+                  {
+                    "const": "browse",
+                    "type": "string"
+                  }
+                ]
+              },
+              "results": {
+                "maxItems": 10,
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "tutorial": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                          "type": "string"
+                        },
+                        "revisionId": {
+                          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                          "type": "string"
+                        },
+                        "domain": {
+                          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                          "type": "string"
+                        },
+                        "domainLabel": {
+                          "anyOf": [
+                            {
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "title": {
+                          "minLength": 1,
+                          "maxLength": 200,
+                          "type": "string"
+                        },
+                        "description": {
+                          "minLength": 1,
+                          "maxLength": 8000,
+                          "type": "string"
+                        },
+                        "language": {
+                          "minLength": 2,
+                          "maxLength": 35,
+                          "pattern": "^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$",
+                          "type": "string"
+                        },
+                        "languageFallback": {
+                          "type": "boolean"
+                        },
+                        "durationMs": {
+                          "minimum": 1,
+                          "maximum": 86400000,
+                          "type": "integer"
+                        },
+                        "videoUrl": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "posterUrl": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "chapters": {
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                                "type": "string"
+                              },
+                              "title": {
+                                "minLength": 1,
+                                "maxLength": 200,
+                                "type": "string"
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "maxLength": 4000,
+                                "type": "string"
+                              },
+                              "startMs": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "endMs": {
+                                "minimum": 0,
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "description",
+                              "startMs",
+                              "endMs"
+                            ]
+                          }
+                        },
+                        "pageKeys": {
+                          "maxItems": 64,
+                          "type": "array",
+                          "items": {
+                            "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "revisionId",
+                        "domain",
+                        "title",
+                        "description",
+                        "language",
+                        "languageFallback",
+                        "durationMs",
+                        "videoUrl",
+                        "posterUrl",
+                        "chapters",
+                        "pageKeys"
+                      ]
+                    },
+                    "chapterId": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "excerpt": {
+                      "maxLength": 10000,
+                      "type": "string"
+                    },
+                    "startMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "endMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "rankScore": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "tutorial",
+                    "excerpt",
+                    "startMs",
+                    "endMs",
+                    "rankScore"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "mode",
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskTutorialResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "key": {
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                "type": "string"
+              },
+              "revisionId": {
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "type": "string"
+              },
+              "domain": {
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                "type": "string"
+              },
+              "domainLabel": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "title": {
+                "minLength": 1,
+                "maxLength": 200,
+                "type": "string"
+              },
+              "description": {
+                "minLength": 1,
+                "maxLength": 8000,
+                "type": "string"
+              },
+              "language": {
+                "minLength": 2,
+                "maxLength": 35,
+                "pattern": "^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$",
+                "type": "string"
+              },
+              "languageFallback": {
+                "type": "boolean"
+              },
+              "durationMs": {
+                "minimum": 1,
+                "maximum": 86400000,
+                "type": "integer"
+              },
+              "videoUrl": {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              "posterUrl": {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              "chapters": {
+                "minItems": 1,
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                      "type": "string"
+                    },
+                    "title": {
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "description": {
+                      "minLength": 1,
+                      "maxLength": 4000,
+                      "type": "string"
+                    },
+                    "startMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "endMs": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "startMs",
+                    "endMs"
+                  ]
+                }
+              },
+              "pageKeys": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "key",
+              "revisionId",
+              "domain",
+              "title",
+              "description",
+              "language",
+              "languageFallback",
+              "durationMs",
+              "videoUrl",
+              "posterUrl",
+              "chapters",
+              "pageKeys"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HelpdeskDomainsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "key": {
+                  "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+                  "type": "string"
+                },
+                "label": {
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "label"
+              ]
+            }
           }
         },
         "required": [
@@ -155694,7 +156725,7 @@
         "properties": {
           "sizeBytes": {
             "minimum": 1,
-            "maximum": 524288000,
+            "maximum": 838860800,
             "type": "integer"
           }
         },
@@ -155888,13 +156919,94 @@
                     "type": "null"
                   }
                 ]
+              },
+              "progress": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "anyOf": [
+                          {
+                            "const": "collecting-content",
+                            "type": "string"
+                          },
+                          {
+                            "const": "copying-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "packaging",
+                            "type": "string"
+                          },
+                          {
+                            "const": "downloading",
+                            "type": "string"
+                          },
+                          {
+                            "const": "verifying",
+                            "type": "string"
+                          },
+                          {
+                            "const": "uploading-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "indexing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "saving",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "percent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "stage",
+                      "percent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "jobId",
               "state",
               "result",
-              "failedReason"
+              "failedReason",
+              "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "expiresInSeconds": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "url",
+              "expiresInSeconds"
             ]
           }
         },
@@ -163884,6 +164996,10 @@
                               {
                                 "const": "resource",
                                 "type": "string"
+                              },
+                              {
+                                "const": "helpdesk",
+                                "type": "string"
                               }
                             ]
                           },
@@ -164223,6 +165339,10 @@
                             {
                               "const": "resource",
                               "type": "string"
+                            },
+                            {
+                              "const": "helpdesk",
+                              "type": "string"
                             }
                           ]
                         },
@@ -164367,6 +165487,10 @@
                             },
                             {
                               "const": "resource",
+                              "type": "string"
+                            },
+                            {
+                              "const": "helpdesk",
                               "type": "string"
                             }
                           ]
@@ -169402,6 +170526,18 @@
                 "type": "string"
               },
               {
+                "const": "ENTRA_ID_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_DIRECTORY_ID",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -169531,6 +170667,18 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_DIRECTORY_ID",
                       "type": "string"
                     },
                     {
@@ -170579,13 +171727,94 @@
                     "type": "null"
                   }
                 ]
+              },
+              "progress": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "anyOf": [
+                          {
+                            "const": "collecting-content",
+                            "type": "string"
+                          },
+                          {
+                            "const": "copying-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "packaging",
+                            "type": "string"
+                          },
+                          {
+                            "const": "downloading",
+                            "type": "string"
+                          },
+                          {
+                            "const": "verifying",
+                            "type": "string"
+                          },
+                          {
+                            "const": "uploading-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "indexing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "saving",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "percent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "stage",
+                      "percent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "jobId",
               "state",
               "result",
-              "failedReason"
+              "failedReason",
+              "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseArchiveDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "expiresInSeconds": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "url",
+              "expiresInSeconds"
             ]
           }
         },

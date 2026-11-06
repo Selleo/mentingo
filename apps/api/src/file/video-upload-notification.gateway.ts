@@ -9,6 +9,7 @@ import { USER_SOCKET_EVENTS } from "@repo/shared";
 import { Server } from "socket.io";
 
 import { getUserRoomKey } from "src/file/utils/userRoom";
+import { isQueueSandboxProcess } from "src/queue/queue.constants";
 import {
   REDIS_EVENTS_SUBSCRIBER_CLIENT,
   REDIS_PUBLISHER_CLIENT,
@@ -50,7 +51,10 @@ export class VideoUploadNotificationGateway implements OnGatewayInit, OnModuleIn
     private readonly redisPublisher: RedisClient,
   ) {}
 
+  /** A queue sandbox has no socket server, so it only publishes notifications for the API to emit. */
   onModuleInit() {
+    if (isQueueSandboxProcess()) return;
+
     void this.setupRedisSubscriber();
   }
 

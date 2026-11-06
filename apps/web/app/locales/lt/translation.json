@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Prisijungimo nuoroda",
     "password": "Slaptažodis",
     "description": "Pasirinkite, kaip jūsų organizacijos žmonės gali prisijungti.",
@@ -34,6 +35,8 @@
       "disabled": "Šis prisijungimo būdas išjungtas.",
       "missingConfiguration": "Pirmiausia pridėkite tiekėjo prisijungimo duomenis aplinkos nustatymuose.",
       "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "invalidDirectoryId": "Įveskite katalogo (nuomininko) ID iš Entra programos registracijos GUID formatu.",
+      "untrustedDirectory": "Ši paskyra nepriklauso jūsų organizacijos Entra ID katalogui.",
       "save": "Nepavyko išsaugoti prisijungimo būdų.",
       "load": "Nepavyko įkelti prisijungimo būdų."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Su šiuo kursu susieti tiesioginiai mokymai yra neišsamūs ir negali būti eksportuoti.",
       "courseNotFound": "Eksportuojamas kursas nerastas.",
       "categoryNotFound": "Kurso kategorija nerasta."
+    },
+    "progress": {
+      "waiting": "Laukiama pradžios…",
+      "step": "{{current}} žingsnis iš {{total}}",
+      "uploadingPackage": "Įkeliamas paketas",
+      "stages": {
+        "collecting-content": "Renkamas kurso turinys",
+        "copying-files": "Kopijuojami failai",
+        "packaging": "Pakuojama",
+        "downloading": "Atsisiunčiamas paketas",
+        "verifying": "Tikrinamas paketas",
+        "uploading-files": "Įkeliami failai",
+        "indexing": "Ruošiamas DI turinys",
+        "saving": "Išsaugomas kursas"
+      }
     }
   },
   "aiConversations": {
@@ -778,6 +796,7 @@
     "continueWithGoogle": "Tęskite su Google",
     "continueWithMicrosoft": "Tęskite su Microsoft",
     "continueWithSlack": "Tęskite su Slack",
+    "continueWithEntraId": "Tęskite su Entra ID",
     "enterFullscreen": "Visas ekranas",
     "exitFullscreen": "Išeikite per visą ekraną",
     "refreshPage": "Atnaujinti puslapį",
@@ -995,38 +1014,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Atgal",
-    "eyebrow": "Kurso nustatymas",
     "title": "Sukurti naują kursą",
     "subtitle": "Pasirinkite standartinį redaktorių, SCORM paketą arba Mentingo paketą.",
     "standard": {
       "title": "Standartinis",
-      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
-      "features": {
-        "authoring": "Kuriama vietiniame kursų redaktoriuje",
-        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
-        "translations": "Palaikomos kurso kalbos ir vertimai",
-        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "features": {
-        "import": "Kuriama iš SCORM 1.2 .zip paketo",
-        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
-        "structure": "Importuoto paketo struktūra išsaugoma",
-        "future": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo."
     },
     "mentingoPackage": {
       "title": "Mentingo paketas",
-      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo.",
-      "features": {
-        "structure": "Atkuriama kurso struktūra ir vertimai",
-        "settings": "Atkuriami nustatymai ir metaduomenys",
-        "assets": "Pridedami susiję failai",
-        "learningPath": "Palaikomi mokymosi keliai ir jų kursai"
-      }
+      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo."
     }
   },
   "studentChapterCardView": {
@@ -2573,6 +2573,10 @@
         "title": "Prisijungimas per Slack",
         "description": "Leiskite naudotojams prisijungti su Slack paskyra."
       },
+      "entraIdSignIn": {
+        "title": "Prisijungimas per Entra ID",
+        "description": "Leiskite naudotojams prisijungti tik paskyromis iš jūsų organizacijos Microsoft Entra ID katalogo."
+      },
       "microsoftCalendar": {
         "title": "Microsoft kalendorius",
         "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
@@ -2664,6 +2668,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra ID katalogo (nuomininko) ID",
+        "description": "Katalogo (nuomininko) ID GUID iš programos registracijos apžvalgos. Prisijungti gali tik šio katalogo paskyros."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra ID kliento ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra ID kliento slaptažodis"
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
@@ -4409,6 +4423,11 @@
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
       "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
+    },
+    "preview": {
+      "title": "Peržiūrite kurso turinį",
+      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus, dalyvauti veiklose ir išsaugoti pažangą.",
+      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus, dalyvauti veiklose ir stebėti pažangą."
     }
   },
   "studentCourseView": {
@@ -4703,7 +4722,9 @@
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
-      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis"
+      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
+      "publicCoursePreview": "Viešų kursų peržiūra prieš registraciją",
+      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus neužsiregistravus. Testams, veikloms ir pažangos išsaugojimui reikia registracijos. Mokamų kursų prieigos taisyklės nesikeičia."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -4716,7 +4737,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
-      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų"
+      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų",
+      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas"
     }
   },
   "registrationFormBuilder": {
@@ -8416,7 +8438,8 @@
       "qa": "Klausimas ir atsakymas",
       "development_path": "Mokymosi kelias",
       "resource": "Išteklius",
-      "reference": "Šaltinis"
+      "reference": "Šaltinis",
+      "helpdesk": "Pagalbos pamoka"
     },
     "title": "Asistentas",
     "eyebrow": "Jūsų platformos žinios",
@@ -9119,6 +9142,43 @@
       "inUse_few": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
       "inUse_many": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
       "inUse_other": "„{{name}}“ naudoja {{count}} kompetencijų. Prieš ištrindami perkelkite jas į kitą kategoriją."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demonstracija",
+    "title": "Pagalba ir pamokos",
+    "heading": "Kaip galime padėti?",
+    "subtitle": "Rask kitą žingsnį Mentingo.",
+    "loading": "Įkeliama pagalba",
+    "askAssistant": "Klausti asistento",
+    "assistantHint": "Aprašyk, ką nori padaryti.",
+    "search": "Ieškok temos arba užduok klausimą…",
+    "clear": "Išvalyti paiešką",
+    "results": "Pamokos",
+    "suggested": "Siūloma tau",
+    "empty": "Pamokų nerasta",
+    "emptyHint": "Išbandyk trumpesnę frazę arba kitą temą.",
+    "chapterCount": "{{count}} skyriai",
+    "timeline": "Vaizdo laiko juosta",
+    "jumpHint": "Pasirink skyrių ir pereik į norimą žingsnį",
+    "chapters": "Šiame vaizdo įraše",
+    "related": "Atrask daugiau funkcijų",
+    "domains": {
+      "authoring": "Kursų redagavimas",
+      "paths": "Tobulėjimo keliai",
+      "learning": "Mokymasis"
+    },
+    "keywordFallback": "DI paieška nepasiekiama. Rodomi raktažodžių atitikmenys.",
+    "languageFallback": "Vaizdo įrašas prieinamas {{language}} kalba",
+    "retry": "Bandyti dar kartą",
+    "back": "Grįžti į Mentingo",
+    "chapterUnavailable": "Šis skyrius nebepasiekiamas. Vaizdo įrašas rodomas nuo pradžių.",
+    "errors": {
+      "unavailable": "Pamokos laikinai nepasiekiamos. Bandykite dar kartą.",
+      "versionUnavailable": "Šiai Mentingo versijai pagalba dar nepasiekiama.",
+      "disabled": "Šioje sistemoje pagalbos pamokos neįjungtos.",
+      "notFound": "Ši pamoka nepasiekiama jūsų Mentingo versijai.",
+      "invalidRequest": "Pasirinkite pasiekiamą pamoką arba pakeiskite paieškos frazę ir bandykite dar kartą."
     }
   }
 }

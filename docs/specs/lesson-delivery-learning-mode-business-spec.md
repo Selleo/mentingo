@@ -26,6 +26,7 @@ For courses with optional repetition enabled, a learner can explicitly start aga
 - Warn learners before leaving an incomplete lesson with required video content and offer a direct way to continue watching.
 - Resume the most recently active incomplete video, or the next eligible incomplete video, from the saved watched position.
 - Navigate to previous and next lessons from the learner lesson page.
+- Browse eligible public courses before enrollment when an administrator enables course previews, with an enrollment prompt for learning activities.
 - Enforce lesson sequencing when ordered completion is enabled.
 - Keep later lessons locked after unmet requirements, such as a failed required quiz.
 - Mark lessons complete automatically or after lesson-specific completion criteria.
@@ -44,6 +45,10 @@ Learning-time tracking adds another reporting signal, helping teams understand b
 The lesson page loads the selected course and lesson in the active content language. It shows the lesson content, chapter context, navigation controls, and the course lesson sidebar. When an administrator or content creator enters learning mode from the course overview, Mentingo returns the course panel to the table of contents so an admin-only Statistics tab cannot leave the learner view empty.
 
 Moving between lessons reloads the selected lesson's learner-specific state before its content is mounted. This keeps the progress strip and video resume position aligned with the latest saved watched ranges instead of briefly reusing another lesson's player state or an older cached response.
+
+When public course previews are enabled for the organization, signed-in learners can open published, unarchived free course lessons without enrolling. Preview navigation bypasses lesson sequencing, while learning activities remain unavailable. A notice explains that enrollment unlocks quizzes, interactive activities, and saved progress, with a direct enrollment action. Administrators in preview see an explanation and a Learn-mode action. Starting Learn mode uses the existing course enrollment flow. Paid course access and anonymous access retain their separate rules.
+
+Preview reads do not start lesson progress or AI conversations. Learning-time reporting requires active enrollment, and preview does not save video coverage, quiz attempts, or completion.
 
 Each lesson type has its own completion behavior. Content and embed lessons can complete when opened or when required video content finishes. Quiz lessons depend on quiz submission and passing rules. AI mentor, SCORM, and live training lessons use their own lesson-specific state. When sequence mode is enabled, Mentingo blocks access to later lessons until earlier lessons are complete.
 
@@ -72,4 +77,5 @@ While the learner studies, the page also runs the learning-time tracker. Complet
 - Web E2E coverage verifies starting learning, continuing to the next content lesson, opening lessons out of order when sequence is disabled, blocking skipped lessons when sequence is enabled, keeping the next lesson locked after a failed required quiz, submitting and retaking quizzes, completing embed lessons, accessing AI mentor entry points, and SCORM launch/resume/completion behavior.
 - Web unit coverage verifies the learning-mode reset from Statistics to the table of contents, the segmented lesson video progress strip, watched chunk rendering, 90% green completion state, and live updates from the video tracker.
 - Focused frontend coverage verifies the required-video warning, leave dialog actions and remembered preference, and resuming the selected video from its saved position.
+- Focused preview component tests verify enrollment and Learn-mode actions, public/free eligibility, preview entry points, and blocked interactive lesson mounting. API preview tests exercise read-only lesson delivery, quiz redaction, progress-write denial, and learning-time/video safeguards. HTTP preview coverage checks setting permissions and the public/private/draft/archived/paid/anonymous access matrix. Browser preview E2E has not been run.
 - API E2E coverage verifies quiz feedback visibility rules, lesson completion restrictions for authors/admins outside learning mode, admin/content-creator learning-mode behavior, quiz submission rules, quiz lesson deletion with submitted answers, and learning-time queue processing.

@@ -4,6 +4,7 @@ import { PassportModule } from "@nestjs/passport";
 import { ResendVerificationMailCron } from "src/auth/resend-verification-mail-cron";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
+import { EntraIdOAuthGuard } from "src/common/guards/entra-id-oauth.guard";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
@@ -22,6 +23,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
+import { EntraIdStrategy } from "./strategy/entra-id.strategy";
 import { GoogleStrategy } from "./strategy/google.strategy";
 import { JwtStrategy } from "./strategy/jwt.strategy";
 import { LocalStrategy } from "./strategy/local.strategy";
@@ -56,11 +58,13 @@ import { TokenService } from "./token.service";
     GoogleStrategy,
     MicrosoftStrategy,
     SlackStrategy,
+    EntraIdStrategy,
     GoogleOAuthGuard,
     MicrosoftOAuthGuard,
     SlackOAuthGuard,
+    EntraIdOAuthGuard,
     SettingsService,
   ],
-  exports: [CreatePasswordService],
+  exports: [CreatePasswordService, AuthService, TokenService],
 })
 export class AuthModule {}

@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Link do logowania",
     "password": "Hasło",
     "description": "Wybierz, w jaki sposób osoby w Twojej organizacji mogą się logować.",
@@ -34,6 +35,8 @@
       "disabled": "Ta metoda logowania jest wyłączona.",
       "missingConfiguration": "Najpierw dodaj dane uwierzytelniające dostawcy w ustawieniach środowiska.",
       "lastMethod": "Pozostaw co najmniej jedną działającą metodę logowania.",
+      "invalidDirectoryId": "Podaj identyfikator katalogu (dzierżawy) z rejestracji aplikacji Entra w formacie GUID.",
+      "untrustedDirectory": "To konto nie należy do katalogu Entra ID Twojej organizacji.",
       "save": "Nie udało się zapisać metod logowania.",
       "load": "Nie udało się pobrać metod logowania."
     }
@@ -89,12 +92,27 @@
       "unsupportedVersion": "Ta wersja pakietu Mentingo nie jest obsługiwana.",
       "missingAsset": "W pakiecie Mentingo brakuje wymaganego pliku.",
       "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo.",
-      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z marketplace.",
+      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z katalogu kursów.",
       "pathNotFound": "Nie znaleziono Ścieżki Rozwoju do eksportu.",
       "accessDenied": "Nie masz uprawnień do eksportu tej treści.",
       "liveTrainingIncomplete": "Szkolenie na żywo powiązane z tym kursem jest niekompletne i nie może zostać wyeksportowane.",
       "courseNotFound": "Nie znaleziono kursu do eksportu.",
       "categoryNotFound": "Nie znaleziono kategorii kursu."
+    },
+    "progress": {
+      "waiting": "Oczekiwanie na rozpoczęcie…",
+      "step": "Krok {{current}} z {{total}}",
+      "uploadingPackage": "Przesyłanie pakietu",
+      "stages": {
+        "collecting-content": "Zbieranie zawartości kursu",
+        "copying-files": "Kopiowanie plików",
+        "packaging": "Pakowanie",
+        "downloading": "Pobieranie pakietu",
+        "verifying": "Sprawdzanie pakietu",
+        "uploading-files": "Przesyłanie plików",
+        "indexing": "Przygotowywanie treści AI",
+        "saving": "Zapisywanie kursu"
+      }
     }
   },
   "aiConversations": {
@@ -781,6 +799,7 @@
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
     "continueWithSlack": "Kontynuuj z użyciem Slack",
+    "continueWithEntraId": "Kontynuuj z użyciem Entra ID",
     "enterFullscreen": "Pełny ekran",
     "exitFullscreen": "Wyjdź z pełnego ekranu",
     "refreshPage": "Odśwież stronę",
@@ -998,38 +1017,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Wstecz",
-    "eyebrow": "Konfiguracja kursu",
     "title": "Utwórz nowy kurs",
     "subtitle": "Wybierz edytor standardowy, pakiet SCORM lub pakiet Mentingo.",
     "standard": {
       "title": "Standardowy",
-      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami.",
-      "features": {
-        "authoring": "Tworzony w natywnym edytorze kursów",
-        "curriculum": "Rozdziały, lekcje i quizy zarządzane w Mentingo",
-        "translations": "Obsługa języków i tłumaczeń kursu",
-        "settings": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "features": {
-        "import": "Tworzony z pakietu SCORM 1.2 .zip",
-        "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
-        "structure": "Zachowana struktura importowanego pakietu",
-        "future": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z pakietu SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Pakiet Mentingo",
-      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo.",
-      "features": {
-        "structure": "Odtwarzanie struktury kursu i tłumaczeń",
-        "settings": "Odtwarzanie ustawień i metadanych",
-        "assets": "Dołączone powiązane pliki",
-        "learningPath": "Obsługa ścieżek i ich kursów"
-      }
+      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -1985,7 +1985,7 @@
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
         "microsoft_calendar": "Kalendarz Microsoft",
-        "contentMarketplace": "Marketplace treści",
+        "contentMarketplace": "Katalog kursów",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1998,7 +1998,7 @@
         "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
         "microsoft_calendar": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook.",
-        "contentMarketplace": "Odkrywaj i importuj gotowe kursy z marketplace'u treści.",
+        "contentMarketplace": "Odkrywaj i importuj gotowe kursy z katalogu kursów.",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
         "luma": "Włącz funkcje generowania kursów AI",
@@ -2552,7 +2552,7 @@
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
         "phishing_report_read": "Może przeglądać raporty z symulacji phishingu.",
-        "content_marketplace_browse": "Przeglądanie marketplace treści i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
+        "content_marketplace_browse": "Przeglądanie katalogu kursów i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
         "account_read_self": "Może przeglądać własne dane konta.",
         "account_update_self": "Może edytować własne dane konta.",
         "user_read_self": "Może przeglądać własny profil użytkownika.",
@@ -2826,6 +2826,10 @@
         "title": "Logowanie przez Slack",
         "description": "Pozwól użytkownikom logować się kontem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Logowanie przez Entra ID",
+        "description": "Pozwól użytkownikom logować się wyłącznie kontami z katalogu Microsoft Entra ID Twojej organizacji."
+      },
       "microsoftCalendar": {
         "title": "Kalendarz Microsoft",
         "description": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook."
@@ -2914,6 +2918,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Identyfikator katalogu (dzierżawy) Entra ID",
+        "description": "Identyfikator GUID katalogu (dzierżawy) z przeglądu rejestracji aplikacji. Zalogować się mogą tylko konta z tego katalogu."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Identyfikator klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Klucz tajny klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -4677,6 +4691,11 @@
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
       "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
+    },
+    "preview": {
+      "title": "Przeglądasz podgląd kursu",
+      "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy, uczestniczyć w aktywnościach i zapisywać postępy.",
+      "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy, uczestniczyć w aktywnościach i śledzić postępy."
     }
   },
   "studentCourseView": {
@@ -5013,7 +5032,9 @@
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
-      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy"
+      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
+      "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
+      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne publiczne kursy bez zapisu. Quizy, aktywności i zapisywanie postępów wymagają zapisu. Zasady dostępu do płatnych kursów pozostają bez zmian."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5026,7 +5047,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
-      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
+      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach",
+      "publicCoursePreviewPreferenceChangeSuccess": "Zaktualizowano ustawienie podglądu kursów"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
@@ -8435,14 +8457,14 @@
     "sortTitle": "Tytuł (A–Z)",
     "noResults": "Brak kursów pasujących do wyszukiwania. Spróbuj innego słowa.",
     "addToCourses": "Dodaj do kursów",
-    "title": "Marketplace treści",
-    "browseAll": "Przeglądaj wszystkie",
+    "title": "Katalog kursów",
+    "browseAll": "Przeglądaj",
     "description": "Przeglądaj wybrane kursy i kopiuj je do swojej organizacji.",
     "loading": "Ładowanie…",
     "retry": "Spróbuj ponownie",
-    "unavailable": "Marketplace treści nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
-    "serviceError": "Marketplace treści jest niedostępny. Spróbuj ponownie.",
-    "empty": "W marketplace nie ma jeszcze żadnych kursów.",
+    "unavailable": "Katalog kursów nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
+    "serviceError": "Katalog kursów jest niedostępny. Spróbuj ponownie.",
+    "empty": "W katalogu kursów nie ma jeszcze żadnych kursów.",
     "updated": "Zaktualizowano {{date}}",
     "copying": "Kopiowanie kursu…",
     "copyNotice": "Kurs zostanie dodany jako kurs udostępniony, którego nie można edytować. Synchronizacja aktualizuje go do najnowszej wersji i zachowuje postępy uczestników.",
@@ -8456,10 +8478,10 @@
     "firstPage": "Wróć do pierwszej strony",
     "error": {
       "invalidQuery": "Nieprawidłowe parametry wyszukiwania lub stronicowania katalogu.",
-      "unavailable": "Marketplace treści nie jest dostępny dla tej organizacji.",
-      "listingNotFound": "Nie znaleziono tego kursu w marketplace.",
-      "thumbnailNotFound": "Ten kurs z marketplace nie ma miniatury.",
-      "serviceError": "Marketplace treści nie mógł zrealizować żądania. Spróbuj ponownie później."
+      "unavailable": "Katalog kursów nie jest dostępny dla tej organizacji.",
+      "listingNotFound": "Nie znaleziono tego kursu w katalogu kursów.",
+      "thumbnailNotFound": "Ten kurs z katalogu kursów nie ma miniatury.",
+      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później."
     }
   },
   "aiJudgeConfiguration": {
@@ -8502,7 +8524,8 @@
       "qa": "Pytanie i odpowiedź",
       "development_path": "Ścieżka rozwoju",
       "resource": "Materiał",
-      "reference": "Źródło"
+      "reference": "Źródło",
+      "helpdesk": "Samouczek pomocy"
     },
     "title": "Asystent",
     "eyebrow": "Wiedza z Twojej platformy",
@@ -9205,6 +9228,43 @@
       "inUse_few": "Kategoria „{{name}}” jest używana przez {{count}} kompetencje. Przenieś je do innej kategorii przed usunięciem.",
       "inUse_many": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem.",
       "inUse_other": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demo",
+    "title": "Pomoc i poradniki",
+    "heading": "W czym możemy pomóc?",
+    "subtitle": "Znajdź swój kolejny krok w Mentingo.",
+    "loading": "Wczytywanie pomocy",
+    "askAssistant": "Zapytaj asystenta",
+    "assistantHint": "Opisz, co chcesz zrobić.",
+    "search": "Wyszukaj temat lub zadaj pytanie…",
+    "clear": "Wyczyść wyszukiwanie",
+    "results": "Poradniki",
+    "suggested": "Proponowane dla Ciebie",
+    "empty": "Nie znaleziono poradników",
+    "emptyHint": "Spróbuj krótszej frazy lub innego tematu.",
+    "chapterCount": "{{count}} rozdziałów",
+    "timeline": "Oś czasu filmu",
+    "jumpHint": "Wybierz rozdział, aby przejść do danego kroku",
+    "chapters": "W tym filmie",
+    "related": "Poznaj więcej funkcji",
+    "domains": {
+      "authoring": "Edycja kursów",
+      "paths": "Ścieżki rozwoju",
+      "learning": "Nauka"
+    },
+    "keywordFallback": "Wyświetlamy wyniki słów kluczowych, ponieważ wyszukiwanie AI jest niedostępne.",
+    "languageFallback": "Film dostępny w języku {{language}}",
+    "retry": "Spróbuj ponownie",
+    "back": "Wróć do Mentingo",
+    "chapterUnavailable": "Ten rozdział nie jest już dostępny. Pokazujemy film od początku.",
+    "errors": {
+      "unavailable": "Samouczki są chwilowo niedostępne. Spróbuj ponownie.",
+      "versionUnavailable": "Pomoc nie jest jeszcze dostępna dla tej wersji Mentingo.",
+      "disabled": "Samouczki pomocy nie są włączone w tej instalacji.",
+      "notFound": "Ten samouczek nie jest dostępny dla Twojej wersji Mentingo.",
+      "invalidRequest": "Wybierz dostępny samouczek lub popraw wyszukiwanie i spróbuj ponownie."
     }
   }
 }

@@ -9,6 +9,7 @@ import { tenants } from "src/storage/schema";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-self-onboarding.constants";
 
 import type { INestApplication } from "@nestjs/common";
 import type { Test } from "supertest";
@@ -256,7 +257,8 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
               .trim(),
           );
       const tools = body.result.tools.map((tool: { name: string }) => tool.name);
-      if (scope === MCP_SCOPES.SEARCH_READ) expect(tools).toEqual(["global_search"]);
+      if (scope === MCP_SCOPES.SEARCH_READ)
+        expect(tools).toEqual([...Object.values(MCP_HELPDESK_TOOL_NAMES), "global_search"]);
       else {
         expect(tools).toEqual(expect.arrayContaining(["global_search", "get_course"]));
         expect(tools).not.toContain("create_course");

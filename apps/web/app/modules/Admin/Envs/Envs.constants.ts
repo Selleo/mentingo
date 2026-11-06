@@ -9,6 +9,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
+import EntraId from "~/assets/svgs/entra-id.svg?react";
 import Google from "~/assets/svgs/google.svg?react";
 import Microsoft from "~/assets/svgs/microsoft.svg?react";
 import Slack from "~/assets/svgs/slack.svg?react";
@@ -85,6 +86,19 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.SLACK_CLIENT_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  ENTRA_ID_DIRECTORY_ID: {
+    labelKey: "adminEnvsView.form.ENTRA_ID_DIRECTORY_ID.label",
+    descriptionKey: "adminEnvsView.form.ENTRA_ID_DIRECTORY_ID.description",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  ENTRA_ID_CLIENT_ID: {
+    labelKey: "adminEnvsView.form.ENTRA_ID_CLIENT_ID.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  ENTRA_ID_CLIENT_SECRET: {
+    labelKey: "adminEnvsView.form.ENTRA_ID_CLIENT_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   PHISHING_API_KEY: {
     labelKey: "phishing.PHISHING_API_KEY",
     placeholderKey: "adminEnvsView.form.placeholder",
@@ -137,6 +151,12 @@ export const ENV_GROUPS = [
     titleKey: "adminEnvsView.groups.microsoftSignIn.title",
     descriptionKey: "adminEnvsView.groups.microsoftSignIn.description",
     secretNames: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET"],
+  },
+  {
+    id: "entraIdSignIn",
+    titleKey: "adminEnvsView.groups.entraIdSignIn.title",
+    descriptionKey: "adminEnvsView.groups.entraIdSignIn.description",
+    secretNames: ["ENTRA_ID_DIRECTORY_ID", "ENTRA_ID_CLIENT_ID", "ENTRA_ID_CLIENT_SECRET"],
   },
   {
     id: "slackSignIn",
@@ -204,6 +224,7 @@ export type EnvGroupId = (typeof ENV_GROUPS)[number]["id"];
 export const OAUTH_LOGIN_METHOD_ENV_GROUP_IDS = {
   [OAUTH_LOGIN_METHODS.GOOGLE]: "googleSignIn",
   [OAUTH_LOGIN_METHODS.MICROSOFT]: "microsoftSignIn",
+  [OAUTH_LOGIN_METHODS.ENTRA_ID]: "entraIdSignIn",
   [OAUTH_LOGIN_METHODS.SLACK]: "slackSignIn",
 } as const satisfies Record<OAuthLoginMethod, EnvGroupId>;
 
@@ -218,6 +239,7 @@ export const ENV_STATUS = {
 export const ENV_GROUP_PRESENTATION = {
   googleSignIn: { icon: Google, category: "signIn", services: ["google_authorization"] },
   microsoftSignIn: { icon: Microsoft, category: "signIn", services: ["microsoft_authorization"] },
+  entraIdSignIn: { icon: EntraId, category: "signIn", services: ["entra_id_authorization"] },
   slackSignIn: { icon: Slack, category: "signIn", services: ["slack_authorization"] },
   microsoftCalendar: { icon: CalendarSync, category: "calendar", services: ["microsoft_calendar"] },
   payments: { icon: WalletCards, category: "payments", services: ["stripe"] },

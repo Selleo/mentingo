@@ -22,6 +22,10 @@ const NO_OAUTH_PROVIDERS = {
   SLACK_OAUTH_ENABLED: "false",
   SLACK_CLIENT_ID: "",
   SLACK_CLIENT_SECRET: "",
+  ENTRA_ID_OAUTH_ENABLED: "false",
+  ENTRA_ID_DIRECTORY_ID: "",
+  ENTRA_ID_CLIENT_ID: "",
+  ENTRA_ID_CLIENT_SECRET: "",
 };
 
 const createLoginMethodsService = (
@@ -117,6 +121,7 @@ describe("LoginMethodsService", () => {
     expect(loginMethods).toEqual({
       google: false,
       microsoft: false,
+      entraId: false,
       slack: false,
       magicLink: true,
       password: true,

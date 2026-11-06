@@ -110,10 +110,17 @@ describe("Native archive import (e2e)", () => {
     runAsTenant(currentActor.tenantId, () => importer.importArchive(zipPath, currentActor));
 
   it("imports a course into tenant-scoped rows with a distinct id and persisted originalId", async () => {
+    const learningOutcomes = {
+      en: Array.from({ length: 9 }, (_, index) => `Outcome ${index + 1}`),
+      pl: ["Rozpoznaj ryzyko", "Oceń wynik"],
+    };
+    const source = createNativeArchiveCourseSnapshot(STANDALONE_COURSE_ID);
+    const snapshot = {
+      ...source,
+      course: { ...source.course, learningOutcomes },
+    };
     const zipPath = await writeNativeArchiveZip(
-      createNativeArchiveImportInput(NATIVE_ARCHIVE_KIND.COURSE, [
-        createNativeArchiveCourseSnapshot(STANDALONE_COURSE_ID),
-      ]),
+      createNativeArchiveImportInput(NATIVE_ARCHIVE_KIND.COURSE, [snapshot]),
       temporaryDirectory,
     );
 
@@ -132,6 +139,7 @@ describe("Native archive import (e2e)", () => {
       id: targetId,
       originalId: STANDALONE_COURSE_ID,
       tenantId: actor.tenantId,
+      learningOutcomes,
     });
 
     const repeatedResult = await importArchive(zipPath);

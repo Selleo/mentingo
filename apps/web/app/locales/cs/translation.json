@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Přihlašovací odkaz",
     "password": "Heslo",
     "description": "Zvolte, jak se mohou lidé ve vaší organizaci přihlašovat.",
@@ -34,6 +35,8 @@
       "disabled": "Tento způsob přihlášení je vypnutý.",
       "missingConfiguration": "Nejprve přidejte přihlašovací údaje poskytovatele v nastavení prostředí.",
       "lastMethod": "Ponechte zapnutý alespoň jeden použitelný způsob přihlášení.",
+      "invalidDirectoryId": "Zadejte ID adresáře (tenanta) z registrace aplikace Entra ve formátu GUID.",
+      "untrustedDirectory": "Tento účet nepatří do adresáře Entra ID vaší organizace.",
       "save": "Způsoby přihlášení se nepodařilo uložit.",
       "load": "Způsoby přihlášení se nepodařilo načíst."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Živé školení propojené s tímto kurzem je neúplné a nelze jej exportovat.",
       "courseNotFound": "Kurz k exportu nebyl nalezen.",
       "categoryNotFound": "Kategorie kurzu nebyla nalezena."
+    },
+    "progress": {
+      "waiting": "Čekání na spuštění…",
+      "step": "Krok {{current}} z {{total}}",
+      "uploadingPackage": "Nahrávání balíčku",
+      "stages": {
+        "collecting-content": "Shromažďování obsahu kurzu",
+        "copying-files": "Kopírování souborů",
+        "packaging": "Balení",
+        "downloading": "Stahování balíčku",
+        "verifying": "Kontrola balíčku",
+        "uploading-files": "Nahrávání souborů",
+        "indexing": "Příprava obsahu AI",
+        "saving": "Ukládání kurzu"
+      }
     }
   },
   "aiConversations": {
@@ -784,6 +802,7 @@
     "continueWithGoogle": "Pokračujte s Googlem",
     "continueWithMicrosoft": "Pokračujte s Microsoftem",
     "continueWithSlack": "Pokračujte se Slackem",
+    "continueWithEntraId": "Pokračujte s Entra ID",
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku",
     "refreshPage": "Obnovit stránku",
@@ -1001,38 +1020,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Zpět",
-    "eyebrow": "Nastavení kurzu",
     "title": "Vytvořit nový kurz",
     "subtitle": "Vyberte standardní editor, balíček SCORM nebo balíček Mentingo.",
     "standard": {
       "title": "Standardní",
-      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
-      "features": {
-        "authoring": "Vytvořeno v nativním editoru kurzů",
-        "curriculum": "Kapitoly, lekce a kvízy spravované v Mentingu",
-        "translations": "Podpora jazyků a překladů kurzu",
-        "settings": "Ceny, stav a certifikáty jsou součástí"
-      }
+      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Vytvořte kurz z balíčku SCORM 1.2.",
-      "features": {
-        "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
-        "tracking": "Podpora dokončení SCO a runtime stavu",
-        "structure": "Struktura importovaného balíčku zachována",
-        "future": "Ceny, stav a certifikáty jsou součástí"
-      }
+      "description": "Vytvořte kurz z balíčku SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Balíček Mentingo",
-      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo.",
-      "features": {
-        "structure": "Obnovení struktury kurzu a překladů",
-        "settings": "Obnovení nastavení a metadat",
-        "assets": "Související soubory součástí",
-        "learningPath": "Podpora vzdělávacích cest a jejich kurzů"
-      }
+      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -2579,6 +2579,10 @@
         "title": "Přihlášení přes Slack",
         "description": "Umožněte uživatelům přihlásit se účtem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Přihlášení přes Entra ID",
+        "description": "Umožněte uživatelům přihlásit se pouze účty z adresáře Microsoft Entra ID vaší organizace."
+      },
       "microsoftCalendar": {
         "title": "Kalendář Microsoft",
         "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
@@ -2670,6 +2674,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Tajné tajemství klienta Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID adresáře (tenanta) Entra ID",
+        "description": "GUID ID adresáře (tenanta) z přehledu registrace aplikace. Přihlásit se mohou pouze účty z tohoto adresáře."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API klíč"
@@ -4414,6 +4428,11 @@
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
       "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu."
+    },
+    "preview": {
+      "title": "Prohlížíte si náhled kurzu",
+      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy, účastnit se aktivit a ukládat svůj postup.",
+      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy, účastnit se aktivit a sledovat svůj postup."
     }
   },
   "studentCourseView": {
@@ -4708,7 +4727,9 @@
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
-      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy"
+      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
+      "publicCoursePreview": "Náhled veřejných kurzů před zápisem",
+      "publicCoursePreviewDescription": "Přihlášení uživatelé si mohou prohlížet bezplatné veřejné kurzy bez zápisu. Kvízy, aktivity a ukládání postupu vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -4721,7 +4742,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
-      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila"
+      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila",
+      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno"
     }
   },
   "registrationFormBuilder": {
@@ -8418,7 +8440,8 @@
       "qa": "Otázka a odpověď",
       "development_path": "Vzdělávací cesta",
       "resource": "Materiál",
-      "reference": "Zdroj"
+      "reference": "Zdroj",
+      "helpdesk": "Návod nápovědy"
     },
     "title": "Asistent",
     "eyebrow": "Znalosti z vaší platformy",
@@ -9121,6 +9144,43 @@
       "inUse_few": "„{{name}}“ používají {{count}} kompetence. Před smazáním je přesuňte do jiné kategorie.",
       "inUse_many": "„{{name}}“ používá {{count}} kompetencí. Před smazáním je přesuňte do jiné kategorie.",
       "inUse_other": "„{{name}}“ používá {{count}} kompetencí. Před smazáním je přesuňte do jiné kategorie."
+    }
+  },
+  "helpdesk": {
+    "demo": "Ukázka",
+    "title": "Nápověda a návody",
+    "heading": "Jak vám můžeme pomoci?",
+    "subtitle": "Najděte další krok v Mentingo.",
+    "loading": "Načítání nápovědy",
+    "askAssistant": "Zeptat se asistenta",
+    "assistantHint": "Popište, co chcete udělat.",
+    "search": "Vyhledejte téma nebo položte otázku…",
+    "clear": "Vymazat hledání",
+    "results": "Návody",
+    "suggested": "Doporučeno pro vás",
+    "empty": "Žádné návody nenalezeny",
+    "emptyHint": "Zkuste kratší frázi nebo jiné téma.",
+    "chapterCount": "{{count}} kapitol",
+    "timeline": "Časová osa videa",
+    "jumpHint": "Vyberte kapitolu a přejděte na daný krok",
+    "chapters": "V tomto videu",
+    "related": "Objevte další funkce",
+    "domains": {
+      "authoring": "Úprava kurzů",
+      "paths": "Rozvojové cesty",
+      "learning": "Učení"
+    },
+    "keywordFallback": "Vyhledávání AI není dostupné. Zobrazují se shody klíčových slov.",
+    "languageFallback": "Video je dostupné v jazyce {{language}}",
+    "retry": "Zkusit znovu",
+    "back": "Zpět do Mentingo",
+    "chapterUnavailable": "Tato kapitola již není dostupná. Video se přehrává od začátku.",
+    "errors": {
+      "unavailable": "Návody jsou dočasně nedostupné. Zkuste to znovu.",
+      "versionUnavailable": "Pro tuto verzi Mentingo zatím není nápověda dostupná.",
+      "disabled": "Návody nápovědy nejsou v této instalaci zapnuté.",
+      "notFound": "Tento návod není pro vaši verzi Mentingo dostupný.",
+      "invalidRequest": "Vyberte dostupný návod nebo upravte vyhledávání a zkuste to znovu."
     }
   }
 }

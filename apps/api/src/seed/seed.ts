@@ -60,6 +60,7 @@ import {
   seedTruncateAllTables,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
+import { selfOnboardingCourses } from "./self-onboarding-data-seed";
 import { admin, contentCreators, students, trainers } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
@@ -170,7 +171,15 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
   const [createdGlobalSettings] = await database
     .insert(settings)
     .values({
-      settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+      settings: settingsToJSONBuildObject(
+        process.env.SELF_ONBOARDING_DEMO === "1"
+          ? {
+              ...DEFAULT_GLOBAL_SETTINGS,
+              learningPathsEnabled: true,
+              inviteOnlyRegistration: false,
+            }
+          : DEFAULT_GLOBAL_SETTINGS,
+      ),
       tenantId,
     })
     .returning({
@@ -296,11 +305,24 @@ async function createDeadlineGroups(
   const createdGroups = await db
     .insert(groups)
     .values(
-      deadlineGroupsData.map((groupData) => ({
-        name: sql`json_build_object('en', ${groupData.name}::text)`,
-        characteristic: sql`json_build_object('en', ${groupData.characteristic}::text)`,
-        tenantId,
-      })),
+      deadlineGroupsData.map((groupData, index) => {
+        if (process.env.SELF_ONBOARDING_DEMO === "1") {
+          const polishName = index === 0 ? "Akademia zespołu" : "Zespół analityczny";
+          const polishDescription =
+            "Uczestnicy rozwijający umiejętności w ramach wspólnego planu nauki.";
+          return {
+            name: sql`json_build_object('en', ${groupData.name}::text, 'pl', ${polishName}::text)`,
+            characteristic: sql`json_build_object('en', ${groupData.characteristic}::text, 'pl', ${polishDescription}::text)`,
+            availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+            tenantId,
+          };
+        }
+        return {
+          name: sql`json_build_object('en', ${groupData.name}::text)`,
+          characteristic: sql`json_build_object('en', ${groupData.characteristic}::text)`,
+          tenantId,
+        };
+      }),
     )
     .returning();
 
@@ -676,19 +698,20 @@ async function seed() {
         emailSuffix,
       );
       const createdTrainers = await createUsers(trainers, tenantId, "password", emailSuffix);
-      await createUsers(
-        [
-          {
-            email: "student0@example.com",
-            firstName: faker.person.firstName(),
-            lastName: "Student",
-            roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
-          },
-        ],
-        tenantId,
-        "password",
-        emailSuffix,
-      );
+      if (process.env.SELF_ONBOARDING_DEMO !== "1")
+        await createUsers(
+          [
+            {
+              email: "student0@example.com",
+              firstName: faker.person.firstName(),
+              lastName: "Student",
+              roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
+            },
+          ],
+          tenantId,
+          "password",
+          emailSuffix,
+        );
 
       const createdStudentIds = createdStudents.map((student) => student.id);
       const creatorCourseIds = [
@@ -701,10 +724,17 @@ async function seed() {
       console.log("Created or found content creators user:", createdContentCreators);
       console.log("Created or found trainers user:", createdTrainers);
 
-      const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
+      const createdCourses = await createNiceCourses(
+        creatorCourseIds,
+        db,
+        process.env.SELF_ONBOARDING_DEMO === "1" ? selfOnboardingCourses : niceCourses,
+        tenantId,
+      );
       console.log("✨✨✨Created nice courses✨✨✨");
-      await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
-      console.log("🧪 Created e2e courses");
+      if (process.env.SELF_ONBOARDING_DEMO !== "1") {
+        await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
+        console.log("🧪 Created e2e courses");
+      }
       await refreshSeedSearchDocuments(db, tenantId);
 
       console.log("Selected random courses for student from createdCourses");

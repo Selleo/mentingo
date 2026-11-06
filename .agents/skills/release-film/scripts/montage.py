@@ -23,7 +23,7 @@ from urllib.parse import urlsplit
 import language
 
 VIEWPORT = (1600, 900)
-USABLE = (8, 0, 1584, 890)  # film area of the 1600x900 page above the clock strip (even sizes for ffmpeg)
+USABLE = (0, 0, *VIEWPORT)  # CDP captures have no clock strip: retain sheets, drawers and footer controls at every edge.
 FPS = 30
 SENTENCE_END = re.compile(r'[.!?…]["”»)]*$')
 # abbreviations a sentence goes on after, even before a capital or a digit (np. Excel, ok. 5 stron, e.g. PDF); those

@@ -95,7 +95,10 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
+      command:
+        process.env.SELF_ONBOARDING_DEMO === "1"
+          ? "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed && pnpm run start"
+          : "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
       timeout: 240 * 1000,
       reuseExistingServer: false,

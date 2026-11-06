@@ -1836,6 +1836,61 @@
         ]
       }
     },
+    "/api/integration/native-archive/jobs/{jobId}/download-url": {
+      "get": {
+        "operationId": "IntegrationNativeArchiveController_getCourseArchiveDownloadUrl",
+        "summary": "Get a download URL for a native archive",
+        "description": "Returns a short-lived storage URL for the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. Fetch the URL without API headers; the download itself does not pass through the API. The URL must be used before it expires; ask for a new one if it does.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseArchiveDownloadUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/plugins/content-marketplace": {
       "put": {
         "operationId": "IntegrationContentMarketplaceController_saveContentMarketplaceConnection",
@@ -2636,6 +2691,18 @@
                 "type": "string"
               },
               {
+                "const": "ENTRA_ID_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "ENTRA_ID_DIRECTORY_ID",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -2765,6 +2832,18 @@
                     },
                     {
                       "const": "SLACK_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ENTRA_ID_DIRECTORY_ID",
                       "type": "string"
                     },
                     {
@@ -4279,13 +4358,94 @@
                     "type": "null"
                   }
                 ]
+              },
+              "progress": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "anyOf": [
+                          {
+                            "const": "collecting-content",
+                            "type": "string"
+                          },
+                          {
+                            "const": "copying-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "packaging",
+                            "type": "string"
+                          },
+                          {
+                            "const": "downloading",
+                            "type": "string"
+                          },
+                          {
+                            "const": "verifying",
+                            "type": "string"
+                          },
+                          {
+                            "const": "uploading-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "indexing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "saving",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "percent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "stage",
+                      "percent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "jobId",
               "state",
               "result",
-              "failedReason"
+              "failedReason",
+              "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseArchiveDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "expiresInSeconds": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "url",
+              "expiresInSeconds"
             ]
           }
         },

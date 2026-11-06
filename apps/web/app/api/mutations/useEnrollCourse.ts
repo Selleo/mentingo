@@ -1,6 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { AVAILABLE_COURSES_QUERY_KEY } from "~/api/queries/useAvailableCourses";
+import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { STUDENT_COURSES_QUERY_KEY } from "~/api/queries/useStudentCourses";
+import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -22,7 +26,14 @@ export function useEnrollCourse() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["course"] }),
+        queryClient.invalidateQueries({ queryKey: ["lesson"] }),
+        queryClient.invalidateQueries({ queryKey: [AVAILABLE_COURSES_QUERY_KEY] }),
+        queryClient.invalidateQueries({ queryKey: [STUDENT_COURSES_QUERY_KEY] }),
+        queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY }),
+      ]);
       toast({
         variant: "default",
         description: t("studentCoursesView.other.successfullyEnrolledToCourse"),

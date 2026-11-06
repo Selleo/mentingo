@@ -1,12 +1,14 @@
 import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { buffer } from "node:stream/consumers";
 import { pipeline } from "node:stream/promises";
 
 import archiver from "archiver";
+import unzipper from "unzipper";
 
 import {
   NATIVE_ARCHIVE_FORMAT,
@@ -14,7 +16,7 @@ import {
   NATIVE_ARCHIVE_LIMITS,
 } from "../../native-archive.constants";
 import { buildNativeArchive, readNativeArchive } from "../native-archive-zip.service";
-import { extractVerifiedAssets } from "../native-archive-zip.utils";
+import { verifyAssetDigests } from "../native-archive-zip.utils";
 
 import type { UUIDType } from "src/common";
 
@@ -81,7 +83,10 @@ describe("native archive ZIP", () => {
           "course/a.txt",
           "course/b.txt",
         ]);
-        expect(parsed.assetFiles.size).toBe(1);
+        expect(new Set(parsed.manifest.assets.map((asset) => asset.path)).size).toBe(1);
+        expect((await buffer(parsed.openAsset(parsed.manifest.assets[0]!.path))).toString()).toBe(
+          "same bytes",
+        );
       } finally {
         await parsed.cleanup();
       }
@@ -98,7 +103,7 @@ describe("native archive ZIP", () => {
     );
   });
 
-  it("aborts extraction when streamed bytes exceed the ZIP declared entry size", async () => {
+  it("aborts verification when streamed bytes exceed the ZIP declared entry size", async () => {
     const digest = "a".repeat(64);
     const assetPath = `assets/${digest}`;
     const stream = jest.fn(() => Readable.from([Buffer.from("payload is too large")]));
@@ -113,14 +118,14 @@ describe("native archive ZIP", () => {
       },
     ];
 
-    await expect(extractVerifiedAssets(assets, entriesByPath, temporaryDirectory)).rejects.toThrow(
+    await expect(verifyAssetDigests(assets, entriesByPath)).rejects.toThrow(
       "nativeArchive.error.assetTooLarge",
     );
     expect(stream).toHaveBeenCalledTimes(1);
     expect(await readdir(temporaryDirectory)).toEqual([]);
   });
 
-  it("caps actual bytes extracted across asset entries", async () => {
+  it("caps actual bytes verified across asset entries without writing any of them", async () => {
     const limit = jest.replaceProperty(NATIVE_ARCHIVE_LIMITS, "MAX_UNCOMPRESSED_BYTES", 12);
 
     try {
@@ -145,11 +150,10 @@ describe("native archive ZIP", () => {
         ]),
       );
 
-      await expect(
-        extractVerifiedAssets(assets, entriesByPath, temporaryDirectory),
-      ).rejects.toThrow("nativeArchive.error.assetTooLarge");
-      expect((await stat(path.join(temporaryDirectory, assets[0]!.sha256))).size).toBe(8);
-      expect(await readdir(temporaryDirectory)).toEqual([assets[0]!.sha256]);
+      await expect(verifyAssetDigests(assets, entriesByPath)).rejects.toThrow(
+        "nativeArchive.error.assetTooLarge",
+      );
+      expect(await readdir(temporaryDirectory)).toEqual([]);
     } finally {
       limit.restore();
     }
@@ -198,5 +202,105 @@ describe("native archive ZIP", () => {
     await writeArchive({ ...validCourseManifest(), ...overrides });
 
     await expect(readNativeArchive(zipPath)).rejects.toThrow("nativeArchive.error.invalidArchive");
+  });
+
+  async function writeBuiltArchive(fileContents: Record<string, string>) {
+    const archive = await buildNativeArchive({
+      kind: NATIVE_ARCHIVE_KIND.COURSE,
+      rootId: COURSE_ID,
+      courses: { [COURSE_ID]: { course: { id: COURSE_ID }, category: {} } },
+      files: Object.entries(fileContents).map(([sourceReference, content]) => ({
+        path: sourceReference,
+        sourceReference,
+        contentType: "application/octet-stream",
+        open: async () => Readable.from(Buffer.from(content)),
+      })),
+    });
+
+    try {
+      await pipeline(archive.stream, createWriteStream(zipPath));
+    } finally {
+      await archive.cleanup();
+    }
+  }
+
+  it("stores assets uncompressed and compresses the JSON documents", async () => {
+    await writeBuiltArchive({ "course/video.mp4": "x".repeat(4096) });
+
+    const { files } = await unzipper.Open.file(zipPath);
+    const compressionMethodByKind = Object.fromEntries(
+      files.map((file) => [
+        file.path.startsWith("assets/") ? "asset" : file.path,
+        file.compressionMethod,
+      ]),
+    );
+
+    expect(compressionMethodByKind).toEqual({
+      asset: 0,
+      "manifest.json": 8,
+      [`courses/${COURSE_ID}.json`]: 8,
+    });
+  });
+
+  it("serves only manifest assets from an opened archive", async () => {
+    await writeBuiltArchive({ "course/handout.pdf": "handout bytes" });
+    const parsed = await readNativeArchive(zipPath);
+
+    try {
+      const [handout] = parsed.manifest.assets;
+
+      expect((await buffer(parsed.openAsset(handout!.path))).toString()).toBe("handout bytes");
+      expect(() => parsed.openAsset("manifest.json")).toThrow("nativeArchive.error.missingAsset");
+    } finally {
+      await parsed.cleanup();
+    }
+  });
+
+  it("rejects an asset whose bytes do not match its manifest digest", async () => {
+    const content = Buffer.from("tampered bytes");
+    const declaredDigest = createHash("sha256").update("original bytes").digest("hex");
+    const assets = [
+      {
+        path: `assets/${declaredDigest}`,
+        sha256: declaredDigest,
+        byteLength: content.length,
+        contentType: "application/octet-stream",
+        sourceReference: "course/resource",
+      },
+    ];
+    const entriesByPath = new Map([
+      [
+        assets[0]!.path,
+        { uncompressedSize: content.length, stream: () => Readable.from([content]) } as never,
+      ],
+    ]);
+
+    await expect(verifyAssetDigests(assets, entriesByPath)).rejects.toThrow(
+      "nativeArchive.error.invalidArchive",
+    );
+  });
+
+  it("estimates the package size from each distinct asset and its documents", async () => {
+    const courseDocument = { course: { id: COURSE_ID }, category: {} };
+    const archive = await buildNativeArchive({
+      kind: NATIVE_ARCHIVE_KIND.COURSE,
+      rootId: COURSE_ID,
+      courses: { [COURSE_ID]: courseDocument },
+      files: ["course/a.txt", "course/b.txt", "course/c.txt"].map((sourceReference, index) => ({
+        path: sourceReference,
+        sourceReference,
+        contentType: "application/octet-stream",
+        open: async () => Readable.from(Buffer.from(index < 2 ? "same bytes" : "other")),
+      })),
+    });
+
+    try {
+      expect(archive.estimatedByteLength).toBe(
+        "same bytes".length + "other".length + JSON.stringify(courseDocument).length,
+      );
+    } finally {
+      archive.stream.destroy();
+      await archive.cleanup();
+    }
   });
 });

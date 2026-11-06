@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { COURSE_STATUSES, PERMISSIONS } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
 import { canUpdateCourseByAuthor, resolveCourseExperienceState } from "../CourseAccessProvider";
@@ -16,6 +16,70 @@ const createCourse = (
   }) as GetCourseResponse["data"];
 
 describe("resolveCourseExperienceState", () => {
+  it("uses read-only preview for a non-enrolled learner when public previews are enabled", () => {
+    const state = resolveCourseExperienceState({
+      course: createCourse({
+        status: COURSE_STATUSES.PUBLISHED,
+        priceInCents: 0,
+        isArchived: false,
+      }),
+      forcePreviewMode: false,
+      currentUserId: "student-1",
+      canUseLearningMode: false,
+      canUpdateLearningProgress: true,
+      activeLearningModeCourseIds: [],
+      publicCoursePreviewEnabled: true,
+    });
+
+    expect(state.isPreviewMode).toBe(true);
+    expect(state.isEffectiveStudentExperience).toBe(false);
+  });
+
+  it.each([
+    { name: "disabled setting", enabled: false, overrides: {} },
+    { name: "enrolled learner", enabled: true, overrides: { enrolled: true } },
+    { name: "paid course", enabled: true, overrides: { priceInCents: 1000 } },
+    { name: "private course", enabled: true, overrides: { status: COURSE_STATUSES.PRIVATE } },
+    { name: "draft course", enabled: true, overrides: { status: COURSE_STATUSES.DRAFT } },
+    { name: "archived course", enabled: true, overrides: { isArchived: true } },
+  ])("preserves existing learner behavior for $name", ({ enabled, overrides }) => {
+    const state = resolveCourseExperienceState({
+      course: createCourse({
+        status: COURSE_STATUSES.PUBLISHED,
+        priceInCents: 0,
+        isArchived: false,
+        ...overrides,
+      }),
+      forcePreviewMode: false,
+      currentUserId: "student-1",
+      canUseLearningMode: false,
+      canUpdateLearningProgress: true,
+      activeLearningModeCourseIds: [],
+      publicCoursePreviewEnabled: enabled,
+    });
+
+    expect(state.isPreviewMode).toBe(false);
+  });
+
+  it("keeps admin Learn mode interactive when public previews are enabled", () => {
+    const state = resolveCourseExperienceState({
+      course: createCourse({
+        status: COURSE_STATUSES.PUBLISHED,
+        priceInCents: 0,
+        isArchived: false,
+      }),
+      forcePreviewMode: false,
+      currentUserId: "admin-1",
+      canUseLearningMode: true,
+      canUpdateLearningProgress: true,
+      activeLearningModeCourseIds: ["course-1"],
+      publicCoursePreviewEnabled: true,
+    });
+
+    expect(state.isPreviewMode).toBe(false);
+    expect(state.isEffectiveStudentExperience).toBe(true);
+  });
+
   it("uses preview mode for visitors without a user session", () => {
     const state = resolveCourseExperienceState({
       course: createCourse(),

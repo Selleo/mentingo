@@ -3,6 +3,7 @@ import { match } from "ts-pattern";
 
 import Viewer from "~/components/RichText/Viever";
 import { RICH_TEXT_VIEWER_VARIANT } from "~/components/RichText/viewerTypes";
+import { useOptionalCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
@@ -42,6 +43,17 @@ export const LessonContentRenderer = memo(
     onVideoEnded,
     videoCoverageTracking,
   }: LessonContentRendererProps) => {
+    const courseExperience = useOptionalCourseAccessProvider();
+    const isRestrictedPreviewActivity =
+      courseExperience?.isPreviewMode &&
+      ["ai_mentor", "scorm", "live_training"].includes(lesson.type);
+
+    if (isRestrictedPreviewActivity) {
+      return (
+        <Viewer variant={RICH_TEXT_VIEWER_VARIANT.CONTENT} content={lesson.description ?? ""} />
+      );
+    }
+
     return match(lesson.type)
       .with("content", () => (
         <Viewer

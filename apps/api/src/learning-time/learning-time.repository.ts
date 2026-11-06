@@ -56,6 +56,27 @@ export class LearningTimeRepository {
     return result?.courseId ?? null;
   }
 
+  async getEnrolledCourseIdByLessonId(
+    lessonId: UUIDType,
+    userId: UUIDType,
+  ): Promise<UUIDType | null> {
+    const [result] = await this.db
+      .select({ courseId: chapters.courseId })
+      .from(lessons)
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .where(eq(lessons.id, lessonId));
+
+    return result?.courseId ?? null;
+  }
+
   async getLearningTimeForUser(userId: UUIDType, lessonId: UUIDType) {
     const [result] = await this.db
       .select({

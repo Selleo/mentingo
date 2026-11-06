@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "@remix-run/react";
+import { Link, useLocation, useNavigate, useParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,8 @@ import { CopyUrlButton } from "~/components/CopyUrlButton/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
@@ -32,6 +34,8 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
   const { t } = useTranslation();
   const { id = "" } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isPreviewMode } = useCourseAccessProvider();
   const { language } = useLanguageStore();
 
   const { mutateAsync: enrollCourse } = useEnrollCourse();
@@ -89,6 +93,14 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
         {t("studentCourseView.sideSection.optionHeader")}
       </h4>
       <div className="flex flex-col gap-y-2">
+        {isPreviewMode && currentUser && (
+          <Button
+            variant="outline"
+            onClick={() => navigateToNextLesson(course, navigate, { openFirstLesson: true })}
+          >
+            {t("adminCourseView.common.preview")}
+          </Button>
+        )}
         <CopyUrlButton variant="outline" className="gap-x-2">
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>

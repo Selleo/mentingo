@@ -120,15 +120,14 @@ export class LearningTimeService implements OnModuleInit {
     }
   }
 
-  private async hasLesson(
+  private async getEnrolledLessonCourseId(
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
-  ): Promise<boolean> {
-    const { tenantId } = socket.data.user;
-    return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      const courseId = await this.learningTimeRepository.getCourseIdByLessonId(payload.lessonId);
-      return Boolean(courseId);
-    });
+  ): Promise<UUIDType | null> {
+    const { tenantId, userId } = socket.data.user;
+    return this.tenantDbRunnerService.runWithTenant(tenantId, () =>
+      this.learningTimeRepository.getEnrolledCourseIdByLessonId(payload.lessonId, userId),
+    );
   }
 
   private async handleJoinLesson(
@@ -139,10 +138,11 @@ export class LearningTimeService implements OnModuleInit {
       return;
     }
 
-    if (!(await this.hasLesson(socket, payload))) return;
+    const courseId = await this.getEnrolledLessonCourseId(socket, payload);
+    if (!courseId) return;
 
     const userId = socket.data.user.userId;
-    const { lessonId, courseId } = payload;
+    const { lessonId } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id, payload.learningStateId);
 
     const session: LessonSession = {
@@ -201,11 +201,12 @@ export class LearningTimeService implements OnModuleInit {
       return;
     }
 
-    if (!(await this.hasLesson(socket, payload))) return;
+    const courseId = await this.getEnrolledLessonCourseId(socket, payload);
+    if (!courseId) return;
 
     const userId = socket.data.user.userId;
     const tenantId = socket.data.user.tenantId;
-    const { lessonId, courseId, isActive } = payload;
+    const { lessonId, isActive } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id, payload.learningStateId);
     const session = await this.getSession(sessionKey);
 

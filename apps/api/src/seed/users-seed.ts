@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SELF_ONBOARDING_DEMO_PEOPLE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import type { UsersSeed } from "./seed.types";
 
@@ -56,3 +56,38 @@ export const trainers: UsersSeed = [
     lastName: "Trainer 2",
   },
 ];
+
+if (process.env.SELF_ONBOARDING_DEMO === "1") {
+  students.splice(
+    0,
+    students.length,
+    {
+      ...SELF_ONBOARDING_DEMO_PEOPLE[SYSTEM_ROLE_SLUGS.STUDENT],
+      roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
+    },
+    {
+      email: "emma.thompson@example.com",
+      firstName: "Emma",
+      lastName: "Thompson",
+      roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
+    },
+    {
+      email: "mateusz.zielinski@example.com",
+      firstName: "Mateusz",
+      lastName: "Zielinski",
+      roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
+    },
+  );
+  admin.splice(0, admin.length, {
+    ...SELF_ONBOARDING_DEMO_PEOPLE[SYSTEM_ROLE_SLUGS.ADMIN],
+    roleSlug: SYSTEM_ROLE_SLUGS.ADMIN,
+  });
+  contentCreators.splice(0, contentCreators.length, {
+    ...SELF_ONBOARDING_DEMO_PEOPLE[SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
+    roleSlug: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+  });
+  trainers.splice(0, trainers.length, {
+    ...SELF_ONBOARDING_DEMO_PEOPLE[SYSTEM_ROLE_SLUGS.TRAINER],
+    roleSlug: SYSTEM_ROLE_SLUGS.TRAINER,
+  });
+}

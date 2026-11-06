@@ -1,0 +1,462 @@
+{
+  "schemaVersion": 1,
+  "areas": [
+    {
+      "key": "development-paths",
+      "title": "Development paths",
+      "specPaths": [
+        "docs/specs/learning-paths-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/development-paths",
+          "pageKey": "development-paths"
+        },
+        {
+          "prefix": "/admin/development-paths",
+          "pageKey": "development-paths"
+        }
+      ]
+    },
+    {
+      "key": "course-authoring",
+      "title": "Course authoring",
+      "specPaths": [
+        "docs/specs/course-authoring-management-business-spec.md",
+        "docs/specs/course-overview-management-business-spec.md",
+        "docs/specs/curriculum-lesson-builder-business-spec.md",
+        "docs/specs/ai-course-generation-business-spec.md",
+        "docs/specs/ai-course-translation-business-spec.md",
+        "docs/specs/course-duplication-business-spec.md",
+        "docs/specs/course-sharing-business-spec.md",
+        "docs/specs/course-authoring-business-spec.md",
+        "docs/specs/resource-library-business-spec.md",
+        "docs/specs/course-duration-estimates-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/courses",
+          "pageKey": "admin.course.curriculum"
+        },
+        {
+          "prefix": "/admin/beta-courses",
+          "pageKey": "admin.course.curriculum"
+        }
+      ]
+    },
+    {
+      "key": "course-learning",
+      "title": "Learning in courses",
+      "specPaths": [
+        "docs/specs/lesson-delivery-learning-mode-business-spec.md",
+        "docs/specs/course-enrollment-business-spec.md",
+        "docs/specs/course-repetition-business-spec.md",
+        "docs/specs/quiz-assessment-engine-business-spec.md",
+        "docs/specs/scorm-support-business-spec.md",
+        "docs/specs/course-discussions-business-spec.md",
+        "docs/specs/certificates-business-spec.md",
+        "docs/specs/learning-time-tracking-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/courses",
+          "pageKey": "student.course"
+        },
+        {
+          "prefix": "/course",
+          "pageKey": "student.course"
+        }
+      ]
+    },
+    {
+      "key": "knowledge-base-articles",
+      "title": "Knowledge base articles",
+      "specPaths": [
+        "docs/specs/knowledge-base-articles-business-spec.md",
+        "docs/specs/knowledge-base-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/articles",
+          "pageKey": "articles"
+        }
+      ]
+    },
+    {
+      "key": "news",
+      "title": "News",
+      "specPaths": [
+        "docs/specs/news-hub-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/news",
+          "pageKey": "news"
+        }
+      ]
+    },
+    {
+      "key": "authentication",
+      "title": "Account access",
+      "specPaths": [
+        "docs/specs/authentication-account-access-business-spec.md",
+        "docs/specs/mentingo-mcp-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/auth",
+          "pageKey": "authentication"
+        },
+        {
+          "prefix": "/oauth/connect",
+          "pageKey": "authentication"
+        }
+      ]
+    },
+    {
+      "key": "dashboard",
+      "title": "Personal dashboard",
+      "specPaths": [
+        "docs/specs/personal-dashboard-business-spec.md",
+        "docs/specs/featured-course-business-spec.md",
+        "docs/specs/global-search-business-spec.md",
+        "docs/specs/onboarding-tours-business-spec.md",
+        "docs/specs/self-onboarding-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/",
+          "pageKey": "dashboard"
+        },
+        {
+          "prefix": "/dashboard",
+          "pageKey": "dashboard"
+        }
+      ]
+    },
+    {
+      "key": "assistant",
+      "title": "AI assistant",
+      "specPaths": [
+        "docs/specs/assistant-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/assistant",
+          "pageKey": "assistant"
+        }
+      ]
+    },
+    {
+      "key": "ai-mentor",
+      "title": "AI mentor practice",
+      "specPaths": [
+        "docs/specs/ai-mentor-lessons-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/ai-mentor/practice",
+          "pageKey": "ai-mentor"
+        }
+      ]
+    },
+    {
+      "key": "phishing",
+      "title": "Phishing simulations",
+      "specPaths": [
+        "docs/specs/phishing-simulation-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/phishing",
+          "pageKey": "phishing"
+        }
+      ]
+    },
+    {
+      "key": "content-marketplace",
+      "title": "Content marketplace",
+      "specPaths": [
+        "docs/specs/content-marketplace-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/content-marketplace",
+          "pageKey": "content-marketplace"
+        }
+      ]
+    },
+    {
+      "key": "notifications",
+      "title": "Announcements and notifications",
+      "specPaths": [
+        "docs/specs/announcements-notifications-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/notifications",
+          "pageKey": "notifications"
+        }
+      ]
+    },
+    {
+      "key": "personal-settings",
+      "title": "Settings and personalization",
+      "specPaths": [
+        "docs/specs/organization-settings-business-spec.md",
+        "docs/specs/language-localization-business-spec.md",
+        "docs/specs/platform-branding-theme-business-spec.md",
+        "docs/specs/registration-form-builder-business-spec.md",
+        "docs/specs/role-permission-management-business-spec.md",
+        "docs/specs/support-mode-business-spec.md",
+        "docs/specs/dynamic-pwa-branding-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/settings",
+          "pageKey": "settings"
+        }
+      ]
+    },
+    {
+      "key": "provider-information",
+      "title": "Provider information",
+      "specPaths": [
+        "docs/specs/provider-information-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/provider-information",
+          "pageKey": "provider-information"
+        }
+      ]
+    },
+    {
+      "key": "profiles",
+      "title": "User profiles",
+      "specPaths": [
+        "docs/specs/user-management-business-spec.md",
+        "docs/specs/personal-dashboard-business-spec.md",
+        "docs/specs/statistics-analytics-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/profile",
+          "pageKey": "profiles"
+        }
+      ]
+    },
+    {
+      "key": "calendar",
+      "title": "Calendar",
+      "specPaths": [
+        "docs/specs/calendar-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/calendar",
+          "pageKey": "calendar"
+        }
+      ]
+    },
+    {
+      "key": "reports",
+      "title": "Reports and analytics",
+      "specPaths": [
+        "docs/specs/reports-business-spec.md",
+        "docs/specs/statistics-analytics-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/reports",
+          "pageKey": "reports"
+        }
+      ]
+    },
+    {
+      "key": "qa",
+      "title": "Questions and answers",
+      "specPaths": [
+        "docs/specs/qa-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/qa",
+          "pageKey": "qa"
+        }
+      ]
+    },
+    {
+      "key": "live-training",
+      "title": "Live training",
+      "specPaths": [
+        "docs/specs/live-training-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/live-training",
+          "pageKey": "live-training"
+        }
+      ]
+    },
+    {
+      "key": "environment-configuration",
+      "title": "Environment and integrations",
+      "specPaths": [
+        "docs/specs/environment-integration-configuration-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/envs",
+          "pageKey": "environment-configuration"
+        }
+      ]
+    },
+    {
+      "key": "users",
+      "title": "User management",
+      "specPaths": [
+        "docs/specs/user-management-business-spec.md",
+        "docs/specs/group-manager-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/users",
+          "pageKey": "users"
+        }
+      ]
+    },
+    {
+      "key": "automations",
+      "title": "Automations",
+      "specPaths": [
+        "docs/specs/automations-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/automations",
+          "pageKey": "automations"
+        },
+        {
+          "prefix": "/admin/automation-logs",
+          "pageKey": "automations"
+        }
+      ]
+    },
+    {
+      "key": "email-templates",
+      "title": "Email templates",
+      "specPaths": [
+        "docs/specs/email-template-builder-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/email-templates",
+          "pageKey": "email-templates"
+        }
+      ]
+    },
+    {
+      "key": "categories",
+      "title": "Course categories",
+      "specPaths": [
+        "docs/specs/category-management-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/categories",
+          "pageKey": "categories"
+        }
+      ]
+    },
+    {
+      "key": "groups",
+      "title": "Groups",
+      "specPaths": [
+        "docs/specs/group-management-business-spec.md",
+        "docs/specs/group-manager-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/groups",
+          "pageKey": "groups"
+        }
+      ]
+    },
+    {
+      "key": "promotion-codes",
+      "title": "Billing and promotion codes",
+      "specPaths": [
+        "docs/specs/billing-promotion-codes-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/promotion-codes",
+          "pageKey": "promotion-codes"
+        }
+      ]
+    },
+    {
+      "key": "activity-logs",
+      "title": "Activity logs",
+      "specPaths": [
+        "docs/specs/activity-logs-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/activity-logs",
+          "pageKey": "activity-logs"
+        }
+      ]
+    },
+    {
+      "key": "ai-conversations",
+      "title": "AI conversations",
+      "specPaths": [
+        "docs/specs/ai-conversations-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/ai-conversations",
+          "pageKey": "ai-conversations"
+        }
+      ]
+    },
+    {
+      "key": "tenants",
+      "title": "Tenant administration",
+      "specPaths": [
+        "docs/specs/tenant-administration-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/super-admin/tenants",
+          "pageKey": "tenants"
+        }
+      ]
+    },
+    {
+      "key": "competencies",
+      "title": "Competencies",
+      "specPaths": [
+        "docs/specs/competencies-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/competencies",
+          "pageKey": "competencies"
+        }
+      ]
+    }
+  ],
+  "excludedRoutes": [
+    {
+      "prefix": "/tenant-inactive",
+      "reason": "Tenant availability status is a utility screen, not an executable product tutorial."
+    },
+    {
+      "prefix": "/helpdesk/tutorials",
+      "reason": "Tutorial playback is the help destination; no recursive help-context recommendation is sent."
+    }
+  ]
+}

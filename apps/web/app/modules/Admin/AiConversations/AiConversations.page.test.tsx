@@ -68,7 +68,9 @@ describe("AI conversations inbox", () => {
     async (platform) => {
       listState.externalSource = platform.toLowerCase();
       renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
-      expect(await screen.findAllByRole("img", { name: platform })).toHaveLength(3);
+      const icons = await screen.findAllByRole("img", { name: platform });
+      expect(icons).toHaveLength(3);
+      icons.forEach((icon) => expect(icon.closest("div")?.firstElementChild?.tagName).toBe("H2"));
       expect(screen.queryByText(/Alex Learner/)).not.toBeInTheDocument();
     },
   );
@@ -138,8 +140,8 @@ describe("AI conversations inbox", () => {
     expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(screen.queryByText("Practice session")).not.toBeInTheDocument();
-    expect(screen.getByText("In progress")).toHaveClass("text-warning-800");
-    expect(screen.getByText("Completed")).toHaveClass("text-success-700");
-    expect(screen.getByText("Archived")).toHaveClass("text-neutral-500");
+    expect(screen.queryByText("In progress")).not.toBeInTheDocument();
+    expect(screen.queryByText("Completed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Archived")).not.toBeInTheDocument();
   });
 });

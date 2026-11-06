@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import {
+  NATIVE_ARCHIVE_JOB_STAGES,
   NATIVE_ARCHIVE_JOB_STATE,
   NATIVE_ARCHIVE_KIND,
   NATIVE_ARCHIVE_LOADER_MIN_VISIBLE_MS,
@@ -21,6 +22,8 @@ import { useToast } from "~/components/ui/use-toast";
 import { ScormPackageUploadField } from "~/modules/Admin/Scorm/components/ScormPackageUploadField";
 
 import { useMinimumVisibleDuration } from "../hooks/useMinimumVisibleDuration";
+
+import { NativeArchiveImportProgress } from "./NativeArchiveImportProgress";
 
 type NativeArchiveImportProps = {
   cancelTo?: string;
@@ -40,6 +43,7 @@ export function NativeArchiveImport({
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [uploadPercent, setUploadPercent] = useState(0);
   const notifiedJobId = useRef<string | null>(null);
   const { isVisible, start, afterMinimumDuration, stop } = useMinimumVisibleDuration(
     NATIVE_ARCHIVE_LOADER_MIN_VISIBLE_MS,
@@ -125,36 +129,43 @@ export function NativeArchiveImport({
     toast,
   ]);
 
+  const jobProgress =
+    status.data?.state === NATIVE_ARCHIVE_JOB_STATE.COMPLETED
+      ? { stage: NATIVE_ARCHIVE_JOB_STAGES.SAVING, percent: 100 }
+      : status.data?.progress;
+
   return (
     <section className="flex flex-col gap-5">
-      <ScormPackageUploadField
-        file={file ?? undefined}
-        disabled={isWorking}
-        readonlyTitle={file?.name}
-        readonlyDescription={t("nativeArchive.importing")}
-        showUploadDescription={false}
-        isProcessing={isWorking}
-        processingAriaLabel={
-          importMutation.isPending ? t("nativeArchive.uploading") : t("nativeArchive.importing")
-        }
-        icon={FolderUp}
-        inputAriaLabel={t("nativeArchive.selectFile")}
-        labels={{
-          upload: t("nativeArchive.uploadPrompt"),
-          drop: t("nativeArchive.dropPrompt"),
-          ready: t("nativeArchive.fileReady"),
-          replace: t("nativeArchive.replaceFile"),
-          remove: t("nativeArchive.removeFile"),
-        }}
-        onChange={(selectedFile) => {
-          setFile(selectedFile);
-          setJobId(null);
-        }}
-        onClear={() => {
-          setFile(null);
-          setJobId(null);
-        }}
-      />
+      {isWorking && file ? (
+        <NativeArchiveImportProgress
+          file={file}
+          isUploading={importMutation.isPending}
+          uploadPercent={uploadPercent}
+          jobProgress={jobProgress}
+        />
+      ) : (
+        <ScormPackageUploadField
+          file={file ?? undefined}
+          showUploadDescription={false}
+          icon={FolderUp}
+          inputAriaLabel={t("nativeArchive.selectFile")}
+          labels={{
+            upload: t("nativeArchive.uploadPrompt"),
+            drop: t("nativeArchive.dropPrompt"),
+            ready: t("nativeArchive.fileReady"),
+            replace: t("nativeArchive.replaceFile"),
+            remove: t("nativeArchive.removeFile"),
+          }}
+          onChange={(selectedFile) => {
+            setFile(selectedFile);
+            setJobId(null);
+          }}
+          onClear={() => {
+            setFile(null);
+            setJobId(null);
+          }}
+        />
+      )}
       <div className="flex flex-wrap justify-end gap-3">
         {onCancel && (
           <Button type="button" variant="outline" disabled={isWorking} onClick={onCancel}>
@@ -179,10 +190,11 @@ export function NativeArchiveImport({
             if (!file) return;
 
             start();
-            importMutation.mutate(file, {
-              onSuccess: setJobId,
-              onError: stop,
-            });
+            setUploadPercent(0);
+            importMutation.mutate(
+              { file, onUploadProgress: setUploadPercent },
+              { onSuccess: setJobId, onError: stop },
+            );
           }}
         >
           {importMutation.isPending

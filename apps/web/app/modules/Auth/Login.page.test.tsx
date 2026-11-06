@@ -22,6 +22,7 @@ const methods = vi.hoisted(() => ({
   google: false,
   microsoft: false,
   slack: false,
+  entraId: false,
 }));
 vi.mock("~/api/queries/useLoginMethods", () => ({ useLoginMethods: () => ({ data: methods }) }));
 

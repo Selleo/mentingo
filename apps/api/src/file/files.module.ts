@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
+import { isQueueSandboxProcess } from "src/queue/queue.constants";
 import { S3Module } from "src/s3/s3.module";
 
 import { FileController } from "./file.controller";
@@ -44,7 +45,7 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
     VideoMetadataQueueService,
     VideoMetadataRepository,
     VideoMetadataService,
-    VideoMetadataWorker,
+    ...(isQueueSandboxProcess() ? [] : [VideoMetadataWorker]),
   ],
   exports: [
     FileService,

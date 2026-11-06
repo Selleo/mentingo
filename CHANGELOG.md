@@ -1,3 +1,43 @@
+<a name="v4.29.0"></a>
+
+## [v4.29.0] - 05.11.2026
+
+### Features:
+
+- preview free public courses before enrollment ([#2156](https://github.com/Selleo/mentingo/issues/2156))
+
+- add searchable self-onboarding videos and automated publishing ([#2115](https://github.com/Selleo/mentingo/issues/2115))
+
+- enable single sign-on (SSO) with Microsoft Entra for easier login ([#2117](https://github.com/Selleo/mentingo/issues/2117))
+
+### Bug Fixes:
+
+- show enrolled course authors in the course's enrolled students list ([#2157](https://github.com/Selleo/mentingo/issues/2157))
+
+- preserve final tutorial captions when publishing videos ([#2147](https://github.com/Selleo/mentingo/issues/2147))
+
+- preserve learning outcomes in native course imports ([#2145](https://github.com/Selleo/mentingo/issues/2145))
+
+- reuse existing categories when importing course packages ([#2114](https://github.com/Selleo/mentingo/issues/2114))
+
+- move source icons right of AI conversation titles and hide row status ([#2112](https://github.com/Selleo/mentingo/issues/2112))
+
+- name native course exports after course titles ([#2109](https://github.com/Selleo/mentingo/issues/2109))
+
+- simplify course catalog entry and update Polish naming ([#2108](https://github.com/Selleo/mentingo/issues/2108))
+
+- keep drawers and page edges visible in films ([#2107](https://github.com/Selleo/mentingo/issues/2107))
+
+- reuse the shared Slack icon in AI Conversations ([#2106](https://github.com/Selleo/mentingo/issues/2106))
+
+- watch release films directly in release notes ([#2104](https://github.com/Selleo/mentingo/issues/2104))
+
+### Chores:
+
+- add a user switcher to simplify testing during development ([#2152](https://github.com/Selleo/mentingo/issues/2152))
+
+- improve course package handling to increase app performance ([#2113](https://github.com/Selleo/mentingo/issues/2113))
+
 <a name="v4.28.0"></a>
 
 ## [v4.28.0] - 02.11.2026
@@ -15,6 +55,10 @@
 - keep existing content when opening the article editor ([#2102](https://github.com/Selleo/mentingo/issues/2102))
 
 - ensure all document attachments are preserved in articles and news ([#2101](https://github.com/Selleo/mentingo/issues/2101))
+
+### Documentation:
+
+- update changelog for version v4.28.0
 
 <a name="v4.27.0"></a>
 
@@ -3632,7 +3676,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.28.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.29.0...HEAD
+[v4.29.0]: https://github.com/Selleo/mentingo/compare/v4.28.0...v4.29.0
 [v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
 [v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0
 [v4.26.0]: https://github.com/Selleo/mentingo/compare/v4.25.0...v4.26.0

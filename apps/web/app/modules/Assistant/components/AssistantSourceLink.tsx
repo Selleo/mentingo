@@ -1,5 +1,6 @@
 import { Anchor } from "@radix-ui/react-popover";
 import { Link } from "@remix-run/react";
+import { ASSISTANT_SOURCE_TYPES } from "@repo/shared";
 import {
   ArrowUpRight,
   BookOpen,
@@ -8,6 +9,7 @@ import {
   GraduationCap,
   Layers,
   Link2,
+  CircleHelp,
   MessageCircleQuestion,
   Newspaper,
   Tag,
@@ -19,6 +21,8 @@ import { useTranslation } from "react-i18next";
 
 import { Popover, PopoverContent } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+
+import { AssistantHelpdeskLink } from "./AssistantSelfOnboardingLink";
 
 import type { AssistantSource } from "../assistant.types";
 
@@ -33,20 +37,30 @@ const sourceIcons = {
   qa: MessageCircleQuestion,
   development_path: Layers,
   resource: FolderOpen,
+  helpdesk: CircleHelp,
 };
 
-/** Uses only metadata already returned by an authorized Assistant read. */
-export function AssistantSourceLink({
-  source,
-  children,
-  className,
-  testId,
-}: {
+type AssistantSourceLinkProps = {
   source: AssistantSource;
   children: ReactNode;
   className?: string;
   testId?: string;
-}) {
+};
+
+/** Uses only metadata already returned by an authorized Assistant read. */
+export function AssistantSourceLink(props: AssistantSourceLinkProps) {
+  if (props.source.entityType === ASSISTANT_SOURCE_TYPES.HELPDESK) {
+    return <AssistantHelpdeskLink {...props} />;
+  }
+  return <AssistantEntitySourceLink {...props} />;
+}
+
+function AssistantEntitySourceLink({
+  source,
+  children,
+  className,
+  testId,
+}: AssistantSourceLinkProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const previewId = useId();

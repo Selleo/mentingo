@@ -1,6 +1,7 @@
 export const OAUTH_LOGIN_METHODS = {
   GOOGLE: "google",
   MICROSOFT: "microsoft",
+  ENTRA_ID: "entraId",
   SLACK: "slack",
 } as const;
 
@@ -18,6 +19,8 @@ export const LOGIN_METHOD_ERROR_KEYS = {
   DISABLED: "loginMethods.errors.disabled",
   MISSING_CONFIGURATION: "loginMethods.errors.missingConfiguration",
   LAST_METHOD: "loginMethods.errors.lastMethod",
+  INVALID_DIRECTORY_ID: "loginMethods.errors.invalidDirectoryId",
+  UNTRUSTED_DIRECTORY: "loginMethods.errors.untrustedDirectory",
 } as const;
 
 export type OAuthLoginMethod = (typeof OAUTH_LOGIN_METHODS)[keyof typeof OAUTH_LOGIN_METHODS];

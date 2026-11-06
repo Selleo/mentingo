@@ -209,6 +209,65 @@ describe("AssistantExecutionService", () => {
     expect(assistantRepository.updateRun).toHaveBeenCalledTimes(1);
   });
 
+  it("persists registered product guidance sources without establishing readable tenant content", async () => {
+    const source = {
+      title: "Add a lesson",
+      description: "Use the course editor.",
+      url: `${run.origin}/helpdesk/tutorials/course-authoring.edit?chapter=add-lesson`,
+      entityType: "helpdesk",
+    };
+    assistantRepository.getRun.mockResolvedValue({
+      ...run,
+      sources: [],
+      successfulToolCalls: 0,
+      readableToolCalls: 0,
+    });
+    mcpHttpService.executeNativeReadTool.mockResolvedValue({
+      structuredContent: {
+        guidanceKind: "product_guidance",
+        tutorial: {
+          ...source,
+          guidanceKind: "product_guidance",
+          tutorialKey: "course-authoring.edit",
+          chapterId: "add-lesson",
+        },
+      },
+    });
+    await service.executeTool(identity, "get_helpdesk_tutorial", {
+      key: "course-authoring.edit",
+      language: "en",
+    });
+    expect(assistantRepository.updateRun).toHaveBeenCalledWith(identity, {
+      sources: [source],
+      recordTool: { readable: false },
+    });
+    assistantRepository.getRun.mockResolvedValue({
+      ...run,
+      sources: [source],
+      successfulToolCalls: 1,
+      readableToolCalls: 0,
+    });
+    await expect(
+      service.validateOutcome(identity, {
+        kind: ASSISTANT_OUTCOME_KINDS.ANSWER,
+        text: "Use the course editor.",
+        requiresReadableContent: false,
+      }),
+    ).resolves.toEqual(expect.objectContaining({ accepted: true }));
+    await expect(
+      service.validateOutcome(identity, {
+        kind: ASSISTANT_OUTCOME_KINDS.ANSWER,
+        text: "This tenant's lesson contains...",
+        requiresReadableContent: true,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        accepted: false,
+        code: ASSISTANT_OUTCOME_VALIDATION_CODES.NO_READABLE_EVIDENCE,
+      }),
+    );
+  });
+
   it("rechecks an active account before every tool call and denies a removed account", async () => {
     await service.executeTool(identity, "global_search", {});
     activeAccount.mockResolvedValue(false);

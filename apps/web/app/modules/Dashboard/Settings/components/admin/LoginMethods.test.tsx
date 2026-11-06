@@ -12,11 +12,19 @@ import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handl
 import LoginMethods from "./LoginMethods";
 
 const loginMethodSetup = vi.hoisted(() => ({
-  methods: { google: false, microsoft: false, slack: false, magicLink: true, password: true },
+  methods: {
+    google: false,
+    microsoft: false,
+    slack: false,
+    entraId: false,
+    magicLink: true,
+    password: true,
+  },
   missingCredentials: {
     google: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
     microsoft: ["MICROSOFT_CLIENT_SECRET"],
     slack: [],
+    entraId: [],
   },
 }));
 const envApi = vi.hoisted(() => ({

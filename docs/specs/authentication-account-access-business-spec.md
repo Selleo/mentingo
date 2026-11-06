@@ -26,8 +26,9 @@ The main workflow begins on the auth pages. A visitor signs in, registers, follo
 - Let users request and consume magic-link emails for passwordless login.
 - Require MFA verification when a user's settings or role policy require it.
 - Support Google, Microsoft, and Slack OAuth entry points when configured.
+- Support Entra ID sign-in restricted to one organization's own Entra directory, configured separately per tenant.
 - Refresh sessions with refresh tokens and clear session cookies on logout.
-- Let organization administrators turn password, magic-link, Google, Microsoft, and Slack login on or off, with a shortcut to the right environment settings section when a provider still needs credentials.
+- Let organization administrators turn password, magic-link, Google, Microsoft, Slack, and Entra ID login on or off, with a shortcut to the right environment settings section when a provider still needs credentials.
 
 ## End-User Value
 
@@ -47,6 +48,8 @@ For recovery and passwordless flows, Mentingo sends tenant-aware email links. Re
 
 Organization administrators manage login methods from the Organization tab in Settings. Each method has its own switch. A provider that still needs a client ID or secret can't be switched on; hovering its switch explains that all required environment variables must be added first, and a "Go to configuration" button sits beside it. The button opens that provider's highlighted section of the environment settings page. A provider that is already on can always be switched off. The public login page shows only the enabled methods. Turning off password login hides the password form, registration link, and "or continue with" separator, and the API also rejects password sign-in, registration, password creation, and password recovery. Turning off magic links hides the magic-link button and blocks requesting or using links, including ones already issued. Mentingo refuses to turn off the last method that still works. Providers without credentials don't count as working, and neither does password login while SSO is enforced. Simultaneous changes by two administrators are handled one at a time, so they can't lock everyone out together.
 
+Entra ID login differs from the Microsoft login: the Microsoft login accepts any Microsoft account, while Entra ID only admits accounts from the directory the tenant configured. Each tenant stores its own Entra directory (tenant) ID, client ID, and client secret, and all three are required before the switch can be turned on. The directory ID must be the directory's GUID; aliases such as `common` are rejected so a misconfiguration cannot open sign-in to every Microsoft directory. On sign-in Mentingo checks that the identity comes from that directory and that app registration before matching the person by email, under the same rules as other providers: archived users are refused, invite-only registration blocks unknown emails, otherwise a learner account is created, and MFA still applies.
+
 When an organization provides an account with a temporary password, Mentingo takes the user to a dedicated password-change screen after sign-in and MFA. The rest of the platform remains unavailable until the user saves a compliant replacement password or logs out. A password reset also fulfils this requirement, so users can recover safely without administrator intervention.
 
 ## Key Technical Context
@@ -57,7 +60,7 @@ When an organization provides an account with a temporary password, Mentingo tak
 - Session handling uses access and refresh token cookies through the auth/token service flow.
 - Tenant settings influence SSO enforcement, invite-only registration, MFA-enforced roles, login assets, and registration form requirements.
 - User password status and password changes are covered through user endpoints in `apps/api/src/user`.
-- Login methods are managed through `apps/api/src/env/services/login-methods.service.ts` and the Organization settings tab. Changing them requires env-management permission. The list of enabled methods is public, so the login page can render without a session. All login switches, including the provider enable flags previously edited as environment values, can only be changed through this flow, not through generic secret updates. The configuration status checks each provider only for its client ID and secret; Microsoft Calendar is reported separately.
+- Login methods are managed through `apps/api/src/env/services/login-methods.service.ts` and the Organization settings tab. Changing them requires env-management permission. The list of enabled methods is public, so the login page can render without a session. All login switches, including the provider enable flags previously edited as environment values, can only be changed through this flow, not through generic secret updates. The configuration status checks each provider only for its client ID and secret (plus the directory ID for Entra ID); Microsoft Calendar is reported separately.
 - Password credentials can require a change; API enforcement blocks normal authenticated operations and the frontend uses the MFA guard pattern to keep the user on `/auth/change-password` until completion.
 
 ## Test Evidence

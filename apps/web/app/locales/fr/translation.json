@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Lien de connexion",
     "password": "Mot de passe",
     "description": "Choisissez comment les membres de votre organisation peuvent se connecter.",
@@ -34,6 +35,8 @@
       "disabled": "Cette méthode de connexion est désactivée.",
       "missingConfiguration": "Ajoutez d'abord les identifiants du fournisseur dans les paramètres d'environnement.",
       "lastMethod": "Gardez au moins une méthode de connexion utilisable activée.",
+      "invalidDirectoryId": "Saisissez l'ID de l'annuaire (locataire) de votre inscription d'application Entra au format GUID.",
+      "untrustedDirectory": "Ce compte n'appartient pas à l'annuaire Entra ID de votre organisation.",
       "save": "Impossible d’enregistrer les méthodes de connexion.",
       "load": "Impossible de charger les méthodes de connexion."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Une formation en direct liée à ce cours est incomplète et ne peut pas être exportée.",
       "courseNotFound": "Le cours à exporter est introuvable.",
       "categoryNotFound": "La catégorie du cours est introuvable."
+    },
+    "progress": {
+      "waiting": "En attente de démarrage…",
+      "step": "Étape {{current}} sur {{total}}",
+      "uploadingPackage": "Envoi du paquet",
+      "stages": {
+        "collecting-content": "Collecte du contenu du cours",
+        "copying-files": "Copie des fichiers",
+        "packaging": "Création du paquet",
+        "downloading": "Téléchargement du paquet",
+        "verifying": "Vérification du paquet",
+        "uploading-files": "Envoi des fichiers",
+        "indexing": "Préparation du contenu IA",
+        "saving": "Enregistrement du cours"
+      }
     }
   },
   "aiConversations": {
@@ -777,6 +795,7 @@
     "continueWithGoogle": "Continuer avec Google",
     "continueWithMicrosoft": "Continuer avec Microsoft",
     "continueWithSlack": "Continuer avec Slack",
+    "continueWithEntraId": "Continuer avec Entra ID",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "refreshPage": "Actualiser la page",
@@ -994,38 +1013,19 @@
   },
   "adminCourseTypeSelector": {
     "back": "Retour",
-    "eyebrow": "Configuration du cours",
     "title": "Créer un nouveau cours",
     "subtitle": "Choisissez l’éditeur standard, un package SCORM ou un package Mentingo.",
     "standard": {
       "title": "Norme",
-      "description": "Créez un cours avec le programme d'études, les leçons, les quiz et les paramètres intégrés.",
-      "features": {
-        "authoring": "Construit avec l'éditeur de cours natif",
-        "curriculum": "Chapitres, leçons et quiz gérés dans Mentingo",
-        "translations": "Langues du cours et traductions prises en charge",
-        "settings": "Prix, statut et certificats inclus"
-      }
+      "description": "Créez un cours avec le programme d'études, les leçons, les quiz et les paramètres intégrés."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Créez un cours à partir d'un package SCORM 1.2.",
-      "features": {
-        "import": "Construit à partir d'un package SCORM 1.2 .zip",
-        "tracking": "Achèvement SCO et suivi de l'exécution pris en charge",
-        "structure": "Structure du package importé préservée",
-        "future": "Prix, statut et certificats inclus"
-      }
+      "description": "Créez un cours à partir d'un package SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Package Mentingo",
-      "description": "Restaurez un cours ou un parcours à partir d’un package Mentingo.",
-      "features": {
-        "structure": "Structure et traductions du cours restaurées",
-        "settings": "Réglages et métadonnées restaurés",
-        "assets": "Fichiers associés inclus",
-        "learningPath": "Parcours et leurs cours pris en charge"
-      }
+      "description": "Restaurez un cours ou un parcours à partir d’un package Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -2568,6 +2568,10 @@
         "title": "Connexion avec Slack",
         "description": "Permettre aux utilisateurs de se connecter avec leur compte Slack."
       },
+      "entraIdSignIn": {
+        "title": "Connexion avec Entra ID",
+        "description": "Permettez aux utilisateurs de se connecter uniquement avec des comptes de l'annuaire Microsoft Entra ID de votre organisation."
+      },
       "microsoftCalendar": {
         "title": "Calendrier Microsoft",
         "description": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook."
@@ -2659,6 +2663,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secret client Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID de l'annuaire (locataire) Entra ID",
+        "description": "Le GUID de l'ID de l'annuaire (locataire) indiqué dans la vue d'ensemble de l'inscription d'application. Seuls les comptes de cet annuaire peuvent se connecter."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID client Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Secret client Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Clé API Luma"
@@ -4150,6 +4164,11 @@
       "courseEnrollmentRequired": "Vous n'êtes pas inscrit à ce cours.",
       "quizRetakeUnavailable": "Les réponses au quiz ne peuvent pas être réinitialisées en raison de la limite de tentatives ou du temps de recharge.",
       "quizResetFailed": "Échec de la réinitialisation des réponses au quiz. Veuillez réessayer."
+    },
+    "preview": {
+      "title": "Vous consultez un aperçu du cours",
+      "enrollmentDescription": "Inscrivez-vous pour répondre aux quiz, participer aux activités et enregistrer votre progression.",
+      "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz, participer aux activités et suivre votre progression."
     }
   },
   "studentCourseView": {
@@ -4426,7 +4445,9 @@
       "finishedCourseNotification": "Notifications de cours terminés",
       "finishedCourseNotificationDescription": "Recevoir des notifications lorsqu'un utilisateur termine un cours",
       "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
-      "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard"
+      "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard",
+      "publicCoursePreview": "Aperçu des cours publics avant inscription",
+      "publicCoursePreviewDescription": "Permet aux utilisateurs connectés de consulter les cours publics gratuits sans inscription. Les quiz, les activités et le suivi de progression nécessitent une inscription. Les règles d’accès aux cours payants restent inchangées."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",
@@ -4439,7 +4460,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Les préférences de notification de cours terminé ont été mises à jour avec succès",
       "finishedCourseNotificationsPreferenceChangeError": "Échec de la mise à jour des préférences de notification de cours terminé",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Les préférences de notification de cours en retard ont été mises à jour avec succès",
-      "overdueCourseNotificationsPreferenceChangeError": "Échec de la mise à jour des préférences de notification de cours en retard"
+      "overdueCourseNotificationsPreferenceChangeError": "Échec de la mise à jour des préférences de notification de cours en retard",
+      "publicCoursePreviewPreferenceChangeSuccess": "Préférence d’aperçu des cours mise à jour"
     }
   },
   "registrationFormBuilder": {
@@ -7931,7 +7953,8 @@
       "qa": "Question et réponse",
       "development_path": "Parcours d’apprentissage",
       "resource": "Ressource",
-      "reference": "Source"
+      "reference": "Source",
+      "helpdesk": "Tutoriel d’aide"
     },
     "title": "Assistant",
     "eyebrow": "Les connaissances de votre plateforme",
@@ -8586,6 +8609,43 @@
       "inUse_one": "« {{name}} » est utilisée par {{count}} compétence. Déplacez-la vers une autre catégorie avant de la supprimer.",
       "inUse_many": "« {{name}} » est utilisée par {{count}} compétences. Déplacez-les vers une autre catégorie avant de la supprimer.",
       "inUse_other": "« {{name}} » est utilisée par {{count}} compétences. Déplacez-les vers une autre catégorie avant de la supprimer."
+    }
+  },
+  "helpdesk": {
+    "demo": "Démo",
+    "title": "Aide et tutoriels",
+    "heading": "Comment pouvons-nous vous aider ?",
+    "subtitle": "Trouvez votre prochaine étape dans Mentingo.",
+    "loading": "Chargement de l’aide",
+    "askAssistant": "Demander à l’assistant",
+    "assistantHint": "Décrivez ce que vous souhaitez faire.",
+    "search": "Recherchez un sujet ou posez une question…",
+    "clear": "Effacer la recherche",
+    "results": "Tutoriels",
+    "suggested": "Suggestions pour vous",
+    "empty": "Aucun tutoriel trouvé",
+    "emptyHint": "Essayez une expression plus courte ou un autre sujet.",
+    "chapterCount": "{{count}} chapitres",
+    "timeline": "Chronologie de la vidéo",
+    "jumpHint": "Sélectionnez un chapitre pour accéder à une étape",
+    "chapters": "Dans cette vidéo",
+    "related": "Découvrez d’autres fonctionnalités",
+    "domains": {
+      "authoring": "Édition de cours",
+      "paths": "Parcours de développement",
+      "learning": "Apprentissage"
+    },
+    "keywordFallback": "La recherche IA est indisponible. Les correspondances par mots-clés sont affichées.",
+    "languageFallback": "Vidéo disponible en {{language}}",
+    "retry": "Réessayer",
+    "back": "Retour à Mentingo",
+    "chapterUnavailable": "Ce chapitre n’est plus disponible. La vidéo commence au début.",
+    "errors": {
+      "unavailable": "Les tutoriels sont temporairement indisponibles. Veuillez réessayer.",
+      "versionUnavailable": "L’aide n’est pas encore disponible pour cette version de Mentingo.",
+      "disabled": "Les tutoriels d’aide ne sont pas activés sur cette installation.",
+      "notFound": "Ce tutoriel n’est pas disponible pour votre version de Mentingo.",
+      "invalidRequest": "Choisissez un tutoriel disponible ou modifiez votre recherche et réessayez."
     }
   }
 }

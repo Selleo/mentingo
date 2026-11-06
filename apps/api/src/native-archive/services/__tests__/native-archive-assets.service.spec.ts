@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createReadStream } from "node:fs";
 import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -7,6 +8,7 @@ import { RESOURCE_VISIBILITY } from "@repo/shared";
 
 import { FileGuard } from "src/file/guards/file.guard";
 
+import { NATIVE_ARCHIVE_LIMITS } from "../../native-archive.constants";
 import { NativeArchiveAssetsService } from "../native-archive-assets.service";
 
 import type { ParsedNativeArchive } from "../../native-archive.types";
@@ -33,6 +35,24 @@ function archiveAsset(sourceReference: string) {
     byteLength: 0,
     contentType: "application/octet-stream",
   };
+}
+
+/** An opened archive whose assets are read from the given files, as the ZIP reader serves them. */
+function archiveFromFiles(
+  assets: ReturnType<typeof archiveAsset>[],
+  filePathByAssetPath: Map<string, string>,
+): ParsedNativeArchive {
+  const getFilePath = (assetPath: string) => {
+    const filePath = filePathByAssetPath.get(assetPath);
+    if (!filePath) throw new Error("nativeArchive.error.missingAsset");
+    return filePath;
+  };
+
+  return {
+    manifest: { assets },
+    openAsset: (assetPath: string) => createReadStream(getFilePath(assetPath)),
+    extractAsset: async (assetPath: string) => getFilePath(assetPath),
+  } as unknown as ParsedNativeArchive;
 }
 
 async function createImageFile(): Promise<{
@@ -97,6 +117,7 @@ describe("NativeArchiveAssetsService", () => {
       };
       const storage = {
         isConfigured: jest.fn(() => true),
+        getFileExists: jest.fn().mockResolvedValue(false),
         deleteFile: jest.fn(),
         uploadStreamMultipart: jest.fn(async (stream) => {
           for await (const _chunk of stream) {
@@ -104,10 +125,7 @@ describe("NativeArchiveAssetsService", () => {
           }
         }),
       };
-      const archive = {
-        manifest: { assets: [asset] },
-        assetFiles: new Map([[asset.path, filePath]]),
-      } as ParsedNativeArchive;
+      const archive = archiveFromFiles([asset], new Map([[asset.path, filePath]]));
       const snapshot = courseSnapshot(null, [
         { extractedFilesReference: SCORM_DIRECTORY } as SourceSnapshot["scormPackages"][number],
       ]);
@@ -135,6 +153,7 @@ describe("NativeArchiveAssetsService", () => {
       };
       const storage = {
         isConfigured: jest.fn(() => true),
+        getFileExists: jest.fn().mockResolvedValue(false),
         deleteFile: jest.fn(),
         uploadStreamMultipart: jest.fn(async (stream) => {
           for await (const _chunk of stream) {
@@ -143,10 +162,7 @@ describe("NativeArchiveAssetsService", () => {
         }),
       };
       const fileService = { archiveResources: jest.fn(), deleteFile: jest.fn() };
-      const archive = {
-        manifest: { assets: [asset] },
-        assetFiles: new Map([[asset.path, filePath]]),
-      } as ParsedNativeArchive;
+      const archive = archiveFromFiles([asset], new Map([[asset.path, filePath]]));
       const snapshot = {
         ...courseSnapshot(null),
         lessonContentResources: [{ reference: asset.sourceReference }],
@@ -162,11 +178,11 @@ describe("NativeArchiveAssetsService", () => {
         const staged = await operation;
         expect(storage.uploadStreamMultipart).toHaveBeenCalledWith(
           expect.anything(),
-          expect.stringContaining("/files/"),
+          expect.stringContaining("/native-archive/assets/"),
           "audio/wav",
         );
         expect(staged.snapshots[0].lessonContentResources[0].reference).toContain(
-          "/native-archive/imports/",
+          "/native-archive/assets/",
         );
       }
     } finally {
@@ -177,6 +193,7 @@ describe("NativeArchiveAssetsService", () => {
   it("stages referenced image variants and SCORM files, then cleans up uploaded assets", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
       deleteFile: jest.fn().mockResolvedValue(undefined),
     };
@@ -195,15 +212,15 @@ describe("NativeArchiveAssetsService", () => {
     const assets = [IMAGE_VARIANT, SCORM_FILE, UNUSED_FILE].map(archiveAsset);
     const { directory, filePath: imagePath, byteLength } = await createImageFile();
     assets[0]!.byteLength = byteLength;
-    const archive = {
-      manifest: { assets },
-      assetFiles: new Map(
+    const archive = archiveFromFiles(
+      assets,
+      new Map(
         assets.map((asset) => [
           asset.path,
           asset.path === assets[0]!.path ? imagePath : "/unused/test-file",
         ]),
       ),
-    } as ParsedNativeArchive;
+    );
     const snapshot = courseSnapshot(IMAGE_BASE, [
       { extractedFilesReference: SCORM_DIRECTORY } as SourceSnapshot["scormPackages"][number],
     ]);
@@ -248,6 +265,7 @@ describe("NativeArchiveAssetsService", () => {
   it("rejects image candidates whose bytes are not a valid image", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
     };
     const fileService = {
@@ -259,10 +277,7 @@ describe("NativeArchiveAssetsService", () => {
     const directory = await mkdtemp(path.join(tmpdir(), "native-archive-invalid-image-"));
     const filePath = path.join(directory, "cover.png");
     await writeFile(filePath, "not an image");
-    const archive = {
-      manifest: { assets: [asset] },
-      assetFiles: new Map([[asset.path, filePath]]),
-    } as ParsedNativeArchive;
+    const archive = archiveFromFiles([asset], new Map([[asset.path, filePath]]));
 
     await expect(
       new NativeArchiveAssetsService(storage as never, fileService as never).stageArchiveAssets(
@@ -279,6 +294,7 @@ describe("NativeArchiveAssetsService", () => {
   it("uses the largest available generated image when the original is absent", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
     };
     const fileService = {
@@ -301,10 +317,10 @@ describe("NativeArchiveAssetsService", () => {
     candidates.forEach((asset) => {
       asset.byteLength = byteLength;
     });
-    const archive = {
-      manifest: { assets: candidates },
-      assetFiles: new Map(candidates.map((asset) => [asset.path, filePath])),
-    } as ParsedNativeArchive;
+    const archive = archiveFromFiles(
+      candidates,
+      new Map(candidates.map((asset) => [asset.path, filePath])),
+    );
 
     const staged = await new NativeArchiveAssetsService(
       storage as never,
@@ -323,6 +339,7 @@ describe("NativeArchiveAssetsService", () => {
   it("cleans up an imported image when staging a later asset fails", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
       deleteFile: jest.fn().mockResolvedValue(undefined),
     };
@@ -339,13 +356,13 @@ describe("NativeArchiveAssetsService", () => {
       .mockResolvedValue({ ext: "png", mime: "image/png" } as never);
 
     const imageAsset = archiveAsset("course/cover.png");
-    const missingAsset = archiveAsset("course/material.pdf");
+    const missingAsset = { ...archiveAsset("course/material.pdf"), byteLength: 1 };
     const { directory, filePath, byteLength } = await createImageFile();
     imageAsset.byteLength = byteLength;
-    const archive = {
-      manifest: { assets: [imageAsset, missingAsset] },
-      assetFiles: new Map([[imageAsset.path, filePath]]),
-    } as ParsedNativeArchive;
+    const archive = archiveFromFiles(
+      [imageAsset, missingAsset],
+      new Map([[imageAsset.path, filePath]]),
+    );
 
     await expect(
       new NativeArchiveAssetsService(storage as never, fileService as never).stageArchiveAssets(
@@ -367,10 +384,11 @@ describe("NativeArchiveAssetsService", () => {
     await rm(directory, { recursive: true, force: true });
   });
 
-  it("removes the target file when an upload fails", async () => {
+  it("keeps content-addressed files when an upload fails", async () => {
     const uploadError = new Error("upload failed");
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockRejectedValue(uploadError),
       deleteFile: jest.fn().mockResolvedValue(undefined),
     };
@@ -383,10 +401,7 @@ describe("NativeArchiveAssetsService", () => {
       archiveResources: jest.fn().mockResolvedValue(undefined),
     };
     const asset = archiveAsset(UNUSED_FILE);
-    const archive = {
-      manifest: { assets: [asset] },
-      assetFiles: new Map([[asset.path, "/unused/test-file"]]),
-    } as ParsedNativeArchive;
+    const archive = archiveFromFiles([asset], new Map([[asset.path, "/unused/test-file"]]));
     const snapshot = courseSnapshot(UNUSED_FILE);
 
     await expect(
@@ -396,12 +411,13 @@ describe("NativeArchiveAssetsService", () => {
         [snapshot],
       ),
     ).rejects.toBe(uploadError);
-    expect(storage.deleteFile).toHaveBeenCalledWith(expect.stringContaining("/files/"));
+    expect(storage.deleteFile).not.toHaveBeenCalled();
   });
 
   it("stores only allowlisted passive MIME types for non-image archive assets", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
       deleteFile: jest.fn().mockResolvedValue(undefined),
     };
@@ -415,10 +431,10 @@ describe("NativeArchiveAssetsService", () => {
       { ...archiveAsset("course/resource.bin"), contentType: "application/xhtml+xml" },
       { ...archiveAsset("course/handout.pdf"), contentType: "application/pdf" },
     ];
-    const archive = {
-      manifest: { assets },
-      assetFiles: new Map(assets.map((asset) => [asset.path, "/unused/test-file"])),
-    } as ParsedNativeArchive;
+    const archive = archiveFromFiles(
+      assets,
+      new Map(assets.map((asset) => [asset.path, "/unused/test-file"])),
+    );
     const snapshot = {
       ...courseSnapshot(null),
       lessons: [{ fileS3Key: assets[0]!.sourceReference }],
@@ -444,6 +460,7 @@ describe("NativeArchiveAssetsService", () => {
   it("stages learning path and live training materials", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn().mockResolvedValue(undefined),
     };
     const fileService = {
@@ -469,9 +486,9 @@ describe("NativeArchiveAssetsService", () => {
       .forEach((asset) => {
         asset.byteLength = byteLength;
       });
-    const archive = {
-      manifest: { assets },
-      assetFiles: new Map(
+    const archive = archiveFromFiles(
+      assets,
+      new Map(
         assets.map((asset) => {
           let assetPath = "/unused/test-file";
           if (asset.sourceReference.endsWith(".png")) assetPath = filePath;
@@ -479,7 +496,7 @@ describe("NativeArchiveAssetsService", () => {
           return [asset.path, assetPath];
         }),
       ),
-    } as ParsedNativeArchive;
+    );
     const snapshot = {
       ...courseSnapshot(references[0]!),
       liveTrainingLessons: [{ materials: [{ resource: { reference: references[3] } }] }],
@@ -511,8 +528,112 @@ describe("NativeArchiveAssetsService", () => {
       expect(staged.rewriteReference(reference)).toBe(IMAGE_FILE_KEY);
     });
     expect(staged.rewriteReference(references[3]!)).toMatch(
-      new RegExp(`^${TENANT_ID}/native-archive/imports/`),
+      new RegExp(`^${TENANT_ID}/native-archive/assets/`),
     );
     await rm(directory, { recursive: true, force: true });
+  });
+
+  function arrangePlainFileStaging(existingKeys: Set<string> = new Set()) {
+    const storage = {
+      isConfigured: jest.fn().mockReturnValue(true),
+      getFileExists: jest.fn(async (key: string) => existingKeys.has(key)),
+      uploadFile: jest.fn().mockResolvedValue(undefined),
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+    };
+    const fileService = {
+      uploadResource: jest.fn(),
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+      archiveResources: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new NativeArchiveAssetsService(storage as never, fileService as never);
+
+    const stageHandouts = async (assets: ReturnType<typeof archiveAsset>[]) => {
+      const archive = archiveFromFiles(assets, new Map());
+      const snapshot = {
+        ...courseSnapshot(null),
+        courseResources: assets.map((asset) => ({
+          resource: { reference: asset.sourceReference },
+        })),
+      } as unknown as SourceSnapshot;
+
+      return service.stageArchiveAssets(archive, ACTOR, [snapshot]);
+    };
+
+    return { storage, stageHandouts };
+  }
+
+  it("skips a file that an earlier import already stored under its content key", async () => {
+    const handout = { ...archiveAsset("course/handout.pdf"), sha256: "a".repeat(64) };
+    const first = arrangePlainFileStaging();
+    const stagedKey = (await first.stageHandouts([handout])).rewriteReference(
+      handout.sourceReference,
+    );
+
+    const repeat = arrangePlainFileStaging(new Set([stagedKey ?? ""]));
+    const repeated = await repeat.stageHandouts([handout]);
+
+    expect(stagedKey).toMatch(
+      new RegExp(`^${TENANT_ID}/native-archive/assets/[a-f0-9]{64}\\.pdf$`),
+    );
+    expect(repeated.rewriteReference(handout.sourceReference)).toBe(stagedKey);
+    expect(repeat.storage.uploadFile).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      change: "the same file imported again",
+      sha256: "a".repeat(64),
+      reference: "course/a.pdf",
+      sameKey: true,
+    },
+    {
+      change: "different bytes",
+      sha256: "b".repeat(64),
+      reference: "course/a.pdf",
+      sameKey: false,
+    },
+    {
+      change: "another source file with the same bytes",
+      sha256: "a".repeat(64),
+      reference: "course/b.pdf",
+      sameKey: false,
+    },
+  ])("keys $change by content and source reference", async ({ sha256, reference, sameKey }) => {
+    const original = { ...archiveAsset("course/a.pdf"), sha256: "a".repeat(64) };
+    const candidate = { ...archiveAsset(reference), sha256 };
+
+    const originalKey = (
+      await arrangePlainFileStaging().stageHandouts([original])
+    ).rewriteReference(original.sourceReference);
+    const candidateKey = (
+      await arrangePlainFileStaging().stageHandouts([candidate])
+    ).rewriteReference(candidate.sourceReference);
+
+    expect(candidateKey === originalKey).toBe(sameKey);
+  });
+
+  it("uploads several files at once, never more than the batch size", async () => {
+    const { storage, stageHandouts } = arrangePlainFileStaging();
+    let inFlight = 0;
+    let maxInFlight = 0;
+    storage.uploadFile.mockImplementation(async () => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+    });
+    const handouts = Array.from(
+      { length: NATIVE_ARCHIVE_LIMITS.ASSET_UPLOAD_BATCH_SIZE * 2 },
+      (_, index) => ({
+        ...archiveAsset(`course/handout-${index}.pdf`),
+        sha256: index.toString(16).padStart(64, "0"),
+      }),
+    );
+
+    await stageHandouts(handouts);
+
+    expect(storage.uploadFile).toHaveBeenCalledTimes(handouts.length);
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(maxInFlight).toBeLessThanOrEqual(NATIVE_ARCHIVE_LIMITS.ASSET_UPLOAD_BATCH_SIZE);
   });
 });
