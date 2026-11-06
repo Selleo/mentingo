@@ -1,6 +1,6 @@
 # Running Core AI tests and experiments
 
-All commands run from the repository root on the evaluation PR branch, using the repository's Node 22.15+ and pnpm environment. Normal dependencies/shared packages must already be installed/built. This runbook adds no workflow, webhook, schedule or remote execution. See the [matrix](core-test-case-matrix.md) for which cases each runner owns.
+Run commands from the repository root using Node 22.15+, pnpm and installed/built workspace dependencies. See the [matrix](core-test-case-matrix.md) for which cases each runner owns.
 
 ## Package commands for local use
 
@@ -38,7 +38,7 @@ pnpm --filter=api test --runInBand src/ai/utils/voice-delivery.spec.ts src/ai/ut
 pnpm --filter=web test app/modules/Voice/voiceSocketProtocol.test.ts app/modules/Voice/hooks/voiceMentorSocketHandlers.test.ts
 ```
 
-These are controlled tests, not real recognition or listening checks. The matrix links more existing audio/capture/recovery specs. The commands are inventory guidance; only commands listed in the matrix's validation record were rerun for this documentation change.
+These are controlled tests, not real recognition or listening checks. The matrix links more existing audio/capture/recovery specs.
 
 ## 2. Run the normal Core–Luma application contract tests
 
@@ -48,7 +48,7 @@ Use the existing E2E environment with disposable test database, migrations and r
 NODE_OPTIONS=--experimental-vm-modules pnpm --filter=api test:e2e --runInBand --testPathPattern='course-authoring-(http-roundtrip|native-apply)\.e2e-spec\.ts'
 ```
 
-These tests cover HTTP request/proposal/application receipts, native persistence, rollback and retry deduplication. Do not point test configuration at production. This command was not executed for the documentation update.
+These tests cover HTTP request/proposal/application receipts, native persistence, rollback and retry deduplication. Do not point test configuration at production.
 
 ## 3. List or prepare feature experiments offline
 
@@ -57,7 +57,28 @@ pnpm eval:ai --mode list
 pnpm eval:ai --mode prepare --feature mentor-teacher-chat --prompt-source local --out /tmp/core-evals/teacher-prepared.json
 ```
 
-Local source is explicitly nonproduction. For comparison against managed production prompts, replace `--prompt-source local` with `--prompt-snapshots /tmp/core-evals/production-prompts.json`. Supply all required fragments in the [documented snapshot format](core-ai-feature-coverage.md#prepare-without-provider-or-application-calls). Snapshots pin prompt names, versions and hashes. Preparation performs no model, application or Langfuse requests; it cannot pass a quality case.
+Local source is explicitly nonproduction. For comparison against managed production prompts, replace `--prompt-source local` with `--prompt-snapshots /tmp/core-evals/production-prompts.json`. Supply all required fragments in the [snapshot format below](#prompt-snapshots). Snapshots pin prompt names, versions and hashes. Preparation performs no model, application or Langfuse requests; it cannot pass a quality case.
+
+### Prompt snapshots
+
+Supply every prompt fragment needed by the selected cases:
+
+```json
+{
+  "label": "production",
+  "prompts": [
+    {
+      "name": "teacherPrompt",
+      "version": 7,
+      "prompt": "PINNED_TEMPLATE_TEXT",
+      "config": {},
+      "labels": ["production"]
+    }
+  ]
+}
+```
+
+Each record can also use `label: "production"`. Missing managed fragments fail; there is no silent local fallback. `--prompt-source local` explicitly uses authoritative YAML as a nonproduction source. Results record fragment names, versions, origin and hashes. Source files, prompt IDs and trace names are listed in `apps/api/test/evaluations/feature-catalogue.v1.json`; SDK function IDs are not assumed to be observation names.
 
 ## 4. Explicitly run a model response case
 
@@ -77,7 +98,7 @@ This calls the model. It does not start the native Mentor application, save a co
 
 ## 5. Explicitly run a native application case
 
-Provision a local disposable Core/Luma environment with workers and owned fixtures. The runner does not seed fixtures. Use an app config matching [the feature fixture contract](core-ai-feature-coverage.md#run-native-application-tasks-with-disposable-fixtures): loopback base URL, `disposableTenant: true`, fresh isolated resources, cookies referenced only by environment-variable name, and fixtures keyed by feature item ID. Authoring needs `allowAuthoringWrites: true` and a distinct disposable course per case.
+Provision a local disposable Core/Luma environment with workers and owned fixtures. The runner does not seed fixtures. Use an app config matching [the fixture contract below](#application-fixtures): loopback base URL, `disposableTenant: true`, fresh isolated resources, cookies referenced only by environment-variable name, and fixtures keyed by feature item ID. Authoring needs `allowAuthoringWrites: true` and a distinct disposable course per case.
 
 ```sh
 pnpm eval:ai --mode run --feature core-luma-authoring-apply --case core-luma-authoring-apply-grounded-v1 --prompt-source local --app-config /tmp/core-evals/app-fixtures.json --allow-app-requests --out /tmp/core-evals/apply-result.json
@@ -86,6 +107,41 @@ pnpm eval:ai --mode run --feature core-luma-authoring-apply --case core-luma-aut
 This can call Luma's configured provider and write to the disposable course. For proposal-only checking select `core-luma-authoring-proposal` and its item ID instead. The stale-edit adversarial apply case remains `not_run`: no concurrent-edit driver is implemented.
 
 For actual transcription, select `mentor-transcription` and supply a synthetic 16 kHz mono PCM fixture, expected script and matching SHA256 as documented. The same flag enables authenticated socket calls. No microphone is captured; a transcript is not proof of playback or voice quality.
+
+### Application fixtures
+
+Feature runner fixture keys are the normalized item IDs from the feature catalogue. Use distinct fresh threads/courses per case; the runner does not create or reset them.
+
+```json
+{
+  "baseUrl": "http://127.0.0.1:3000/api",
+  "disposableTenant": true,
+  "allowAuthoringWrites": true,
+  "fixtures": {
+    "assistant-conversation-grounded-v1": {
+      "isolated": true,
+      "cookieEnv": "EVAL_ASSISTANT_COOKIE",
+      "threadId": "FRESH_OWNED_THREAD_ID"
+    },
+    "core-luma-authoring-apply-grounded-v1": {
+      "isolated": true,
+      "cookieEnv": "EVAL_AUTHOR_COOKIE",
+      "courseId": "DISPOSABLE_COURSE_ID"
+    },
+    "mentor-transcription-grounded-v1": {
+      "isolated": true,
+      "cookieEnv": "EVAL_AUDIO_COOKIE",
+      "audioPath": "/tmp/core-evals/synthetic.pcm",
+      "audioSha256": "SHA256_OF_FIXTURE_BYTES",
+      "audioSampleRate": 16000
+    }
+  }
+}
+```
+
+Assistant source-read cases additionally need nonempty `expectedSourceUrls` and explicit `forbiddenSourceUrls`. Transcription uses Socket.IO namespace `/ws`, path `/api/ws`, and `startAudio` / PCM `audioChunk` / `stopAudio`; supply mono signed 16-bit little-endian 16 kHz PCM matching the expected script. It does not capture a microphone.
+
+Verified-assessment cases additionally need `lessonId`, `blockingErrorIds` mapping both `B1` and `B2` to persisted UUIDs, and optionally `rubricCookieEnv` for an independently authorized rubric reader. Seed the exact case transcript, localized rubric and fresh active owned thread. The adapter compares these before invoking Core's Judge endpoint and reading back the completed thread.
 
 ## 6. Record actual results in Langfuse
 
@@ -117,7 +173,20 @@ The separate local semantic judge supports captured legacy application reports a
 pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode calibrate --judge-config /tmp/core-evals/judge.json --allow-judge-requests --out /tmp/core-evals/calibration.json
 ```
 
-This calls the judge on 16 labeled candidates across eight scenarios, not the application. See [local semantic evaluation](regression-evaluations.md#llm-evaluators-and-calibration-later) for `--mode http` and `--mode evaluate` captures. Labels need independent domain review; a calibration run was not executed during setup.
+This calls the judge on 16 labeled candidates across eight scenarios, not the application. See [local semantic evaluation below](#local-semantic-evaluation) for `--mode http` and `--mode evaluate` captures. Labels need independent domain review.
+
+### Local semantic evaluation
+
+The older application runner uses IDs from `dataset.v1.json` and `assessment-cases.v1.json` as fixture keys. It supports search, Mentor, title-only authoring and verified assessment. For example:
+
+```sh
+pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode http --allow-app-requests --config /tmp/core-evals/legacy-fixtures.json --case mentor-teacher-multi-turn --out /tmp/core-evals/mentor-capture.json
+pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode evaluate --capture /tmp/core-evals/mentor-capture.json --judge-config /tmp/core-evals/judge.json --allow-judge-requests --out /tmp/core-evals/mentor-judged.json
+```
+
+The local semantic judge analyzes captured legacy reports; it does not rerun the app or accept arbitrary feature/preparation reports. Its exact structure and quote-validation checks are described in [the check reference](core-evaluator-checks.md#separate-local-semantic-judge-validation).
+
+Compare baseline and candidate using the same dataset, source/index snapshot, actors, permissions, language, runtime route, provider/model settings and evaluator version. Use fresh threads because they retain system prompts. Preserve failures and every stochastic attempt rather than selecting the best output. Keep paired/paraphrased scenarios in the same calibration/held-out split, and keep held-out answers out of prompt tuning. Review synthetic labels before treating model scores as release gates.
 
 ## Can Langfuse trigger these directly?
 
@@ -129,7 +198,7 @@ This calls the judge on 16 labeled candidates across eight scenarios, not the ap
 | Trigger a prompt/model-only experiment from Langfuse UI        | Langfuse product capability; no Core UI experiment preset was configured | Prompt/model generation; not Core auth, persistence, sockets or tools    |
 | Click in Langfuse to run this Core CLI against an application  | Not configured                                                           | Requires a deployed external worker/service and configured webhook       |
 | Automatically run a dataset after a prompt changes             | Not configured                                                           | Requires an explicit CI/webhook policy and suitable runtime fixtures     |
-| Automatically judge new application traces                     | Configured separately in the published setup                             | Scores matching captured observations; does not execute regression cases |
+| Automatically judge new application traces                     | Configured in `remote-setup.json`                                        | Scores matching captured observations; does not execute regression cases |
 
 Langfuse supports [UI prompt experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-ui) and [UI webhook triggers for external SDK experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Current full application execution is CLI-based. A future UI trigger would need a deployed authenticated job receiver, disposable fixture provisioning, bounded execution and result export; that service has not been added. Enabling evaluators does not create it.
 

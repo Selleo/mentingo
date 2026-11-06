@@ -9,7 +9,7 @@ Catalogue: **31 feature datasets / 103 entries / 99 distinct complete input obje
 - **Existing normal test**: source file exists; this column records coverage inventory, not a fresh test execution result.
 - **Harness checked**: prior controlled runner/scorer tests, not a live model/application result. The feature harness is covered by `feature-task.spec.ts`, `feature-provider.spec.ts`, `native-feature-adapters.spec.ts` and `http-adapter.spec.ts`.
 - **Prepared**: offline preparation succeeded for all 103 entries with pinned managed snapshots on 2026-11-06. No provider/app was invoked.
-- **Live Core result: not run**: no actual Core feature experiment was executed or uploaded during this documentation update or original Core setup. Do not infer a pass from dataset publication.
+- **Live Core result: not run**: no live result is asserted by this inventory. Use saved run reports as execution evidence; dataset publication alone is not a pass.
 - **No driver**: explicitly unsupported concurrent-edit application scenario.
 
 ## Feature-level ownership and coverage
@@ -396,12 +396,9 @@ These synthetic candidates test the judge itself, not Core application execution
 | `history-2079-actionable-export-failure` | `positive`             | source_grounding: pass; task_fulfillment: pass; safe_behavior: pass                          | Judge model not run |
 | `history-2079-actionable-export-failure` | `adversarial-negative` | source_grounding: fail; task_fulfillment: fail; safe_behavior: fail                          | Judge model not run |
 
-## Verification record and remaining gaps
+## Known limits
 
-- 2026-11-06: feature list command and pinned-snapshot offline preparation verified; all 103 prepared, zero failed/not-run in preparation. This includes preparing the unsupported-case descriptor, not executing its missing driver.
-- 2026-11-06: legacy catalogue validation verified (54 cases); offline production grading executed (12 passed). These results do not cover application/model quality.
-- 2026-11-06: `pnpm test:ai:regression` verified the package entry point; 131 Core evaluation harness tests and 16 Python configuration/recording tests passed. They are controlled tests, not 103 live experiments.
-- Existing product voice/E2E tests are inventoried here; no full product voice suite, application E2E, provider, microphone, TTS listening or calibration run was invoked for this docs-only change.
+- Preparing the 103 descriptors is not executing the cases. Reports produced by the package commands contain execution results; dataset publication does not establish a pass.
 - No concurrent-edit driver for stale-baseline application. No listening/perceptual TTS benchmark. Three identical input pairs need diversification. Synthetic labels and judge accuracy remain unvalidated.
+- Existing product tests are inventoried separately from model/application experiments. Mocks do not establish provider behavior or live delivery.
 - Online rules cannot evaluate uninstrumented calls. Core global-search embedding telemetry is intentionally disabled. Model-only prompt cases do not establish Core permissions or Luma production prompt behavior.
-- Published snapshot: [31 datasets, 35 evaluators, 34 rules](published-setup.md). Three shared live LLM judges plus one feature judge per dataset and a code output-presence evaluator are distinct from application test execution. No new remote configuration or experiments were created for this documentation update.

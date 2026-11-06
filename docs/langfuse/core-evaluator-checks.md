@@ -1,6 +1,6 @@
 # Exact Core evaluation checks
 
-This page separates code assertions from instructions given to a model. Source references below are authoritative; [case expectations](core-test-case-matrix.md) supply scenario-specific facts. The Core hosted judge model is `gpt-6-luna` through the already-stored `openai` connection (updated 2026-11-06). The application model under evaluation is configured independently. No model experiment was launched by this configuration update.
+This page separates code assertions from instructions given to a model. Source references below are authoritative; [case expectations](core-test-case-matrix.md) supply scenario-specific facts. The Core hosted judge model is `gpt-6-luna` through the already-stored `openai` connection. The application model under evaluation is configured independently.
 
 ## Hosted LLM checks
 
