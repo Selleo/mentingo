@@ -1,3 +1,5 @@
+import { match } from "ts-pattern";
+
 import {
   BISECTION_STEPS,
   CONTRAST_FLARE,
@@ -69,6 +71,32 @@ export const rgbToHex = (rgb: Vector3) =>
         .padStart(2, "0"),
     )
     .join("")}`;
+
+/**
+ * HEX to rounded HSL: hue in degrees, saturation and lightness in percent.
+ */
+export const hexToHslTuple = (hex: string): Vector3 => {
+  const [red, green, blue] = hexToRgb(hex);
+  const maxChannel = Math.max(red, green, blue);
+  const minChannel = Math.min(red, green, blue);
+  const delta = maxChannel - minChannel;
+  const lightness = (maxChannel + minChannel) / 2;
+
+  if (delta === 0) return [0, 0, Math.round(lightness * 100)];
+
+  const saturation =
+    lightness > 0.5 ? delta / (2 - maxChannel - minChannel) : delta / (maxChannel + minChannel);
+  const hueSextant = match(maxChannel)
+    .with(red, () => (green - blue) / delta + (green < blue ? 6 : 0))
+    .with(green, () => (blue - red) / delta + 2)
+    .otherwise(() => (red - green) / delta + 4);
+
+  return [
+    Math.round((hueSextant / 6) * FULL_TURN_DEGREES),
+    Math.round(saturation * 100),
+    Math.round(lightness * 100),
+  ];
+};
 
 const toLinear = (channel: number) => {
   const { encodedThreshold, linearSlope, offset, gamma } = SRGB_TRANSFER;
