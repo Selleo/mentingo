@@ -3,7 +3,6 @@ import { USER_ROLE } from "~/config/userRoles";
 import { CURRICULUM_TEST_DATA } from "../../data/curriculum/curriculum.data";
 import { CURRICULUM_HANDLES, EMBED_LESSON_FORM_HANDLES } from "../../data/curriculum/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { expandChapterFlow } from "../../flows/curriculum/expand-chapter.flow";
 import { fillEmbedLessonFormFlow } from "../../flows/curriculum/fill-embed-lesson-form.flow";
 import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
 import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
@@ -45,7 +44,11 @@ test("admin can switch between embed lessons and save only the selected lesson",
       resources: secondResources,
     });
     await openCurriculumPageFlow(page, course.id);
-    await expandChapterFlow(page, chapter.id);
+    await page.getByTestId(CURRICULUM_HANDLES.chapterAccordion(chapter.id)).click();
+    await expect(page.getByTestId(CURRICULUM_HANDLES.chapterAccordion(chapter.id))).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     const title = page.getByTestId(EMBED_LESSON_FORM_HANDLES.TITLE_INPUT);
     for (const lesson of [first, second, first, second]) {
       await page.getByTestId(CURRICULUM_HANDLES.lessonCard(lesson.id)).click();
@@ -74,7 +77,11 @@ test("admin can switch between embed lessons and save only the selected lesson",
       "Second embed updated",
     );
     await page.reload();
-    await expandChapterFlow(page, chapter.id);
+    await page.getByTestId(CURRICULUM_HANDLES.chapterAccordion(chapter.id)).click();
+    await expect(page.getByTestId(CURRICULUM_HANDLES.chapterAccordion(chapter.id))).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     await page.getByTestId(CURRICULUM_HANDLES.lessonCard(second.id)).click();
     await expect(title).toHaveValue("Second embed updated");
     await expect(page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceUrlInput(0))).toHaveValue(
