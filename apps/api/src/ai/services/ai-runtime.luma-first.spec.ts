@@ -107,6 +107,39 @@ describe("AiRuntimeService Luma-first paths", () => {
     expect(openAiChatModel.doStream).not.toHaveBeenCalled();
   });
 
+  it("preserves tool-call options when the assistant stream fails before opening", async () => {
+    const streamed = { stream: new ReadableStream() };
+    const options = {
+      prompt: [],
+      tools: [{ type: "function", name: "read_course", parameters: {} }],
+      toolChoice: { type: "required" },
+    };
+    lumaChatModel.doStream.mockRejectedValue(new Error("Luma unavailable"));
+    openAiChatModel.doStream.mockResolvedValue(streamed);
+    const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
+
+    await expect(model.doStream(options as never)).resolves.toBe(streamed);
+    expect(lumaChatModel.doStream).toHaveBeenCalledWith(options);
+    expect(openAiChatModel.doStream).toHaveBeenCalledWith(options);
+  });
+
+  it("does not repeat a tool-capable assistant call after its stream has opened", async () => {
+    const failure = new Error("upstream connection interrupted");
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue({ type: "text-delta", id: "message", delta: "Already emitted" });
+        controller.error(failure);
+      },
+    });
+    lumaChatModel.doStream.mockResolvedValue({ stream });
+    const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
+    const result = await model.doStream({ prompt: [] } as never);
+
+    await expect(result.stream.getReader().read()).rejects.toBe(failure);
+    expect(openAiChatModel.doStream).not.toHaveBeenCalled();
+    expect(openAiProvider).not.toHaveBeenCalled();
+  });
+
   it("uses OpenAI directly for the assistant when Luma does not run chat", async () => {
     const model: LanguageModelV4 = await createService(
       AI_RUNTIME_SOURCES.CORE,

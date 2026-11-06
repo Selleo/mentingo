@@ -57,6 +57,24 @@ Global search records which model embedded each chunk and compares a query only 
 
 AI Mentor lesson documents do not record their embedding model. Re-upload them after the embedding model changes or after documents were embedded during a Luma outage.
 
+The native embeddings and assistant relay integration is independent of course-source image
+reading. Luma's source vision continues to use its dedicated `courseGenerationVision`
+configuration and bounded PNG reader; the assistant relay does not select its vision model.
+
+### Local contract verification
+
+The runtime suite covers malformed embedding responses, model metadata, bounded waits,
+assistant tool-call fallback before a stream opens, and preservation of errors after a stream
+opens. A loopback HTTP test uses the installed published SDK to verify the native path,
+`X-API-Key`, raw Unicode text, dimensions and returned model without a paid provider.
+
+A combined local check also ran Core's runtime service and the published SDK against the
+actual Luma FastAPI embeddings controller and runtime service after alignment with the
+current PDF vision implementation. It verified two raw texts, 1536-dimensional finite vectors,
+the model reported by that same invocation and absence of Core fallback. Authentication and
+provider output were controlled fixtures; this is transport/service-contract evidence, not a
+live model-quality, database integration, browser or deployment check.
+
 ## Storage and media
 
 | Variable                                                                                                                                      | Purpose                                                         |
@@ -96,3 +114,14 @@ AI Mentor lesson documents do not record their embedding model. Re-upload them a
 - [ ] Object storage bucket is private; files are served through pre-signed URLs.
 - [ ] Backups configured and a restore tested.
 - [ ] AI provider and its data-processing terms reviewed before enabling AI features.
+
+## Local-model alignment validation (2026-11-06)
+
+Core PR #2111 was merged with current `main` (`a0df13891`) before checking the
+Luma PR #63 contract against the newer PDF vision implementation. The focused
+runtime, search, assistant and telemetry suite passed 89 tests across eight files.
+`pnpm lint-tsc-api` passed, including the full API TypeScript, workflow TypeScript
+and ESLint checks. Workspace packages were built locally first; the previous
+email-template export compilation blocker is resolved in the current main branch.
+No additional generated API changes, database migrations, provider calls or
+production mutations were required for this alignment.
