@@ -1,0 +1,23 @@
+{
+  "project": "slackbot",
+  "repo": "../../../mentingo-plugins",
+  "python": "python3",
+  "features": [
+    "assistant"
+  ],
+  "cases": [
+    "quality-lesson-content-pl"
+  ],
+  "runName": "prompt-regression",
+  "outputDir": "./experiment-runs",
+  "model": {
+    "model": "gpt-6-luna",
+    "apiKeyEnv": "EVAL_MODEL_API_KEY",
+    "baseURL": "https://api.openai.com/v1"
+  },
+  "envFiles": [
+    "../../../mentingo-plugins/apps/slack-bot/.env"
+  ],
+  "timeoutSeconds": 300,
+  "allowBundledPrompts": true
+}
