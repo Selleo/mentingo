@@ -64,7 +64,7 @@ The user's own profile shows their level and XP, then each achievement with its 
 ## Key Technical Context
 
 - Achievements are measured from the platform's durable domain-event history (login, lesson completed, course finished, quiz completed). Live updates and backfills use the same calculation, so it is safe to re-run.
-- Default achievements are added for every organization at platform startup and when a new organization is created. When a new default is added, the organization's past activity is recalculated.
+- Default achievements are added for every organization at platform startup and when a new organization is created. When a new default is added, the organization's past activity is recalculated. Existing default achievements are not overwritten, except that their icon is refreshed, so an icon change reaches every organization.
 - There are three permissions. "View levels, XP and achievements" is granted to every role, and the API only returns the requesting user's own profile. "Earn hidden achievements" is granted to learners, content creators and trainers. "Configure achievements and gamification settings" is granted to administrators and covers the admin page, the achievement API and the on/off toggle. All data is isolated per organization.
 - Achievement titles and descriptions follow the user's selected language and fall back to the achievement's base language.
 - XP is tracked as lifetime XP, which drives levels, and as spendable XP, kept for a future rewards store.
@@ -78,7 +78,7 @@ The user's own profile shows their level and XP, then each achievement with its 
 
 - The backend E2E spec (`apps/api/src/gamification/__tests__/gamification.e2e-spec.ts`) covers:
   - Events are built from the real event classes, so the tests break if a payload shape drifts.
-  - Default achievements are seeded once per organization.
+  - Default achievements are seeded once per organization, and an existing default gets its icon refreshed.
   - Repeated lessons count once, rewards are idempotent, and concurrent evaluations grant once.
   - Support-mode lessons and quizzes are ignored while the learner's own activity counts.
   - Login streaks use the longest run of consecutive days, and level-ups happen.

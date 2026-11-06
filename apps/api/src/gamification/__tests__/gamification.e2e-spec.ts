@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { ACHIEVEMENT_VISIBILITY } from "@repo/shared";
+import { ACHIEVEMENT_ICONS, ACHIEVEMENT_VISIBILITY } from "@repo/shared";
 import { subDays } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
@@ -171,6 +171,24 @@ describe("Gamification (e2e)", () => {
     );
 
     expect(insertedAgain).toBe(0);
+  });
+
+  it("refreshes the icon of predefined achievements seeded before it changed", async () => {
+    const [firstLogin] = PREDEFINED_ACHIEVEMENTS.filter(({ key }) => key === "first_login");
+
+    await db
+      .update(achievements)
+      .set({ icon: ACHIEVEMENT_ICONS.TROPHY })
+      .where(eq(achievements.key, firstLogin.key));
+
+    expect(await runAsTenant(() => gamificationService.ensurePredefinedAchievements())).toBe(0);
+
+    const [row] = await db
+      .select({ icon: achievements.icon })
+      .from(achievements)
+      .where(eq(achievements.key, firstLogin.key));
+
+    expect(row.icon).toBe(firstLogin.icon);
   });
 
   it("grants lesson achievements once, counting distinct lessons only", async () => {

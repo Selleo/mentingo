@@ -5,7 +5,7 @@ import {
   XP_TRANSACTION_TYPES,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, sql, type SQL } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -324,7 +324,10 @@ export class GamificationRepository {
       .limit(RECENT_REWARDS_LIMIT);
   }
 
-  /** Returns the inserted achievement id, or null when the tenant already has this key. */
+  /**
+   * Returns the inserted achievement id, or null when the tenant already has this key. An existing
+   * achievement only gets its icon refreshed: defaults are read-only, so no admin choice is lost.
+   */
   async insertPredefinedAchievement(definition: PredefinedAchievement) {
     const [row] = await this.db
       .insert(achievements)
@@ -343,7 +346,14 @@ export class GamificationRepository {
       .onConflictDoNothing({ target: [achievements.tenantId, achievements.key] })
       .returning({ id: achievements.id });
 
-    if (!row) return null;
+    if (!row) {
+      await this.db
+        .update(achievements)
+        .set({ icon: definition.icon, updatedAt: sql`now()` })
+        .where(and(eq(achievements.key, definition.key), ne(achievements.icon, definition.icon)));
+
+      return null;
+    }
 
     await this.db
       .insert(achievementLevels)
