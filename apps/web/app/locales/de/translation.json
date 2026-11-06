@@ -1090,6 +1090,7 @@
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
     "reports": "Berichte",
+    "leaderboards": "Bestenlisten",
     "gamification": "Gamification"
   },
   "microsoftCalendar": {
@@ -2419,6 +2420,8 @@
         "activity_log_read": "Aktivitätsprotokolle anzeigen.",
         "gamification_read": "Level, XP und Erfolge anzeigen.",
         "gamification_earn_hidden": "Versteckte Erfolge erhalten.",
+        "gamification_leaderboard_read": "Bestenlisten der eigenen Gruppen ansehen sowie die Bestenliste der Organisation, wenn sie öffentlich ist.",
+        "gamification_leaderboard_read_all": "Die Bestenliste der Organisation und alle Gruppenbestenlisten ansehen.",
         "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren."
       }
     },
@@ -9196,6 +9199,56 @@
     },
     "loadError": "Erfolge konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
+    "leaderboard": {
+      "title": "Bestenlisten",
+      "description": "Vergleiche XP und Erfolge mit anderen Lernenden.",
+      "scope": "Bestenliste",
+      "organization": "Gesamte Organisation",
+      "metricLabel": "Rangfolge",
+      "periodLabel": "Zeitraum",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Erfolge"
+      },
+      "period": {
+        "week": "Diese Woche",
+        "month": "Dieser Monat",
+        "allTime": "Gesamter Zeitraum",
+        "custom": "Eigener Zeitraum"
+      },
+      "from": "Von",
+      "to": "Bis",
+      "rank": "Rang",
+      "user": "Lernende",
+      "yourPosition": "Deine Position",
+      "empty": "Noch keine Lernenden in der Rangliste.",
+      "noGroups": "Du bist noch in keiner Gruppe, daher gibt es keine Bestenliste.",
+      "unavailable": "Bestenlisten sind in deiner Organisation nicht aktiviert.",
+      "loadError": "Die Bestenliste konnte nicht geladen werden.",
+      "invalidRange": "Wähle ein Startdatum, das nicht nach dem Enddatum liegt.",
+      "chooseRange": "Wähle ein Start- und ein Enddatum.",
+      "settings": {
+        "header": "Bestenlisten",
+        "subHeader": "Lernende können XP und Erfolge vergleichen.",
+        "updated": "Einstellungen der Bestenlisten aktualisiert.",
+        "enabled": {
+          "label": "Bestenlisten aktivieren",
+          "description": "Zeigt die Seite mit den Bestenlisten. Wenn deaktiviert, kann niemand Bestenlisten öffnen."
+        },
+        "visibility": {
+          "label": "Sichtbarkeit für Lernende",
+          "description": "Admins sehen immer alle Bestenlisten.",
+          "closed": {
+            "label": "Geschlossen",
+            "description": "Lernende sehen nur die Bestenlisten ihrer Gruppen."
+          },
+          "public": {
+            "label": "Öffentlich",
+            "description": "Lernende sehen auch die Bestenliste der gesamten Organisation."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Gamification",
       "description": "Aktiviere Gamification für deine Organisation und konfiguriere die Erfolge, die Lernende erhalten können.",

@@ -1096,6 +1096,7 @@
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju",
     "reports": "Raporty",
+    "leaderboards": "Rankingi",
     "gamification": "Grywalizacja"
   },
   "microsoftCalendar": {
@@ -2668,6 +2669,8 @@
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI.",
         "gamification_read": "Wyświetlanie poziomów, XP i osiągnięć.",
         "gamification_earn_hidden": "Zdobywanie ukrytych osiągnięć.",
+        "gamification_leaderboard_read": "Przeglądanie rankingów swoich grup oraz rankingu organizacji, gdy jest publiczny.",
+        "gamification_leaderboard_read_all": "Przeglądanie rankingu organizacji i rankingów wszystkich grup.",
         "gamification_manage": "Konfigurowanie osiągnięć i ustawień grywalizacji."
       }
     },
@@ -9345,6 +9348,56 @@
     },
     "loadError": "Nie udało się wczytać osiągnięć.",
     "retry": "Spróbuj ponownie",
+    "leaderboard": {
+      "title": "Rankingi",
+      "description": "Porównuj XP i osiągnięcia z innymi uczestnikami.",
+      "scope": "Ranking",
+      "organization": "Cała organizacja",
+      "metricLabel": "Kryterium",
+      "periodLabel": "Okres",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Osiągnięcia"
+      },
+      "period": {
+        "week": "Ten tydzień",
+        "month": "Ten miesiąc",
+        "allTime": "Cały czas",
+        "custom": "Własny zakres"
+      },
+      "from": "Od",
+      "to": "Do",
+      "rank": "Miejsce",
+      "user": "Uczestnik",
+      "yourPosition": "Twoja pozycja",
+      "empty": "Brak uczestników w rankingu.",
+      "noGroups": "Nie należysz jeszcze do żadnej grupy, więc nie ma rankingu do wyświetlenia.",
+      "unavailable": "Rankingi nie są włączone w Twojej organizacji.",
+      "loadError": "Nie udało się wczytać rankingu.",
+      "invalidRange": "Wybierz datę początkową, która nie jest późniejsza niż końcowa.",
+      "chooseRange": "Wybierz datę początkową i końcową.",
+      "settings": {
+        "header": "Rankingi",
+        "subHeader": "Pozwól uczestnikom porównywać XP i osiągnięcia.",
+        "updated": "Zaktualizowano ustawienia rankingów.",
+        "enabled": {
+          "label": "Włącz rankingi",
+          "description": "Pokazuje stronę rankingów. Gdy wyłączone, nikt nie może otworzyć rankingów."
+        },
+        "visibility": {
+          "label": "Widoczność dla uczestników",
+          "description": "Administratorzy zawsze widzą wszystkie rankingi.",
+          "closed": {
+            "label": "Zamknięte",
+            "description": "Uczestnicy widzą tylko rankingi grup, do których należą."
+          },
+          "public": {
+            "label": "Publiczne",
+            "description": "Uczestnicy widzą też ranking całej organizacji."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Grywalizacja",
       "description": "Włącz grywalizację w organizacji i skonfiguruj osiągnięcia, które mogą zdobywać uczestnicy.",

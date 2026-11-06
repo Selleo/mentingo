@@ -296,6 +296,8 @@ export interface CurrentUserResponse {
       | "gamification.read"
       | "gamification.earn_hidden"
       | "gamification.manage"
+      | "gamification.leaderboard_read"
+      | "gamification.leaderboard_read_all"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -470,6 +472,8 @@ export interface GetPublicGlobalSettingsResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -752,6 +756,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -796,6 +802,8 @@ export interface UpdateEnforceSSOResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -840,6 +848,8 @@ export interface UpdateModernCourseListEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -884,6 +894,8 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -932,6 +944,8 @@ export interface UpdateFeaturedCourseResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -976,6 +990,59 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateLeaderboardSettingsBody {
+  leaderboardsEnabled?: boolean;
+  leaderboardVisibility?: "closed" | "public";
+}
+
+export interface UpdateLeaderboardSettingsResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1020,6 +1087,8 @@ export interface UpdateCalendarEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1064,6 +1133,8 @@ export interface UpdateLiveTrainingEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1113,6 +1184,8 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1157,6 +1230,8 @@ export interface UpdateLearningPathsEnabledResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1197,9 +1272,12 @@ export interface UpdateGamificationEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1273,6 +1351,8 @@ export interface UpdateColorSchemaResponse {
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -34383,6 +34463,57 @@ export interface UpdateAchievementStatusResponse {
   };
 }
 
+export interface GetLeaderboardScopesResponse {
+  data: {
+    tenantWide: boolean;
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+export interface GetLeaderboardResponse {
+  data: {
+    metric: "xp" | "achievements";
+    period: "week" | "month" | "all_time" | "custom";
+    groupId: string | null;
+    startsAt: string | null;
+    endsAt: string | null;
+    entries: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      /** @min 0 */
+      score: number;
+      /** @min 1 */
+      rank: number;
+    }[];
+    currentUser: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      /** @min 0 */
+      score: number;
+      /** @min 1 */
+      rank: number;
+    } | null;
+    nearby: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      /** @min 0 */
+      score: number;
+      /** @min 1 */
+      rank: number;
+    }[];
+  };
+}
+
 export interface GetContentMarketplaceAvailabilityResponse {
   data: {
     enabled: boolean;
@@ -38763,6 +38894,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateCourseDiscussionsEnabledResponse, any>({
         path: `/api/settings/admin/course-discussions`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLeaderboardSettings
+     * @request PATCH:/api/settings/admin/leaderboards
+     */
+    settingsControllerUpdateLeaderboardSettings: (
+      data: UpdateLeaderboardSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLeaderboardSettingsResponse, any>({
+        path: `/api/settings/admin/leaderboards`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -48152,6 +48302,54 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LeaderboardControllerGetLeaderboardScopes
+     * @request GET:/api/gamification/leaderboards/scopes
+     */
+    leaderboardControllerGetLeaderboardScopes: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLeaderboardScopesResponse, any>({
+        path: `/api/gamification/leaderboards/scopes`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LeaderboardControllerGetLeaderboard
+     * @request GET:/api/gamification/leaderboards
+     */
+    leaderboardControllerGetLeaderboard: (
+      query?: {
+        metric?: "xp" | "achievements";
+        period?: "week" | "month" | "all_time" | "custom";
+        /** @format date */
+        from?: string;
+        /** @format date */
+        to?: string;
+        /** @format uuid */
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLeaderboardResponse, any>({
+        path: `/api/gamification/leaderboards`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

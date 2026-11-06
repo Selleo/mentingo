@@ -3,6 +3,7 @@ import {
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
+  LEADERBOARD_VISIBILITY,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -29,6 +30,8 @@ export const globalSettingsJSONSchema = Type.Object({
   featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
   courseDiscussionsEnabled: Type.Boolean(),
   gamificationEnabled: Type.Boolean(),
+  leaderboardsEnabled: Type.Boolean(),
+  leaderboardVisibility: Type.Enum(LEADERBOARD_VISIBILITY),
   calendarEnabled: Type.Boolean(),
   liveTrainingEnabled: Type.Boolean(),
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),

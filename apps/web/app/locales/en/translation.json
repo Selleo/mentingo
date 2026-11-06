@@ -1091,6 +1091,7 @@
     "tenants": "Organizations",
     "activityLogs": "Activity Logs",
     "reports": "Reports",
+    "leaderboards": "Leaderboards",
     "gamification": "Gamification"
   },
   "microsoftCalendar": {
@@ -2420,6 +2421,8 @@
         "course_ai_generation": "Generate course structure and content with AI tools.",
         "gamification_read": "View levels, XP and achievements.",
         "gamification_earn_hidden": "Earn hidden achievements.",
+        "gamification_leaderboard_read": "View leaderboards of their groups, and the organization leaderboard when it is public.",
+        "gamification_leaderboard_read_all": "View the organization leaderboard and every group leaderboard.",
         "gamification_manage": "Configure achievements and gamification settings."
       }
     },
@@ -9238,6 +9241,56 @@
     },
     "loadError": "Achievements could not be loaded.",
     "retry": "Try again",
+    "leaderboard": {
+      "title": "Leaderboards",
+      "description": "Compare XP and achievements with other learners.",
+      "scope": "Leaderboard",
+      "organization": "Whole organization",
+      "metricLabel": "Ranking",
+      "periodLabel": "Period",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Achievements"
+      },
+      "period": {
+        "week": "This week",
+        "month": "This month",
+        "allTime": "All time",
+        "custom": "Custom range"
+      },
+      "from": "From",
+      "to": "To",
+      "rank": "Rank",
+      "user": "Learner",
+      "yourPosition": "Your position",
+      "empty": "No learners to rank yet.",
+      "noGroups": "You are not in any group yet, so there is no leaderboard to show.",
+      "unavailable": "Leaderboards are not enabled in your organization.",
+      "loadError": "The leaderboard could not be loaded.",
+      "invalidRange": "Choose a start date that is not after the end date.",
+      "chooseRange": "Choose a start and an end date.",
+      "settings": {
+        "header": "Leaderboards",
+        "subHeader": "Let learners compare XP and achievements.",
+        "updated": "Leaderboard settings updated.",
+        "enabled": {
+          "label": "Enable leaderboards",
+          "description": "Shows the leaderboards page. When off, nobody can open leaderboards."
+        },
+        "visibility": {
+          "label": "Learner visibility",
+          "description": "Admins always see every leaderboard.",
+          "closed": {
+            "label": "Closed",
+            "description": "Learners see only the leaderboards of groups they belong to."
+          },
+          "public": {
+            "label": "Public",
+            "description": "Learners also see the leaderboard of the whole organization."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Gamification",
       "description": "Turn gamification on for your organization and configure the achievements learners can earn.",

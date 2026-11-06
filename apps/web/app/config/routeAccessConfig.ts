@@ -89,6 +89,7 @@ const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
 
 export const routeAccessConfig = createRouteConfig({
   competencies: { allOf: [PERMISSIONS.COMPETENCIES_USE] },
+  leaderboards: { allOf: [PERMISSIONS.GAMIFICATION_LEADERBOARD_READ] },
   phishing: { anyOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.PHISHING_REPORT_READ] },
   "phishing/new": { allOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.COURSE_ENROLLMENT] },
   "phishing/:id": { allOf: [PERMISSIONS.PHISHING_REPORT_READ] },

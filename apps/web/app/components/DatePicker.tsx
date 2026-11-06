@@ -9,26 +9,42 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
 
-type ReportDatePickerProps = {
+const DATE_FORMAT = "yyyy-MM-dd";
+
+type DatePickerProps = {
   label: string;
   placeholder: string;
+  /** Selected day as `yyyy-MM-dd`. */
   value: string | undefined;
+  /** Earliest and latest selectable days as `yyyy-MM-dd`, both inclusive. */
+  minDate?: string;
+  maxDate?: string;
   className?: string;
+  testId?: string;
   onChange: (value: string | undefined) => void;
 };
 
-export function ReportDatePicker({
+export function DatePicker({
   label,
   placeholder,
   value,
+  minDate,
+  maxDate,
   className,
+  testId,
   onChange,
-}: ReportDatePickerProps) {
+}: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const language = useLanguageStore((state) => state.language);
   const calendarLocale = getDateLocale(language);
   const parsedDate = value ? parseISO(value) : undefined;
   const selectedDate = parsedDate && isValid(parsedDate) ? parsedDate : undefined;
+
+  const isOutsideRange = (date: Date) => {
+    const day = format(date, DATE_FORMAT);
+
+    return Boolean((minDate && day < minDate) || (maxDate && day > maxDate));
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -37,6 +53,7 @@ export function ReportDatePicker({
           type="button"
           variant="outline"
           aria-label={label}
+          data-testid={testId}
           className={cn(
             "h-10 min-w-0 justify-start gap-2 bg-background font-normal",
             selectedDate
@@ -57,10 +74,12 @@ export function ReportDatePicker({
           mode="single"
           captionLayout="dropdown-buttons"
           selected={selectedDate}
+          defaultMonth={selectedDate}
           onSelect={(date) => {
-            onChange(date ? format(date, "yyyy-MM-dd") : undefined);
+            onChange(date ? format(date, DATE_FORMAT) : undefined);
             setIsOpen(false);
           }}
+          disabled={isOutsideRange}
           fromYear={2000}
           toYear={new Date().getFullYear() + 1}
           initialFocus

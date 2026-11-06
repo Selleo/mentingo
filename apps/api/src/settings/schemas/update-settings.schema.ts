@@ -1,4 +1,4 @@
-import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX } from "@repo/shared";
+import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX, LEADERBOARD_VISIBILITY } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -72,6 +72,16 @@ export const updateFeaturedCourseSchema = Type.Object({
   featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
 });
 
+export const updateLeaderboardSettingsSchema = Type.Partial(
+  Type.Object(
+    {
+      leaderboardsEnabled: Type.Boolean(),
+      leaderboardVisibility: Type.Enum(LEADERBOARD_VISIBILITY),
+    },
+    { additionalProperties: false },
+  ),
+);
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateDashboardSettingsBody = Static<typeof updateDashboardSettingsBodySchema>;
 export type ResetDashboardSettingsBody = Static<typeof resetDashboardSettingsBodySchema>;
@@ -84,3 +94,4 @@ export type UpdateLiveTrainingMaxParallelSessionsBody = Static<
   typeof updateLiveTrainingMaxParallelSessionsSchema
 >;
 export type UpdateFeaturedCourseBody = Static<typeof updateFeaturedCourseSchema>;
+export type UpdateLeaderboardSettingsBody = Static<typeof updateLeaderboardSettingsSchema>;
