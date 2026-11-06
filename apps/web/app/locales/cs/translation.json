@@ -1096,6 +1096,7 @@
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
     "reports": "Přehledy",
+    "leaderboards": "Žebříčky",
     "gamification": "Gamifikace"
   },
   "microsoftCalendar": {
@@ -2425,6 +2426,8 @@
         "activity_log_read": "Může zobrazit protokoly aktivit.",
         "gamification_read": "Zobrazit úrovně, XP a úspěchy.",
         "gamification_earn_hidden": "Získávat skryté úspěchy.",
+        "gamification_leaderboard_read": "Zobrazit žebříčky svých skupin a žebříček organizace, pokud je veřejný.",
+        "gamification_leaderboard_read_all": "Zobrazit žebříček organizace a žebříčky všech skupin.",
         "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace."
       }
     },
@@ -9261,6 +9264,56 @@
     },
     "loadError": "Úspěchy se nepodařilo načíst.",
     "retry": "Zkusit znovu",
+    "leaderboard": {
+      "title": "Žebříčky",
+      "description": "Porovnejte XP a úspěchy s ostatními studenty.",
+      "scope": "Žebříček",
+      "organization": "Celá organizace",
+      "metricLabel": "Pořadí podle",
+      "periodLabel": "Období",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Úspěchy"
+      },
+      "period": {
+        "week": "Tento týden",
+        "month": "Tento měsíc",
+        "allTime": "Celkově",
+        "custom": "Vlastní rozsah"
+      },
+      "from": "Od",
+      "to": "Do",
+      "rank": "Pořadí",
+      "user": "Student",
+      "yourPosition": "Vaše pozice",
+      "empty": "Zatím nejsou žádní studenti k seřazení.",
+      "noGroups": "Zatím nejste v žádné skupině, takže není co zobrazit.",
+      "unavailable": "Žebříčky nejsou ve vaší organizaci zapnuté.",
+      "loadError": "Žebříček se nepodařilo načíst.",
+      "invalidRange": "Zvolte počáteční datum, které není po koncovém datu.",
+      "chooseRange": "Zvolte počáteční a koncové datum.",
+      "settings": {
+        "header": "Žebříčky",
+        "subHeader": "Umožněte studentům porovnávat XP a úspěchy.",
+        "updated": "Nastavení žebříčků bylo aktualizováno.",
+        "enabled": {
+          "label": "Zapnout žebříčky",
+          "description": "Zobrazí stránku žebříčků. Když je vypnuto, nikdo žebříčky neotevře."
+        },
+        "visibility": {
+          "label": "Viditelnost pro studenty",
+          "description": "Administrátoři vždy vidí všechny žebříčky.",
+          "closed": {
+            "label": "Uzavřené",
+            "description": "Studenti vidí jen žebříčky skupin, do kterých patří."
+          },
+          "public": {
+            "label": "Veřejné",
+            "description": "Studenti vidí i žebříček celé organizace."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Gamifikace",
       "description": "Zapněte gamifikaci pro svou organizaci a nastavte úspěchy, které mohou studenti získat.",

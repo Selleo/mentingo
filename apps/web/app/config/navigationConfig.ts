@@ -50,6 +50,7 @@ export const getNavigationConfig = (
   isPhishingEnabled = false,
   roleSlugs: readonly string[] = [],
   isCompetenciesEnabled = false,
+  isLeaderboardsEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -128,6 +129,16 @@ export const getNavigationConfig = (
                 path: "competencies",
                 iconName: "Milestone",
                 accessRequirement: routeAccessConfig.competencies,
+              },
+            ] satisfies NavigationItem[])
+          : []),
+        ...(isLeaderboardsEnabled
+          ? ([
+              {
+                label: t("navigationSideBar.leaderboards"),
+                path: "leaderboards",
+                iconName: "Medal",
+                testId: NAVIGATION_HANDLES.LEADERBOARDS_LINK,
               },
             ] satisfies NavigationItem[])
           : []),

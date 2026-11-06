@@ -90,6 +90,8 @@ import {
   UpdateLiveTrainingMaxParallelSessionsBody,
   updateFeaturedCourseSchema,
   UpdateFeaturedCourseBody,
+  updateLeaderboardSettingsSchema,
+  UpdateLeaderboardSettingsBody,
   updateDashboardSettingsBodySchema,
   resetDashboardSettingsBodySchema,
   UpdateDashboardSettingsBody,
@@ -295,6 +297,20 @@ export class SettingsController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalCourseDiscussionsEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/leaderboards")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: updateLeaderboardSettingsSchema }],
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateLeaderboardSettings(
+    @Body() body: UpdateLeaderboardSettingsBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalLeaderboardSettings(body, currentUser);
     return new BaseResponse(result);
   }
 

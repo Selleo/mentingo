@@ -20,6 +20,7 @@ import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { areLeaderboardsEnabled } from "~/modules/Gamification/Leaderboard/leaderboard.utils";
 
 import { Button } from "../ui/button";
 
@@ -118,6 +119,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         phishingConfiguration?.enabled === true && !isPhishingConfigurationError,
         user?.roleSlugs ?? [],
         competenciesConfiguration?.enabled === true && !isCompetenciesConfigurationError,
+        areLeaderboardsEnabled(globalSettings),
       ),
     );
   }
