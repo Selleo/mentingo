@@ -5,6 +5,7 @@ import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   type SupportedLanguages,
@@ -226,6 +227,10 @@ export class QuizRuntimeService {
       (answer) => answer.questionId === question.id,
     );
     const hasFeedback = Boolean(questionAnswer);
+    // A pending attempt shows the learner's own answers but no correctness until it is graded.
+    const showsCorrectness =
+      hasFeedback &&
+      attemptFeedback?.attempt.gradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
 
     const choiceSelections = new Set(
       attemptFeedback?.choiceSelections
@@ -310,7 +315,7 @@ export class QuizRuntimeService {
             return this.mapDeliveryOption(
               question.id,
               blank.id,
-              hasFeedback ? preferredAnswer : null,
+              showsCorrectness ? preferredAnswer : null,
               index + 1,
               undefined,
               hasFeedback,
@@ -355,10 +360,12 @@ export class QuizRuntimeService {
       title: question.title,
       description: mapQuizQuestionDescriptionForDelivery(deliveryQuestion),
       displayOrder: question.displayOrder,
-      solutionExplanation: hasFeedback ? this.buildSolutionExplanation(deliveryQuestion) : null,
+      solutionExplanation: showsCorrectness
+        ? this.buildSolutionExplanation(deliveryQuestion)
+        : null,
       photoS3Key: question.photoS3Key,
       options: deliveryOptions,
-      passQuestion: hasFeedback ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
+      passQuestion: showsCorrectness ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
     };
   }
 
@@ -515,12 +522,12 @@ export class QuizRuntimeService {
       learnerId,
       language: submission.language,
       availablePoints: this.sumAvailablePoints(quizDefinition).toString(),
-      awardedPoints: "0",
-      scorePercentage: "0",
-      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      awardedPoints: null,
+      scorePercentage: null,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
       result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
       submittedAt,
-      gradedAt: submittedAt,
+      gradedAt: null,
       questionAnswers: [],
       choiceSelections: [],
       statementAnswers: [],
@@ -557,13 +564,17 @@ export class QuizRuntimeService {
       if (allowUnanswered && !submittedQuestion.answers.length) continue;
 
       const questionAnswerId = randomUUID();
-      const questionIsCorrect = this.gradeQuestionAnswer(quizQuestion, submittedQuestion.answers);
+      const awaitsReview = quizQuestion.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL;
+      const questionIsCorrect =
+        !awaitsReview && this.gradeQuestionAnswer(quizQuestion, submittedQuestion.answers);
       const awardedPoints = questionIsCorrect ? Number(quizQuestion.maximumPoints) : 0;
 
       attemptData.questionAnswers.push({
         id: questionAnswerId,
         questionId: quizQuestion.id,
-        gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
+        gradingStatus: awaitsReview
+          ? ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING
+          : ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
         awardedPoints: awardedPoints.toString(),
         submittedAt,
       });
@@ -597,6 +608,14 @@ export class QuizRuntimeService {
       }
     }
 
+    // The score is final only once every answer is graded; reviewers finish pending attempts.
+    if (
+      attemptData.questionAnswers.some(
+        ({ gradingStatus }) => gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
+      )
+    )
+      return attemptData;
+
     const awardedPoints = attemptData.questionAnswers.reduce(
       (total, questionAnswer) => total + Number(questionAnswer.awardedPoints),
       0,
@@ -604,6 +623,8 @@ export class QuizRuntimeService {
 
     const scorePercentage = availablePoints ? (awardedPoints / availablePoints) * 100 : 0;
 
+    attemptData.gradingStatus = ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
+    attemptData.gradedAt = submittedAt;
     attemptData.awardedPoints = awardedPoints.toString();
     attemptData.scorePercentage = scorePercentage.toFixed(2);
     attemptData.result =

@@ -14,6 +14,7 @@ import { activeLearningState } from "src/course-repetition/course-learning-state
 import { hasPublicCoursePreviewAccess } from "src/lesson/repositories/public-course-preview-access";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { quizAwaitingReview } from "src/quiz/quiz-awaiting-review.sql";
 import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
@@ -161,6 +162,7 @@ export class LessonRepository {
         quizScore: sql<number | null>`${studentLessonProgress.quizScore}`,
         updatedAt: studentLessonProgress.updatedAt,
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
+        isQuizAwaitingReview: quizAwaitingReview(lessons.id, userId),
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
         quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
         videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
@@ -465,6 +467,7 @@ export class LessonRepository {
         updatedAt: studentLessonProgress.updatedAt,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        quizAwaitingReview: quizAwaitingReview(lessons.id, userId),
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
       })

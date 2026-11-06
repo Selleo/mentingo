@@ -250,6 +250,7 @@ export class QuizRuntimeRepository {
       .select({
         id: assessmentAttempts.id,
         scorePercentage: assessmentAttempts.scorePercentage,
+        gradingStatus: assessmentAttempts.gradingStatus,
         attemptNumber: assessmentAttempts.attemptNumber,
       })
       .from(assessmentAttempts)

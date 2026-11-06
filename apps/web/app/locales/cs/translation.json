@@ -4353,7 +4353,8 @@
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
       "openInNewTab": "Otevřít na nové kartě",
-      "scale_1_5": "Otázka typu škála (1–5)"
+      "scale_1_5": "Otázka typu škála (1–5)",
+      "awaitingReview": "Vaše otevřené odpovědi čekají na hodnocení. Výsledek se zobrazí po jejich ohodnocení."
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -4427,7 +4428,8 @@
       "retakeAvailableIn": "Uzamčeno na {{time}} hodin po posledním opětovném pořízení.",
       "cooldown": "Kvíz bude uzamčen na {{time}} hodin po posledním pokusu.",
       "noCooldown": "Žádná doba ochlazení.",
-      "beta": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko."
+      "beta": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
+      "awaitingReview": "Kvíz můžete opakovat po jeho ohodnocení."
     },
     "breadcrumbs": {
       "availableCourses": "Dostupné kurzy",
@@ -4465,7 +4467,8 @@
       "quizNotAnsweredYet": "Tento kvíz jste ještě nevyplnili.",
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
-      "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu."
+      "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu.",
+      "quizAwaitingReview": "Tento kvíz čeká na hodnocení."
     },
     "preview": {
       "title": "Prohlížíte si náhled kurzu",
@@ -4873,7 +4876,8 @@
     "completed": "Dokončeno",
     "inProgress": "Probíhá",
     "notStarted": "Nezahájeno",
-    "blocked": "Blokováno"
+    "blocked": "Blokováno",
+    "awaitingReview": "Čeká na hodnocení"
   },
   "studentCertificateView": {
     "header": "Certifikáty",
@@ -6560,7 +6564,8 @@
         "started": "Zahájeno",
         "completed": "Dokončeno",
         "inProgress": "Probíhá",
-        "notStarted": "Nezahájeno"
+        "notStarted": "Nezahájeno",
+        "awaitingReview": "Čeká na hodnocení"
       },
       "lessonTypes": {
         "content": "Obsah",

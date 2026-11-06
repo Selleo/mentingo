@@ -2,6 +2,7 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
   ASSESSMENT_TIME_LIMIT_MINUTES,
+  LEARNER_PROGRESS_STATUSES,
   QUIZ_ATTEMPT_START_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -287,6 +288,7 @@ export const lessonShowSchema = Type.Object({
   timeLimitMinutes: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   quizAttempt: Type.Optional(Type.Union([quizAttemptStateSchema, Type.Null()])),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
+  isQuizAwaitingReview: Type.Optional(Type.Boolean()),
   attempts: Type.Union([Type.Number(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
@@ -365,7 +367,10 @@ export const lessonForChapterSchema = Type.Array(
     title: Type.String(),
     type: Type.Enum(LESSON_TYPES),
     displayOrder: Type.Number(),
-    status: Type.Enum(PROGRESS_STATUSES),
+    status: Type.Union([
+      Type.Enum(PROGRESS_STATUSES),
+      Type.Literal(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW),
+    ]),
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),
     lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
