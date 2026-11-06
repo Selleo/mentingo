@@ -68,7 +68,7 @@ describe("AiJudgeConfigurationCard", () => {
     const aiAction = screen.getByRole("button", { name: "Create with AI" });
     const manualAction = screen.getByRole("button", { name: "Configure manually" });
 
-    expect(aiAction).toHaveClass("h-9", "bg-primary-700");
+    expect(aiAction).toHaveClass("h-9", "bg-brand");
     expect(manualAction).toHaveClass("text-primary");
 
     await user.click(aiAction);
