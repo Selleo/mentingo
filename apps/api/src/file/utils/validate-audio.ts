@@ -5,7 +5,12 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { BadRequestException } from "@nestjs/common";
-import { AUDIO_UPLOAD_MAX_BYTES, isAudioFile } from "@repo/shared";
+import {
+  isAudioFile,
+  MAX_AUDIO_FILE_SIZE_BYTES,
+  MAX_AUDIO_FILE_SIZE_MB,
+  MEGABYTE_UNIT,
+} from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { match } from "ts-pattern";
 
@@ -170,7 +175,12 @@ const decodeAudioToNullSink = (filePath: string) =>
   );
 
 const assertAudioSize = (size: number) => {
-  if (size > AUDIO_UPLOAD_MAX_BYTES) throw new BadRequestException("files.toast.audioFileTooLarge");
+  if (size > MAX_AUDIO_FILE_SIZE_BYTES)
+    throw new BadRequestException({
+      message: "files.toast.audioFileTooLarge",
+      translationParams: { size: MAX_AUDIO_FILE_SIZE_MB, unit: MEGABYTE_UNIT },
+    });
+
   if (!size) throw new BadRequestException("files.toast.invalidData");
 };
 

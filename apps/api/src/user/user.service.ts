@@ -1431,6 +1431,7 @@ export class UserService {
           reason: SESSION_REVOCATION_SOCKET.REASONS.ROLES_CHANGED,
           messageKey: SESSION_REVOCATION_SOCKET.MESSAGE_KEYS.PERMISSIONS_UPDATED,
         });
+        this.wsGateway.disconnectUser(userId);
       }),
     );
   }

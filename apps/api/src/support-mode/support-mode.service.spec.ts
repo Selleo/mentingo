@@ -5,7 +5,9 @@ import { SupportModeService } from "./support-mode.service";
 
 import type { SupportModeRepository } from "./support-mode.repository";
 import type { ConfigService } from "@nestjs/config";
+import type { SessionService } from "src/auth/session/session.service";
 import type { FileService } from "src/file/file.service";
+import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 const createRepositoryMock = () =>
   ({
@@ -58,9 +60,13 @@ describe("SupportModeService", () => {
       getFileUrl: jest.fn(async (reference: string) => `https://files.local/${reference}`),
     } as unknown as jest.Mocked<FileService>;
     service = new SupportModeService(
+      { storeSupportSessionMfaAssurance: jest.fn() } as unknown as SessionService,
       repository,
       { get: jest.fn(() => "jwt-secret") } as unknown as ConfigService,
       fileService,
+      {
+        runWithTenant: jest.fn((_tenantId: string, fn: () => unknown) => fn()),
+      } as unknown as TenantDbRunnerService,
     );
   });
 

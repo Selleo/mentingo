@@ -5,7 +5,10 @@ import { FormatRegistry } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { validate } from "uuid";
 
-import { authoringOperationSchema } from "./course-authoring-operations.schema";
+import {
+  authoringOperationSchema,
+  manualAuthoringOperationSchema,
+} from "./course-authoring-operations.schema";
 
 describe("authoring producer operation compatibility", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
@@ -37,6 +40,35 @@ describe("authoring producer operation compatibility", () => {
         payload: { categoryId: "00000000-0000-4000-8000-000000000001" },
       }),
     ).toBe(false);
+  });
+
+  it("accepts bounded image insertion and rejects prose rewrites or missing whole-lesson baselines", () => {
+    const operation = {
+      operationId: "00000000-0000-4000-8000-000000000001",
+      targetId: "00000000-0000-4000-8000-000000000002",
+      language: "en",
+      baselineHash: "a".repeat(64),
+      dependencies: [],
+      type: "lesson.image.insert",
+      payload: {
+        assetId: "00000000-0000-4000-8000-000000000003",
+        anchorBlockId: "00000000-0000-4000-8000-000000000004",
+        position: "after",
+        caption: null,
+        altText: "Revenue chart",
+      },
+    };
+    expect(Value.Check(authoringOperationSchema, operation)).toBe(true);
+    expect(Value.Check(manualAuthoringOperationSchema, operation)).toBe(false);
+    for (const invalid of [
+      { ...operation, baselineHash: null },
+      { ...operation, payload: { ...operation.payload, description: "New lesson prose" } },
+      { ...operation, payload: { ...operation.payload, caption: "x".repeat(1001) } },
+      { ...operation, payload: { ...operation.payload, caption: "" } },
+      { ...operation, payload: { ...operation.payload, position: "append" } },
+      { ...operation, payload: { ...operation.payload, altText: "" } },
+    ])
+      expect(Value.Check(authoringOperationSchema, invalid)).toBe(false);
   });
 
   it.each([{ title: "Renamed lesson" }, { description: "" }, { description: "New introduction" }])(

@@ -1,9 +1,9 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "@repo/shared";
 
 import { CACHE_MANAGER_TOKEN, Cache } from "src/cache/cache.types";
 import { S3Service } from "src/s3/s3.service";
 
-import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "./scorm-package-limits";
 import { SCORM_TUS_MIN_S3_PART_SIZE, SCORM_TUS_STATE_TTL } from "./scorm-tus-upload.constants";
 
 import type {

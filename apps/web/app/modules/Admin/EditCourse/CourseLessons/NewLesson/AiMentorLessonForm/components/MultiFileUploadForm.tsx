@@ -1,4 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  MAX_INGESTION_FILE_COUNT,
+  MAX_INGESTION_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useCallback, useEffect, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -13,11 +18,7 @@ import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  AI_MENTOR_FILE_TYPES_MAP,
-  MAX_MB_PER_FILE,
-  MAX_NUM_OF_FILES,
-} from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLesson.constants";
+import { AI_MENTOR_FILE_TYPES_MAP } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLesson.constants";
 import { FileLoader } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/FileLoader";
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 
@@ -120,8 +121,8 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
           </Label>
           <Label className="text-sm text-neutral-600">
             {t("adminCourseView.curriculum.lesson.field.includeFiles", {
-              count: MAX_NUM_OF_FILES,
-              MAX_FILE_SIZE: MAX_MB_PER_FILE,
+              count: MAX_INGESTION_FILE_COUNT,
+              maxSize: formatFileSize(MAX_INGESTION_FILE_SIZE_BYTES),
             })}
           </Label>
 
@@ -133,7 +134,7 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
                   meta={AI_MENTOR_FILE_TYPES_MAP[item.type] ?? item.type ?? "File"}
                   key={`${item.name} - ${item.type} - ${item.size}`}
                   onRemove={() => removeWhere({ fileName: item.name, fileSize: item.size })}
-                  error={idx >= MAX_NUM_OF_FILES}
+                  error={idx >= MAX_INGESTION_FILE_COUNT}
                 />
               ))}
           </div>

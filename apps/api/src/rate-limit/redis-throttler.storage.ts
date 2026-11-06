@@ -5,6 +5,8 @@ import { RedisClient } from "src/redis";
 import type { ThrottleResult } from "./rate-limit.types";
 import type { ThrottlerStorage } from "@nestjs/throttler";
 
+export const RATE_LIMIT_STORAGE_KEY_PREFIX = "rate-limit:throttler";
+
 @Injectable()
 export class RedisThrottlerStorage implements ThrottlerStorage {
   constructor(private readonly redisClient: RedisClient) {}
@@ -16,7 +18,7 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     _blockDuration: number,
     throttlerName: string,
   ): Promise<ThrottleResult> {
-    const storageKey = `rate-limit:throttler:${throttlerName}:${key}`;
+    const storageKey = `${RATE_LIMIT_STORAGE_KEY_PREFIX}:${throttlerName}:${key}`;
     const totalHits = await this.redisClient.incr(storageKey);
 
     if (totalHits === 1) await this.redisClient.pExpire(storageKey, ttl);

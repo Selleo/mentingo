@@ -118,7 +118,10 @@ const generateIndexContent = () => {
       );
 
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-renderer")));
-      path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-renderer.types")));
+      path.pushContainer(
+        "body",
+        t.exportAllDeclaration(t.stringLiteral("./template-renderer.types")),
+      );
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./publication.types")));
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./publications")));
       path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-usage")));
@@ -141,23 +144,19 @@ const generateIndexContent = () => {
   return output.code;
 };
 
-const tsupPlugin = () => {
-  return {
-    name: "dynamic-template-exports",
-    buildEnd: () => {
-      const indexFilePath = path.resolve(process.cwd(), "src", "index.ts");
-      const content = generateIndexContent();
+/** Generate the complete entry before tsup starts parallel JS and declaration builds. */
+export const generateEmailTemplateIndex = () => {
+  const indexFilePath = path.resolve(process.cwd(), "src", "index.ts");
+  const content = generateIndexContent();
+  if (fs.existsSync(indexFilePath) && fs.readFileSync(indexFilePath, "utf-8") === content) return;
 
-      fs.writeFileSync(indexFilePath, content, "utf-8");
-      console.log(`Generated ${indexFilePath}.`);
-
-      const savedContent = fs.readFileSync(indexFilePath, "utf-8");
-
-      if (content !== savedContent) {
-        console.error("Error: Saved content does not match generated content!");
-      }
-    },
-  };
+  // Readers must never observe the empty file produced by truncating a live entry.
+  const temporaryPath = `${indexFilePath}.${process.pid}.tmp`;
+  try {
+    fs.writeFileSync(temporaryPath, content, "utf-8");
+    fs.renameSync(temporaryPath, indexFilePath);
+  } finally {
+    if (fs.existsSync(temporaryPath)) fs.unlinkSync(temporaryPath);
+  }
+  console.log(`Generated ${indexFilePath}.`);
 };
-
-export default tsupPlugin;

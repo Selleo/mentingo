@@ -36,6 +36,7 @@ import {
   AUTHORING_PART_STATUS,
   AUTHORING_TOOL_STATUS,
 } from "../courseAuthoring.constants";
+import { compactSourceReadActivity } from "../sourceReadActivity";
 
 import { AuthoringToolActivity } from "./AuthoringActivityRail";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
@@ -479,7 +480,9 @@ const AssistantChatMessage = ({
   const baseContentTestId = `course-authoring-assistant-content-${requestId}${testIdSuffix ?? ""}`;
   const contentNode = (
     <div className="space-y-2">
-      {message.parts.map((part, index) => {
+      {compactSourceReadActivity(message.parts, (part) =>
+        isPartMarker(part) ? part.data : undefined,
+      ).map((part, index) => {
         if (!isPartMarker(part)) return null;
         let partNode: ReactNode = null;
         if (part.data.partKind === AUTHORING_PART_KIND.TEXT && part.data.text) {

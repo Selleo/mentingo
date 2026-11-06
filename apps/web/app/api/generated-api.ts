@@ -293,6 +293,9 @@ export interface CurrentUserResponse {
       | "tenant.manage"
       | "course.ai_generation"
       | "activity_log.read"
+      | "gamification.read"
+      | "gamification.earn_hidden"
+      | "gamification.manage"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -382,6 +385,22 @@ export interface ResetPasswordBody {
   resetToken: string;
 }
 
+export interface SessionResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
+export interface MfaChallengeResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
 export interface MFASetupResponse {
   data: {
     secret: string;
@@ -390,6 +409,11 @@ export interface MFASetupResponse {
 }
 
 export interface MFAVerifyBody {
+  /**
+   * @minLength 6
+   * @maxLength 6
+   * @pattern ^[0-9]{6}$
+   */
   token: string;
 }
 
@@ -445,6 +469,7 @@ export interface GetPublicGlobalSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -522,35 +547,23 @@ export interface GetUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
 }
 
-export type UpdateUserSettingsBody =
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-    }
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-      adminNewUserNotification?: boolean;
-      adminFinishedCourseNotification?: boolean;
-      configWarningDismissed?: boolean;
-    };
+export interface UpdateUserSettingsBody {
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  adminNewUserNotification?: boolean;
+  adminFinishedCourseNotification?: boolean;
+  configWarningDismissed?: boolean;
+}
 
 export interface UpdateUserSettingsResponse {
   data:
@@ -558,13 +571,11 @@ export interface UpdateUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -587,7 +598,8 @@ export interface GetDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -602,7 +614,8 @@ export interface GetDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -624,7 +637,8 @@ export interface UpdateDashboardSettingsBody {
       | "continue_learning"
       | "required_courses"
       | "course_completion"
-      | "certificates";
+      | "certificates"
+      | "gamification";
     size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
     visible: boolean;
   }[];
@@ -646,7 +660,8 @@ export interface UpdateDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -661,7 +676,8 @@ export interface UpdateDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -691,7 +707,8 @@ export interface ResetDashboardSettingsResponse {
           | "continue_learning"
           | "required_courses"
           | "course_completion"
-          | "certificates";
+          | "certificates"
+          | "gamification";
         size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
         visible: boolean;
       }[];
@@ -706,7 +723,8 @@ export interface ResetDashboardSettingsResponse {
         | "continue_learning"
         | "required_courses"
         | "course_completion"
-        | "certificates";
+        | "certificates"
+        | "gamification";
       alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
@@ -720,7 +738,6 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -734,6 +751,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -777,6 +795,7 @@ export interface UpdateEnforceSSOResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -820,6 +839,7 @@ export interface UpdateModernCourseListEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -863,6 +883,7 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -910,6 +931,7 @@ export interface UpdateFeaturedCourseResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -953,6 +975,7 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -996,6 +1019,7 @@ export interface UpdateCalendarEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1039,6 +1063,7 @@ export interface UpdateLiveTrainingEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1087,6 +1112,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1130,6 +1156,50 @@ export interface UpdateLearningPathsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateGamificationEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1171,7 +1241,6 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1183,7 +1252,6 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1204,6 +1272,7 @@ export interface UpdateColorSchemaResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
     /** @min 1 */
@@ -1402,7 +1471,6 @@ export interface UpdateConfigWarningDismissedResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1658,7 +1726,9 @@ export interface GetUserDetailsResponse {
 }
 
 export interface UpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -1699,7 +1769,9 @@ export interface UpsertUserDetailsResponse {
 }
 
 export interface AdminUpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -2631,6 +2703,7 @@ export interface HasMissingTranslationsResponse {
 }
 
 export type CreateCourseBody = {
+  /** @maxLength 255 */
   title: string;
   description: string;
   status?: "draft" | "published" | "private";
@@ -2737,6 +2810,7 @@ export interface UpdateCourseMediaResponse {
 }
 
 export interface UpdateCourseBody {
+  /** @maxLength 255 */
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
@@ -8738,7 +8812,7 @@ export interface GetLoginMethodSetupResponse {
 }
 
 export interface UpdateLoginMethodBody {
-  method: "google" | "microsoft" | "slack" | "entraId" | "magicLink" | "password";
+  method: "google" | "microsoft" | "entraId" | "slack" | "magicLink" | "password";
   enabled: boolean;
 }
 
@@ -32880,6 +32954,21 @@ export interface LaunchScormAttemptResponse {
   };
 }
 
+export interface RenewScormContentBody {
+  /**
+   * @minLength 64
+   * @maxLength 64
+   * @pattern ^[a-f0-9]{64}$
+   */
+  token: string;
+}
+
+export interface RenewScormContentResponse {
+  data: {
+    renewed: boolean;
+  };
+}
+
 export interface CommitScormAttemptBody {
   /** @format uuid */
   attemptId: string;
@@ -33602,6 +33691,695 @@ export interface CreateSupportSessionResponse {
   data: {
     redirectUrl: string;
     expiresAt: string;
+  };
+}
+
+export interface GetUserGamificationProfileResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    /** @min 0 */
+    lifetimeXp: number;
+    /** @min 0 */
+    spendableXp: number;
+    /** @min 1 */
+    level: number;
+    /** @min 0 */
+    currentLevelXp: number;
+    /** @min 0 */
+    nextLevelXp: number;
+    achievements: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      description: string;
+      eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+      requirementType: "first_time" | "count" | "streak" | "time_window";
+      visibility: "visible" | "hidden";
+      icon:
+        | "trophy"
+        | "star"
+        | "flame"
+        | "zap"
+        | "target"
+        | "award"
+        | "medal"
+        | "crown"
+        | "rocket"
+        | "book_open"
+        | "graduation_cap"
+        | "log_in"
+        | "door_open"
+        | "calendar_check"
+        | "clock"
+        | "brain"
+        | "lightbulb"
+        | "puzzle"
+        | "message_circle"
+        | "heart"
+        | "thumbs_up"
+        | "sparkles"
+        | "circle_check"
+        | "gem"
+        | "diamond"
+        | "shield_check"
+        | "badge_check"
+        | "flag"
+        | "mountain"
+        | "footprints"
+        | "gauge"
+        | "timer"
+        | "hourglass"
+        | "alarm_clock"
+        | "calendar_days"
+        | "sunrise"
+        | "sun"
+        | "moon"
+        | "coffee"
+        | "book"
+        | "library"
+        | "notebook_pen"
+        | "pencil"
+        | "clipboard_check"
+        | "list_checks"
+        | "check_check"
+        | "glasses"
+        | "microscope"
+        | "flask_conical"
+        | "atom"
+        | "calculator"
+        | "languages"
+        | "globe"
+        | "compass"
+        | "map"
+        | "route"
+        | "telescope"
+        | "headphones"
+        | "mic"
+        | "palette"
+        | "users"
+        | "handshake"
+        | "smile"
+        | "party_popper"
+        | "gift"
+        | "sprout"
+        | "leaf"
+        | "infinity"
+        | "repeat"
+        | "trending_up"
+        | "activity"
+        | "dumbbell"
+        | "gamepad_2"
+        | "key"
+        | "anchor"
+        | "plane";
+      /** @min 0 */
+      progress: number;
+      levels: {
+        /** @min 1 */
+        level: number;
+        /** @min 1 */
+        threshold: number;
+        /** @min 0 */
+        xpReward: number;
+        earnedAt: string | null;
+        badgeImageUrl: string | null;
+      }[];
+    }[];
+    recentRewards: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      achievementId: string;
+      achievementTitle: string;
+      /** @min 1 */
+      level: number;
+      /** @min 0 */
+      xpReward: number;
+      earnedAt: string;
+    }[];
+  };
+}
+
+export interface GetAdminAchievementsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    isPredefined: boolean;
+    title: string;
+    description: string;
+    eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+    requirementType: "first_time" | "count" | "streak" | "time_window";
+    windowDays: number | null;
+    filters: {
+      /** @format uuid */
+      courseId?: string;
+      /**
+       * @min 0
+       * @max 100
+       */
+      minScore?: number;
+    };
+    visibility: "visible" | "hidden";
+    icon:
+      | "trophy"
+      | "star"
+      | "flame"
+      | "zap"
+      | "target"
+      | "award"
+      | "medal"
+      | "crown"
+      | "rocket"
+      | "book_open"
+      | "graduation_cap"
+      | "log_in"
+      | "door_open"
+      | "calendar_check"
+      | "clock"
+      | "brain"
+      | "lightbulb"
+      | "puzzle"
+      | "message_circle"
+      | "heart"
+      | "thumbs_up"
+      | "sparkles"
+      | "circle_check"
+      | "gem"
+      | "diamond"
+      | "shield_check"
+      | "badge_check"
+      | "flag"
+      | "mountain"
+      | "footprints"
+      | "gauge"
+      | "timer"
+      | "hourglass"
+      | "alarm_clock"
+      | "calendar_days"
+      | "sunrise"
+      | "sun"
+      | "moon"
+      | "coffee"
+      | "book"
+      | "library"
+      | "notebook_pen"
+      | "pencil"
+      | "clipboard_check"
+      | "list_checks"
+      | "check_check"
+      | "glasses"
+      | "microscope"
+      | "flask_conical"
+      | "atom"
+      | "calculator"
+      | "languages"
+      | "globe"
+      | "compass"
+      | "map"
+      | "route"
+      | "telescope"
+      | "headphones"
+      | "mic"
+      | "palette"
+      | "users"
+      | "handshake"
+      | "smile"
+      | "party_popper"
+      | "gift"
+      | "sprout"
+      | "leaf"
+      | "infinity"
+      | "repeat"
+      | "trending_up"
+      | "activity"
+      | "dumbbell"
+      | "gamepad_2"
+      | "key"
+      | "anchor"
+      | "plane";
+    isEnabled: boolean;
+    levels: {
+      /** @min 1 */
+      level: number;
+      /** @min 1 */
+      threshold: number;
+      /** @min 0 */
+      xpReward: number;
+      /** @min 0 */
+      earnedCount: number;
+      badgeImageKey: string | null;
+      badgeImageUrl: string | null;
+    }[];
+  }[];
+}
+
+export interface GetAdminAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    isPredefined: boolean;
+    eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+    requirementType: "first_time" | "count" | "streak" | "time_window";
+    windowDays: number | null;
+    filters: {
+      /** @format uuid */
+      courseId?: string;
+      /**
+       * @min 0
+       * @max 100
+       */
+      minScore?: number;
+    };
+    visibility: "visible" | "hidden";
+    icon:
+      | "trophy"
+      | "star"
+      | "flame"
+      | "zap"
+      | "target"
+      | "award"
+      | "medal"
+      | "crown"
+      | "rocket"
+      | "book_open"
+      | "graduation_cap"
+      | "log_in"
+      | "door_open"
+      | "calendar_check"
+      | "clock"
+      | "brain"
+      | "lightbulb"
+      | "puzzle"
+      | "message_circle"
+      | "heart"
+      | "thumbs_up"
+      | "sparkles"
+      | "circle_check"
+      | "gem"
+      | "diamond"
+      | "shield_check"
+      | "badge_check"
+      | "flag"
+      | "mountain"
+      | "footprints"
+      | "gauge"
+      | "timer"
+      | "hourglass"
+      | "alarm_clock"
+      | "calendar_days"
+      | "sunrise"
+      | "sun"
+      | "moon"
+      | "coffee"
+      | "book"
+      | "library"
+      | "notebook_pen"
+      | "pencil"
+      | "clipboard_check"
+      | "list_checks"
+      | "check_check"
+      | "glasses"
+      | "microscope"
+      | "flask_conical"
+      | "atom"
+      | "calculator"
+      | "languages"
+      | "globe"
+      | "compass"
+      | "map"
+      | "route"
+      | "telescope"
+      | "headphones"
+      | "mic"
+      | "palette"
+      | "users"
+      | "handshake"
+      | "smile"
+      | "party_popper"
+      | "gift"
+      | "sprout"
+      | "leaf"
+      | "infinity"
+      | "repeat"
+      | "trending_up"
+      | "activity"
+      | "dumbbell"
+      | "gamepad_2"
+      | "key"
+      | "anchor"
+      | "plane";
+    isEnabled: boolean;
+    levels: {
+      /** @min 1 */
+      level: number;
+      /** @min 1 */
+      threshold: number;
+      /** @min 0 */
+      xpReward: number;
+      /** @min 0 */
+      earnedCount: number;
+      badgeImageKey: string | null;
+      badgeImageUrl: string | null;
+    }[];
+    title: {
+      /** @maxLength 500 */
+      en?: string;
+      /** @maxLength 500 */
+      pl?: string;
+      /** @maxLength 500 */
+      de?: string;
+      /** @maxLength 500 */
+      lt?: string;
+      /** @maxLength 500 */
+      cs?: string;
+      /** @maxLength 500 */
+      es?: string;
+      /** @maxLength 500 */
+      fr?: string;
+    };
+    description: {
+      /** @maxLength 500 */
+      en?: string;
+      /** @maxLength 500 */
+      pl?: string;
+      /** @maxLength 500 */
+      de?: string;
+      /** @maxLength 500 */
+      lt?: string;
+      /** @maxLength 500 */
+      cs?: string;
+      /** @maxLength 500 */
+      es?: string;
+      /** @maxLength 500 */
+      fr?: string;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  };
+}
+
+export interface CreateAchievementBody {
+  title: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  description: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+  requirementType: "first_time" | "count" | "streak" | "time_window";
+  windowDays: number | null;
+  filters: {
+    /** @format uuid */
+    courseId?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minScore?: number;
+  };
+  visibility: "visible" | "hidden";
+  icon:
+    | "trophy"
+    | "star"
+    | "flame"
+    | "zap"
+    | "target"
+    | "award"
+    | "medal"
+    | "crown"
+    | "rocket"
+    | "book_open"
+    | "graduation_cap"
+    | "log_in"
+    | "door_open"
+    | "calendar_check"
+    | "clock"
+    | "brain"
+    | "lightbulb"
+    | "puzzle"
+    | "message_circle"
+    | "heart"
+    | "thumbs_up"
+    | "sparkles"
+    | "circle_check"
+    | "gem"
+    | "diamond"
+    | "shield_check"
+    | "badge_check"
+    | "flag"
+    | "mountain"
+    | "footprints"
+    | "gauge"
+    | "timer"
+    | "hourglass"
+    | "alarm_clock"
+    | "calendar_days"
+    | "sunrise"
+    | "sun"
+    | "moon"
+    | "coffee"
+    | "book"
+    | "library"
+    | "notebook_pen"
+    | "pencil"
+    | "clipboard_check"
+    | "list_checks"
+    | "check_check"
+    | "glasses"
+    | "microscope"
+    | "flask_conical"
+    | "atom"
+    | "calculator"
+    | "languages"
+    | "globe"
+    | "compass"
+    | "map"
+    | "route"
+    | "telescope"
+    | "headphones"
+    | "mic"
+    | "palette"
+    | "users"
+    | "handshake"
+    | "smile"
+    | "party_popper"
+    | "gift"
+    | "sprout"
+    | "leaf"
+    | "infinity"
+    | "repeat"
+    | "trending_up"
+    | "activity"
+    | "dumbbell"
+    | "gamepad_2"
+    | "key"
+    | "anchor"
+    | "plane";
+  isEnabled: boolean;
+  /**
+   * @maxItems 3
+   * @minItems 1
+   */
+  levels: {
+    /** @min 1 */
+    threshold: number;
+    /**
+     * @min 0
+     * @max 100000
+     */
+    xpReward: number;
+    badgeImageKey: string | null;
+  }[];
+}
+
+export interface CreateAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UpdateAchievementBody {
+  title: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  description: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+  requirementType: "first_time" | "count" | "streak" | "time_window";
+  windowDays: number | null;
+  filters: {
+    /** @format uuid */
+    courseId?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minScore?: number;
+  };
+  visibility: "visible" | "hidden";
+  icon:
+    | "trophy"
+    | "star"
+    | "flame"
+    | "zap"
+    | "target"
+    | "award"
+    | "medal"
+    | "crown"
+    | "rocket"
+    | "book_open"
+    | "graduation_cap"
+    | "log_in"
+    | "door_open"
+    | "calendar_check"
+    | "clock"
+    | "brain"
+    | "lightbulb"
+    | "puzzle"
+    | "message_circle"
+    | "heart"
+    | "thumbs_up"
+    | "sparkles"
+    | "circle_check"
+    | "gem"
+    | "diamond"
+    | "shield_check"
+    | "badge_check"
+    | "flag"
+    | "mountain"
+    | "footprints"
+    | "gauge"
+    | "timer"
+    | "hourglass"
+    | "alarm_clock"
+    | "calendar_days"
+    | "sunrise"
+    | "sun"
+    | "moon"
+    | "coffee"
+    | "book"
+    | "library"
+    | "notebook_pen"
+    | "pencil"
+    | "clipboard_check"
+    | "list_checks"
+    | "check_check"
+    | "glasses"
+    | "microscope"
+    | "flask_conical"
+    | "atom"
+    | "calculator"
+    | "languages"
+    | "globe"
+    | "compass"
+    | "map"
+    | "route"
+    | "telescope"
+    | "headphones"
+    | "mic"
+    | "palette"
+    | "users"
+    | "handshake"
+    | "smile"
+    | "party_popper"
+    | "gift"
+    | "sprout"
+    | "leaf"
+    | "infinity"
+    | "repeat"
+    | "trending_up"
+    | "activity"
+    | "dumbbell"
+    | "gamepad_2"
+    | "key"
+    | "anchor"
+    | "plane";
+  isEnabled: boolean;
+  /**
+   * @maxItems 3
+   * @minItems 1
+   */
+  levels: {
+    /** @min 1 */
+    threshold: number;
+    /**
+     * @min 0
+     * @max 100000
+     */
+    xpReward: number;
+    badgeImageKey: string | null;
+  }[];
+}
+
+export interface UpdateAchievementResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateAchievementStatusBody {
+  isEnabled: boolean;
+}
+
+export interface UpdateAchievementStatusResponse {
+  data: {
+    message: string;
   };
 }
 
@@ -37661,6 +38439,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AuthControllerSession
+     * @request GET:/api/auth/session
+     */
+    authControllerSession: (params: RequestParams = {}) =>
+      this.request<SessionResponse, any>({
+        path: `/api/auth/session`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaChallenge
+     * @request POST:/api/auth/mfa/challenge
+     */
+    authControllerMfaChallenge: (params: RequestParams = {}) =>
+      this.request<MfaChallengeResponse, any>({
+        path: `/api/auth/mfa/challenge`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AuthControllerMfaSetup
      * @request POST:/api/auth/mfa/setup
      */
@@ -38017,6 +38823,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateLearningPathsEnabled: (params: RequestParams = {}) =>
       this.request<UpdateLearningPathsEnabledResponse, any>({
         path: `/api/settings/admin/learning-paths-enabled`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateGamificationEnabled
+     * @request PATCH:/api/settings/admin/gamification-enabled
+     */
+    settingsControllerUpdateGamificationEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateGamificationEnabledResponse, any>({
+        path: `/api/settings/admin/gamification-enabled`,
         method: "PATCH",
         format: "json",
         ...params,
@@ -38480,6 +39300,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/settings/login-page-files`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerStreamLoginPageFile
+     * @request GET:/api/settings/login-page-files/{id}/content
+     */
+    settingsControllerStreamLoginPageFile: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-page-files/${id}/content`,
+        method: "GET",
         ...params,
       }),
 
@@ -41702,8 +42535,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -41722,8 +42557,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -44944,8 +45781,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -44964,8 +45803,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -46296,6 +47137,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ScormControllerRenewScormContent
+     * @request POST:/api/scorm/runtime/content/renew
+     */
+    scormControllerRenewScormContent: (data: RenewScormContentBody, params: RequestParams = {}) =>
+      this.request<RenewScormContentResponse, any>({
+        path: `/api/scorm/runtime/content/renew`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerCommitScormAttempt
      * @request POST:/api/scorm/runtime/commit
      */
@@ -47169,6 +48026,130 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreateSupportSessionResponse, any>({
         path: `/api/super-admin/tenants/${id}/support-session`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GamificationControllerGetUserGamificationProfile
+     * @request GET:/api/gamification/users/{userId}
+     */
+    gamificationControllerGetUserGamificationProfile: (
+      userId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserGamificationProfileResponse, any>({
+        path: `/api/gamification/users/${userId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerGetAdminAchievements
+     * @request GET:/api/gamification/admin/achievements
+     */
+    achievementAdminControllerGetAdminAchievements: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAchievementsResponse, any>({
+        path: `/api/gamification/admin/achievements`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerCreateAchievement
+     * @request POST:/api/gamification/admin/achievements
+     */
+    achievementAdminControllerCreateAchievement: (
+      data: CreateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerGetAdminAchievement
+     * @request GET:/api/gamification/admin/achievements/{id}
+     */
+    achievementAdminControllerGetAdminAchievement: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerUpdateAchievement
+     * @request PUT:/api/gamification/admin/achievements/{id}
+     */
+    achievementAdminControllerUpdateAchievement: (
+      id: string,
+      data: UpdateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerUpdateAchievementStatus
+     * @request PATCH:/api/gamification/admin/achievements/{id}/status
+     */
+    achievementAdminControllerUpdateAchievementStatus: (
+      id: string,
+      data: UpdateAchievementStatusBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAchievementStatusResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}/status`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

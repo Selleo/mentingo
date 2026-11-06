@@ -1,6 +1,7 @@
 import { AppStartupService } from "./app-startup.service";
 
 import type { DefaultAutomationSetupService } from "./automation-execution/services/default-automation-setup.service";
+import type { GamificationSetupService } from "./gamification/gamification-setup.service";
 import type { PermissionsBackfillService } from "./permissions/permissions-backfill.service";
 import type { DatabaseMigrationService } from "./storage/db/database-migration.service";
 
@@ -19,10 +20,14 @@ describe("AppStartupService", () => {
   const automations = {
     ensureDefaultAutomationsForAllTenants: jest.fn(),
   } as unknown as jest.Mocked<DefaultAutomationSetupService>;
+  const gamification = {
+    ensurePredefinedAchievementsForAllTenants: jest.fn(),
+  } as unknown as jest.Mocked<GamificationSetupService>;
   const service = new AppStartupService(
     databaseMigrationService,
     permissionsBackfillService,
     automations,
+    gamification,
   );
 
   beforeEach(() => {
@@ -73,10 +78,13 @@ describe("AppStartupService", () => {
         return { insertedCount: 0, tenantCount: 2 };
       },
     );
+    gamification.ensurePredefinedAchievementsForAllTenants.mockImplementation(async () => {
+      calls.push("gamification");
+    });
 
     await service.onModuleInit();
 
-    expect(calls).toEqual(["migrations", "automations", "backfill"]);
+    expect(calls).toEqual(["migrations", "automations", "backfill", "gamification"]);
   });
 
   it("does not run permission backfill when migrations fail", async () => {

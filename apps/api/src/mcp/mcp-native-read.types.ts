@@ -10,7 +10,13 @@ export type NativeReadActor = {
 export type BoundToolActor = McpToolActor | NativeReadActor;
 export function bindToolActor(actor: BoundToolActor) {
   if ("native" in actor)
-    return { ...actor.native, clientId: "native-assistant", scopes: [] as string[] };
+    return {
+      ...actor.native,
+      clientId: "native-assistant",
+      scopes: [] as string[],
+      sessionVersion: undefined,
+      mfaVerified: undefined,
+    };
   return { ...actor.grant, email: actor.email };
 }
 export type NativeReadTool = {

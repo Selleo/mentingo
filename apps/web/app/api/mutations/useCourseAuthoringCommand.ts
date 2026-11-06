@@ -1,5 +1,6 @@
 /** Sends one workspace command and refreshes its durable session projection. */
 import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 import { sendAuthoringCommand } from "../../modules/CourseAuthoring/courseAuthoring.api";
 import {
@@ -46,6 +47,14 @@ export const useCourseAuthoringCommand = ({ courseId, sessionId }: Options) =>
         });
       } catch {
         // The command was accepted; a failed read must not invite a duplicate submission.
+        await queryClient.invalidateQueries({ queryKey: authoringSessionKey(courseId, sessionId) });
+      }
+    },
+    onError: async (error) => {
+      if (!sessionId || !isAxiosError(error) || error.response?.status !== 409) return;
+      try {
+        await refreshAuthoringSession(courseId, sessionId);
+      } catch {
         await queryClient.invalidateQueries({ queryKey: authoringSessionKey(courseId, sessionId) });
       }
     },

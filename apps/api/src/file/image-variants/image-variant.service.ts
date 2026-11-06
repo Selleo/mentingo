@@ -1,5 +1,6 @@
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import sharp from "sharp";
+import { match } from "ts-pattern";
 
 import { S3Service } from "src/s3/s3.service";
 
@@ -58,13 +59,7 @@ export class ImageVariantService {
         await Promise.all(
           variantDefinitions.map(async (definition) => [
             definition.quality,
-            await this.createVariant(
-              params.buffer,
-              referenceKey,
-              sourceMetadata,
-              definition,
-              resizeMode,
-            ),
+            await this.createVariant(params.buffer, referenceKey, definition, resizeMode),
           ]),
         ),
       ) as Partial<Record<ImageQuality, ImageVariantBufferDetails>>;
@@ -115,13 +110,7 @@ export class ImageVariantService {
         await Promise.all(
           variantDefinitions.map(async (definition) => [
             definition.quality,
-            await this.createVariant(
-              params.buffer,
-              params.referenceKey,
-              sourceMetadata,
-              definition,
-              resizeMode,
-            ),
+            await this.createVariant(params.buffer, params.referenceKey, definition, resizeMode),
           ]),
         ),
       ) as Partial<Record<ImageQuality, ImageVariantBufferDetails>>;
@@ -149,23 +138,21 @@ export class ImageVariantService {
   }
 
   private resizeToWebp(buffer: Buffer, width: ImageVariantWidth, resizeMode: ImageResizeMode) {
-    if (resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE) {
-      return sharp(buffer)
-        .rotate()
-        .resize({ width, height: width, fit: "cover", position: "center" })
-        .webp({ quality: 82 })
-        .toBuffer();
-    }
+    const resizeOptions = match(resizeMode)
+      .with(IMAGE_RESIZE_MODES.COVER_SQUARE, () => ({
+        width,
+        height: width,
+        fit: "cover" as const,
+        position: "center",
+      }))
+      .with(IMAGE_RESIZE_MODES.CONTAIN, () => ({ width, withoutEnlargement: true }))
+      .exhaustive();
 
-    return sharp(buffer).rotate().resize({ width }).webp({ quality: 82 }).toBuffer();
-  }
-
-  private calculateHeight(
-    sourceWidth: number,
-    sourceHeight: number,
-    targetWidth: ImageVariantWidth,
-  ) {
-    return Math.round((sourceHeight / sourceWidth) * targetWidth);
+    return sharp(buffer)
+      .rotate()
+      .resize(resizeOptions)
+      .webp({ quality: 82 })
+      .toBuffer({ resolveWithObject: true });
   }
 
   private removeBuffersFromVariants(
@@ -194,22 +181,17 @@ export class ImageVariantService {
   private async createVariant(
     buffer: Buffer,
     referenceKey: string,
-    sourceMetadata: { width: number; height: number },
     definition: ImageVariantDefinition,
     resizeMode: ImageResizeMode,
   ): Promise<ImageVariantBufferDetails> {
-    const { quality, width } = definition;
-    const height =
-      resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE
-        ? width
-        : this.calculateHeight(sourceMetadata.width, sourceMetadata.height, width);
+    const { data, info } = await this.resizeToWebp(buffer, definition.width, resizeMode);
 
     return {
-      key: getImageVariantKey(referenceKey, quality),
-      width,
-      height,
+      key: getImageVariantKey(referenceKey, definition.quality),
+      width: info.width,
+      height: info.height,
       contentType: IMAGE_VARIANT_CONTENT_TYPE,
-      buffer: await this.resizeToWebp(buffer, width, resizeMode),
+      buffer: data,
     };
   }
 }

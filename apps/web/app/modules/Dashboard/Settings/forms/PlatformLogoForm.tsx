@@ -1,3 +1,8 @@
+import {
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  formatFileSize,
+} from "@repo/shared";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -60,9 +65,11 @@ export const PlatformLogoForm = () => {
             fileInputRef={fileInputRef}
             variant="video"
             inputId="platform-logo"
-            accept=".png, .svg"
+            accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
             imageFit="contain"
-            detailsText={t("platformLogo.field.imageRequirements")}
+            detailsText={t("platformLogo.field.imageRequirements", {
+              maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
+            })}
             inputTestId={SETTINGS_PAGE_HANDLES.PLATFORM_LOGO_INPUT}
           />
           {isUploading && (

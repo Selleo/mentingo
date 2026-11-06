@@ -70,6 +70,7 @@ describe("CourseAuthoringContextService legacy block preparation", () => {
         description: { en: "<p>Existing lesson</p>", pl: "<p>Polska treść</p>" },
       },
       { id: "00000000-0000-4000-8000-000000000004", description: { en: "Legacy plain text" } },
+      { id: "00000000-0000-4000-8000-000000000006", description: { en: "" } },
     ]);
     const updateWhere = jest.fn().mockResolvedValue(undefined);
     const set = jest.fn().mockReturnValue({ where: updateWhere });
@@ -105,8 +106,15 @@ describe("CourseAuthoringContextService legacy block preparation", () => {
       roleSlugs: [],
     });
     expect(lock).toHaveBeenCalledWith("update", expect.objectContaining({ of: expect.anything() }));
-    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledTimes(3);
     expect(Object.keys(set.mock.calls[0][0])).toEqual(["description"]);
+    const dialect = new PgDialect();
+    const prepared = set.mock.calls.map(
+      ([values]) => dialect.sqlToQuery(values.description).params,
+    );
+    expect(JSON.stringify(prepared)).toContain("Legacy plain text");
+    expect(JSON.stringify(prepared)).toContain("data-authoring-block-id");
+    expect(JSON.stringify(prepared)).toContain("Existing lesson");
     expect(validateAccess).toHaveBeenCalledTimes(1);
   });
 });

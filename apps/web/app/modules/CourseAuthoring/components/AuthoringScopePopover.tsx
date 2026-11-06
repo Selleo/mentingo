@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { CourseContext } from "../courseAuthoring.types";
 
@@ -298,11 +298,11 @@ export const AuthoringScopePopover = ({
                                   >
                                     <span
                                       className="min-w-0 flex-1 truncate"
-                                      title={stripHtmlTags(block.html).trim() || undefined}
+                                      title={toPlainTextPreview(block.html).trim() || undefined}
                                     >
                                       {t("courseAuthoring.scope.block", { number: blockIndex + 1 })}
                                       {" · "}
-                                      {stripHtmlTags(block.html).trim().slice(0, 56) ||
+                                      {toPlainTextPreview(block.html).trim().slice(0, 56) ||
                                         t("courseAuthoring.scope.untitled")}
                                     </span>
                                     {blockSelected && (

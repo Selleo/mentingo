@@ -511,6 +511,11 @@
             "ready": "Today's practice is ready.",
             "failed": "Scenario generation failed. Open it to retry."
           }
+        },
+        "gamification": {
+          "description": "Your level, XP and latest achievements",
+          "empty": "Complete lessons and courses to earn your first achievement.",
+          "recentRewards": "Recent achievements"
         }
       },
       "commonDescription": "Key information at a glance",
@@ -615,6 +620,9 @@
           "reorderSuccess": "Task order saved.",
           "reorderError": "We could not save the task order."
         }
+      },
+      "gamification": {
+        "title": "Level and achievements"
       }
     }
   },
@@ -801,7 +809,8 @@
     "exitFullscreen": "Exit fullscreen",
     "refreshPage": "Refresh page",
     "validation": {
-      "messageRequired": "Message is required."
+      "messageRequired": "Message is required.",
+      "nameMaxLength": "Must be at most {{max}} characters."
     }
   },
   "lessons": {
@@ -820,6 +829,7 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully",
+      "uploadFailed": "File upload failed. Check the file type and size, then try again.",
       "videoFailed": "Video upload failed",
       "videoTooLarge": "Video file exceeds the maximum allowed size",
       "videoReady": "Video is ready to use",
@@ -830,9 +840,9 @@
       "uploadForbidden": "This upload does not belong to the current user."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG or SVG",
-      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
-      "presentation": "PPT/PPTX (max. to 100MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
+      "presentation": "PPTX or ODP (max. {{maxSize}})"
     },
     "processing": {
       "title": "Video is processing",
@@ -889,7 +899,7 @@
       "setUpCourse": "Set up course",
       "provideDetails": "Provide the details to set up a new course",
       "uploadFileHeader": "Click to upload or drag and drop",
-      "uploadFileBody": "SCORM .zip file (max. to 500MB)",
+      "uploadFileBody": "SCORM .zip file (max. {{maxSize}})",
       "pricing": "Pricing",
       "status": "Status",
       "setUpPricing": "Set pricing for the course",
@@ -958,7 +968,8 @@
         "invalidAttempt": "SCORM attempt is invalid.",
         "invalidCmiValue": "SCORM runtime data is invalid.",
         "contentNotFound": "SCORM content was not found.",
-        "contentForbidden": "You do not have access to this SCORM content."
+        "contentForbidden": "You do not have access to this SCORM content.",
+        "contentUnavailable": "SCORM content is temporarily unavailable. Please contact your administrator."
       }
     },
     "coursePlaceholder": {
@@ -976,7 +987,7 @@
       "requirements": {
         "title": "Package requirements",
         "version": "SCORM 1.2 package",
-        "archive": ".zip archive up to 500MB",
+        "archive": ".zip archive up to {{maxSize}}",
         "metadata": "Course metadata can be edited before import"
       },
       "packageSection": "SCORM package",
@@ -991,11 +1002,22 @@
       "replacePackage": "Replace package",
       "removePackage": "Remove package",
       "uploadThumbnail": "Upload thumbnail",
-      "uploadThumbnailDescription": "PNG, JPG or JPEG up to 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
       "thumbnailPreviewAlt": "Course thumbnail preview",
       "submit": "Create SCORM course",
       "creating": "Creating SCORM course...",
-      "toastDraftReady": "SCORM course form is ready for API integration"
+      "toastDraftReady": "SCORM course form is ready for API integration",
+      "categoryRequired": "Category is required.",
+      "descriptionMaxLength": "Description must contain at most {{maxLength}} characters.",
+      "descriptionMinLength": "Description must be at least 2 characters.",
+      "languageInvalid": "Select a supported language.",
+      "packageInvalidType": "SCORM package must be a .zip file",
+      "packageRequired": "SCORM package is required.",
+      "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
+      "thumbnailInvalid": "Thumbnail must be a valid image file",
+      "thumbnailInvalidType": "Thumbnail must be PNG, JPG/JPEG, WEBP, or SVG",
+      "thumbnailTooLarge": "Thumbnail must be smaller than {{maxSize}}",
+      "titleMinLength": "Title must be at least 2 characters."
     },
     "lesson": {
       "packageSection": "SCORM package",
@@ -1007,7 +1029,7 @@
       "validation": {
         "titleRequired": "Title is required",
         "packageRequired": "SCORM package is required",
-        "packageTooLarge": "SCORM package must be less than 500MB",
+        "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
         "packageInvalidType": "SCORM package must be a .zip file"
       }
     }
@@ -1068,7 +1090,8 @@
     "qa": "Q&A",
     "tenants": "Organizations",
     "activityLogs": "Activity Logs",
-    "reports": "Reports"
+    "reports": "Reports",
+    "gamification": "Gamification"
   },
   "microsoftCalendar": {
     "title": "Microsoft Calendar",
@@ -2299,7 +2322,8 @@
         "live_training": "live trainings",
         "activity_log": "activity log",
         "competencies": "competencies",
-        "other": "platform capabilities"
+        "other": "platform capabilities",
+        "gamification": "gamification"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -2393,7 +2417,10 @@
         "activity_log_read": "View activity logs.",
         "competencies_use": "Use competencies within the permitted scope.",
         "competencies_manage": "Manage competency definitions and job profiles.",
-        "course_ai_generation": "Generate course structure and content with AI tools."
+        "course_ai_generation": "Generate course structure and content with AI tools.",
+        "gamification_read": "View levels, XP and achievements.",
+        "gamification_earn_hidden": "Earn hidden achievements.",
+        "gamification_manage": "Configure achievements and gamification settings."
       }
     },
     "dropdown": {
@@ -2975,7 +3002,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
@@ -3010,7 +3037,7 @@
           "groups": "Groups",
           "users": "Users"
         },
-        "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}; transparent background recommended)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",
         "certificatePreviewButton": "Preview",
@@ -3032,7 +3059,7 @@
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
-        "titleMaxLength": "Title must be at most 250 characters.",
+        "titleMaxLength": "Title must be at most {{max}} characters.",
         "descriptionMinLength": "Description must be at least 2 characters.",
         "categoryRequired": "Category is required",
         "certificateManageDenied": "You cannot manage certificates for this course.",
@@ -3159,11 +3186,12 @@
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",
           "titleMaxLength": "Title is too long (max 250 characters)",
-          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "File size must be below {{maxSize}}",
           "maxFileNumber_one": "You cannot upload more than 1 file",
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
-          "sourceUrlRequired": "Source URL is required"
+          "sourceUrlRequired": "Source URL is required",
+          "sourceUrlInvalid": "Enter a valid HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -3237,8 +3265,8 @@
           "voiceMode": "Voice Mode",
           "ttsPreset": "TTS Preset",
           "customTTSReference": "Custom TTS Reference",
-          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
-          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
+          "includeFiles_one": "Attach up to 1 file below {{maxSize}} to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -3778,7 +3806,7 @@
           "leaveContentCancel": "Keep editing",
           "leaveContentDiscard": "Leave without saving",
           "dropOrClick": "Drop image here or click to upload",
-          "allowedFormats": "PNG, JPG or SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
           "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
           "updateAiMentorAvatar": "Update AI mentor avatar",
@@ -4320,6 +4348,7 @@
       "loading": "Loading SCORM content...",
       "launchFailed": "SCORM content could not be launched.",
       "launchFailedBody": "Please try again. If the problem continues, the SCORM package may need to be reuploaded.",
+      "contentAccessExpired": "Access to SCORM content could not be renewed. Reopen the lesson to continue.",
       "saveFailed": "SCORM progress could not be saved.",
       "saving": "Saving progress",
       "previousSco": "Previous section",
@@ -4425,8 +4454,8 @@
     },
     "preview": {
       "title": "You are previewing this course",
-      "enrollmentDescription": "Enroll to take quizzes, join activities and save your progress.",
-      "learningModeDescription": "Enable Learn mode to take quizzes, join activities and track your progress."
+      "enrollmentDescription": "Enroll to take quizzes and save your progress.",
+      "learningModeDescription": "Enable Learn mode to take quizzes and track your progress."
     }
   },
   "studentCourseView": {
@@ -4465,6 +4494,7 @@
         "stopVoiceRecording": "Stop voice recording",
         "taskDescription": "Task description",
         "taskButton": "Task description",
+        "taskDescriptionEmpty": "No task description has been added to this lesson.",
         "resultButton": "Result",
         "resultButtonDisabledTooltip": "Check the lesson first to see your result.",
         "taskDescriptionExpand": "Click to expand",
@@ -4670,7 +4700,7 @@
       "preview": "Preview"
     },
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "other": {
       "uploading": "Uploading...",
@@ -4721,7 +4751,7 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "Preview public courses before enrollment",
-      "publicCoursePreviewDescription": "Let signed-in users browse free public courses without enrolling. Quizzes, activities and progress require enrollment. Paid courses keep their existing access rules."
+      "publicCoursePreviewDescription": "Let signed-in users browse free public courses and chat with AI mentors without enrolling. Quizzes and learning progress require enrollment. Paid courses keep their existing access rules."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -4817,6 +4847,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaVerificationRequired": "MFA is now required for your role. Set it up or verify it to continue.",
       "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
     }
   },
@@ -4969,10 +5000,10 @@
   },
   "platformLogo": {
     "header": "Platform Logo",
-    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform logo"
@@ -4985,10 +5016,10 @@
   },
   "platformSimpleLogo": {
     "header": "Platform Simple Logo (icon)",
-    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform icon logo"
@@ -5007,7 +5038,7 @@
     "title": "Login Background Image Upload",
     "description": "Upload a custom background image for the organization login page.",
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Delete login background image"
@@ -5030,11 +5061,16 @@
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type.",
+      "invalidFileType": "The file is invalid or its format is not supported.",
       "missingTenantContext": "Missing tenant context for file upload",
       "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}.",
-      "audioFileTooLarge": "Audio file is too large. Upload audio up to 200 MB.",
-      "rangeNotSatisfiable": "The requested byte range is not available."
+      "audioFileTooLarge": "Audio file is too large. Upload audio up to {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "The requested byte range is not available.",
+      "fileTooLarge": "The file is too large. The maximum size is {{maxSize}}.",
+      "uploadTooLarge": "The file is too large to upload.",
+      "imageResolutionTooLarge": "The image is too large. The maximum resolution is {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "The image must have a {{aspectRatio}} aspect ratio.",
+      "invalidImageReference": "The selected image isn't available. Upload the image again."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -5308,8 +5344,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Asset",
-        "actions": "Actions"
+        "asset": "Asset"
       },
       "visibility": {
         "public": "Public",
@@ -5399,7 +5434,8 @@
     "tenants": "Organizations",
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
-    "adminLearningPathEditor": "Development Path Editor"
+    "adminLearningPathEditor": "Development Path Editor",
+    "gamification": "Gamification"
   },
   "learningPathsView": {
     "hero": {
@@ -5575,7 +5611,7 @@
       "titlePlaceholder": "Name the development path",
       "description": "Description",
       "descriptionPlaceholder": "Describe what students will complete in this path",
-      "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
+      "imageHint": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}, recommended 1200x1200 or higher)",
       "sequenceEnabled": "Sequential learning",
       "sequenceEnabledDescription": "Students must complete courses in display order.",
       "includesCertificate": "Certificate",
@@ -6006,6 +6042,7 @@
       "hostAlreadyExists": "Organization host already exists",
       "notFound": "Organization not found",
       "invalidHost": "Invalid organization host URL",
+      "reservedHost": "This organization host is reserved and can't be used",
       "managingTenantRequired": "Managing organization admin required",
       "currentTenantSupportNotAllowed": "Support mode is not available for the current organization",
       "currentTenantDeleteNotAllowed": "The current managing organization cannot be deleted"
@@ -6018,7 +6055,13 @@
       "invalidRefreshToken": "Invalid refresh token",
       "adminRoleRequired": "Admin role required",
       "missingPermission": "You do not have permission to access this resource",
-      "sessionRevoked": "Your session was revoked. Please refresh your session."
+      "sessionRevoked": "Your session was revoked. Please refresh your session.",
+      "mfaRequired": "Complete two-factor authentication to continue.",
+      "sessionExpired": "Your sign-in session expired. Please sign in again.",
+      "mfaAlreadyEnabled": "Two-factor authentication is already enabled.",
+      "mfaCodeAlreadyUsed": "This code has already been used. Wait for a new code in your authenticator app and try again.",
+      "invalidMfaCode": "Enter a valid six-digit authentication code.",
+      "invalidSettingsUpdate": "These security settings cannot be changed here."
     }
   },
   "sessionRevocation": {
@@ -6388,11 +6431,11 @@
       "uploadImage": "Upload new hero image",
       "dropImage": "Drop hero image here",
       "browse": "or click to browse",
-      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageLimit": "PNG, JPG up to {{maxSize}}",
       "imageRecommendation": "Recommended: 1920x820 px (21:9)",
       "trailer": "Course trailer (optional)",
       "dropVideo": "Drop trailer video here",
-      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoLimit": "MP4, MOV up to {{maxSize}}",
       "videoRecommendation": "Recommended: 30-90 seconds",
       "save": "Upload media"
     },
@@ -6839,13 +6882,13 @@
       "uploading": "Uploading {{name}}...",
       "description": "Choose approved material or explicitly allow public sources.",
       "library": "Course sources",
-      "fileHint": "PDF, DOCX, plain text or Markdown · up to 25 MiB",
+      "fileHint": "PDF, DOCX, text, Markdown, PNG, JPEG or WebP · up to 25 MiB",
       "use": "Use source {{name}}",
       "required": "Required",
       "exclude": "Exclude",
       "emptyLibrary": "Attach approved material or enable a source permission.",
       "tooLarge": "The source exceeds the 25 MiB upload limit.",
-      "unsupportedFile": "Choose a PDF, DOCX, plain text or Markdown file.",
+      "unsupportedFile": "Choose a PDF, DOCX, text, Markdown, PNG, JPEG or WebP file.",
       "status": {
         "queued": "Queued",
         "processing": "Processing",
@@ -6981,6 +7024,7 @@
       "assetDecisionFallback": "This asset needs an explicit decision.",
       "generatedVisualTitle": "Generated visual",
       "restoreAsset": "Undo skip",
+      "sourceImageTitle": "Source image",
       "assetDetails": "Details",
       "retryApprovalExplanation": "The previous request may already have been accepted. Retrying could charge you again.",
       "assetStatus": {
@@ -9158,6 +9202,253 @@
       "disabled": "Help tutorials are not enabled on this installation.",
       "notFound": "This tutorial is not available for your version of Mentingo.",
       "invalidRequest": "Choose a valid tutorial or search phrase and try again."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Development path not found.",
+      "createError": "Couldn't create the development path.",
+      "updateError": "Couldn't update the development path.",
+      "updateMissingLanguage": "This development path isn't available in the selected language.",
+      "languageNotSupported": "This language isn't supported.",
+      "courseNotFound": "Course not found.",
+      "courseAlreadyExists": "This course is already in the development path.",
+      "courseIdsMustBeUnique": "Each course can be added only once.",
+      "courseIdsEmpty": "Select at least one course.",
+      "courseIdsMismatch": "The course order doesn't match the courses in this development path.",
+      "courseLinkNotFound": "This course isn't part of the development path.",
+      "studentIdsEmpty": "Select at least one learner.",
+      "groupIdsEmpty": "Select at least one group.",
+      "featureDisabled": "Development paths are turned off on this platform."
+    }
+  },
+  "gamification": {
+    "level": "Level {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP to level {{level}}",
+    "levelOf": "Level {{level}} of {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Earned {{date}}",
+    "achievements": "Achievements",
+    "achievementsEmpty": "No achievements available yet.",
+    "toast": {
+      "title": "Achievement unlocked!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Achievements could not be loaded.",
+    "retry": "Try again",
+    "admin": {
+      "title": "Gamification",
+      "description": "Turn gamification on for your organization and configure the achievements learners can earn.",
+      "enabled": {
+        "label": "Enable gamification",
+        "description": "Show levels, XP, achievements and reward notifications to users. Rewards are calculated even while this is off."
+      },
+      "achievements": {
+        "title": "Achievements",
+        "description": "Predefined and custom achievements. Disabling an achievement stops new progress but keeps rewards already earned.",
+        "create": "New achievement"
+      },
+      "columns": {
+        "achievement": "Achievement",
+        "event": "Event",
+        "levels": "Levels",
+        "visibility": "Visibility",
+        "enabled": "Active"
+      },
+      "predefined": "Predefined",
+      "events": {
+        "login": "Login",
+        "lesson_completed": "Lesson completed",
+        "course_completed": "Course completed",
+        "quiz_completed": "Quiz completed"
+      },
+      "visibilityHints": {
+        "visible": "Learners see it before they earn it.",
+        "hidden": "Learners see it only after they earn it."
+      },
+      "icons": {
+        "trophy": "Trophy",
+        "star": "Star",
+        "flame": "Flame",
+        "zap": "Lightning",
+        "target": "Target",
+        "award": "Award",
+        "medal": "Medal",
+        "crown": "Crown",
+        "rocket": "Rocket",
+        "book_open": "Book",
+        "graduation_cap": "Graduation cap",
+        "log_in": "Sign in",
+        "door_open": "Open door",
+        "calendar_check": "Calendar",
+        "clock": "Clock",
+        "brain": "Brain",
+        "lightbulb": "Light bulb",
+        "puzzle": "Puzzle",
+        "message_circle": "Speech bubble",
+        "heart": "Heart",
+        "thumbs_up": "Thumbs up",
+        "sparkles": "Sparkles",
+        "circle_check": "Check mark",
+        "gem": "Gem",
+        "diamond": "Diamond",
+        "shield_check": "Shield",
+        "badge_check": "Verified badge",
+        "flag": "Flag",
+        "mountain": "Mountain",
+        "footprints": "Footprints",
+        "gauge": "Gauge",
+        "timer": "Timer",
+        "hourglass": "Hourglass",
+        "alarm_clock": "Alarm clock",
+        "calendar_days": "Calendar",
+        "sunrise": "Sunrise",
+        "sun": "Sun",
+        "moon": "Moon",
+        "coffee": "Coffee",
+        "book": "Book",
+        "library": "Library",
+        "notebook_pen": "Notebook",
+        "pencil": "Pencil",
+        "clipboard_check": "Checklist",
+        "list_checks": "Task list",
+        "check_check": "Double check",
+        "glasses": "Glasses",
+        "microscope": "Microscope",
+        "flask_conical": "Flask",
+        "atom": "Atom",
+        "calculator": "Calculator",
+        "languages": "Languages",
+        "globe": "Globe",
+        "compass": "Compass",
+        "map": "Map",
+        "route": "Route",
+        "telescope": "Telescope",
+        "headphones": "Headphones",
+        "mic": "Microphone",
+        "palette": "Palette",
+        "users": "People",
+        "handshake": "Handshake",
+        "smile": "Smile",
+        "party_popper": "Celebration",
+        "gift": "Gift",
+        "sprout": "Sprout",
+        "leaf": "Leaf",
+        "infinity": "Infinity",
+        "repeat": "Repeat",
+        "trending_up": "Growth",
+        "activity": "Activity",
+        "dumbbell": "Dumbbell",
+        "gamepad_2": "Gamepad",
+        "key": "Key",
+        "anchor": "Anchor",
+        "plane": "Plane"
+      },
+      "requirementHints": {
+        "first_time": "Granted the first time the activity happens. There is a single level.",
+        "count": "Counts every time the activity happens, in total.",
+        "streak": "Counts the longest run of consecutive days with the activity.",
+        "time_window": "Counts the most activities within any period of the chosen length."
+      },
+      "requirements": {
+        "first_time": "First time",
+        "count": "Count",
+        "streak": "Daily streak",
+        "time_window": "Within a time window"
+      },
+      "levelsSummary": "Levels: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Visible",
+        "hidden": "Hidden until earned"
+      },
+      "language": {
+        "label": "Language",
+        "baseLanguage": "Default",
+        "notAddedLanguages": "Languages to add",
+        "setBaseLanguage": "Set as default",
+        "setBaseTitle": "Change default language",
+        "setBaseDescription": "Use {{language}} as the default language for this achievement?",
+        "createTitle": "Create translation",
+        "createDescription": "Create a translation for this achievement in {{language}}?",
+        "deleteTitle": "Delete translation",
+        "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+      },
+      "form": {
+        "createTitle": "New achievement",
+        "editTitle": "Edit achievement",
+        "viewTitle": "Default achievement",
+        "predefinedReadOnly": "Default achievements ship with the platform, so they can't be edited. You can still turn this one on or off.",
+        "translationMode": "You're editing the {{language}} translation. Only the name and description can be changed here; switch to the default language to edit everything else.",
+        "name": "Name",
+        "description": "Description",
+        "requirement": "Requirement",
+        "event": "Event",
+        "requirementType": "Requirement type",
+        "windowDays": "Window length (days)",
+        "course": "Course",
+        "anyCourse": "Any course",
+        "minScore": "Minimum quiz score (%)",
+        "levels": "Levels and XP rewards",
+        "thresholdLabels": {
+          "count": {
+            "login": "Number of logins",
+            "lesson_completed": "Number of completed lessons",
+            "course_completed": "Number of completed courses",
+            "quiz_completed": "Number of completed quizzes"
+          },
+          "streak": {
+            "login": "Days in a row with a login",
+            "lesson_completed": "Days in a row with a completed lesson",
+            "course_completed": "Days in a row with a completed course",
+            "quiz_completed": "Days in a row with a completed quiz"
+          },
+          "time_window": {
+            "login": "Logins within the window",
+            "lesson_completed": "Lessons completed within the window",
+            "course_completed": "Courses completed within the window",
+            "quiz_completed": "Quizzes completed within the window"
+          }
+        },
+        "xpReward": "XP reward",
+        "addLevel": "Add level",
+        "inactive": "Inactive",
+        "statusHint": "Inactive achievements stop granting new levels. Levels already earned are kept.",
+        "badge": "Badge",
+        "icon": "Icon",
+        "badgePreview": "Badge preview",
+        "iconHint": "The icon is shown only on default badges. Levels with an uploaded badge show the image as it is.",
+        "searchIcon": "Search icons",
+        "noIconFound": "No icon found.",
+        "resetBadge": "Use default badge"
+      },
+      "validation": {
+        "threshold": "Enter a value of at least 1.",
+        "xpReward": "Enter a whole number of XP from 0 to {{max}}.",
+        "titleRequired": "Enter a name in the base language.",
+        "windowDays": "Enter a whole number of days from 1 to {{max}}.",
+        "thresholdsAscending": "Each level must require more than the previous one.",
+        "minScore": "Enter a score between 0 and 100.",
+        "textTooLong": "Use at most {{max}} characters."
+      },
+      "loadFailed": "Could not load the achievement.",
+      "loadListFailed": "Could not load achievements.",
+      "toast": {
+        "achievementSaved": "Achievement saved.",
+        "achievementNotSaved": "Achievement could not be saved.",
+        "settingsSaved": "Gamification settings saved.",
+        "achievementNotFound": "Achievement not found.",
+        "predefinedNotEditable": "Predefined achievements can only be enabled or disabled.",
+        "earnedLevelRemoved": "Levels that users have already earned cannot be removed.",
+        "baseLanguageTitleRequired": "Enter a name in the base language.",
+        "unsupportedFilter": "The selected event does not support this filter.",
+        "courseNotFound": "The selected course does not exist.",
+        "invalidTimeWindow": "Set a window length only for time-window achievements.",
+        "invalidFirstTimeLevels": "First-time achievements have exactly one level with value 1.",
+        "thresholdsNotAscending": "Each level must require more than the previous one.",
+        "invalidBadgeImage": "The badge image is invalid. Upload it again."
+      }
     }
   }
 }

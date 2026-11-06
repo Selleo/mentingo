@@ -36,7 +36,11 @@ import {
   studentCourses,
 } from "src/storage/schema";
 
-import { BASE_THUMBNAIL_CONTENT_TYPE, getVideoThumbnailKey } from "./utils/videoThumbnail";
+import {
+  BASE_THUMBNAIL_CONTENT_TYPE,
+  getRemoteInputProtocolWhitelist,
+  getVideoThumbnailKey,
+} from "./utils/videoThumbnail";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -347,6 +351,8 @@ export class ThumbnailService {
 
       "-ss",
       "0",
+      "-protocol_whitelist",
+      getRemoteInputProtocolWhitelist(signedUrl),
       "-i",
       signedUrl,
 

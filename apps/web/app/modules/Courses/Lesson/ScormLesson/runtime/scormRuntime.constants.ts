@@ -1,0 +1,7 @@
+import { SCORM_12_API_METHODS } from "@repo/shared";
+
+export const SCORM_RUNTIME_EVENTS = {
+  SET_VALUE: `${SCORM_12_API_METHODS.SET_VALUE}.cmi.*`,
+  COMMIT: SCORM_12_API_METHODS.COMMIT,
+  FINISH: SCORM_12_API_METHODS.FINISH,
+} as const;

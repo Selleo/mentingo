@@ -25,6 +25,8 @@ const practiceId = "00000000-0000-4000-8000-000000000001";
 const threadId = "00000000-0000-4000-8000-000000000002";
 const user: WsUser = {
   userId: "learner-1",
+  sessionId: "s".repeat(32),
+  sessionVersion: "v".repeat(32),
   tenantId: "tenant-1",
   email: "learner@example.com",
   permissions: [],

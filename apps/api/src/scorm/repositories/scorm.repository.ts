@@ -349,7 +349,7 @@ export class ScormRepository {
     return runtimeState;
   }
 
-  async findAttemptContext(attemptId: string) {
+  async findAttemptContextForUpdate(attemptId: string) {
     const [attempt] = await this.db
       .select({
         ...getTableColumns(scormAttempts),
@@ -361,6 +361,7 @@ export class ScormRepository {
       .where(
         and(eq(scormAttempts.id, attemptId), activeLearningState(scormAttempts.learningStateId)),
       )
+      .for("update", { of: scormAttempts })
       .limit(1);
 
     return attempt;
@@ -387,7 +388,11 @@ export class ScormRepository {
       .update(scormAttempts)
       .set({ completedAt: sql`now()` })
       .where(
-        and(eq(scormAttempts.id, attemptId), activeLearningState(scormAttempts.learningStateId)),
+        and(
+          eq(scormAttempts.id, attemptId),
+          activeLearningState(scormAttempts.learningStateId),
+          isNull(scormAttempts.completedAt),
+        ),
       );
   }
 

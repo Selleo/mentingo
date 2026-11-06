@@ -17,7 +17,7 @@ import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import {
   CourseAuthoringBlockError,
   getCourseAuthoringBlocks,
-  normalizeCourseAuthoringBlocks,
+  normalizeCourseAuthoringHtml,
 } from "src/common/utils/courseAuthoringBlocks";
 import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 import { AiJudgeConfigurationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration.service";
@@ -128,26 +128,35 @@ export class CourseAuthoringContextService {
       .orderBy(asc(chapters.displayOrder), asc(lessons.displayOrder), asc(lessons.id));
   }
 
-  /** Persist identity metadata once; never change content, progress, or other locales. */
-  /** Normalizes supported lesson blocks under row locks without altering unsupported markup. */
+  /** Gives legacy plain copy and existing HTML stable anchors without changing authored words.
+   * Row locks make identity preparation idempotent; selected refreshes avoid unrelated lessons.
+   */
   async prepareBlockIdentities(
     courseId: UUIDType,
     language: AuthoringContextQuery["language"],
     actor: CurrentUserType,
+    lessonIds?: readonly UUIDType[],
   ) {
     await this.authorize(courseId, actor);
+    if (lessonIds?.length === 0) return;
     await this.db.transaction(async (transaction) => {
       const rows = await transaction
         .select({ id: lessons.id, description: lessons.description })
         .from(lessons)
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-        .where(and(eq(chapters.courseId, courseId), eq(lessons.type, "content")))
+        .where(
+          and(
+            eq(chapters.courseId, courseId),
+            eq(lessons.type, "content"),
+            ...(lessonIds ? [inArray(lessons.id, [...lessonIds])] : []),
+          ),
+        )
         .for("update", { of: lessons });
       for (const row of rows) {
         const original = row.description?.[language];
-        if (!original) continue;
+        if (original === undefined || original === null) continue;
         try {
-          const normalized = normalizeCourseAuthoringBlocks(original);
+          const normalized = normalizeCourseAuthoringHtml(original);
           if (normalized !== original)
             await transaction
               .update(lessons)

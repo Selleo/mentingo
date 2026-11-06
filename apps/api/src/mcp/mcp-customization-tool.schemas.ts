@@ -1,13 +1,12 @@
 import {
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type, type TSchema } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
-import { FILE_SIZE_BASE } from "src/common/constants";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { updateRegistrationFormSchema } from "src/settings/schemas/registration-form.schema";
 import { companyInformationJSONSchema } from "src/settings/schemas/settings.schema";
 import {
@@ -78,12 +77,8 @@ export const customizationImageInputSchema = Type.Object(
   {
     kind: customizationImageKindSchema,
     ...uploadMetadata,
-    size: Type.Integer({ minimum: 1, maximum: FILE_SIZE_BASE }),
-    mimeType: Type.Union(
-      [...new Set([...ALLOWED_AVATAR_IMAGE_TYPES, ...ALLOWED_LESSON_IMAGE_FILE_TYPES])].map(
-        (mime) => Type.Literal(mime),
-      ),
-    ),
+    size: Type.Integer({ minimum: 1, maximum: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES }),
+    mimeType: Type.Union(ALLOWED_LESSON_IMAGE_FILE_TYPES.map((mime) => Type.Literal(mime))),
   },
   { additionalProperties: false },
 );
@@ -95,8 +90,8 @@ export const customizationLoginFileInputSchema = Type.Object(
   {
     ...uploadMetadata,
     name: Type.String({ minLength: 1, maxLength: 255 }),
-    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE }),
-    mimeType: Type.Union(LOGIN_PAGE_DOCUMENTS_FILE_TYPES.map((mime) => Type.Literal(mime))),
+    size: Type.Integer({ minimum: 1, maximum: MAX_FILE_SIZE_BYTES }),
+    mimeType: Type.Union(ALLOWED_PDF_FILE_TYPES.map((mime) => Type.Literal(mime))),
   },
   { additionalProperties: false },
 );

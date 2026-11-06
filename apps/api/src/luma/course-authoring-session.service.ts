@@ -169,6 +169,17 @@ export class CourseAuthoringSessionService {
         })
       | undefined = undefined;
     if ("request" in input && input.request) {
+      const selectedLessonIds = input.request.targets
+        .filter((target) => ["lesson", "block", "question"].includes(target.kind))
+        .map((target) => target.targetId);
+      await this.context.prepareBlockIdentities(
+        courseId,
+        snapshot.language,
+        actor,
+        // Conversational requests resolve their targets later. Prepare the course
+        // before capturing its baseline so the detail callback does not change it.
+        input.request.targets.length ? selectedLessonIds : undefined,
+      );
       const context = await this.context.getContext(
         courseId,
         {
@@ -332,7 +343,14 @@ export class CourseAuthoringSessionService {
           ].includes(detail)
         )
           throw new ConflictException("courseAuthoring.errors.sourceRefreshSelectionChanged");
-        throw new ConflictException("courseAuthoring.errors.revisionChanged");
+        if (detail === "AUTHORING_STALE_PROPOSAL")
+          throw new ConflictException("courseAuthoring.errors.revisionChanged");
+        if (
+          detail === "AUTHORING_PROPOSAL_ALREADY_ACCEPTED" ||
+          detail === "AUTHORING_PROPOSAL_TERMINAL"
+        )
+          throw new ConflictException("courseAuthoring.errors.proposalNotReady");
+        throw new ConflictException("courseAuthoring.errors.invalidCommand");
       }
       if (isAxiosError(error) && error.response?.status === 403)
         throw new ForbiddenException("common.toast.noAccess");

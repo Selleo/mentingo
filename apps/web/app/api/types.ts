@@ -6,6 +6,7 @@ export type ApiErrorResponse = {
   message: string;
   statusCode?: number;
   retryAfterSeconds?: number;
+  redirectUrl?: string;
   translationParams?: Record<string, unknown>;
 };
 

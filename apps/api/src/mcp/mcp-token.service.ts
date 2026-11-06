@@ -4,6 +4,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
+import { SessionService } from "src/auth/session/session.service";
 import { DatabasePg } from "src/common";
 import { REDIS_CLIENT, RedisClient, SessionRevocationService } from "src/redis";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -12,7 +13,7 @@ import { credentials, tenants, users } from "src/storage/schema";
 import { McpResourceService } from "./mcp-resource.service";
 import { isMcpScopeSet } from "./mcp-tool-scope";
 
-import type { McpAccessGrant, McpToolActor } from "./mcp.types";
+import type { McpAccessGrant, McpCredentialOwner, McpToolActor } from "./mcp.types";
 
 const TOKEN_TTL_SECONDS = 60 * 60;
 
@@ -22,7 +23,8 @@ export class McpTokenService {
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly resources: McpResourceService,
-    private readonly revocation: SessionRevocationService,
+    private readonly sessionRevocationService: SessionRevocationService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async issue(grant: Omit<McpAccessGrant, "expiresAt">): Promise<string> {
@@ -64,12 +66,36 @@ export class McpTokenService {
       return null;
     const resource = await this.resources.forTenant(grant.tenantId);
     if (grant.resource !== resource.url) return null;
-    const email = await this.resolveIdentity(grant.userId, grant.tenantId);
+    const email = await this.resolveIdentity(grant);
     return email ? { grant, email } : null;
   }
 
-  async resolveIdentity(userId: string, tenantId: string): Promise<string | null> {
-    if (await this.revocation.isUserRevoked(userId)) return null;
+  /**
+   * Resolves the email of an MCP credential's owner while the account is active, the credential
+   * belongs to their current session version (so revoking their sessions also voids MCP access),
+   * and the MFA assurance it was issued with still satisfies their current MFA policy.
+   */
+  async resolveIdentity({
+    userId,
+    tenantId,
+    sessionVersion,
+    mfaVerified,
+  }: McpCredentialOwner): Promise<string | null> {
+    const isCurrentSession = await this.sessionRevocationService
+      .assertUserSessionVersion(userId, sessionVersion)
+      .then(
+        () => true,
+        () => false,
+      );
+    if (!isCurrentSession) return null;
+
+    const isMfaSatisfied = await this.sessionService
+      .assertMfaAssurance({ userId, tenantId, mfaVerified })
+      .then(
+        () => true,
+        () => false,
+      );
+    if (!isMfaSatisfied) return null;
 
     const [identity] = await this.dbAdmin
       .select({

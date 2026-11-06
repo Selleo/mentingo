@@ -66,6 +66,7 @@ describe("CourseAuthoringContextBridgeWorker", () => {
       description: "Selected description",
     };
     const context = {
+      prepareBlockIdentities: jest.fn().mockResolvedValue(undefined),
       getContext: jest.fn().mockResolvedValue({
         courseId,
         language: "en",
@@ -126,6 +127,15 @@ describe("CourseAuthoringContextBridgeWorker", () => {
     await test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner as never);
 
     expect(test.tenantRunner.runWithTenant).toHaveBeenCalledWith(tenantId, expect.any(Function));
+    expect(test.context.prepareBlockIdentities).toHaveBeenCalledWith(
+      courseId,
+      "en",
+      expect.objectContaining({ userId: actorId, tenantId }),
+      [lessonId],
+    );
+    expect(test.context.prepareBlockIdentities.mock.invocationCallOrder[0]).toBeLessThan(
+      test.context.getContext.mock.invocationCallOrder[0],
+    );
     expect(test.context.getSelectedLessonDetails).toHaveBeenCalledWith(
       courseId,
       "en",
@@ -210,6 +220,44 @@ describe("CourseAuthoringContextBridgeWorker", () => {
     expect(test.failContext).not.toHaveBeenCalled();
     expect(test.repository.markFailed).not.toHaveBeenCalled();
     expect(dbAls.getStore()).toBeUndefined();
+  });
+
+  it.each([
+    "AUTHORING_CONTEXT_CHAPTER_BASELINE_STALE",
+    "AUTHORING_CONTEXT_LESSON_BASELINE_STALE",
+    "AUTHORING_CONTEXT_COURSE_BASELINE_STALE",
+  ])("ends the context wait after permanent conflict %s", async (detail) => {
+    const test = setup();
+    test.fulfillContext.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { detail } },
+    });
+
+    await expect(
+      test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner),
+    ).rejects.toBeInstanceOf(UnrecoverableError);
+    expect(test.repository.markFailed).toHaveBeenCalledWith(
+      tenantId,
+      contextRequestId,
+      "context_invalid",
+    );
+    expect(test.failContext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        failure: expect.objectContaining({ reasonCode: "context_invalid" }),
+      }),
+    );
+  });
+
+  it("retries unknown upstream conflicts without treating them as baseline rejection", async () => {
+    const test = setup();
+    const error = { isAxiosError: true, response: { status: 409, data: { detail: "other" } } };
+    test.fulfillContext.mockRejectedValue(error);
+
+    await expect(
+      test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner),
+    ).rejects.toBe(error);
+    expect(test.failContext).not.toHaveBeenCalled();
+    expect(test.repository.markFailed).not.toHaveBeenCalled();
   });
 
   it("does not redeliver a request after its durable status is fulfilled", async () => {

@@ -2004,6 +2004,7 @@ export const certificates = pgTable(
     archivedAt: timestampWithTimezone({ name: "archived_at" }),
     archiveReason: text("archive_reason").$type<CertificateArchiveReason>(),
     expirationWarningSentAt: timestampWithTimezone({ name: "expiration_warning_sent_at" }),
+    shareToken: uuid("share_token").unique(),
     tenantId,
   },
   withTenantIdIndex("certificates", (table) => ({
@@ -2317,6 +2318,21 @@ export const activityLogs = pgTable(
   })),
 );
 
+/** Must mirror GAMIFICATION_EVENT_SOURCES; both constants back outbox_events_gamification_user_idx, so queries reuse OUTBOX_EVENT_USER_ID_SQL verbatim. */
+export const GAMIFICATION_OUTBOX_EVENT_TYPES = [
+  "UserLoginEvent",
+  "LessonCompletedEvent",
+  "UserCourseFinishedEvent",
+  "QuizCompletedEvent",
+] as const;
+
+export const OUTBOX_EVENT_USER_ID_SQL =
+  "COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload ->> 'userId')";
+
+const gamificationOutboxEventTypesSql = GAMIFICATION_OUTBOX_EVENT_TYPES.map(
+  (type) => `'${type}'`,
+).join(", ");
+
 export const outboxEvents = pgTable(
   "outbox_events",
   {
@@ -2336,6 +2352,9 @@ export const outboxEvents = pgTable(
   },
   withTenantIdIndex("outbox_events", (table) => ({
     pollIdx: index("outbox_events_poll_idx").on(table.tenantId, table.status, table.createdAt),
+    gamificationUserIdx: index("outbox_events_gamification_user_idx")
+      .on(table.tenantId, sql.raw(`(${OUTBOX_EVENT_USER_ID_SQL})`), table.eventType)
+      .where(sql.raw(`event_type IN (${gamificationOutboxEventTypesSql})`)),
   })),
 );
 
@@ -3098,6 +3117,7 @@ export const learningPathCertificates = pgTable(
     learningPathId: uuid("learning_path_id")
       .references(() => learningPaths.id, { onDelete: "cascade" })
       .notNull(),
+    shareToken: uuid("share_token").unique(),
     status: text("status")
       .notNull()
       .$type<LearningPathCertificateStatus>()
@@ -3601,3 +3621,4 @@ export const nativeArchiveEntityMap = pgTable(
 );
 
 export * from "./assistant.schema";
+export * from "./gamification.schema";

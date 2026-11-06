@@ -88,12 +88,57 @@ describe("public course lesson preview", () => {
     expect(started).not.toHaveBeenCalled();
   });
 
-  it("does not create or expose an AI conversation during preview", async () => {
+  it("does not create or expose an AI conversation without AI permission", async () => {
     const { service, aiService } = fixture(LESSON_TYPES.AI_MENTOR);
     const result = await service.getLessonById(id, id, user, "en");
     expect(result.threadId).toBeUndefined();
     expect(aiService.getOrCreateLessonThread).not.toHaveBeenCalled();
     expect(aiService.getExistingThreadForLesson).not.toHaveBeenCalled();
+  });
+
+  it("opens the student's own mentor thread during an authorized public preview without progress", async () => {
+    const { service, aiService, started } = fixture(LESSON_TYPES.AI_MENTOR);
+    aiService.getOrCreateLessonThread.mockResolvedValue({
+      data: { id, status: "active", userLanguage: "en" },
+    } as never);
+    const context = { learningStateId: null, readOnly: false };
+    const result = await courseLearningContext.run(context, () =>
+      service.getLessonById(
+        id,
+        id,
+        {
+          ...user,
+          permissions: [...user.permissions, PERMISSIONS.AI_USE],
+        },
+        "en",
+      ),
+    );
+    expect(result.threadId).toBe(id);
+    expect(result.status).toBe("active");
+    expect(result.aiMentorDetails).toBeNull();
+    expect(result.lessonCompleted).toBe(false);
+    expect(context.readOnly).toBe(true);
+    expect(started).not.toHaveBeenCalled();
+    expect(aiService.getOrCreateLessonThread).toHaveBeenCalledWith({
+      lessonId: id,
+      status: "active",
+      userLanguage: "en",
+      userId: id,
+    });
+  });
+
+  it("does not create a preview conversation for another student", async () => {
+    const { service, aiService } = fixture(LESSON_TYPES.AI_MENTOR);
+    await service.getLessonById(
+      id,
+      "22222222-2222-4222-8222-222222222222",
+      {
+        ...user,
+        permissions: [...user.permissions, PERMISSIONS.AI_USE],
+      },
+      "en",
+    );
+    expect(aiService.getOrCreateLessonThread).not.toHaveBeenCalled();
   });
 
   it("denies quiz submission before grading or progress changes", async () => {

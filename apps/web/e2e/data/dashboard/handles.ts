@@ -6,6 +6,7 @@ export const DASHBOARD_WIDGET_HANDLES = {
   STUDENT_REQUIRED_COURSE: "dashboard-widget-student-required-course",
   STUDENT_COURSE_COMPLETION: "dashboard-widget-student-course-completion",
   STUDENT_CERTIFICATES: "dashboard-widget-student-certificates",
+  STUDENT_GAMIFICATION: "dashboard-widget-student-gamification",
   TODO_TASKS: "dashboard-widget-todo-tasks",
 } as const;
 

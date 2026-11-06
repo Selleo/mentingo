@@ -1,10 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
 import OAuth2Server from "@node-oauth/oauth2-server";
+import { AUTH_TOKEN_PURPOSE } from "@repo/shared";
 
+import { SessionService } from "src/auth/session/session.service";
 import { REDIS_CLIENT, type RedisClient } from "src/redis";
 
 import { ACCESS_TTL, CLIENT_TTL, CODE_TTL, CONSENT_TTL, REFRESH_TTL } from "./mcp-oauth.constants";
@@ -40,8 +40,7 @@ export class McpOAuthService {
 
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
-    private readonly config: ConfigService,
-    private readonly jwt: JwtService,
+    private readonly sessionService: SessionService,
     private readonly mcpTokens: McpTokenService,
     private readonly resources: McpResourceService,
   ) {
@@ -408,18 +407,27 @@ export class McpOAuthService {
     return result;
   }
 
+  /** Accepts only an active, fully verified browser session, so revoked or MFA-pending logins cannot connect. */
   private async webUser(req: Request): Promise<(McpUser & { email: string }) | null> {
     const token = req.cookies?.access_token;
     if (typeof token !== "string") return null;
     try {
-      const payload = await this.jwt.verifyAsync<{ userId: string; tenantId: string }>(token, {
-        secret: this.config.get<string>("jwt.secret"),
-      });
+      const payload = await this.sessionService.verifySessionToken(
+        token,
+        AUTH_TOKEN_PURPOSE.ACCESS,
+      );
       const resource = await this.resources.fromRequest(req);
       if (payload.tenantId !== resource.tenantId) return null;
-      const email = await this.mcpTokens.resolveIdentity(payload.userId, payload.tenantId);
+      const email = await this.mcpTokens.resolveIdentity(payload);
       return email
-        ? { userId: payload.userId, tenantId: payload.tenantId, resource: resource.url, email }
+        ? {
+            userId: payload.userId,
+            tenantId: payload.tenantId,
+            sessionVersion: payload.sessionVersion,
+            mfaVerified: payload.mfaVerified,
+            resource: resource.url,
+            email,
+          }
         : null;
     } catch {
       return null;
@@ -472,12 +480,14 @@ export class McpOAuthService {
   ): Promise<OAuth2Server.Token> {
     if (!isMcpScopeSet(token.scope)) throw new Error("Invalid MCP token scope");
     const mcpUser = user as McpUser;
-    const email = await this.mcpTokens.resolveIdentity(mcpUser.userId, mcpUser.tenantId);
+    const email = await this.mcpTokens.resolveIdentity(mcpUser);
     const resource = await this.resources.forTenant(mcpUser.tenantId);
     if (!email || mcpUser.resource !== resource.url) throw new Error("MCP authorization revoked");
     await this.mcpTokens.store(token.accessToken, {
       userId: mcpUser.userId,
       tenantId: mcpUser.tenantId,
+      sessionVersion: mcpUser.sessionVersion,
+      mfaVerified: mcpUser.mfaVerified,
       clientId: client.id,
       resource: mcpUser.resource,
       scopes: token.scope,
@@ -505,13 +515,7 @@ export class McpOAuthService {
     const stored = JSON.parse(raw) as StoredRefresh;
     if (!isMcpScopeSet(stored.scope)) return false;
     if (new Date(stored.refreshTokenExpiresAt).getTime() <= Date.now()) return false;
-    if (
-      !(await this.mcpTokens.resolveIdentity(
-        (stored.user as McpUser).userId,
-        (stored.user as McpUser).tenantId,
-      ))
-    )
-      return false;
+    if (!(await this.mcpTokens.resolveIdentity(stored.user as McpUser))) return false;
     return {
       ...stored,
       refreshTokenExpiresAt: new Date(stored.refreshTokenExpiresAt),

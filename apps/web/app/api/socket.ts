@@ -2,8 +2,12 @@ import { io, type Socket } from "socket.io-client";
 
 import { baseUrl } from "~/utils/baseUrl";
 
+import { ApiClient } from "./api-client";
+import { registerSocketAuthRecovery } from "./socket-auth-recovery";
+
 let socket: Socket | null = null;
 let socketRefCount = 0;
+let disposeAuthRecovery: (() => void) | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
@@ -16,6 +20,12 @@ export function getSocket(): Socket {
       autoConnect: false,
       path: "/api/ws",
     });
+
+    disposeAuthRecovery = registerSocketAuthRecovery(
+      socket,
+      () => ApiClient.api.authControllerRefreshTokens(),
+      () => socketRefCount > 0,
+    );
   }
 
   return socket;
@@ -32,6 +42,8 @@ export function releaseSocket(): void {
   }
 
   if (socketRefCount === 0 && socket) {
+    disposeAuthRecovery?.();
+    disposeAuthRecovery = null;
     socket.disconnect();
     socket = null;
   }

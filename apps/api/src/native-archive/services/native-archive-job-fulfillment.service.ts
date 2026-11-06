@@ -284,45 +284,39 @@ export class NativeArchiveJobFulfillmentService {
 
     progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.COLLECTING_CONTENT);
 
-    const filename = await this.tenantDbRunnerService.runWithTenant(
-      actor.tenantId,
-      async () => {
-        const snapshot =
-          kind === NATIVE_ARCHIVE_KIND.COURSE
-            ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(
-                rootId,
-                actor,
-                exportAccess,
-              )
-            : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(
-                rootId,
-                actor,
-              );
-        const archiveInput = { kind, rootId, ...snapshot };
-        const fingerprint = fingerprintArchiveInput(archiveInput);
-        const archiveFilename = buildNativeArchiveFilename(archiveInput);
+    const filename = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
+      const snapshot =
+        kind === NATIVE_ARCHIVE_KIND.COURSE
+          ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(
+              rootId,
+              actor,
+              exportAccess,
+            )
+          : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(rootId, actor);
+      const archiveInput = { kind, rootId, ...snapshot };
+      const fingerprint = fingerprintArchiveInput(archiveInput);
+      const archiveFilename = buildNativeArchiveFilename(archiveInput);
 
-        if (
-          await this.nativeArchiveExportReuseService.copyRememberedExport(
-            actor.tenantId,
-            fingerprint,
-            exportKey,
-          )
-        ) {
-          progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.PACKAGING);
-          return archiveFilename;
-        }
-
-        await this.uploadBuiltArchive(archiveInput, exportKey, progress);
-        await this.nativeArchiveExportReuseService.rememberExport(
+      if (
+        await this.nativeArchiveExportReuseService.copyRememberedExport(
           actor.tenantId,
           fingerprint,
           exportKey,
-        );
-
+        )
+      ) {
+        progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.PACKAGING);
         return archiveFilename;
-      },
-    );
+      }
+
+      await this.uploadBuiltArchive(archiveInput, exportKey, progress);
+      await this.nativeArchiveExportReuseService.rememberExport(
+        actor.tenantId,
+        fingerprint,
+        exportKey,
+      );
+
+      return archiveFilename;
+    });
 
     return { key: exportKey, kind, rootId, filename };
   }

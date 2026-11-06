@@ -1,23 +1,23 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_VOICE_MODE,
+  MAX_INGESTION_FILE_COUNT,
+  MAX_INGESTION_FILE_SIZE_BYTES,
+  formatFileSize,
+  stripHtmlTags,
+} from "@repo/shared";
 import { z } from "zod";
 
 import { aiJudgeConfigurationSchema } from "../AiJudge/aiJudgeConfiguration.schema";
 import { aiMentorConfigurationSchema } from "../AiMentorConfiguration/aiMentorConfiguration.schema";
-import {
-  MAX_AI_MENTOR_TEXT_LENGTH,
-  MAX_MB_PER_FILE,
-  MAX_NUM_OF_FILES,
-} from "../AiMentorLesson.constants";
+import { MAX_AI_MENTOR_TEXT_LENGTH } from "../AiMentorLesson.constants";
 
 import type { TFunction } from "i18next";
 
-export const stripHtmlTags = (str: string): string => {
-  return str
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&[a-zA-Z0-9#]+;/g, "")
+export const toTrimmedPlainText = (html: string): string =>
+  stripHtmlTags(html)
+    .replace(/\u00a0/g, " ")
     .trim();
-};
 
 export const aiMentorLessonFormSchema = (t: TFunction, requireAiMentorConfiguration = false) => {
   const mentorConfigurationField = requireAiMentorConfiguration
@@ -32,7 +32,7 @@ export const aiMentorLessonFormSchema = (t: TFunction, requireAiMentorConfigurat
         .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
       description: z
         .string()
-        .refine((val) => stripHtmlTags(val).length <= MAX_AI_MENTOR_TEXT_LENGTH, {
+        .refine((val) => toTrimmedPlainText(val).length <= MAX_AI_MENTOR_TEXT_LENGTH, {
           message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength", {
             count: MAX_AI_MENTOR_TEXT_LENGTH,
           }),
@@ -70,14 +70,14 @@ export const aiMentorLessonFileSchema = (t: TFunction) =>
           }),
         ]),
       )
-      .max(MAX_NUM_OF_FILES, {
+      .max(MAX_INGESTION_FILE_COUNT, {
         message: t(`adminCourseView.curriculum.lesson.validation.maxFileNumber`, {
-          count: MAX_NUM_OF_FILES,
+          count: MAX_INGESTION_FILE_COUNT,
         }),
       })
-      .refine((files) => files.every((f) => f.size < MAX_MB_PER_FILE * 1024 * 1024), {
+      .refine((files) => files.every((f) => f.size <= MAX_INGESTION_FILE_SIZE_BYTES), {
         message: t("adminCourseView.curriculum.lesson.validation.maxFileSize", {
-          MAX_MB_PER_FILE,
+          maxSize: formatFileSize(MAX_INGESTION_FILE_SIZE_BYTES),
         }),
       }),
   });

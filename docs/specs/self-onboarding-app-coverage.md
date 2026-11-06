@@ -1,9 +1,9 @@
 # App-wide self-onboarding coverage
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
-The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
-in `docs/specs`. It contains 224 explicit flows, assigned exactly once to 91 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 182
+The catalog covers all 31 user-facing route areas and the 60 app business specifications currently
+in `docs/specs`. It contains 226 explicit flows, assigned exactly once to 92 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 184
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -13,39 +13,40 @@ The public source of area keys, page mappings and business-spec ownership is
 for contextual help and semantic filtering. They do not limit the text query to a topic filter or force
 AI search. Workflow selection by business spec maps to these same recording features.
 
-| Area key | Registered flows | Stable video groups | Source business specifications |
-| --- | ---: | ---: | --- |
-| `development-paths` | 20 | 7 | `learning-paths` |
-| `course-authoring` | 32 | 13 | `course-authoring-management`, `course-overview-management`, `curriculum-lesson-builder`, `ai-course-generation`, `ai-course-translation`, `course-duplication`, `course-sharing`, `course-authoring`, `resource-library`, `course-duration-estimates`, `learning-time-tracking` |
-| `course-learning` | 16 | 6 | `lesson-delivery-learning-mode`, `course-enrollment`, `course-repetition`, `quiz-assessment-engine`, `scorm-support`, `course-discussions`, `certificates`, `learning-time-tracking`, `course-duration-estimates` |
-| `knowledge-base-articles` | 11 | 4 | `knowledge-base-articles`, `knowledge-base` |
-| `news` | 11 | 4 | `news-hub` |
-| `authentication` | 7 | 3 | `authentication-account-access`, `mentingo-mcp` |
-| `dashboard` | 9 | 4 | `personal-dashboard`, `featured-course`, `global-search`, `onboarding-tours`, `self-onboarding` |
-| `assistant` | 5 | 3 | `assistant` |
-| `ai-mentor` | 4 | 2 | `ai-mentor-lessons` |
-| `phishing` | 4 | 2 | `phishing-simulation` |
-| `content-marketplace` | 4 | 2 | `content-marketplace` |
-| `notifications` | 4 | 2 | `announcements-notifications` |
-| `personal-settings` | 11 | 4 | `organization-settings`, `language-localization`, `platform-branding-theme`, `registration-form-builder`, `role-permission-management`, `support-mode`, `dynamic-pwa-branding` |
-| `provider-information` | 2 | 1 | `provider-information` |
-| `profiles` | 3 | 1 | `user-management`, `personal-dashboard`, `statistics-analytics` |
-| `calendar` | 4 | 2 | `calendar` |
-| `reports` | 4 | 2 | `reports`, `statistics-analytics` |
-| `qa` | 5 | 2 | `qa` |
-| `live-training` | 5 | 3 | `live-training` |
-| `environment-configuration` | 3 | 1 | `environment-integration-configuration` |
-| `users` | 10 | 4 | `user-management`, `group-manager` |
-| `automations` | 5 | 2 | `automations` |
-| `email-templates` | 7 | 3 | `email-template-builder` |
-| `categories` | 6 | 2 | `category-management` |
-| `groups` | 5 | 2 | `group-management`, `group-manager` |
-| `promotion-codes` | 3 | 1 | `billing-promotion-codes` |
-| `activity-logs` | 2 | 1 | `activity-logs` |
-| `ai-conversations` | 2 | 1 | `ai-conversations` |
-| `tenants` | 5 | 2 | `tenant-administration` |
+| Area key                    | Registered flows | Stable video groups | Source business specifications                                                                                                                                                                                                                                                   |
+| --------------------------- | ---------------: | ------------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `development-paths`         |               20 |                   7 | `learning-paths`                                                                                                                                                                                                                                                                 |
+| `course-authoring`          |               32 |                  13 | `course-authoring-management`, `course-overview-management`, `curriculum-lesson-builder`, `ai-course-generation`, `ai-course-translation`, `course-duplication`, `course-sharing`, `course-authoring`, `resource-library`, `course-duration-estimates`, `learning-time-tracking` |
+| `course-learning`           |               16 |                   6 | `lesson-delivery-learning-mode`, `course-enrollment`, `course-repetition`, `quiz-assessment-engine`, `scorm-support`, `course-discussions`, `certificates`, `learning-time-tracking`, `course-duration-estimates`                                                                |
+| `knowledge-base-articles`   |               11 |                   4 | `knowledge-base-articles`, `knowledge-base`                                                                                                                                                                                                                                      |
+| `news`                      |               11 |                   4 | `news-hub`                                                                                                                                                                                                                                                                       |
+| `authentication`            |                7 |                   3 | `authentication-account-access`, `mentingo-mcp`                                                                                                                                                                                                                                  |
+| `dashboard`                 |                9 |                   4 | `personal-dashboard`, `featured-course`, `global-search`, `onboarding-tours`, `self-onboarding`                                                                                                                                                                                  |
+| `assistant`                 |                5 |                   3 | `assistant`                                                                                                                                                                                                                                                                      |
+| `ai-mentor`                 |                4 |                   2 | `ai-mentor-lessons`                                                                                                                                                                                                                                                              |
+| `phishing`                  |                4 |                   2 | `phishing-simulation`                                                                                                                                                                                                                                                            |
+| `content-marketplace`       |                4 |                   2 | `content-marketplace`                                                                                                                                                                                                                                                            |
+| `notifications`             |                4 |                   2 | `announcements-notifications`                                                                                                                                                                                                                                                    |
+| `personal-settings`         |               11 |                   4 | `organization-settings`, `language-localization`, `platform-branding-theme`, `registration-form-builder`, `role-permission-management`, `support-mode`, `dynamic-pwa-branding`                                                                                                   |
+| `provider-information`      |                2 |                   1 | `provider-information`                                                                                                                                                                                                                                                           |
+| `profiles`                  |                3 |                   1 | `user-management`, `personal-dashboard`, `statistics-analytics`                                                                                                                                                                                                                  |
+| `calendar`                  |                4 |                   2 | `calendar`                                                                                                                                                                                                                                                                       |
+| `reports`                   |                4 |                   2 | `reports`, `statistics-analytics`                                                                                                                                                                                                                                                |
+| `qa`                        |                5 |                   2 | `qa`                                                                                                                                                                                                                                                                             |
+| `live-training`             |                5 |                   3 | `live-training`                                                                                                                                                                                                                                                                  |
+| `environment-configuration` |                3 |                   1 | `environment-integration-configuration`                                                                                                                                                                                                                                          |
+| `users`                     |               10 |                   4 | `user-management`, `group-manager`                                                                                                                                                                                                                                               |
+| `automations`               |                5 |                   2 | `automations`                                                                                                                                                                                                                                                                    |
+| `email-templates`           |                7 |                   3 | `email-template-builder`                                                                                                                                                                                                                                                         |
+| `categories`                |                6 |                   2 | `category-management`                                                                                                                                                                                                                                                            |
+| `groups`                    |                5 |                   2 | `group-management`, `group-manager`                                                                                                                                                                                                                                              |
+| `promotion-codes`           |                3 |                   1 | `billing-promotion-codes`                                                                                                                                                                                                                                                        |
+| `activity-logs`             |                2 |                   1 | `activity-logs`                                                                                                                                                                                                                                                                  |
+| `ai-conversations`          |                2 |                   1 | `ai-conversations`                                                                                                                                                                                                                                                               |
+| `tenants`                   |                5 |                   2 | `tenant-administration`                                                                                                                                                                                                                                                          |
 
 | `competencies` | 15 | 5 | `competencies` |
+| `gamification` | 2 | 1 | `gamification` |
 
 ## Evidence and boundaries
 

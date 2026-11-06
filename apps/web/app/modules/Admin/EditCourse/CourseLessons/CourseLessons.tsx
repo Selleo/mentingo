@@ -1,8 +1,9 @@
 import { useParams, useSearchParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { fetchAuthoringReviewCourse } from "~/api/queries/fetchAuthoringReviewCourse";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,11 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useToast } from "~/components/ui/use-toast";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { UnsavedChangesExitGuard } from "~/modules/Admin/components/UnsavedChangesExitGuard";
 import { CourseGenerationDrawer } from "~/modules/CourseAuthoring/CourseGenerationDrawer";
+import { AUTHORING_OPERATION_TYPE } from "~/modules/CourseAuthoring/review/curriculumReview.constants";
 import { CurriculumReviewWorkspace } from "~/modules/CourseAuthoring/review/CurriculumReviewWorkspace";
 import { syncReviewPreview } from "~/modules/CourseAuthoring/review/syncReviewPreview";
 
@@ -100,6 +103,9 @@ const CourseLessons = ({
   const [curriculumPreviewActions, setCurriculumPreviewActions] =
     useState<CurriculumPreviewActions | null>(null);
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [reviewChapters, setReviewChapters] = useState<Chapter[] | null>(null);
+  const reviewRequestRef = useRef(0);
 
   const handleCurriculumPreviewChange = useCallback((preview: CurriculumPreview | null) => {
     if (!preview) {
@@ -112,11 +118,36 @@ const CourseLessons = ({
 
   const handlePreviewProposalInCurriculum = useCallback(
     (preview: CurriculumPreview, actions: CurriculumPreviewActions) => {
-      setAuthoringCurriculumPreview(preview);
-      setCurriculumPreviewActions(actions);
-      setAuthoringDrawerOpen(false);
+      const requestId = ++reviewRequestRef.current;
+      const openReview = (currentChapters: Chapter[] | null) => {
+        if (requestId !== reviewRequestRef.current) return;
+        setReviewChapters(currentChapters);
+        setAuthoringCurriculumPreview(preview);
+        setCurriculumPreviewActions(actions);
+        setAuthoringDrawerOpen(false);
+      };
+      const insertsImage = preview.operations?.some(
+        (operation) => operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT,
+      );
+      if (!insertsImage) {
+        openReview(null);
+        return;
+      }
+      if (!courseId) {
+        toast({ variant: "destructive", description: t("common.toast.somethingWentWrong") });
+        return;
+      }
+      // The context bridge may have added IDs after this editor cached the plain body.
+      // Pair the proposal with the fetched snapshot, rather than waiting for parent query renders.
+      void fetchAuthoringReviewCourse(courseId, language).then(
+        (course) => openReview(course.chapters as Chapter[]),
+        () => {
+          if (requestId !== reviewRequestRef.current) return;
+          toast({ variant: "destructive", description: t("common.toast.somethingWentWrong") });
+        },
+      );
     },
-    [setAuthoringDrawerOpen],
+    [courseId, language, setAuthoringDrawerOpen, t, toast],
   );
 
   /** Leaves review mode on the refreshed curriculum so the author sees the applied result. */
@@ -176,6 +207,8 @@ const CourseLessons = ({
   }, [chapters, selectedChapter, selectedLesson]);
 
   useEffect(() => {
+    reviewRequestRef.current += 1;
+    setReviewChapters(null);
     setAuthoringCurriculumPreview(null);
     setCurriculumPreviewActions(null);
   }, [courseId, language]);
@@ -328,7 +361,7 @@ const CourseLessons = ({
       {authoringCurriculumPreview ? (
         <CurriculumReviewWorkspace
           key={authoringCurriculumPreview.proposalId}
-          chapters={chapters ?? []}
+          chapters={reviewChapters ?? chapters ?? []}
           trustedCourseDescription={trustedCourseDescription}
           preview={authoringCurriculumPreview}
           actions={curriculumPreviewActions}

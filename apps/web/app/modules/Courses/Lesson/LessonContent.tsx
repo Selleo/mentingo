@@ -29,6 +29,7 @@ type LessonContentProps = {
   course: GetCourseResponse["data"];
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
+  showPreviewNotice?: boolean;
   handlePrevious: () => void;
   handleNext: () => void;
   isFirstLesson: boolean;
@@ -41,6 +42,7 @@ export const LessonContent = ({
   course,
   previewUser,
   hideControls = false,
+  showPreviewNotice = false,
   handlePrevious,
   handleNext,
   isFirstLesson,
@@ -282,7 +284,7 @@ export const LessonContent = ({
           )}
         </div>
 
-        <CoursePreviewNotice />
+        {showPreviewNotice && <CoursePreviewNotice />}
 
         <LessonVideoProgressStrip
           lessonId={lesson.id}

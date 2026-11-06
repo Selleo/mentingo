@@ -3539,9 +3539,11 @@
         "type": "object",
         "properties": {
           "firstName": {
+            "maxLength": 64,
             "type": "string"
           },
           "lastName": {
+            "maxLength": 64,
             "type": "string"
           },
           "groups": {

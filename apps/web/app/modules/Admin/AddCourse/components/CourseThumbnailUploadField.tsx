@@ -1,3 +1,8 @@
+import {
+  MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  formatFileSize,
+} from "@repo/shared";
 import { ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -54,7 +59,11 @@ export const CourseThumbnailUploadField = ({
                 ? t("common.other.uploadingImage")
                 : t("adminScorm.create.uploadThumbnail")}
             </p>
-            <p className="body-sm">{t("adminScorm.create.uploadThumbnailDescription")}</p>
+            <p className="body-sm">
+              {t("adminScorm.create.uploadThumbnailDescription", {
+                maxSize: formatFileSize(MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES),
+              })}
+            </p>
           </div>
         )}
         <input
@@ -62,7 +71,7 @@ export const CourseThumbnailUploadField = ({
           id={inputId}
           ref={inputRef}
           type="file"
-          accept=".png,.jpg,.jpeg"
+          accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
           disabled={isUploading}
           className={cn(
             "absolute inset-0 opacity-0",

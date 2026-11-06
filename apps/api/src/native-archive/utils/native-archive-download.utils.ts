@@ -1,4 +1,3 @@
-
 import type { NativeArchiveDownload } from "../native-archive.types";
 import type { Response } from "express";
 

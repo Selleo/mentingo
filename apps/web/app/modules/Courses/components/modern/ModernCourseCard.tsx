@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, isAllowedIframeUrl, stripHtmlTags } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { isEqual } from "lodash-es";
 import { BookOpen, Clock, Play } from "lucide-react";
@@ -12,7 +12,6 @@ import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { formatDuration } from "./utils";
 
@@ -27,10 +26,6 @@ const CONTENT_TRANSITION_DURATION = "600ms";
 const SMOOTH_EASE = "cubic-bezier(0.22,1,0.36,1)";
 const ROW_HOVER_COUNT_KEY = "courseRowHoverCount";
 const ROW_ELEVATED_Z_INDEX = "1000";
-
-const isEmbedUrl = (url: string): boolean => {
-  return url.includes("iframe.mediadelivery.net/embed") || url.includes("youtube.com/embed");
-};
 
 const getEmbedUrlWithParams = (url: string): string => {
   const separator = url.includes("?") ? "&" : "?";
@@ -135,7 +130,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
     : undefined;
   const showProgress = progressPercent && progressPercent > 0;
 
-  const isEmbed = useMemo(() => trailerUrl && isEmbedUrl(trailerUrl), [trailerUrl]);
+  const isEmbed = useMemo(() => trailerUrl && isAllowedIframeUrl(trailerUrl), [trailerUrl]);
   const embedSrc = useMemo(
     () => (trailerUrl && isEmbed ? getEmbedUrlWithParams(trailerUrl) : null),
     [trailerUrl, isEmbed],
@@ -276,6 +271,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
 
             {isEmbed && embedSrc ? (
               <iframe
+                sandbox="allow-scripts allow-presentation"
                 src={isMediaActive ? embedSrc : undefined}
                 className={cn(
                   "absolute inset-0 h-full w-full border-0 transition-opacity pointer-events-none no-controls",
