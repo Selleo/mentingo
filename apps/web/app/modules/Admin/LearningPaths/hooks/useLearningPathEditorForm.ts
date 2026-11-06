@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
   LEARNING_PATH_STATUSES,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
@@ -96,7 +96,7 @@ export function useLearningPathEditorForm({
   };
 
   const handleCertificateSignatureUpload = (file: File) => {
-    if (!(ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES as readonly string[]).includes(file.type)) {
+    if (!(ALLOWED_LESSON_IMAGE_FILE_TYPES as readonly string[]).includes(file.type)) {
       toast({
         variant: "destructive",
         description: t("adminCourseView.toast.certificateUpdateError"),

@@ -9,3 +9,5 @@ export enum FORM_FIELD_TYPES {
 }
 
 export type RegistrationFormFieldType = `${FORM_FIELD_TYPES}`;
+
+export const MAX_USER_NAME_LENGTH = 64;

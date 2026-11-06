@@ -46,7 +46,7 @@ const CreateNewScormCourse = () => {
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<ScormCourseFormValues>({
-    resolver: zodResolver(scormCourseFormSchema),
+    resolver: zodResolver(scormCourseFormSchema(t)),
     mode: "onChange",
     defaultValues: {
       title: "",

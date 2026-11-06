@@ -20,6 +20,7 @@ import {
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
   SUPPORTED_LANGUAGES,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
 import { load as loadHtml } from "cheerio";
@@ -45,7 +46,6 @@ import { ScormRepository } from "./repositories/scorm.repository";
 import { resolveScormContentType, resolveScormContentTypeFromFilename } from "./scorm-content-type";
 import {
   MAX_SCORM_EXTRACTED_FILE_COUNT,
-  MAX_SCORM_PACKAGE_SIZE_BYTES,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
 import { ScormQueueService } from "./scorm-queue.service";
@@ -72,9 +72,10 @@ import {
   SCORM_TUS_VERSION,
 } from "./scorm-tus-upload.constants";
 
+import type { ScormContentGrant } from "./content/scorm-content.types";
 import type { InitScormImportBody } from "./schemas/scormImport.schema";
 import type { ScormTusUploadState } from "./scorm-tus-upload.types";
-import type { ScormPackageStatus } from "@repo/shared";
+import type { ScormCompletionStatus, ScormPackageStatus, ScormSuccessStatus } from "@repo/shared";
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -888,8 +889,7 @@ export class ScormService {
       scoId: launchableSco.scoId,
       lessonId: launchableSco.lessonId,
       courseId: launchableSco.courseId,
-      launchUrl: this.buildContentUrl(
-        launchableSco.packageId,
+      contentLaunchPath: this.buildContentLaunchPath(
         launchableSco.extractedFilesReference,
         launchableSco.launchPath,
       ),
@@ -900,9 +900,15 @@ export class ScormService {
   }
 
   async commitRuntime(params: ScormRuntimeCommitParams | ScormRuntimeFinishParams) {
+    return this.db.transaction(() => this.commitRuntimeTransaction(params));
+  }
+
+  private async commitRuntimeTransaction(
+    params: ScormRuntimeCommitParams | ScormRuntimeFinishParams,
+  ) {
     const { body, currentUser, finish } = params;
 
-    const attemptContext = await this.scormRepository.findAttemptContext(body.attemptId);
+    const attemptContext = await this.scormRepository.findAttemptContextForUpdate(body.attemptId);
 
     if (
       !attemptContext ||
@@ -919,10 +925,24 @@ export class ScormService {
     this.assertRuntimeValues(body.values);
 
     const existingRuntimeState = await this.scormRepository.findRuntimeState(body.attemptId);
+    const existingCmiJson = this.asRuntimeJson(existingRuntimeState?.rawCmiJson);
     const mergedCmiJson = {
-      ...this.asRuntimeJson(existingRuntimeState?.rawCmiJson),
+      ...existingCmiJson,
       ...body.values,
     };
+
+    if (
+      !this.isRetakeReset(body.values) &&
+      this.wouldDowngradeCompletedStatus(
+        existingRuntimeState?.completionStatus,
+        existingRuntimeState?.successStatus,
+        mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS],
+      )
+    ) {
+      mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] =
+        existingCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS];
+    }
+
     const shouldRollupSessionTime = finish && !attemptContext.completedAt;
 
     if (shouldRollupSessionTime) {
@@ -991,8 +1011,6 @@ export class ScormService {
           studentId: currentUser.userId,
           userPermissions: currentUser.permissions,
           actor: currentUser,
-          resetStarted:
-            normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.NOT_ATTEMPTED,
         });
 
     const navigation = await this.scormRepository.findScoNavigation({
@@ -1007,6 +1025,27 @@ export class ScormService {
       scormStatus: mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] ?? null,
       nextScoId: navigation.nextScoId,
     };
+  }
+
+  async assertContentGrantAccess(grant: ScormContentGrant) {
+    const scormPackage = await this.scormRepository.findPackageById(grant.packageId);
+    if (
+      !scormPackage ||
+      scormPackage.status !== SCORM_PACKAGE_STATUS.READY ||
+      scormPackage.extractedFilesReference !== grant.extractedFilesReference
+    ) {
+      throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
+    }
+    await this.assertPackageContentAccess(grant.packageId, grant.actor);
+  }
+
+  async getContentGrantDetails(packageId: UUIDType, currentUser: CurrentUserType) {
+    await this.assertPackageContentAccess(packageId, currentUser);
+    const scormPackage = await this.scormRepository.findPackageById(packageId);
+    if (!scormPackage || scormPackage.status !== SCORM_PACKAGE_STATUS.READY) {
+      throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
+    }
+    return { extractedFilesReference: scormPackage.extractedFilesReference };
   }
 
   async getContentFile(params: {
@@ -1825,18 +1864,14 @@ export class ScormService {
     await Promise.allSettled(references.map((reference) => this.s3Service.deleteFile(reference)));
   }
 
-  private buildContentUrl(
-    packageId: UUIDType,
-    extractedFilesReference: string,
-    launchPath: string,
-  ) {
+  private buildContentLaunchPath(extractedFilesReference: string, launchPath: string) {
     const relativeLaunchPath = this.stripExtractedFilesReference(
       extractedFilesReference,
       launchPath,
     );
     const { path: launchFilePath, suffix } = this.stripLaunchSuffix(relativeLaunchPath);
 
-    return `/api/scorm/content/${packageId}/${this.encodeRelativeUrlPath(launchFilePath)}${suffix}`;
+    return `${this.encodeRelativeUrlPath(launchFilePath)}${suffix}`;
   }
 
   private stripExtractedFilesReference(extractedFilesReference: string, launchPath: string) {
@@ -1933,6 +1968,40 @@ export class ScormService {
       default:
         return SCORM_1_2_VALUE_LIMITS.DEFAULT_MAX_LENGTH;
     }
+  }
+
+  private isRetakeReset(values: Record<string, string>) {
+    return (
+      values[SCORM_1_2_CMI_KEYS.LESSON_STATUS] === SCORM_1_2_LESSON_STATUS.NOT_ATTEMPTED &&
+      [
+        SCORM_1_2_CMI_KEYS.SCORE_RAW,
+        SCORM_1_2_CMI_KEYS.SCORE_MIN,
+        SCORM_1_2_CMI_KEYS.SCORE_MAX,
+      ].every((key) => values[key] === "")
+    );
+  }
+
+  private wouldDowngradeCompletedStatus(
+    completionStatus: ScormCompletionStatus | undefined,
+    successStatus: ScormSuccessStatus | undefined,
+    nextLessonStatus: string | undefined,
+  ) {
+    if (
+      completionStatus !== SCORM_COMPLETION_STATUS.COMPLETED ||
+      successStatus === SCORM_SUCCESS_STATUS.FAILED
+    ) {
+      return false;
+    }
+
+    const nextCompletionStatus = this.resolveCompletionStatus(nextLessonStatus);
+    const nextSuccessStatus = this.resolveSuccessStatus(nextLessonStatus);
+
+    return (
+      nextCompletionStatus !== SCORM_COMPLETION_STATUS.COMPLETED ||
+      nextSuccessStatus === SCORM_SUCCESS_STATUS.FAILED ||
+      (successStatus === SCORM_SUCCESS_STATUS.PASSED &&
+        nextSuccessStatus !== SCORM_SUCCESS_STATUS.PASSED)
+    );
   }
 
   private normalizeRuntimeState(values: Record<string, string>) {

@@ -364,6 +364,17 @@ export class CourseTransferGraphRepository {
     return existingCategory;
   }
 
+  async findCategoryByStoredBaseTitle(title: string) {
+    const [existingCategory] = await this.db
+      .select(getTableColumns(categories))
+      .from(categories)
+      // Match the tenant/base-title unique index, regardless of the incoming locale.
+      .where(sql`${categories.title} ->> ${categories.baseLanguage} = ${title}`)
+      .limit(1);
+
+    return existingCategory;
+  }
+
   async findCategoryByLocalizedTitle(title: string) {
     const [existingCategory] = await this.db
       .select()

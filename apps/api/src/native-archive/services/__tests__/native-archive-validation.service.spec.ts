@@ -50,6 +50,39 @@ function snapshot(chapters: unknown[] = [{ id: CHAPTER_ID }], lessons: unknown[]
 describe("NativeArchiveValidationService", () => {
   const service = new NativeArchiveValidationService();
 
+  it("accepts localized learning outcomes without truncating legacy archives", () => {
+    const learningOutcomes = {
+      en: Array.from({ length: 9 }, (_, index) => `Outcome ${index + 1}`),
+      pl: ["Rozpoznaj ryzyko", "Oceń wynik"],
+      de: [],
+    };
+    const value = snapshot();
+    value.course = { ...(value.course as object), learningOutcomes };
+
+    expect(() => service.validateCourseSnapshot(value)).not.toThrow();
+    expect(value.course).toHaveProperty("learningOutcomes", learningOutcomes);
+  });
+
+  it("accepts legacy course snapshots without learning outcomes", () => {
+    expect(() => service.validateCourseSnapshot(snapshot())).not.toThrow();
+  });
+
+  it.each([
+    null,
+    ["Outcome"],
+    { en: "Outcome" },
+    { en: [null] },
+    { en: [1] },
+    { xx: ["Unsupported language"] },
+  ])("rejects malformed learning outcomes: %j", (learningOutcomes) => {
+    const value = snapshot();
+    value.course = { ...(value.course as object), learningOutcomes };
+
+    expect(() => service.validateCourseSnapshot(value)).toThrow(
+      new BadRequestException("nativeArchive.error.invalidCourseSnapshot"),
+    );
+  });
+
   it.each([
     "../outside.html",
     "content//index.html",

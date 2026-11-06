@@ -68,6 +68,8 @@ function setup() {
     },
   };
   const findReceipt = jest.fn().mockResolvedValue(null);
+  const recordStagedAsset = jest.fn();
+  const uploadFile = jest.fn();
   const latestTerminalSessionReceipt = jest.fn().mockResolvedValue(null);
   const recordFailureOnce = jest.fn().mockImplementation(async (_claim, result) => result);
   const pendingSessionReceipts = jest.fn().mockResolvedValue([]);
@@ -111,9 +113,10 @@ function setup() {
       latestTerminalSessionReceipt,
       pendingSessionReceipts,
       markDelivered: jest.fn(),
+      recordStagedAsset,
     } as unknown as CourseAuthoringApplicationRepository,
     { applyPreparedExport } as unknown as CourseAuthoringApplyService,
-    { uploadFile: jest.fn() } as unknown as S3Service,
+    { uploadFile } as unknown as S3Service,
     {
       prepareUnassignedDocument,
       prepareUnassignedMentorContextDocument,
@@ -134,6 +137,7 @@ function setup() {
     prepareUnassignedMentorContextDocument,
     getContext,
     getMentorContextLessons,
+    uploadFile,
     command,
     service,
   };
@@ -518,6 +522,33 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
       }),
     );
   });
+  it("stores visual SVG assets as rasterized WebP instead of the producer's raw SVG", async () => {
+    const test = setup();
+    const bytes = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><script>alert(1)</script></svg>',
+    );
+    test.exported.assets = [
+      {
+        assetId,
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+        mimeType: "image/svg+xml",
+        byteSize: bytes.length,
+        revision: 1,
+        required: true,
+        role: "visual",
+      },
+    ];
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+    test.client.authoring.downloadAsset.mockResolvedValue({ assetId, revision: 1, bytes });
+
+    await test.service.process({ courseId, sessionId, exportId, actor }).catch(() => undefined);
+
+    expect(test.uploadFile).toHaveBeenCalledTimes(1);
+    const [storedBytes, , storedType] = test.uploadFile.mock.calls[0] as [Buffer, string, string];
+    expect(storedType).toBe("image/webp");
+    expect(storedBytes.includes("script")).toBe(false);
+  });
+
   it("does not ingest mentor material bound to another operation", async () => {
     const test = setup();
     const bytes = Buffer.from("Permitted material");

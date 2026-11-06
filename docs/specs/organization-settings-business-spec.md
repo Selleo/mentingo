@@ -21,6 +21,7 @@ For HR and L&D, this matters because learning programs often need to follow comp
 - Require invite-only registration when open self-registration should be disabled.
 - Enable or disable user email triggers used by operational learning workflows.
 - Require MFA for selected roles.
+- Let signed-in learners browse public free courses before enrolling, using an optional course-preview setting.
 - Set the default course currency when Stripe-based course pricing is configured.
 - Set, change, or clear the tenant age limit.
 - Define the maximum number of live trainings that may run in parallel.
@@ -36,6 +37,8 @@ An administrator opens Settings and uses the Organization tab to review configur
 
 Changes are saved through dedicated settings controls and immediately affect the tenant's platform behavior. Login-page documents can be added with a display name, previewed, and removed; these files are available publicly on the login page so unauthenticated learners or visitors can access the organization's supporting materials.
 
+The public course preview switch starts disabled. When enabled, signed-in learners can browse published, unarchived free courses before enrolling. Lesson pages explain that quizzes, interactive activities, and progress require enrollment and offer an enrollment action. Administrators previewing a course see a Learn-mode action instead. Paid lessons retain their existing access rules, and anonymous course access remains a separate setting.
+
 Users without settings-management access do not see administrator organization controls. The Settings navigation also adapts by showing only the tabs and cards the current user's permissions allow.
 
 ## Key Technical Context
@@ -49,3 +52,5 @@ Users without settings-management access do not see administrator organization c
 ## Test Evidence
 
 Frontend Playwright coverage verifies SSO enforcement, invite-only registration, user email trigger persistence, role-based MFA, default currency, age-limit updates, settings navigation/access rules, and login-page file upload, validation, preview, deletion, and max-file behavior. Backend E2E coverage verifies global settings reads and updates, permission denials, SSO, learning-path/course-discussion/calendar/live-training settings, and login-page file access rules.
+
+Focused API HTTP tests cover the course-preview toggle permission and persistence, along with preview eligibility. Frontend component tests cover the resulting learner enrollment and administrator Learn-mode calls to action; browser coverage for the new switch has not been run.

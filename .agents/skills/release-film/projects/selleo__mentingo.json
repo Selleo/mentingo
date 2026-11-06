@@ -29,7 +29,9 @@
       {
         "name": "postgres",
         "image": "pgvector/pgvector:pg16",
-        "ports": ["54321:5432"],
+        "ports": [
+          "54321:5432"
+        ],
         "env": {
           "POSTGRES_USER": "test_user",
           "POSTGRES_PASSWORD": "test_password",
@@ -40,29 +42,39 @@
       {
         "name": "redis",
         "image": "redis:alpine",
-        "ports": ["6380:6379"],
+        "ports": [
+          "6380:6379"
+        ],
         "health": "redis-cli ping"
       },
       {
         "name": "mailhog",
         "image": "mailhog/mailhog:v1.0.1",
-        "ports": ["1025:1025", "8025:8025"]
+        "ports": [
+          "1025:1025",
+          "8025:8025"
+        ]
       },
       {
         "name": "rustfs",
         "image": "rustfs/rustfs:latest",
-        "ports": ["9100:9000"],
+        "ports": [
+          "9100:9000"
+        ],
         "env": {
           "RUSTFS_ACCESS_KEY": "rustfsadmin",
           "RUSTFS_SECRET_KEY": "rustfsadmin"
         },
-        "args": ["/data"],
+        "args": [
+          "/data"
+        ],
         "health": "curl -fsS http://localhost:9000/health/ready || exit 1"
       }
     ],
     "setup": [
       "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION --entrypoint sh amazon/aws-cli:latest -c 'aws --endpoint-url http://localhost:9000 s3api head-bucket --bucket test-bucket 2>/dev/null || aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket test-bucket'",
-      "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3api put-bucket-cors --bucket test-bucket --cors-configuration '{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}'"
+      "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3api put-bucket-cors --bucket test-bucket --cors-configuration '{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}'",
+      "if [ \"${SELF_ONBOARDING_DEMO:-0}\" = \"1\" ]; then docker run --rm --network container:{service:runner} -v \"$PWD/e2e/data/self-onboarding/cover.svg:/cover.svg:ro\" -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3 cp /cover.svg s3://test-bucket/self-onboarding/course-cover.svg --content-type image/svg+xml; fi"
     ],
     "env": {
       "CI": "true",
@@ -91,7 +103,11 @@
       "MASTER_KEY": "<random-base64>",
       "RELEASE_FILM_DEMO": "1"
     },
-    "args": ["--project", "chromium", "--workers=1"],
+    "args": [
+      "--project",
+      "chromium",
+      "--workers=1"
+    ],
     "isolate": true,
     "unavailable": [
       "No configured OpenAI, Luma or local LLM provider: AI course generation and AI settings show Disabled; do not select scenes that require generated AI results."
@@ -118,9 +134,14 @@
         "preserve_as": "apps/web/e2e/fixtures/release-film.base.fixture.ts"
       }
     ],
-    "recording_instructions": "The standard populated db:seed is loaded in the isolated localhost tenant. Existing test.fixture imports use the recording adapter: withWorkerPage and withReadonlyPage sign in to seeded admin, student and content creator accounts, without E2E worker tenants. Reuse populated demo courses and groups. When factories are needed, supply realistic explicit names, descriptions and emails; avoid default E2E/Worker/Readonly names, test courses and random suffixes in footage. Keep login and setup off camera. Do not create isolated E2E workspaces. If a base spec depends on sparse E2E seed assumptions, write a scene using the populated data instead."
+    "recording_instructions": "The standard populated db:seed is loaded in the isolated localhost tenant. Existing test.fixture imports use the recording adapter: withWorkerPage and withReadonlyPage sign in to seeded admin, student and content creator accounts, without E2E worker tenants. Reuse populated demo courses and groups. When factories are needed, supply realistic explicit names, descriptions and emails; avoid default E2E/Worker/Readonly names, test courses and random suffixes in footage. Keep login and setup off camera. Do not create isolated E2E workspaces. If a base spec depends on sparse E2E seed assumptions, write a scene using the populated data instead.",
+    "readiness_ca": "/tmp/home/.local/share/caddy/pki/authorities/local/root.crt"
   },
   "specs": {
-    "avoid": ["audit", "\\.smoke\\.", "\\.setup\\."]
+    "avoid": [
+      "audit",
+      "\\.smoke\\.",
+      "\\.setup\\."
+    ]
   }
 }

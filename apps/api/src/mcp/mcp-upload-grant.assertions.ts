@@ -1,6 +1,8 @@
 import { ForbiddenException } from "@nestjs/common";
 import { ENTITY_TYPES, RESOURCE_VISIBILITY, SCORM_IMPORT_ACTION } from "@repo/shared";
 
+import { getDeclaredUpload } from "src/file/validation/normalizeUploadedFile";
+
 import { MCP_UPLOAD_GRANT_KIND } from "./mcp.types";
 
 import type {
@@ -35,9 +37,9 @@ export function assertCourseUploadGrant(
     !("kind" in grant) ||
     grant.kind !== kind ||
     grant.targetId !== courseId ||
-    grant.filename !== file.originalname ||
-    grant.mimeType !== file.mimetype ||
-    grant.size !== file.size ||
+    grant.filename !== getDeclaredUpload(file).originalname ||
+    grant.mimeType !== getDeclaredUpload(file).mimetype ||
+    grant.size !== getDeclaredUpload(file).size ||
     (kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL &&
       (body.language !== grant.language ||
         Number(body.thumbnailPositionY) !== grant.thumbnailPositionY ||
@@ -60,9 +62,9 @@ export function assertLearningPathUploadGrant(
     grant.targetId !== pathId ||
     Object.keys(body).length > 0 ||
     !file ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size ||
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size ||
     (files.thumbnail?.length ?? 0) + (files.certificateSignature?.length ?? 0) !== 1
   )
     throw new ForbiddenException("Development path upload does not match its grant");
@@ -87,9 +89,9 @@ export function assertEditorialCoverUploadGrant(
   if (
     files.length !== 1 ||
     file.fieldname !== `cover.${grant.language}` ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size ||
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size ||
     Object.keys(body).some((key) => key !== "translations") ||
     JSON.stringify(body.translations) !== JSON.stringify(grant.translations)
   )
@@ -108,9 +110,9 @@ export function assertAvatarUploadGrant(
     !("kind" in grant) ||
     grant.kind !== MCP_UPLOAD_GRANT_KIND.AI_MENTOR_AVATAR ||
     grant.targetId !== lessonId ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size
   )
     throw new ForbiddenException("Avatar upload does not match its grant");
 }
@@ -125,9 +127,9 @@ export function assertGenericFileUploadGrant(
     !("kind" in grant) ||
     grant.kind !== MCP_UPLOAD_GRANT_KIND.GENERIC_FILE ||
     grant.resource !== resource ||
-    grant.filename !== file.originalname ||
-    grant.mimeType !== file.mimetype ||
-    grant.size !== file.size
+    grant.filename !== getDeclaredUpload(file).originalname ||
+    grant.mimeType !== getDeclaredUpload(file).mimetype ||
+    grant.size !== getDeclaredUpload(file).size
   )
     throw new ForbiddenException("File upload does not match its grant");
 }
@@ -176,9 +178,9 @@ export function assertLessonUploadGrant(
     grant.targetType !== ENTITY_TYPES.LESSON ||
     lessonId !== grant.lessonId ||
     language !== grant.language ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size ||
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size ||
     title !== grant.filename ||
     description !== "" ||
     contextId !== undefined ||
@@ -204,9 +206,9 @@ export function assertEditorialUploadGrant(
     grant.targetType !== targetType ||
     grant.targetId !== targetId ||
     grant.language !== language ||
-    grant.filename !== file.originalname ||
-    grant.mimeType !== file.mimetype ||
-    grant.size !== file.size ||
+    grant.filename !== getDeclaredUpload(file).originalname ||
+    grant.mimeType !== getDeclaredUpload(file).mimetype ||
+    grant.size !== getDeclaredUpload(file).size ||
     title !== grant.filename ||
     description !== "" ||
     visibility !== RESOURCE_VISIBILITY.PUBLIC
@@ -227,9 +229,9 @@ export function assertScormUploadGrant(
     !("operation" in grant) ||
     "kind" in grant ||
     grant.operation !== operation ||
-    grant.filename !== file.originalname ||
-    grant.mimeType !== file.mimetype ||
-    grant.size !== file.size ||
+    grant.filename !== getDeclaredUpload(file).originalname ||
+    grant.mimeType !== getDeclaredUpload(file).mimetype ||
+    grant.size !== getDeclaredUpload(file).size ||
     grant.title !== metadata.title ||
     grant.language !== metadata.language
   )
@@ -238,9 +240,9 @@ export function assertScormUploadGrant(
   if (thumbnail) {
     if (
       operation !== SCORM_IMPORT_ACTION.CREATE_COURSE ||
-      grant.thumbnailFilename !== thumbnail.originalname ||
-      grant.thumbnailMimeType !== thumbnail.mimetype ||
-      grant.thumbnailSize !== thumbnail.size
+      grant.thumbnailFilename !== getDeclaredUpload(thumbnail).originalname ||
+      grant.thumbnailMimeType !== getDeclaredUpload(thumbnail).mimetype ||
+      grant.thumbnailSize !== getDeclaredUpload(thumbnail).size
     )
       throw new ForbiddenException("SCORM thumbnail does not match its grant");
   } else if (grant.thumbnailFilename !== undefined) {
@@ -293,9 +295,9 @@ export function assertPlatformAssetUploadGrant(
     grant.asset !== asset ||
     !file ||
     file.fieldname !== fieldNames[asset] ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size ||
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size ||
     (asset === "loginDocument"
       ? Object.keys(body).length !== 1 || body.name !== grant.name
       : Object.keys(body).length !== 0)
@@ -334,9 +336,9 @@ export function assertUserAvatarUploadGrant(
     grant.targetId !== currentUserId ||
     !file ||
     file.fieldname !== "userAvatar" ||
-    file.originalname !== grant.filename ||
-    file.mimetype !== grant.mimeType ||
-    file.size !== grant.size ||
+    getDeclaredUpload(file).originalname !== grant.filename ||
+    getDeclaredUpload(file).mimetype !== grant.mimeType ||
+    getDeclaredUpload(file).size !== grant.size ||
     !data ||
     typeof data !== "object" ||
     Array.isArray(data) ||

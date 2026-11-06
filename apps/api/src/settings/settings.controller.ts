@@ -22,21 +22,21 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   PERMISSIONS,
   type AllowedArticlesSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
   SupportedLanguages,
+  ALLOWED_PDF_FILE_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
-import { FILE_SIZE_BASE } from "src/common/constants";
 import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
@@ -44,7 +44,6 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -64,14 +63,15 @@ import {
   type UpdateRegistrationFormBody,
 } from "./schemas/registration-form.schema";
 import {
-  adminSettingsJSONContentSchema,
+  publicAdminSettingsSchema as adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
   dashboardSettingsResponseSchema,
   globalSettingsJSONSchema,
   loginPageResourceResponseSchema,
-  settingsJSONContentSchema,
+  publicUserSettingsSchema as settingsJSONContentSchema,
   UploadFilesToLoginPageBody,
-  userSettingsJSONContentSchema,
+  publicUserSettingsSchema as userSettingsJSONContentSchema,
+  toPublicUserSettings,
 } from "./schemas/settings.schema";
 import {
   UpdateDefaultCourseCurrencyBody,
@@ -98,9 +98,9 @@ import {
 import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
-  AdminSettingsJSONContentSchema,
+  PublicAdminSettings as AdminSettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
-  SettingsJSONContentSchema,
+  PublicUserSettings as SettingsJSONContentSchema,
   DashboardSettingsResponseSchema,
 } from "./schemas/settings.schema";
 
@@ -146,7 +146,9 @@ export class SettingsController {
   async getUserSettings(
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getCurrentUserSettings(currentUser));
+    return new BaseResponse(
+      toPublicUserSettings(await this.settingsService.getCurrentUserSettings(currentUser)),
+    );
   }
 
   @Put()
@@ -160,7 +162,9 @@ export class SettingsController {
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
+    return new BaseResponse(
+      toPublicUserSettings(await this.settingsService.updateUserSettings(userId, updatedSettings)),
+    );
   }
 
   @Get("dashboard")
@@ -212,7 +216,7 @@ export class SettingsController {
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminNewUserNotification(currentUserId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/unregistered-user-courses-accessibility")
@@ -250,6 +254,18 @@ export class SettingsController {
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalModernCourseListEnabled(currentUser);
     return new BaseResponse(result);
+  }
+
+  @Patch("admin/public-course-preview")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({ response: baseResponse(globalSettingsJSONSchema) })
+  async updatePublicCoursePreviewEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    return new BaseResponse(
+      await this.settingsService.updateGlobalPublicCoursePreviewEnabled(currentUser),
+    );
   }
 
   @Patch("admin/featured-course")
@@ -345,7 +361,7 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminFinishedCourseNotification(userId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/overdue-course-notification")
@@ -359,7 +375,7 @@ export class SettingsController {
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result =
       await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(userId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/color-schema")
@@ -426,7 +442,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
-        fileSize: FILE_SIZE_BASE,
+        fileSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       },
     }),
   )
@@ -445,7 +461,10 @@ export class SettingsController {
   })
   async updatePlatformLogo(
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
@@ -457,8 +476,8 @@ export class SettingsController {
     if (request.mcpUploadGrant) {
       assertPlatformAssetUploadGrant(request.mcpUploadGrant, "platformLogo", logo, request.body);
       await FileGuard.validateFile(logo!, {
-        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
-        maxSize: FILE_SIZE_BASE,
+        allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        maxSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       });
     }
     await this.settingsService.uploadPlatformLogo(logo, currentUser);
@@ -490,7 +509,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
-        fileSize: FILE_SIZE_BASE,
+        fileSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       },
     }),
   )
@@ -509,7 +528,10 @@ export class SettingsController {
   })
   async updatePlatformSimpleLogo(
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
@@ -526,8 +548,8 @@ export class SettingsController {
         request.body,
       );
       await FileGuard.validateFile(logo!, {
-        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
-        maxSize: FILE_SIZE_BASE,
+        allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        maxSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       });
     }
     await this.settingsService.uploadPlatformSimpleLogo(logo, currentUser);
@@ -558,7 +580,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("login-background", {
       limits: {
-        fileSize: FILE_SIZE_BASE,
+        fileSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       },
     }),
   )
@@ -579,7 +601,7 @@ export class SettingsController {
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
-        FILE_SIZE_BASE,
+        MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
@@ -598,7 +620,7 @@ export class SettingsController {
       );
       await FileGuard.validateFile(loginBackground!, {
         allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-        maxSize: FILE_SIZE_BASE,
+        maxSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       });
     }
     await this.settingsService.uploadLoginBackgroundImage(loginBackground, currentUser);
@@ -647,7 +669,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("certificate-background", {
       limits: {
-        fileSize: FILE_SIZE_BASE,
+        fileSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       },
     }),
   )
@@ -668,7 +690,7 @@ export class SettingsController {
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
-        FILE_SIZE_BASE,
+        MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
@@ -687,7 +709,7 @@ export class SettingsController {
       );
       await FileGuard.validateFile(certificateBackground!, {
         allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-        maxSize: FILE_SIZE_BASE,
+        maxSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       });
     }
     return new BaseResponse(
@@ -744,7 +766,7 @@ export class SettingsController {
       userId,
       body.dismissed,
     );
-    return new BaseResponse(updatedSettings);
+    return new BaseResponse(toPublicUserSettings(updatedSettings));
   }
 
   @Patch("admin/qa/:setting")
@@ -809,7 +831,7 @@ export class SettingsController {
   async updateLoginPageFiles(
     @Body() uploadedData: UploadFilesToLoginPageBody,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(LOGIN_PAGE_DOCUMENTS_FILE_TYPES)).build({
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_PDF_FILE_TYPES)).build({
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
@@ -820,8 +842,8 @@ export class SettingsController {
     if (request.mcpUploadGrant) {
       assertPlatformAssetUploadGrant(request.mcpUploadGrant, "loginDocument", file, request.body);
       await FileGuard.validateFile(file, {
-        allowedTypes: LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
-        maxSize: MAX_FILE_SIZE,
+        allowedTypes: ALLOWED_PDF_FILE_TYPES,
+        maxSize: MAX_FILE_SIZE_BYTES,
       });
     }
     return this.settingsService.uploadLoginPageFile(uploadedData, file, currentUser);
@@ -834,6 +856,15 @@ export class SettingsController {
   })
   async getLoginPageFiles() {
     return this.settingsService.getLoginPageFiles();
+  }
+
+  @Public()
+  @Get("login-page-files/:id/content")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+  })
+  async streamLoginPageFile(@Param("id") id: UUIDType, @Req() req: Request, @Res() res: Response) {
+    return this.settingsService.streamLoginPageFile(id, req, res);
   }
 
   @Delete("login-page-files/:id")

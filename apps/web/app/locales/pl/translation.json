@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Link do logowania",
     "password": "Hasło",
     "description": "Wybierz, w jaki sposób osoby w Twojej organizacji mogą się logować.",
@@ -34,6 +35,8 @@
       "disabled": "Ta metoda logowania jest wyłączona.",
       "missingConfiguration": "Najpierw dodaj dane uwierzytelniające dostawcy w ustawieniach środowiska.",
       "lastMethod": "Pozostaw co najmniej jedną działającą metodę logowania.",
+      "invalidDirectoryId": "Podaj identyfikator katalogu (dzierżawy) z rejestracji aplikacji Entra w formacie GUID.",
+      "untrustedDirectory": "To konto nie należy do katalogu Entra ID Twojej organizacji.",
       "save": "Nie udało się zapisać metod logowania.",
       "load": "Nie udało się pobrać metod logowania."
     }
@@ -89,12 +92,27 @@
       "unsupportedVersion": "Ta wersja pakietu Mentingo nie jest obsługiwana.",
       "missingAsset": "W pakiecie Mentingo brakuje wymaganego pliku.",
       "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo.",
-      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z marketplace.",
+      "courseNotSyncable": "Ten kurs został dodany jako edytowalna kopia i nie można go zsynchronizować. Usuń go i dodaj ponownie z katalogu kursów.",
       "pathNotFound": "Nie znaleziono Ścieżki Rozwoju do eksportu.",
       "accessDenied": "Nie masz uprawnień do eksportu tej treści.",
       "liveTrainingIncomplete": "Szkolenie na żywo powiązane z tym kursem jest niekompletne i nie może zostać wyeksportowane.",
       "courseNotFound": "Nie znaleziono kursu do eksportu.",
       "categoryNotFound": "Nie znaleziono kategorii kursu."
+    },
+    "progress": {
+      "waiting": "Oczekiwanie na rozpoczęcie…",
+      "step": "Krok {{current}} z {{total}}",
+      "uploadingPackage": "Przesyłanie pakietu",
+      "stages": {
+        "collecting-content": "Zbieranie zawartości kursu",
+        "copying-files": "Kopiowanie plików",
+        "packaging": "Pakowanie",
+        "downloading": "Pobieranie pakietu",
+        "verifying": "Sprawdzanie pakietu",
+        "uploading-files": "Przesyłanie plików",
+        "indexing": "Przygotowywanie treści AI",
+        "saving": "Zapisywanie kursu"
+      }
     }
   },
   "aiConversations": {
@@ -781,11 +799,13 @@
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
     "continueWithSlack": "Kontynuuj z użyciem Slack",
+    "continueWithEntraId": "Kontynuuj z użyciem Entra ID",
     "enterFullscreen": "Pełny ekran",
     "exitFullscreen": "Wyjdź z pełnego ekranu",
     "refreshPage": "Odśwież stronę",
     "validation": {
-      "messageRequired": "Wiadomość jest wymagana."
+      "messageRequired": "Wiadomość jest wymagana.",
+      "nameMaxLength": "Może mieć maksymalnie {{max}} znaków."
     }
   },
   "lessons": {
@@ -814,9 +834,9 @@
       "uploadForbidden": "To przesyłanie nie należy do bieżącego użytkownika."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG lub SVG",
-      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 5GB)",
-      "presentation": "PPT/PPTX (maksymalnie 100MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM lub OGG (maks. {{maxSize}})",
+      "presentation": "PPTX lub ODP (maks. {{maxSize}})"
     },
     "processing": {
       "title": "Wideo jest przetwarzane",
@@ -873,7 +893,7 @@
       "setUpCourse": "Skonfiguruj kurs",
       "provideDetails": "Podaj szczegóły, aby skonfigurować nowy kurs",
       "uploadFileHeader": "Kliknij, aby przesłać lub przeciągnij i upuść",
-      "uploadFileBody": "Plik SCORM w formacie .zip (max. 500MB)",
+      "uploadFileBody": "Plik SCORM w formacie .zip (maks. {{maxSize}})",
       "pricing": "Cennik",
       "status": "Status",
       "setUpPricing": "Ustaw cenę za kurs",
@@ -942,7 +962,8 @@
         "invalidAttempt": "Próba SCORM jest nieprawidłowa.",
         "invalidCmiValue": "Dane runtime SCORM są nieprawidłowe.",
         "contentNotFound": "Nie znaleziono treści SCORM.",
-        "contentForbidden": "Nie masz dostępu do tej treści SCORM."
+        "contentForbidden": "Nie masz dostępu do tej treści SCORM.",
+        "contentUnavailable": "Treści SCORM są tymczasowo niedostępne. Skontaktuj się z administratorem."
       }
     },
     "coursePlaceholder": {
@@ -960,7 +981,7 @@
       "requirements": {
         "title": "Wymagania pakietu",
         "version": "Pakiet SCORM 1.2",
-        "archive": "Archiwum .zip do 500MB",
+        "archive": "Archiwum .zip do {{maxSize}}",
         "metadata": "Metadane kursu można edytować przed importem"
       },
       "packageSection": "Pakiet SCORM",
@@ -975,11 +996,22 @@
       "replacePackage": "Zastąp pakiet",
       "removePackage": "Usuń pakiet",
       "uploadThumbnail": "Prześlij miniaturę",
-      "uploadThumbnailDescription": "PNG, JPG lub JPEG do 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
       "thumbnailPreviewAlt": "Podgląd miniatury kursu",
       "submit": "Utwórz kurs SCORM",
       "creating": "Tworzenie kursu SCORM...",
-      "toastDraftReady": "Formularz kursu SCORM jest gotowy do integracji z API"
+      "toastDraftReady": "Formularz kursu SCORM jest gotowy do integracji z API",
+      "categoryRequired": "Kategoria jest wymagana.",
+      "descriptionMaxLength": "Opis może zawierać maksymalnie {{maxLength}} znaków.",
+      "descriptionMinLength": "Opis musi mieć co najmniej 2 znaki.",
+      "languageInvalid": "Wybierz obsługiwany język.",
+      "packageInvalidType": "Pakiet SCORM musi być plikiem .zip",
+      "packageRequired": "Pakiet SCORM jest wymagany.",
+      "packageTooLarge": "Pakiet SCORM musi być mniejszy niż {{maxSize}}",
+      "thumbnailInvalid": "Miniatura musi być prawidłowym plikiem obrazu",
+      "thumbnailInvalidType": "Miniatura musi być w formacie PNG, JPG/JPEG, WEBP lub SVG",
+      "thumbnailTooLarge": "Miniatura musi być mniejsza niż {{maxSize}}",
+      "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki."
     },
     "lesson": {
       "packageSection": "Pakiet SCORM",
@@ -991,45 +1023,26 @@
       "validation": {
         "titleRequired": "Tytuł jest wymagany",
         "packageRequired": "Pakiet SCORM jest wymagany",
-        "packageTooLarge": "Pakiet SCORM musi mieć mniej niż 500MB",
+        "packageTooLarge": "Pakiet SCORM musi być mniejszy niż {{maxSize}}",
         "packageInvalidType": "Pakiet SCORM musi być plikiem .zip"
       }
     }
   },
   "adminCourseTypeSelector": {
     "back": "Wstecz",
-    "eyebrow": "Konfiguracja kursu",
     "title": "Utwórz nowy kurs",
     "subtitle": "Wybierz edytor standardowy, pakiet SCORM lub pakiet Mentingo.",
     "standard": {
       "title": "Standardowy",
-      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami.",
-      "features": {
-        "authoring": "Tworzony w natywnym edytorze kursów",
-        "curriculum": "Rozdziały, lekcje i quizy zarządzane w Mentingo",
-        "translations": "Obsługa języków i tłumaczeń kursu",
-        "settings": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "features": {
-        "import": "Tworzony z pakietu SCORM 1.2 .zip",
-        "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
-        "structure": "Zachowana struktura importowanego pakietu",
-        "future": "Ceny, status i certyfikaty wliczone"
-      }
+      "description": "Utwórz kurs z pakietu SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Pakiet Mentingo",
-      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo.",
-      "features": {
-        "structure": "Odtwarzanie struktury kursu i tłumaczeń",
-        "settings": "Odtwarzanie ustawień i metadanych",
-        "assets": "Dołączone powiązane pliki",
-        "learningPath": "Obsługa ścieżek i ich kursów"
-      }
+      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -1513,8 +1526,8 @@
     "emptyDescription": "Nie dodano jeszcze opisu.",
     "status": {
       "draft": "Wersja robocza",
-      "published": "Opublikowano",
-      "private": "Prywatna",
+      "published": "Opublikowany",
+      "private": "Niepubliczny",
       "not_started": "Nie rozpoczęto",
       "in_progress": "W toku",
       "completed": "Ukończono",
@@ -1669,7 +1682,7 @@
       "titlePlaceholder": "Nazwij ścieżkę rozwoju",
       "description": "Opis",
       "descriptionPlaceholder": "Opisz, co uczestnicy ukończą w tej ścieżce",
-      "imageHint": "PNG, JPG lub JPEG (maks. 20 MB, zalecane 1200x1200 lub większe)",
+      "imageHint": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}}, zalecane 1200x1200 lub większe)",
       "sequenceEnabled": "Nauka sekwencyjna",
       "sequenceEnabledDescription": "Uczestnicy muszą ukończyć kursy w podanej kolejności.",
       "includesCertificate": "Certyfikat",
@@ -1985,7 +1998,7 @@
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
         "microsoft_calendar": "Kalendarz Microsoft",
-        "contentMarketplace": "Marketplace treści",
+        "contentMarketplace": "Katalog kursów",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
         "luma": "Luma",
@@ -1998,7 +2011,7 @@
         "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
         "microsoft_calendar": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook.",
-        "contentMarketplace": "Odkrywaj i importuj gotowe kursy z marketplace'u treści.",
+        "contentMarketplace": "Odkrywaj i importuj gotowe kursy z katalogu kursów.",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
         "luma": "Włącz funkcje generowania kursów AI",
@@ -2552,7 +2565,7 @@
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
         "phishing_report_read": "Może przeglądać raporty z symulacji phishingu.",
-        "content_marketplace_browse": "Przeglądanie marketplace treści i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
+        "content_marketplace_browse": "Przeglądanie katalogu kursów i kopiowanie jego kursów (kopiowanie wymaga też tworzenia kursów).",
         "account_read_self": "Może przeglądać własne dane konta.",
         "account_update_self": "Może edytować własne dane konta.",
         "user_read_self": "Może przeglądać własny profil użytkownika.",
@@ -2826,6 +2839,10 @@
         "title": "Logowanie przez Slack",
         "description": "Pozwól użytkownikom logować się kontem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Logowanie przez Entra ID",
+        "description": "Pozwól użytkownikom logować się wyłącznie kontami z katalogu Microsoft Entra ID Twojej organizacji."
+      },
       "microsoftCalendar": {
         "title": "Kalendarz Microsoft",
         "description": "Synchronizuj sesje szkoleń na żywo z kalendarzami Microsoft Outlook."
@@ -2914,6 +2931,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Identyfikator katalogu (dzierżawy) Entra ID",
+        "description": "Identyfikator GUID katalogu (dzierżawy) z przeglądu rejestracji aplikacji. Zalogować się mogą tylko konta z tego katalogu."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Identyfikator klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Klucz tajny klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -3213,7 +3240,7 @@
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
-        "trailerUploadDetails": "MP4, MOV (maksymalnie 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM lub OGG (maks. {{maxSize}})",
         "enableCertificate": "Włącz certyfikat",
         "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
         "certificateValidity": "Ważność certyfikatu",
@@ -3248,7 +3275,7 @@
           "groups": "Grupy",
           "users": "Użytkownicy"
         },
-        "certificateSignatureRequirements": "PNG lub SVG (zalecane przezroczyste tło)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
         "certificatePreviewTitle": "Podgląd certyfikatu",
         "certificatePreviewDescription": "Otwórz podgląd, aby dostosować język i kolor.",
         "certificatePreviewButton": "Podgląd",
@@ -3270,7 +3297,7 @@
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
-        "titleMaxLength": "Tytuł może mieć maksymalnie 250 znaków.",
+        "titleMaxLength": "Tytuł może mieć maksymalnie {{max}} znaków.",
         "descriptionMinLength": "Opis musi mieć co najmniej 2 znaki.",
         "categoryRequired": "Kategoria jest wymagana",
         "certificateManageDenied": "Nie możesz zarządzać certyfikatami tego kursu.",
@@ -3397,13 +3424,14 @@
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
           "titleMinLength": "Tytuł jest zbyt krótki (min. 2 znaki)",
           "titleMaxLength": "Tytuł jest zbyt długi (maks. 250 znaków)",
-          "maxFileSize": "Rozmiar pliku musi być mniejszy niż {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "Rozmiar pliku musi być mniejszy niż {{maxSize}}",
           "maxFileNumber_one": "Nie możesz przesłać więcej niż 1 plik",
           "maxFileNumber_few": "Nie możesz przesłać więcej niż {{ count }} pliki",
           "maxFileNumber_many": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxResources": "Nie możesz dodać więcej niż {{ count }} zasobów do lekcji",
-          "sourceUrlRequired": "Adres URL źródła jest wymagany"
+          "sourceUrlRequired": "Adres URL źródła jest wymagany",
+          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -3477,10 +3505,10 @@
           "ttsPreset": "Preset TTS",
           "customTTSReference": "Niestandardowy identyfikator TTS",
           "additionalContext": "Dodatkowy kontekst",
-          "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{ MAX_FILE_SIZE }} MB, który będzie używany jako kontekst w lekcjach",
-          "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
-          "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
-          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach"
+          "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{maxSize}}, który będzie używany jako kontekst w lekcjach",
+          "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
+          "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
+          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -3998,7 +4026,7 @@
           "option": "Opcja",
           "singleChoice": "Pojedynczy wybór",
           "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
-          "allowedFormats": "PNG, JPG lub SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
           "multipleChoice": "Wielokrotny wybór",
           "matchWords": "Dopasowanie",
           "trueOrFalse": "Prawda/fałsz",
@@ -4575,6 +4603,7 @@
       "loading": "Ładowanie treści SCORM...",
       "launchFailed": "Nie udało się uruchomić treści SCORM.",
       "launchFailedBody": "Spróbuj ponownie. Jeśli problem będzie się powtarzał, pakiet SCORM może wymagać ponownego przesłania.",
+      "contentAccessExpired": "Nie udało się odnowić dostępu do treści SCORM. Otwórz lekcję ponownie, aby kontynuować.",
       "saveFailed": "Nie udało się zapisać postępu SCORM.",
       "saving": "Zapisywanie postępu",
       "previousSco": "Poprzednia sekcja",
@@ -4677,6 +4706,11 @@
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
       "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
+    },
+    "preview": {
+      "title": "Przeglądasz podgląd kursu",
+      "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy, uczestniczyć w aktywnościach i zapisywać postępy.",
+      "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy, uczestniczyć w aktywnościach i śledzić postępy."
     }
   },
   "studentCourseView": {
@@ -4915,10 +4949,10 @@
   },
   "platformSimpleLogo": {
     "header": "Proste logo platformy (ikona)",
-    "subHeader": "Prześlij własne logo, które będzie używane jako sygnet i favicon. Obsługiwane formaty: PNG, SVG",
+    "subHeader": "Prześlij własne logo, które będzie używane jako sygnet i favicon. Obsługiwane formaty: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Obraz logo",
-      "imageRequirements": "PNG lub SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Usuń logo ikony platformy"
@@ -4937,7 +4971,7 @@
       "preview": "Podgląd"
     },
     "field": {
-      "imageRequirements": "PNG, JPG lub JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
     },
     "other": {
       "uploading": "Przesyłanie..."
@@ -5013,7 +5047,9 @@
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
-      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy"
+      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
+      "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
+      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne publiczne kursy bez zapisu. Quizy, aktywności i zapisywanie postępów wymagają zapisu. Zasady dostępu do płatnych kursów pozostają bez zmian."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5026,7 +5062,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
-      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
+      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach",
+      "publicCoursePreviewPreferenceChangeSuccess": "Zaktualizowano ustawienie podglądu kursów"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
@@ -5109,6 +5146,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Ustawienia wymuszenia MFA zostały pomyślnie zaktualizowane.",
+      "mfaVerificationRequired": "MFA jest teraz wymagane dla Twojej roli. Skonfiguruj je lub potwierdź, aby kontynuować.",
       "mfaEnforcementUpdateFailed": "Nie udało się zaktualizować ustawień wymuszenia MFA."
     }
   },
@@ -5261,10 +5299,10 @@
   },
   "platformLogo": {
     "header": "Logo Platformy",
-    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
+    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Obraz Logo",
-      "imageRequirements": "PNG lub SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Usuń logo platformy"
@@ -5283,7 +5321,7 @@
     "title": "Przesyłanie obrazu tła logowania",
     "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
     "field": {
-      "imageRequirements": "PNG, JPG lub JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Usuń tło strony logowania"
@@ -5306,11 +5344,16 @@
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
-      "invalidFileType": "Nieprawidłowy typ pliku.",
+      "invalidFileType": "Plik jest nieprawidłowy lub jego format nie jest obsługiwany.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
       "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}.",
-      "audioFileTooLarge": "Plik audio jest zbyt duży. Prześlij plik audio o rozmiarze do 200 MB.",
-      "rangeNotSatisfiable": "Żądany zakres bajtów jest niedostępny."
+      "audioFileTooLarge": "Plik audio jest zbyt duży. Prześlij plik audio o rozmiarze do {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "Żądany zakres bajtów jest niedostępny.",
+      "fileTooLarge": "Plik jest za duży. Maksymalny rozmiar to {{maxSize}}.",
+      "uploadTooLarge": "Plik jest za duży, aby go przesłać.",
+      "imageResolutionTooLarge": "Obraz jest za duży. Maksymalna rozdzielczość to {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "Obraz musi mieć proporcje {{aspectRatio}}.",
+      "invalidImageReference": "Wybrany obraz jest niedostępny. Prześlij obraz ponownie."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
@@ -6033,6 +6076,7 @@
       "hostAlreadyExists": "Host organizacji już istnieje",
       "notFound": "Nie znaleziono organizacji",
       "invalidHost": "Nieprawidłowy adres URL hosta organizacji",
+      "reservedHost": "Ten host organizacji jest zarezerwowany i nie może zostać użyty",
       "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji",
       "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji",
       "currentTenantDeleteNotAllowed": "Nie można usunąć bieżącej organizacji zarządzającej"
@@ -6045,7 +6089,13 @@
       "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
-      "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
+      "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję.",
+      "mfaRequired": "Dokończ uwierzytelnianie dwuskładnikowe, aby kontynuować.",
+      "sessionExpired": "Sesja logowania wygasła. Zaloguj się ponownie.",
+      "mfaAlreadyEnabled": "Uwierzytelnianie dwuskładnikowe jest już włączone.",
+      "mfaCodeAlreadyUsed": "Ten kod został już użyty. Poczekaj na nowy kod w aplikacji uwierzytelniającej i spróbuj ponownie.",
+      "invalidMfaCode": "Wprowadź poprawny sześciocyfrowy kod uwierzytelniający.",
+      "invalidSettingsUpdate": "Tych ustawień bezpieczeństwa nie można tutaj zmienić."
     }
   },
   "sessionRevocation": {
@@ -6415,11 +6465,11 @@
       "uploadImage": "Prześlij nowy obraz główny",
       "dropImage": "Upuść obraz główny tutaj",
       "browse": "lub kliknij, aby wybrać plik",
-      "imageLimit": "PNG, JPG do 10 MB",
+      "imageLimit": "PNG, JPG do {{maxSize}}",
       "imageRecommendation": "Zalecane: 1920x820 px (21:9)",
       "trailer": "Zwiastun kursu (opcjonalnie)",
       "dropVideo": "Upuść zwiastun tutaj",
-      "videoLimit": "MP4, MOV do 50 MB",
+      "videoLimit": "MP4, MOV do {{maxSize}}",
       "videoRecommendation": "Zalecane: 30–90 sekund",
       "save": "Prześlij multimedia"
     },
@@ -8436,14 +8486,14 @@
     "sortTitle": "Tytuł (A–Z)",
     "noResults": "Brak kursów pasujących do wyszukiwania. Spróbuj innego słowa.",
     "addToCourses": "Dodaj do kursów",
-    "title": "Marketplace treści",
-    "browseAll": "Przeglądaj wszystkie",
+    "title": "Katalog kursów",
+    "browseAll": "Przeglądaj",
     "description": "Przeglądaj wybrane kursy i kopiuj je do swojej organizacji.",
     "loading": "Ładowanie…",
     "retry": "Spróbuj ponownie",
-    "unavailable": "Marketplace treści nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
-    "serviceError": "Marketplace treści jest niedostępny. Spróbuj ponownie.",
-    "empty": "W marketplace nie ma jeszcze żadnych kursów.",
+    "unavailable": "Katalog kursów nie jest włączony dla tej organizacji. Skontaktuj się z administratorem.",
+    "serviceError": "Katalog kursów jest niedostępny. Spróbuj ponownie.",
+    "empty": "W katalogu kursów nie ma jeszcze żadnych kursów.",
     "updated": "Zaktualizowano {{date}}",
     "copying": "Kopiowanie kursu…",
     "copyNotice": "Kurs zostanie dodany jako kurs udostępniony, którego nie można edytować. Synchronizacja aktualizuje go do najnowszej wersji i zachowuje postępy uczestników.",
@@ -8457,10 +8507,10 @@
     "firstPage": "Wróć do pierwszej strony",
     "error": {
       "invalidQuery": "Nieprawidłowe parametry wyszukiwania lub stronicowania katalogu.",
-      "unavailable": "Marketplace treści nie jest dostępny dla tej organizacji.",
-      "listingNotFound": "Nie znaleziono tego kursu w marketplace.",
-      "thumbnailNotFound": "Ten kurs z marketplace nie ma miniatury.",
-      "serviceError": "Marketplace treści nie mógł zrealizować żądania. Spróbuj ponownie później."
+      "unavailable": "Katalog kursów nie jest dostępny dla tej organizacji.",
+      "listingNotFound": "Nie znaleziono tego kursu w katalogu kursów.",
+      "thumbnailNotFound": "Ten kurs z katalogu kursów nie ma miniatury.",
+      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później."
     }
   },
   "aiJudgeConfiguration": {
@@ -8503,7 +8553,8 @@
       "qa": "Pytanie i odpowiedź",
       "development_path": "Ścieżka rozwoju",
       "resource": "Materiał",
-      "reference": "Źródło"
+      "reference": "Źródło",
+      "helpdesk": "Samouczek pomocy"
     },
     "title": "Asystent",
     "eyebrow": "Wiedza z Twojej platformy",
@@ -9206,6 +9257,61 @@
       "inUse_few": "Kategoria „{{name}}” jest używana przez {{count}} kompetencje. Przenieś je do innej kategorii przed usunięciem.",
       "inUse_many": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem.",
       "inUse_other": "Kategoria „{{name}}” jest używana przez {{count}} kompetencji. Przenieś je do innej kategorii przed usunięciem."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demo",
+    "title": "Pomoc i poradniki",
+    "heading": "W czym możemy pomóc?",
+    "subtitle": "Znajdź swój kolejny krok w Mentingo.",
+    "loading": "Wczytywanie pomocy",
+    "askAssistant": "Zapytaj asystenta",
+    "assistantHint": "Opisz, co chcesz zrobić.",
+    "search": "Wyszukaj temat lub zadaj pytanie…",
+    "clear": "Wyczyść wyszukiwanie",
+    "results": "Poradniki",
+    "suggested": "Proponowane dla Ciebie",
+    "empty": "Nie znaleziono poradników",
+    "emptyHint": "Spróbuj krótszej frazy lub innego tematu.",
+    "chapterCount": "{{count}} rozdziałów",
+    "timeline": "Oś czasu filmu",
+    "jumpHint": "Wybierz rozdział, aby przejść do danego kroku",
+    "chapters": "W tym filmie",
+    "related": "Poznaj więcej funkcji",
+    "domains": {
+      "authoring": "Edycja kursów",
+      "paths": "Ścieżki rozwoju",
+      "learning": "Nauka"
+    },
+    "keywordFallback": "Wyświetlamy wyniki słów kluczowych, ponieważ wyszukiwanie AI jest niedostępne.",
+    "languageFallback": "Film dostępny w języku {{language}}",
+    "retry": "Spróbuj ponownie",
+    "back": "Wróć do Mentingo",
+    "chapterUnavailable": "Ten rozdział nie jest już dostępny. Pokazujemy film od początku.",
+    "errors": {
+      "unavailable": "Samouczki są chwilowo niedostępne. Spróbuj ponownie.",
+      "versionUnavailable": "Pomoc nie jest jeszcze dostępna dla tej wersji Mentingo.",
+      "disabled": "Samouczki pomocy nie są włączone w tej instalacji.",
+      "notFound": "Ten samouczek nie jest dostępny dla Twojej wersji Mentingo.",
+      "invalidRequest": "Wybierz dostępny samouczek lub popraw wyszukiwanie i spróbuj ponownie."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Nie znaleziono Ścieżki Rozwoju.",
+      "createError": "Nie udało się utworzyć Ścieżki Rozwoju.",
+      "updateError": "Nie udało się zaktualizować Ścieżki Rozwoju.",
+      "updateMissingLanguage": "Ta Ścieżka Rozwoju nie jest dostępna w wybranym języku.",
+      "languageNotSupported": "Ten język nie jest obsługiwany.",
+      "courseNotFound": "Nie znaleziono kursu.",
+      "courseAlreadyExists": "Ten kurs jest już w Ścieżce Rozwoju.",
+      "courseIdsMustBeUnique": "Każdy kurs można dodać tylko raz.",
+      "courseIdsEmpty": "Wybierz co najmniej jeden kurs.",
+      "courseIdsMismatch": "Kolejność kursów nie odpowiada kursom w tej Ścieżce Rozwoju.",
+      "courseLinkNotFound": "Ten kurs nie należy do Ścieżki Rozwoju.",
+      "studentIdsEmpty": "Wybierz co najmniej jednego uczestnika.",
+      "groupIdsEmpty": "Wybierz co najmniej jedną grupę.",
+      "featureDisabled": "Ścieżki Rozwoju są wyłączone na tej platformie."
     }
   }
 }

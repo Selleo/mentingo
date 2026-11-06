@@ -11,6 +11,10 @@ describe("native archive insert projections", () => {
       id: "course-id",
       title: { en: "Course" },
       description: { en: "Description" },
+      learningOutcomes: {
+        en: Array.from({ length: 9 }, (_, index) => `Outcome ${index + 1}`),
+        pl: ["Pierwszy efekt", "Drugi efekt"],
+      },
       courseType: "default",
       settings: {
         lessonSequenceEnabled: false,
@@ -38,10 +42,25 @@ describe("native archive insert projections", () => {
       authorId: "actor-id",
       categoryId: "category-id",
       priceInCents: 0,
+      learningOutcomes: {
+        en: Array.from({ length: 9 }, (_, index) => `Outcome ${index + 1}`),
+        pl: ["Pierwszy efekt", "Drugi efekt"],
+      },
     });
     expect(insert).not.toHaveProperty("tenantId");
     expect(insert).not.toHaveProperty("sourceCourseId");
     expect(insert).not.toHaveProperty("thumbnailS3Key");
+  });
+
+  it("defaults learning outcomes to an empty map for legacy archives", () => {
+    const insert = buildNativeArchiveCourseInsert(
+      { id: "legacy-course", title: {}, description: {} } as never,
+      "actor-id",
+      "category-id",
+      "target-id",
+    );
+
+    expect(insert.learningOutcomes).toEqual({});
   });
 
   it("keeps learning path inserts to approved fields and forces actor-controlled values", () => {

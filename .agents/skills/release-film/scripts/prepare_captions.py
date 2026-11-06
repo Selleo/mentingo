@@ -5,8 +5,8 @@ of more than 0.8 s starts a new cue. A cue stays on screen through the pause bef
 flicker off between sentences, but never past the moment the picture leaves its sentence (``limits``, from the
 montage): a caption over the next picture reads as a caption behind it.
 Overlaps up to 60 ms advance the next word's start to the previous word's end; larger overlaps and words collapsed by
-it are rejected. Provider and codec timing tails are clamped to measured playable audio without an overhang
-cutoff. A word entirely outside the audio is still unusable and rejected.
+it are rejected. Provider timing tails are clamped to measured audio. Release captions reject words
+entirely outside audio; tutorials omit those unusable cues. Clipped cues are marked in the preparation report.
 """
 from decimal import Decimal
 import math
@@ -31,7 +31,7 @@ def milliseconds(value):
     return ((hours * 60 + minutes) * 60 + seconds) * 1000 + fraction
 
 
-def words_of(srt, audio_seconds):
+def words_of(srt, audio_seconds, end_tolerance_ms=1):
     """[{'start', 'end', 'text'}] in seconds from a word SRT, checked and normalised."""
     source = srt.lstrip('﻿').strip()
     if not source:
@@ -49,12 +49,14 @@ def words_of(srt, audio_seconds):
         start, end = map(milliseconds, interval)
         if start < previous_start or end <= start:
             raise ValueError(f'SRT intervals must be ordered and positive (cue {lines[0].strip()}: {start}–{end} ms)')
-        trimmed = end > audio_milliseconds
-        if start >= audio_milliseconds:
+        if end_tolerance_ms is not None and start >= audio_milliseconds:
             raise ValueError(f'SRT cue {lines[0].strip()} starts outside playable audio '
                              f'({start} ms; audio {audio_milliseconds} ms)')
-        end = min(end, audio_seconds * 1000)
         previous_start = start
+        if end_tolerance_ms is None and start >= audio_milliseconds:
+            continue  # Provider tail outside playable audio cannot be displayed.
+        trimmed = end > audio_milliseconds
+        end = min(end, audio_seconds * 1000)
         if previous_end - start > 60:
             raise ValueError('SRT overlap exceeds 60 ms')
         start = max(start, previous_end)
@@ -72,7 +74,7 @@ def words_of(srt, audio_seconds):
     return words
 
 
-def prepare_captions(srt, audio_seconds, offset=2, limits=None):
+def prepare_captions(srt, audio_seconds, offset=2, limits=None, end_tolerance_ms=1):
     """Caption cues ``[{'start', 'end', 'text', 'timing'}]`` in chapter time (``offset``: when the voice starts).
     ``limits``: ``[[sentence start, the moment the picture leaves the sentence or None]]`` in voice time."""
     for name, value, low, high in [('audio_seconds', audio_seconds, .01, 86400), ('offset', offset, 0, 2)]:
@@ -80,6 +82,9 @@ def prepare_captions(srt, audio_seconds, offset=2, limits=None):
                 or not math.isfinite(value) or not low <= value <= high):
             raise ValueError(f'{name} must be finite in [{low}, {high}]')
     captions, group = [], []
+    if end_tolerance_ms is not None and (type(end_tolerance_ms) not in (int, float)
+            or not math.isfinite(end_tolerance_ms) or not 1 <= end_tolerance_ms <= 250):
+        raise ValueError('Caption end tolerance must be None or between 1 and 250 milliseconds')
 
     def lines(words):
         return textwrap.wrap(' '.join(w['text'] for w in words), width=LINE, break_long_words=False,
@@ -89,7 +94,7 @@ def prepare_captions(srt, audio_seconds, offset=2, limits=None):
         captions.append(dict(start=offset + group[0]['start'], end=offset + group[-1]['end'], text='\n'.join(lines(group)),
                              timing='word_boundary_trimmed' if any(w['trimmed'] for w in group) else 'word_boundary'))
 
-    for word in words_of(srt, audio_seconds):
+    for word in words_of(srt, audio_seconds, end_tolerance_ms):
         if group and (len(lines([*group, word])) > 2 or word['start'] - group[-1]['end'] > PAUSE
                       or word['end'] - group[0]['start'] > LONGEST or ends_sentence(group[-1]['text'], word['text'])):
             emit()

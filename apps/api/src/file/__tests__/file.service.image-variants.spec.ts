@@ -2,6 +2,7 @@ import { Test } from "@nestjs/testing";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
+import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { RESOURCE_CATEGORIES } from "../file.constants";
@@ -22,6 +23,7 @@ type S3ServiceMock = {
   getFileStream: jest.MockedFunction<S3Service["getFileStream"]>;
   getFileBuffer: jest.MockedFunction<S3Service["getFileBuffer"]>;
   deleteFile: jest.MockedFunction<S3Service["deleteFile"]>;
+  getFileContentType: jest.MockedFunction<S3Service["getFileContentType"]>;
 };
 
 describe("FileService image variant references", () => {
@@ -47,6 +49,7 @@ describe("FileService image variant references", () => {
             })),
             getFileBuffer: jest.fn(async () => Buffer.from("image")),
             deleteFile: jest.fn().mockResolvedValue(undefined),
+            getFileContentType: jest.fn().mockResolvedValue("image/webp"),
           },
         },
         { provide: BunnyStreamService, useValue: {} },
@@ -158,5 +161,97 @@ describe("FileService image variant references", () => {
     ).rejects.toThrow("database unavailable");
 
     expect(s3Service.deleteFile).toHaveBeenCalledTimes(8);
+  });
+
+  describe("assertImageReference", () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111";
+    const tenantVariant = `${tenantId}/course/variants/image.webp`;
+
+    it("accepts a stored raster image of the caller's tenant, checking the concrete variant", async () => {
+      await expect(service.assertImageReference(tenantVariant, tenantId)).resolves.toBeUndefined();
+
+      expect(s3Service.getFileContentType).toHaveBeenCalledWith(
+        expect.stringContaining(`${tenantId}/course/variants/`),
+      );
+      expect(s3Service.getFileContentType).not.toHaveBeenCalledWith(tenantVariant);
+    });
+
+    it("ignores an empty reference", async () => {
+      await expect(service.assertImageReference("", tenantId)).resolves.toBeUndefined();
+      expect(s3Service.getFileContentType).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      "https://images.example.com/thumbnail.png",
+      "//images.example.com/thumbnail.png",
+      "course/thumbnail.png",
+      "22222222-2222-4222-8222-222222222222/course/thumbnail.png",
+    ])("rejects %s before touching storage", async (reference) => {
+      await expect(service.assertImageReference(reference, tenantId)).rejects.toThrow(
+        "files.toast.invalidImageReference",
+      );
+      expect(s3Service.getFileContentType).not.toHaveBeenCalled();
+    });
+
+    it.each(["image/svg+xml", "image/bmp", "image/tiff"])(
+      "accepts an already uploaded %s image of the caller's tenant",
+      async (contentType) => {
+        s3Service.getFileContentType.mockResolvedValue(contentType);
+
+        await expect(
+          service.assertImageReference(`${tenantId}/course/legacy-image`, tenantId),
+        ).resolves.toBeUndefined();
+      },
+    );
+
+    it.each([["application/pdf"], ["text/html"], [null]])(
+      "rejects a tenant object stored as %s",
+      async (contentType) => {
+        s3Service.getFileContentType.mockResolvedValue(contentType);
+
+        await expect(
+          service.assertImageReference(`${tenantId}/course/file.png`, tenantId),
+        ).rejects.toThrow("files.toast.invalidImageReference");
+      },
+    );
+
+    it("rejects a reference to an object that does not exist", async () => {
+      s3Service.getFileContentType.mockRejectedValue(new Error("NotFound"));
+
+      await expect(
+        service.assertImageReference(`${tenantId}/course/missing.png`, tenantId),
+      ).rejects.toThrow("files.toast.invalidImageReference");
+    });
+  });
+
+  describe("tenant-scoped signing", () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111";
+    const otherTenantId = "99999999-9999-4999-8999-999999999999";
+
+    it.each([`${otherTenantId}/course/private.png`, `${otherTenantId}/course/variants/image.webp`])(
+      "returns no URL for another tenant's reference %s",
+      async (reference) => {
+        await expect(dbAls.run({ tenantId }, () => service.getFileUrl(reference))).resolves.toBe(
+          "",
+        );
+        expect(s3Service.getSignedUrl).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      [`${tenantId}/course/image.png`, `${tenantId}/course/image.png`],
+      ["user-avatars/legacy-avatar.png", "user-avatars/legacy-avatar.png"],
+    ])("signs an own-tenant or legacy reference %s", async (reference, storageKey) => {
+      await expect(dbAls.run({ tenantId }, () => service.getFileUrl(reference))).resolves.toBe(
+        `signed:${storageKey}`,
+      );
+    });
+
+    it("leaves external URLs untouched", async () => {
+      const url = "https://placehold.co/600x400";
+
+      await expect(dbAls.run({ tenantId }, () => service.getFileUrl(url))).resolves.toBe(url);
+      expect(s3Service.getSignedUrl).not.toHaveBeenCalled();
+    });
   });
 });

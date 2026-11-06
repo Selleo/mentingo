@@ -39,14 +39,15 @@ export class LoginMethodsService {
   }
 
   async getLoginMethodSetup(): Promise<LoginMethodSetupResponse> {
-    const [methods, google, microsoft, slack] = await Promise.all([
+    const [methods, google, microsoft, slack, entraId] = await Promise.all([
       this.getLoginMethods(),
       this.getMissingCredentials(OAUTH_LOGIN_METHODS.GOOGLE),
       this.getMissingCredentials(OAUTH_LOGIN_METHODS.MICROSOFT),
       this.getMissingCredentials(OAUTH_LOGIN_METHODS.SLACK),
+      this.getMissingCredentials(OAUTH_LOGIN_METHODS.ENTRA_ID),
     ]);
 
-    return { methods, missingCredentials: { google, microsoft, slack } };
+    return { methods, missingCredentials: { google, microsoft, slack, entraId } };
   }
 
   async assertLoginMethodEnabled(method: LoginMethod) {

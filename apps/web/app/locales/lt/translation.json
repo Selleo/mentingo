@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Prisijungimo nuoroda",
     "password": "Slaptažodis",
     "description": "Pasirinkite, kaip jūsų organizacijos žmonės gali prisijungti.",
@@ -34,6 +35,8 @@
       "disabled": "Šis prisijungimo būdas išjungtas.",
       "missingConfiguration": "Pirmiausia pridėkite tiekėjo prisijungimo duomenis aplinkos nustatymuose.",
       "lastMethod": "Palikite įjungtą bent vieną veikiantį prisijungimo būdą.",
+      "invalidDirectoryId": "Įveskite katalogo (nuomininko) ID iš Entra programos registracijos GUID formatu.",
+      "untrustedDirectory": "Ši paskyra nepriklauso jūsų organizacijos Entra ID katalogui.",
       "save": "Nepavyko išsaugoti prisijungimo būdų.",
       "load": "Nepavyko įkelti prisijungimo būdų."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Su šiuo kursu susieti tiesioginiai mokymai yra neišsamūs ir negali būti eksportuoti.",
       "courseNotFound": "Eksportuojamas kursas nerastas.",
       "categoryNotFound": "Kurso kategorija nerasta."
+    },
+    "progress": {
+      "waiting": "Laukiama pradžios…",
+      "step": "{{current}} žingsnis iš {{total}}",
+      "uploadingPackage": "Įkeliamas paketas",
+      "stages": {
+        "collecting-content": "Renkamas kurso turinys",
+        "copying-files": "Kopijuojami failai",
+        "packaging": "Pakuojama",
+        "downloading": "Atsisiunčiamas paketas",
+        "verifying": "Tikrinamas paketas",
+        "uploading-files": "Įkeliami failai",
+        "indexing": "Ruošiamas DI turinys",
+        "saving": "Išsaugomas kursas"
+      }
     }
   },
   "aiConversations": {
@@ -778,11 +796,13 @@
     "continueWithGoogle": "Tęskite su Google",
     "continueWithMicrosoft": "Tęskite su Microsoft",
     "continueWithSlack": "Tęskite su Slack",
+    "continueWithEntraId": "Tęskite su Entra ID",
     "enterFullscreen": "Visas ekranas",
     "exitFullscreen": "Išeikite per visą ekraną",
     "refreshPage": "Atnaujinti puslapį",
     "validation": {
-      "messageRequired": "Žinutė yra privaloma."
+      "messageRequired": "Žinutė yra privaloma.",
+      "nameMaxLength": "Gali būti ne daugiau kaip {{max}} simbolių."
     }
   },
   "lessons": {
@@ -811,9 +831,9 @@
       "uploadForbidden": "Šis įkėlimas nepriklauso dabartiniam vartotojui."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG arba SVG",
-      "video": "MP4, MOV, MPEG-2 arba Hevc (maks. iki 5 GB)",
-      "presentation": "PPT / PPTX (maks. iki 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM arba OGG (maks. {{maxSize}})",
+      "presentation": "PPTX arba ODP (maks. {{maxSize}})"
     },
     "processing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -870,7 +890,7 @@
       "setUpCourse": "Nustatykite kursą",
       "provideDetails": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą",
       "uploadFileHeader": "Spustelėkite, kad įkeltumėte arba nuvilkite ir numeskite",
-      "uploadFileBody": "SCORM .zip failas (maks. iki 500 MB)",
+      "uploadFileBody": "SCORM .zip failas (maks. {{maxSize}})",
       "pricing": "Kainodara",
       "status": "Būsena",
       "setUpPricing": "Nustatykite kurso kainą",
@@ -939,7 +959,8 @@
         "invalidAttempt": "SCORM bandymas neteisingas.",
         "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
         "contentNotFound": "SCORM turinys nerastas.",
-        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio.",
+        "contentUnavailable": "SCORM turinys laikinai nepasiekiamas. Kreipkitės į administratorių."
       }
     },
     "coursePlaceholder": {
@@ -957,7 +978,7 @@
       "requirements": {
         "title": "Paketo reikalavimai",
         "version": "SCORM 1.2 paketas",
-        "archive": ".zip archyvas iki 500MB",
+        "archive": ".zip archyvas iki {{maxSize}}",
         "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
       },
       "packageSection": "SCORM paketas",
@@ -972,11 +993,22 @@
       "replacePackage": "Pakeisti paketą",
       "removePackage": "Pašalinti paketą",
       "uploadThumbnail": "Įkelti miniatiūrą",
-      "uploadThumbnailDescription": "PNG, JPG arba JPEG iki 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
       "thumbnailPreviewAlt": "Kurso miniatiūros peržiūra",
       "submit": "Sukurti SCORM kursą",
       "creating": "Kuriamas SCORM kursas...",
-      "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+      "toastDraftReady": "SCORM kurso forma paruošta API integracijai",
+      "categoryRequired": "Kategorija yra privaloma.",
+      "descriptionMaxLength": "Apraše gali būti ne daugiau kaip {{maxLength}} simbolių.",
+      "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
+      "languageInvalid": "Pasirinkite palaikomą kalbą.",
+      "packageInvalidType": "SCORM paketas turi būti .zip failas",
+      "packageRequired": "SCORM paketas yra privalomas.",
+      "packageTooLarge": "SCORM paketas turi būti mažesnis nei {{maxSize}}",
+      "thumbnailInvalid": "Miniatiūra turi būti tinkamas vaizdo failas",
+      "thumbnailInvalidType": "Miniatiūra turi būti PNG, JPG/JPEG, WEBP arba SVG",
+      "thumbnailTooLarge": "Miniatiūra turi būti mažesnė nei {{maxSize}}",
+      "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai."
     },
     "lesson": {
       "packageSection": "SCORM paketas",
@@ -988,45 +1020,26 @@
       "validation": {
         "titleRequired": "Pavadinimas būtinas",
         "packageRequired": "SCORM paketas yra privalomas",
-        "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
+        "packageTooLarge": "SCORM paketas turi būti mažesnis nei {{maxSize}}",
         "packageInvalidType": "SCORM paketas turi būti .zip failas"
       }
     }
   },
   "adminCourseTypeSelector": {
     "back": "Atgal",
-    "eyebrow": "Kurso nustatymas",
     "title": "Sukurti naują kursą",
     "subtitle": "Pasirinkite standartinį redaktorių, SCORM paketą arba Mentingo paketą.",
     "standard": {
       "title": "Standartinis",
-      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
-      "features": {
-        "authoring": "Kuriama vietiniame kursų redaktoriuje",
-        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
-        "translations": "Palaikomos kurso kalbos ir vertimai",
-        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "features": {
-        "import": "Kuriama iš SCORM 1.2 .zip paketo",
-        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
-        "structure": "Importuoto paketo struktūra išsaugoma",
-        "future": "Kainodara, būsena ir sertifikatai įtraukti"
-      }
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo."
     },
     "mentingoPackage": {
       "title": "Mentingo paketas",
-      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo.",
-      "features": {
-        "structure": "Atkuriama kurso struktūra ir vertimai",
-        "settings": "Atkuriami nustatymai ir metaduomenys",
-        "assets": "Pridedami susiję failai",
-        "learningPath": "Palaikomi mokymosi keliai ir jų kursai"
-      }
+      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo."
     }
   },
   "studentChapterCardView": {
@@ -2573,6 +2586,10 @@
         "title": "Prisijungimas per Slack",
         "description": "Leiskite naudotojams prisijungti su Slack paskyra."
       },
+      "entraIdSignIn": {
+        "title": "Prisijungimas per Entra ID",
+        "description": "Leiskite naudotojams prisijungti tik paskyromis iš jūsų organizacijos Microsoft Entra ID katalogo."
+      },
       "microsoftCalendar": {
         "title": "Microsoft kalendorius",
         "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
@@ -2664,6 +2681,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra ID katalogo (nuomininko) ID",
+        "description": "Katalogo (nuomininko) ID GUID iš programos registracijos apžvalgos. Prisijungti gali tik šio katalogo paskyros."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra ID kliento ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra ID kliento slaptažodis"
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
@@ -2960,7 +2987,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
-        "trailerUploadDetails": "MP4, MOV (maks. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM arba OGG (maks. {{maxSize}})",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",
@@ -2995,7 +3022,7 @@
           "groups": "Grupės",
           "users": "Naudotojai"
         },
-        "certificateSignatureRequirements": "PNG arba SVG (rekomenduojamas skaidrus fonas)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
         "certificatePreviewTitle": "Sertifikato peržiūra",
         "certificatePreviewDescription": "Atidarykite peržiūrą, kad sureguliuotumėte kalbą ir spalvą.",
         "certificatePreviewButton": "Peržiūra",
@@ -3017,7 +3044,7 @@
       },
       "validation": {
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
-        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
+        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip {{max}} simbolių.",
         "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
         "categoryRequired": "Kategorija būtina",
         "certificateManageDenied": "Negalite tvarkyti šio kurso pažymėjimų.",
@@ -3144,11 +3171,12 @@
           "passThresholdMax": "Išlaikymo slenkstis negali viršyti 10",
           "titleMinLength": "Pavadinimas per trumpas (mažiausiai 2 simboliai)",
           "titleMaxLength": "Pavadinimas per ilgas (maks. 250 simbolių)",
-          "maxFileSize": "Failo dydis turi būti mažesnis nei {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "Failo dydis turi būti mažesnis nei {{maxSize}}",
           "maxFileNumber_one": "Negalite įkelti daugiau nei 1 failo",
           "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
           "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
-          "sourceUrlRequired": "Būtinas šaltinio URL"
+          "sourceUrlRequired": "Būtinas šaltinio URL",
+          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -3222,8 +3250,8 @@
           "voiceMode": "Balso režimas",
           "ttsPreset": "Iš anksto nustatytas TTS",
           "customTTSReference": "Pasirinktinė TTS nuoroda",
-          "includeFiles_one": "Pridėkite iki 1 failo žemiau {{ MAX_FILE_SIZE }} MB, kad būtų naudojamas kaip kontekstas pamokose",
-          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{ MAX_FILE_SIZE }} MB, kad galėtumėte naudoti kaip kontekstą pamokose"
+          "includeFiles_one": "Pridėkite iki 1 failo žemiau {{maxSize}}, kad būtų naudojamas kaip kontekstas pamokose",
+          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose"
         },
         "placeholder": {
           "title": "Pateikite pamokos pavadinimą...",
@@ -3765,7 +3793,7 @@
           "leaveContentCancel": "Tęsti redagavimą",
           "leaveContentDiscard": "Išeiti neišsaugojus",
           "dropOrClick": "Nuvilkite vaizdą čia arba spustelėkite, kad įkeltumėte",
-          "allowedFormats": "PNG, JPG arba SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Apibūdinkite, kaip AI mentorius turėtų elgtis pamokos metu. Įtraukite kontekstą, vaidmenį ar scenarijų, kurio AI turėtų laikytis. Tai apibrėžia, kaip AI vadovaus pokalbiui.",
           "updateAiMentorAvatarDescription": "Įkelkite naują AI mentoriaus vaizdą arba pašalinkite esamą.",
           "updateAiMentorAvatar": "Atnaujinkite AI mentoriaus avatarą",
@@ -4307,6 +4335,7 @@
       "loading": "Įkeliamas SCORM turinys...",
       "launchFailed": "Nepavyko paleisti SCORM turinio.",
       "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "contentAccessExpired": "Nepavyko atnaujinti prieigos prie SCORM turinio. Norėdami tęsti, iš naujo atidarykite pamoką.",
       "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
       "saving": "Išsaugoma pažanga",
       "previousSco": "Ankstesnė dalis",
@@ -4409,6 +4438,11 @@
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
       "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
+    },
+    "preview": {
+      "title": "Peržiūrite kurso turinį",
+      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus, dalyvauti veiklose ir išsaugoti pažangą.",
+      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus, dalyvauti veiklose ir stebėti pažangą."
     }
   },
   "studentCourseView": {
@@ -4654,7 +4688,7 @@
       "preview": "Peržiūra"
     },
     "field": {
-      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "other": {
       "uploading": "Įkeliama...",
@@ -4703,7 +4737,9 @@
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
-      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis"
+      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
+      "publicCoursePreview": "Viešų kursų peržiūra prieš registraciją",
+      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus neužsiregistravus. Testams, veikloms ir pažangos išsaugojimui reikia registracijos. Mokamų kursų prieigos taisyklės nesikeičia."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -4716,7 +4752,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
-      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų"
+      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų",
+      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas"
     }
   },
   "registrationFormBuilder": {
@@ -4798,6 +4835,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA vykdymo nustatymai sėkmingai atnaujinti.",
+      "mfaVerificationRequired": "Jūsų vaidmeniui dabar reikalingas MFA. Norėdami tęsti, nustatykite arba patvirtinkite jį.",
       "mfaEnforcementUpdateFailed": "Nepavyko atnaujinti MFA vykdymo nustatymų."
     }
   },
@@ -4931,10 +4969,10 @@
   },
   "platformLogo": {
     "header": "Platformos logotipas",
-    "subHeader": "Įkelkite tinkintą logotipą savo platformai. Palaikomi formatai: PNG, SVG",
+    "subHeader": "Įkelkite tinkintą logotipą savo platformai. Palaikomi formatai: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
-      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Ištrinti platformos logotipą"
@@ -4947,10 +4985,10 @@
   },
   "platformSimpleLogo": {
     "header": "Platformos paprastas logotipas (piktograma)",
-    "subHeader": "Įkelkite tinkintą logotipą, kuris bus naudojamas kaip ženklas ir favicon. Palaikomi formatai: PNG, SVG",
+    "subHeader": "Įkelkite tinkintą logotipą, kuris bus naudojamas kaip ženklas ir favicon. Palaikomi formatai: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
-      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Ištrinti platformos piktogramos logotipą"
@@ -4969,7 +5007,7 @@
     "title": "Prisijungimo fono paveikslėlio įkėlimas",
     "description": "Įkelkite tinkintą organizacijos prisijungimo puslapio fono paveikslėlį.",
     "field": {
-      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Ištrinkite prisijungimo fono paveikslėlį"
@@ -4992,11 +5030,16 @@
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas.",
+      "invalidFileType": "Failas netinkamas arba jo formatas nepalaikomas.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
       "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}.",
-      "audioFileTooLarge": "Garso failas per didelis. Įkelkite garso įrašą iki 200 MB.",
-      "rangeNotSatisfiable": "Prašomas baitų intervalas nepasiekiamas."
+      "audioFileTooLarge": "Garso failas per didelis. Įkelkite garso įrašą iki {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "Prašomas baitų intervalas nepasiekiamas.",
+      "fileTooLarge": "Failas per didelis. Didžiausias dydis – {{maxSize}}.",
+      "uploadTooLarge": "Failas per didelis, kad būtų įkeltas.",
+      "imageResolutionTooLarge": "Vaizdas per didelis. Didžiausia raiška – {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "Vaizdo kraštinių santykis turi būti {{aspectRatio}}.",
+      "invalidImageReference": "Pasirinktas vaizdas nepasiekiamas. Įkelkite vaizdą dar kartą."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -5584,7 +5627,7 @@
     "status": {
       "draft": "Juodraštis",
       "published": "Paskelbta",
-      "private": "Privatu",
+      "private": "Privatus",
       "not_started": "Nepradėta",
       "in_progress": "Vykdoma",
       "completed": "Baigta",
@@ -5739,7 +5782,7 @@
       "titlePlaceholder": "Pavadinkite tobulėjimo kelią",
       "description": "Aprašymas",
       "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame tobulėjimo kelyje",
-      "imageHint": "PNG, JPG arba JPEG (maks. 20 MB, rekomenduojama 1200x1200 ar didesnė)",
+      "imageHint": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}}, rekomenduojama 1200x1200 ar didesnė)",
       "sequenceEnabled": "Nuoseklus mokymasis",
       "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
       "includesCertificate": "Sertifikatas",
@@ -6170,6 +6213,7 @@
       "hostAlreadyExists": "Organizacijos priegloba jau egzistuoja",
       "notFound": "Organizacija nerasta",
       "invalidHost": "Netinkamas organizacijos prieglobos URL",
+      "reservedHost": "Ši organizacijos priegloba yra rezervuota ir negali būti naudojama",
       "managingTenantRequired": "Reikalingas valdančios organizacijos administratorius",
       "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas",
       "currentTenantDeleteNotAllowed": "Dabartinės valdančiosios organizacijos ištrinti negalima"
@@ -6182,7 +6226,13 @@
       "invalidRefreshToken": "Netinkamas atnaujinimo prieigos raktas",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
       "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
-      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."
+      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją.",
+      "mfaRequired": "Norėdami tęsti, užbaikite dviejų veiksnių autentifikavimą.",
+      "sessionExpired": "Prisijungimo sesija baigėsi. Prisijunkite iš naujo.",
+      "mfaAlreadyEnabled": "Dviejų veiksnių autentifikavimas jau įjungtas.",
+      "mfaCodeAlreadyUsed": "Šis kodas jau panaudotas. Palaukite naujo kodo autentifikavimo programėlėje ir bandykite dar kartą.",
+      "invalidMfaCode": "Įveskite galiojantį šešių skaitmenų autentifikavimo kodą.",
+      "invalidSettingsUpdate": "Šių saugumo nustatymų čia keisti negalima."
     }
   },
   "sessionRevocation": {
@@ -6353,11 +6403,11 @@
       "uploadImage": "Įkelti naują pagrindinį vaizdą",
       "dropImage": "Nuvilkite pagrindinį vaizdą čia",
       "browse": "arba spustelėkite ir pasirinkite",
-      "imageLimit": "PNG, JPG iki 10 MB",
+      "imageLimit": "PNG, JPG iki {{maxSize}}",
       "imageRecommendation": "Rekomenduojama: 1920x820 px (21:9)",
       "trailer": "Kurso anonsas (nebūtina)",
       "dropVideo": "Nuvilkite anonsą čia",
-      "videoLimit": "MP4, MOV iki 50 MB",
+      "videoLimit": "MP4, MOV iki {{maxSize}}",
       "videoRecommendation": "Rekomenduojama: 30–90 sekundžių",
       "save": "Įkelti mediją"
     },
@@ -8417,7 +8467,8 @@
       "qa": "Klausimas ir atsakymas",
       "development_path": "Mokymosi kelias",
       "resource": "Išteklius",
-      "reference": "Šaltinis"
+      "reference": "Šaltinis",
+      "helpdesk": "Pagalbos pamoka"
     },
     "title": "Asistentas",
     "eyebrow": "Jūsų platformos žinios",
@@ -9120,6 +9171,61 @@
       "inUse_few": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
       "inUse_many": "„{{name}}“ naudoja {{count}} kompetencijos. Prieš ištrindami perkelkite jas į kitą kategoriją.",
       "inUse_other": "„{{name}}“ naudoja {{count}} kompetencijų. Prieš ištrindami perkelkite jas į kitą kategoriją."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demonstracija",
+    "title": "Pagalba ir pamokos",
+    "heading": "Kaip galime padėti?",
+    "subtitle": "Rask kitą žingsnį Mentingo.",
+    "loading": "Įkeliama pagalba",
+    "askAssistant": "Klausti asistento",
+    "assistantHint": "Aprašyk, ką nori padaryti.",
+    "search": "Ieškok temos arba užduok klausimą…",
+    "clear": "Išvalyti paiešką",
+    "results": "Pamokos",
+    "suggested": "Siūloma tau",
+    "empty": "Pamokų nerasta",
+    "emptyHint": "Išbandyk trumpesnę frazę arba kitą temą.",
+    "chapterCount": "{{count}} skyriai",
+    "timeline": "Vaizdo laiko juosta",
+    "jumpHint": "Pasirink skyrių ir pereik į norimą žingsnį",
+    "chapters": "Šiame vaizdo įraše",
+    "related": "Atrask daugiau funkcijų",
+    "domains": {
+      "authoring": "Kursų redagavimas",
+      "paths": "Tobulėjimo keliai",
+      "learning": "Mokymasis"
+    },
+    "keywordFallback": "DI paieška nepasiekiama. Rodomi raktažodžių atitikmenys.",
+    "languageFallback": "Vaizdo įrašas prieinamas {{language}} kalba",
+    "retry": "Bandyti dar kartą",
+    "back": "Grįžti į Mentingo",
+    "chapterUnavailable": "Šis skyrius nebepasiekiamas. Vaizdo įrašas rodomas nuo pradžių.",
+    "errors": {
+      "unavailable": "Pamokos laikinai nepasiekiamos. Bandykite dar kartą.",
+      "versionUnavailable": "Šiai Mentingo versijai pagalba dar nepasiekiama.",
+      "disabled": "Šioje sistemoje pagalbos pamokos neįjungtos.",
+      "notFound": "Ši pamoka nepasiekiama jūsų Mentingo versijai.",
+      "invalidRequest": "Pasirinkite pasiekiamą pamoką arba pakeiskite paieškos frazę ir bandykite dar kartą."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Tobulėjimo kelias nerastas.",
+      "createError": "Nepavyko sukurti tobulėjimo kelio.",
+      "updateError": "Nepavyko atnaujinti tobulėjimo kelio.",
+      "updateMissingLanguage": "Šis tobulėjimo kelias nepasiekiamas pasirinkta kalba.",
+      "languageNotSupported": "Ši kalba nepalaikoma.",
+      "courseNotFound": "Kursas nerastas.",
+      "courseAlreadyExists": "Šis kursas jau yra tobulėjimo kelyje.",
+      "courseIdsMustBeUnique": "Kiekvieną kursą galima pridėti tik vieną kartą.",
+      "courseIdsEmpty": "Pasirinkite bent vieną kursą.",
+      "courseIdsMismatch": "Kursų tvarka neatitinka šio tobulėjimo kelio kursų.",
+      "courseLinkNotFound": "Šis kursas nepriklauso tobulėjimo keliui.",
+      "studentIdsEmpty": "Pasirinkite bent vieną besimokantįjį.",
+      "groupIdsEmpty": "Pasirinkite bent vieną grupę.",
+      "featureDisabled": "Tobulėjimo keliai šioje platformoje išjungti."
     }
   }
 }

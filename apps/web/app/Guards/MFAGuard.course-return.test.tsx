@@ -9,6 +9,16 @@ import { MFAGuard } from "./MFAGuard";
 
 let currentUser: { shouldVerifyMFA: boolean; requiresPasswordChange: boolean } | null = null;
 
+vi.mock("~/api/queries/useAuthSession", async () => {
+  const { AUTH_SESSION_STATUS } = await import("@repo/shared");
+  return {
+    useAuthSession: () => ({
+      data: currentUser && { status: AUTH_SESSION_STATUS.AUTHENTICATED },
+      isLoading: false,
+      isError: false,
+    }),
+  };
+});
 vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUser: () => ({ data: currentUser, isLoading: false }),
 }));

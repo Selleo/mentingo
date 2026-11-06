@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { CreateGroupBody, GetGroupByIdResponse, UpdateGroupBody } from "~/api/generated-api";
@@ -13,7 +12,7 @@ export type GroupFactoryUpdateInput = UpdateGroupBody;
 
 const createGroupDefaults = (): CreateGroupBody => ({
   name: `${TEST_DATA.group.namePrefix} ${randomUUID().slice(0, 8)}`,
-  language: SUPPORTED_LANGUAGES.EN,
+  language: getSelfOnboardingLanguage(),
 });
 
 export class GroupFactory {
@@ -37,7 +36,7 @@ export class GroupFactory {
 
   async getById(id: string): Promise<GroupFactoryRecord> {
     const response = await this.apiClient.api.groupControllerGetGroupById(id, {
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
     });
 
     return response.data.data;
@@ -49,7 +48,7 @@ export class GroupFactory {
       page: 1,
       perPage: 100,
       sort: "name",
-      language: SUPPORTED_LANGUAGES.EN,
+      language: getSelfOnboardingLanguage(),
     });
 
     return response.data.data.find((group) => group.name === name) ?? null;

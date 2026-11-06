@@ -14,17 +14,16 @@ export default function NativeArchiveImportPage() {
   const { t } = useTranslation();
 
   return (
-    <main className="min-h-screen bg-white px-6 py-8 lg:grid lg:grid-cols-2 lg:gap-12 lg:px-16">
-      <div className="hidden items-center justify-center lg:flex">
-        <img src={SplashScreenImage} alt="" className="w-full max-w-xl rounded" />
+    <main className="flex h-screen overflow-auto bg-white px-20 py-8">
+      <div className="flex w-full items-center justify-center">
+        <img src={SplashScreenImage} alt="" className="rounded" />
       </div>
-      <div className="mx-auto flex w-full max-w-[820px] flex-col gap-6 lg:justify-center">
+      <div className="flex w-full max-w-[820px] flex-col justify-center gap-y-6 px-8">
         <Breadcrumb
           backTo="/admin/beta-courses/new"
           currentLabel={t("adminCourseTypeSelector.mentingoPackage.title")}
         />
         <hgroup className="flex flex-col gap-1">
-          <p className="body-base-md text-sky-700">{t("adminCourseTypeSelector.eyebrow")}</p>
           <h1 className="h3 text-neutral-950">{t("nativeArchive.importTitle")}</h1>
         </hgroup>
         <NativeArchiveImport cancelTo="/admin/beta-courses/new" />

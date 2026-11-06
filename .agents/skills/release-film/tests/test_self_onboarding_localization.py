@@ -1,0 +1,880 @@
+"""Shared scenarios, native-language captures and portable private-state regressions."""
+import copy
+import json
+import os
+from pathlib import Path
+import shutil
+import sys
+import tarfile
+import tempfile
+from types import SimpleNamespace
+import unittest
+from unittest.mock import patch
+
+sys.dont_write_bytecode = True
+SKILL = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SKILL/'scripts'))
+import core
+import self_onboarding
+import self_onboarding_catalog
+import self_onboarding_recording as recording
+import self_onboarding_store as store
+import self_onboarding_voices as narrators
+
+
+class LocalizationTest(unittest.TestCase):
+    def test_polish_render_rejects_english_footage_instead_of_silently_reusing_it(self):
+        reference = self.raw()
+        narrator = self.patch(recording.cut, 'narrate')
+        with self.assertRaisesRegex(ValueError, 'footage language'):
+            recording.render_flow(self.root/'run', self.flow, self.domain, 'pl', self.commit,
+                                  'Selleo/mentingo', {}, self.cache, reference)
+        narrator.assert_not_called()
+
+    def test_verified_translation_is_reused_without_calling_a_model_again(self):
+        translated = copy.deepcopy(self.chapter)
+        translated['title'] = 'Utwórz ścieżkę'
+        model = self.patch(recording, 'localize_story', return_value=(translated, 'Opis ścieżki'))
+        first = recording.localized_story(self.cache, self.chapter, 'pl', 'Create a path.')
+        second = recording.localized_story(self.cache, self.chapter, 'pl', 'Create a path.', allow_model=False)
+        self.assertEqual(first, second)
+        model.assert_called_once()
+
+    def test_localized_capture_failure_does_not_discard_the_english_video(self):
+        self.setup_generator()
+        self.replay.side_effect = RuntimeError('Polish selector no longer matches')
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'localized-capture')
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.camera.assert_called_once()
+
+    def test_saved_scenario_replay_records_polish_without_an_authoring_worker(self):
+        reference = self.raw()
+        # Save a source that uses the real localized recording fixture.
+        source_root = self.root/'raw'/self.commit/self.flow['id']/'en'
+        reference = recording.cache_capture(self.cache, self.root/'run', source_root, {'chapters': [self.chapter]},
+            self.flow, self.domain, self.commit, 'Selleo/mentingo', self.root/'checkout',
+            scenario={'base': 'apps/web/e2e/specs/demo.spec.ts',
+                      'source': 'import { test } from "../fixtures/self-onboarding.fixture";\ntest("flow", async () => {});'})
+        self.raw(code='pl')
+        run = self.root/'run'
+        shutil.copytree(self.root/'checkout', run/'checkout', dirs_exist_ok=True)
+        base = run/'checkout/apps/web/e2e/specs/demo.spec.ts'
+        base.parent.mkdir(parents=True, exist_ok=True); base.write_text('original test')
+        camera = self.patch(recording.harness, 'capture', return_value=[{'status': 'passed', 'error': '',
+            'capture': str(self.root/'raw'/self.commit/self.flow['id']/'pl')}])
+        self.patch(recording.harness, 'test_env', return_value={})
+        self.patch(recording.takes, 'convert')
+        worker = self.patch(recording.gaps, 'launch_workers', side_effect=AssertionError('No model needed for replay'))
+        result = recording.replay_flow(run, self.flow, self.domain, 'pl', self.commit, 'Selleo/mentingo',
+                                       {'harness': {}}, self.cache, reference)
+        manifest, _ = recording.restore_capture(self.cache, result, self.root/'polish-restore')
+        self.assertEqual(manifest['language'], 'pl')
+        self.assertNotEqual(result['id'], reference['id'])
+        self.assertEqual(result['parentCaptureId'], reference['id'])
+        self.assertEqual(camera.call_args.args[2]['SELF_ONBOARDING_LANGUAGE'], 'pl')
+        worker.assert_not_called()
+        self.assertFalse(list(base.parent.glob('rf-localized-*.spec.ts')))
+
+    def test_default_generation_does_not_wait_for_visual_review(self):
+        story, model = self.review_fixture([])
+        with patch.dict(os.environ, {'SELF_ONBOARDING_VISUAL_REVIEW': '0'}):
+            report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'disabled')
+        model.assert_not_called()
+
+    def test_english_labels_reuse_narration_without_a_model_call(self):
+        model = self.patch(recording.llm, 'complete', side_effect=AssertionError('English needs no translation'))
+        localized, description = recording.localize_story(self.chapter, 'en', 'Create a path.')
+        self.assertEqual(description, 'Create a path.')
+        self.assertEqual([s['text'] for s in localized['sentences']], [s['text'] for s in self.chapter['sentences']])
+        self.assertEqual([s['action'] for s in localized['sentences']], [0, 1, 2])
+        self.assertTrue(all(s['label'] for s in localized['sentences']))
+        model.assert_not_called()
+
+    def test_tutorial_worker_has_a_short_bounded_deadline_and_two_browser_tries(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(folder/'gap.json', {'tutorialMode': True})
+        self.patch(recording.gaps, 'runner_wait', return_value=999)
+        self.assertEqual(recording.gaps.deadlines(run, 100, 'browse'), (340, 400))
+        (folder/'scene.spec.ts').write_text('test scene')
+        (folder/'tries').mkdir()
+        for index in range(2):
+            (folder/'tries'/f'{index}.spec.ts').write_text('previous try')
+        result = recording.gaps.try_scene(run, {}, {}, 'browse')
+        self.assertFalse(result['ok'])
+        self.assertIn('two tries', result['error'])
+
+    def test_worker_try_preserves_demo_environment_when_reloading_base_recipe(self):
+        run = self.root/'run'
+        (run/'checkout').mkdir(parents=True)
+        core.save(run/'meta.json', {'repo': 'Selleo/mentingo', 'recordingMode': 'self-onboarding',
+                                   'addon': {'harness': {'env': {'SELF_ONBOARDING_DEMO': '1'}}}})
+        self.patch(self_onboarding.film.core, 'addon', return_value={'harness': {'env': {'CI': 'true'}}})
+        camera = self.patch(self_onboarding.film.gaps, 'try_scene', return_value={'ok': True})
+        args = SimpleNamespace(run=str(run), gap='browse-paths')
+        self.assertTrue(self_onboarding.film.try_scene(args)['ok'])
+        _, recipe, env, _ = camera.call_args.args
+        self.assertEqual(recipe['env']['SELF_ONBOARDING_DEMO'], '1')
+        self.assertEqual(env['SELF_ONBOARDING_DEMO'], '1')
+        self.assertEqual(env['SELF_ONBOARDING_LANGUAGE'], 'en')
+        self.assertEqual(env['DEMO_FAILURE_SCREENSHOTS'], '1')
+        self.assertEqual(env['CI'], 'true')
+        # Ordinary release runs retain the base recipe and do not opt into demo seeds.
+        core.save(run/'meta.json', {'repo': 'Selleo/mentingo', 'addon': {}})
+        self.patch(self_onboarding.film.core, 'addon', return_value={'harness': {'env': {'CI': 'true'}}})
+        self.assertNotIn('SELF_ONBOARDING_DEMO', self_onboarding.film.meta(run)['addon']['harness']['env'])
+
+    def test_tutorial_accepts_paraphrased_or_absent_proofs_but_keeps_action_validation(self):
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {'actions_text': ['0 expects "Saved"'], 'steps': [{}, {}, {}]})
+        chapter = copy.deepcopy(self.chapter)
+        for proofs in (['Enrolled by group'], []):
+            chapter['proofs'] = proofs
+            problems = recording.editor.chapter_problems(chapter, 1, {'F1': str(folder)}, {1},
+                max_sentences=None, check_proofs=False)
+            self.assertEqual(problems, [])
+            # Release films retain their existing proof requirements by default.
+            self.assertTrue(recording.editor.chapter_problems(chapter, 1, {'F1': str(folder)}, {1}))
+        chapter['sentences'][0]['action'] = 100
+        problems = recording.editor.chapter_problems(chapter, 1, {'F1': str(folder)}, {1},
+            max_sentences=None, check_proofs=False)
+        self.assertTrue(any('not one of' in p for p in problems))
+
+    def test_narration_freshness_uses_take_acceptance_not_conversion_time(self):
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {})
+        answer = self.root/'story.txt'
+        answer.write_text('Narration for F1')
+        os.utime(answer, (110, 110))
+        # Conversion finishes after the worker saves its narration.
+        os.utime(folder/'capture.json', (150, 150))
+        recording.validate_narration(answer, {'key': 'F1', 'since': 100}, {'F1': str(folder)})
+        # A replacement take still invalidates narration for the previous take.
+        with self.assertRaisesRegex(RuntimeError, 'stale'):
+            recording.validate_narration(answer, {'key': 'F1', 'since': 120}, {'F1': str(folder)})
+
+    def test_narration_freshness_rejects_missing_identity_timestamp_and_story(self):
+        answer = self.root/'story.txt'
+        for since in (None, True, 0, float('nan'), float('inf'), '100'):
+            with self.subTest(since=since), self.assertRaisesRegex(RuntimeError, 'acceptance timestamp'):
+                recording.validate_narration(answer, {'key': 'F1', 'since': since}, {'F1': 'capture'})
+        with self.assertRaisesRegex(RuntimeError, 'not registered'):
+            recording.validate_narration(answer, {'key': 'F2', 'since': 100}, {'F1': 'capture'})
+        with self.assertRaisesRegex(RuntimeError, 'missing or stale'):
+            recording.validate_narration(answer, {'key': 'F1', 'since': 100}, {'F1': 'capture'})
+
+    def test_failed_flow_reports_browser_error_and_scrubs_generated_secrets(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(run/'secrets.json', {'MASTER_KEY': 'private-fixture-key'})
+        core.save(folder/'result.json', {'ok': False, 'error': 'Search results timed out: private-fixture-key'})
+        self.patch(recording.core, 'worker_result', return_value={'subtype': 'error_max_budget_usd', 'is_error': True})
+        error = recording.flow_failure(run, 'browse-paths', folder, 'no answer')
+        self.assertIn('Search results timed out', str(error))
+        self.assertIn('error_max_budget_usd', str(error))
+        self.assertNotIn('private-fixture-key', str(error))
+        report = core.load(run/'review/flow-failure.json')
+        self.assertFalse(report['takePassed'])
+        self.assertFalse(report['storySaved'])
+
+    def test_passing_take_without_narration_has_a_distinct_failure(self):
+        run = self.root/'run'
+        folder = run/'gaps/browse'
+        core.save(folder/'result.json', {'ok': True})
+        self.patch(recording.core, 'worker_result', return_value={})
+        error = recording.flow_failure(run, 'browse-paths', folder, 'no answer')
+        self.assertIn('browser take passed', str(error))
+        self.assertIn('did not save narration', str(error))
+
+    def review_fixture(self, answers):
+        manager = patch.dict(os.environ, {'SELF_ONBOARDING_VISUAL_REVIEW': '1'})
+        manager.start()
+        self.addCleanup(manager.stop)
+        folder = self.root/'capture'
+        core.save(folder/'capture.json', {'actions_text': ['Open editor', 'Save']})
+        story = {'chapters': [copy.deepcopy(self.chapter)], 'keys': {'F1': str(folder)}}
+        self.patch(recording.review, 'sheets', return_value=['review/chapter-1.jpg'])
+        self.patch(recording.llm, 'capabilities', return_value={'review': True})
+        model = self.patch(recording.llm, 'visual', side_effect=[(json.dumps(v), {}) for v in answers])
+        return story, model
+
+    def test_claim_suggestions_are_advisory_and_never_mutate_a_passing_story(self):
+        result = {'complete': True, 'missing': [], 'claims': [
+            {'sentence': 1, 'problem': 'Order not provable from screenshot', 'fix': 'View the courses.'}]}
+        story, model = self.review_fixture([result])
+        before = copy.deepcopy(story)
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(story, before)
+        self.assertEqual(report['status'], 'warnings')
+        self.assertTrue(report['advisory'])
+        model.assert_called_once()
+        self.assertEqual(model.call_args.kwargs['timeout'], 120)
+        self.assertIn('A screenshot need not independently prove a documented rule', model.call_args.args[0])
+        self.assertEqual(core.load(self.root/'run/review'/self.flow['id']/'en/claim-review.json'), report)
+
+    def test_model_coverage_concerns_are_reported_without_discarding_recorded_flow(self):
+        result = {'complete': False, 'missing': ['Save was not visible in review images'], 'claims': []}
+        story, model = self.review_fixture([result])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'warnings')
+        self.assertEqual(report['reviews'][0]['missing'], result['missing'])
+        model.assert_called_once()
+
+    def test_clean_review_is_recorded_without_another_model_call(self):
+        story, model = self.review_fixture([{'complete': True, 'missing': [], 'claims': []}])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+        self.assertEqual(report['status'], 'reviewed')
+        model.assert_called_once()
+
+    def test_unavailable_reviewer_is_explicitly_reported_without_a_model_call(self):
+        story, model = self.review_fixture([])
+        self.patch(recording.llm, 'capabilities', return_value={'review': False})
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'pl'}, story)
+        self.assertEqual(report['status'], 'unavailable')
+        self.assertEqual(report['reviews'], [])
+        model.assert_not_called()
+
+    def test_bad_review_json_or_provider_timeout_cannot_fail_generation(self):
+        import subprocess
+        for response in ('invalid JSON', json.dumps({'complete': True, 'missing': [], 'claims': [
+                {'sentence': 999, 'problem': 'Wrong index', 'fix': 'Suggestion'}]}),
+                subprocess.TimeoutExpired('review', 120)):
+            with self.subTest(response=type(response).__name__):
+                story, model = self.review_fixture([])
+                model.side_effect = response if isinstance(response, Exception) else None
+                model.return_value = (response, {})
+                before = copy.deepcopy(story)
+                report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story)
+                self.assertEqual(report['status'], 'unavailable')
+                self.assertIn('warning', report)
+                self.assertEqual(story, before)
+                model.assert_called_once()
+
+    def test_missing_whole_video_cannot_pass_output_coverage(self):
+        self.split_feature()
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        report = {'language':'en', 'domains':[self.domain]}
+        with self.assertRaisesRegex(ValueError, 'missing or duplicates'):
+            self_onboarding.validate_output_coverage([report], manifest['videoCoverage'][:1], manifest['domains'][:1])
+
+    def test_removing_a_published_video_key_requires_explicit_migration(self):
+        self.split_feature()
+        core.save(self.cache/'state.json', {'schemaVersion':1, 'languages':{}, 'published':{
+            self.domain['key']+':en':{'revisionId':'old-monolith'}}})
+        with self.assertRaisesRegex(ValueError, 'explicitly retire'):
+            self.generate(codes=('en',))
+        self.camera.assert_not_called()
+
+    def test_analyze_saves_unassigned_discovery_and_blocks_before_camera(self):
+        self.setup_generator()
+        domain = copy.deepcopy(self.domain)
+        domain['flows'].append(dict(copy.deepcopy(self.flow), id='discovered-new-flow', action='record'))
+        planned = {'ok':True, 'domains':[domain], 'commit':self.commit, 'version':'1.2.0'}
+        self.patch(self_onboarding_catalog, 'plan', return_value=planned)
+        args = SimpleNamespace(cache=str(self.cache), catalog='mock', repo=str(self.root), target='v1.2.0',
+            domains='', languages='en,pl', force=False, out=str(self.root/'blocked-analysis.json'))
+        with self.assertRaisesRegex(ValueError, 'Update the video-group registry'):
+            self_onboarding.analyze(args)
+        saved = core.load(args.out)
+        self.assertTrue(all(not report['ok'] for report in saved['reports']))
+        self.assertIn('discovered-new-flow', saved['reports'][0]['domains'][0]['error'])
+        self.camera.assert_not_called()
+
+    def test_publication_flags_are_not_cleared_when_a_group_is_unconfirmed(self):
+        self.split_feature()
+        self.generate(codes=('en',))
+        before = core.load(self.cache/'state.json')
+        with self.assertRaisesRegex(ValueError, 'not been confirmed published'):
+            self_onboarding.mark_published(SimpleNamespace(cache=str(self.cache)))
+        self.assertEqual(before, core.load(self.cache/'state.json'))
+
+    def test_pending_bundle_cannot_resume_under_a_different_group_registry(self):
+        self.split_feature()
+        self.generate(codes=('en',))
+        self.domain['videos'][0]['title'] = 'Changed editorial group'
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.camera.reset_mock()
+        with self.assertRaisesRegex(ValueError, 'publication is pending'):
+            self.generate(codes=('en',), name='regrouped')
+        self.camera.assert_not_called()
+
+    def test_single_flow_smoke_test_is_explicitly_scoped_and_cannot_publish(self):
+        self.split_feature()
+        domain = copy.deepcopy(self.domain)
+        domain['coverage'] = {'decision':'complete'}
+        domain['flows'] = [dict(flow, action='record') for flow in domain['flows']]
+        plan = self.root/'single-plan.json'
+        core.save(plan, {'schemaVersion':1, 'testMode':True, 'testFlow':'flow-0',
+            'reports':[{'ok':True,'domains':[domain],'commit':self.commit,'version':'1.2.0','language':'en'}]})
+        args = SimpleNamespace(plan=str(plan), run=str(self.root/'run'), cache=str(self.cache),
+            out=str(self.cache/'bundles/smoke'), repo=str(self.root), repository='Selleo/mentingo', workflow_run_id='123')
+        result = self_onboarding.generate(args)
+        self.camera.assert_called_once(); self.render.assert_called_once()
+        manifest = core.load(result['manifest'])
+        self.assertTrue(manifest['testMode'])
+        self.assertEqual(manifest['testFlow'], 'flow-0')
+        self.assertEqual(manifest['domains'][0]['requiredFlowIds'], ['flow-0'])
+        self.assertEqual(len(manifest['videoCoverage']), 1)
+        data = core.load(plan); data['testMode'] = False; core.save(plan,data)
+        with self.assertRaisesRegex(ValueError,'cannot be used in production'):
+            self_onboarding.generate(args)
+
+    def test_unknown_smoke_flow_is_rejected(self):
+        with self.assertRaisesRegex(ValueError,'exactly one registered flow'):
+            self_onboarding.scope_test_flow([{'domains':[self.domain]}], 'unknown-flow')
+
+    def split_feature(self):
+        self.domain['flows'] = [dict(copy.deepcopy(self.flow), id=f'flow-{index}') for index in range(6)]
+        self.domain['videos'] = [{'key':f'development-paths.video-{index}', 'title':f'Video {index}',
+            'description':f'Related steps {index}.', 'flowIds':[f'flow-{n}' for n in range(index*3, index*3+3)]}
+            for index in range(2)]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+
+    def test_one_changed_flow_rebuilds_only_its_stable_video_group(self):
+        self.split_feature()
+        first = self.generate(codes=('en',))
+        self.assertEqual(first['videos'], 2)
+        self.assertEqual([len(call.args[0]['flows']) for call in self.assemble.call_args_list], [3, 3])
+        self.published()
+        self.camera.reset_mock(); self.render.reset_mock(); self.assemble.reset_mock()
+        self.commit = 'b'*40
+        second = self.generate(codes=('en',), action={'flow-0':'record'}, name='one-change')
+        self.assertEqual(second['videos'], 1)
+        self.camera.assert_called_once(); self.render.assert_called_once(); self.assemble.assert_called_once()
+        self.assertEqual(self.assemble.call_args.args[0]['key'], 'development-paths.video-0')
+        manifest = core.load(second['manifest'])
+        self.assertEqual([v['status'] for v in manifest['videoCoverage']], ['assembled', 'unchanged'])
+        self.assertEqual(manifest['domains'][0]['requiredFlowIds'], ['flow-0','flow-1','flow-2'])
+
+    def test_failed_flow_is_explicit_and_does_not_discard_other_video_groups(self):
+        self.split_feature()
+        capture = self.camera.side_effect
+        def fail_one(run, flow, *args):
+            if flow['id'] == 'flow-1': raise RuntimeError('Drawer did not open')
+            return capture(run, flow, *args)
+        self.camera.side_effect = fail_one
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        self.assertEqual(result['videos'], 2)
+        self.assertFalse(manifest['complete'])
+        self.assertEqual(manifest['domains'][0]['skippedFlowIds'], ['flow-1'])
+        self.assertEqual(manifest['domains'][1]['skippedFlowIds'], [])
+        self.assertEqual(manifest['skippedFlows'][0]['flowId'], 'flow-1')
+
+    def test_new_unassigned_flow_is_rejected_before_any_recording(self):
+        self.domain['flows'].append(dict(copy.deepcopy(self.flow), id='new-flow'))
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        with self.assertRaisesRegex(ValueError, 'missing video-group assignments'):
+            self.generate()
+        self.camera.assert_not_called(); self.render.assert_not_called()
+
+    def test_publication_completion_clears_group_flags_and_retains_feature_baselines(self):
+        self.split_feature()
+        result = self.generate(codes=('en',))
+        manifest = core.load(result['manifest'])
+        state = core.load(self.cache/'state.json')
+        for entry in manifest['domains']:
+            state['published'][entry['key']+':en'] = {'revisionId':'published-id', 'commit':self.commit, 'version':'1.2.0'}
+        core.save(self.cache/'state.json', state)
+        self_onboarding.mark_published(SimpleNamespace(cache=str(self.cache)))
+        state = core.load(self.cache/'state.json')
+        self.assertNotIn('pendingBundle', state)
+        feature = state['languages']['en']['domains'][self.domain['key']]
+        self.assertEqual(len(feature['flows']), 6)
+        self.assertFalse(feature['needsPublication'])
+        self.assertTrue(all(not v['needsPublication'] for v in feature['videos'].values()))
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.cache = self.root/'cache'
+        self.commit = 'a'*40
+        self.domain = copy.deepcopy(self_onboarding_catalog.load_catalog(SKILL/'projects/mentingo-self-onboarding.json')['domains'][0])
+        self.domain['flows'] = self.domain['flows'][:1]
+        self.flow = self.domain['flows'][0]
+        self.domain['videos'] = [{'key':self.domain['key'], 'title':self.domain['title'],
+                                  'description':self.domain['description'], 'flowIds':[self.flow['id']]}]
+        self.chapter = {'film':'F1','title':'Create a path','prs':[1],'proofs':['Saved'], 'sentences':[
+            {'action':i,'text':text,'line':i} for i,text in enumerate([
+                'Open the path editor.','Enter the path title.','Save the development path.'])]}
+        self.registry = {'domains':[copy.deepcopy(self.domain)],'sharedWatchPaths':[]}
+
+    def patch(self, owner, name, **kwargs):
+        manager = patch.object(owner,name,**kwargs)
+        result = manager.start()
+        self.addCleanup(manager.stop)
+        return result
+
+    def raw(self, flow=None, commit=None, code='en'):
+        flow,commit = flow or self.flow,commit or self.commit
+        source = self.root/'raw'/commit/flow['id']/code
+        source.mkdir(parents=True,exist_ok=True)
+        (source/'take.mp4').write_bytes(b'visual '+commit.encode())
+        (source/'first.jpg').write_bytes(b'review still')
+        (source/'download.pdf').write_bytes(b'%PDF-synthetic')
+        (source/'worker.log').write_text('must never be archived')
+        core.save(source/'capture.json',{'take':str(source/'take.mp4'),'scale':1,'start':0,'end':5,
+            'steps':[{'step':i} for i in range(3)],'actions_text':['0 Open','1 Enter','2 Saved'],
+            'documents':[{'file':str(source/'download.pdf'),'name':'Result.pdf','step':2,'text':'Saved'}]})
+        core.save(source/'actions.json',[{'id':i,'kind':'click','still':'first.jpg','headers':{'private':'never copy'}} for i in range(3)])
+        core.save(source/'page-log.json',{'pages':[{'still':'first.jpg'}],'ignored':'never copy'})
+        checkout = self.root/'checkout'
+        for name in flow['specPaths']:
+            document = checkout/name
+            document.parent.mkdir(parents=True,exist_ok=True)
+            document.write_text('Create and save a path.')
+        return recording.cache_capture(self.cache,self.root/'run',source,{'chapters':[self.chapter]},flow,
+                                       self.domain,commit,'Selleo/mentingo',checkout, code=code,
+                                       scenario={'base': 'apps/web/e2e/specs/demo.spec.ts', 'source': 'test scenario'})
+
+    def test_advisory_findings_survive_raw_capture_cache_and_restore(self):
+        report = {'advisory': True, 'flowId': self.flow['id'], 'status': 'warnings', 'reviews': []}
+        core.save(self.root/'run/review/claim-review.json', report)
+        reference = self.raw()
+        destination = self.root/'restored'
+        manifest, _ = recording.restore_capture(self.cache, reference, destination)
+        self.assertIn('claim-review.json', manifest['files'])
+        self.assertEqual(core.load(destination/'claim-review.json'), report)
+
+    def setup_generator(self):
+        self.patch(self_onboarding_catalog,'load_catalog',return_value=self.registry)
+        self.patch(self_onboarding.core,'addon',return_value={'harness':{}})
+        self.patch(self_onboarding.voice_provider,'elevenlabs_config',return_value={'voice':'same-voice','model_id':'test'})
+        self.patch(recording, 'prepare_demo_checkout')
+        self.setup = self.patch(self_onboarding.harness,'setup')
+        self.patch(self_onboarding.harness,'keep_set')
+        self.patch(self_onboarding.harness,'test_env',return_value={})
+        self.patch(self_onboarding.harness,'checkout',return_value=self.root/'checkout')
+        self.patch(self_onboarding.doctor,'check',return_value={'ok':True})
+        self.patch(self_onboarding.core,'sh',side_effect=lambda *a,**kw:SimpleNamespace(stdout=self.commit))
+        self.patch(self_onboarding.film,'stop')
+        self.camera = self.patch(recording,'capture_flow',side_effect=lambda run,flow,domain,commit,*a:self.raw(flow,commit))
+        def replay(run,flow,domain,code,commit,repo,addon,cache,reference):
+            localized = self.raw(flow, commit, code=code)
+            localized['parentCaptureId'] = reference['id']
+            return localized
+        self.replay = self.patch(recording, 'replay_flow', side_effect=replay)
+        def render(run,flow,domain,code,commit,repo,addon,cache,reference,allow_model=True):
+            folder = Path(cache)/'segments'/code/flow['id']/reference['id']
+            folder.mkdir(parents=True,exist_ok=True)
+            video = folder/'demo.mp4'
+            video.write_bytes((code+reference['id']).encode())
+            return {'path':str(video.relative_to(cache)),'sha256':recording.digest(video),
+                'title':'Utwórz ścieżkę' if code=='pl' else 'Create a path','captureId':reference['id'],'language':code}
+        self.render = self.patch(recording,'render_flow',side_effect=render)
+        def localize(domain,code,previous=None,allow_model=True):
+            if code != 'en' and not allow_model:
+                raise self_onboarding.self_onboarding_model.ModelQuotaError('Text model quota exhausted')
+            result=copy.deepcopy(domain)
+            if code=='pl':
+                result.update(title='Ścieżki rozwoju',description='Twórz i przypisuj ścieżki.')
+            return result,{'language':code,'title':result['title'],'description':result['description']}
+        self.patch(recording,'localize_domain',side_effect=localize)
+        def assemble(domain,code,flows,cache,out,*args):
+            video=Path(out)/'video.mp4'
+            video.parent.mkdir(parents=True,exist_ok=True)
+            video.write_bytes(code.encode())
+            return {'key':domain['key'],'language':code,'video':str(video),'metadata':{'title':domain['title']}}
+        self.assemble = self.patch(recording,'assemble',side_effect=assemble)
+
+    def generate(self,codes=('en','pl'),action='record',name='batch'):
+        domain=copy.deepcopy(self.domain)
+        domain['coverage']={'decision':'complete'}
+        domain['flows']=[dict(f,action=action.get(f['id'],'reuse') if isinstance(action,dict) else action,reason='Verified',evidence=[]) for f in domain['flows']]
+        reports=[{'ok':True,'domains':[domain],'commit':self.commit,'version':'1.2.0','language':code} for code in codes]
+        plan=self.root/(name+'-plan.json')
+        core.save(plan,{'schemaVersion':1,'reports':reports})
+        args=SimpleNamespace(plan=str(plan),run=str(self.root/'run'),cache=str(self.cache),out=str(self.cache/'bundles'/name),
+            repository='Selleo/mentingo',repo=str(self.root),workflow_run_id='123')
+        return self_onboarding.generate(args)
+
+    def published(self):
+        state=core.load(self.cache/'state.json')
+        state.pop('pendingBundle',None)
+        state.pop('pendingSelection',None)
+        for language in state['languages'].values():
+            for domain in language['domains'].values():
+                domain['needsPublication']=False
+                for video in domain.get('videos', {}).values(): video['needsPublication']=False
+        core.save(self.cache/'state.json',state)
+
+    def test_one_agent_scenario_supports_two_native_language_captures(self):
+        self.setup_generator()
+        result=self.generate()
+        self.assertEqual(result['videos'],2)
+        self.camera.assert_called_once()
+        self.setup.assert_called_once()
+        self.assertEqual(core.load(self.root/'run/meta.json')['recordingMode'], 'self-onboarding')
+
+        self.assertEqual([call.args[0]['domainLabel'] for call in self.assemble.call_args_list],
+                         ['Development Paths', 'Ścieżki rozwoju'])
+        self.assertEqual(self.render.call_count,2)
+        references=[call.args[-1]['id'] for call in self.render.call_args_list]
+        self.assertNotEqual(references[0],references[1])
+        self.replay.assert_called_once()
+        self.assertEqual([call.args[3] for call in self.render.call_args_list],['en','pl'])
+        self.assertEqual([d['metadata']['title'] for d in core.load(result['manifest'])['domains']],
+                         ['Development Paths','Ścieżki rozwoju'])
+
+    def test_failed_capture_is_skipped_and_remaining_flows_are_assembled_in_both_languages(self):
+        second = dict(copy.deepcopy(self.flow), id='next-flow')
+        self.domain['flows'].append(second)
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        def capture(run, flow, domain, commit, *args):
+            if flow['id'] == self.flow['id']:
+                raise RuntimeError('Expected Start path, received Continue path')
+            return self.raw(flow, commit)
+        self.camera.side_effect = capture
+        result = self.generate()
+        self.assertEqual(result['videos'], 2)
+        self.assertEqual(len(result['skippedFlows']), 1)
+        manifest = core.load(result['manifest'])
+        self.assertFalse(manifest['complete'])
+        self.assertEqual(manifest['domains'][0]['skippedFlowIds'], [self.flow['id']])
+        for call in self.assemble.call_args_list:
+            self.assertEqual([f['id'] for f in call.args[0]['flows']], ['next-flow'])
+            self.assertEqual(set(call.args[2]), {'next-flow'})
+
+    def test_all_failed_captures_produce_a_summary_without_an_empty_video_or_publication(self):
+        self.setup_generator()
+        self.camera.side_effect = RuntimeError('No passing take')
+        result = self.generate()
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['videos'], 0)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'capture')
+        self.assertNotIn('pendingBundle', core.load(self.cache/'state.json'))
+        self.render.assert_not_called()
+        self.assemble.assert_not_called()
+
+    def test_model_quota_stops_new_workers_but_renders_available_english_captures(self):
+        self.domain['flows'] += [dict(copy.deepcopy(self.flow), id=name) for name in ('second-flow', 'third-flow')]
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        self.setup_generator()
+        def capture(run, flow, domain, commit, *args):
+            if flow['id'] == 'second-flow':
+                raise RuntimeError("You've hit your session limit · resets 5:10pm (UTC)")
+            return self.raw(flow, commit)
+        self.camera.side_effect = capture
+        result = self.generate()
+        self.assertEqual(self.camera.call_count, 2)  # Never launch the third worker.
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(self.render.call_count, 1)
+        self.assertEqual(self.render.call_args.args[3], 'en')
+        self.assertFalse(self.render.call_args.kwargs['allow_model'])
+        manifest = core.load(result['manifest'])
+        self.assertIn('session limit', manifest['textModelQuota'])
+        self.assertEqual(manifest['domains'][0]['language'], 'en')
+        self.assertTrue(any(s['stage'] in ('localization', 'render') and s['language'] == 'pl' for s in result['skippedFlows']))
+
+    def test_metadata_localization_failure_does_not_discard_generated_english_video(self):
+        self.setup_generator()
+        def metadata(domain, code, previous=None, allow_model=True):
+            if code == 'pl':
+                raise RuntimeError('Polish model unavailable')
+            return copy.deepcopy(domain), {'language': code, 'title': domain['title'], 'description': domain['description']}
+        self.patch(recording, 'localize_domain', side_effect=metadata)
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'localization')
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.assertEqual(core.load(result['manifest'])['domains'][0]['language'], 'en')
+
+    def test_quota_error_from_localization_keeps_its_provider_reason(self):
+        self.patch(recording.llm, 'complete', return_value=('', {
+            'provider': 'agent', 'fallback': "You've hit your session limit · resets 5:10pm (UTC)"}))
+        with self.assertRaisesRegex(self_onboarding.self_onboarding_model.ModelQuotaError, 'resets 5:10pm'):
+            recording.localize_domain(self.domain, 'pl')
+
+    def test_known_quota_blocks_uncached_translation_without_calling_model(self):
+        model = self.patch(recording.llm, 'complete')
+        with self.assertRaises(self_onboarding.self_onboarding_model.ModelQuotaError):
+            recording.localize_domain(self.domain, 'pl', allow_model=False)
+        english, _ = recording.localize_domain(self.domain, 'en', allow_model=False)
+        self.assertEqual(english['title'], self.domain['title'])
+        model.assert_not_called()
+
+    def test_known_quota_also_disables_opted_in_advisory_review(self):
+        story, model = self.review_fixture([])
+        report = recording.verify_story(self.root/'run', self.flow, {'language': 'en'}, story, allow_model=False)
+        self.assertEqual(report['status'], 'disabled')
+        model.assert_not_called()
+
+    def test_cached_polish_metadata_can_be_reused_after_quota_exhaustion(self):
+        source = {name: self.domain[name] for name in ('title', 'description')}
+        previous = {'sourceFingerprint': recording.hashlib.sha256(json.dumps(source, sort_keys=True).encode()).hexdigest(),
+                    'language': 'pl', 'title': 'Ścieżki rozwoju', 'description': 'Rozwijaj umiejętności.'}
+        model = self.patch(recording.llm, 'complete')
+        domain, metadata = recording.localize_domain(self.domain, 'pl', previous, allow_model=False)
+        self.assertEqual(domain['title'], previous['title'])
+        self.assertEqual(metadata, previous)
+        model.assert_not_called()
+
+    def test_failed_language_render_does_not_discard_the_other_language(self):
+        self.setup_generator()
+        successful_render = self.render.side_effect
+        def render(*args, **kwargs):
+            if args[3] == 'pl':
+                raise SystemExit('Narration provider failed')
+            return successful_render(*args, **kwargs)
+        self.render.side_effect = render
+        result = self.generate()
+        self.assertEqual(result['videos'], 1)
+        self.assertEqual(result['skippedFlows'][0]['language'], 'pl')
+        self.assertEqual(result['skippedFlows'][0]['stage'], 'render')
+
+    def test_startup_failure_is_not_misreported_as_a_skipped_chapter(self):
+        self.setup_generator()
+        self.setup.side_effect = RuntimeError('Database unavailable')
+        with self.assertRaisesRegex(RuntimeError, 'Database unavailable'):
+            self.generate()
+        self.camera.assert_not_called()
+
+    def test_adding_polish_later_replays_without_an_authoring_agent(self):
+        self.setup_generator()
+        self.generate(codes=('en',))
+        self.published()
+        self.camera.reset_mock(); self.setup.reset_mock(); self.render.reset_mock()
+        self.assertEqual(self.generate(codes=('pl',),action='reuse',name='polish')['videos'],1)
+        self.camera.assert_not_called(); self.setup.assert_called_once(); self.render.assert_called_once()
+
+    def test_semantic_change_records_once_but_internal_refactor_records_nothing(self):
+        self.setup_generator()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.render.reset_mock(); self.assemble.reset_mock()
+        self.commit='b'*40
+        self.assertEqual(self.generate(action='reuse',name='refactor')['videos'],0)
+        self.camera.assert_not_called(); self.render.assert_not_called(); self.assemble.assert_not_called()
+        self.commit='c'*40
+        self.assertEqual(self.generate(name='changed')['videos'],2)
+        self.camera.assert_called_once()
+        self.assertEqual(self.render.call_count,2)
+
+    def test_missing_legacy_raw_capture_requires_explicit_migration(self):
+        self.setup_generator()
+        self.generate(codes=('en',)); self.published()
+        state=core.load(self.cache/'state.json'); state.pop('captures')
+        core.save(self.cache/'state.json',state)
+        self.camera.reset_mock()
+        result = self.generate(codes=('pl',),action='reuse',name='legacy')
+        self.assertEqual(result['videos'], 0)
+        self.assertIn('explicitly force', result['skippedFlows'][0]['reason'])
+        self.camera.assert_not_called()
+
+    def test_analyze_calls_semantic_planner_once_for_both_languages(self):
+        self.setup_generator()
+        self.generate(codes=('en',)); self.published()
+        domain=dict(copy.deepcopy(self.domain),flows=[dict(self.flow,action='reuse')])
+        planned={'ok':True,'domains':[domain],'commit':self.commit,'version':'1.2.0'}
+        analyze=self.patch(self_onboarding_catalog,'plan',return_value=planned)
+        args=SimpleNamespace(cache=str(self.cache),catalog='ignored',repo=str(self.root),target='v1.2.0',
+            domains='',languages='en,pl',force=False,out=str(self.root/'analysis.json'))
+        self.assertEqual(self_onboarding.analyze(args)['record'],0)
+        analyze.assert_called_once()
+        self.assertIn(self.flow['id'],analyze.call_args.args[2]['domains'][self.domain['key']]['flows'])
+        self.assertEqual([r['language'] for r in core.load(args.out)['reports']],['en','pl'])
+
+    def test_raw_snapshot_survives_new_machine_paths_and_checks_all_dependencies(self):
+        reference=self.raw()
+        core.save(self.cache/'state.json',{'schemaVersion':1,'languages':{},'captures':{'domains':{
+            self.domain['key']:{'flows':{self.flow['id']:{'capture':reference}}}}}})
+        files=store.snapshot_files(self.cache)
+        self.assertFalse(any(p.name in ('worker.log','secrets.json') for p in files))
+        self.assertTrue(any(p.suffix=='.pdf' for p in files)); self.assertTrue(any(p.suffix=='.md' for p in files))
+        archive=self.root/'raw.tar'
+        with tarfile.open(archive,'w') as target:
+            for path in files: target.add(path,arcname=str(path.relative_to(self.cache)),recursive=False)
+        restored=self.root/'restored'; store.extract(archive,restored)
+        shutil.rmtree(self.root/'raw')
+        manifest,chapter=recording.restore_capture(restored,reference,self.root/'view')
+        capture=core.load(self.root/'view/capture.json')
+        self.assertEqual(Path(capture['take']).read_bytes(),b'visual '+self.commit.encode())
+        self.assertTrue(Path(capture['documents'][0]['file']).is_file())
+        self.assertTrue((self.root/'view/stills/0.jpg').is_file())
+        self.assertEqual(chapter['sentences'],self.chapter['sentences'])
+        self.assertNotIn(str(self.root/'raw'),json.dumps(manifest))
+        (restored/Path(reference['path']).parent/'take.mp4').write_bytes(b'damaged')
+        with self.assertRaisesRegex(ValueError,'damaged'): store.snapshot_files(restored)
+
+    def test_translation_keeps_verified_pins_proofs_and_complete_sentence_order(self):
+        texts=['Otwórz edytor ścieżki.','Wpisz tytuł ścieżki.','Zapisz ścieżkę rozwoju.']
+        answer={'title':'Utwórz ścieżkę','description':'Utwórz i zapisz ścieżkę.','sentences':[
+            {'action':i,'text':text,'label':text} for i,text in enumerate(texts)]}
+        model=self.patch(recording.llm,'complete',return_value=(json.dumps(answer),{'provider':'cli'}))
+        localized,description=recording.localize_story(self.chapter,'pl','Create and save a path.')
+        self.assertEqual(localized['proofs'],['Saved'])
+        self.assertEqual([s['action'] for s in localized['sentences']],[0,1,2])
+        self.assertEqual([s['label'] for s in localized['sentences']],texts)
+        self.assertEqual(self.chapter['sentences'][0]['text'],'Open the path editor.')
+        answer['sentences'][0]['action']=2; model.return_value=(json.dumps(answer),{'provider':'cli'})
+        with self.assertRaisesRegex(ValueError,'action pin'): recording.localize_story(self.chapter,'pl','Create a path.')
+
+    def test_different_voice_ids_are_rejected_before_camera(self):
+        self.setup_generator()
+        self.patch(self_onboarding.voice_provider,'elevenlabs_config',side_effect=lambda addon,code:{'voice':code})
+        before={name:os.environ.get(name) for name in ('RELEASE_FILM_RUN','RELEASE_FILM_VOICE')}
+        with self.assertRaisesRegex(ValueError,'same ElevenLabs voice'): self.generate()
+        self.assertEqual({name:os.environ.get(name) for name in before},before)
+        self.camera.assert_not_called(); self.render.assert_not_called()
+
+    def test_model_profile_change_rerenders_languages_without_camera(self):
+        self.setup_generator()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.setup.reset_mock(); self.render.reset_mock()
+        self.patch(self_onboarding.voice_provider,'elevenlabs_config',return_value={'voice':'same-voice','model_id':'new-model'})
+        self.assertEqual(self.generate(action='reuse',name='new-model')['videos'],2)
+        self.camera.assert_not_called(); self.setup.assert_not_called()
+        self.assertEqual(self.render.call_count,2)
+
+    def test_brand_change_rerenders_retained_captures_without_recording_again(self):
+        self.setup_generator()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.patch(self_onboarding.core, 'addon', return_value={'harness': {}, 'brand': {
+            'colors': {'frame': '#222949', 'accent': '#3f58b6'}}})
+        self.assertEqual(self.generate(action='reuse', name='branded')['videos'], 2)
+        self.camera.assert_not_called()
+        self.assertEqual(self.render.call_count, 2)
+
+    def setup_voice_pool(self):
+        provider = self_onboarding.voice_provider.elevenlabs_config
+        self.setup_generator()
+        self.patch(self_onboarding.voice_provider, 'elevenlabs_config', side_effect=provider)
+        environment = patch.dict(os.environ, dict(zip(narrators.VOICE_VARIABLES,
+            ('female-one', 'female-two', 'male-one', 'male-two'))))
+        environment.start(); self.addCleanup(environment.stop)
+        return self.patch(narrators.secrets, 'choice', return_value='female-two')
+
+    def test_random_narrator_is_shared_by_chapters_languages_and_future_versions(self):
+        self.domain['flows'].append(dict(copy.deepcopy(self.flow), id='second-flow'))
+        self.domain['videos'][0]['flowIds'] = [f['id'] for f in self.domain['flows']]
+        self.registry['domains'] = [copy.deepcopy(self.domain)]
+        choose = self.setup_voice_pool()
+        rendered_voices = []
+        render = self.render.side_effect
+        def observe(*args, **kwargs):
+            rendered_voices.append(os.environ['ELEVENLABS_VOICE_ID'])
+            return render(*args, **kwargs)
+        self.render.side_effect = observe
+        before = os.environ.get('ELEVENLABS_VOICE_ID')
+        self.generate(); self.published()
+        self.assertEqual(rendered_voices, ['female-two'] * 4)
+        choose.assert_called_once_with(('female-one', 'female-two', 'male-one', 'male-two'))
+        state = core.load(self.cache/'state.json')
+        self.assertEqual(state['captures']['domains'][self.domain['key']]['voiceId'], 'female-two')
+        self.assertEqual(os.environ.get('ELEVENLABS_VOICE_ID'), before)
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.commit = 'b' * 40
+        self.assertEqual(self.generate(action='reuse', name='refactor')['videos'], 0)
+        self.camera.assert_not_called(); self.render.assert_not_called(); choose.assert_called_once()
+        self.commit = 'c' * 40
+        self.generate(name='updated')
+        self.assertEqual(rendered_voices, ['female-two'] * 8)
+        choose.assert_called_once()
+
+    def test_later_language_keeps_saved_random_voice(self):
+        choose = self.setup_voice_pool()
+        self.generate(codes=('en',)); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        self.generate(codes=('pl',), action='reuse', name='polish')
+        choose.assert_called_once(); self.camera.assert_not_called(); self.render.assert_called_once()
+        state = core.load(self.cache/'state.json')
+        english = state['languages']['en']['domains'][self.domain['key']]['flows'][self.flow['id']]
+        polish = state['languages']['pl']['domains'][self.domain['key']]['flows'][self.flow['id']]
+        self.assertEqual(english['voiceProfile'], polish['voiceProfile'])
+
+    def test_failed_render_retains_narrator_and_restores_environment_on_retry(self):
+        choose = self.setup_voice_pool()
+        before = os.environ.get('ELEVENLABS_VOICE_ID')
+        render = self.render.side_effect
+        self.render.side_effect = RuntimeError('Synthetic render failure')
+        result = self.generate()
+        self.assertEqual(result['videos'], 0)
+        self.assertEqual(len(result['skippedFlows']), 2)
+        self.assertEqual(os.environ.get('ELEVENLABS_VOICE_ID'), before)
+        self.render.side_effect = render
+        self.camera.reset_mock()
+        self.generate()
+        choose.assert_called_once(); self.camera.assert_not_called()
+
+    def test_removed_narrator_revoices_all_languages_without_new_camera_capture(self):
+        choose = self.setup_voice_pool()
+        self.generate(); self.published()
+        self.camera.reset_mock(); self.render.reset_mock()
+        os.environ['ELEVENLABS_VOICE_ID_FEMALE_2'] = 'new-female-two'
+        choose.return_value = 'male-one'
+        self.generate(action='reuse', name='new-narrator')
+        self.camera.assert_not_called(); self.assertEqual(self.render.call_count, 2)
+        self.assertEqual(choose.call_count, 2)
+        state = core.load(self.cache/'state.json')
+        self.assertEqual(state['captures']['domains'][self.domain['key']]['voiceId'], 'male-one')
+
+    def test_partial_or_duplicate_pool_fails_before_camera_or_narration(self):
+        self.setup_voice_pool()
+        os.environ['ELEVENLABS_VOICE_ID_MALE_2'] = ''
+        with self.assertRaisesRegex(ValueError, 'all four narrator'): self.generate()
+        os.environ['ELEVENLABS_VOICE_ID_MALE_2'] = 'male-one'
+        with self.assertRaisesRegex(ValueError, 'four distinct'): self.generate()
+        self.camera.assert_not_called(); self.render.assert_not_called()
+
+    def test_localized_render_uses_own_labels_captions_and_measured_duration(self):
+        reference=self.raw()
+        texts=['Otwórz edytor ścieżki.','Wpisz tytuł ścieżki.','Zapisz ścieżkę rozwoju.']
+        def translate(prompt,system,**kwargs):
+            payload=json.loads(prompt)
+            polish=payload['language']=='Polish'
+            sentences=[{'action':s['action'],'text':texts[i] if polish else s['text'],
+                        'label':texts[i] if polish else s['text']} for i,s in enumerate(payload['sentences'])]
+            return json.dumps({'title':'Utwórz ścieżkę' if polish else payload['title'],
+                'description':'Utwórz i zapisz ścieżkę.' if polish else payload['description'],
+                'sentences':sentences}),{'provider':'cli'}
+        self.patch(recording.llm,'complete',side_effect=translate)
+        self.patch(recording.editor,'chapter_problems',return_value=[])
+        verified=self.patch(recording,'verify_story',return_value={})
+        def narrate(run,story,addon,root=None):
+            folder=Path(root)/'c1'; folder.mkdir(parents=True,exist_ok=True)
+            text=' '.join(s['text'] for s in story['chapters'][0]['sentences'])
+            (folder/'audio.mp3').write_bytes(text.encode())
+            (folder/'subtitles.srt').write_text('1\n00:00:00,100 --> 00:00:01,000\n'+text+'\n\n')
+        narration=self.patch(recording.cut,'narrate',side_effect=narrate)
+        entries=[]
+        def chapter_cut(ffmpeg,chapter,folder,voice,sources,**kwargs):
+            entry={'title':chapter['title'], 'audio': str(Path(voice)/'audio.mp3'), 'srt': str(Path(voice)/'subtitles.srt'), 'steps':[[i,s['label']] for i,s in enumerate(chapter['sentences'])]}
+            entries.append((sources['language'],copy.deepcopy(entry)))
+            return entry,{}
+        self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
+        self.patch(recording.cut,'film_font',return_value=('unused-font','Test',None))
+        prepared = self.patch(recording.render_demo,'prepare')
+        run=self.root/'render-run'
+        self.patch(recording.render_demo,'load_plan',side_effect=lambda *args,**kwargs:{'language':core.load(run/'sources.json')['language']})
+        def render(plan,out):
+            out=Path(out); out.mkdir(parents=True,exist_ok=True)
+            code=plan['language']; text=' '.join(texts) if code=='pl' else ' '.join(s['text'] for s in self.chapter['sentences'])
+            (out/'demo.mp4').write_bytes(code.encode())
+            for ext in ('srt','vtt'): (out/f'captions-{code}.{ext}').write_text(text)
+            (out/'poster.jpg').write_bytes(b'image'); core.save(out/'timeline.json',{'duration':8 if code=='pl' else 6})
+        self.patch(recording.render_demo,'render',side_effect=render)
+        self.patch(recording.render_demo,'probe',side_effect=lambda path:{'format':{'duration':8 if Path(path).read_bytes()==b'pl' else 6}})
+        brand = {'brand': {'colors': {'accent': '#3f58b6', 'frame': '#222949'}}}
+        english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',brand,self.cache,reference)
+        authored = core.load(prepared.call_args.args[0])
+        self.assertEqual(authored['colors'], brand['brand']['colors'])
+        polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,self.raw(code='pl'))
+        self.assertEqual((english['duration'],polish['duration']),(6,8))
+        self.assertNotEqual(polish['captureId'],english['captureId'])
+        self.assertEqual(verified.call_count,2); self.assertEqual(narration.call_count,2)
+        self.assertEqual(entries[1][1]['steps'][0][1],texts[0])
+        self.assertIn(texts[0],(self.cache/polish['captions']).read_text())
+        self.assertNotIn(texts[0],(self.cache/english['captions']).read_text())
+
+
+if __name__=='__main__': unittest.main()

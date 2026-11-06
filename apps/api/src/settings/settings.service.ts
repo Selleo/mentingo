@@ -10,17 +10,18 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  AUTH_ERROR_KEYS,
   COURSE_STATUSES,
   DASHBOARD_DEFAULT_LAYOUTS,
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_CATALOG,
   ENTITY_TYPES,
+  FEATURE_SETTINGS_KEYS,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
-  FEATURE_SETTINGS_KEYS,
 } from "@repo/shared";
 import { and, asc, count, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -73,6 +74,7 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "./constants/settings.constants";
+import { updateSettingsBodySchema } from "./schemas/update-settings.schema";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type { PwaManifest } from "./schemas/pwa-manifest.schema";
@@ -233,7 +235,22 @@ export class SettingsService {
       throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  public async getImageS3KeysByTenantId(tenantId: UUIDType): Promise<SettingsImageS3Keys> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
+
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  private toImageS3Keys(settings: GlobalSettingsJSONContentSchema): SettingsImageS3Keys {
+    const parsedSettings = this.parseGlobalSettings(settings);
 
     return {
       platformLogoS3Key: parsedSettings.platformLogoS3Key ?? null,
@@ -998,6 +1015,12 @@ export class SettingsService {
       throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
+    const allowedKeys = Object.keys(updateSettingsBodySchema.properties);
+
+    if (Object.keys(updatedSettings).some((key) => !allowedKeys.includes(key))) {
+      throw new BadRequestException(AUTH_ERROR_KEYS.INVALID_SETTINGS_UPDATE);
+    }
+
     const mergedSettings = {
       ...currentSettings,
       ...updatedSettings,
@@ -1195,6 +1218,33 @@ export class SettingsService {
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
 
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalPublicCoursePreviewEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(
+          ${settings.settings},
+          '{publicCoursePreviewEnabled}',
+          to_jsonb(NOT COALESCE((${settings.settings}->>'publicCoursePreviewEnabled')::boolean, false)),
+          true
+        )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+    const updatedRecord = await this.getGlobalSettingsRecord();
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
@@ -2246,6 +2296,28 @@ export class SettingsService {
     });
   }
 
+  async streamLoginPageFile(id: UUIDType, req: Request, res: Response): Promise<void> {
+    const { resourceIds } = await this.getExistingLoginPageResourceIds();
+    if (!resourceIds.includes(id))
+      throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const [resource] = await this.db
+      .select({ reference: resources.reference })
+      .from(resources)
+      .where(eq(resources.id, id));
+
+    if (!resource) throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const file = await this.fileService.getFileDelivery(resource.reference, req.headers.range);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      res.redirect(file.url);
+      return;
+    }
+
+    streamFileToResponse(res, file);
+  }
+
   async getLoginPageFiles(): Promise<LoginPageResourceResponseBody> {
     const existingResourceIds = await this.getExistingLoginPageResourceIds();
 
@@ -2365,6 +2437,8 @@ export class SettingsService {
     Reflect.deleteProperty(publicSettings, "userEmailTriggers");
     return {
       ...publicSettings,
+      publicCoursePreviewEnabled:
+        settings.publicCoursePreviewEnabled ?? DEFAULT_GLOBAL_SETTINGS.publicCoursePreviewEnabled,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:

@@ -382,6 +382,22 @@ export interface ResetPasswordBody {
   resetToken: string;
 }
 
+export interface SessionResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
+export interface MfaChallengeResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
 export interface MFASetupResponse {
   data: {
     secret: string;
@@ -390,6 +406,11 @@ export interface MFASetupResponse {
 }
 
 export interface MFAVerifyBody {
+  /**
+   * @minLength 6
+   * @maxLength 6
+   * @pattern ^[0-9]{6}$
+   */
   token: string;
 }
 
@@ -442,6 +463,7 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -521,35 +543,23 @@ export interface GetUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
 }
 
-export type UpdateUserSettingsBody =
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-    }
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-      adminNewUserNotification?: boolean;
-      adminFinishedCourseNotification?: boolean;
-      configWarningDismissed?: boolean;
-    };
+export interface UpdateUserSettingsBody {
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  adminNewUserNotification?: boolean;
+  adminFinishedCourseNotification?: boolean;
+  configWarningDismissed?: boolean;
+}
 
 export interface UpdateUserSettingsResponse {
   data:
@@ -557,13 +567,11 @@ export interface UpdateUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -719,7 +727,6 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -730,6 +737,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -772,6 +780,7 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -814,6 +823,50 @@ export interface UpdateModernCourseListEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdatePublicCoursePreviewEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -860,6 +913,7 @@ export interface UpdateFeaturedCourseResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -902,6 +956,7 @@ export interface UpdateCourseDiscussionsEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -944,6 +999,7 @@ export interface UpdateCalendarEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -986,6 +1042,7 @@ export interface UpdateLiveTrainingEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1033,6 +1090,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1075,6 +1133,7 @@ export interface UpdateLearningPathsEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1118,7 +1177,6 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1130,7 +1188,6 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1148,6 +1205,7 @@ export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     calendarEnabled: boolean;
@@ -1348,7 +1406,6 @@ export interface UpdateConfigWarningDismissedResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1604,7 +1661,9 @@ export interface GetUserDetailsResponse {
 }
 
 export interface UpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -1645,7 +1704,9 @@ export interface UpsertUserDetailsResponse {
 }
 
 export interface AdminUpdateUserBody {
+  /** @maxLength 64 */
   firstName?: string;
+  /** @maxLength 64 */
   lastName?: string;
   groups?: string[] | null;
   managedGroupIds?: string[];
@@ -2577,6 +2638,7 @@ export interface HasMissingTranslationsResponse {
 }
 
 export type CreateCourseBody = {
+  /** @maxLength 255 */
   title: string;
   description: string;
   status?: "draft" | "published" | "private";
@@ -2683,6 +2745,7 @@ export interface UpdateCourseMediaResponse {
 }
 
 export interface UpdateCourseBody {
+  /** @maxLength 255 */
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
@@ -8658,6 +8721,7 @@ export interface GetLoginMethodsResponse {
     google: boolean;
     microsoft: boolean;
     slack: boolean;
+    entraId: boolean;
     magicLink: boolean;
     password: boolean;
   };
@@ -8669,6 +8733,7 @@ export interface GetLoginMethodSetupResponse {
       google: boolean;
       microsoft: boolean;
       slack: boolean;
+      entraId: boolean;
       magicLink: boolean;
       password: boolean;
     };
@@ -8676,12 +8741,13 @@ export interface GetLoginMethodSetupResponse {
       google: string[];
       microsoft: string[];
       slack: string[];
+      entraId: string[];
     };
   };
 }
 
 export interface UpdateLoginMethodBody {
-  method: "google" | "microsoft" | "slack" | "magicLink" | "password";
+  method: "google" | "microsoft" | "entraId" | "slack" | "magicLink" | "password";
   enabled: boolean;
 }
 
@@ -8691,6 +8757,7 @@ export interface UpdateLoginMethodResponse {
       google: boolean;
       microsoft: boolean;
       slack: boolean;
+      entraId: boolean;
       magicLink: boolean;
       password: boolean;
     };
@@ -8698,6 +8765,7 @@ export interface UpdateLoginMethodResponse {
       google: string[];
       microsoft: string[];
       slack: string[];
+      entraId: string[];
     };
   };
 }
@@ -8712,6 +8780,7 @@ export interface GetFrontendSSOEnabledResponse {
     google?: string;
     microsoft?: string;
     slack?: string;
+    entraId?: string;
   };
 }
 
@@ -8960,6 +9029,176 @@ export interface UpdatePromotionCodeResponse {
     };
     timesRedeemed: number;
   };
+}
+
+export interface HelpdeskSearchRequest {
+  /**
+   * @maxLength 500
+   * @pattern ^[^\u0000]*$
+   */
+  query: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** Keyword uses FTS only; hybrid combines semantic and keyword retrieval. */
+  mode?: "keyword" | "hybrid";
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  pageKey?: string;
+  /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+  domain?: string;
+  /**
+   * @min 1
+   * @max 10
+   */
+  limit?: number;
+}
+
+export interface HelpdeskSearchResponse {
+  data: {
+    mode: "keyword" | "hybrid" | "keyword_fallback" | "browse";
+    /** @maxItems 10 */
+    results: {
+      tutorial: {
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        key: string;
+        /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+        revisionId: string;
+        /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+        domain: string;
+        domainLabel?: string | null;
+        /**
+         * @minLength 1
+         * @maxLength 200
+         */
+        title: string;
+        /**
+         * @minLength 1
+         * @maxLength 8000
+         */
+        description: string;
+        /**
+         * @minLength 2
+         * @maxLength 35
+         * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+         */
+        language: string;
+        languageFallback: boolean;
+        /**
+         * @min 1
+         * @max 86400000
+         */
+        durationMs: number;
+        /** @maxLength 2048 */
+        videoUrl: string;
+        /** @maxLength 2048 */
+        posterUrl: string;
+        /**
+         * @maxItems 100
+         * @minItems 1
+         */
+        chapters: {
+          /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+          id: string;
+          /**
+           * @minLength 1
+           * @maxLength 200
+           */
+          title: string;
+          /**
+           * @minLength 1
+           * @maxLength 4000
+           */
+          description: string;
+          /** @min 0 */
+          startMs: number;
+          /** @min 0 */
+          endMs: number;
+        }[];
+        /** @maxItems 64 */
+        pageKeys: string[];
+      };
+      chapterId?: string | null;
+      /** @maxLength 10000 */
+      excerpt: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+      rankScore: number;
+    }[];
+  };
+}
+
+export interface HelpdeskTutorialResponse {
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */
+    revisionId: string;
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    domain: string;
+    domainLabel?: string | null;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 8000
+     */
+    description: string;
+    /**
+     * @minLength 2
+     * @maxLength 35
+     * @pattern ^[a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{1,8})*$
+     */
+    language: string;
+    languageFallback: boolean;
+    /**
+     * @min 1
+     * @max 86400000
+     */
+    durationMs: number;
+    /** @maxLength 2048 */
+    videoUrl: string;
+    /** @maxLength 2048 */
+    posterUrl: string;
+    /**
+     * @maxItems 100
+     * @minItems 1
+     */
+    chapters: {
+      /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+      id: string;
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      title: string;
+      /**
+       * @minLength 1
+       * @maxLength 4000
+       */
+      description: string;
+      /** @min 0 */
+      startMs: number;
+      /** @min 0 */
+      endMs: number;
+    }[];
+    /** @maxItems 64 */
+    pageKeys: string[];
+  };
+}
+
+export interface HelpdeskDomainsResponse {
+  data: {
+    /** @pattern ^[a-z0-9][a-z0-9._-]{0,127}$ */
+    key: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    label: string;
+  }[];
 }
 
 export interface ListEmailTemplateEventsResponse {
@@ -29960,7 +30199,7 @@ export interface DeleteManyCategoriesResponse {
 export interface InitTusImportBody {
   /**
    * @min 1
-   * @max 524288000
+   * @max 838860800
    */
   sizeBytes: number;
 }
@@ -30012,6 +30251,29 @@ export interface GetNativeArchiveStatusResponse {
       reusedCourseIds?: string[];
     };
     failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetNativeArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -31677,7 +31939,8 @@ export interface ListMessagesResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31739,7 +32002,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -31768,7 +32032,8 @@ export interface SendMessageResponse {
           | "news"
           | "qa"
           | "development_path"
-          | "resource";
+          | "resource"
+          | "helpdesk";
         /** @maxLength 300 */
         description?: string;
       }[];
@@ -32624,6 +32889,21 @@ export interface LaunchScormAttemptResponse {
   };
 }
 
+export interface RenewScormContentBody {
+  /**
+   * @minLength 64
+   * @maxLength 64
+   * @pattern ^[a-f0-9]{64}$
+   */
+  token: string;
+}
+
+export interface RenewScormContentResponse {
+  data: {
+    renewed: boolean;
+  };
+}
+
 export interface CommitScormAttemptBody {
   /** @format uuid */
   attemptId: string;
@@ -32856,6 +33136,9 @@ export interface UpdateTenantApiKeysBody {
     | "VITE_STRIPE_PUBLISHABLE_KEY"
     | "SLACK_CLIENT_ID"
     | "SLACK_CLIENT_SECRET"
+    | "ENTRA_ID_CLIENT_ID"
+    | "ENTRA_ID_CLIENT_SECRET"
+    | "ENTRA_ID_DIRECTORY_ID"
     | "LUMA_API_KEY"
     | "LIVEKIT_URL"
     | "LIVEKIT_API_KEY"
@@ -32894,6 +33177,9 @@ export interface UpdateTenantApiKeysResponse {
       | "VITE_STRIPE_PUBLISHABLE_KEY"
       | "SLACK_CLIENT_ID"
       | "SLACK_CLIENT_SECRET"
+      | "ENTRA_ID_CLIENT_ID"
+      | "ENTRA_ID_CLIENT_SECRET"
+      | "ENTRA_ID_DIRECTORY_ID"
       | "LUMA_API_KEY"
       | "LIVEKIT_URL"
       | "LIVEKIT_API_KEY"
@@ -33099,6 +33385,29 @@ export interface GetCourseArchiveExportStatusResponse {
       reusedCourseIds?: string[];
     };
     failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetCourseArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -37350,6 +37659,60 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AuthControllerEntraIdAuth
+     * @request GET:/api/auth/entra-id
+     */
+    authControllerEntraIdAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/entra-id`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerEntraIdAuthCallback
+     * @request GET:/api/auth/entra-id/callback
+     */
+    authControllerEntraIdAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/entra-id/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSession
+     * @request GET:/api/auth/session
+     */
+    authControllerSession: (params: RequestParams = {}) =>
+      this.request<SessionResponse, any>({
+        path: `/api/auth/session`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaChallenge
+     * @request POST:/api/auth/mfa/challenge
+     */
+    authControllerMfaChallenge: (params: RequestParams = {}) =>
+      this.request<MfaChallengeResponse, any>({
+        path: `/api/auth/mfa/challenge`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AuthControllerMfaSetup
      * @request POST:/api/auth/mfa/setup
      */
@@ -37598,6 +37961,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
       this.request<UpdateModernCourseListEnabledResponse, any>({
         path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePublicCoursePreviewEnabled
+     * @request PATCH:/api/settings/admin/public-course-preview
+     */
+    settingsControllerUpdatePublicCoursePreviewEnabled: (params: RequestParams = {}) =>
+      this.request<UpdatePublicCoursePreviewEnabledResponse, any>({
+        path: `/api/settings/admin/public-course-preview`,
         method: "PATCH",
         format: "json",
         ...params,
@@ -38155,6 +38532,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/settings/login-page-files`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerStreamLoginPageFile
+     * @request GET:/api/settings/login-page-files/{id}/content
+     */
+    settingsControllerStreamLoginPageFile: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-page-files/${id}/content`,
+        method: "GET",
         ...params,
       }),
 
@@ -41377,8 +41767,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -41397,8 +41789,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -42727,6 +43121,66 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags Helpdesk
+     * @name SearchHelpdesk
+     * @request POST:/api/helpdesk/search
+     */
+    searchHelpdesk: (data: HelpdeskSearchRequest, params: RequestParams = {}) =>
+      this.request<HelpdeskSearchResponse, any>({
+        path: `/api/helpdesk/search`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskTutorial
+     * @request GET:/api/helpdesk/tutorials/{key}
+     */
+    getHelpdeskTutorial: (
+      key: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HelpdeskTutorialResponse, any>({
+        path: `/api/helpdesk/tutorials/${key}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Helpdesk
+     * @name GetHelpdeskDomains
+     * @request GET:/api/helpdesk/domains
+     */
+    getHelpdeskDomains: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HelpdeskDomainsResponse, any>({
+        path: `/api/helpdesk/domains`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EmailTemplateManagementControllerListEmailTemplateEvents
      * @request GET:/api/email-templates/events
      */
@@ -43959,6 +44413,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
+     * @request GET:/api/native-archives/jobs/{id}/download-url
+     */
+    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveDownloadUrlResponse, any>({
+        path: `/api/native-archives/jobs/${id}/download-url`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name NativeArchiveControllerDownloadNativeArchive
      * @request GET:/api/native-archives/jobs/{id}/download
      */
@@ -44545,8 +45013,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -44565,8 +45035,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
-        certificateId: string;
-        lang: string;
+        /** @format uuid */
+        token: string;
+        /** @default "en" */
+        lang?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -45897,6 +46369,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ScormControllerRenewScormContent
+     * @request POST:/api/scorm/runtime/content/renew
+     */
+    scormControllerRenewScormContent: (data: RenewScormContentBody, params: RequestParams = {}) =>
+      this.request<RenewScormContentResponse, any>({
+        path: `/api/scorm/runtime/content/renew`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerCommitScormAttempt
      * @request POST:/api/scorm/runtime/commit
      */
@@ -46527,6 +47015,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, void>({
         path: `/api/integration/native-archive/jobs/${jobId}/download`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description Returns a short-lived storage URL for the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. Fetch the URL without API headers; the download itself does not pass through the API. The URL must be used before it expires; ask for a new one if it does.
+     *
+     * @tags Integration
+     * @name IntegrationNativeArchiveControllerGetCourseArchiveDownloadUrl
+     * @summary Get a download URL for a native archive
+     * @request GET:/api/integration/native-archive/jobs/{jobId}/download-url
+     */
+    integrationNativeArchiveControllerGetCourseArchiveDownloadUrl: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseArchiveDownloadUrlResponse, void>({
+        path: `/api/integration/native-archive/jobs/${jobId}/download-url`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

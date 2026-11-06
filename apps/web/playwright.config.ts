@@ -95,7 +95,10 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
+      command:
+        process.env.SELF_ONBOARDING_DEMO === "1"
+          ? "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed && pnpm run start"
+          : "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
       timeout: 240 * 1000,
       reuseExistingServer: false,
@@ -106,6 +109,7 @@ if (process.env.CI) {
         REDIS_URL: "redis://localhost:6380",
         MODE: "test",
         E2E: "true",
+        SCORM_CONTENT_ORIGIN: "https://scorm.localhost:5443",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
         CORS_ORIGIN: process.env.CORS_ORIGIN || "https://localhost:5173",

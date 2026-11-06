@@ -21,6 +21,7 @@ import {
 } from "src/global-search/semantic-search-index.chunking";
 import { SemanticSearchEmbeddingService } from "src/global-search/semantic-search-index.embedding.service";
 import { SemanticSearchIndexRepository } from "src/global-search/semantic-search-index.repository";
+import { SessionRevocationService } from "src/redis";
 import { DB } from "src/storage/db/db.providers";
 import {
   users,
@@ -50,6 +51,7 @@ import { createQAFactory } from "../../../test/factory/qa.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
+import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-self-onboarding.constants";
 import { McpTokenService } from "../mcp-token.service";
 import { MCP_SCOPES } from "../mcp-tool-scope";
 
@@ -142,9 +144,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     host: string,
     scopes: string[] = [MCP_SCOPES.ACCOUNT_ACCESS],
   ): Promise<Client> {
+    const sessionVersion = await app
+      .get(SessionRevocationService)
+      .getOrCreateUserSessionVersion(user.id);
     const token = await app.get(McpTokenService).issue({
       userId: user.id,
       tenantId: user.tenantId,
+      sessionVersion,
       clientId: "mcp-http-e2e",
       resource: `http://${host}/api/mcp`,
       scopes,
@@ -379,13 +385,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
   });
 
   it.each([MCP_SCOPES.SEARCH, MCP_SCOPES.SEARCH_READ])(
-    "restricts an administrator's %s token to global search at discovery and invocation",
+    "restricts an administrator's %s token to global search and public guidance",
     async (scope) => {
       const search = await issueClient(admin.user, admin.host, [scope]);
       const tools = (await rpc(search, "tools/list")).result.tools.map(
         (tool: ToolResult) => tool.name,
       );
-      expect(tools).toEqual(["global_search"]);
+      expect(tools).toEqual([...Object.values(MCP_HELPDESK_TOOL_NAMES), "global_search"]);
       // Explicit calls cannot regain the administrator's broader account permissions.
       await rejectedCall("create_course", { title: "Forbidden search scope course" }, search);
       await rejectedCall("list_users", {}, search);
@@ -453,6 +459,7 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     );
     expect(tools.sort()).toEqual(
       [
+        ...Object.values(MCP_HELPDESK_TOOL_NAMES),
         "global_search",
         "list_courses",
         "get_course",
@@ -1121,7 +1128,8 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     const tools = (await rpc(search, "tools/list")).result.tools.map(
       (tool: ToolResult) => tool.name,
     );
-    expect(tools).toEqual([]);
+    // Public product guidance remains available; tenant-content search is revoked.
+    expect(tools).toEqual(Object.values(MCP_HELPDESK_TOOL_NAMES));
     await rejectedCall("global_search", { searchQuery: "MCP", language: "en" }, search);
   });
 

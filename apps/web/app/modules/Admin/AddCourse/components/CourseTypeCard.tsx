@@ -1,7 +1,6 @@
 import { Link } from "@remix-run/react";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 
 import type { LucideIcon } from "lucide-react";
@@ -9,7 +8,6 @@ import type { LucideIcon } from "lucide-react";
 type CourseTypeCardProps = {
   title: string;
   description: string;
-  features: string[];
   href: string;
   icon: LucideIcon;
   accent: "standard" | "scorm" | "mentingoPackage";
@@ -18,26 +16,23 @@ type CourseTypeCardProps = {
 
 const accentClassNames = {
   standard: {
-    icon: "border-primary-100 bg-primary-50 text-primary-800 group-hover:border-primary-200",
-    card: "hover:border-primary-300 hover:bg-primary-50/40",
-    arrow: "text-primary-800",
+    row: "hover:border-primary-500",
+    icon: "bg-primary-50 text-primary-800",
   },
   scorm: {
-    icon: "border-emerald-100 bg-emerald-50 text-emerald-700 group-hover:border-emerald-200",
-    card: "hover:border-emerald-300 hover:bg-emerald-50/40",
-    arrow: "text-emerald-700",
+    row: "hover:border-emerald-500",
+    icon: "bg-emerald-50 text-emerald-700",
   },
   mentingoPackage: {
-    icon: "border-sky-100 bg-sky-50 text-sky-700 group-hover:border-sky-200",
-    card: "hover:border-sky-300 hover:bg-sky-50/40",
-    arrow: "text-sky-700",
+    row: "hover:border-sky-500",
+    icon: "bg-sky-50 text-sky-700",
   },
 } as const;
 
+/** One way to create a course, shown as a selectable row in the course creation flow. */
 export const CourseTypeCard = ({
   title,
   description,
-  features,
   href,
   icon: Icon,
   accent,
@@ -46,44 +41,27 @@ export const CourseTypeCard = ({
   const classes = accentClassNames[accent];
 
   return (
-    <Link to={href} data-testid={testId} className="group block h-full focus:outline-none">
-      <Card
-        className={cn(
-          "flex h-full min-h-[340px] flex-col border-neutral-200 bg-white shadow-none transition-colors duration-200 focus-within:ring-2 focus-within:ring-primary-800 group-focus-visible:ring-2 group-focus-visible:ring-primary-800",
-          classes.card,
-        )}
+    <Link
+      to={href}
+      data-testid={testId}
+      className={cn(
+        "group flex items-center gap-4 rounded-lg border border-neutral-200 bg-white p-5 transition-colors duration-200 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-800 focus-visible:ring-offset-2",
+        classes.row,
+      )}
+    >
+      <div
+        className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", classes.icon)}
       >
-        <CardHeader className="gap-5 p-8 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div
-              className={cn(
-                "flex size-14 items-center justify-center rounded-lg border",
-                classes.icon,
-              )}
-            >
-              <Icon className="size-7" aria-hidden="true" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <CardTitle className="h4 text-neutral-950">{title}</CardTitle>
-            <p className="body-base text-neutral-700">{description}</p>
-          </div>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-between gap-8 p-8 pt-2">
-          <ul className="grid gap-3">
-            {features.map((feature) => (
-              <li key={feature} className="flex items-start gap-3 text-sm text-neutral-800">
-                <span className={cn("mt-2 size-1.5 rounded-full", classes.arrow)} />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-          <div className={cn("flex items-center gap-2 body-base-md", classes.arrow)}>
-            <span>{title}</span>
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </div>
-        </CardContent>
-      </Card>
+        <Icon className="size-6" aria-hidden="true" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h2 className="body-base-md text-neutral-950">{title}</h2>
+        <p className="body-sm mt-1 text-neutral-700">{description}</p>
+      </div>
+      <ChevronRight
+        className="size-5 shrink-0 text-neutral-400 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-neutral-950"
+        aria-hidden="true"
+      />
     </Link>
   );
 };

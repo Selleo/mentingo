@@ -1,3 +1,4 @@
+import { MAX_SCORM_PACKAGE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { z } from "zod";
 
 export const courseFormSchema = z.object({
@@ -6,8 +7,8 @@ export const courseFormSchema = z.object({
       .custom<File>()
       .refine((file) => file instanceof File, "File is required")
       .refine(
-        (file) => file instanceof File && file.size <= 500 * 1024 * 1024,
-        "File size must be less than 500MB",
+        (file) => file instanceof File && file.size <= MAX_SCORM_PACKAGE_SIZE_BYTES,
+        `File size must be less than ${formatFileSize(MAX_SCORM_PACKAGE_SIZE_BYTES)}`,
       )
       .refine(
         (file) => file instanceof File && file.name.endsWith(".zip"),

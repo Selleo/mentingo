@@ -19,6 +19,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import {
+  nativeArchiveDownloadUrlResponseSchema,
   nativeArchiveJobResponseSchema,
   nativeArchiveStatusResponseSchema,
 } from "src/native-archive/schemas/native-archive.schema";
@@ -117,12 +118,38 @@ export class IntegrationNativeArchiveController {
     @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
     @Res() response: Response,
   ) {
-    const file = await this.integrationCourseExportService.getCourseArchiveStream(
+    const download = await this.integrationCourseExportService.getCourseArchiveStream(
       jobId,
       actor,
       keyTenant,
     );
 
-    streamNativeArchiveDownload(file, response);
+    streamNativeArchiveDownload(download, response);
+  }
+
+  @Get("native-archive/jobs/:jobId/download-url")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @ApiEndpointDocs({
+    summary: "Get a download URL for a native archive",
+    description:
+      "Returns a short-lived storage URL for the zip of a completed native archive export started with this integration key in the tenant selected by X-Tenant-Id. Fetch the URL without API headers; the download itself does not pass through the API. The URL must be used before it expires; ask for a new one if it does.",
+    headers: [API_HEADERS.X_TENANT_ID],
+  })
+  @Validate({
+    request: [{ type: "param", name: "jobId", schema: Type.String(), required: true }],
+    response: baseResponse(nativeArchiveDownloadUrlResponseSchema),
+  })
+  async getCourseArchiveDownloadUrl(
+    @Param("jobId") jobId: string,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ) {
+    return new BaseResponse(
+      await this.integrationCourseExportService.getCourseArchiveDownloadUrl(
+        jobId,
+        actor,
+        keyTenant,
+      ),
+    );
   }
 }

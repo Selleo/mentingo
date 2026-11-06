@@ -1,4 +1,4 @@
-import type { PermissionKey } from "@repo/shared";
+import type { AUTH_SOCKET_EVENTS, PermissionKey } from "@repo/shared";
 import type { Socket } from "socket.io";
 
 export interface HeartbeatPayload {
@@ -30,6 +30,8 @@ export interface LeaveLiveTrainingPayload {
 
 export interface WsUser {
   userId: string;
+  sessionId: string;
+  sessionVersion: string;
   email: string;
   roleSlugs: string[];
   permissions: PermissionKey[];
@@ -38,7 +40,7 @@ export interface WsUser {
 
 export type AuthenticatedSocket = Socket<
   Record<string, never>,
-  Record<string, never>,
+  { [AUTH_SOCKET_EVENTS.SESSION_EXPIRED]: () => void },
   Record<string, never>,
   { user: WsUser }
 >;

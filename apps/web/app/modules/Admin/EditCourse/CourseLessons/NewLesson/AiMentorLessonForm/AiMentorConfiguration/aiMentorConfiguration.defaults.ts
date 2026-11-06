@@ -2,9 +2,8 @@ import {
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TEACHING_STYLE,
   AI_MENTOR_TYPE,
+  stripHtmlTags,
 } from "@repo/shared";
-
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { AiMentorConfigurationDraft } from "./aiMentorConfiguration.types";
 import type { AiMentorType } from "@repo/shared";

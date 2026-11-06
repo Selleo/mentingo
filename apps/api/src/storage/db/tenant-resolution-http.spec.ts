@@ -1,5 +1,4 @@
 import { Controller, Get } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
 import { TENANT_STATUSES } from "@repo/shared";
@@ -63,8 +62,8 @@ describe("Tenant resolution HTTP status", () => {
       { select: () => dbQuery } as never,
       { verify: async () => null } as never,
     );
-    const jwtService = {
-      verifyAsync: async (token: string) => {
+    const sessionService = {
+      verifySessionToken: async (token: string) => {
         if (token === "valid") return { userId: "user-1", tenantId: knownId };
         if (token === "deleted-tenant")
           return { userId: "user-1", tenantId: "ca8de1a4-cc78-42b1-a48f-9ea784693199" };
@@ -80,10 +79,8 @@ describe("Tenant resolution HTTP status", () => {
     app.use(cors({ origin: createCorsOriginOption({} as never), credentials: true }));
     app.useGlobalGuards(
       new JwtAuthGuard(
-        jwtService as never,
+        sessionService as never,
         new Reflector(),
-        new ConfigService({ jwt: { secret: "test-secret" } }),
-        { isUserRevoked: async () => false } as never,
         {} as never,
         tenantResolverService,
       ),

@@ -1,3 +1,5 @@
+import { SCORM_PLAYER_ATTRIBUTES } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { TOAST_HANDLES } from "../../data/common/handles";
@@ -22,6 +24,10 @@ import type { PageHandle } from "../../fixtures/types";
 import type { Page } from "@playwright/test";
 import type { UserRole } from "~/config/userRoles";
 
+test.use({
+  launchOptions: { args: ["--ignore-certificate-errors", "--allow-insecure-localhost"] },
+});
+
 type Cleanup = {
   add: (task: () => Promise<void> | void) => void;
 };
@@ -32,7 +38,12 @@ type WithWorkerPage = (
   options?: { root?: boolean },
 ) => Promise<void>;
 
-const scormFrame = (page: Page) => page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME).contentFrame();
+const scormFrame = (page: Page) =>
+  page
+    .getByTestId(LEARNING_HANDLES.SCORM_IFRAME)
+    .contentFrame()
+    .getByTestId(LEARNING_HANDLES.SCORM_PACKAGE_IFRAME)
+    .contentFrame();
 
 async function createScormCourseForLearning({
   cleanup,
@@ -195,6 +206,29 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${lesson.id}$`));
       await expect(scormFrame(page).getByTestId(SCORM_PACKAGE_HANDLES.SINGLE_TITLE)).toBeVisible();
+      const wrapper = page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME);
+      await expect(wrapper).toHaveAttribute("sandbox", SCORM_PLAYER_ATTRIBUTES.SANDBOX);
+      const contentUrl = await wrapper.getAttribute("src");
+      expect(new URL(contentUrl!).origin).not.toBe(new URL(page.url()).origin);
+      const isolation = await scormFrame(page)
+        .getByTestId(SCORM_PACKAGE_HANDLES.SINGLE_TITLE)
+        .evaluate(() => {
+          let canReadApplication = false;
+          try {
+            canReadApplication = Boolean(window.top?.document.body);
+          } catch {
+            /* Browser denied access. */
+          }
+          return {
+            canReadApplication,
+            cookies: document.cookie,
+            popupBlocked: window.open("about:blank") === null,
+          };
+        });
+      expect(isolation.canReadApplication).toBe(false);
+      expect(isolation.cookies).not.toContain("access_token=");
+      expect(isolation.cookies).not.toContain("refresh_token=");
+      expect(isolation.popupBlocked).toBe(true);
       await expect(scormFrame(page).getByTestId(SCORM_PACKAGE_HANDLES.ENTRY)).toHaveText(
         "ab-initio",
       );

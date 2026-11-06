@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common";
-import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
-import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
+import { ConditionalModule, ConfigModule } from "@nestjs/config";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
@@ -12,6 +13,7 @@ import { AutomationExecutionModule } from "src/automation-execution/automation-e
 import { AutomationModule } from "src/automations/automation.module";
 import { CourseRepetitionModule } from "src/course-repetition/course-repetition.module";
 import { EnvModule } from "src/env/env.module";
+import { UploadTooLargeFilter } from "src/file/filters/upload-too-large.filter";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
@@ -28,6 +30,7 @@ import { ArticlesModule } from "./articles/articles.module";
 import { AssistantModule } from "./assistant/assistant.module";
 import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
+import { SessionModule } from "./auth/session/session.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
@@ -35,17 +38,8 @@ import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
 import { CategoryModule } from "./category/category.module";
 import { CertificatesModule } from "./certificates/certificates.module";
-import bunnyConfig from "./common/configuration/bunny";
-import callbackUrlConfig from "./common/configuration/callbackUrl";
-import database from "./common/configuration/database";
-import emailConfig from "./common/configuration/email";
-import jwtConfig from "./common/configuration/jwt";
-import livekitConfig from "./common/configuration/livekit";
-import { getOptionalConfigs } from "./common/configuration/optional-config-loader";
-import phishingConfig from "./common/configuration/phishing";
-import redisConfig from "./common/configuration/redis";
-import s3Config from "./common/configuration/s3";
-import stripeConfig from "./common/configuration/stripe";
+import { getAppConfigLoaders } from "./common/configuration/app-config-loaders";
+import { jwtModuleOptions } from "./common/configuration/jwt-module-options";
 import { EmailModule } from "./common/emails/emails.module";
 import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
@@ -56,6 +50,7 @@ import { CompetenciesModule } from "./competencies/competencies.module";
 import { ContentMarketplaceModule } from "./content-marketplace/content-marketplace.module";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
+import { DevToolsModule, isDevToolsEnabled } from "./dev-tools/dev-tools.module";
 import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
@@ -82,6 +77,7 @@ import { ReportModule } from "./report/report.module";
 import { ResourceLibraryModule } from "./resource-library/resource-library.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
+import { HelpdeskModule } from "./self-onboarding/self-onboarding.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
 import { SettingsModule } from "./settings/settings.module";
 import { StatisticsModule } from "./statistics/statistics.module";
@@ -99,41 +95,15 @@ import type { RedisClient } from "src/redis";
 
 @Module({
   imports: [
+    SessionModule,
     ConfigModule.forRoot({
-      load: [
-        database,
-        jwtConfig,
-        emailConfig,
-        s3Config,
-        stripeConfig,
-        phishingConfig,
-        redisConfig,
-        callbackUrlConfig,
-        bunnyConfig,
-        livekitConfig,
-        ...getOptionalConfigs(),
-      ],
+      load: getAppConfigLoaders(),
       isGlobal: true,
     }),
     DbModule,
     SupportModeModule,
-    JwtModule.registerAsync({
-      useFactory(configService: ConfigService) {
-        return {
-          secret: configService.get<string>("jwt.secret")!,
-          signOptions: {
-            expiresIn: configService.get<string>("jwt.expirationTime"),
-          },
-        };
-      },
-      inject: [ConfigService],
-      global: true,
-    }),
-    MulterModule.register({
-      limits: {
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
-      },
-    }),
+    JwtModule.registerAsync(jwtModuleOptions),
+    { ...MulterModule.register({ limits: { fileSize: MAX_FILE_SIZE_BYTES } }), global: true },
     ThrottlerModule.forRootAsync({
       inject: [REDIS_CLIENT],
       useFactory: (redisClient: RedisClient) => ({
@@ -151,6 +121,7 @@ import type { RedisClient } from "src/redis";
     }),
     AuthModule,
     HealthModule,
+    HelpdeskModule,
     UserModule,
     EmailModule,
     EmailTemplateModule,
@@ -158,6 +129,7 @@ import type { RedisClient } from "src/redis";
     AutomationExecutionModule,
     NotificationsModule,
     TestConfigModule,
+    ConditionalModule.registerWhen(DevToolsModule, isDevToolsEnabled),
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
@@ -214,6 +186,10 @@ import type { RedisClient } from "src/redis";
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: UploadTooLargeFilter,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TenantRlsInterceptor,

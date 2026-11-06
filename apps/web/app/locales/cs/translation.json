@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Přihlašovací odkaz",
     "password": "Heslo",
     "description": "Zvolte, jak se mohou lidé ve vaší organizaci přihlašovat.",
@@ -34,6 +35,8 @@
       "disabled": "Tento způsob přihlášení je vypnutý.",
       "missingConfiguration": "Nejprve přidejte přihlašovací údaje poskytovatele v nastavení prostředí.",
       "lastMethod": "Ponechte zapnutý alespoň jeden použitelný způsob přihlášení.",
+      "invalidDirectoryId": "Zadejte ID adresáře (tenanta) z registrace aplikace Entra ve formátu GUID.",
+      "untrustedDirectory": "Tento účet nepatří do adresáře Entra ID vaší organizace.",
       "save": "Způsoby přihlášení se nepodařilo uložit.",
       "load": "Způsoby přihlášení se nepodařilo načíst."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Živé školení propojené s tímto kurzem je neúplné a nelze jej exportovat.",
       "courseNotFound": "Kurz k exportu nebyl nalezen.",
       "categoryNotFound": "Kategorie kurzu nebyla nalezena."
+    },
+    "progress": {
+      "waiting": "Čekání na spuštění…",
+      "step": "Krok {{current}} z {{total}}",
+      "uploadingPackage": "Nahrávání balíčku",
+      "stages": {
+        "collecting-content": "Shromažďování obsahu kurzu",
+        "copying-files": "Kopírování souborů",
+        "packaging": "Balení",
+        "downloading": "Stahování balíčku",
+        "verifying": "Kontrola balíčku",
+        "uploading-files": "Nahrávání souborů",
+        "indexing": "Příprava obsahu AI",
+        "saving": "Ukládání kurzu"
+      }
     }
   },
   "aiConversations": {
@@ -784,11 +802,13 @@
     "continueWithGoogle": "Pokračujte s Googlem",
     "continueWithMicrosoft": "Pokračujte s Microsoftem",
     "continueWithSlack": "Pokračujte se Slackem",
+    "continueWithEntraId": "Pokračujte s Entra ID",
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku",
     "refreshPage": "Obnovit stránku",
     "validation": {
-      "messageRequired": "Zpráva je povinná."
+      "messageRequired": "Zpráva je povinná.",
+      "nameMaxLength": "Může mít nejvýše {{max}} znaků."
     }
   },
   "lessons": {
@@ -817,9 +837,9 @@
       "uploadForbidden": "Toto nahrání nepatří aktuálnímu uživateli."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG nebo SVG",
-      "video": "MP4, MOV, MPEG-2 nebo Hevc (max. do 5 GB)",
-      "presentation": "PPT/PPTX (max. do 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM nebo OGG (max. {{maxSize}})",
+      "presentation": "PPTX nebo ODP (max. {{maxSize}})"
     },
     "processing": {
       "title": "Video se zpracovává",
@@ -876,7 +896,7 @@
       "setUpCourse": "Nastavit kurz",
       "provideDetails": "Zadejte podrobnosti pro vytvoření nového kurzu",
       "uploadFileHeader": "Kliknutím nahrajte nebo přetáhněte",
-      "uploadFileBody": "SCORM soubor .zip (max. do 500 MB)",
+      "uploadFileBody": "SCORM soubor .zip (max. {{maxSize}})",
       "pricing": "Ceny",
       "status": "Postavení",
       "setUpPricing": "Stanovte cenu kurzu",
@@ -945,7 +965,8 @@
         "invalidAttempt": "Pokus SCORM je neplatný.",
         "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
         "contentNotFound": "Obsah SCORM nebyl nalezen.",
-        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup.",
+        "contentUnavailable": "Obsah SCORM je dočasně nedostupný. Obraťte se na správce."
       }
     },
     "coursePlaceholder": {
@@ -963,7 +984,7 @@
       "requirements": {
         "title": "Požadavky na balíček",
         "version": "Balíček SCORM 1.2",
-        "archive": "Archiv .zip do 500MB",
+        "archive": "Archiv .zip do {{maxSize}}",
         "metadata": "Metadata kurzu lze upravit před importem"
       },
       "packageSection": "Balíček SCORM",
@@ -978,11 +999,22 @@
       "replacePackage": "Nahradit balíček",
       "removePackage": "Odebrat balíček",
       "uploadThumbnail": "Nahrát miniaturu",
-      "uploadThumbnailDescription": "PNG, JPG nebo JPEG do 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
       "thumbnailPreviewAlt": "Náhled miniatury kurzu",
       "submit": "Vytvořit kurz SCORM",
       "creating": "Vytváření kurzu SCORM...",
-      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API"
+      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API",
+      "categoryRequired": "Kategorie je povinná.",
+      "descriptionMaxLength": "Popis může obsahovat nejvýše {{maxLength}} znaků.",
+      "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
+      "languageInvalid": "Vyberte podporovaný jazyk.",
+      "packageInvalidType": "Balíček SCORM musí být soubor .zip",
+      "packageRequired": "Balíček SCORM je povinný.",
+      "packageTooLarge": "Balíček SCORM musí být menší než {{maxSize}}",
+      "thumbnailInvalid": "Miniatura musí být platný obrázek",
+      "thumbnailInvalidType": "Miniatura musí být PNG, JPG/JPEG, WEBP nebo SVG",
+      "thumbnailTooLarge": "Miniatura musí být menší než {{maxSize}}",
+      "titleMinLength": "Název musí mít alespoň 2 znaky."
     },
     "lesson": {
       "packageSection": "Balíček SCORM",
@@ -994,45 +1026,26 @@
       "validation": {
         "titleRequired": "Název je povinný",
         "packageRequired": "Balíček SCORM je povinný",
-        "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
+        "packageTooLarge": "Balíček SCORM musí být menší než {{maxSize}}",
         "packageInvalidType": "Balíček SCORM musí být soubor .zip"
       }
     }
   },
   "adminCourseTypeSelector": {
     "back": "Zpět",
-    "eyebrow": "Nastavení kurzu",
     "title": "Vytvořit nový kurz",
     "subtitle": "Vyberte standardní editor, balíček SCORM nebo balíček Mentingo.",
     "standard": {
       "title": "Standardní",
-      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
-      "features": {
-        "authoring": "Vytvořeno v nativním editoru kurzů",
-        "curriculum": "Kapitoly, lekce a kvízy spravované v Mentingu",
-        "translations": "Podpora jazyků a překladů kurzu",
-        "settings": "Ceny, stav a certifikáty jsou součástí"
-      }
+      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Vytvořte kurz z balíčku SCORM 1.2.",
-      "features": {
-        "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
-        "tracking": "Podpora dokončení SCO a runtime stavu",
-        "structure": "Struktura importovaného balíčku zachována",
-        "future": "Ceny, stav a certifikáty jsou součástí"
-      }
+      "description": "Vytvořte kurz z balíčku SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Balíček Mentingo",
-      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo.",
-      "features": {
-        "structure": "Obnovení struktury kurzu a překladů",
-        "settings": "Obnovení nastavení a metadat",
-        "assets": "Související soubory součástí",
-        "learningPath": "Podpora vzdělávacích cest a jejich kurzů"
-      }
+      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -2579,6 +2592,10 @@
         "title": "Přihlášení přes Slack",
         "description": "Umožněte uživatelům přihlásit se účtem Slack."
       },
+      "entraIdSignIn": {
+        "title": "Přihlášení přes Entra ID",
+        "description": "Umožněte uživatelům přihlásit se pouze účty z adresáře Microsoft Entra ID vaší organizace."
+      },
       "microsoftCalendar": {
         "title": "Kalendář Microsoft",
         "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
@@ -2670,6 +2687,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Tajné tajemství klienta Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID adresáře (tenanta) Entra ID",
+        "description": "GUID ID adresáře (tenanta) z přehledu registrace aplikace. Přihlásit se mohou pouze účty z tohoto adresáře."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID klienta Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API klíč"
@@ -2966,7 +2993,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
-        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM nebo OGG (max. {{maxSize}})",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",
@@ -3001,7 +3028,7 @@
           "groups": "Skupiny",
           "users": "Uživatelé"
         },
-        "certificateSignatureRequirements": "PNG nebo SVG (doporučené průhledné pozadí)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
         "certificatePreviewTitle": "Náhled certifikátu",
         "certificatePreviewDescription": "Otevřete náhled a upravte jazyk a barvu.",
         "certificatePreviewButton": "Náhled",
@@ -3023,7 +3050,7 @@
       },
       "validation": {
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
-        "titleMaxLength": "Název musí mít maximálně 250 znaků.",
+        "titleMaxLength": "Název musí mít maximálně {{max}} znaků.",
         "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
         "categoryRequired": "Kategorie je povinná",
         "certificateManageDenied": "Nemůžete spravovat certifikáty pro tento kurz.",
@@ -3150,11 +3177,12 @@
           "passThresholdMax": "Práh průchodu nesmí překročit 10",
           "titleMinLength": "Název je příliš krátký (min. 2 znaky)",
           "titleMaxLength": "Název je příliš dlouhý (max. 250 znaků)",
-          "maxFileSize": "Velikost souboru musí být menší než {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "Velikost souboru musí být menší než {{maxSize}}",
           "maxFileNumber_one": "Nemůžete nahrát více než 1 soubor",
           "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
           "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
-          "sourceUrlRequired": "Adresa URL zdroje je povinná"
+          "sourceUrlRequired": "Adresa URL zdroje je povinná",
+          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -3228,8 +3256,8 @@
           "voiceMode": "Hlasový režim",
           "ttsPreset": "Předvolba TTS",
           "customTTSReference": "Vlastní reference TTS",
-          "includeFiles_one": "Připojte až 1 soubor pod {{ MAX_FILE_SIZE }} MB, který bude použit jako kontext v lekcích",
-          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{ MAX_FILE_SIZE }} MB, které budou použity jako kontext v lekcích"
+          "includeFiles_one": "Připojte až 1 soubor pod {{maxSize}}, který bude použit jako kontext v lekcích",
+          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích"
         },
         "placeholder": {
           "title": "Uveďte název lekce...",
@@ -3770,7 +3798,7 @@
           "leaveContentCancel": "Pokračovat v úpravách",
           "leaveContentDiscard": "Opustit bez uložení",
           "dropOrClick": "Přetáhněte obrázek sem nebo jej nahrajte kliknutím",
-          "allowedFormats": "PNG, JPG nebo SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Popište, jak by se měl AI Mentor chovat během lekce. Zahrňte kontext, roli nebo scénář, který by AI měla následovat. To určuje, jak bude AI vést konverzaci.",
           "updateAiMentorAvatarDescription": "Nahrajte nový obrázek pro AI mentora nebo odeberte aktuální.",
           "updateAiMentorAvatar": "Aktualizujte avatar AI mentora",
@@ -4312,6 +4340,7 @@
       "loading": "Načítání obsahu SCORM...",
       "launchFailed": "Obsah SCORM se nepodařilo spustit.",
       "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "contentAccessExpired": "Přístup k obsahu SCORM se nepodařilo obnovit. Chcete-li pokračovat, znovu otevřete lekci.",
       "saveFailed": "Postup SCORM se nepodařilo uložit.",
       "saving": "Ukládání postupu",
       "previousSco": "Předchozí část",
@@ -4414,6 +4443,11 @@
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
       "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu."
+    },
+    "preview": {
+      "title": "Prohlížíte si náhled kurzu",
+      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy, účastnit se aktivit a ukládat svůj postup.",
+      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy, účastnit se aktivit a sledovat svůj postup."
     }
   },
   "studentCourseView": {
@@ -4659,7 +4693,7 @@
       "preview": "Náhled"
     },
     "field": {
-      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "other": {
       "uploading": "Nahrávání...",
@@ -4708,7 +4742,9 @@
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
-      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy"
+      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
+      "publicCoursePreview": "Náhled veřejných kurzů před zápisem",
+      "publicCoursePreviewDescription": "Přihlášení uživatelé si mohou prohlížet bezplatné veřejné kurzy bez zápisu. Kvízy, aktivity a ukládání postupu vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -4721,7 +4757,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
-      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila"
+      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila",
+      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno"
     }
   },
   "registrationFormBuilder": {
@@ -4803,6 +4840,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Nastavení vynucení MFA byla úspěšně aktualizována.",
+      "mfaVerificationRequired": "Pro vaši roli je nyní vyžadováno MFA. Pro pokračování jej nastavte nebo ověřte.",
       "mfaEnforcementUpdateFailed": "Aktualizace nastavení vynucení MFA se nezdařila."
     }
   },
@@ -4936,10 +4974,10 @@
   },
   "platformLogo": {
     "header": "Logo platformy",
-    "subHeader": "Nahrajte vlastní logo pro vaši platformu. Podporované formáty: PNG, SVG",
+    "subHeader": "Nahrajte vlastní logo pro vaši platformu. Podporované formáty: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Obrázek loga",
-      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Smazat logo platformy"
@@ -4952,10 +4990,10 @@
   },
   "platformSimpleLogo": {
     "header": "Jednoduché logo platformy (ikona)",
-    "subHeader": "Nahrajte vlastní logo, které bude použito jako signet a favicon. Podporované formáty: PNG, SVG",
+    "subHeader": "Nahrajte vlastní logo, které bude použito jako signet a favicon. Podporované formáty: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Obrázek loga",
-      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Odstranit logo ikony platformy"
@@ -4974,7 +5012,7 @@
     "title": "Nahrání obrázku na pozadí přihlášení",
     "description": "Nahrajte vlastní obrázek na pozadí pro přihlašovací stránku organizace.",
     "field": {
-      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Smazat obrázek na pozadí přihlášení"
@@ -4997,11 +5035,16 @@
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru.",
+      "invalidFileType": "Soubor je neplatný nebo jeho formát není podporován.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
       "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}.",
-      "audioFileTooLarge": "Zvukový soubor je příliš velký. Nahrajte zvuk o velikosti do 200 MB.",
-      "rangeNotSatisfiable": "Požadovaný rozsah bajtů není k dispozici."
+      "audioFileTooLarge": "Zvukový soubor je příliš velký. Nahrajte zvuk o velikosti do {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "Požadovaný rozsah bajtů není k dispozici.",
+      "fileTooLarge": "Soubor je příliš velký. Maximální velikost je {{maxSize}}.",
+      "uploadTooLarge": "Soubor je příliš velký na nahrání.",
+      "imageResolutionTooLarge": "Obrázek je příliš velký. Maximální rozlišení je {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "Obrázek musí mít poměr stran {{aspectRatio}}.",
+      "invalidImageReference": "Vybraný obrázek není k dispozici. Nahrajte obrázek znovu."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",
@@ -5586,7 +5629,7 @@
     "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
     "emptyDescription": "Popis zatím nebyl přidán.",
     "status": {
-      "draft": "Koncept",
+      "draft": "Návrh",
       "published": "Publikováno",
       "private": "Soukromé",
       "not_started": "Nezahájeno",
@@ -5743,7 +5786,7 @@
       "titlePlaceholder": "Pojmenujte rozvojovou cestu",
       "description": "Popis",
       "descriptionPlaceholder": "Popište, co studenti v této cestě dokončí",
-      "imageHint": "PNG, JPG nebo JPEG (max. 20 MB, doporučeno 1200x1200 nebo vyšší)",
+      "imageHint": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}}, doporučeno 1200x1200 nebo vyšší)",
       "sequenceEnabled": "Sekvenční učení",
       "sequenceEnabledDescription": "Studenti musí dokončit kurzy v zobrazeném pořadí.",
       "includesCertificate": "Certifikát",
@@ -6174,6 +6217,7 @@
       "hostAlreadyExists": "Hostitel organizace již existuje",
       "notFound": "Organizace nenalezena",
       "invalidHost": "Neplatná adresa URL hostitele organizace",
+      "reservedHost": "Tento hostitel organizace je rezervován a nelze jej použít",
       "managingTenantRequired": "Je vyžadován správce spravující organizaci",
       "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici",
       "currentTenantDeleteNotAllowed": "Aktuální spravující organizaci nelze odstranit"
@@ -6186,7 +6230,13 @@
       "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
-      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."
+      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci.",
+      "mfaRequired": "Chcete-li pokračovat, dokončete dvoufaktorové ověření.",
+      "sessionExpired": "Platnost přihlašovací relace vypršela. Přihlaste se znovu.",
+      "mfaAlreadyEnabled": "Dvoufaktorové ověření je již zapnuté.",
+      "mfaCodeAlreadyUsed": "Tento kód již byl použit. Počkejte na nový kód v ověřovací aplikaci a zkuste to znovu.",
+      "invalidMfaCode": "Zadejte platný šestimístný ověřovací kód.",
+      "invalidSettingsUpdate": "Tato bezpečnostní nastavení zde nelze změnit."
     }
   },
   "sessionRevocation": {
@@ -6357,11 +6407,11 @@
       "uploadImage": "Nahrát nový hlavní obrázek",
       "dropImage": "Přetáhněte hlavní obrázek sem",
       "browse": "nebo klikněte a vyberte soubor",
-      "imageLimit": "PNG, JPG do 10 MB",
+      "imageLimit": "PNG, JPG do {{maxSize}}",
       "imageRecommendation": "Doporučeno: 1920x820 px (21:9)",
       "trailer": "Upoutávka kurzu (volitelné)",
       "dropVideo": "Přetáhněte upoutávku sem",
-      "videoLimit": "MP4, MOV do 50 MB",
+      "videoLimit": "MP4, MOV do {{maxSize}}",
       "videoRecommendation": "Doporučeno: 30–90 sekund",
       "save": "Nahrát média"
     },
@@ -8419,7 +8469,8 @@
       "qa": "Otázka a odpověď",
       "development_path": "Vzdělávací cesta",
       "resource": "Materiál",
-      "reference": "Zdroj"
+      "reference": "Zdroj",
+      "helpdesk": "Návod nápovědy"
     },
     "title": "Asistent",
     "eyebrow": "Znalosti z vaší platformy",
@@ -9122,6 +9173,61 @@
       "inUse_few": "„{{name}}“ používají {{count}} kompetence. Před smazáním je přesuňte do jiné kategorie.",
       "inUse_many": "„{{name}}“ používá {{count}} kompetencí. Před smazáním je přesuňte do jiné kategorie.",
       "inUse_other": "„{{name}}“ používá {{count}} kompetencí. Před smazáním je přesuňte do jiné kategorie."
+    }
+  },
+  "helpdesk": {
+    "demo": "Ukázka",
+    "title": "Nápověda a návody",
+    "heading": "Jak vám můžeme pomoci?",
+    "subtitle": "Najděte další krok v Mentingo.",
+    "loading": "Načítání nápovědy",
+    "askAssistant": "Zeptat se asistenta",
+    "assistantHint": "Popište, co chcete udělat.",
+    "search": "Vyhledejte téma nebo položte otázku…",
+    "clear": "Vymazat hledání",
+    "results": "Návody",
+    "suggested": "Doporučeno pro vás",
+    "empty": "Žádné návody nenalezeny",
+    "emptyHint": "Zkuste kratší frázi nebo jiné téma.",
+    "chapterCount": "{{count}} kapitol",
+    "timeline": "Časová osa videa",
+    "jumpHint": "Vyberte kapitolu a přejděte na daný krok",
+    "chapters": "V tomto videu",
+    "related": "Objevte další funkce",
+    "domains": {
+      "authoring": "Úprava kurzů",
+      "paths": "Rozvojové cesty",
+      "learning": "Učení"
+    },
+    "keywordFallback": "Vyhledávání AI není dostupné. Zobrazují se shody klíčových slov.",
+    "languageFallback": "Video je dostupné v jazyce {{language}}",
+    "retry": "Zkusit znovu",
+    "back": "Zpět do Mentingo",
+    "chapterUnavailable": "Tato kapitola již není dostupná. Video se přehrává od začátku.",
+    "errors": {
+      "unavailable": "Návody jsou dočasně nedostupné. Zkuste to znovu.",
+      "versionUnavailable": "Pro tuto verzi Mentingo zatím není nápověda dostupná.",
+      "disabled": "Návody nápovědy nejsou v této instalaci zapnuté.",
+      "notFound": "Tento návod není pro vaši verzi Mentingo dostupný.",
+      "invalidRequest": "Vyberte dostupný návod nebo upravte vyhledávání a zkuste to znovu."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Rozvojová cesta nebyla nalezena.",
+      "createError": "Rozvojovou cestu se nepodařilo vytvořit.",
+      "updateError": "Rozvojovou cestu se nepodařilo aktualizovat.",
+      "updateMissingLanguage": "Tato rozvojová cesta není dostupná ve vybraném jazyce.",
+      "languageNotSupported": "Tento jazyk není podporován.",
+      "courseNotFound": "Kurz nebyl nalezen.",
+      "courseAlreadyExists": "Tento kurz už v rozvojové cestě je.",
+      "courseIdsMustBeUnique": "Každý kurz lze přidat pouze jednou.",
+      "courseIdsEmpty": "Vyberte alespoň jeden kurz.",
+      "courseIdsMismatch": "Pořadí kurzů neodpovídá kurzům v této rozvojové cestě.",
+      "courseLinkNotFound": "Tento kurz není součástí rozvojové cesty.",
+      "studentIdsEmpty": "Vyberte alespoň jednoho studenta.",
+      "groupIdsEmpty": "Vyberte alespoň jednu skupinu.",
+      "featureDisabled": "Rozvojové cesty jsou na této platformě vypnuté."
     }
   }
 }

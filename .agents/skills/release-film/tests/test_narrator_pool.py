@@ -37,6 +37,16 @@ class NarratorPool(unittest.TestCase):
         draw.assert_called_once_with(tuple(self.voices.values()))
         self.assertEqual({job['voice'] for job in english + polish}, {'woman2'})
 
+    def test_tutorial_keeps_its_saved_video_voice_instead_of_drawing_a_release_voice(self):
+        core.save(self.run / 'sources.json', {'mode': 'tutorial', 'language': 'en'})
+        addon = {'elevenlabs': {'voice_id': 'woman1'}}
+        with mock.patch.object(narrator_pool, 'for_run') as release_voice:
+            cut.narration_addon(self.run, addon, persist=True)
+            jobs = cut.narration_jobs(self.run, self.story, addon, self.run / 'voice')
+        release_voice.assert_not_called()
+        self.assertEqual({job['voice'] for job in jobs}, {'woman1'})
+        self.assertEqual({job['audio_profile'] for job in jobs}, {'pcm-48000-v1'})
+
     def test_cache_check_and_recut_never_create_a_narrator(self):
         self.assertFalse(cut.spoken(self.run, self.story))
         self.assertFalse((self.run / 'narrator.json').exists())

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import { MAX_INGESTION_FILE_SIZE_BYTES } from "@repo/shared";
 
-import { SEARCH_EXTRACTABLE_FILE_TYPES, MAX_MB_PER_FILE } from "src/ingestion/ingestion.config";
+import { SEARCH_EXTRACTABLE_FILE_TYPES } from "src/ingestion/ingestion.config";
 import { ChunkService } from "src/ingestion/services/chunk.service";
 import { S3Service } from "src/s3/s3.service";
 
@@ -32,10 +33,10 @@ export class SemanticSearchIndexService {
       SEARCH_EXTRACTABLE_FILE_TYPES.includes(source.resourceContentType)
     ) {
       const size = await this.s3.getFileSize(source.resourceReference);
-      if (size > MAX_MB_PER_FILE * 1024 * 1024)
+      if (size > MAX_INGESTION_FILE_SIZE_BYTES)
         throw new Error("Search attachment exceeds the extraction size limit");
       const buffer = await this.s3.getFileBuffer(source.resourceReference);
-      if (buffer.length > MAX_MB_PER_FILE * 1024 * 1024)
+      if (buffer.length > MAX_INGESTION_FILE_SIZE_BYTES)
         throw new Error("Search attachment exceeds the extraction size limit");
       const pages = await this.extraction.extractSearchText({
         buffer,

@@ -5,17 +5,14 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+import { AUTH_TOKEN_PURPOSE } from "@repo/shared";
 
+import { SessionService } from "src/auth/session/session.service";
 import { extractToken } from "src/utils/extract-token";
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly sessionService: SessionService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -26,9 +23,10 @@ export class RefreshTokenGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>("jwt.refreshSecret"),
-      });
+      const payload = await this.sessionService.verifySessionToken(
+        refreshToken,
+        AUTH_TOKEN_PURPOSE.REFRESH,
+      );
 
       request["user"] = payload;
       request["refreshToken"] = refreshToken;

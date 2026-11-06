@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { SupportedLanguages } from "@repo/shared";
@@ -53,7 +54,7 @@ export class NewsFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
   async create(input: NewsFactoryCreateInput = {}): Promise<NewsFactoryRecord> {
-    const language = input.language ?? "en";
+    const language = input.language ?? getSelfOnboardingLanguage();
     const createResponse = await this.apiClient.api.newsControllerCreateNews({ language });
     const createdId = createResponse.data.data.id;
     const defaults = createNewsDefaults();
@@ -70,13 +71,16 @@ export class NewsFactory {
     return this.getById(createdId, language);
   }
 
-  async getById(id: string, language: SupportedLanguages = "en"): Promise<NewsFactoryRecord> {
+  async getById(
+    id: string,
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
+  ): Promise<NewsFactoryRecord> {
     const response = await this.apiClient.api.newsControllerGetNews(id, { language });
     return response.data.data;
   }
 
   async update(id: string, data: NewsFactoryUpdateInput): Promise<NewsFactoryRecord> {
-    const language = data.language ?? "en";
+    const language = data.language ?? getSelfOnboardingLanguage();
 
     await this.apiClient.api.newsControllerUpdateNews(id, toUpdateNewsPayload(language, data));
 
@@ -89,7 +93,7 @@ export class NewsFactory {
 
   async safeGetById(
     id: string,
-    language: SupportedLanguages = "en",
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<NewsFactoryRecord | null> {
     try {
       return await this.getById(id, language);

@@ -1,3 +1,4 @@
+import { MAX_AVATAR_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { Minus, UploadCloud } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -168,7 +169,9 @@ const UpdateAiAvatarModal = ({
                 {t("adminCourseView.curriculum.lesson.other.dropOrClick")}
               </p>
               <p className="text-xs text-neutral-500">
-                {t("adminCourseView.curriculum.lesson.other.allowedFormats")}
+                {t("adminCourseView.curriculum.lesson.other.allowedFormats", {
+                  maxSize: formatFileSize(MAX_AVATAR_FILE_SIZE_BYTES),
+                })}
               </p>
               <input
                 ref={fileInputRef}

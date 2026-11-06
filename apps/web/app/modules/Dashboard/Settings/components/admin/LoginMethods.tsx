@@ -46,6 +46,9 @@ const renderLoginMethodIcon = (method: LoginMethod) =>
       <Icon name="Microsoft" className={LOGIN_METHOD_ICON_CLASS_NAME} />
     ))
     .with(LOGIN_METHODS.SLACK, () => <Icon name="Slack" className={LOGIN_METHOD_ICON_CLASS_NAME} />)
+    .with(LOGIN_METHODS.ENTRA_ID, () => (
+      <Icon name="EntraId" className={LOGIN_METHOD_ICON_CLASS_NAME} />
+    ))
     .with(LOGIN_METHODS.MAGIC_LINK, () => (
       <Icon name="WandSparkles" className={LOGIN_METHOD_ICON_CLASS_NAME} />
     ))

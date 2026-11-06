@@ -3,11 +3,11 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { MAX_INGESTION_FILE_SIZE_BYTES } from "@repo/shared";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 
 import {
   ALLOWED_FILE_TYPES_MAP,
-  MAX_MB_PER_FILE,
   SEARCH_FILE_TYPES_MAP,
   SEARCH_EXTRACTABLE_FILE_TYPES,
 } from "src/ingestion/ingestion.config";
@@ -46,7 +46,7 @@ export class ChunkService {
 
   /** Extract supported search attachments without widening the ingestion upload policy. */
   async extractSearchText(file: Express.Multer.File): Promise<TextExtractionBody> {
-    if (file.buffer.length > MAX_MB_PER_FILE * 1024 * 1024) {
+    if (file.buffer.length > MAX_INGESTION_FILE_SIZE_BYTES) {
       throw new BadRequestException("Search attachment exceeds the extraction size limit");
     }
     if (!SEARCH_EXTRACTABLE_FILE_TYPES.includes(file.mimetype)) {

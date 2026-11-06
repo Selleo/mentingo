@@ -48,6 +48,16 @@ describe("resolveRateLimitPolicy", () => {
     });
   });
 
+  it("returns the SCORM delivery policy for isolated content requests", () => {
+    const policy = resolveRateLimitPolicy("GET", "/api/scorm/delivery/token/assets/index.html");
+
+    expect(policy).toEqual({
+      key: "scorm.delivery",
+      limit: RATE_LIMITS.SCORM_DELIVERY_REQUESTS_PER_MINUTE,
+      windowSec: RATE_LIMIT_WINDOW_SEC,
+    });
+  });
+
   it("returns null for technical routes", () => {
     expect(resolveRateLimitPolicy("GET", "/api/healthcheck")).toBeNull();
     expect(resolveRateLimitPolicy("GET", "/api/integration-json")).toBeNull();

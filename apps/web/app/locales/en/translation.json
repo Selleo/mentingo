@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Magic link",
     "password": "Password",
     "description": "Choose how people in your organization can sign in.",
@@ -34,6 +35,8 @@
       "disabled": "This login method is disabled.",
       "missingConfiguration": "Add this provider's credentials in environment settings first.",
       "lastMethod": "Keep at least one usable login method enabled.",
+      "invalidDirectoryId": "Enter the Directory (tenant) ID from your Entra app registration as a GUID.",
+      "untrustedDirectory": "This account doesn't belong to your organization's Entra ID directory.",
       "save": "Unable to save login methods.",
       "load": "Unable to load login methods."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "A Live Training linked to this course is incomplete and cannot be exported.",
       "courseNotFound": "The course to export was not found.",
       "categoryNotFound": "The course category was not found."
+    },
+    "progress": {
+      "waiting": "Waiting to start…",
+      "step": "Step {{current}} of {{total}}",
+      "uploadingPackage": "Uploading package",
+      "stages": {
+        "collecting-content": "Collecting course content",
+        "copying-files": "Copying files",
+        "packaging": "Packaging",
+        "downloading": "Downloading package",
+        "verifying": "Checking package",
+        "uploading-files": "Uploading files",
+        "indexing": "Preparing AI content",
+        "saving": "Saving course"
+      }
     }
   },
   "aiConversations": {
@@ -778,11 +796,13 @@
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft",
     "continueWithSlack": "Continue with Slack",
+    "continueWithEntraId": "Continue with Entra ID",
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
     "refreshPage": "Refresh page",
     "validation": {
-      "messageRequired": "Message is required."
+      "messageRequired": "Message is required.",
+      "nameMaxLength": "Must be at most {{max}} characters."
     }
   },
   "lessons": {
@@ -811,9 +831,9 @@
       "uploadForbidden": "This upload does not belong to the current user."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG or SVG",
-      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
-      "presentation": "PPT/PPTX (max. to 100MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
+      "presentation": "PPTX or ODP (max. {{maxSize}})"
     },
     "processing": {
       "title": "Video is processing",
@@ -870,7 +890,7 @@
       "setUpCourse": "Set up course",
       "provideDetails": "Provide the details to set up a new course",
       "uploadFileHeader": "Click to upload or drag and drop",
-      "uploadFileBody": "SCORM .zip file (max. to 500MB)",
+      "uploadFileBody": "SCORM .zip file (max. {{maxSize}})",
       "pricing": "Pricing",
       "status": "Status",
       "setUpPricing": "Set pricing for the course",
@@ -939,7 +959,8 @@
         "invalidAttempt": "SCORM attempt is invalid.",
         "invalidCmiValue": "SCORM runtime data is invalid.",
         "contentNotFound": "SCORM content was not found.",
-        "contentForbidden": "You do not have access to this SCORM content."
+        "contentForbidden": "You do not have access to this SCORM content.",
+        "contentUnavailable": "SCORM content is temporarily unavailable. Please contact your administrator."
       }
     },
     "coursePlaceholder": {
@@ -957,7 +978,7 @@
       "requirements": {
         "title": "Package requirements",
         "version": "SCORM 1.2 package",
-        "archive": ".zip archive up to 500MB",
+        "archive": ".zip archive up to {{maxSize}}",
         "metadata": "Course metadata can be edited before import"
       },
       "packageSection": "SCORM package",
@@ -972,11 +993,22 @@
       "replacePackage": "Replace package",
       "removePackage": "Remove package",
       "uploadThumbnail": "Upload thumbnail",
-      "uploadThumbnailDescription": "PNG, JPG or JPEG up to 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
       "thumbnailPreviewAlt": "Course thumbnail preview",
       "submit": "Create SCORM course",
       "creating": "Creating SCORM course...",
-      "toastDraftReady": "SCORM course form is ready for API integration"
+      "toastDraftReady": "SCORM course form is ready for API integration",
+      "categoryRequired": "Category is required.",
+      "descriptionMaxLength": "Description must contain at most {{maxLength}} characters.",
+      "descriptionMinLength": "Description must be at least 2 characters.",
+      "languageInvalid": "Select a supported language.",
+      "packageInvalidType": "SCORM package must be a .zip file",
+      "packageRequired": "SCORM package is required.",
+      "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
+      "thumbnailInvalid": "Thumbnail must be a valid image file",
+      "thumbnailInvalidType": "Thumbnail must be PNG, JPG/JPEG, WEBP, or SVG",
+      "thumbnailTooLarge": "Thumbnail must be smaller than {{maxSize}}",
+      "titleMinLength": "Title must be at least 2 characters."
     },
     "lesson": {
       "packageSection": "SCORM package",
@@ -988,45 +1020,26 @@
       "validation": {
         "titleRequired": "Title is required",
         "packageRequired": "SCORM package is required",
-        "packageTooLarge": "SCORM package must be less than 500MB",
+        "packageTooLarge": "SCORM package must be smaller than {{maxSize}}",
         "packageInvalidType": "SCORM package must be a .zip file"
       }
     }
   },
   "adminCourseTypeSelector": {
     "back": "Back",
-    "eyebrow": "Course setup",
     "title": "Create New Course",
     "subtitle": "Choose the standard editor, a SCORM package, or a Mentingo package.",
     "standard": {
       "title": "Standard",
-      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings.",
-      "features": {
-        "authoring": "Built with the native course editor",
-        "curriculum": "Chapters, lessons, and quizzes managed in Mentingo",
-        "translations": "Course languages and translations supported",
-        "settings": "Pricing, status, and certificates included"
-      }
+      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Create a course from a SCORM 1.2 package.",
-      "features": {
-        "import": "Built from a SCORM 1.2 .zip package",
-        "tracking": "SCO completion and runtime tracking supported",
-        "structure": "Imported package structure preserved",
-        "future": "Pricing, status, and certificates included"
-      }
+      "description": "Create a course from a SCORM 1.2 package."
     },
     "mentingoPackage": {
       "title": "Mentingo package",
-      "description": "Restore a course or learning path from a Mentingo package.",
-      "features": {
-        "structure": "Course structure and translations restored",
-        "settings": "Settings and metadata restored",
-        "assets": "Related files included",
-        "learningPath": "Learning paths and their courses supported"
-      }
+      "description": "Restore a course or learning path from a Mentingo package."
     }
   },
   "studentChapterCardView": {
@@ -2574,6 +2587,10 @@
         "title": "Slack Sign-In",
         "description": "Let users sign in with their Slack account."
       },
+      "entraIdSignIn": {
+        "title": "Entra ID Sign-In",
+        "description": "Let users sign in only with accounts from your organization's Microsoft Entra ID directory."
+      },
       "microsoftCalendar": {
         "title": "Microsoft Calendar",
         "description": "Sync live training sessions to Microsoft Outlook calendars."
@@ -2665,6 +2682,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Slack Client Secret"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "Entra ID Directory (tenant) ID",
+        "description": "The Directory (tenant) ID GUID from your app registration's overview. Only accounts from this directory can sign in."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "Entra ID Client ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Entra ID Client Secret"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
@@ -2961,7 +2988,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM or OGG (max. {{maxSize}})",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
@@ -2996,7 +3023,7 @@
           "groups": "Groups",
           "users": "Users"
         },
-        "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}; transparent background recommended)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",
         "certificatePreviewButton": "Preview",
@@ -3018,7 +3045,7 @@
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
-        "titleMaxLength": "Title must be at most 250 characters.",
+        "titleMaxLength": "Title must be at most {{max}} characters.",
         "descriptionMinLength": "Description must be at least 2 characters.",
         "categoryRequired": "Category is required",
         "certificateManageDenied": "You cannot manage certificates for this course.",
@@ -3145,11 +3172,12 @@
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",
           "titleMaxLength": "Title is too long (max 250 characters)",
-          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "File size must be below {{maxSize}}",
           "maxFileNumber_one": "You cannot upload more than 1 file",
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
-          "sourceUrlRequired": "Source URL is required"
+          "sourceUrlRequired": "Source URL is required",
+          "sourceUrlInvalid": "Enter a valid HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -3223,8 +3251,8 @@
           "voiceMode": "Voice Mode",
           "ttsPreset": "TTS Preset",
           "customTTSReference": "Custom TTS Reference",
-          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
-          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
+          "includeFiles_one": "Attach up to 1 file below {{maxSize}} to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -3764,7 +3792,7 @@
           "leaveContentCancel": "Keep editing",
           "leaveContentDiscard": "Leave without saving",
           "dropOrClick": "Drop image here or click to upload",
-          "allowedFormats": "PNG, JPG or SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
           "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
           "updateAiMentorAvatar": "Update AI mentor avatar",
@@ -4306,6 +4334,7 @@
       "loading": "Loading SCORM content...",
       "launchFailed": "SCORM content could not be launched.",
       "launchFailedBody": "Please try again. If the problem continues, the SCORM package may need to be reuploaded.",
+      "contentAccessExpired": "Access to SCORM content could not be renewed. Reopen the lesson to continue.",
       "saveFailed": "SCORM progress could not be saved.",
       "saving": "Saving progress",
       "previousSco": "Previous section",
@@ -4408,6 +4437,11 @@
       "courseEnrollmentRequired": "You are not enrolled in this course.",
       "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
       "quizResetFailed": "Failed to reset quiz answers. Please try again."
+    },
+    "preview": {
+      "title": "You are previewing this course",
+      "enrollmentDescription": "Enroll to take quizzes, join activities and save your progress.",
+      "learningModeDescription": "Enable Learn mode to take quizzes, join activities and track your progress."
     }
   },
   "studentCourseView": {
@@ -4651,7 +4685,7 @@
       "preview": "Preview"
     },
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "other": {
       "uploading": "Uploading...",
@@ -4700,7 +4734,9 @@
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
-      "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses"
+      "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
+      "publicCoursePreview": "Preview public courses before enrollment",
+      "publicCoursePreviewDescription": "Let signed-in users browse free public courses without enrolling. Quizzes, activities and progress require enrollment. Paid courses keep their existing access rules."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -4713,7 +4749,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
-      "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences"
+      "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences",
+      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated"
     }
   },
   "registrationFormBuilder": {
@@ -4795,6 +4832,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaVerificationRequired": "MFA is now required for your role. Set it up or verify it to continue.",
       "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
     }
   },
@@ -4947,10 +4985,10 @@
   },
   "platformLogo": {
     "header": "Platform Logo",
-    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform logo"
@@ -4963,10 +5001,10 @@
   },
   "platformSimpleLogo": {
     "header": "Platform Simple Logo (icon)",
-    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Logo Image",
-      "imageRequirements": "PNG or SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Delete platform icon logo"
@@ -4985,7 +5023,7 @@
     "title": "Login Background Image Upload",
     "description": "Upload a custom background image for the organization login page.",
     "field": {
-      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Delete login background image"
@@ -5008,11 +5046,16 @@
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type.",
+      "invalidFileType": "The file is invalid or its format is not supported.",
       "missingTenantContext": "Missing tenant context for file upload",
       "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}.",
-      "audioFileTooLarge": "Audio file is too large. Upload audio up to 200 MB.",
-      "rangeNotSatisfiable": "The requested byte range is not available."
+      "audioFileTooLarge": "Audio file is too large. Upload audio up to {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "The requested byte range is not available.",
+      "fileTooLarge": "The file is too large. The maximum size is {{maxSize}}.",
+      "uploadTooLarge": "The file is too large to upload.",
+      "imageResolutionTooLarge": "The image is too large. The maximum resolution is {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "The image must have a {{aspectRatio}} aspect ratio.",
+      "invalidImageReference": "The selected image isn't available. Upload the image again."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -5553,7 +5596,7 @@
       "titlePlaceholder": "Name the development path",
       "description": "Description",
       "descriptionPlaceholder": "Describe what students will complete in this path",
-      "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
+      "imageHint": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}}, recommended 1200x1200 or higher)",
       "sequenceEnabled": "Sequential learning",
       "sequenceEnabledDescription": "Students must complete courses in display order.",
       "includesCertificate": "Certificate",
@@ -5984,6 +6027,7 @@
       "hostAlreadyExists": "Organization host already exists",
       "notFound": "Organization not found",
       "invalidHost": "Invalid organization host URL",
+      "reservedHost": "This organization host is reserved and can't be used",
       "managingTenantRequired": "Managing organization admin required",
       "currentTenantSupportNotAllowed": "Support mode is not available for the current organization",
       "currentTenantDeleteNotAllowed": "The current managing organization cannot be deleted"
@@ -5996,7 +6040,13 @@
       "invalidRefreshToken": "Invalid refresh token",
       "adminRoleRequired": "Admin role required",
       "missingPermission": "You do not have permission to access this resource",
-      "sessionRevoked": "Your session was revoked. Please refresh your session."
+      "sessionRevoked": "Your session was revoked. Please refresh your session.",
+      "mfaRequired": "Complete two-factor authentication to continue.",
+      "sessionExpired": "Your sign-in session expired. Please sign in again.",
+      "mfaAlreadyEnabled": "Two-factor authentication is already enabled.",
+      "mfaCodeAlreadyUsed": "This code has already been used. Wait for a new code in your authenticator app and try again.",
+      "invalidMfaCode": "Enter a valid six-digit authentication code.",
+      "invalidSettingsUpdate": "These security settings cannot be changed here."
     }
   },
   "sessionRevocation": {
@@ -6366,11 +6416,11 @@
       "uploadImage": "Upload new hero image",
       "dropImage": "Drop hero image here",
       "browse": "or click to browse",
-      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageLimit": "PNG, JPG up to {{maxSize}}",
       "imageRecommendation": "Recommended: 1920x820 px (21:9)",
       "trailer": "Course trailer (optional)",
       "dropVideo": "Drop trailer video here",
-      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoLimit": "MP4, MOV up to {{maxSize}}",
       "videoRecommendation": "Recommended: 30-90 seconds",
       "save": "Upload media"
     },
@@ -8442,7 +8492,8 @@
       "qa": "Question & answer",
       "development_path": "Learning path",
       "resource": "Resource",
-      "reference": "Reference"
+      "reference": "Reference",
+      "helpdesk": "Help tutorial"
     },
     "title": "Assistant",
     "eyebrow": "Your workspace, connected",
@@ -9099,6 +9150,61 @@
       "deleteConfirmation": "Delete the category \"{{name}}\"?",
       "inUse_one": "\"{{name}}\" is used by {{count}} competency. Move it to another category before deleting.",
       "inUse_other": "\"{{name}}\" is used by {{count}} competencies. Move them to another category before deleting."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demo",
+    "title": "Help & tutorials",
+    "heading": "How can we help?",
+    "subtitle": "Find your next step in Mentingo.",
+    "loading": "Loading help",
+    "askAssistant": "Ask the assistant",
+    "assistantHint": "Describe what you want to do.",
+    "search": "Search topics or ask a question…",
+    "clear": "Clear search",
+    "results": "Tutorials",
+    "suggested": "Suggested for you",
+    "empty": "No tutorials found",
+    "emptyHint": "Try a shorter phrase or another topic.",
+    "chapterCount": "{{count}} chapters",
+    "timeline": "Video timeline",
+    "jumpHint": "Select a chapter to jump to a step",
+    "chapters": "In this video",
+    "related": "Explore more features",
+    "domains": {
+      "authoring": "Course editing",
+      "paths": "Development paths",
+      "learning": "Learning"
+    },
+    "keywordFallback": "Showing keyword matches while AI search is unavailable.",
+    "languageFallback": "Video available in {{language}}",
+    "retry": "Try again",
+    "back": "Back to Mentingo",
+    "chapterUnavailable": "This chapter is no longer available. Showing the video from the beginning.",
+    "errors": {
+      "unavailable": "Tutorials are temporarily unavailable. Please try again.",
+      "versionUnavailable": "Help is not available for this version of Mentingo yet.",
+      "disabled": "Help tutorials are not enabled on this installation.",
+      "notFound": "This tutorial is not available for your version of Mentingo.",
+      "invalidRequest": "Choose a valid tutorial or search phrase and try again."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Development path not found.",
+      "createError": "Couldn't create the development path.",
+      "updateError": "Couldn't update the development path.",
+      "updateMissingLanguage": "This development path isn't available in the selected language.",
+      "languageNotSupported": "This language isn't supported.",
+      "courseNotFound": "Course not found.",
+      "courseAlreadyExists": "This course is already in the development path.",
+      "courseIdsMustBeUnique": "Each course can be added only once.",
+      "courseIdsEmpty": "Select at least one course.",
+      "courseIdsMismatch": "The course order doesn't match the courses in this development path.",
+      "courseLinkNotFound": "This course isn't part of the development path.",
+      "studentIdsEmpty": "Select at least one learner.",
+      "groupIdsEmpty": "Select at least one group.",
+      "featureDisabled": "Development paths are turned off on this platform."
     }
   }
 }

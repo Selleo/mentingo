@@ -9,6 +9,7 @@ import {
 import { Server } from "socket.io";
 
 import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
+import { getSessionRoomName, getUserRoomName } from "src/websocket/websocket.rooms";
 import {
   AuthenticatedSocket,
   HeartbeatPayload,
@@ -32,6 +33,8 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
 
   private readonly logger = new Logger(WsGateway.name);
 
+  constructor(private readonly wsJwtGuard: WsJwtGuard) {}
+
   private heartbeatHandlers: Array<
     (socket: AuthenticatedSocket, payload: HeartbeatPayload) => Promise<void>
   > = [];
@@ -50,8 +53,15 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
     this.logger.log("WebSocket Gateway initialized");
   }
 
-  handleConnection(client: Socket) {
+  /** Rejects handshakes without an active session and joins valid sockets to their user and session rooms. */
+  async handleConnection(client: Socket) {
     this.logger.debug(`Client attempting connection: ${client.id}`);
+
+    try {
+      await this.wsJwtGuard.authenticateCurrent(client as AuthenticatedSocket);
+    } catch {
+      client.disconnect(true);
+    }
   }
 
   async handleDisconnect(client: Socket) {
@@ -197,7 +207,16 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
   }
 
   emitToUser(userId: string, event: string, data: unknown) {
-    this.server.to(`user:${userId}`).emit(event, data);
+    this.server.to(getUserRoomName(userId)).emit(event, data);
+  }
+
+  /** Disconnects through the Redis adapter, so sockets held by other API instances close too. */
+  disconnectSession(sessionId: string) {
+    this.server.in(getSessionRoomName(sessionId)).disconnectSockets(true);
+  }
+
+  disconnectUser(userId: string) {
+    this.server.in(getUserRoomName(userId)).disconnectSockets(true);
   }
 }
 

@@ -19,7 +19,6 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ENTITY_TYPES,
   isAudioFile,
-  MAX_COURSE_TRAILER_VIDEO_SIZE,
   RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
   VIDEO_PROVIDERS,
@@ -27,6 +26,11 @@ import {
   type ResourceVisibility,
   type SupportedLanguages,
   type EntityType,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  MAX_PRESENTATION_FILE_SIZE_BYTES,
+  MAX_PRESENTATION_FILE_SIZE_MB,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+  MEGABYTE_UNIT,
 } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
@@ -54,6 +58,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
+import { dbAls } from "src/storage/db/db-als.store";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { resources, resourceEntity } from "src/storage/schema";
@@ -61,12 +66,8 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   ALLOWED_EXCEL_MIME_TYPES_MAP,
-  MAX_PRESENTATION_FILE_SIZE,
-  MAX_PRESENTATION_FILE_SIZE_UNIT,
-  MAX_PRESENTATION_FILE_SIZE_VALUE,
   PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
   RESOURCE_RELATIONSHIP_TYPES,
-  MAX_VIDEO_SIZE,
   VALIDATED_AUDIO_FILE_EXTENSIONS,
 } from "./file.constants";
 import { HostedVideoStatusService } from "./hosted-video-status.service";
@@ -76,7 +77,8 @@ import { ThumbnailService } from "./thumbnail.service";
 import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { isStorageRangeNotSatisfiableError } from "./utils/storageErrors";
-import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { findStorageKeyTenantId, prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { UPLOAD_ERROR_KEYS } from "./utils/uploadErrors";
 import { validateAudioUpload } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
@@ -141,20 +143,48 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
 
-    if (isImageVariantReference(fileKey)) {
-      return this.getImageUrlByQuality(fileKey, options.quality);
-    }
-
-    return this.s3Service.getSignedUrl(fileKey);
+    return this.getImageUrlByQuality(fileKey, options.quality);
   }
 
   async getImageUrlByQuality(
     reference: string,
     quality: ImageQuality = IMAGE_QUALITY.XL,
   ): Promise<string> {
+    const tenantId = dbAls.getStore()?.tenantId;
+
+    if (tenantId && this.isForeignTenantStorageReference(reference, tenantId)) return "";
+
     if (!isImageVariantReference(reference)) return this.s3Service.getSignedUrl(reference);
 
     return this.s3Service.getSignedUrl(this.getFileStorageKeyByQuality(reference, quality));
+  }
+
+  /**
+   * Accepts an image reference sent by a client only if it is an already stored image of the
+   * caller's tenant, whatever its format (legacy uploads included); external URLs and other
+   * tenants' keys are rejected before reaching storage.
+   */
+  async assertImageReference(fileKey: string | null | undefined, tenantId: UUIDType) {
+    if (!fileKey) return;
+
+    if (findStorageKeyTenantId(fileKey) !== tenantId) {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_IMAGE_REFERENCE);
+    }
+
+    const contentType = await this.s3Service
+      .getFileContentType(this.getFileStorageKey(fileKey))
+      .catch(() => null);
+
+    if (!contentType?.toLowerCase().startsWith("image/")) {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_IMAGE_REFERENCE);
+    }
+  }
+
+  /** Keys namespaced under another tenant are never signed; legacy unprefixed keys still are. */
+  private isForeignTenantStorageReference(reference: string, tenantId: UUIDType) {
+    const ownerTenantId = findStorageKeyTenantId(reference);
+
+    return Boolean(ownerTenantId && ownerTenantId !== tenantId);
   }
 
   async getFileContentType(fileKey: string): Promise<string | null> {
@@ -238,13 +268,13 @@ export class FileService {
 
     if (
       ALLOWED_PRESENTATION_FILE_TYPES.includes(file.mimetype) &&
-      file.size > MAX_PRESENTATION_FILE_SIZE
+      file.size > MAX_PRESENTATION_FILE_SIZE_BYTES
     ) {
       throw new BadRequestException({
         message: "files.toast.presentationFileTooLarge",
         translationParams: {
-          size: MAX_PRESENTATION_FILE_SIZE_VALUE,
-          unit: MAX_PRESENTATION_FILE_SIZE_UNIT,
+          size: MAX_PRESENTATION_FILE_SIZE_MB,
+          unit: MEGABYTE_UNIT,
         },
       });
     }
@@ -311,16 +341,15 @@ export class FileService {
     uploadId: string,
     placeholderKey: string,
     fileType: string | undefined,
-    currentUserId?: UUIDType,
-    tenantId?: UUIDType,
+    currentUser: CurrentUserType | undefined,
     maxUploadSize?: number,
   ) {
     await this.videoProcessingStateService.initializeState(
       uploadId,
       placeholderKey,
       fileType,
-      currentUserId,
-      { maxUploadSize, tenantId },
+      currentUser?.userId,
+      { maxUploadSize, tenantId: currentUser?.tenantId },
     );
   }
 
@@ -436,7 +465,9 @@ export class FileService {
       entityType === ENTITY_TYPES.COURSE &&
       relationshipType === RESOURCE_RELATIONSHIP_TYPES.TRAILER;
 
-    const maxUploadSize = isCourseTrailer ? MAX_COURSE_TRAILER_VIDEO_SIZE : MAX_VIDEO_SIZE;
+    const maxUploadSize = isCourseTrailer
+      ? MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES
+      : MAX_VIDEO_FILE_SIZE_BYTES;
 
     if (sizeBytes > maxUploadSize) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");
@@ -469,8 +500,7 @@ export class FileService {
       uploadId,
       placeholderKey,
       fileType,
-      currentUser?.userId,
-      currentUser?.tenantId,
+      currentUser,
       maxUploadSize,
     );
 

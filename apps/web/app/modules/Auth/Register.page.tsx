@@ -58,6 +58,8 @@ export default function RegisterPage() {
 
   const isSlackOAuthEnabled = loginMethods?.slack ?? false;
 
+  const isEntraIdOAuthEnabled = loginMethods?.entraId ?? false;
+
   const requiredFieldIds = useMemo(
     () => registrationForm?.fields.filter((field) => field.required).map((field) => field.id) ?? [],
     [registrationForm?.fields],
@@ -121,8 +123,12 @@ export default function RegisterPage() {
   }, [methods, registrationForm?.fields, reset]);
 
   const isAnyProviderEnabled = useMemo(
-    () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
-    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
+    () =>
+      isGoogleOAuthEnabled ||
+      isMicrosoftOAuthEnabled ||
+      isSlackOAuthEnabled ||
+      isEntraIdOAuthEnabled,
+    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled, isEntraIdOAuthEnabled],
   );
 
   const onSubmit = async (data: RegisterFormValues) => {
@@ -360,6 +366,7 @@ export default function RegisterPage() {
                     isGoogleOAuthEnabled={isGoogleOAuthEnabled}
                     isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
                     isSlackOAuthEnabled={isSlackOAuthEnabled}
+                    isEntraIdOAuthEnabled={isEntraIdOAuthEnabled}
                   />
                 )}
 

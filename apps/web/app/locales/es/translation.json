@@ -25,6 +25,7 @@
     "google": "Google",
     "microsoft": "Microsoft",
     "slack": "Slack",
+    "entraId": "Entra ID",
     "magicLink": "Enlace de acceso",
     "password": "Contraseña",
     "description": "Elige cómo pueden iniciar sesión las personas de tu organización.",
@@ -34,6 +35,8 @@
       "disabled": "Este método de acceso está desactivado.",
       "missingConfiguration": "Primero añade las credenciales del proveedor en la configuración del entorno.",
       "lastMethod": "Mantenga al menos un método de acceso utilizable activado.",
+      "invalidDirectoryId": "Introduzca el ID de directorio (inquilino) de su registro de aplicación de Entra como GUID.",
+      "untrustedDirectory": "Esta cuenta no pertenece al directorio de Entra ID de su organización.",
       "save": "No se pudieron guardar los métodos de acceso.",
       "load": "No se pudieron cargar los métodos de acceso."
     }
@@ -95,6 +98,21 @@
       "liveTrainingIncomplete": "Una formación en vivo vinculada a este curso está incompleta y no se puede exportar.",
       "courseNotFound": "No se encontró el curso que se va a exportar.",
       "categoryNotFound": "No se encontró la categoría del curso."
+    },
+    "progress": {
+      "waiting": "Esperando para empezar…",
+      "step": "Paso {{current}} de {{total}}",
+      "uploadingPackage": "Subiendo el paquete",
+      "stages": {
+        "collecting-content": "Recopilando el contenido del curso",
+        "copying-files": "Copiando archivos",
+        "packaging": "Empaquetando",
+        "downloading": "Descargando el paquete",
+        "verifying": "Comprobando el paquete",
+        "uploading-files": "Subiendo archivos",
+        "indexing": "Preparando el contenido de IA",
+        "saving": "Guardando el curso"
+      }
     }
   },
   "aiConversations": {
@@ -781,11 +799,13 @@
     "continueWithGoogle": "Continuar con Google",
     "continueWithMicrosoft": "Continuar con Microsoft",
     "continueWithSlack": "Continuar con Slack",
+    "continueWithEntraId": "Continuar con Entra ID",
     "enterFullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa",
     "refreshPage": "Actualizar página",
     "validation": {
-      "messageRequired": "El mensaje es obligatorio."
+      "messageRequired": "El mensaje es obligatorio.",
+      "nameMaxLength": "Debe tener como máximo {{max}} caracteres."
     }
   },
   "lessons": {
@@ -814,9 +834,9 @@
       "uploadForbidden": "Esta subida no pertenece al usuario actual."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG o SVG",
-      "video": "MP4, MOV, MPEG-2 o HEVC (máx. 5 GB)",
-      "presentation": "PPT/PPTX (máx. 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM u OGG (máx. {{maxSize}})",
+      "presentation": "PPTX u ODP (máx. {{maxSize}})"
     },
     "processing": {
       "title": "El vídeo se está procesando",
@@ -873,7 +893,7 @@
       "setUpCourse": "Configurar curso",
       "provideDetails": "Proporcione los detalles para configurar un nuevo curso.",
       "uploadFileHeader": "Haga clic para cargar o arrastre y suelte",
-      "uploadFileBody": "Archivo .zip de SCORM (máx. 500 MB)",
+      "uploadFileBody": "Archivo .zip de SCORM (máx. {{maxSize}})",
       "pricing": "Precios",
       "status": "Estado",
       "setUpPricing": "Establecer precios para el curso.",
@@ -942,7 +962,8 @@
         "invalidAttempt": "El intento SCORM no es válido.",
         "invalidCmiValue": "Los datos de tiempo de ejecución de SCORM no son válidos.",
         "contentNotFound": "No se encontró contenido de SCORM.",
-        "contentForbidden": "No tienes acceso a este contenido de SCORM."
+        "contentForbidden": "No tienes acceso a este contenido de SCORM.",
+        "contentUnavailable": "El contenido SCORM no está disponible temporalmente. Ponte en contacto con tu administrador."
       }
     },
     "coursePlaceholder": {
@@ -960,7 +981,7 @@
       "requirements": {
         "title": "Requisitos del paquete",
         "version": "Paquete SCORM 1.2",
-        "archive": "Archivo .zip de hasta 500 MB",
+        "archive": "Archivo .zip de hasta {{maxSize}}",
         "metadata": "Los metadatos del curso se pueden editar antes de importarlos."
       },
       "packageSection": "Paquete SCORM",
@@ -975,11 +996,22 @@
       "replacePackage": "Reemplazar paquete",
       "removePackage": "Quitar paquete",
       "uploadThumbnail": "Subir miniatura",
-      "uploadThumbnailDescription": "PNG, JPG o JPEG hasta 20 MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
       "thumbnailPreviewAlt": "Vista previa en miniatura del curso",
       "submit": "Crear curso SCORM",
       "creating": "Creando curso SCORM...",
-      "toastDraftReady": "El formulario del curso SCORM está listo para la integración con la API"
+      "toastDraftReady": "El formulario del curso SCORM está listo para la integración con la API",
+      "categoryRequired": "La categoría es obligatoria.",
+      "descriptionMaxLength": "La descripción debe contener como máximo {{maxLength}} caracteres.",
+      "descriptionMinLength": "La descripción debe tener al menos 2 caracteres.",
+      "languageInvalid": "Seleccione un idioma compatible.",
+      "packageInvalidType": "El paquete SCORM debe ser un archivo .zip",
+      "packageRequired": "El paquete SCORM es obligatorio.",
+      "packageTooLarge": "El paquete SCORM debe ser menor que {{maxSize}}",
+      "thumbnailInvalid": "La miniatura debe ser un archivo de imagen válido",
+      "thumbnailInvalidType": "La miniatura debe ser PNG, JPG/JPEG, WEBP o SVG",
+      "thumbnailTooLarge": "La miniatura debe ser menor que {{maxSize}}",
+      "titleMinLength": "El título debe tener al menos 2 caracteres."
     },
     "lesson": {
       "packageSection": "Paquete SCORM",
@@ -991,45 +1023,26 @@
       "validation": {
         "titleRequired": "Se requiere título",
         "packageRequired": "Se requiere el paquete SCORM",
-        "packageTooLarge": "El paquete SCORM debe tener menos de 500 MB",
+        "packageTooLarge": "El paquete SCORM debe ser menor que {{maxSize}}",
         "packageInvalidType": "El paquete SCORM debe ser un archivo .zip"
       }
     }
   },
   "adminCourseTypeSelector": {
     "back": "Atrás",
-    "eyebrow": "Configuración del curso",
     "title": "Crear nuevo curso",
     "subtitle": "Elige el editor estándar, un paquete SCORM o un paquete de Mentingo.",
     "standard": {
       "title": "Estándar",
-      "description": "Cree un curso con el plan de estudios, las lecciones, los cuestionarios y la configuración integrados.",
-      "features": {
-        "authoring": "Construido con el editor de cursos nativo",
-        "curriculum": "Capítulos, lecciones y cuestionarios administrados en Mentingo",
-        "translations": "Idiomas del curso y traducciones compatibles.",
-        "settings": "Precios, estado y certificados incluidos"
-      }
+      "description": "Cree un curso con el plan de estudios, las lecciones, los cuestionarios y la configuración integrados."
     },
     "scorm": {
       "title": "SCORM",
-      "description": "Cree un curso a partir de un paquete SCORM 1.2.",
-      "features": {
-        "import": "Construido a partir de un paquete .zip SCORM 1.2",
-        "tracking": "Se admite la finalización de SCO y el seguimiento del tiempo de ejecución",
-        "structure": "Se conserva la estructura del paquete importado.",
-        "future": "Precios, estado y certificados incluidos"
-      }
+      "description": "Cree un curso a partir de un paquete SCORM 1.2."
     },
     "mentingoPackage": {
       "title": "Paquete de Mentingo",
-      "description": "Restaura un curso o una ruta de aprendizaje desde un paquete de Mentingo.",
-      "features": {
-        "structure": "Se restauran la estructura y las traducciones",
-        "settings": "Se restauran los ajustes y metadatos",
-        "assets": "Se incluyen los archivos relacionados",
-        "learningPath": "Se admiten rutas y sus cursos"
-      }
+      "description": "Restaura un curso o una ruta de aprendizaje desde un paquete de Mentingo."
     }
   },
   "studentChapterCardView": {
@@ -2566,6 +2579,10 @@
         "title": "Inicio de sesión con Slack",
         "description": "Permite que los usuarios inicien sesión con su cuenta de Slack."
       },
+      "entraIdSignIn": {
+        "title": "Inicio de sesión con Entra ID",
+        "description": "Permita que los usuarios inicien sesión solo con cuentas del directorio de Microsoft Entra ID de su organización."
+      },
       "microsoftCalendar": {
         "title": "Calendario de Microsoft",
         "description": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook."
@@ -2657,6 +2674,16 @@
       },
       "SLACK_CLIENT_SECRET": {
         "label": "Secreto del cliente de Slack"
+      },
+      "ENTRA_ID_DIRECTORY_ID": {
+        "label": "ID de directorio (inquilino) de Entra ID",
+        "description": "El GUID del ID de directorio (inquilino) que aparece en la información general del registro de la aplicación. Solo pueden iniciar sesión cuentas de este directorio."
+      },
+      "ENTRA_ID_CLIENT_ID": {
+        "label": "ID de cliente de Entra ID"
+      },
+      "ENTRA_ID_CLIENT_SECRET": {
+        "label": "Secreto de cliente de Entra ID"
       },
       "LUMA_API_KEY": {
         "label": "Luma API Clave"
@@ -2953,7 +2980,7 @@
         "charactersLeft": "Caracteres restantes",
         "reachedCharactersLimit": "Has alcanzado el límite de caracteres.",
         "reachedCharactersLimitHtml": "Demasiado formato. Reduzca la cantidad de formato para que se ajuste al límite.",
-        "trailerUploadDetails": "MP4, MOV (máx. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM u OGG (máx. {{maxSize}})",
         "enableCertificate": "Habilitar certificado",
         "enableCertificateDescription": "Active esta opción para emitir certificados para este curso y configure su firma y vista previa a continuación.",
         "certificateValidity": "Validez del certificado",
@@ -2988,7 +3015,7 @@
           "groups": "Grupos",
           "users": "Usuarios"
         },
-        "certificateSignatureRequirements": "PNG o SVG (fondo transparente recomendado)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
         "certificatePreviewTitle": "Vista previa del certificado",
         "certificatePreviewDescription": "Abre la vista previa para ajustar el idioma y el color.",
         "certificatePreviewButton": "Vista previa",
@@ -3010,7 +3037,7 @@
       },
       "validation": {
         "titleMinLength": "El título debe tener al menos 2 caracteres.",
-        "titleMaxLength": "El título debe tener como máximo 250 caracteres.",
+        "titleMaxLength": "El título debe tener como máximo {{max}} caracteres.",
         "descriptionMinLength": "La descripción debe tener al menos 2 caracteres.",
         "categoryRequired": "Se requiere categoría",
         "certificateManageDenied": "No puedes gestionar certificados para este curso.",
@@ -3137,11 +3164,12 @@
           "passThresholdMax": "El umbral de aprobación no puede exceder 10",
           "titleMinLength": "El título es demasiado corto (mínimo 2 caracteres)",
           "titleMaxLength": "El título es demasiado largo (máximo 250 caracteres)",
-          "maxFileSize": "El tamaño del archivo debe ser inferior a {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "El tamaño del archivo debe ser inferior a {{maxSize}}",
           "maxFileNumber_one": "No puedes subir más de 1 archivo",
           "maxFileNumber_other": "No puedes cargar más de archivos {{ count }}",
           "maxResources_five": "No puedes agregar más de 5 recursos.",
-          "sourceUrlRequired": "La URL de origen es obligatoria"
+          "sourceUrlRequired": "La URL de origen es obligatoria",
+          "sourceUrlInvalid": "Introduce una URL HTTPS válida"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -3215,8 +3243,8 @@
           "voiceMode": "Modo de voz",
           "ttsPreset": "Preajuste TTS",
           "customTTSReference": "Referencia TTS personalizada",
-          "includeFiles_one": "Adjunte hasta 1 archivo debajo de {{ MAX_FILE_SIZE }} MB para usarlo como contexto en las lecciones",
-          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{ MAX_FILE_SIZE }} MB para usarlos como contexto en las lecciones"
+          "includeFiles_one": "Adjunte hasta 1 archivo debajo de {{maxSize}} para usarlo como contexto en las lecciones",
+          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{maxSize}} para usarlos como contexto en las lecciones"
         },
         "placeholder": {
           "title": "Proporcione el título de la lección...",
@@ -3708,7 +3736,7 @@
           "leaveContentCancel": "Seguir editando",
           "leaveContentDiscard": "Salir sin guardar",
           "dropOrClick": "Suelta la imagen aquí o haz clic para subirla.",
-          "allowedFormats": "PNG, JPG o SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Describe cómo debe comportarse el mentor de IA durante la lección. Incluya el contexto, rol o escenario que debe seguir la IA. Esto define cómo la IA guiará la conversación.",
           "updateAiMentorAvatarDescription": "Cargue una nueva imagen para el mentor de IA o elimine la actual.",
           "updateAiMentorAvatar": "Actualizar avatar de mentor de IA",
@@ -4250,6 +4278,7 @@
       "loading": "Cargando contenido SCORM...",
       "launchFailed": "No se pudo iniciar el contenido SCORM.",
       "launchFailedBody": "Por favor inténtalo de nuevo. Si el problema continúa, es posible que sea necesario volver a cargar el paquete SCORM.",
+      "contentAccessExpired": "No se pudo renovar el acceso al contenido SCORM. Vuelve a abrir la lección para continuar.",
       "saveFailed": "No se pudo guardar el progreso de SCORM.",
       "saving": "Guardando progreso",
       "previousSco": "Sección anterior",
@@ -4352,6 +4381,11 @@
       "courseEnrollmentRequired": "No estás inscrito en este curso.",
       "quizRetakeUnavailable": "Las respuestas del cuestionario no se pueden restablecer debido al límite de intentos o al tiempo de reutilización.",
       "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo."
+    },
+    "preview": {
+      "title": "Estás viendo una vista previa del curso",
+      "enrollmentDescription": "Inscríbete para responder cuestionarios, participar en actividades y guardar tu progreso.",
+      "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios, participar en actividades y registrar tu progreso."
     }
   },
   "studentCourseView": {
@@ -4589,7 +4623,7 @@
       "preview": "Vista previa"
     },
     "field": {
-      "imageRequirements": "PNG, JPG o JPEG (máx. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "other": {
       "uploading": "Subiendo...",
@@ -4638,7 +4672,9 @@
       "finishedCourseNotification": "Notificaciones de cursos terminados",
       "finishedCourseNotificationDescription": "Recibir notificaciones cuando un usuario finalice un curso.",
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
-      "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados"
+      "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
+      "publicCoursePreview": "Vista previa de cursos públicos antes de inscribirse",
+      "publicCoursePreviewDescription": "Permite a los usuarios conectados explorar cursos públicos gratuitos sin inscribirse. Los cuestionarios, las actividades y el progreso requieren inscripción. Los cursos de pago mantienen sus reglas de acceso."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",
@@ -4651,7 +4687,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos finalizados se han actualizado correctamente.",
       "finishedCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación del curso terminado",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos vencidos se han actualizado correctamente",
-      "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos"
+      "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos",
+      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada"
     }
   },
   "registrationFormBuilder": {
@@ -4732,6 +4769,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "La configuración de cumplimiento de MFA se ha actualizado correctamente.",
+      "mfaVerificationRequired": "Ahora se requiere MFA para tu rol. Configúralo o verifícalo para continuar.",
       "mfaEnforcementUpdateFailed": "No se pudo actualizar la configuración de cumplimiento de MFA."
     }
   },
@@ -4884,10 +4922,10 @@
   },
   "platformLogo": {
     "header": "Logotipo de la plataforma",
-    "subHeader": "Cargue un logotipo personalizado para su plataforma. Formatos soportados: PNG, SVG",
+    "subHeader": "Cargue un logotipo personalizado para su plataforma. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Imagen del logotipo",
-      "imageRequirements": "PNG o SVG (máx. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Eliminar logo de plataforma"
@@ -4900,10 +4938,10 @@
   },
   "platformSimpleLogo": {
     "header": "Logotipo simple de plataforma (icono)",
-    "subHeader": "Cargue un logotipo personalizado que se utilizará como sello y favicon. Formatos soportados: PNG, SVG",
+    "subHeader": "Cargue un logotipo personalizado que se utilizará como sello y favicon. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Imagen del logotipo",
-      "imageRequirements": "PNG o SVG (máx. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Eliminar el logotipo del icono de la plataforma"
@@ -4922,7 +4960,7 @@
     "title": "Iniciar sesión Subir imagen de fondo",
     "description": "Cargue una imagen de fondo personalizada para la página de inicio de sesión de la organización.",
     "field": {
-      "imageRequirements": "PNG, JPG o JPEG (máx. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Eliminar imagen de fondo de inicio de sesión"
@@ -4945,11 +4983,16 @@
       "invalidData": "Error al cargar el archivo: datos de archivo no válidos",
       "fileEmpty": "Error al cargar el archivo: el archivo está vacío",
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
-      "invalidFileType": "Tipo de archivo no válido.",
+      "invalidFileType": "El archivo no es válido o su formato no es compatible.",
       "missingTenantContext": "Falta contexto de inquilino para la carga de archivos",
       "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}.",
-      "audioFileTooLarge": "El archivo de audio es demasiado grande. Cargue un audio de hasta 200 MB.",
-      "rangeNotSatisfiable": "El rango de bytes solicitado no está disponible."
+      "audioFileTooLarge": "El archivo de audio es demasiado grande. Cargue un audio de hasta {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "El rango de bytes solicitado no está disponible.",
+      "fileTooLarge": "El archivo es demasiado grande. El tamaño máximo es {{maxSize}}.",
+      "uploadTooLarge": "El archivo es demasiado grande para subirlo.",
+      "imageResolutionTooLarge": "La imagen es demasiado grande. La resolución máxima es {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "La imagen debe tener una relación de aspecto de {{aspectRatio}}.",
+      "invalidImageReference": "La imagen seleccionada no está disponible. Vuelve a subir la imagen."
     },
     "import": {
       "noFileUploaded": "No se ha subido ningún archivo",
@@ -5490,7 +5533,7 @@
       "titlePlaceholder": "Nombra la ruta de desarrollo",
       "description": "Descripción",
       "descriptionPlaceholder": "Describe lo que los estudiantes completarán en este camino.",
-      "imageHint": "PNG, JPG o JPEG (máx. 20 MB, recomendado 1200x1200 o superior)",
+      "imageHint": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}}, recomendado 1200x1200 o superior)",
       "sequenceEnabled": "Aprendizaje secuencial",
       "sequenceEnabledDescription": "Los estudiantes deben completar los cursos en orden de visualización.",
       "includesCertificate": "Certificado",
@@ -5921,6 +5964,7 @@
       "hostAlreadyExists": "El host de la organización ya existe",
       "notFound": "Organización no encontrada",
       "invalidHost": "URL del host de la organización no válida",
+      "reservedHost": "Este host de la organización está reservado y no se puede usar",
       "managingTenantRequired": "Se requiere administrador de la organización gestora",
       "currentTenantSupportNotAllowed": "El modo de soporte no está disponible para la organización actual",
       "currentTenantDeleteNotAllowed": "No se puede eliminar la organización gestora actual"
@@ -5933,7 +5977,13 @@
       "invalidRefreshToken": "Token de actualización no válido",
       "adminRoleRequired": "Se requiere rol de administrador",
       "missingPermission": "No tienes permiso para acceder a este recurso.",
-      "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión."
+      "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión.",
+      "mfaRequired": "Completa la autenticación en dos pasos para continuar.",
+      "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+      "mfaAlreadyEnabled": "La autenticación en dos pasos ya está activada.",
+      "mfaCodeAlreadyUsed": "Este código ya se ha utilizado. Espera un nuevo código en tu aplicación de autenticación e inténtalo de nuevo.",
+      "invalidMfaCode": "Introduce un código de autenticación válido de seis dígitos.",
+      "invalidSettingsUpdate": "Esta configuración de seguridad no se puede cambiar aquí."
     }
   },
   "sessionRevocation": {
@@ -6303,11 +6353,11 @@
       "uploadImage": "Subir nueva imagen principal",
       "dropImage": "Suelta aquí la imagen principal",
       "browse": "o haz clic para buscar",
-      "imageLimit": "PNG, JPG hasta 10 MB",
+      "imageLimit": "PNG, JPG hasta {{maxSize}}",
       "imageRecommendation": "Recomendado: 1920x820 px (21:9)",
       "trailer": "Tráiler del curso (opcional)",
       "dropVideo": "Suelta aquí el tráiler",
-      "videoLimit": "MP4, MOV hasta 50 MB",
+      "videoLimit": "MP4, MOV hasta {{maxSize}}",
       "videoRecommendation": "Recomendado: 30–90 segundos",
       "save": "Subir contenido multimedia"
     },
@@ -8352,7 +8402,8 @@
       "qa": "Pregunta y respuesta",
       "development_path": "Ruta de aprendizaje",
       "resource": "Recurso",
-      "reference": "Fuente"
+      "reference": "Fuente",
+      "helpdesk": "Tutorial de ayuda"
     },
     "title": "Asistente",
     "eyebrow": "El conocimiento de tu plataforma",
@@ -9007,6 +9058,61 @@
       "inUse_one": "«{{name}}» la usa {{count}} competencia. Muévela a otra categoría antes de eliminarla.",
       "inUse_many": "«{{name}}» la usan {{count}} competencias. Muévelas a otra categoría antes de eliminarla.",
       "inUse_other": "«{{name}}» la usan {{count}} competencias. Muévelas a otra categoría antes de eliminarla."
+    }
+  },
+  "helpdesk": {
+    "demo": "Demo",
+    "title": "Ayuda y tutoriales",
+    "heading": "¿Cómo podemos ayudarte?",
+    "subtitle": "Encuentra tu próximo paso en Mentingo.",
+    "loading": "Cargando ayuda",
+    "askAssistant": "Preguntar al asistente",
+    "assistantHint": "Describe lo que quieres hacer.",
+    "search": "Busca un tema o haz una pregunta…",
+    "clear": "Borrar búsqueda",
+    "results": "Tutoriales",
+    "suggested": "Sugerencias para ti",
+    "empty": "No se encontraron tutoriales",
+    "emptyHint": "Prueba una frase más corta u otro tema.",
+    "chapterCount": "{{count}} capítulos",
+    "timeline": "Línea de tiempo del vídeo",
+    "jumpHint": "Selecciona un capítulo para ir a ese paso",
+    "chapters": "En este vídeo",
+    "related": "Descubre más funciones",
+    "domains": {
+      "authoring": "Edición de cursos",
+      "paths": "Itinerarios de desarrollo",
+      "learning": "Aprendizaje"
+    },
+    "keywordFallback": "La búsqueda con IA no está disponible. Se muestran coincidencias de palabras clave.",
+    "languageFallback": "Vídeo disponible en {{language}}",
+    "retry": "Volver a intentar",
+    "back": "Volver a Mentingo",
+    "chapterUnavailable": "Este capítulo ya no está disponible. El vídeo comienza desde el principio.",
+    "errors": {
+      "unavailable": "Los tutoriales no están disponibles temporalmente. Vuelve a intentarlo.",
+      "versionUnavailable": "La ayuda aún no está disponible para esta versión de Mentingo.",
+      "disabled": "Los tutoriales de ayuda no están activados en esta instalación.",
+      "notFound": "Este tutorial no está disponible para tu versión de Mentingo.",
+      "invalidRequest": "Elige un tutorial disponible o cambia la búsqueda y vuelve a intentarlo."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "No se encontró la ruta de desarrollo.",
+      "createError": "No se pudo crear la ruta de desarrollo.",
+      "updateError": "No se pudo actualizar la ruta de desarrollo.",
+      "updateMissingLanguage": "Esta ruta de desarrollo no está disponible en el idioma seleccionado.",
+      "languageNotSupported": "Este idioma no es compatible.",
+      "courseNotFound": "No se encontró el curso.",
+      "courseAlreadyExists": "Este curso ya está en la ruta de desarrollo.",
+      "courseIdsMustBeUnique": "Cada curso solo se puede añadir una vez.",
+      "courseIdsEmpty": "Selecciona al menos un curso.",
+      "courseIdsMismatch": "El orden de los cursos no coincide con los cursos de esta ruta de desarrollo.",
+      "courseLinkNotFound": "Este curso no forma parte de la ruta de desarrollo.",
+      "studentIdsEmpty": "Selecciona al menos un estudiante.",
+      "groupIdsEmpty": "Selecciona al menos un grupo.",
+      "featureDisabled": "Las rutas de desarrollo están desactivadas en esta plataforma."
     }
   }
 }

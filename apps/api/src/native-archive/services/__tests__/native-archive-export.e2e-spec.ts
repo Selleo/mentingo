@@ -10,7 +10,6 @@ import { createE2ETest } from "../../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../../test/factory/course.factory";
 import { createLearningPathFactory } from "../../../../test/factory/learningPath.factory";
-import { createSettingsFactory } from "../../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../../test/factory/user.factory";
 import { getNativeArchiveExportPrefix } from "../../native-archive-storage-paths";
 
@@ -112,7 +111,7 @@ describe("NativeArchive export (e2e)", () => {
     const downloaded = await downloadNativeArchive(app, jobId, cookie);
     expect(downloaded.headers["content-type"]).toContain("application/zip");
     expect(downloaded.headers["content-disposition"]).toContain(
-      'attachment; filename="mentingo-package.zip"',
+      'attachment; filename="archive-course-in-english.zip"',
     );
     const downloadedArchive = await readNativeArchiveBytes(downloaded.body as Buffer);
     expect(downloadedArchive.manifest).toEqual(
@@ -326,7 +325,6 @@ describe("NativeArchive export (e2e)", () => {
   it("rejects access to an export job from another user and reports a missing course as failed", async () => {
     const { admin, cookie } = await createAdmin();
     const other = await createAdmin();
-    await runAsTenant(foreignTenant.id, () => createSettingsFactory(db).create({ userId: null }));
     const { cookie: foreignCookie } = await createNativeArchiveTestUser({
       app,
       db,
@@ -379,5 +377,69 @@ describe("NativeArchive export (e2e)", () => {
       .expect(201);
     const failedStatus = await waitForNativeArchiveJob(app, missing.body.data.jobId, cookie);
     expect(failedStatus.state).toBe("failed");
+  });
+
+  async function exportCourseTitled(title: string) {
+    const { admin, cookie } = await createAdmin();
+    const course = await runAsTenant(tenantId, () =>
+      courseFactory.create({ authorId: admin.id, title, thumbnailS3Key: null, baseLanguage: "en" }),
+    );
+
+    const startExport = async () => {
+      const queued = await request(app.getHttpServer())
+        .post(`/api/native-archives/courses/${course.id}/export`)
+        .set("Cookie", cookie)
+        .expect(201);
+      const jobId = queued.body.data.jobId as string;
+      const status = await waitForNativeArchiveJob(app, jobId, cookie);
+
+      return { jobId, status };
+    };
+
+    return { cookie, startExport };
+  }
+
+  it("copies the earlier package of an unchanged course instead of building it again", async () => {
+    const { startExport } = await exportCourseTitled("Unchanged course");
+
+    const first = await startExport();
+    const second = await startExport();
+
+    expect([first.status.state, second.status.state]).toEqual(["completed", "completed"]);
+    expect(storage.uploadedKeys).toHaveLength(1);
+    expect(storage.copiedKeys).toEqual([
+      expect.stringMatching(new RegExp(`^${getNativeArchiveExportPrefix(tenantId)}`)),
+    ]);
+    expect(storage.copiedKeys[0]).not.toBe(storage.uploadedKeys[0]);
+    expect((await storage.readArchive(storage.copiedKeys[0]!)).courses).toEqual(
+      (await storage.readArchive(storage.uploadedKeys[0]!)).courses,
+    );
+  });
+
+  it("returns a short-lived download URL that saves the package under the course name", async () => {
+    const { cookie, startExport } = await exportCourseTitled("Żółć & Gęślą: kurs #1");
+    const { jobId } = await startExport();
+
+    const response = await request(app.getHttpServer())
+      .get(`/api/native-archives/jobs/${jobId}/download-url`)
+      .set("Cookie", cookie)
+      .expect(200);
+
+    expect(response.body.data).toEqual({
+      url: expect.stringContaining("filename=zolc-and-gesla-kurs-1.zip"),
+      expiresInSeconds: 300,
+    });
+    expect(response.body.data.url).toContain(getNativeArchiveExportPrefix(tenantId));
+  });
+
+  it("keeps the last reported stage of a finished export in its status", async () => {
+    const { startExport } = await exportCourseTitled("Course with progress");
+
+    const { status } = await startExport();
+
+    expect(status).toMatchObject({
+      state: "completed",
+      progress: { stage: "packaging", percent: 80 },
+    });
   });
 });

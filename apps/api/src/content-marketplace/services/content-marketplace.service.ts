@@ -15,6 +15,7 @@ import { match, P } from "ts-pattern";
 
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { NATIVE_ARCHIVE_IMPORT_MODES } from "src/native-archive/native-archive.constants";
+import { NativeArchiveJobFulfillmentService } from "src/native-archive/services/native-archive-job-fulfillment.service";
 import { NativeArchiveJobService } from "src/native-archive/services/native-archive-job.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
@@ -58,12 +59,13 @@ export class ContentMarketplaceService implements OnModuleInit {
   constructor(
     private readonly contentMarketplaceClientService: ContentMarketplaceClientService,
     private readonly nativeArchiveJobService: NativeArchiveJobService,
+    private readonly nativeArchiveJobFulfillmentService: NativeArchiveJobFulfillmentService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly contentMarketplaceLineageRepository: ContentMarketplaceLineageRepository,
   ) {}
 
   onModuleInit(): void {
-    this.nativeArchiveJobService.registerSourceArchiveDownloader(
+    this.nativeArchiveJobFulfillmentService.registerSourceArchiveDownloader(
       CONTENT_MARKETPLACE_IMPORT_SOURCE_KIND,
       (importSource) => this.downloadAcquisitionArchive(importSource),
     );

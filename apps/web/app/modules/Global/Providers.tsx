@@ -17,6 +17,7 @@ import { ApiClient } from "../../api/api-client";
 import { currentUserQueryOptions } from "../../api/queries";
 import { queryClient } from "../../api/queryClient";
 import { LanguageProvider } from "../Dashboard/Settings/Language/LanguageProvider";
+import { DevUserSwitcher } from "../DevTools/DevUserSwitcher";
 import { ThemeProvider } from "../Theme";
 
 import { PostHogWrapper } from "./PostHogWrapper";
@@ -126,7 +127,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
               <LanguageProvider>{children}</LanguageProvider>
               {process.env.NODE_ENV === "development" && (
-                <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+                <>
+                  <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+                  <DevUserSwitcher />
+                </>
               )}
             </ThemeProvider>
           </TourProvider>

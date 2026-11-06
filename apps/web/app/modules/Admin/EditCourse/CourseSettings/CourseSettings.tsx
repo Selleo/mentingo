@@ -1,4 +1,4 @@
-import { COURSE_TYPE, ENTITY_TYPES } from "@repo/shared";
+import { COURSE_TYPE, ENTITY_TYPES, isAllowedIframeUrl, stripHtmlTags } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +28,6 @@ import {
 } from "~/components/ui/select";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import {
@@ -44,11 +43,6 @@ import { CourseTrailerUploadField } from "./components/CourseTrailerUploadField"
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 import type { CourseType, SupportedLanguages } from "@repo/shared";
-
-const isEmbedUrl = (url?: string) => {
-  if (!url) return false;
-  return url.includes("iframe.mediadelivery.net/embed") || url.includes("youtube.com/embed");
-};
 
 type CourseSettingsProps = {
   courseId: string;
@@ -107,7 +101,8 @@ const CourseSettings = ({
   );
 
   const trailerEmbedUrl = useMemo(
-    () => (displayTrailerUrl && isEmbedUrl(displayTrailerUrl) ? displayTrailerUrl : undefined),
+    () =>
+      displayTrailerUrl && isAllowedIframeUrl(displayTrailerUrl) ? displayTrailerUrl : undefined,
     [displayTrailerUrl],
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);

@@ -1,4 +1,8 @@
-import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -45,7 +49,7 @@ const CourseCertificateSetting = ({
   const colorSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedColorRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const acceptedSignatureTypes = [...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES];
+  const acceptedSignatureTypes = [...ALLOWED_LESSON_IMAGE_FILE_TYPES];
 
   const { mutate: updateHasCertificate, isPending: isUpdatingCertificate } =
     useUpdateHasCertificate();
@@ -228,7 +232,9 @@ const CourseCertificateSetting = ({
               variant="video"
               accept={acceptedSignatureTypes.join(",")}
               imageFit="contain"
-              detailsText={t("adminCourseView.settings.other.certificateSignatureRequirements")}
+              detailsText={t("adminCourseView.settings.other.certificateSignatureRequirements", {
+                maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES),
+              })}
             />
             {isUploading && (
               <p className="text-xs font-medium text-neutral-500">

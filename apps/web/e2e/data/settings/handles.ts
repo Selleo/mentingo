@@ -6,6 +6,7 @@ export const SETTINGS_PAGE_SELECTORS = {
 export const SETTINGS_PAGE_HANDLES = {
   ACCOUNT_TAB: "settings-account-tab",
   INTEGRATIONS_TAB: "settings-integrations-tab",
+  PUBLIC_COURSE_PREVIEW_SWITCH: "settings-public-course-preview-switch",
   ORGANIZATION_TAB: "settings-organization-tab",
   PLATFORM_CUSTOMIZATION_TAB: "settings-platform-customization-tab",
   ACCOUNT_CONTENT: "settings-account-content",
@@ -71,6 +72,7 @@ export const SETTINGS_PAGE_HANDLES = {
   loginPageFileDelete: (name: string) => `settings-login-page-file-delete-${name}`,
   LOGIN_PAGE_FILE_DELETE_CONFIRM: "settings-login-page-file-delete-confirm",
   LOGIN_PAGE_FILE_PREVIEW_DIALOG: "settings-login-page-file-preview-dialog",
+  LOGIN_PAGE_FILE_PREVIEW_DOCUMENT: "settings-login-page-file-preview-document",
   LOGIN_PAGE_FILE_PREVIEW_CLOSE: "settings-login-page-file-preview-close",
   ADMIN_PREFERENCES_CARD: "settings-admin-preferences-card",
   COURSES_VISIBILITY_SWITCH: "settings-courses-visibility-switch",

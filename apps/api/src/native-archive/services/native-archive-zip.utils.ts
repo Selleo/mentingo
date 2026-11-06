@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { mkdir, stat, unlink } from "node:fs/promises";
+import { stat, unlink } from "node:fs/promises";
 import path from "node:path";
-import { Transform } from "node:stream";
+import { Transform, Writable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import { BadRequestException } from "@nestjs/common";
@@ -12,6 +12,7 @@ import unzipper from "unzipper";
 import { validate as isUuid } from "uuid";
 
 import { isRecord } from "src/common/utils/object.utils";
+import { processInBatches } from "src/common/utils/processInBatches";
 
 import { version } from "../../../version.json";
 import {
@@ -24,11 +25,14 @@ import { nativeArchiveManifestSchema } from "../schemas/native-archive-manifest.
 
 import type {
   NativeArchiveBuildInput,
+  NativeArchiveBuildOptions,
   NativeArchiveDocument,
   NativeArchiveFileHash,
   NativeArchiveManifest,
   NativeArchivePreparedAsset,
+  NativeArchiveReadOptions,
 } from "../native-archive.types";
+import type { Readable } from "node:stream";
 
 /** Rejects an archive that does not satisfy the native ZIP format. */
 function rejectInvalidArchive(): never {
@@ -37,10 +41,10 @@ function rejectInvalidArchive(): never {
 
 type ByteBudget = { remainingBytes: number };
 
-/** Copies an asset while hashing its bytes and enforcing entry and archive limits. */
-async function copyAndHashAsset(
+/** Streams an asset into the destination while hashing its bytes and enforcing entry and archive limits. */
+async function pipeAndHashAsset(
   sourceStream: NodeJS.ReadableStream,
-  destinationPath: string,
+  destination: NodeJS.WritableStream,
   entryLimit: number,
   budget: ByteBudget,
 ): Promise<NativeArchiveFileHash> {
@@ -60,47 +64,68 @@ async function copyAndHashAsset(
     },
   });
 
-  try {
-    await pipeline(sourceStream, hashingStream, createWriteStream(destinationPath));
-  } catch (error) {
-    await unlink(destinationPath).catch(() => undefined);
-    throw error;
-  }
+  await pipeline(sourceStream, hashingStream, destination);
 
   return { sha256: digest.digest("hex"), byteLength };
 }
 
+/** Copies an asset to a file while hashing it, removing the partial file when copying fails. */
+async function copyAndHashAsset(
+  sourceStream: NodeJS.ReadableStream,
+  destinationPath: string,
+  entryLimit: number,
+  budget: ByteBudget,
+): Promise<NativeArchiveFileHash> {
+  try {
+    return await pipeAndHashAsset(
+      sourceStream,
+      createWriteStream(destinationPath),
+      entryLimit,
+      budget,
+    );
+  } catch (error) {
+    await unlink(destinationPath).catch(() => undefined);
+    throw error;
+  }
+}
+
 /**
- * Copies source assets to temporary files and assigns each a digest-based archive path.
- * The combined uncompressed size is checked before the ZIP writer sees the files.
+ * Copies source assets to temporary files, a few at a time, and assigns each a digest-based
+ * archive path. The combined uncompressed size is checked before the ZIP writer sees the files.
  */
 export async function stageSourceAssets(
   sourceFiles: NativeArchiveBuildInput["files"],
   temporaryDirectory: string,
+  { onAssetStaged }: NativeArchiveBuildOptions = {},
 ): Promise<NativeArchivePreparedAsset[]> {
-  const stagedAssets: NativeArchivePreparedAsset[] = [];
   const budget: ByteBudget = { remainingBytes: NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES };
+  let stagedCount = 0;
 
-  for (const sourceFile of sourceFiles) {
-    const stagedFilePath = path.join(temporaryDirectory, randomUUID());
-    const { sha256, byteLength } = await copyAndHashAsset(
-      await sourceFile.open(),
-      stagedFilePath,
-      NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES,
-      budget,
-    );
+  return processInBatches(
+    sourceFiles,
+    async (sourceFile): Promise<NativeArchivePreparedAsset> => {
+      const stagedFilePath = path.join(temporaryDirectory, randomUUID());
 
-    stagedAssets.push({
-      path: `assets/${sha256}`,
-      sha256,
-      byteLength,
-      contentType: sourceFile.contentType,
-      sourceReference: sourceFile.sourceReference,
-      stagedFilePath,
-    });
-  }
+      const { sha256, byteLength } = await copyAndHashAsset(
+        await sourceFile.open(),
+        stagedFilePath,
+        NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES,
+        budget,
+      );
+      stagedCount += 1;
+      onAssetStaged?.(stagedCount, sourceFiles.length);
 
-  return stagedAssets;
+      return {
+        path: `assets/${sha256}`,
+        sha256,
+        byteLength,
+        contentType: sourceFile.contentType,
+        sourceReference: sourceFile.sourceReference,
+        stagedFilePath,
+      };
+    },
+    { batchSize: NATIVE_ARCHIVE_LIMITS.ASSET_STAGING_BATCH_SIZE },
+  );
 }
 
 /** Builds the portable manifest without including temporary filesystem paths. */
@@ -123,6 +148,51 @@ export function buildArchiveManifest(
   };
 }
 
+/**
+ * Identifies the archive an export input would build. Stored files never change under their key,
+ * so the documents plus each file's reference determine the archive's contents.
+ */
+export function fingerprintArchiveInput(archiveInput: NativeArchiveBuildInput): string {
+  const { kind, rootId, courses, learningPath, files } = archiveInput;
+
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        format: NATIVE_ARCHIVE_FORMAT,
+        version: NATIVE_ARCHIVE_VERSION,
+        applicationVersion: version,
+        kind,
+        rootId,
+        courses,
+        learningPath,
+        files: files.map(({ path: filePath, contentType, sourceReference }) => ({
+          path: filePath,
+          contentType,
+          sourceReference,
+        })),
+      }),
+    )
+    .digest("hex");
+}
+
+/** Sums the bytes the package will hold: each distinct asset once, plus its JSON documents. */
+export function estimateArchiveByteLength(
+  archiveInput: NativeArchiveBuildInput,
+  stagedAssets: NativeArchivePreparedAsset[],
+): number {
+  const assetBytes = [...new Map(stagedAssets.map((asset) => [asset.path, asset])).values()].reduce(
+    (total, asset) => total + asset.byteLength,
+    0,
+  );
+  const documentBytes = [...Object.values(archiveInput.courses), archiveInput.learningPath].reduce(
+    (total: number, document) =>
+      document ? total + Buffer.byteLength(JSON.stringify(document)) : total,
+    0,
+  );
+
+  return assetBytes + documentBytes;
+}
+
 /** Passes archive bytes through and fails the stream once they exceed the archive size limit. */
 export function createSizeLimitedArchiveStream(): Transform {
   let archiveBytes = 0;
@@ -142,7 +212,8 @@ export function createSizeLimitedArchiveStream(): Transform {
 }
 
 /**
- * Streams the manifest, JSON documents, and one file per distinct asset digest.
+ * Streams the manifest, JSON documents, and one file per distinct asset digest. Assets are
+ * stored uncompressed: media is already compressed, so deflating it costs CPU for no size gain.
  * The caller owns the returned stream and the temporary files used to build it.
  */
 export function createNativeArchiveZipStream(
@@ -168,7 +239,8 @@ export function createNativeArchiveZipStream(
 
   const assetsByDigestPath = new Map(stagedAssets.map((asset) => [asset.path, asset]));
   for (const asset of assetsByDigestPath.values()) {
-    zipWriter.file(asset.stagedFilePath, { name: asset.path });
+    const assetEntry: archiver.ZipEntryData = { name: asset.path, store: true };
+    zipWriter.file(asset.stagedFilePath, assetEntry);
   }
 
   queueMicrotask(() => zipWriter.finalize().catch((error) => archiveOutput.destroy(error)));
@@ -404,36 +476,50 @@ export async function readArchiveDocuments(
 }
 
 /**
- * Extracts assets into the temporary directory and verifies their bytes against the manifest.
- * Returns a mapping from each manifest asset path to its extracted file path.
+ * Verifies every asset's bytes against the manifest by streaming them through a hash, without
+ * writing them anywhere. Assets are read from the ZIP again only when they are imported.
  */
-export async function extractVerifiedAssets(
+export async function verifyAssetDigests(
   assets: NativeArchiveManifest["assets"],
   entriesByPath: Map<string, unzipper.File>,
-  temporaryDirectory: string,
-): Promise<Map<string, string>> {
-  await mkdir(temporaryDirectory, { recursive: true });
-
-  const extractedFilesByAssetPath = new Map<string, string>();
+  { onAssetVerified }: NativeArchiveReadOptions = {},
+): Promise<void> {
   const budget: ByteBudget = { remainingBytes: NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES };
 
-  for (const asset of assets) {
+  for (const [assetIndex, asset] of assets.entries()) {
     const assetEntry = entriesByPath.get(asset.path);
     if (!assetEntry) rejectInvalidArchive();
 
-    const extractedFilePath = path.join(temporaryDirectory, asset.sha256);
-    const extractedHash = await copyAndHashAsset(
+    const { sha256, byteLength } = await pipeAndHashAsset(
       assetEntry.stream(),
-      extractedFilePath,
+      createDiscardingStream(),
       assetEntry.uncompressedSize,
       budget,
     );
-    if (extractedHash.sha256 !== asset.sha256 || extractedHash.byteLength !== asset.byteLength) {
-      rejectInvalidArchive();
-    }
-
-    extractedFilesByAssetPath.set(asset.path, extractedFilePath);
+    if (sha256 !== asset.sha256 || byteLength !== asset.byteLength) rejectInvalidArchive();
+    onAssetVerified?.(assetIndex + 1, assets.length);
   }
+}
 
-  return extractedFilesByAssetPath;
+function createDiscardingStream(): Writable {
+  return new Writable({
+    write(_chunk, _encoding, callback) {
+      callback();
+    },
+  });
+}
+
+/** Opens a verified asset of the archive by its manifest path. */
+export function openVerifiedAsset(
+  assets: NativeArchiveManifest["assets"],
+  entriesByPath: Map<string, unzipper.File>,
+  assetPath: string,
+): Readable {
+  const assetEntry = assets.some((asset) => asset.path === assetPath)
+    ? entriesByPath.get(assetPath)
+    : undefined;
+
+  if (!assetEntry) throw new BadRequestException("nativeArchive.error.missingAsset");
+
+  return assetEntry.stream();
 }

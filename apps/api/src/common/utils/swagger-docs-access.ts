@@ -1,5 +1,7 @@
 import { UnauthorizedException, type INestApplication } from "@nestjs/common";
+import { AUTH_TOKEN_PURPOSE } from "@repo/shared";
 
+import { SessionService } from "src/auth/session/session.service";
 import { extractToken } from "src/utils/extract-token";
 
 import type { JwtService } from "@nestjs/jwt";
@@ -31,8 +33,6 @@ const matchesAnyRoute = (path: string, matchers: RegExp[]) =>
 
 export const registerSwaggerDocsAccessControl = ({
   app,
-  jwtService,
-  jwtSecret,
   isDevelopment,
 }: SwaggerDocsAccessOptions) => {
   if (!isDevelopment) {
@@ -48,6 +48,8 @@ export const registerSwaggerDocsAccessControl = ({
       next();
     });
   }
+
+  const sessionService = app.get(SessionService);
 
   app.use(async (request: Request, _response: Response, next: NextFunction) => {
     const path = getRequestPath(request);
@@ -66,7 +68,7 @@ export const registerSwaggerDocsAccessControl = ({
     }
 
     try {
-      const payload = await jwtService.verifyAsync(token, { secret: jwtSecret });
+      const payload = await sessionService.verifySessionToken(token, AUTH_TOKEN_PURPOSE.ACCESS);
       request["user"] = payload;
       next();
     } catch {

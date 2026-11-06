@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { AnyFilesInterceptor, FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
@@ -30,6 +31,7 @@ import {
   type EditableResourceVisibility,
   ENTITY_TYPES,
   FEATURES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -40,6 +42,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
@@ -72,6 +75,7 @@ import {
 } from "./schemas/updateNews.schema";
 
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
+@UsePipes(SanitizeRichTextPipe)
 @Controller("news")
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
@@ -204,9 +208,13 @@ export class NewsController {
   @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async updateNews(
     @Param("id") id: string,
-    @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
+    @Body(new ValidateMultipartPipe(updateNewsSchema), SanitizeRichTextPipe)
+    updateNewsBody: UpdateNews,
     @UploadedFiles(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_IMAGE_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),

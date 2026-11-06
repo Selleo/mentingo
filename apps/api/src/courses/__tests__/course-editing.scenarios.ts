@@ -77,11 +77,6 @@ export const COURSE_FIELD_UPDATES = [
     expectedCourse: { thumbnailPositionY: 80 },
   },
   {
-    field: "thumbnailS3Key",
-    body: { thumbnailS3Key: "course/new-thumbnail.png" },
-    expectedCourse: { thumbnailS3Key: "course/new-thumbnail.png" },
-  },
-  {
     field: "status",
     body: { status: COURSE_STATUSES.DRAFT },
     expectedCourse: { status: COURSE_STATUSES.DRAFT },

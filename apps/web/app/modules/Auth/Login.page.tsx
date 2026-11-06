@@ -90,6 +90,7 @@ export default function LoginPage() {
   const isGoogleOAuthEnabled = loginMethods?.google ?? false;
   const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
   const isSlackOAuthEnabled = loginMethods?.slack ?? false;
+  const isEntraIdOAuthEnabled = loginMethods?.entraId ?? false;
   const isMagicLinkEnabled = loginMethods?.magicLink ?? false;
 
   const { mutateAsync: loginUser } = useLoginUser();
@@ -120,8 +121,12 @@ export default function LoginPage() {
   } = useForm<LoginBody>({ resolver: zodResolver(loginSchema(t)) });
 
   const isAnyProviderEnabled = useMemo(
-    () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
-    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
+    () =>
+      isGoogleOAuthEnabled ||
+      isMicrosoftOAuthEnabled ||
+      isSlackOAuthEnabled ||
+      isEntraIdOAuthEnabled,
+    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled, isEntraIdOAuthEnabled],
   );
 
   const loginResources = loginPageFiles?.resources ?? [];
@@ -229,6 +234,7 @@ export default function LoginPage() {
             isGoogleOAuthEnabled={isGoogleOAuthEnabled}
             isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
             isSlackOAuthEnabled={isSlackOAuthEnabled}
+            isEntraIdOAuthEnabled={isEntraIdOAuthEnabled}
           />
 
           {!inviteOnlyRegistration && isPasswordLoginVisible && (
@@ -279,7 +285,7 @@ export default function LoginPage() {
       <UploadFilesToLoginPagePreviewDialog
         open={isPreviewDialogOpen}
         resourceName={previewResource?.name ?? t("loginFilesUpload.unnamedFile")}
-        resourceUrl={previewResource?.resourceUrl ?? ""}
+        resourceId={previewResource?.id ?? null}
         onClose={handleClosePreviewDialog}
       />
     </>

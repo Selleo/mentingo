@@ -1,8 +1,9 @@
-import { PERMISSIONS, type PermissionKey } from "@repo/shared";
+import { COURSE_STATUSES, PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useMarkCourseOpened } from "~/api/mutations/useMarkCourseOpened";
 import { useCurrentUser } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { hasPermission } from "~/common/permissions/permission.utils";
 
 import type { PropsWithChildren } from "react";
@@ -25,6 +26,7 @@ type CourseExperienceResolverParams = {
   canUpdateLearningProgress: boolean;
   canEditCourse?: boolean;
   activeLearningModeCourseIds: string[];
+  publicCoursePreviewEnabled?: boolean;
 };
 
 type CourseUpdateAccessParams = {
@@ -60,6 +62,7 @@ export function resolveCourseExperienceState({
   canUpdateLearningProgress,
   canEditCourse = false,
   activeLearningModeCourseIds,
+  publicCoursePreviewEnabled = false,
 }: CourseExperienceResolverParams): CourseExperienceContextValue {
   const isCourseStudentModeActive =
     !forcePreviewMode && canUseLearningMode && activeLearningModeCourseIds.includes(course.id);
@@ -71,7 +74,17 @@ export function resolveCourseExperienceState({
 
   const canLearnByLearningMode = canUseLearningMode && isCourseStudentModeActive;
 
+  const isPublicCoursePreview =
+    publicCoursePreviewEnabled &&
+    Boolean(currentUserId) &&
+    !course.enrolled &&
+    course.status === COURSE_STATUSES.PUBLISHED &&
+    !course.isArchived &&
+    course.priceInCents === 0 &&
+    !isCourseStudentModeActive;
+
   const isPreviewMode =
+    isPublicCoursePreview ||
     forcePreviewMode ||
     !currentUserId ||
     (canUseLearningMode && !canLearnByLearningMode && !canLearnByEnrollment);
@@ -96,6 +109,7 @@ export function CourseAccessProvider({
   children,
 }: CourseAccessProviderProps) {
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
   const { mutate: markCourseOpened } = useMarkCourseOpened();
 
   const permissions = currentUser?.permissions ?? [];
@@ -113,17 +127,19 @@ export function CourseAccessProvider({
   const value = useMemo(() => {
     return resolveCourseExperienceState({
       course,
-      forcePreviewMode,
+      forcePreviewMode: forcePreviewMode || (!globalSettings && !course.enrolled),
       currentUserId: currentUser?.id,
       canUseLearningMode,
       canUpdateLearningProgress,
       canEditCourse,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
+      publicCoursePreviewEnabled: globalSettings?.publicCoursePreviewEnabled,
     });
   }, [
     course,
     currentUser?.id,
     currentUser?.studentModeCourseIds,
+    globalSettings,
     forcePreviewMode,
     canUseLearningMode,
     canUpdateLearningProgress,

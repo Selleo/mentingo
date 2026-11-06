@@ -1,18 +1,13 @@
-import { Link, useSearchParams } from "@remix-run/react";
-import { ArrowLeft, FileText, FolderUp, Package } from "lucide-react";
+import { useSearchParams } from "@remix-run/react";
+import { FileText, FolderUp, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import {
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "~/components/ui/breadcrumb";
-import { Button } from "~/components/ui/button";
+import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { COURSE_TYPE_SELECTOR_HANDLES } from "../../../../e2e/data/courses/handles";
 
+import Breadcrumb from "./components/Breadcrumb";
 import { CourseTypeCard } from "./components/CourseTypeCard";
 import { getAddCourseExitPath, withAddCourseContext } from "./utils/addCourseOrigin";
 
@@ -24,7 +19,6 @@ type CourseTypeOption = {
   href: string;
   icon: LucideIcon;
   testId: string;
-  featureKeys: string[];
 };
 
 const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
@@ -33,36 +27,18 @@ const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
     href: "/admin/beta-courses/new/standard",
     icon: FileText,
     testId: COURSE_TYPE_SELECTOR_HANDLES.STANDARD_CARD,
-    featureKeys: [
-      "adminCourseTypeSelector.standard.features.authoring",
-      "adminCourseTypeSelector.standard.features.curriculum",
-      "adminCourseTypeSelector.standard.features.translations",
-      "adminCourseTypeSelector.standard.features.settings",
-    ],
   },
   {
     id: "scorm",
     href: "/admin/courses/new-scorm",
     icon: Package,
     testId: COURSE_TYPE_SELECTOR_HANDLES.SCORM_CARD,
-    featureKeys: [
-      "adminCourseTypeSelector.scorm.features.import",
-      "adminCourseTypeSelector.scorm.features.tracking",
-      "adminCourseTypeSelector.scorm.features.structure",
-      "adminCourseTypeSelector.scorm.features.future",
-    ],
   },
   {
     id: "mentingoPackage",
     href: "/admin/courses/import-package",
     icon: FolderUp,
     testId: COURSE_TYPE_SELECTOR_HANDLES.MENTINGO_PACKAGE_CARD,
-    featureKeys: [
-      "adminCourseTypeSelector.mentingoPackage.features.structure",
-      "adminCourseTypeSelector.mentingoPackage.features.settings",
-      "adminCourseTypeSelector.mentingoPackage.features.assets",
-      "adminCourseTypeSelector.mentingoPackage.features.learningPath",
-    ],
   },
 ];
 
@@ -78,56 +54,31 @@ const CourseTypeSelectorPage = () => {
   return (
     <main
       data-testid={COURSE_TYPE_SELECTOR_HANDLES.PAGE}
-      className="min-h-screen bg-white px-6 py-8 md:px-10 lg:px-16"
+      className="flex h-screen overflow-auto bg-white px-20 py-8"
     >
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center">
-        <BreadcrumbList className="mb-8">
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild className="body-base-md text-primary-800">
-              <Button asChild variant="outline" className="mr-2 w-min">
-                <Link to={exitPath} data-testid={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON}>
-                  <ArrowLeft className="mr-2 size-3" />
-                  {t("adminCourseTypeSelector.back")}
-                </Link>
-              </Button>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href="/admin/courses"
-              className="text-neutral-850 body-base-md hover:text-neutral-850"
-            >
-              {t("adminCourseView.settings.breadcrumbs.myCourses")}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem className="body-base-md text-neutral-950">
-            {t("adminCourseView.settings.breadcrumbs.createNew")}
-          </BreadcrumbItem>
-        </BreadcrumbList>
-
-        <div className="mb-8 max-w-3xl">
-          <p className="body-base-md mb-3 text-primary-800">
-            {t("adminCourseTypeSelector.eyebrow")}
-          </p>
-          <h1 className="h2 text-neutral-950">{t("adminCourseTypeSelector.title")}</h1>
-          <p className="body-lg mt-4 text-neutral-700">{t("adminCourseTypeSelector.subtitle")}</p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="flex w-full items-center justify-center">
+        <img src={SplashScreenImage} alt="" className="rounded" />
+      </div>
+      <div className="flex w-full max-w-[820px] flex-col justify-center gap-y-6 px-8">
+        <Breadcrumb backTo={exitPath} backButtonTestId={COURSE_TYPE_SELECTOR_HANDLES.BACK_BUTTON} />
+        <hgroup className="flex flex-col gap-1">
+          <h1 className="h3 text-neutral-950">{t("adminCourseTypeSelector.title")}</h1>
+          <p className="body-lg-md text-neutral-800">{t("adminCourseTypeSelector.subtitle")}</p>
+        </hgroup>
+        <ul className="flex flex-col gap-3">
           {COURSE_TYPE_OPTIONS.map((option) => (
-            <CourseTypeCard
-              key={option.id}
-              title={t(`adminCourseTypeSelector.${option.id}.title`)}
-              description={t(`adminCourseTypeSelector.${option.id}.description`)}
-              features={option.featureKeys.map((featureKey) => t(featureKey))}
-              href={getOptionHref(option)}
-              icon={option.icon}
-              accent={option.id}
-              testId={option.testId}
-            />
+            <li key={option.id}>
+              <CourseTypeCard
+                title={t(`adminCourseTypeSelector.${option.id}.title`)}
+                description={t(`adminCourseTypeSelector.${option.id}.description`)}
+                href={getOptionHref(option)}
+                icon={option.icon}
+                accent={option.id}
+                testId={option.testId}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </main>
   );

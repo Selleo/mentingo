@@ -1,21 +1,20 @@
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+} from "@repo/shared";
+
 export const REDIS_TTL = 59 * 60 * 1000;
-export const MAX_FILE_SIZE = 1024 * 1024 * 1024;
-export const MAX_VIDEO_SIZE = 5 * 1024 * 1024 * 1024;
-export const MAX_PRESENTATION_FILE_SIZE_VALUE = 150;
-export const MAX_PRESENTATION_FILE_SIZE_UNIT = "MB";
-export const MAX_PRESENTATION_FILE_SIZE = MAX_PRESENTATION_FILE_SIZE_VALUE * 1024 * 1024;
 export const PRESENTATION_PDF_PREVIEW_CONTENT_TYPE = "application/pdf";
 
 export const ALLOWED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/svg+xml",
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "video/mp4",
-  "video/quicktime",
-  "text/csv",
+  ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ...ALLOWED_PDF_FILE_TYPES,
+  ...ALLOWED_PRESENTATION_FILE_TYPES,
+  ...ALLOWED_VIDEO_FILE_TYPES,
+  ...ALLOWED_EXCEL_FILE_TYPES,
 ] as const;
 
 export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
@@ -26,19 +25,20 @@ export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
   svg: "image/svg+xml",
   pdf: "application/pdf",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  odp: "application/vnd.oasis.opendocument.presentation",
   mp4: "video/mp4",
   mov: "video/quicktime",
+  qt: "video/quicktime",
+  webm: "video/webm",
+  ogg: "video/ogg",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv",
 };
 
 export const ALLOWED_EXCEL_MIME_TYPES_MAP = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   csv: "text/csv",
 };
-
-export const ALLOWED_EXCEL_MIME_TYPES = [
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "text/csv",
-] as const;
 
 export const RESOURCE_RELATIONSHIP_TYPES = {
   ATTACHMENT: "attachment",

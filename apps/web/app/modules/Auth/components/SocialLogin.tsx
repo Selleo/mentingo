@@ -15,6 +15,7 @@ interface SocialLoginProps {
   isGoogleOAuthEnabled?: boolean;
   isMicrosoftOAuthEnabled?: boolean;
   isSlackOAuthEnabled?: boolean;
+  isEntraIdOAuthEnabled?: boolean;
 }
 
 export function SocialLogin({
@@ -23,10 +24,15 @@ export function SocialLogin({
   isGoogleOAuthEnabled,
   isMicrosoftOAuthEnabled,
   isSlackOAuthEnabled,
+  isEntraIdOAuthEnabled,
 }: SocialLoginProps) {
   const { t } = useTranslation();
   const isAnyAlternativeLoginEnabled =
-    isMagicLinkEnabled || isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled;
+    isMagicLinkEnabled ||
+    isGoogleOAuthEnabled ||
+    isMicrosoftOAuthEnabled ||
+    isSlackOAuthEnabled ||
+    isEntraIdOAuthEnabled;
 
   const handleProviderSignIn = (provider: string) => () => {
     const authUrl = new URL(`${baseUrl}/api/auth/${provider}`);
@@ -73,6 +79,14 @@ export function SocialLogin({
           buttonTextTranslationKey="common.continueWithMicrosoft"
           handleSignIn={handleProviderSignIn("microsoft")}
           testId={SSO_LOGIN_HANDLES.MICROSOFT}
+        />
+      )}
+      {isEntraIdOAuthEnabled && (
+        <ProviderOAuthLoginButton
+          iconName="EntraId"
+          buttonTextTranslationKey="common.continueWithEntraId"
+          handleSignIn={handleProviderSignIn("entra-id")}
+          testId={SSO_LOGIN_HANDLES.ENTRA_ID}
         />
       )}
       {isSlackOAuthEnabled && (

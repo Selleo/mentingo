@@ -1,8 +1,7 @@
+import { MAX_SCORM_PACKAGE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { z } from "zod";
 
 import type i18next from "i18next";
-
-const MAX_SCORM_FILE_SIZE = 500 * 1024 * 1024;
 
 const isFile = (value: unknown): value is File =>
   typeof File !== "undefined" && value instanceof File;
@@ -15,8 +14,10 @@ export const scormLessonFormSchema = (t: typeof i18next.t, isEditing = false) =>
       : z
           .unknown()
           .refine((file) => isFile(file), t("adminScorm.lesson.validation.packageRequired"))
-          .refine((file) => !isFile(file) || file.size <= MAX_SCORM_FILE_SIZE, {
-            message: t("adminScorm.lesson.validation.packageTooLarge"),
+          .refine((file) => !isFile(file) || file.size <= MAX_SCORM_PACKAGE_SIZE_BYTES, {
+            message: t("adminScorm.lesson.validation.packageTooLarge", {
+              maxSize: formatFileSize(MAX_SCORM_PACKAGE_SIZE_BYTES),
+            }),
           })
           .refine((file) => !isFile(file) || file.name.toLowerCase().endsWith(".zip"), {
             message: t("adminScorm.lesson.validation.packageInvalidType"),

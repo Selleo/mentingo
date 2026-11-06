@@ -36,6 +36,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.request
+import urllib.parse
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
@@ -130,16 +131,48 @@ def plan_uploads(staged, existing):
     return [name for name in staged if name not in existing], conflicts
 
 
-def notes_section(tag, code, links):
-    """The notes section linking the film's assets the release has."""
-    labels = (('film', 'film (MP4)'), ('page', 'page with the film and every pull request (ZIP)'),
-              ('captions_vtt', 'narration subtitles (VTT)'))
+def notes_section(tag, code, links, base_url=None, video_url=None, video_sha256=None):
+    """An inline player; watch/download links appear only when embedding is unavailable."""
     names = asset_names(tag, code)
-    parts = [f'[{label}]({links[names[key]]})' for key, label in labels if names[key] in links]
+    watch = f'{base_url.rstrip("/")}/{tag}/' if base_url else None
+    parts = [f'[Watch video]({watch})'] if watch else []
+    if names['film'] in links:
+        parts.append(f'[Download MP4]({links[names["film"]]})')
     preview = ''
-    if names['poster'] in links and names['film'] in links:
-        preview = f'[![Watch the release film]({links[names["poster"]]})]({links[names["film"]]})\n\n'
-    return f'{MARK_START}\n## 🎬 Release film\n\n{preview}A narrated demo of this release: {" · ".join(parts)}\n{MARK_END}'
+    if video_url:
+        check(re.fullmatch(r'https://github\.com/user-attachments/assets/[a-fA-F0-9-]+', video_url),
+              'the inline video must be a GitHub media attachment')
+        check(re.fullmatch(r'[a-f0-9]{64}', video_sha256 or ''), 'the inline video needs its film checksum')
+        preview = f'<!-- release-film-video sha256={video_sha256} url={video_url} -->\n\n{video_url}\n\n'
+        parts = []
+    elif names['poster'] in links and (watch or names['film'] in links):
+        preview = f'[![Watch video]({links[names["poster"]]})]({watch or links[names["film"]]})\n\n'
+    return f'{MARK_START}\n## 🎬 Release film\n\n{preview}{" · ".join(parts)}\n{MARK_END}'
+
+
+def upload_video(path, repo, body, checksum):
+    """Use the same media endpoint as github.com/cli/cli internal/attachments/client.go.
+
+    A release asset URL downloads; a bare media attachment URL renders an inline player.
+    Reuse a matching attachment on publication retries instead of uploading it again.
+    """
+    saved = re.search(r'<!-- release-film-video sha256=' + re.escape(checksum) +
+                      r' url=(https://github\.com/user-attachments/assets/[a-fA-F0-9-]+) -->', body or '')
+    if saved:
+        return saved[1]
+    path = Path(path)
+    check(0 < path.stat().st_size <= 100 * 1024 * 1024, 'GitHub inline videos must be at most 100 MB')
+    repository_id = json.loads(gh('api', f'repos/{repo}'))['id']
+    check(isinstance(repository_id, int) and repository_id > 0, 'GitHub returned no valid repository ID')
+    query = urllib.parse.urlencode({'name': path.name, 'content_type': 'video/mp4', 'repository_id': repository_id})
+    answer = json.loads(gh('api', f'https://uploads.github.com/user-attachments/assets?{query}', '--method', 'POST',
+                           '-H', 'Content-Type: application/octet-stream', '-H', 'Accept: application/vnd.github+json',
+                           '--input', str(path)))
+    check(isinstance(answer, dict), 'GitHub returned no media attachment')
+    url = answer.get('url', '')
+    check(isinstance(url, str) and re.fullmatch(r'https://github\.com/user-attachments/assets/[a-fA-F0-9-]+', url),
+          'GitHub returned no valid inline video URL')
+    return url
 
 
 def with_section(body, section):
@@ -258,13 +291,24 @@ def publish(folder, target, repo=None, replace=False, base_url=None):
         gh('release', 'upload', release['tag_name'], '--repo', repo, *[str(folder / name) for name in uploads])
     release = json.loads(gh('api', f'repos/{repo}/releases/{release["id"]}'))
     links = {a['name']: a['browser_download_url'] for a in release.get('assets') or []}
-    body = with_section(release.get('body'), notes_section(tag, code, links))
+    film_name = asset_names(tag, code)['film']
+    video_url, video_error = None, None
+    try:
+        video_url = upload_video(folder / film_name, repo, release.get('body'), manifest['assets'][film_name])
+    except (SystemExit, OSError, ValueError, KeyError) as error:
+        video_error = str(error).removeprefix('::error::')
+        fallback = 'Watch video' if base_url else 'Download MP4'
+        print(f'::warning::Inline release player unavailable; use {fallback}. ' +
+              video_error.replace('\n', ' ')[:400], file=sys.stderr)
+    body = with_section(release.get('body'), notes_section(tag, code, links, base_url, video_url,
+                                                         manifest['assets'][film_name]))
     if body != (release.get('body') or ''):
         gh('api', '-X', 'PATCH', f'repos/{repo}/releases/{release["id"]}', '-F', 'body=@-', input_text=body)
     return {'target': target, 'release': release.get('html_url'), 'removed': stale, 'site_film_replaced': on_site,
             'uploaded': uploads,
             'kept': [name for name in manifest['assets'] if name not in uploads],
-            'notes': 'updated' if body != (release.get('body') or '') else 'unchanged'}
+            'notes': 'updated' if body != (release.get('body') or '') else 'unchanged',
+            'inline_player': video_url, 'inline_player_error': video_error}
 
 
 def index_page(repo, releases, brand=None):

@@ -10,12 +10,11 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE_BYTES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { isAxiosError } from "axios";
 import { v5 as uuidv5 } from "uuid";
 
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
@@ -389,7 +388,7 @@ export class CourseAuthoringApplicationService {
     const preparedDocumentIds: Record<string, string[]> = {};
     if (!existing)
       for (const asset of exported.assets) {
-        if (asset.byteSize > MAX_FILE_SIZE)
+        if (asset.byteSize > MAX_FILE_SIZE_BYTES)
           throw new BadRequestException("courseAuthoring.errors.assetTooLarge");
         const downloaded = await client.authoring.downloadAsset({
           sessionId: data.sessionId,
@@ -450,16 +449,16 @@ export class CourseAuthoringApplicationService {
         }
         await FileGuard.validateFile(file, {
           allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-          maxSize: MAX_FILE_SIZE,
+          maxSize: MAX_FILE_SIZE_BYTES,
         });
         const key = prefixTenantStorageKey(
           `course-authoring/${data.sessionId}/${asset.assetId}/${asset.revision}/${asset.sha256}`,
           actor.tenantId,
         );
         await this.receipts.recordStagedAsset(actor.tenantId, data.sessionId, data.exportId, key);
-        await this.storage.uploadFile(buffer, key, asset.mimeType);
+        await this.storage.uploadFile(file.buffer, key, file.mimetype);
         assets[asset.assetId] = key;
-        assetMimeTypes[asset.assetId] = asset.mimeType;
+        assetMimeTypes[asset.assetId] = file.mimetype;
       }
     if (!existing) {
       const operations = exported.operations;

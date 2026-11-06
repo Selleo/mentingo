@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { SupportedLanguages } from "@repo/shared";
@@ -77,7 +78,7 @@ export class ArticleFactory {
   async createSection(
     input: ArticleSectionFactoryCreateInput = {},
   ): Promise<ArticleSectionFactoryRecord> {
-    const language = input.language ?? "en";
+    const language = input.language ?? getSelfOnboardingLanguage();
     const response = await this.apiClient.api.articlesControllerCreateArticleSection({ language });
     const sectionId = response.data.data.id;
 
@@ -90,7 +91,7 @@ export class ArticleFactory {
   }
 
   async create(input: ArticleFactoryCreateInput = {}): Promise<ArticleFactoryRecord> {
-    const language = input.language ?? "en";
+    const language = input.language ?? getSelfOnboardingLanguage();
     let sectionId = input.sectionId;
 
     if (!sectionId) {
@@ -124,7 +125,7 @@ export class ArticleFactory {
     article: ArticleFactoryRecord;
     section: ArticleSectionFactoryRecord;
   }> {
-    const language = input.language ?? "en";
+    const language = input.language ?? getSelfOnboardingLanguage();
     const section = input.sectionId
       ? await this.getSectionById(input.sectionId, language)
       : await this.createSection({
@@ -141,14 +142,17 @@ export class ArticleFactory {
     return { article, section };
   }
 
-  async getById(id: string, language: SupportedLanguages = "en"): Promise<ArticleFactoryRecord> {
+  async getById(
+    id: string,
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
+  ): Promise<ArticleFactoryRecord> {
     const response = await this.apiClient.api.articlesControllerGetArticle(id, { language });
     return response.data.data;
   }
 
   async safeGetById(
     id: string,
-    language: SupportedLanguages = "en",
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<ArticleFactoryRecord | null> {
     try {
       return await this.getById(id, language);
@@ -158,7 +162,7 @@ export class ArticleFactory {
   }
 
   async update(id: string, data: ArticleFactoryUpdateInput): Promise<ArticleFactoryRecord> {
-    const language = data.language ?? "en";
+    const language = data.language ?? getSelfOnboardingLanguage();
 
     await this.apiClient.api.articlesControllerUpdateArticle(
       id,
@@ -174,7 +178,7 @@ export class ArticleFactory {
 
   async getSectionById(
     id: string,
-    language: SupportedLanguages = "en",
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<ArticleSectionFactoryRecord> {
     const response = await this.apiClient.api.articlesControllerGetArticleSection(id, { language });
     return response.data.data;
@@ -182,7 +186,7 @@ export class ArticleFactory {
 
   async safeGetSectionById(
     id: string,
-    language: SupportedLanguages = "en",
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<ArticleSectionFactoryRecord | null> {
     try {
       return await this.getSectionById(id, language);
@@ -195,7 +199,7 @@ export class ArticleFactory {
     id: string,
     data: ArticleSectionFactoryCreateInput,
   ): Promise<ArticleSectionFactoryRecord> {
-    const language = data.language ?? "en";
+    const language = data.language ?? getSelfOnboardingLanguage();
 
     await this.apiClient.api.articlesControllerUpdateArticleSection(id, {
       translations: [{ language, title: data.title }],
@@ -209,7 +213,7 @@ export class ArticleFactory {
   }
 
   async getToc(
-    language: SupportedLanguages = "en",
+    language: SupportedLanguages = getSelfOnboardingLanguage(),
     isDraftMode?: boolean,
   ): Promise<ArticleTocSectionRecord[]> {
     const response = await this.apiClient.api.articlesControllerGetArticleToc({

@@ -1,5 +1,6 @@
 import type {
   NativeArchiveAsset,
+  NativeArchiveProgressReporter,
   NativeArchiveScormAssetDirectory,
   ParsedNativeArchive,
 } from "../native-archive.types";
@@ -17,9 +18,19 @@ export type NativeArchiveAssetStagingContext = {
   uploadedFileReferences: string[];
   uploadedS3Keys: string[];
   resourceIds: UUIDType[];
+  progress: NativeArchiveProgressReporter;
+  uploadWork: { completed: number; total: number };
 };
 
 export type NativeArchiveImageAssetGroup = {
   sourceBase: string;
   assets: NativeArchiveAsset[];
+};
+
+export type NativeArchiveAssetUpload = {
+  asset: NativeArchiveAsset;
+  targetReference: string;
+  contentType: string;
+  isLessonFile: boolean;
+  isContentAddressed: boolean;
 };

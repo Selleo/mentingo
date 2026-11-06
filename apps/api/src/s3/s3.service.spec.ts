@@ -1,8 +1,14 @@
 import { Readable } from "stream";
 
+import {
+  AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+} from "@aws-sdk/client-s3";
 import { Logger } from "@nestjs/common";
 
-import { S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
+import { S3_MULTIPART_UPLOAD_CONCURRENCY, S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
 
 import { S3Service } from "./s3.service";
 
@@ -85,5 +91,119 @@ describe("S3Service", () => {
     const stream = await service.getFileStream("tenant/file.txt");
 
     expect(stream.streamTimeoutMs).toBe(S3_OPERATION_TIMEOUT_MS);
+  });
+
+  const PART_SIZE = 5 * 1024 * 1024;
+  const CHUNK_SIZE = 1024 * 1024;
+
+  function arrangeMultipartUpload({ failingPartNumber }: { failingPartNumber?: number } = {}) {
+    const service = new S3Service(buildConfigService());
+    const client = (service as unknown as { s3Client: { send: (...args: unknown[]) => unknown } })
+      .s3Client;
+    const uploadedParts: Array<{ partNumber: number; byteLength: number }> = [];
+    let partsInFlight = 0;
+    let maxPartsInFlight = 0;
+    const send = jest.spyOn(client, "send").mockImplementation(async (command: unknown) => {
+      if (command instanceof CreateMultipartUploadCommand) return { UploadId: "upload-1" };
+      if (command instanceof UploadPartCommand) {
+        const partNumber = command.input.PartNumber ?? 0;
+        partsInFlight += 1;
+        maxPartsInFlight = Math.max(maxPartsInFlight, partsInFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        partsInFlight -= 1;
+        if (partNumber === failingPartNumber) throw new Error("part upload failed");
+        uploadedParts.push({ partNumber, byteLength: (command.input.Body as Buffer).length });
+        return { ETag: `"etag-${partNumber}"` };
+      }
+      return {};
+    });
+
+    const sentCommands = <T>(commandType: new (...args: never[]) => T): T[] =>
+      send.mock.calls
+        .map(([command]) => command)
+        .filter((command): command is T => command instanceof commandType);
+
+    return {
+      service,
+      uploadedParts,
+      sentCommands,
+      getMaxPartsInFlight: () => maxPartsInFlight,
+    };
+  }
+
+  const megabyteChunks = (chunkCount: number) =>
+    Readable.from(Array.from({ length: chunkCount }, () => Buffer.alloc(CHUNK_SIZE, 1)));
+
+  it("joins small chunks into full parts and completes them in order", async () => {
+    const { service, uploadedParts, sentCommands } = arrangeMultipartUpload();
+
+    await service.uploadStreamMultipart(
+      megabyteChunks(16),
+      "tenant/archive.zip",
+      "application/zip",
+      { partSize: PART_SIZE },
+    );
+
+    expect([...uploadedParts].sort((left, right) => left.partNumber - right.partNumber)).toEqual([
+      { partNumber: 1, byteLength: PART_SIZE },
+      { partNumber: 2, byteLength: PART_SIZE },
+      { partNumber: 3, byteLength: PART_SIZE },
+      { partNumber: 4, byteLength: CHUNK_SIZE },
+    ]);
+    const [completeCommand] = sentCommands(CompleteMultipartUploadCommand);
+    expect(completeCommand?.input.MultipartUpload?.Parts).toEqual(
+      [1, 2, 3, 4].map((partNumber) =>
+        expect.objectContaining({ ETag: `"etag-${partNumber}"`, PartNumber: partNumber }),
+      ),
+    );
+  });
+
+  it("uploads several parts at once, never more than the concurrency limit", async () => {
+    const { service, getMaxPartsInFlight } = arrangeMultipartUpload();
+
+    await service.uploadStreamMultipart(
+      megabyteChunks(30),
+      "tenant/archive.zip",
+      "application/zip",
+      { partSize: PART_SIZE },
+    );
+
+    expect(getMaxPartsInFlight()).toBeGreaterThan(1);
+    expect(getMaxPartsInFlight()).toBeLessThanOrEqual(S3_MULTIPART_UPLOAD_CONCURRENCY);
+  });
+
+  it("aborts the upload and reports the error when a part fails", async () => {
+    const { service, sentCommands } = arrangeMultipartUpload({ failingPartNumber: 2 });
+
+    await expect(
+      service.uploadStreamMultipart(megabyteChunks(16), "tenant/archive.zip", "application/zip", {
+        partSize: PART_SIZE,
+      }),
+    ).rejects.toThrow("part upload failed");
+
+    expect(sentCommands(AbortMultipartUploadCommand)).toHaveLength(1);
+    expect(sentCommands(CompleteMultipartUploadCommand)).toHaveLength(0);
+  });
+
+  it("reports the bytes uploaded as parts finish", async () => {
+    const { service } = arrangeMultipartUpload();
+    const onUploadedBytes = jest.fn();
+
+    await service.uploadStreamMultipart(
+      megabyteChunks(11),
+      "tenant/archive.zip",
+      "application/zip",
+      {
+        partSize: PART_SIZE,
+        onUploadedBytes,
+      },
+    );
+
+    expect(onUploadedBytes.mock.calls.at(-1)).toEqual([11 * CHUNK_SIZE]);
+    expect(onUploadedBytes.mock.calls.map(([uploadedBytes]) => uploadedBytes)).toEqual(
+      [...onUploadedBytes.mock.calls.map(([uploadedBytes]) => uploadedBytes)].sort(
+        (left, right) => left - right,
+      ),
+    );
   });
 });

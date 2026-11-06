@@ -1,0 +1,397 @@
+name: Self-onboarding
+on:
+  # A branch-only workflow needs an initial run before API/CLI manual dispatch.
+  # This event registers the Self-onboarding workflow without running the recorder.
+  push:
+    branches: ['jh_*']
+    paths: ['.github/workflows/self-onboarding.yml']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact version tag to demonstrate (no GitHub Release required)
+        required: false
+        type: string
+      domains:
+        description: Comma-separated domains; empty means all reviewed registry domains
+        default: ''
+        type: string
+      languages:
+        description: Comma-separated recorded languages; native EN/PL captures reuse one scenario and voice
+        default: en,pl
+        type: string
+      force:
+        description: Explicitly regenerate all flows in the selected domains
+        default: false
+        type: boolean
+      dry_run:
+        description: Analyze coverage and flow changes without recording or publishing
+        default: false
+        type: boolean
+      visual_review:
+        description: Optional advisory image review (slower; never blocks generation)
+        default: false
+        type: boolean
+      publish:
+        description: Publish the reviewed feature videos to Helpdesk (default branch or explicitly approved commit)
+        default: false
+        type: boolean
+      resume_publication:
+        description: Resume the saved pending bundle without analysis or recording
+        default: false
+        type: boolean
+      retry_failed:
+        description: Explicitly retry recoverable failed media/indexing operations while resuming
+        default: false
+        type: boolean
+      business_spec:
+        description: Exact business spec path; selects all short videos for its feature
+        default: ''
+        type: string
+      test_mode:
+        description: Isolated branch test; fresh state and downloadable artifacts, no publishing or build-store access
+        default: false
+        type: boolean
+      test_flow:
+        description: Isolated test only; exact registered flow ID to record (empty records all selected flows)
+        default: ''
+        type: string
+      target_ref:
+        description: Source branch or commit to record in test mode (default this workflow commit)
+        default: ''
+        type: string
+
+      registration_only:
+        description: Verify this manual trigger without recording, provider keys or publication
+        default: false
+        type: boolean
+
+permissions: {}
+concurrency:
+  # This also serializes the private build-state writer across recording/publication.
+  group: self-onboarding-${{ (github.event_name == 'push' || inputs.registration_only || inputs.test_mode) && github.run_id || 'production' }}
+  cancel-in-progress: false
+  queue: max
+jobs:
+  register:
+    name: Register the standalone self-onboarding workflow
+    if: github.event_name == 'push' || inputs.registration_only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Confirm the Self-onboarding entry point
+        run: |
+          echo 'Self-onboarding workflow registered. Dispatch self-onboarding.yml with test_mode=true and business_spec to record a branch test.' >> "$GITHUB_STEP_SUMMARY"
+
+  generate:
+    name: Analyze flows and build affected feature videos
+    if: github.event_name == 'workflow_dispatch' && !inputs.registration_only && (inputs.test_mode || github.ref_name == github.event.repository.default_branch || github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA)
+    environment: release-film
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    env:
+      RELEASE_FILM_HOME: /mnt/self-onboarding
+      RELEASE_FILM_CI: '1'
+      RELEASE_FILM_CI_WORKERS: '1'
+      S: .agents/skills/release-film/scripts
+      CACHE: ${{ github.workspace }}/.local/self-onboarding-build
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Resolve version and validate configuration
+        id: source
+        env:
+          VERSION_TAG: ${{ inputs.version }}
+          TEST_MODE: ${{ inputs.test_mode }}
+          TARGET_REF: ${{ inputs.target_ref }}
+          BUSINESS_SPEC: ${{ inputs.business_spec }}
+          PUBLISH: ${{ inputs.publish }}
+          RESUME: ${{ inputs.resume_publication }}
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+        run: |
+          set -euo pipefail
+          if [ "$TEST_MODE" = true ]; then
+            test -n "$BUSINESS_SPEC"
+            test "$PUBLISH" != true
+            test "$RESUME" != true
+            commit=$(git rev-parse --verify --end-of-options "${TARGET_REF:-$GITHUB_SHA}^{commit}")
+            echo "record_ref=$commit" >> "$GITHUB_OUTPUT"
+            echo "record_version=v0.0.0-self-onboarding-test.$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+          else
+            [[ "$VERSION_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
+            test -z "$TARGET_REF"
+            git rev-parse --verify "refs/tags/$VERSION_TAG^{commit}" >/dev/null
+            test -n "$STORE"
+            echo "record_version=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          fi
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME" "$RELEASE_FILM_HOME/projects" "$RELEASE_FILM_HOME/tools" "$RELEASE_FILM_HOME/runs"
+          cp .agents/skills/release-film/projects/selleo__mentingo.json "$RELEASE_FILM_HOME/projects/selleo__mentingo.json"
+      - name: Restore private reusable flow segments and publication progress
+        id: restore
+        if: ${{ !inputs.test_mode }}
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/self_onboarding_store.py" pull --uri "$STORE" --cache "$CACHE"
+      - name: Initialize isolated test state
+        if: ${{ inputs.test_mode }}
+        run: |
+          python3 - <<'PYINIT'
+          import json, os, pathlib
+          cache = pathlib.Path(os.environ['CACHE'])
+          cache.mkdir(parents=True, exist_ok=True)
+          (cache/'state.json').write_text(json.dumps({'schemaVersion':1,'languages':{},'published':{},'publications':{}}))
+          PYINIT
+      - name: Check recording credentials before model work
+        if: ${{ !inputs.resume_publication }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+          ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+          ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+          ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo '::error::Configure CLAUDE_CODE_OAUTH_TOKEN in the selected recording environment or repository secrets.'
+            exit 1
+          fi
+          if [ "$DRY_RUN" != true ] && [ -z "$ELEVENLABS_API_KEY" ]; then
+            echo '::error::Configure ELEVENLABS_API_KEY before recording, or select dry-run for analysis only.'
+            exit 1
+          fi
+          if [ "$DRY_RUN" != true ]; then
+            PYTHONPATH="$S" python3 -c 'import self_onboarding_voices; self_onboarding_voices.configured_pool(required=True)'
+          fi
+      - name: Install recorder tools
+        if: ${{ !inputs.resume_publication }}
+        run: bash .agents/skills/release-film/ci/install-tools.sh
+      - name: Analyze business-spec coverage and actual flow changes
+        if: ${{ !inputs.resume_publication }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          VERSION_TAG: ${{ steps.source.outputs.record_version }}
+          TEST_MODE: ${{ inputs.test_mode }}
+          TARGET_REF: ${{ steps.source.outputs.record_ref }}
+          BUSINESS_SPEC: ${{ inputs.business_spec }}
+          TEST_FLOW: ${{ inputs.test_flow }}
+          DOMAINS: ${{ inputs.domains }}
+          LANGUAGES: ${{ inputs.languages }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          args=(plan --target "$VERSION_TAG" --cache "$CACHE" --out "$RUNNER_TEMP/self-onboarding-plan.json" \
+            --domains "$DOMAINS" --languages "$LANGUAGES")
+          if [ "$FORCE" = true ]; then args+=(--force); fi
+          if [ -n "$BUSINESS_SPEC" ]; then args+=(--business-spec "$BUSINESS_SPEC"); fi
+          if [ -n "$TEST_FLOW" ]; then args+=(--test-flow "$TEST_FLOW"); fi
+          if [ "$TEST_MODE" = true ]; then args+=(--test-mode --target-ref "$TARGET_REF"); fi
+          python3 "$S/self_onboarding.py" "${args[@]}"
+      - name: Install the pinned ElevenLabs realtime transport
+        if: ${{ !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 -m venv "$RELEASE_FILM_HOME/tools/elevenlabs"
+          "$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
+          echo "RELEASE_FILM_TTS_PYTHON=$RELEASE_FILM_HOME/tools/elevenlabs/bin/python" >> "$GITHUB_ENV"
+      - name: Record changed flows and assemble available videos
+        if: ${{ !inputs.dry_run && !inputs.resume_publication }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+          ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+          ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+          ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
+          ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_v4_turbo' }}
+          SELF_ONBOARDING_VISUAL_REVIEW: ${{ inputs.visual_review && '1' || '0' }}
+        run: |
+          python3 "$S/self_onboarding.py" generate --plan "$RUNNER_TEMP/self-onboarding-plan.json" --cache "$CACHE" \
+            --repository "$GITHUB_REPOSITORY" --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
+            --out "$CACHE/bundles/$GITHUB_RUN_ID" --workflow-run-id "$GITHUB_RUN_ID"
+      - name: Validate a resumed bundle belongs to the requested version
+        if: ${{ inputs.resume_publication && !inputs.dry_run }}
+        env:
+          VERSION_TAG: ${{ inputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          cache = pathlib.Path(os.environ['CACHE']).resolve()
+          state = json.loads((cache/'state.json').read_text())
+          bundle = (cache/state['pendingBundle']).resolve()
+          assert bundle.is_relative_to(cache)
+          manifest = json.loads((bundle/'manifest.json').read_text())
+          commit = subprocess.check_output(['git','rev-parse','refs/tags/'+os.environ['VERSION_TAG']+'^{commit}'], text=True).strip()
+          assert manifest['commit'] == commit, 'Pending bundle records another version'
+          assert manifest['version'] == os.environ['VERSION_TAG'].removeprefix('v'), 'Pending bundle has another version tag'
+          PY
+      - name: Redact recording text before saving build files
+        id: redact
+        if: ${{ always() && !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 .agents/skills/release-film/ci/redact.py "$RELEASE_FILM_HOME/runs" "$CACHE"
+      - name: Report recorder startup diagnostics
+        if: ${{ failure() && !inputs.dry_run && steps.redact.outcome == 'success' }}
+        run: python3 "$S/self_onboarding_diagnostics.py" "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID"
+      - name: Preserve reviewable recording progress
+        id: progress
+        if: ${{ always() && !inputs.dry_run && !inputs.resume_publication && steps.redact.outcome == 'success' }}
+        run: |
+          python3 "$S/self_onboarding_progress.py" \
+            --run "$RELEASE_FILM_HOME/runs/self-onboarding-$GITHUB_RUN_ID" \
+            --cache "$CACHE" --out "$RUNNER_TEMP/self-onboarding-progress"
+      - name: Downloadable recording progress including failed runs
+        if: ${{ always() && steps.progress.outcome == 'success' && steps.redact.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: self-onboarding-progress
+          path: ${{ runner.temp }}/self-onboarding-progress
+          if-no-files-found: error
+          retention-days: 14
+      - name: Checkpoint private segments even after an interrupted later flow
+        if: ${{ always() && !inputs.test_mode && steps.restore.outcome == 'success' && steps.redact.outcome == 'success' && !inputs.dry_run }}
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/self_onboarding_store.py" push --uri "$STORE" --cache "$CACHE"
+      - name: Downloadable test videos and chapter metadata
+        if: ${{ success() && inputs.test_mode && !inputs.dry_run && steps.redact.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: self-onboarding-test-videos
+          path: |
+            ${{ env.CACHE }}/bundles/**/video.mp4
+            ${{ env.CACHE }}/bundles/**/poster.jpg
+            ${{ env.CACHE }}/bundles/**/captions-*.srt
+            ${{ env.CACHE }}/bundles/**/captions-*.vtt
+            ${{ env.CACHE }}/bundles/**/manifest.json
+            ${{ env.CACHE }}/bundles/**/timeline.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Report skipped flows
+        if: ${{ always() && !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, pathlib, sys
+          path = pathlib.Path(os.environ['CACHE'])/'bundles'/os.environ['GITHUB_RUN_ID']/'manifest.json'
+          if path.exists():
+              manifest = json.loads(path.read_text())
+              skipped = manifest.get('skippedFlows', [])
+              print(f"### Generated {len(manifest['domains'])} videos; skipped {len(skipped)} flow attempts")
+              for entry in manifest['domains']:
+                  included = len(entry['metadata']['chapters'])
+                  expected = included + len(entry.get('skippedFlowIds', []))
+                  print(f"- {entry['key']} / {entry['language']}: {included}/{expected} chapters included")
+              for item in skipped:
+                  reason = ' '.join(item['reason'].split())[:240]
+                  print(f"- {item['domain']} / {item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}")
+                  warning = f"{item['flowId']} / {item.get('language', 'all languages')} ({item['stage']}): {reason}"
+                  print("::warning::" + warning.replace("%", "%25"), file=sys.stderr)
+          PY
+      - name: Report semantic decisions
+        if: ${{ always() && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['RUNNER_TEMP'])/'self-onboarding-plan.json'
+          if path.exists():
+              for report in json.loads(path.read_text())['reports']:
+                  print(f"### {report['version']} / {report['language']}")
+                  for domain in report['domains']:
+                      print(f"- {domain['title']}: coverage {domain.get('coverage',{}).get('decision','blocked')}")
+                      if domain.get('coverage', {}).get('reason'):
+                          print('- Coverage reason: ' + domain['coverage']['reason'])
+                      for flow in domain['flows']:
+                          print(f"  - {flow['id']}: {flow.get('action', 'blocked')} ({flow.get('reason', 'Analysis did not complete')})")
+                      if domain.get('error'): print('- Blocked: '+domain['error'])
+          PY
+      - name: Reject an empty result after preserving artifacts
+        if: ${{ success() && !inputs.dry_run && !inputs.resume_publication }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ['CACHE'])/'bundles'/os.environ['GITHUB_RUN_ID']/'manifest.json'
+          manifest = json.loads(path.read_text())
+          if not manifest['domains'] and manifest.get('skippedFlows'):
+              print('::error::No usable videos were generated. Recording progress and failure details were saved as artifacts.')
+              raise SystemExit(1)
+          PY
+  publish:
+    name: Upload directly to Bunny and publish indexed revisions
+    needs: generate
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.registration_only && inputs.publish && !inputs.dry_run && !inputs.test_mode && (github.ref_name == github.event.repository.default_branch || github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA) }}
+    environment: self-onboarding-publishing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    permissions:
+      contents: read
+    env:
+      CACHE: ${{ github.workspace }}/.local/self-onboarding-build
+      S: .agents/skills/release-film/scripts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Install the pinned Guide SDK and existing TUS client
+        run: corepack pnpm install --frozen-lockfile
+      - name: Restore the private publication bundle
+        id: restore
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/self_onboarding_store.py" pull --uri "$STORE" --cache "$CACHE"
+      - name: Publish the verified bundle through the Guide SDK
+        env:
+          GUIDE_API_URL: ${{ vars.GUIDE_API_URL }}
+          GUIDE_PUBLISH_API_KEY: ${{ secrets.GUIDE_PUBLISH_API_KEY }}
+          RETRY_FAILED: ${{ inputs.retry_failed }}
+        run: |
+          bundle=$(python3 - <<'PY'
+          import json, os, pathlib
+          cache = pathlib.Path(os.environ['CACHE']).resolve()
+          state = json.loads((cache/'state.json').read_text())
+          pending = state.get('pendingBundle')
+          if pending:
+              path = (cache/pending).resolve()
+              assert path.is_relative_to(cache)
+              print(path)
+          PY
+          )
+          if [ -n "$bundle" ]; then
+            args=(--bundle "$bundle" --state "$CACHE/state.json" --output "$RUNNER_TEMP/self-onboarding-publication.json")
+            if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
+            node scripts/self-onboarding-publish/publisher.mjs "${args[@]}"
+            python3 .agents/skills/release-film/scripts/self_onboarding.py published --cache "$CACHE"
+          fi
+      - name: Preserve resumable upload and finalization progress
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        env:
+          STORE: ${{ vars.HELPDESK_BUILD_S3_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.HELPDESK_BUILD_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.HELPDESK_BUILD_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.HELPDESK_BUILD_REGION || 'us-east-1' }}
+          AWS_ENDPOINT_URL: ${{ vars.HELPDESK_BUILD_ENDPOINT_URL }}
+        run: python3 "$S/self_onboarding_store.py" push --uri "$STORE" --cache "$CACHE"

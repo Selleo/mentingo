@@ -103,6 +103,7 @@ export const routeAccessConfig = createRouteConfig({
   "tenant-inactive": PUBLIC,
   "oauth/connect": PUBLIC,
 
+  "helpdesk/tutorials/:key": AUTHENTICATED_USER_ACCESS,
   assistant: AUTHENTICATED_USER_ACCESS,
   "assistant/:threadId": AUTHENTICATED_USER_ACCESS,
 

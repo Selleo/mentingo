@@ -20,6 +20,7 @@ let isAdminExperience = false;
 let canEditCourse = false;
 let isCourseStudentModeActive = false;
 let isEffectiveStudentExperience = false;
+let isPreviewMode = false;
 
 vi.mock("../../components/CourseRepetition", () => ({
   CourseRepetition: () => <div role="status">Repetition progress</div>,
@@ -58,6 +59,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
     canEditCourse,
     isCourseStudentModeActive,
     isEffectiveStudentExperience,
+    isPreviewMode,
   }),
 }));
 
@@ -99,6 +101,20 @@ describe("CourseOverviewActions", () => {
     canEditCourse = false;
     isCourseStudentModeActive = false;
     isEffectiveStudentExperience = false;
+    isPreviewMode = false;
+  });
+
+  it("keeps enrollment and details actions without an extra preview button", () => {
+    currentUser = { id: "student-1", permissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE] };
+    isPreviewMode = true;
+    const onContinueLearning = vi.fn();
+    renderActions({ onContinueLearning });
+
+    expect(screen.queryByRole("button", { name: "Preview" })).not.toBeInTheDocument();
+    expect(onContinueLearning).not.toHaveBeenCalled();
+    expect(enrollCourse).not.toHaveBeenCalled();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON)).toBeInTheDocument();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeInTheDocument();
   });
 
   it("links unauthenticated users to registration when registration is open", () => {

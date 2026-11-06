@@ -8,13 +8,17 @@ import {
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { LOGIN_METHOD_ERROR_KEYS } from "@repo/shared";
+import { Value } from "@sinclair/typebox/value";
 
 import {
   ALLOWED_SECRETS,
   ENCRYPTION_ALG,
+  ENTRA_ID_SECRETS,
   INTERNAL_SECRETS,
   SERVICE_GROUPS,
 } from "src/env/env.config";
+import { entraDirectoryIdSchema } from "src/env/env.schema";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { resolveVoiceTtsProvider } from "src/env/voice-tts-provider";
 import { UpdateEnvEvent } from "src/events";
@@ -52,6 +56,12 @@ export class EnvService {
     for (const env of data) {
       if (!ALLOWED_SECRETS.includes(env.name)) {
         throw new BadRequestException("Secret not supported");
+      }
+      if (
+        env.name === ENTRA_ID_SECRETS.DIRECTORY_ID &&
+        !Value.Check(entraDirectoryIdSchema, env.value.trim())
+      ) {
+        throw new BadRequestException(LOGIN_METHOD_ERROR_KEYS.INVALID_DIRECTORY_ID);
       }
       const value =
         env.name === "COMPETENCIES_BASE_URL" && env.value
@@ -143,7 +153,7 @@ export class EnvService {
   }
 
   async getSSOEnabled() {
-    const [google, microsoft, slack] = await Promise.all([
+    const [google, microsoft, slack, entraId] = await Promise.all([
       this.getEnv("VITE_GOOGLE_OAUTH_ENABLED")
         .then((r) => r.value)
         .catch(() => process.env.VITE_GOOGLE_OAUTH_ENABLED),
@@ -155,12 +165,17 @@ export class EnvService {
       this.getEnv("VITE_SLACK_OAUTH_ENABLED")
         .then((r) => r.value)
         .catch(() => process.env.VITE_SLACK_OAUTH_ENABLED),
+
+      this.getEnv("VITE_ENTRA_ID_OAUTH_ENABLED")
+        .then((r) => r.value)
+        .catch(() => process.env.VITE_ENTRA_ID_OAUTH_ENABLED),
     ]);
 
     return {
       google,
       microsoft,
       slack,
+      entraId,
     };
   }
 

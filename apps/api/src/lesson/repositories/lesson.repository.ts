@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT, COURSE_STATUSES, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 import { and, eq, getTableColumns, isNotNull, isNull, ne, type SQL, sql } from "drizzle-orm";
 
 import {
@@ -23,6 +23,7 @@ import {
   aiMentorThreads,
   chapters,
   courses,
+  courseStudentMode,
   lessons,
   studentCourses,
   studentLessonProgress,
@@ -80,6 +81,41 @@ export class LessonRepository {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, id));
     return lesson;
+  }
+
+  /** Read-only access for signed-in users; never confers enrollment or paid access. */
+  async getHasPublicCoursePreviewAccess(id: UUIDType, userId: UUIDType) {
+    const [preview] = await this.db
+      .select({ id: lessons.id })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(settings, and(isNull(settings.userId), eq(settings.tenantId, courses.tenantId)))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .leftJoin(
+        courseStudentMode,
+        and(eq(courseStudentMode.courseId, courses.id), eq(courseStudentMode.userId, userId)),
+      )
+      .where(
+        and(
+          eq(lessons.id, id),
+          eq(courses.status, COURSE_STATUSES.PUBLISHED),
+          eq(courses.isArchived, false),
+          eq(courses.priceInCents, 0),
+          isNull(studentCourses.id),
+          isNull(courseStudentMode.id),
+          sql`COALESCE((${settings.settings}->>'publicCoursePreviewEnabled')::boolean, false)`,
+        ),
+      )
+      .limit(1);
+    return Boolean(preview);
   }
 
   async getHasLessonAccess(id: UUIDType, userId: UUIDType, isStudent: boolean) {

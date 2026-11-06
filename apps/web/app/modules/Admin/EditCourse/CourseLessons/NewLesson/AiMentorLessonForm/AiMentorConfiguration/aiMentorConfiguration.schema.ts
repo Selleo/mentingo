@@ -2,10 +2,9 @@ import {
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TEACHING_STYLE,
   AI_MENTOR_TYPE,
+  stripHtmlTags,
 } from "@repo/shared";
 import { z } from "zod";
-
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { TFunction } from "i18next";
 

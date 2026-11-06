@@ -1,8 +1,10 @@
-import { ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
-
-import { FILE_SIZE_BASE } from "src/common/constants";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
-import { AVATAR_MAX_SIZE } from "src/user/user.constants";
+import {
+  ENTITY_TYPES,
+  PERMISSIONS,
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
+} from "@repo/shared";
 
 import {
   assertPlatformAssetUploadGrant,
@@ -81,18 +83,22 @@ describe("MCP platform and own avatar native multipart grants", () => {
     const { service } = setup();
     const grant = await service.issuePlatformAssetGrant(actor, {
       ...image,
-      size: FILE_SIZE_BASE,
+      size: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       asset,
     });
     expect(grant).toMatchObject({
       uploadPath,
       fileField,
-      maxSizeBytes: FILE_SIZE_BASE,
+      maxSizeBytes: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
       method: "PATCH",
       fields: {},
     });
     await expect(
-      service.issuePlatformAssetGrant(actor, { ...image, size: FILE_SIZE_BASE + 1, asset }),
+      service.issuePlatformAssetGrant(actor, {
+        ...image,
+        size: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES + 1,
+        asset,
+      }),
     ).rejects.toThrow("Unsupported upload file");
     const result = await service.authenticate(request(grant.token, uploadPath));
     expect(result.grant).toMatchObject({
@@ -111,12 +117,12 @@ describe("MCP platform and own avatar native multipart grants", () => {
       asset: "loginDocument",
       filename: "policy.pdf",
       mimeType: "application/pdf",
-      size: MAX_FILE_SIZE,
+      size: MAX_FILE_SIZE_BYTES,
       name: "Policy",
     });
     expect(document).toMatchObject({
       uploadPath: "/api/settings/admin/login-page-files",
-      maxSizeBytes: MAX_FILE_SIZE,
+      maxSizeBytes: MAX_FILE_SIZE_BYTES,
       fileField: "file",
       fields: { name: "Policy" },
     });
@@ -125,19 +131,22 @@ describe("MCP platform and own avatar native multipart grants", () => {
         asset: "loginDocument",
         filename: "policy.pdf",
         mimeType: "application/pdf",
-        size: MAX_FILE_SIZE + 1,
+        size: MAX_FILE_SIZE_BYTES + 1,
         name: "Policy",
       }),
     ).rejects.toThrow();
-    const avatar = await service.issueUserAvatarGrant(actor, { ...image, size: AVATAR_MAX_SIZE });
+    const avatar = await service.issueUserAvatarGrant(actor, {
+      ...image,
+      size: MAX_AVATAR_FILE_SIZE_BYTES,
+    });
     expect(avatar).toMatchObject({
       uploadPath: "/api/user/profile",
-      maxSizeBytes: AVATAR_MAX_SIZE,
+      maxSizeBytes: MAX_AVATAR_FILE_SIZE_BYTES,
       fileField: "userAvatar",
       fields: { data: "{}" },
     });
     await expect(
-      service.issueUserAvatarGrant(actor, { ...image, size: AVATAR_MAX_SIZE + 1 }),
+      service.issueUserAvatarGrant(actor, { ...image, size: MAX_AVATAR_FILE_SIZE_BYTES + 1 }),
     ).rejects.toThrow();
     await expect(
       service.issuePlatformAssetGrant(actor, { ...image, asset: "loginDocument" }),
@@ -152,7 +161,7 @@ describe("MCP platform and own avatar native multipart grants", () => {
     const grant = await service.issueUserAvatarGrant(actor, image);
     const response = withMcpUploadInstructions(grant, "https://tenant.example.com/api/mcp", image);
     expect(response).toMatchObject({
-      maxSizeBytes: AVATAR_MAX_SIZE,
+      maxSizeBytes: MAX_AVATAR_FILE_SIZE_BYTES,
       uploadUrl: "https://tenant.example.com/api/user/profile",
       acceptedFile: { filename: image.filename, mimeType: image.mimeType, sizeBytes: image.size },
       uploadRequest: {

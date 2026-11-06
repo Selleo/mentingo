@@ -4,11 +4,13 @@ import { MCP_REQUESTABLE_SCOPES, MCP_SCOPES, SYSTEM_ROLE_SLUGS } from "@repo/sha
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
+import { SessionRevocationService } from "src/redis";
 import { tenants } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { MCP_HELPDESK_TOOL_NAMES } from "../mcp-self-onboarding.constants";
 
 import type { INestApplication } from "@nestjs/common";
 import type { Test } from "supertest";
@@ -18,6 +20,7 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
   let app: INestApplication;
   let host: string;
   let cookie: string[];
+  let userId: string;
   let clientId: string;
   const redirectUri = "http://127.0.0.1:32123/callback";
   const managementScopes = [MCP_SCOPES.ACCOUNT_ACCESS];
@@ -95,6 +98,7 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
         .withAdminSettings(setup.db)
         .create({ tenantId: setup.defaultTenantId, roleSlug: SYSTEM_ROLE_SLUGS.ADMIN });
     });
+    userId = user.id;
     const login = await http("/api/auth/login", "post")
       .send({ email: user.email, password: "Mcp-Test-Password123!" })
       .expect(201);
@@ -256,11 +260,35 @@ describe("MCP OAuth HTTP authorization (e2e)", () => {
               .trim(),
           );
       const tools = body.result.tools.map((tool: { name: string }) => tool.name);
-      if (scope === MCP_SCOPES.SEARCH_READ) expect(tools).toEqual(["global_search"]);
+      if (scope === MCP_SCOPES.SEARCH_READ)
+        expect(tools).toEqual([...Object.values(MCP_HELPDESK_TOOL_NAMES), "global_search"]);
       else {
         expect(tools).toEqual(expect.arrayContaining(["global_search", "get_course"]));
         expect(tools).not.toContain("create_course");
       }
     },
   );
+
+  it("voids the browser session and every issued MCP credential when sessions are revoked", async () => {
+    const auth = await authorizationCode();
+    const issued = await exchange(auth.code, auth.verifier).expect(200);
+    const pending = await consent();
+    await app.get(SessionRevocationService).revokeUserSessions(userId);
+
+    await http(`/api/oauth/consent/${pending.nonce}`).set("Cookie", cookie).expect(401);
+    await http("/api/mcp", "post")
+      .set("Authorization", `Bearer ${issued.body.access_token}`)
+      .set("Accept", "application/json, text/event-stream")
+      .send({ jsonrpc: "2.0", id: 1, method: "tools/list" })
+      .expect(401);
+    await http("/api/oauth/token", "post")
+      .type("form")
+      .send({
+        grant_type: "refresh_token",
+        refresh_token: issued.body.refresh_token,
+        client_id: clientId,
+        resource: `http://${host}/api/mcp`,
+      })
+      .expect(400);
+  });
 });

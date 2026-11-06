@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type {
@@ -26,12 +25,11 @@ export class CategoryFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
   async create(input?: CategoryFactoryCreateInput): Promise<CategoryFactoryCreateResult> {
+    const language =
+      typeof input === "object" && input.language ? input.language : getSelfOnboardingLanguage();
     const response = await this.apiClient.api.categoryControllerCreateCategory({
       title: typeof input === "string" ? input : (input?.title ?? createCategoryTitle()),
-      language:
-        typeof input === "string"
-          ? SUPPORTED_LANGUAGES.EN
-          : (input?.language ?? SUPPORTED_LANGUAGES.EN),
+      language,
     });
 
     return this.getById(response.data.data.id);

@@ -1,2 +1,3 @@
-export const ALLOWED_AVATAR_IMAGE_TYPES = ["image/jpeg", "image/png", "image/svg+xml", "image/jpg"];
-export const ALLOWED_EXTENSIONS = ".jpeg,.png,.svg,.jpg";
+import { ALLOWED_IMAGE_FILE_EXTENSIONS } from "./fileTypes";
+
+export const ALLOWED_EXTENSIONS = ALLOWED_IMAGE_FILE_EXTENSIONS.join(",");

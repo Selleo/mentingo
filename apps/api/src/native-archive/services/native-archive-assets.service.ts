@@ -1,10 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
-import { createReadStream } from "node:fs";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { buffer } from "node:stream/consumers";
 
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, isAudioFile, RESOURCE_VISIBILITY } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  isAudioFile,
+  RESOURCE_VISIBILITY,
+  MAX_FILE_SIZE_BYTES,
+} from "@repo/shared";
 import { cloneDeepWith } from "lodash";
 import sharp from "sharp";
 
@@ -12,7 +16,6 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import {
   ALLOWED_MIME_TYPES,
   EXTENSION_TO_MIME_TYPE_MAP,
-  MAX_FILE_SIZE,
   RESOURCE_CATEGORIES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -27,17 +30,23 @@ import { validateAudioFileAtPath } from "src/file/utils/validate-audio";
 import { S3Service } from "src/s3/s3.service";
 
 import { resolveImportedAssetContentType } from "../native-archive-content-type";
-import { getNativeArchiveImportPrefix } from "../native-archive-storage-paths";
-import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
+import {
+  getNativeArchiveAssetKey,
+  getNativeArchiveImportPrefix,
+} from "../native-archive-storage-paths";
+import { NATIVE_ARCHIVE_JOB_STAGES, NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 import { nativeArchiveImageFilePipe } from "../pipes/native-archive-image-file.pipe";
+import { SILENT_NATIVE_ARCHIVE_PROGRESS } from "../utils/native-archive-job-progress.utils";
 
 import type {
   NativeArchiveAssetStagingContext,
+  NativeArchiveAssetUpload,
   NativeArchiveImageAssetGroup,
 } from "./native-archive-assets.types";
 import type { NativeArchiveLearningPathAssetFields } from "../native-archive-learning-path.types";
 import type {
   NativeArchiveAsset,
+  NativeArchiveProgressReporter,
   NativeArchiveScormAssetDirectory,
   NativeArchiveStagedAssets,
   NativeArchiveValidatedCourseSnapshot,
@@ -59,8 +68,10 @@ export class NativeArchiveAssetsService {
     actor: CurrentUserType,
     snapshots: NativeArchiveValidatedCourseSnapshot[],
     learningPath?: NativeArchiveLearningPathAssetFields,
+    progress: NativeArchiveProgressReporter = SILENT_NATIVE_ARCHIVE_PROGRESS,
   ): Promise<NativeArchiveStagedAssets> {
-    const context = this.createStagingContext(archive, actor, snapshots, learningPath);
+    const context = this.createStagingContext(archive, actor, snapshots, learningPath, progress);
+    progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.UPLOADING_FILES);
 
     try {
       await this.stageReferencedImages(context);
@@ -82,7 +93,8 @@ export class NativeArchiveAssetsService {
     archive: ParsedNativeArchive,
     actor: CurrentUserType,
     snapshots: NativeArchiveValidatedCourseSnapshot[],
-    learningPath?: NativeArchiveLearningPathAssetFields,
+    learningPath: NativeArchiveLearningPathAssetFields | undefined,
+    progress: NativeArchiveProgressReporter,
   ): NativeArchiveAssetStagingContext {
     if (archive.manifest.assets.length && !this.s3Service.isConfigured()) {
       throw new BadRequestException("nativeArchive.error.storageUnavailable");
@@ -108,25 +120,50 @@ export class NativeArchiveAssetsService {
       uploadedFileReferences: [],
       uploadedS3Keys: [],
       resourceIds: [],
+      progress,
+      uploadWork: { completed: 0, total: 0 },
     };
   }
 
+  /** Counts planned uploads; the total grows as images and then files are planned. */
+  private planUploadWork(context: NativeArchiveAssetStagingContext, uploadCount: number) {
+    context.uploadWork.total += uploadCount;
+  }
+
+  private completeUploadWork(context: NativeArchiveAssetStagingContext) {
+    context.uploadWork.completed += 1;
+    context.progress.reportStageWork(
+      NATIVE_ARCHIVE_JOB_STAGES.UPLOADING_FILES,
+      context.uploadWork.completed,
+      context.uploadWork.total,
+    );
+  }
+
+  /** Uploads images a few at a time; each one is recorded as soon as it lands, so cleanup sees it. */
   private async stageReferencedImages(context: NativeArchiveAssetStagingContext): Promise<void> {
-    for (const { sourceBase, assets } of this.groupImageAssetsByBase(context.archive)) {
-      const isReferenced =
+    const referencedImageGroups = this.groupImageAssetsByBase(context.archive).filter(
+      ({ sourceBase, assets }) =>
         context.assetReferences.has(sourceBase) ||
-        assets.some((asset) => context.assetReferences.has(asset.sourceReference));
-      if (!isReferenced) continue;
+        assets.some((asset) => context.assetReferences.has(asset.sourceReference)),
+    );
 
-      const sourceAsset = this.chooseImageSource(assets, sourceBase);
-      const uploaded = await this.uploadImageResource(sourceAsset, sourceBase, context);
-      if (!uploaded) continue;
+    this.planUploadWork(context, referencedImageGroups.length);
 
-      context.uploadedFileReferences.push(uploaded.fileKey);
-      context.resourceIds.push(uploaded.resourceId);
-      context.uploadedResourceIdsByFileKey.set(uploaded.fileKey, uploaded.resourceId);
-      context.referenceMap.set(sourceBase, uploaded.fileKey);
-    }
+    await processInBatches(
+      referencedImageGroups,
+      async ({ sourceBase, assets }) => {
+        const sourceAsset = this.chooseImageSource(assets, sourceBase);
+        const uploaded = await this.uploadImageResource(sourceAsset, sourceBase, context);
+        this.completeUploadWork(context);
+        if (!uploaded) return;
+
+        context.uploadedFileReferences.push(uploaded.fileKey);
+        context.resourceIds.push(uploaded.resourceId);
+        context.uploadedResourceIdsByFileKey.set(uploaded.fileKey, uploaded.resourceId);
+        context.referenceMap.set(sourceBase, uploaded.fileKey);
+      },
+      { batchSize: NATIVE_ARCHIVE_LIMITS.ASSET_UPLOAD_BATCH_SIZE },
+    );
   }
 
   private groupImageAssetsByBase(archive: ParsedNativeArchive): NativeArchiveImageAssetGroup[] {
@@ -165,15 +202,12 @@ export class NativeArchiveAssetsService {
     sourceBase: string,
     archive: ParsedNativeArchive,
   ): Promise<Express.Multer.File> {
-    if (asset.byteLength > MAX_FILE_SIZE) {
+    if (asset.byteLength > MAX_FILE_SIZE_BYTES) {
       throw new BadRequestException("nativeArchive.error.invalidAssetReference");
     }
 
-    const filePath = archive.assetFiles.get(asset.path);
-    if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
-
-    const sourceBuffer = await readFile(filePath);
-    if (sourceBuffer.length > MAX_FILE_SIZE) {
+    const sourceBuffer = await buffer(archive.openAsset(asset.path));
+    if (sourceBuffer.length > MAX_FILE_SIZE_BYTES) {
       throw new BadRequestException("nativeArchive.error.invalidAssetReference");
     }
 
@@ -201,7 +235,13 @@ export class NativeArchiveAssetsService {
     }
   }
 
+  /**
+   * Maps every remaining referenced asset to its staged key, then uploads the distinct keys a few at
+   * a time. Content-addressed files that an earlier import already stored are not uploaded again.
+   */
   private async stageRemainingAssets(context: NativeArchiveAssetStagingContext): Promise<void> {
+    const uploadsByTargetReference = new Map<string, NativeArchiveAssetUpload>();
+
     for (const asset of context.archive.manifest.assets) {
       const scormDirectory = context.scormDirectories.find((directory) =>
         asset.sourceReference.startsWith(`${directory.sourcePath}/`),
@@ -234,23 +274,63 @@ export class NativeArchiveAssetsService {
         continue;
       }
 
-      const targetReference = this.getTargetReference(
-        asset.sourceReference,
-        context.importPrefix,
-        scormDirectory,
-        context.referenceMap,
-      );
-      context.uploadedS3Keys.push(targetReference);
+      const targetReference = this.getTargetReference(asset, context, scormDirectory);
+      context.referenceMap.set(asset.sourceReference, targetReference);
 
-      await this.uploadAsset(
-        context.archive,
+      if (uploadsByTargetReference.has(targetReference)) continue;
+
+      uploadsByTargetReference.set(targetReference, {
         asset,
         targetReference,
-        resolveImportedAssetContentType(asset, Boolean(scormDirectory)),
-        !scormDirectory,
-      );
-      context.referenceMap.set(asset.sourceReference, targetReference);
+        contentType: resolveImportedAssetContentType(asset, Boolean(scormDirectory)),
+        isLessonFile: !scormDirectory,
+        isContentAddressed: !scormDirectory && !isImageVariantReference(asset.sourceReference),
+      });
     }
+
+    this.planUploadWork(context, uploadsByTargetReference.size);
+
+    await processInBatches(
+      [...uploadsByTargetReference.values()],
+      async (upload) => {
+        await this.uploadStagedAsset(context, upload);
+        this.completeUploadWork(context);
+      },
+      { batchSize: NATIVE_ARCHIVE_LIMITS.ASSET_UPLOAD_BATCH_SIZE },
+    );
+  }
+
+  /**
+   * Content-addressed files are never deleted when an import fails: another import may already
+   * use the same verified file, and leaving it costs one copy per distinct file.
+   */
+  private async uploadStagedAsset(
+    context: NativeArchiveAssetStagingContext,
+    upload: NativeArchiveAssetUpload,
+  ): Promise<void> {
+    const { asset, targetReference } = upload;
+
+    if (upload.isContentAddressed) {
+      if (await this.s3Service.getFileExists(targetReference)) return;
+    } else {
+      context.uploadedS3Keys.push(targetReference);
+    }
+
+    const uploadContentType = upload.isLessonFile
+      ? await this.resolveValidatedAudioContentType(asset, context.archive, upload.contentType)
+      : upload.contentType;
+
+    if (asset.byteLength === 0) {
+      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, uploadContentType, 0);
+
+      return;
+    }
+
+    await this.s3Service.uploadStreamMultipart(
+      context.archive.openAsset(asset.path),
+      targetReference,
+      uploadContentType,
+    );
   }
 
   private createStagedAssetsResult(
@@ -334,11 +414,12 @@ export class NativeArchiveAssetsService {
   }
 
   private getTargetReference(
-    sourceReference: string,
-    importPrefix: string,
+    asset: NativeArchiveAsset,
+    context: NativeArchiveAssetStagingContext,
     scormDirectory: NativeArchiveScormAssetDirectory | undefined,
-    referenceMap: Map<string, string>,
   ): string {
+    const { sourceReference } = asset;
+
     if (scormDirectory) {
       const relativePath = sourceReference.slice(scormDirectory.sourcePath.length + 1);
 
@@ -346,12 +427,20 @@ export class NativeArchiveAssetsService {
     }
 
     if (isImageVariantReference(sourceReference)) {
-      return this.getImageVariantTargetReference(sourceReference, importPrefix, referenceMap);
+      return this.getImageVariantTargetReference(
+        sourceReference,
+        context.importPrefix,
+        context.referenceMap,
+      );
     }
 
     const extension = path.posix.extname(sourceReference.split("?")[0] ?? "").slice(0, 16);
 
-    return `${importPrefix}/files/${this.hashReference(sourceReference)}${extension}`;
+    return getNativeArchiveAssetKey(
+      context.actor.tenantId,
+      this.hashReference(`${asset.sha256}:${sourceReference}`),
+      extension,
+    );
   }
 
   private isReferencedAsset(
@@ -422,38 +511,10 @@ export class NativeArchiveAssetsService {
     );
   }
 
-  private async uploadAsset(
-    archive: ParsedNativeArchive,
-    asset: NativeArchiveAsset,
-    targetReference: string,
-    contentType: string,
-    shouldValidateLessonAudio: boolean,
-  ): Promise<void> {
-    const filePath = archive.assetFiles.get(asset.path);
-
-    if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
-
-    const uploadContentType = shouldValidateLessonAudio
-      ? await this.resolveValidatedAudioContentType(asset, filePath, contentType)
-      : contentType;
-
-    if (asset.byteLength === 0) {
-      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, uploadContentType, 0);
-
-      return;
-    }
-
-    await this.s3Service.uploadStreamMultipart(
-      createReadStream(filePath),
-      targetReference,
-      uploadContentType,
-    );
-  }
-
   /** Imported lesson audio gets the same content validation as a direct upload. */
   private async resolveValidatedAudioContentType(
     asset: NativeArchiveAsset,
-    filePath: string,
+    archive: ParsedNativeArchive,
     contentType: string,
   ) {
     const isAudioAsset =
@@ -462,7 +523,7 @@ export class NativeArchiveAssetsService {
 
     if (!isAudioAsset) return contentType;
 
-    return validateAudioFileAtPath(filePath, {
+    return validateAudioFileAtPath(await archive.extractAsset(asset.path), {
       originalname: path.posix.basename(asset.sourceReference),
       mimetype: asset.contentType,
       size: asset.byteLength,
@@ -475,6 +536,7 @@ export class NativeArchiveAssetsService {
     );
   }
 
+  /** Removes what this import staged; content-addressed files are kept, see uploadStagedAsset. */
   private async deleteStagedAssets(
     uploadedFileReferences: string[],
     uploadedS3Keys: string[],

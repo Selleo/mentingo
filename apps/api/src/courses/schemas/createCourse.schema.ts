@@ -1,3 +1,4 @@
+import { MAX_COURSE_TITLE_LENGTH } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
@@ -6,7 +7,7 @@ import { courseLearningOutcomesSchema } from "./courseLearningOutcomes.schema";
 import { coursesStatusOptions } from "./courseQuery";
 
 export const baseCourseSchema = Type.Object({
-  title: Type.String(),
+  title: Type.String({ maxLength: MAX_COURSE_TITLE_LENGTH }),
   description: Type.String(),
   status: Type.Optional(coursesStatusOptions),
   thumbnailS3Key: Type.Optional(Type.String()),

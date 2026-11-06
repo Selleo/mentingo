@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { Inject, Injectable } from "@nestjs/common";
 import {
   CERTIFICATE_ARCHIVE_REASONS,
@@ -520,6 +522,7 @@ export class CertificateRepository {
     const [certificate] = await this.dbAdmin
       .select({
         id: certificates.id,
+        shareToken: certificates.shareToken,
         tenantId: certificates.tenantId,
         tenantHost: tenants.host,
         tenantName: tenants.name,
@@ -552,6 +555,29 @@ export class CertificateRepository {
       );
 
     return certificate;
+  }
+
+  /** Returns the certificate's persistent share token, creating it on first share. */
+  async issueShareToken(certificateId: string): Promise<string | null> {
+    const token = randomUUID();
+
+    const [certificate] = await this.db
+      .update(certificates)
+      .set({ shareToken: sql`COALESCE(${certificates.shareToken}, ${token}::uuid)` })
+      .where(eq(certificates.id, certificateId))
+      .returning({ shareToken: certificates.shareToken });
+
+    return certificate?.shareToken ?? null;
+  }
+
+  async findCertificateIdByShareToken(token: string): Promise<string | undefined> {
+    const [certificate] = await this.dbAdmin
+      .select({ id: certificates.id })
+      .from(certificates)
+      .where(eq(certificates.shareToken, token))
+      .limit(1);
+
+    return certificate?.id;
   }
 
   async findExistingCertificate(userId: string, courseId: string, trx?: DatabasePg) {
