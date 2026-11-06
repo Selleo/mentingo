@@ -24,6 +24,7 @@ export function useCompetencyEditor({
   onSave,
   onClose,
   pending,
+  requireLevel = false,
   onDelete,
 }: CompetencyEditorOptions) {
   const { t } = useTranslation();
@@ -53,6 +54,7 @@ export function useCompetencyEditor({
 
   const saveCompetencyDraft = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (pending || (requireLevel && draft.levels.length === 0)) return;
     const invalid = event.currentTarget.querySelector<HTMLInputElement | HTMLTextAreaElement>(
       "input:invalid, textarea:invalid, select:invalid",
     );
