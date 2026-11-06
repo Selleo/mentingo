@@ -4343,7 +4343,8 @@
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
-      "scale_1_5": "Domanda di tipo scala (1–5)"
+      "scale_1_5": "Domanda di tipo scala (1–5)",
+      "awaitingReview": "Jūsų atviri atsakymai laukia įvertinimo. Rezultatas bus parodytas, kai juos įvertins."
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -4417,7 +4418,8 @@
       "retakeAvailableIn": "Užrakinta {{time}} valandoms po paskutinio pakartojimo.",
       "cooldown": "Viktorina bus užrakinta {{time}} valandoms po paskutinio bandymo.",
       "noCooldown": "Nėra aušinimo laikotarpio.",
-      "beta": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika."
+      "beta": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
+      "awaitingReview": "Testą galėsite kartoti po jo įvertinimo."
     },
     "breadcrumbs": {
       "availableCourses": "Galimi kursai",
@@ -4455,7 +4457,8 @@
       "quizNotAnsweredYet": "Jūs dar neatsakėte į šią viktoriną.",
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
-      "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
+      "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą.",
+      "quizAwaitingReview": "Šis testas laukia įvertinimo."
     },
     "preview": {
       "title": "Peržiūrite kurso turinį",
@@ -4863,7 +4866,8 @@
     "completed": "Baigta",
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
-    "blocked": "Užblokuota"
+    "blocked": "Užblokuota",
+    "awaitingReview": "Laukia įvertinimo"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -6509,7 +6513,8 @@
         "started": "Pradėta",
         "completed": "Baigta",
         "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta"
+        "notStarted": "Nepradėta",
+        "awaitingReview": "Laukia įvertinimo"
       },
       "lessonTypes": {
         "content": "Turinys",

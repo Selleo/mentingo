@@ -4094,7 +4094,8 @@
       "score": "Score : {{score}} % ({{correct}} sur {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "Ce contenu ne peut pas être intégré.",
       "openInNewTab": "Ouvrir dans un nouvel onglet",
-      "scale_1_5": "Question sur l'échelle (1-5)"
+      "scale_1_5": "Question sur l'échelle (1-5)",
+      "awaitingReview": "Vos réponses ouvertes sont en attente d'évaluation. Le score apparaîtra une fois qu'elles auront été évaluées."
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",
@@ -4158,7 +4159,8 @@
       "retakeAvailableIn": "Verrouillé pendant {{time}} heures après la dernière reprise.",
       "cooldown": "Le quiz sera verrouillé pendant {{time}} heures après la dernière tentative.",
       "noCooldown": "Pas de période de recharge.",
-      "beta": "Cette fonctionnalité est fournie dans une version de test. Il peut contenir des erreurs ou ne pas fonctionner pleinement comme prévu et est utilisé à vos propres risques."
+      "beta": "Cette fonctionnalité est fournie dans une version de test. Il peut contenir des erreurs ou ne pas fonctionner pleinement comme prévu et est utilisé à vos propres risques.",
+      "awaitingReview": "Vous pourrez repasser le quiz après son évaluation."
     },
     "breadcrumbs": {
       "availableCourses": "Cours disponibles",
@@ -4196,7 +4198,8 @@
       "quizNotAnsweredYet": "Vous n'avez pas encore répondu à ce quiz.",
       "courseEnrollmentRequired": "Vous n'êtes pas inscrit à ce cours.",
       "quizRetakeUnavailable": "Les réponses au quiz ne peuvent pas être réinitialisées en raison de la limite de tentatives ou du temps de recharge.",
-      "quizResetFailed": "Échec de la réinitialisation des réponses au quiz. Veuillez réessayer."
+      "quizResetFailed": "Échec de la réinitialisation des réponses au quiz. Veuillez réessayer.",
+      "quizAwaitingReview": "Ce quiz est en attente d'évaluation."
     },
     "preview": {
       "title": "Vous consultez un aperçu du cours",
@@ -4586,7 +4589,8 @@
     "completed": "Terminé",
     "inProgress": "En cours",
     "notStarted": "Non démarré",
-    "blocked": "Bloqué"
+    "blocked": "Bloqué",
+    "awaitingReview": "En attente d'évaluation"
   },
   "studentCertificateView": {
     "header": "Certificats",
@@ -6244,7 +6248,8 @@
         "started": "Commencé",
         "completed": "Terminé",
         "inProgress": "En cours",
-        "notStarted": "Non commencé"
+        "notStarted": "Non commencé",
+        "awaitingReview": "En attente d'évaluation"
       },
       "lessonTypes": {
         "content": "Contenu",

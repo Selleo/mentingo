@@ -42,6 +42,7 @@ const progressBadge = {
   in_progress: "InProgress",
   not_started: "NotStartedRounded",
   blocked: "Blocked",
+  awaiting_review: "InProgress",
 } as const;
 
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {

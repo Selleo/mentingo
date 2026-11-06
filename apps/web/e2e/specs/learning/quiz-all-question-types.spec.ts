@@ -4,17 +4,13 @@ import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { answerAllRenderedQuizQuestionTypesFlow } from "../../flows/learning/answer-all-rendered-quiz-question-types.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
-import { retakeQuizFlow } from "../../flows/learning/retake-quiz.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
-import {
-  getUserQuizAttemptCountFlow,
-  waitForUserQuizAttemptCountFlow,
-} from "../../flows/learning/wait-for-quiz-attempt-count.flow";
+import { getUserQuizAttemptCountFlow } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
 
 import { createAllRenderedQuestionTypesQuizCourse } from "./learning-test-helpers";
 
-test("student can submit a quiz containing every rendered question type", async ({
+test("student submits a quiz with every rendered question type and waits for review of open answers", async ({
   apiClient,
   cleanup,
   factories,
@@ -46,7 +42,7 @@ test("student can submit a quiz containing every rendered question type", async 
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
       await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
 
-      const expectedQuizAttemptCount = (await getUserQuizAttemptCountFlow(apiClient)) + 1;
+      const quizAttemptCountBeforeSubmit = await getUserQuizAttemptCountFlow(apiClient);
 
       await answerAllRenderedQuizQuestionTypesFlow(page, {
         dndBlankAnswer,
@@ -57,8 +53,10 @@ test("student can submit a quiz containing every rendered question type", async 
       await submitQuizFlow(page);
       quizWasSubmitted = true;
 
+      // Open answers are graded manually, so the attempt waits for a reviewer.
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_AWAITING_REVIEW)).toBeVisible();
       await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
 
       await expect
         .poll(
@@ -82,29 +80,23 @@ test("student can submit a quiz containing every rendered question type", async 
               completedLessonCount: chapter?.completedLessonCount ?? 0,
               courseLessonStatus: courseLesson?.status,
               lessonCompleted: lessonData.lessonCompleted ?? false,
+              isQuizAwaitingReview: lessonData.isQuizAwaitingReview ?? false,
               attempts: lessonData.attempts ?? 0,
-              correctAnswerCount: lessonData.quizDetails?.correctAnswerCount ?? 0,
-              score: lessonData.quizDetails?.score ?? 0,
+              score: lessonData.quizDetails?.score ?? null,
             };
           },
           { timeout: 15_000 },
         )
         .toEqual({
-          completedLessonCount: 1,
-          courseLessonStatus: "completed",
-          lessonCompleted: true,
+          completedLessonCount: 0,
+          courseLessonStatus: "awaiting_review",
+          lessonCompleted: false,
+          isQuizAwaitingReview: true,
           attempts: 1,
-          correctAnswerCount: 9,
-          score: 100,
+          score: null,
         });
 
-      await waitForUserQuizAttemptCountFlow(apiClient, expectedQuizAttemptCount);
-
-      await retakeQuizFlow(page);
-
-      await expect(page.locator('input[name^="trueOrFalseQuestions."]:checked')).toHaveCount(0);
-      await expect(page.getByTestId("text-blank-1")).toBeEditable();
-      await expect(page.getByTestId("text-blank-1")).toHaveValue("");
+      expect(await getUserQuizAttemptCountFlow(apiClient)).toBe(quizAttemptCountBeforeSubmit);
     },
     { root: true },
   );
