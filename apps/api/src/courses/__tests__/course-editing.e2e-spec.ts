@@ -286,6 +286,44 @@ describe("Course editing (e2e)", () => {
       },
     );
 
+    it.each([
+      "https://images.example.com/thumbnail.png",
+      "course/thumbnail.png",
+      "22222222-2222-4222-8222-222222222222/course/thumbnail.png",
+    ])("rejects %s as a new thumbnail reference", async (thumbnailS3Key) => {
+      const { admin, cookie } = await arrangeSignedInAdmin();
+      const course = await arrangeCourse({ authorId: admin.id });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
+        .set("Cookie", cookie)
+        .send({ language: SUPPORTED_LANGUAGES.EN, thumbnailS3Key })
+        .expect(400);
+
+      expect(response.body.message).toBe("files.toast.invalidImageReference");
+      expect(await findCourse(course.id)).toMatchObject({ thumbnailS3Key: null });
+    });
+
+    it("keeps saving a course whose stored thumbnail predates reference validation", async () => {
+      const { admin, cookie } = await arrangeSignedInAdmin();
+      const legacyThumbnail = "https://placehold.co/600x400";
+      const course = await arrangeCourse({ authorId: admin.id, thumbnailS3Key: legacyThumbnail });
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
+        .set("Cookie", cookie)
+        .send({
+          language: SUPPORTED_LANGUAGES.EN,
+          title: "Renamed course",
+          thumbnailS3Key: legacyThumbnail,
+        })
+        .expect(200);
+
+      expect(await findCourse(course.id)).toMatchObject({ thumbnailS3Key: legacyThumbnail });
+    });
+
     it("moves the course to another existing category", async () => {
       const { admin, cookie } = await arrangeSignedInAdmin();
       const course = await arrangeCourse({ authorId: admin.id });

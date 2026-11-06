@@ -81,7 +81,10 @@ describe("MCP file upload guidance", () => {
     expect((presentation.htmlTemplates as Record<string, string>).download).toContain(
       'data-node-type="downloadable-file"',
     );
-    const document = buildMcpUploadFollowUp({ ...input, mimeType: "application/msword" })!;
+    const document = buildMcpUploadFollowUp({
+      ...input,
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    })!;
     expect(document.displayModes).toEqual(["download"]);
   });
 

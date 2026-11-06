@@ -1,4 +1,9 @@
-import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES, LEARNING_PATH_STATUSES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  LEARNING_PATH_STATUSES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
@@ -188,7 +193,9 @@ export function LearningPathEditorDetailsSection({
                     imageUrl={thumbnailUrl}
                     fileInputRef={fileInputRef}
                     variant="video"
-                    detailsText={t("adminLearningPathsView.form.imageHint")}
+                    detailsText={t("adminLearningPathsView.form.imageHint", {
+                      maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES),
+                    })}
                     inputId="learning-path-thumbnail"
                   />
                   {field.value && canEdit && (
@@ -323,10 +330,11 @@ export function LearningPathEditorDetailsSection({
                       imageUrl={certificateSignatureUrl}
                       fileInputRef={certificateSignatureFileInputRef}
                       variant="video"
-                      accept={[...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES].join(",")}
+                      accept={[...ALLOWED_LESSON_IMAGE_FILE_TYPES].join(",")}
                       imageFit="contain"
                       detailsText={t(
                         "adminCourseView.settings.other.certificateSignatureRequirements",
+                        { maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES) },
                       )}
                       inputId="learning-path-certificate-signature"
                     />

@@ -1,32 +1,29 @@
 import { FileValidator } from "@nestjs/common";
 
-import { FileGuard } from "src/file/guards/file.guard";
-
-import type { IFile } from "@nestjs/common/pipes/file/interfaces";
+import { UPLOAD_ERROR_KEYS } from "src/file/utils/uploadErrors";
+import { normalizeUploadedFile } from "src/file/validation/normalizeUploadedFile";
 
 export type MagicFileTypeValidatorOptions = {
   fileType: string | RegExp;
-  fallbackToMimetype?: boolean;
 };
 
-export class MagicFileTypeValidator extends FileValidator<MagicFileTypeValidatorOptions> {
-  private errorMessage = "files.toast.invalidFileType";
+export class MagicFileTypeValidator extends FileValidator<
+  MagicFileTypeValidatorOptions,
+  Express.Multer.File
+> {
+  private errorMessage = UPLOAD_ERROR_KEYS.INVALID_TYPE;
 
-  async isValid<TFile extends IFile = any>(file?: TFile): Promise<boolean> {
+  async isValid(file?: Express.Multer.File): Promise<boolean> {
     if (!file) return true;
 
-    const { fileType, fallbackToMimetype = true } = this.validationOptions;
-    const resolvedType = await FileGuard.getFileType(file as unknown as Express.Multer.File);
-    const detectedMime = resolvedType?.mime ?? (fallbackToMimetype ? file.mimetype : undefined);
-    const resolvedMime = detectedMime?.split(";")[0].trim();
+    try {
+      const { sourceMime } = await normalizeUploadedFile(file);
+      const { fileType } = this.validationOptions;
 
-    if (!resolvedMime) return false;
-
-    if (typeof fileType === "string") {
-      return resolvedMime === fileType;
+      return typeof fileType === "string" ? sourceMime === fileType : fileType.test(sourceMime);
+    } catch {
+      return false;
     }
-
-    return fileType.test(resolvedMime);
   }
 
   buildErrorMessage(): string {

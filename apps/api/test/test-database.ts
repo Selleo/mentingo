@@ -7,6 +7,8 @@ import { assertSeparateTestDatabase } from "./assert-test-database";
 
 import type { DatabasePg } from "../src/common";
 
+export const TEST_REDIS_URL = process.env.REDIS_TEST_URL || "redis://localhost:6379/1";
+
 const applicationDatabaseUrl =
   process.env.DATABASE_URL || "postgresql://postgres:guidebook@localhost:5432/guidebook";
 
@@ -21,7 +23,7 @@ export async function setupTestDatabase(): Promise<{
   const pgConnectionString =
     process.env.DATABASE_TEST_URL ||
     "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
-  const redisUrl = process.env.REDIS_TEST_URL || "redis://localhost:6379/1";
+  const redisUrl = TEST_REDIS_URL;
   assertSeparateTestDatabase(applicationDatabaseUrl, pgConnectionString);
 
   const sql = postgres(pgConnectionString, { max: 10 });

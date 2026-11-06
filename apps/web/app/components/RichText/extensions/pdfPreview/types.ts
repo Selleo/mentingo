@@ -10,6 +10,8 @@ export type PdfPreviewAttrs = {
 export type PdfPreviewViewerProps = {
   src: string;
   name?: string | null;
+  loadingMessage?: string;
+  errorMessage?: string;
 };
 
 export type PdfViewerState = {

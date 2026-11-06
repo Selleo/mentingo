@@ -1,6 +1,12 @@
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
-import { createTextUiMessage, getUiMessageText, MESSAGE_ROLE, toUiMessageRole } from "@repo/shared";
+import {
+  createTextUiMessage,
+  getUiMessageText,
+  MESSAGE_ROLE,
+  toUiMessageRole,
+  stripHtmlTags,
+} from "@repo/shared";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,7 +47,6 @@ import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatL
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 

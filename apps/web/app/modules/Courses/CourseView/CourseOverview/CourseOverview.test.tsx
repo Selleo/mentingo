@@ -1,4 +1,8 @@
-import { COURSE_ORIGIN_TYPES, type CourseOriginType } from "@repo/shared";
+import {
+  COURSE_ORIGIN_TYPES,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  type CourseOriginType,
+} from "@repo/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -192,7 +196,7 @@ vi.mock("./CourseMediaModal", () => ({
         type="button"
         onClick={() => {
           const file = new File(["video"], "large-trailer.mp4", { type: "video/mp4" });
-          Object.defineProperty(file, "size", { value: 50 * 1024 * 1024 + 1 });
+          Object.defineProperty(file, "size", { value: MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES + 1 });
           onTrailerSelection(file);
         }}
       >

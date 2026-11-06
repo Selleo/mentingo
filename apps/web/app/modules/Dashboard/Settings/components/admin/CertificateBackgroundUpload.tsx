@@ -1,3 +1,4 @@
+import { MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -77,7 +78,9 @@ export function CertificateBackgroundUpload({
             imageUrl={certificateBackgroundImage}
             fileInputRef={fileInputRef}
             variant="video"
-            detailsText={t("certificateBackgroundUpload.field.imageRequirements")}
+            detailsText={t("certificateBackgroundUpload.field.imageRequirements", {
+              maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
+            })}
             inputTestId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_INPUT}
           />
           {isUploading && (

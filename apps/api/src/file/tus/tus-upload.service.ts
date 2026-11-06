@@ -1,10 +1,9 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
-import { VIDEO_PROVIDERS, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { VIDEO_PROVIDERS, ALLOWED_VIDEO_FILE_TYPES, MAX_VIDEO_FILE_SIZE_BYTES } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 
 import { S3Service } from "src/s3/s3.service";
 
-import { MAX_VIDEO_SIZE } from "../file.constants";
 import { FileGuard } from "../guards/file.guard";
 import { VideoMetadataQueueService } from "../video-metadata.queue.service";
 import { VideoProcessingStateService } from "../video-processing-state.service";
@@ -49,7 +48,7 @@ export class TusUploadService {
       throw new BadRequestException("S3 video upload not initialized");
     }
 
-    if (uploadLength > (state.maxUploadSize ?? MAX_VIDEO_SIZE)) {
+    if (uploadLength > (state.maxUploadSize ?? MAX_VIDEO_FILE_SIZE_BYTES)) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
 

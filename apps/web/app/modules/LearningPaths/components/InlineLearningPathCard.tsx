@@ -1,5 +1,9 @@
 import { Link } from "@remix-run/react";
-import { COURSE_PROGRESS_STATUSES, type SupportedLanguages } from "@repo/shared";
+import {
+  COURSE_PROGRESS_STATUSES,
+  type SupportedLanguages,
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+} from "@repo/shared";
 import { Award, BookOpen, Camera, ListOrdered, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -270,7 +274,7 @@ export function InlineLearningPathCard({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".png, .jpg, .jpeg"
+                accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
                 className="sr-only"
                 disabled={isUploading || isPending}
                 onChange={(event) => {

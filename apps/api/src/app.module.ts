@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ConditionalModule, ConfigModule } from "@nestjs/config";
-import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
@@ -12,6 +13,7 @@ import { AutomationExecutionModule } from "src/automation-execution/automation-e
 import { AutomationModule } from "src/automations/automation.module";
 import { CourseRepetitionModule } from "src/course-repetition/course-repetition.module";
 import { EnvModule } from "src/env/env.module";
+import { UploadTooLargeFilter } from "src/file/filters/upload-too-large.filter";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
@@ -99,11 +101,7 @@ import type { RedisClient } from "src/redis";
     DbModule,
     SupportModeModule,
     JwtModule.registerAsync(jwtModuleOptions),
-    MulterModule.register({
-      limits: {
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
-      },
-    }),
+    { ...MulterModule.register({ limits: { fileSize: MAX_FILE_SIZE_BYTES } }), global: true },
     ThrottlerModule.forRootAsync({
       inject: [REDIS_CLIENT],
       useFactory: (redisClient: RedisClient) => ({
@@ -186,6 +184,10 @@ import type { RedisClient } from "src/redis";
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: UploadTooLargeFilter,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TenantRlsInterceptor,

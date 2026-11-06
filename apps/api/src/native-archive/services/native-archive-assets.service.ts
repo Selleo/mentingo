@@ -3,7 +3,12 @@ import path from "node:path";
 import { buffer } from "node:stream/consumers";
 
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, isAudioFile, RESOURCE_VISIBILITY } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  isAudioFile,
+  RESOURCE_VISIBILITY,
+  MAX_FILE_SIZE_BYTES,
+} from "@repo/shared";
 import { cloneDeepWith } from "lodash";
 import sharp from "sharp";
 
@@ -11,7 +16,6 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import {
   ALLOWED_MIME_TYPES,
   EXTENSION_TO_MIME_TYPE_MAP,
-  MAX_FILE_SIZE,
   RESOURCE_CATEGORIES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -198,12 +202,12 @@ export class NativeArchiveAssetsService {
     sourceBase: string,
     archive: ParsedNativeArchive,
   ): Promise<Express.Multer.File> {
-    if (asset.byteLength > MAX_FILE_SIZE) {
+    if (asset.byteLength > MAX_FILE_SIZE_BYTES) {
       throw new BadRequestException("nativeArchive.error.invalidAssetReference");
     }
 
     const sourceBuffer = await buffer(archive.openAsset(asset.path));
-    if (sourceBuffer.length > MAX_FILE_SIZE) {
+    if (sourceBuffer.length > MAX_FILE_SIZE_BYTES) {
       throw new BadRequestException("nativeArchive.error.invalidAssetReference");
     }
 

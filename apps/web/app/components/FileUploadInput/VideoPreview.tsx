@@ -1,3 +1,4 @@
+import { MAX_VIDEO_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "../Icon";
@@ -60,7 +61,11 @@ export const VideoPreview = ({
                 <span className="text-primary-400">{t("uploadFile.header")}</span>{" "}
                 <span className="text-white">{t("uploadFile.subHeader")}</span>
               </div>
-              <div className="details text-neutral-200">{t("uploadFile.details.video")}</div>
+              <div className="details text-neutral-200">
+                {t("uploadFile.details.video", {
+                  maxSize: formatFileSize(MAX_VIDEO_FILE_SIZE_BYTES),
+                })}
+              </div>
             </div>
 
             <Button variant="destructive" className="mt-2 gap-x-1" onClick={handleDeleteVideo}>

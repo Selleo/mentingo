@@ -19,7 +19,13 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
-import { PERMISSIONS, VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
+import {
+  PERMISSIONS,
+  VIDEO_EMBED_PROVIDERS,
+  type VideoProvider,
+  MAX_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response, type Request } from "express";
 import { Validate } from "nestjs-typebox";
@@ -30,12 +36,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
-import {
-  ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE,
-  MAX_VIDEO_SIZE,
-  TUS_VERSION,
-} from "src/file/file.constants";
+import { ALLOWED_MIME_TYPES, TUS_VERSION } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
 import {
@@ -109,8 +110,7 @@ export class FileController {
       assertGenericFileUploadGrant(request.mcpUploadGrant, resource, file);
     await FileGuard.validateFile(file, {
       allowedTypes: ALLOWED_MIME_TYPES,
-      maxSize: MAX_FILE_SIZE,
-      maxVideoSize: MAX_VIDEO_SIZE,
+      maxSize: MAX_FILE_SIZE_BYTES,
     });
 
     const uploadResult = await this.fileService.uploadFile(file, resource, currentUser.tenantId);
@@ -360,7 +360,7 @@ export class FileController {
       "Tus-Resumable": TUS_VERSION,
       "Tus-Version": TUS_VERSION,
       "Tus-Extension": "creation",
-      "Tus-Max-Size": String(MAX_VIDEO_SIZE),
+      "Tus-Max-Size": String(MAX_VIDEO_FILE_SIZE_BYTES),
       "Access-Control-Expose-Headers":
         "Tus-Resumable, Tus-Version, Tus-Extension, Tus-Max-Size, Upload-Offset, Upload-Length, Location",
       "Access-Control-Allow-Headers":

@@ -1,4 +1,7 @@
-import { COURSE_AUTHORING_SOURCE_FILE_TYPES, MAX_COURSE_AUTHORING_SOURCE_SIZE } from "@repo/shared";
+import {
+  COURSE_AUTHORING_SOURCE_FILE_TYPES,
+  MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
+} from "@repo/shared";
 import {
   ArrowLeft,
   Bot,
@@ -16,10 +19,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../../e2e/data/curriculum/handles";
 
@@ -70,7 +73,7 @@ const AUTHORING_SOURCE_ACCEPT = [
 ].join(",");
 
 const sourceError = (file: File): string | null => {
-  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE) return "courseAuthoring.sources.tooLarge";
+  if (file.size > MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES) return "courseAuthoring.sources.tooLarge";
   const lowerName = file.name.toLowerCase();
   const validMime = COURSE_AUTHORING_SOURCE_FILE_TYPES.some((type) => type === file.type);
   const validExtension = AUTHORING_SOURCE_EXTENSIONS.some((extension) =>
@@ -429,7 +432,7 @@ const ScopeView = ({
                                         })}
                                       </span>
                                       <span className="min-w-0 flex-1 truncate text-[11px] text-neutral-500">
-                                        {stripHtmlTags(block.html).trim().slice(0, 64) ||
+                                        {toPlainTextPreview(block.html).trim().slice(0, 64) ||
                                           t("courseAuthoring.scope.untitled")}
                                       </span>
                                     </button>

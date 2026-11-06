@@ -87,6 +87,7 @@ describe("CourseController (e2e)", () => {
   let groupFactory: ReturnType<typeof createGroupFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let mockFileService: {
+    assertImageReference: jest.Mock;
     getFileUrl: jest.Mock;
     getResourcesForEntity: jest.Mock;
     getRawFileBuffer: jest.Mock;
@@ -128,6 +129,7 @@ describe("CourseController (e2e)", () => {
   beforeAll(async () => {
     // It can be crashed, test and reapir it later
     mockFileService = {
+      assertImageReference: jest.fn().mockResolvedValue(undefined),
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),

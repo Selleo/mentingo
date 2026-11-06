@@ -11,6 +11,8 @@ import { isRateLimitingDisabled, normalizePath, resolveRateLimitPolicy } from ".
 
 import type { ExecutionContext } from "@nestjs/common";
 
+const AUTH_PATH_PREFIX = "/api/auth/";
+
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
   protected async handleRequest(request: ThrottlerRequest): Promise<boolean> {
@@ -25,23 +27,30 @@ export class AppThrottlerGuard extends ThrottlerGuard {
 
     if (!policy) return true;
 
-    return super.handleRequest({
+    const limitedRequest = {
       ...request,
       limit: policy.limit,
       ttl: policy.windowSec * 1000,
       blockDuration: policy.windowSec * 1000,
-    });
+    };
+
+    if (this.getAuthEmail(req, rawPath)) {
+      await super.handleRequest({
+        ...limitedRequest,
+        getTracker: async () => this.getIpTracker(req),
+      });
+    }
+
+    return super.handleRequest(limitedRequest);
   }
 
   protected async getTracker(req: Record<string, any>): Promise<string> {
     const path = normalizePath(String(req.originalUrl ?? req.url ?? "/"));
 
-    if (path.startsWith("/api/auth")) {
-      const email = req.body?.email;
+    if (path.startsWith(AUTH_PATH_PREFIX)) {
+      const email = this.getAuthEmail(req, path);
 
-      if (typeof email === "string" && email.trim().length > 0) {
-        return `email:${email.trim().toLowerCase()}`;
-      }
+      return email ? `email:${email}` : this.getIpTracker(req);
     }
 
     if (path.startsWith("/api/integration")) {
@@ -58,12 +67,21 @@ export class AppThrottlerGuard extends ThrottlerGuard {
       return `user:${userId}`;
     }
 
-    const forwardedFor = this.getHeaderValue(req.headers?.["x-forwarded-for"]);
-    if (forwardedFor) {
-      return `ip:${forwardedFor.split(",")[0].trim().toLowerCase()}`;
-    }
+    return this.getIpTracker(req);
+  }
 
-    return `ip:${String(req.ip ?? req.socket?.remoteAddress ?? "unknown").toLowerCase()}`;
+  private getAuthEmail(req: Record<string, any>, path: string): string | null {
+    const email = req.body?.email;
+
+    if (!path.startsWith(AUTH_PATH_PREFIX) || typeof email !== "string") return null;
+
+    return email.trim().toLowerCase() || null;
+  }
+
+  private getIpTracker(req: Record<string, any>): string {
+    const ip = String(req.ip ?? req.socket?.remoteAddress ?? "unknown").toLowerCase();
+
+    return `ip:${ip.replace(/^::ffff:/, "")}`;
   }
 
   protected async throwThrottlingException(

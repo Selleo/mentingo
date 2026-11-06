@@ -2,7 +2,7 @@
 import { CourseAuthoringOrderError, orderCourseAuthoringOperations } from "@repo/shared";
 import { isEqual } from "lodash-es";
 
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
+import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 
 import {
   AUTHORING_APPLICATION_STATUS,
@@ -599,7 +599,7 @@ const parsePreview = (record: AuthoringRecord, tasks: AuthoringTask[]): PreviewV
     : [];
   const contentHtml = stringValue(record.payload.contentHtml);
   const contentText = contentHtml
-    ? stripHtmlTags(contentHtml).replace(/\s+/g, " ").trim().slice(0, 600) || null
+    ? toPlainTextPreview(contentHtml).replace(/\s+/g, " ").trim().slice(0, 600) || null
     : null;
 
   return {

@@ -321,9 +321,7 @@ describe("AuthController (e2e)", () => {
         .expect(429);
     });
 
-    it("should not apply login rate limit from one email to another email", async () => {
-      const rateLimitedEmail = `rate-limit-auth-a-${nanoid()}@example.com`;
-
+    it("should return 429 when one client rotates emails past the auth login limit", async () => {
       for (
         let attempt = 1;
         attempt <= RATE_LIMITS.AUTH_SENSITIVE_ENDPOINTS_REQUESTS_PER_MINUTE;
@@ -332,28 +330,28 @@ describe("AuthController (e2e)", () => {
         await request(app.getHttpServer())
           .post("/api/auth/login")
           .send({
-            email: rateLimitedEmail,
+            email: `rate-limit-auth-${attempt}-${nanoid()}@example.com`,
             password: "wrongpassword",
           })
           .expect(401);
       }
 
-      const allowedUser = await userFactory
+      const otherUser = await userFactory
         .withCredentials({
           password: "Password123@",
         })
         .withUserSettings(db)
         .create({
-          email: `rate-limit-auth-b-${nanoid()}@example.com`,
+          email: `rate-limit-auth-other-${nanoid()}@example.com`,
         });
 
       await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({
-          email: allowedUser.email,
+          email: otherUser.email,
           password: "Password123@",
         })
-        .expect(201);
+        .expect(429);
     });
   });
 

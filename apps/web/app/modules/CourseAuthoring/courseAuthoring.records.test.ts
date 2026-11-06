@@ -788,7 +788,7 @@ describe("course authoring record projection", () => {
     expect(result.previews[0]).toMatchObject({
       id: "preview-new",
       lessonTitle: "Safe preview",
-      contentText: "Visible textbad()",
+      contentText: "Visible text",
       status: "succeeded",
     });
     expect(result.previews[0].contentText).not.toContain("<");

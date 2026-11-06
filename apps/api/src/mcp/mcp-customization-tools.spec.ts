@@ -1,9 +1,7 @@
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, MAX_FILE_SIZE_BYTES, MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
-import { FILE_SIZE_BASE } from "src/common/constants";
 import { REQUIRED_PERMISSIONS_KEY } from "src/common/decorators/require-permission.decorator";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { SettingsController } from "src/settings/settings.controller";
 
 import * as Schemas from "./mcp-customization-tool.schemas";
@@ -111,18 +109,24 @@ describe("MCP platform customization", () => {
       name: "Policy",
       filename: "policy.pdf",
       mimeType: "application/pdf",
-      size: 10 * FILE_SIZE_BASE,
+      size: 10 * MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
     };
     expect(Value.Check(Schemas.customizationImageInputSchema, image)).toBe(true);
     expect(
-      Value.Check(Schemas.customizationImageInputSchema, { ...image, size: FILE_SIZE_BASE + 1 }),
+      Value.Check(Schemas.customizationImageInputSchema, {
+        ...image,
+        size: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES + 1,
+      }),
     ).toBe(false);
     expect(Value.Check(Schemas.customizationLoginFileInputSchema, doc)).toBe(true);
     expect(
-      Value.Check(Schemas.customizationLoginFileInputSchema, { ...doc, size: MAX_FILE_SIZE }),
+      Value.Check(Schemas.customizationLoginFileInputSchema, { ...doc, size: MAX_FILE_SIZE_BYTES }),
     ).toBe(true);
     expect(
-      Value.Check(Schemas.customizationLoginFileInputSchema, { ...doc, size: MAX_FILE_SIZE + 1 }),
+      Value.Check(Schemas.customizationLoginFileInputSchema, {
+        ...doc,
+        size: MAX_FILE_SIZE_BYTES + 1,
+      }),
     ).toBe(false);
     for (const extra of [
       { base64: "YWJj" },
@@ -154,7 +158,7 @@ describe("MCP platform customization", () => {
       name: "Policy",
       filename: "policy.pdf",
       mimeType: "application/pdf",
-      size: 10 * FILE_SIZE_BASE,
+      size: 10 * MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
     };
     await handlers.get("request_platform_login_document_upload")!(doc);
     expect(uploads.issuePlatformAssetGrant).toHaveBeenLastCalledWith(actor, {

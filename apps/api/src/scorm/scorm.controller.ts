@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   SCORM_IMPORT_ACTION,
   type SupportedLanguages,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -270,10 +271,13 @@ export class ScormController {
   @Post("course")
   @RequirePermission(PERMISSIONS.COURSE_CREATE)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -343,7 +347,11 @@ export class ScormController {
 
   @Post("lesson")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
-  @UseInterceptors(FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }]))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }], {
+      limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES },
+    }),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -389,10 +397,13 @@ export class ScormController {
 
   @Patch("lesson/:lessonId/package")
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @ApiConsumes("multipart/form-data")
@@ -533,6 +544,6 @@ export class ScormController {
       currentUser,
     });
 
-    streamFileToResponse(response, file);
+    streamFileToResponse(response, { ...file, contentDisposition: "inline" });
   }
 }

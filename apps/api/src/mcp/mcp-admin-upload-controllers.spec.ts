@@ -1,17 +1,17 @@
 import { ForbiddenException } from "@nestjs/common";
 import {
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   ENTITY_TYPES,
   PERMISSIONS,
+  ALLOWED_PDF_FILE_TYPES,
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
+import sharp from "sharp";
 
-import { FILE_SIZE_BASE } from "src/common/constants";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { SettingsController } from "src/settings/settings.controller";
-import { AVATAR_MAX_SIZE } from "src/user/user.constants";
 import { UserController } from "src/user/user.controller";
 
 import { MCP_UPLOAD_GRANT_KIND } from "./mcp.types";
@@ -90,14 +90,14 @@ const routes = [
     service: "uploadPlatformLogo",
     asset: "platformLogo",
     field: "logo",
-    allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
+    allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
   },
   {
     method: "updatePlatformSimpleLogo",
     service: "uploadPlatformSimpleLogo",
     asset: "platformSimpleLogo",
     field: "logo",
-    allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
+    allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
   },
   {
     method: "updateLoginBackground",
@@ -124,7 +124,7 @@ describe("MCP administrative native upload controller boundaries", () => {
       [route.service]: upload,
     } as unknown as SettingsService);
     const validate = jest.spyOn(FileGuard, "validateFile").mockResolvedValue({
-      type: { mime: undefined, ext: undefined },
+      type: { mime: "image/png", ext: "png" },
       size: 4,
       resolution: null,
       aspectRatio: null,
@@ -133,7 +133,7 @@ describe("MCP administrative native upload controller boundaries", () => {
     await controller[route.method](image, actor, request(platformGrant(route.asset)));
     expect(validate).toHaveBeenCalledWith(image, {
       allowedTypes: route.allowedTypes,
-      maxSize: FILE_SIZE_BASE,
+      maxSize: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
     });
     expect(upload).toHaveBeenCalledWith(image, actor);
   });
@@ -169,9 +169,18 @@ describe("MCP administrative native upload controller boundaries", () => {
   it("rejects declared MIME that does not match the detected bytes before storing branding", async () => {
     const uploadPlatformLogo = jest.fn();
     const controller = new SettingsController({ uploadPlatformLogo } as unknown as SettingsService);
-    jest.spyOn(FileGuard, "getFileType").mockResolvedValue({ mime: "image/jpeg", ext: "jpg" });
+    const jpegBytes = await sharp({
+      create: { width: 1, height: 1, channels: 3, background: "#ffffff" },
+    })
+      .jpeg()
+      .toBuffer();
+    const jpegDeclaredAsPng = { ...file(), buffer: jpegBytes, size: jpegBytes.length };
     await expect(
-      controller.updatePlatformLogo(file(), actor, request(platformGrant("platformLogo"))),
+      controller.updatePlatformLogo(
+        jpegDeclaredAsPng,
+        actor,
+        request({ ...platformGrant("platformLogo"), size: jpegBytes.length }),
+      ),
     ).rejects.toThrow("files.toast.contentTypeMismatch");
     expect(uploadPlatformLogo).not.toHaveBeenCalled();
   });
@@ -182,7 +191,7 @@ describe("MCP administrative native upload controller boundaries", () => {
       uploadLoginPageFile,
     } as unknown as SettingsService);
     const validate = jest.spyOn(FileGuard, "validateFile").mockResolvedValue({
-      type: { mime: undefined, ext: undefined },
+      type: { mime: "image/png", ext: "png" },
       size: 4,
       resolution: null,
       aspectRatio: null,
@@ -207,8 +216,8 @@ describe("MCP administrative native upload controller boundaries", () => {
       request(grant, { name: "Policy" }),
     );
     expect(validate).toHaveBeenCalledWith(document, {
-      allowedTypes: LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
-      maxSize: MAX_FILE_SIZE,
+      allowedTypes: ALLOWED_PDF_FILE_TYPES,
+      maxSize: MAX_FILE_SIZE_BYTES,
     });
     expect(uploadLoginPageFile).toHaveBeenCalledWith({ name: "Policy" }, document, actor);
   });
@@ -221,7 +230,7 @@ describe("MCP administrative native upload controller boundaries", () => {
       {} as UserPasswordEmailService,
     );
     const validate = jest.spyOn(FileGuard, "validateFile").mockResolvedValue({
-      type: { mime: undefined, ext: undefined },
+      type: { mime: "image/png", ext: "png" },
       size: 4,
       resolution: null,
       aspectRatio: null,
@@ -261,8 +270,8 @@ describe("MCP administrative native upload controller boundaries", () => {
     expect(updateUserProfile).not.toHaveBeenCalled();
     await controller.updateUserProfile({ data: {} }, userId, image, request(grant, { data: "{}" }));
     expect(validate).toHaveBeenCalledWith(image, {
-      allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
-      maxSize: AVATAR_MAX_SIZE,
+      allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+      maxSize: MAX_AVATAR_FILE_SIZE_BYTES,
     });
     expect(updateUserProfile).toHaveBeenCalledWith(userId, {}, image);
   });

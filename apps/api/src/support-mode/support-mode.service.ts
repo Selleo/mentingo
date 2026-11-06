@@ -13,6 +13,7 @@ import { nanoid } from "nanoid";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { SupportModeRepository } from "./support-mode.repository";
 
@@ -36,6 +37,7 @@ export class SupportModeService {
     private readonly supportModeRepository: SupportModeRepository,
     private readonly configService: ConfigService,
     private readonly fileService: FileService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async listSupportUsers(
@@ -62,7 +64,9 @@ export class SupportModeService {
       this.supportModeRepository.countSupportUsers({ tenantId, search, scope, roleSlug }),
     ]);
 
-    const data = await this.toSupportUsers(records);
+    const data = await this.tenantRunner.runWithTenant(tenantId, () =>
+      this.toSupportUsers(records),
+    );
     const pagination = { page, perPage, totalItems };
 
     return {

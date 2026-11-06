@@ -17,6 +17,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
@@ -24,7 +25,6 @@ import {
   COURSE_LEARNING_STATE_KINDS,
   AI_THREAD_STATUSES,
   ALLOWED_AUDIO_FILE_TYPES,
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
@@ -37,6 +37,8 @@ import {
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
   type EditableResourceVisibility,
+  MAX_FILE_SIZE_BYTES,
+  MAX_AVATAR_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { and, eq } from "drizzle-orm";
@@ -53,6 +55,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
 import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import {
@@ -66,7 +69,6 @@ import {
 } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -115,6 +117,7 @@ import type {
   LessonsFilters,
   LessonShow,
 } from "./lesson.schema";
+@UsePipes(SanitizeRichTextPipe)
 @Controller("lesson")
 export class LessonController {
   constructor(
@@ -576,7 +579,7 @@ export class LessonController {
           ...ALLOWED_PRESENTATION_FILE_TYPES,
           ...ALLOWED_AUDIO_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,
@@ -727,7 +730,10 @@ export class LessonController {
     @CurrentUser() currentUser: CurrentUserType,
     @Body("lessonId") lessonId: UUIDType,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_AVATAR_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),

@@ -12,18 +12,14 @@ import {
   FEATURES,
   FEATURE_SETTINGS_KEYS,
   ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
-  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   DEFAULT_TUS_TTL_MS,
   DEFAULT_TUS_CHUNK_SIZE,
   ENTITY_TYPES,
-  MAX_COURSE_TRAILER_VIDEO_SIZE,
   PERMISSIONS,
   type PermissionKey,
   RESOURCE_VISIBILITY,
@@ -31,35 +27,31 @@ import {
   SUPPORTED_LANGUAGES,
   VIDEO_PROVIDERS,
   hasAnyPermission,
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_PRESENTATION_FILE_SIZE_BYTES,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
+  MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
+  MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
 } from "@repo/shared";
 
 import { ArticlesService } from "src/articles/services/articles.service";
-import { FILE_SIZE_BASE } from "src/common/constants";
 import { CourseService } from "src/courses/course.service";
-import {
-  ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE,
-  MAX_PRESENTATION_FILE_SIZE,
-  MAX_VIDEO_SIZE,
-  RESOURCE_RELATIONSHIP_TYPES,
-} from "src/file/file.constants";
+import { ALLOWED_MIME_TYPES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { NewsService } from "src/news/news.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { REDIS_CLIENT, RedisClient } from "src/redis";
-import { MAX_SCORM_THUMBNAIL_SIZE } from "src/scorm/pipes/validate-scorm-course-files.pipe";
-import {
-  MAX_SCORM_PACKAGE_SIZE_BYTES,
-  SCORM_PACKAGE_MIME_TYPES,
-} from "src/scorm/scorm-package-limits";
+import { SCORM_PACKAGE_MIME_TYPES } from "src/scorm/scorm-package-limits";
 import { SCORM_TUS_STATE_TTL } from "src/scorm/scorm-tus-upload.constants";
 import { ScormTusUploadService } from "src/scorm/scorm-tus-upload.service";
 import { ScormService } from "src/scorm/scorm.service";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { AVATAR_MAX_SIZE } from "src/user/user.constants";
 
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
@@ -113,32 +105,32 @@ const PLATFORM_ASSET_UPLOADS = {
   platformLogo: {
     path: "/api/settings/platform-logo",
     fileField: "logo",
-    allowed: ALLOWED_AVATAR_IMAGE_TYPES,
-    maxSizeBytes: FILE_SIZE_BASE,
+    allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+    maxSizeBytes: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
   },
   platformSimpleLogo: {
     path: "/api/settings/platform-simple-logo",
     fileField: "logo",
-    allowed: ALLOWED_AVATAR_IMAGE_TYPES,
-    maxSizeBytes: FILE_SIZE_BASE,
+    allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+    maxSizeBytes: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
   },
   loginBackground: {
     path: "/api/settings/login-background",
     fileField: "login-background",
     allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-    maxSizeBytes: FILE_SIZE_BASE,
+    maxSizeBytes: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
   },
   certificateBackground: {
     path: "/api/settings/certificate-background",
     fileField: "certificate-background",
     allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-    maxSizeBytes: FILE_SIZE_BASE,
+    maxSizeBytes: MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES,
   },
   loginDocument: {
     path: "/api/settings/admin/login-page-files",
     fileField: "file",
-    allowed: LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
-    maxSizeBytes: MAX_FILE_SIZE,
+    allowed: ALLOWED_PDF_FILE_TYPES,
+    maxSizeBytes: MAX_FILE_SIZE_BYTES,
   },
 } as const;
 
@@ -205,7 +197,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     input: Pick<McpUserAvatarUploadGrant, "filename" | "mimeType" | "size">,
   ) {
-    this.validateNamedFile(input, ALLOWED_AVATAR_IMAGE_TYPES, AVATAR_MAX_SIZE);
+    this.validateNamedFile(input, ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_AVATAR_FILE_SIZE_BYTES);
     await this.validateActiveUploadPermission(actor, PERMISSIONS.ACCOUNT_UPDATE_SELF);
     const token = createUploadToken();
     const grant: McpUserAvatarUploadGrant = {
@@ -225,7 +217,7 @@ export class McpUploadGrantService {
       token,
       expiresAt: new Date(grant.expiresAt).toISOString(),
       fileField: "userAvatar",
-      maxSizeBytes: AVATAR_MAX_SIZE,
+      maxSizeBytes: MAX_AVATAR_FILE_SIZE_BYTES,
       fields: { data: "{}" },
     };
   }
@@ -247,7 +239,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     input: Pick<McpLessonUploadGrant, "lessonId" | "language" | "filename" | "mimeType" | "size">,
   ) {
-    this.validateUploadFile(input, MAX_VIDEO_SIZE);
+    this.validateUploadFile(input, MAX_FILE_SIZE_BYTES);
 
     await this.lessonService.validateAccess(ENTITY_TYPES.LESSON, actor, input.lessonId);
 
@@ -285,7 +277,7 @@ export class McpUploadGrantService {
       "targetType" | "targetId" | "language" | "filename" | "mimeType" | "size"
     >,
   ) {
-    this.validateUploadFile(input, MAX_FILE_SIZE);
+    this.validateUploadFile(input, MAX_FILE_SIZE_BYTES);
     await this.validateEditorialAccess(actor, input);
 
     const token = createUploadToken();
@@ -317,11 +309,11 @@ export class McpUploadGrantService {
     const allowedTypes: readonly string[] =
       input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
         ? ALLOWED_LESSON_IMAGE_FILE_TYPES
-        : ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES;
+        : ALLOWED_LESSON_IMAGE_FILE_TYPES;
     if (
       !allowedTypes.includes(input.mimeType) ||
       input.size < 1 ||
-      input.size > MAX_FILE_SIZE ||
+      input.size > MAX_FILE_SIZE_BYTES ||
       !input.filename ||
       input.filename.length > 255 ||
       basename(input.filename) !== input.filename ||
@@ -369,8 +361,8 @@ export class McpUploadGrantService {
     const allowed =
       input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
         ? ALLOWED_LESSON_IMAGE_FILE_TYPES
-        : ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES;
-    this.validateNamedFile(input, allowed, MAX_FILE_SIZE);
+        : ALLOWED_LESSON_IMAGE_FILE_TYPES;
+    this.validateNamedFile(input, allowed, MAX_FILE_SIZE_BYTES);
     await this.validateLearningPathAccess(actor, input.targetId);
 
     const token = createUploadToken();
@@ -400,7 +392,7 @@ export class McpUploadGrantService {
       "targetType" | "targetId" | "language" | "filename" | "mimeType" | "size" | "translations"
     >,
   ) {
-    this.validateNamedFile(input, ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE);
+    this.validateNamedFile(input, ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE_BYTES);
     if (!input.translations.some((item) => item.language === input.language))
       throw new BadRequestException("Cover language is missing from translations");
     await this.validateEditorialAccess(actor, input);
@@ -429,7 +421,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     input: Pick<McpAvatarUploadGrant, "targetId" | "filename" | "mimeType" | "size">,
   ) {
-    this.validateNamedFile(input, ALLOWED_AVATAR_IMAGE_TYPES, MAX_FILE_SIZE);
+    this.validateNamedFile(input, ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE_BYTES);
     await this.lessonService.validateAccess(ENTITY_TYPES.LESSON, actor, input.targetId);
 
     const token = createUploadToken();
@@ -460,10 +452,10 @@ export class McpUploadGrantService {
     const allowedTypes: readonly string[] = ALLOWED_MIME_TYPES.filter(
       (type) => !type.startsWith("video/"),
     );
-    this.validateNamedFile(input, allowedTypes, MAX_FILE_SIZE);
+    this.validateNamedFile(input, allowedTypes, MAX_FILE_SIZE_BYTES);
     if (
       ALLOWED_PRESENTATION_FILE_TYPES.includes(input.mimeType) &&
-      input.size > MAX_PRESENTATION_FILE_SIZE
+      input.size > MAX_PRESENTATION_FILE_SIZE_BYTES
     )
       throw new BadRequestException("Presentation file is too large");
     if (
@@ -581,7 +573,7 @@ export class McpUploadGrantService {
           size: input.thumbnailSize,
         },
         ALLOWED_LESSON_IMAGE_FILE_TYPES,
-        MAX_SCORM_THUMBNAIL_SIZE,
+        MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
       );
     }
 
@@ -678,7 +670,9 @@ export class McpUploadGrantService {
     >,
   ) {
     const maxSize =
-      input.targetType === ENTITY_TYPES.COURSE ? MAX_COURSE_TRAILER_VIDEO_SIZE : MAX_VIDEO_SIZE;
+      input.targetType === ENTITY_TYPES.COURSE
+        ? MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES
+        : MAX_VIDEO_FILE_SIZE_BYTES;
     this.validateNamedFile(input, ALLOWED_VIDEO_FILE_TYPES, maxSize);
     await this.validateAuthoringTargetAccess(actor, input);
 

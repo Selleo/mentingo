@@ -99,7 +99,7 @@ async function bootstrap() {
     }
   });
   const jwtService = app.get(JwtService);
-  const jwtSecret = app.get(ConfigService).get<string>("jwt.secret");
+  const jwtSecret = app.get(ConfigService).getOrThrow<string>("jwt.secret");
 
   const isDevelopment =
     environmentValidation(process.env.NODE_ENV as string) === Environment.DEVELOPMENT;

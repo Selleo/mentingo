@@ -2273,6 +2273,28 @@ export class SettingsService {
     });
   }
 
+  async streamLoginPageFile(id: UUIDType, req: Request, res: Response): Promise<void> {
+    const { resourceIds } = await this.getExistingLoginPageResourceIds();
+    if (!resourceIds.includes(id))
+      throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const [resource] = await this.db
+      .select({ reference: resources.reference })
+      .from(resources)
+      .where(eq(resources.id, id));
+
+    if (!resource) throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const file = await this.fileService.getFileDelivery(resource.reference, req.headers.range);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      res.redirect(file.url);
+      return;
+    }
+
+    streamFileToResponse(res, file);
+  }
+
   async getLoginPageFiles(): Promise<LoginPageResourceResponseBody> {
     const existingResourceIds = await this.getExistingLoginPageResourceIds();
 

@@ -88,6 +88,6 @@ describe("FileGuard with the installed file-type module", () => {
   });
 
   it("rejects detected types outside the allowed list", () => {
-    expect(result.disallowedType).toContain("File type image/png is not allowed");
+    expect(result.disallowedType).toBe("files.toast.invalidFileType");
   });
 });

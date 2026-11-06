@@ -833,9 +833,9 @@
       "uploadForbidden": "Esta subida no pertenece al usuario actual."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG o SVG",
-      "video": "MP4, MOV, MPEG-2 o HEVC (máx. 5 GB)",
-      "presentation": "PPT/PPTX (máx. 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM u OGG (máx. {{maxSize}})",
+      "presentation": "PPTX u ODP (máx. {{maxSize}})"
     },
     "processing": {
       "title": "El vídeo se está procesando",
@@ -892,7 +892,7 @@
       "setUpCourse": "Configurar curso",
       "provideDetails": "Proporcione los detalles para configurar un nuevo curso.",
       "uploadFileHeader": "Haga clic para cargar o arrastre y suelte",
-      "uploadFileBody": "Archivo .zip de SCORM (máx. 500 MB)",
+      "uploadFileBody": "Archivo .zip de SCORM (máx. {{maxSize}})",
       "pricing": "Precios",
       "status": "Estado",
       "setUpPricing": "Establecer precios para el curso.",
@@ -979,7 +979,7 @@
       "requirements": {
         "title": "Requisitos del paquete",
         "version": "Paquete SCORM 1.2",
-        "archive": "Archivo .zip de hasta 500 MB",
+        "archive": "Archivo .zip de hasta {{maxSize}}",
         "metadata": "Los metadatos del curso se pueden editar antes de importarlos."
       },
       "packageSection": "Paquete SCORM",
@@ -994,11 +994,22 @@
       "replacePackage": "Reemplazar paquete",
       "removePackage": "Quitar paquete",
       "uploadThumbnail": "Subir miniatura",
-      "uploadThumbnailDescription": "PNG, JPG o JPEG hasta 20 MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
       "thumbnailPreviewAlt": "Vista previa en miniatura del curso",
       "submit": "Crear curso SCORM",
       "creating": "Creando curso SCORM...",
-      "toastDraftReady": "El formulario del curso SCORM está listo para la integración con la API"
+      "toastDraftReady": "El formulario del curso SCORM está listo para la integración con la API",
+      "categoryRequired": "La categoría es obligatoria.",
+      "descriptionMaxLength": "La descripción debe contener como máximo {{maxLength}} caracteres.",
+      "descriptionMinLength": "La descripción debe tener al menos 2 caracteres.",
+      "languageInvalid": "Seleccione un idioma compatible.",
+      "packageInvalidType": "El paquete SCORM debe ser un archivo .zip",
+      "packageRequired": "El paquete SCORM es obligatorio.",
+      "packageTooLarge": "El paquete SCORM debe ser menor que {{maxSize}}",
+      "thumbnailInvalid": "La miniatura debe ser un archivo de imagen válido",
+      "thumbnailInvalidType": "La miniatura debe ser PNG, JPG/JPEG, WEBP o SVG",
+      "thumbnailTooLarge": "La miniatura debe ser menor que {{maxSize}}",
+      "titleMinLength": "El título debe tener al menos 2 caracteres."
     },
     "lesson": {
       "packageSection": "Paquete SCORM",
@@ -1010,7 +1021,7 @@
       "validation": {
         "titleRequired": "Se requiere título",
         "packageRequired": "Se requiere el paquete SCORM",
-        "packageTooLarge": "El paquete SCORM debe tener menos de 500 MB",
+        "packageTooLarge": "El paquete SCORM debe ser menor que {{maxSize}}",
         "packageInvalidType": "El paquete SCORM debe ser un archivo .zip"
       }
     }
@@ -2967,7 +2978,7 @@
         "charactersLeft": "Caracteres restantes",
         "reachedCharactersLimit": "Has alcanzado el límite de caracteres.",
         "reachedCharactersLimitHtml": "Demasiado formato. Reduzca la cantidad de formato para que se ajuste al límite.",
-        "trailerUploadDetails": "MP4, MOV (máx. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM u OGG (máx. {{maxSize}})",
         "enableCertificate": "Habilitar certificado",
         "enableCertificateDescription": "Active esta opción para emitir certificados para este curso y configure su firma y vista previa a continuación.",
         "certificateValidity": "Validez del certificado",
@@ -3002,7 +3013,7 @@
           "groups": "Grupos",
           "users": "Usuarios"
         },
-        "certificateSignatureRequirements": "PNG o SVG (fondo transparente recomendado)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
         "certificatePreviewTitle": "Vista previa del certificado",
         "certificatePreviewDescription": "Abre la vista previa para ajustar el idioma y el color.",
         "certificatePreviewButton": "Vista previa",
@@ -3151,11 +3162,12 @@
           "passThresholdMax": "El umbral de aprobación no puede exceder 10",
           "titleMinLength": "El título es demasiado corto (mínimo 2 caracteres)",
           "titleMaxLength": "El título es demasiado largo (máximo 250 caracteres)",
-          "maxFileSize": "El tamaño del archivo debe ser inferior a {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "El tamaño del archivo debe ser inferior a {{maxSize}}",
           "maxFileNumber_one": "No puedes subir más de 1 archivo",
           "maxFileNumber_other": "No puedes cargar más de archivos {{ count }}",
           "maxResources_five": "No puedes agregar más de 5 recursos.",
-          "sourceUrlRequired": "La URL de origen es obligatoria"
+          "sourceUrlRequired": "La URL de origen es obligatoria",
+          "sourceUrlInvalid": "Introduce una URL HTTPS válida"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -3229,8 +3241,8 @@
           "voiceMode": "Modo de voz",
           "ttsPreset": "Preajuste TTS",
           "customTTSReference": "Referencia TTS personalizada",
-          "includeFiles_one": "Adjunte hasta 1 archivo debajo de {{ MAX_FILE_SIZE }} MB para usarlo como contexto en las lecciones",
-          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{ MAX_FILE_SIZE }} MB para usarlos como contexto en las lecciones"
+          "includeFiles_one": "Adjunte hasta 1 archivo debajo de {{maxSize}} para usarlo como contexto en las lecciones",
+          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{maxSize}} para usarlos como contexto en las lecciones"
         },
         "placeholder": {
           "title": "Proporcione el título de la lección...",
@@ -3722,7 +3734,7 @@
           "leaveContentCancel": "Seguir editando",
           "leaveContentDiscard": "Salir sin guardar",
           "dropOrClick": "Suelta la imagen aquí o haz clic para subirla.",
-          "allowedFormats": "PNG, JPG o SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Describe cómo debe comportarse el mentor de IA durante la lección. Incluya el contexto, rol o escenario que debe seguir la IA. Esto define cómo la IA guiará la conversación.",
           "updateAiMentorAvatarDescription": "Cargue una nueva imagen para el mentor de IA o elimine la actual.",
           "updateAiMentorAvatar": "Actualizar avatar de mentor de IA",
@@ -4608,7 +4620,7 @@
       "preview": "Vista previa"
     },
     "field": {
-      "imageRequirements": "PNG, JPG o JPEG (máx. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "other": {
       "uploading": "Subiendo...",
@@ -4906,10 +4918,10 @@
   },
   "platformLogo": {
     "header": "Logotipo de la plataforma",
-    "subHeader": "Cargue un logotipo personalizado para su plataforma. Formatos soportados: PNG, SVG",
+    "subHeader": "Cargue un logotipo personalizado para su plataforma. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Imagen del logotipo",
-      "imageRequirements": "PNG o SVG (máx. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Eliminar logo de plataforma"
@@ -4922,10 +4934,10 @@
   },
   "platformSimpleLogo": {
     "header": "Logotipo simple de plataforma (icono)",
-    "subHeader": "Cargue un logotipo personalizado que se utilizará como sello y favicon. Formatos soportados: PNG, SVG",
+    "subHeader": "Cargue un logotipo personalizado que se utilizará como sello y favicon. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
     "field": {
       "uploadLabel": "Imagen del logotipo",
-      "imageRequirements": "PNG o SVG (máx. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Eliminar el logotipo del icono de la plataforma"
@@ -4944,7 +4956,7 @@
     "title": "Iniciar sesión Subir imagen de fondo",
     "description": "Cargue una imagen de fondo personalizada para la página de inicio de sesión de la organización.",
     "field": {
-      "imageRequirements": "PNG, JPG o JPEG (máx. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Eliminar imagen de fondo de inicio de sesión"
@@ -4967,11 +4979,16 @@
       "invalidData": "Error al cargar el archivo: datos de archivo no válidos",
       "fileEmpty": "Error al cargar el archivo: el archivo está vacío",
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
-      "invalidFileType": "Tipo de archivo no válido.",
+      "invalidFileType": "El archivo no es válido o su formato no es compatible.",
       "missingTenantContext": "Falta contexto de inquilino para la carga de archivos",
       "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}.",
-      "audioFileTooLarge": "El archivo de audio es demasiado grande. Cargue un audio de hasta 200 MB.",
-      "rangeNotSatisfiable": "El rango de bytes solicitado no está disponible."
+      "audioFileTooLarge": "El archivo de audio es demasiado grande. Cargue un audio de hasta {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "El rango de bytes solicitado no está disponible.",
+      "fileTooLarge": "El archivo es demasiado grande. El tamaño máximo es {{maxSize}}.",
+      "uploadTooLarge": "El archivo es demasiado grande para subirlo.",
+      "imageResolutionTooLarge": "La imagen es demasiado grande. La resolución máxima es {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "La imagen debe tener una relación de aspecto de {{aspectRatio}}.",
+      "invalidImageReference": "La imagen seleccionada no está disponible. Vuelve a subir la imagen."
     },
     "import": {
       "noFileUploaded": "No se ha subido ningún archivo",
@@ -5512,7 +5529,7 @@
       "titlePlaceholder": "Nombra la ruta de desarrollo",
       "description": "Descripción",
       "descriptionPlaceholder": "Describe lo que los estudiantes completarán en este camino.",
-      "imageHint": "PNG, JPG o JPEG (máx. 20 MB, recomendado 1200x1200 o superior)",
+      "imageHint": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}}, recomendado 1200x1200 o superior)",
       "sequenceEnabled": "Aprendizaje secuencial",
       "sequenceEnabledDescription": "Los estudiantes deben completar los cursos en orden de visualización.",
       "includesCertificate": "Certificado",
@@ -6325,11 +6342,11 @@
       "uploadImage": "Subir nueva imagen principal",
       "dropImage": "Suelta aquí la imagen principal",
       "browse": "o haz clic para buscar",
-      "imageLimit": "PNG, JPG hasta 10 MB",
+      "imageLimit": "PNG, JPG hasta {{maxSize}}",
       "imageRecommendation": "Recomendado: 1920x820 px (21:9)",
       "trailer": "Tráiler del curso (opcional)",
       "dropVideo": "Suelta aquí el tráiler",
-      "videoLimit": "MP4, MOV hasta 50 MB",
+      "videoLimit": "MP4, MOV hasta {{maxSize}}",
       "videoRecommendation": "Recomendado: 30–90 segundos",
       "save": "Subir contenido multimedia"
     },
@@ -9066,6 +9083,24 @@
       "disabled": "Los tutoriales de ayuda no están activados en esta instalación.",
       "notFound": "Este tutorial no está disponible para tu versión de Mentingo.",
       "invalidRequest": "Elige un tutorial disponible o cambia la búsqueda y vuelve a intentarlo."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "No se encontró la ruta de desarrollo.",
+      "createError": "No se pudo crear la ruta de desarrollo.",
+      "updateError": "No se pudo actualizar la ruta de desarrollo.",
+      "updateMissingLanguage": "Esta ruta de desarrollo no está disponible en el idioma seleccionado.",
+      "languageNotSupported": "Este idioma no es compatible.",
+      "courseNotFound": "No se encontró el curso.",
+      "courseAlreadyExists": "Este curso ya está en la ruta de desarrollo.",
+      "courseIdsMustBeUnique": "Cada curso solo se puede añadir una vez.",
+      "courseIdsEmpty": "Selecciona al menos un curso.",
+      "courseIdsMismatch": "El orden de los cursos no coincide con los cursos de esta ruta de desarrollo.",
+      "courseLinkNotFound": "Este curso no forma parte de la ruta de desarrollo.",
+      "studentIdsEmpty": "Selecciona al menos un estudiante.",
+      "groupIdsEmpty": "Selecciona al menos un grupo.",
+      "featureDisabled": "Las rutas de desarrollo están desactivadas en esta plataforma."
     }
   }
 }

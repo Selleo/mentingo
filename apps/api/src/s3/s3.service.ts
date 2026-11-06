@@ -17,6 +17,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 
+import { uploadContentDisposition } from "src/file/utils/uploadContentDisposition";
 import { S3_MULTIPART_UPLOAD_CONCURRENCY, S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
 
 import type { S3StreamUploadOptions } from "./s3.types";
@@ -222,6 +223,7 @@ export class S3Service {
       Key: key,
       Body: fileBuffer,
       ContentType: contentType,
+      ContentDisposition: uploadContentDisposition(contentType),
       ...(typeof contentLength === "number" ? { ContentLength: contentLength } : {}),
     });
 
@@ -237,7 +239,13 @@ export class S3Service {
       Bucket: this.bucketName,
       CopySource: `${this.bucketName}/${encodeURIComponent(sourceKey).replace(/%2F/g, "/")}`,
       Key: destinationKey,
-      ...(contentType ? { ContentType: contentType, MetadataDirective: "REPLACE" } : {}),
+      ...(contentType
+        ? {
+            ContentType: contentType,
+            ContentDisposition: uploadContentDisposition(contentType),
+            MetadataDirective: "REPLACE",
+          }
+        : {}),
     });
 
     await this.sendWithTimeout(
@@ -265,6 +273,7 @@ export class S3Service {
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
+      ContentDisposition: uploadContentDisposition(contentType),
     });
 
     const response = await this.sendWithTimeout(
@@ -369,7 +378,13 @@ export class S3Service {
   ): Promise<void> {
     const upload = new Upload({
       client: this.s3Client,
-      params: { Bucket: this.bucketName, Key: key, Body: stream, ContentType: contentType },
+      params: {
+        Bucket: this.bucketName,
+        Key: key,
+        Body: stream,
+        ContentType: contentType,
+        ContentDisposition: uploadContentDisposition(contentType),
+      },
       partSize,
       queueSize: S3_MULTIPART_UPLOAD_CONCURRENCY,
       leavePartsOnError: false,

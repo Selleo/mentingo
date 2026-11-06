@@ -9,10 +9,10 @@ import {
   ServiceUnavailableException,
 } from "@nestjs/common";
 import {
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   CourseAuthoringOrderError,
   ENTITY_TYPES,
   normalizeAuthoringQuizQuestionOrder,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { load as loadHtml } from "cheerio";
@@ -465,7 +465,7 @@ export class CourseAuthoringApplyService {
         const { certificateSignatureAssetId, certificateValidity, ...settings } = operation.payload;
         if (
           certificateSignatureAssetId &&
-          !ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES.some(
+          !ALLOWED_LESSON_IMAGE_FILE_TYPES.some(
             (type) => type === input.assetMimeTypes[certificateSignatureAssetId],
           )
         )

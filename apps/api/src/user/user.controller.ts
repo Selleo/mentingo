@@ -17,10 +17,13 @@ import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/fi
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
 import {
-  ALLOWED_AVATAR_IMAGE_TYPES,
   OnboardingPages,
   PERMISSIONS,
   type SupportedLanguages,
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
@@ -42,7 +45,6 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -56,11 +58,7 @@ import {
   createUserSchema,
   importUserResponseSchema,
 } from "src/user/schemas/createUser.schema";
-import {
-  AVATAR_ASPECT_RATIO,
-  AVATAR_MAX_RESOLUTION,
-  AVATAR_MAX_SIZE,
-} from "src/user/user.constants";
+import { AVATAR_ASPECT_RATIO, AVATAR_MAX_RESOLUTION } from "src/user/user.constants";
 import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -296,7 +294,10 @@ export class UserController {
     userInfo: { data: UpdateUserProfileBody },
     @CurrentUser("userId") currentUserId: UUIDType,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), AVATAR_MAX_SIZE)
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_AVATAR_FILE_SIZE_BYTES,
+      )
         .addValidator(
           new ImageConstraintsValidator({
             maxResolution: AVATAR_MAX_RESOLUTION,
@@ -317,8 +318,8 @@ export class UserController {
         request.body,
       );
       await FileGuard.validateFile(userAvatar!, {
-        allowedTypes: ALLOWED_AVATAR_IMAGE_TYPES,
-        maxSize: AVATAR_MAX_SIZE,
+        allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        maxSize: MAX_AVATAR_FILE_SIZE_BYTES,
       });
     }
     await this.usersService.updateUserProfile(currentUserId, userInfo.data, userAvatar);
@@ -536,7 +537,7 @@ export class UserController {
   })
   async importUsers(
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_EXCEL_MIME_TYPES), MAX_FILE_SIZE, true).build({
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_EXCEL_FILE_TYPES), MAX_FILE_SIZE_BYTES).build({
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )

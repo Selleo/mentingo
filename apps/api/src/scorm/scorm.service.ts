@@ -20,6 +20,7 @@ import {
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
   SUPPORTED_LANGUAGES,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
 import { load as loadHtml } from "cheerio";
@@ -45,7 +46,6 @@ import { ScormRepository } from "./repositories/scorm.repository";
 import { resolveScormContentType, resolveScormContentTypeFromFilename } from "./scorm-content-type";
 import {
   MAX_SCORM_EXTRACTED_FILE_COUNT,
-  MAX_SCORM_PACKAGE_SIZE_BYTES,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
 import { ScormQueueService } from "./scorm-queue.service";

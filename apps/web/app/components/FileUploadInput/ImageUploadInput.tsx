@@ -1,3 +1,8 @@
+import {
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
@@ -35,7 +40,7 @@ const ImageUploadInput = ({
   inputId,
   variant = "square",
   size = IMAGE_UPLOAD_SIZES.DEFAULT,
-  accept = ".png, .jpg, .jpeg",
+  accept = ALLOWED_IMAGE_FILE_EXTENSIONS.join(","),
   imageFit = "cover",
   detailsText,
   inputTestId,
@@ -43,10 +48,9 @@ const ImageUploadInput = ({
   const { t } = useTranslation();
   const safeImageUrl = useRichTextMediaUrl(imageUrl || field.value);
   const isSmall = size === IMAGE_UPLOAD_SIZES.SMALL;
-  const fallbackDetails =
-    variant === "video"
-      ? "PNG, JPG or JPEG (max. 20 MB, recommended 1920x1080 or higher)"
-      : "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)";
+  const fallbackDetails = t("uploadFile.details.imageCrop", {
+    maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES),
+  });
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">

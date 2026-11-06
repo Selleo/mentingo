@@ -1,3 +1,4 @@
+import { MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -65,7 +66,9 @@ export function OrganizationLoginBackgroundUpload({
           imageUrl={backgroundImage}
           fileInputRef={fileInputRef}
           variant="video"
-          detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements")}
+          detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements", {
+            maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
+          })}
           inputTestId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_INPUT}
         />
         {isUploading && (

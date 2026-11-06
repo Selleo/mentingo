@@ -1,4 +1,4 @@
-import { AUDIO_UPLOAD_MAX_BYTES, ENTITY_TYPES } from "@repo/shared";
+import { MAX_AUDIO_FILE_SIZE_BYTES, ENTITY_TYPES } from "@repo/shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
@@ -24,7 +24,7 @@ describe("buildRichTextFileUploadHandler", () => {
     expect(RICH_TEXT_ACCEPTED_FILE_TYPES).not.toContain("audio/mpeg");
   });
   it.each([
-    [ENTITY_TYPES.LESSON, "audio/mpeg", AUDIO_UPLOAD_MAX_BYTES + 1],
+    [ENTITY_TYPES.LESSON, "audio/mpeg", MAX_AUDIO_FILE_SIZE_BYTES + 1],
     [ENTITY_TYPES.LESSON, "audio/aac", 4],
     [ENTITY_TYPES.ARTICLES, "audio/mpeg", 4],
     [ENTITY_TYPES.NEWS, "audio/mpeg", 4],

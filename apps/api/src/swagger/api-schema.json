@@ -1636,6 +1636,27 @@
         }
       }
     },
+    "/api/settings/login-page-files/{id}/content": {
+      "get": {
+        "operationId": "SettingsController_streamLoginPageFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/login-page-files/{id}": {
       "delete": {
         "operationId": "SettingsController_deleteLoginPageFile",
