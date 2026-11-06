@@ -77,6 +77,77 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(row["status"], "failed")
         self.assertIsNone(row["output"])
 
+    def test_missing_input_is_unknown_not_copied_from_the_published_fixture(self):
+        row = normalize_report(
+            {
+                "results": [
+                    {
+                        "caseId": "source-grounding",
+                        "status": "response_generated",
+                        "output": "Actual synthetic response",
+                    }
+                ]
+            },
+            manifest(),
+        )[0]
+        self.assertIsNone(row["input"])
+        self.assertEqual(row["metadata"]["inputProvenance"], "missing")
+        self.assertFalse(row["metadata"]["inputMatchesPublishedItem"])
+
+    def test_report_cannot_replace_the_versioned_expected_output(self):
+        with self.assertRaisesRegex(ValueError, "oracle"):
+            normalize_report(
+                {
+                    "results": [
+                        {
+                            "caseId": "source-grounding",
+                            "status": "response_generated",
+                            "output": "Actual synthetic response",
+                            "expectedOutput": {"requiredFacts": ["changed gold"]},
+                        }
+                    ]
+                },
+                manifest(),
+            )
+
+    def test_false_deterministic_check_overrides_a_reported_pass(self):
+        row = normalize_report(
+            {
+                "results": [
+                    {
+                        "caseId": "source-grounding",
+                        "status": "passed",
+                        "output": "The writer claimed success.",
+                        "checks": {"nativePersistence": False, "responded": True},
+                    }
+                ]
+            },
+            manifest(),
+        )[0]
+        self.assertEqual(row["status"], "failed")
+        self.assertEqual(row["metadata"]["reportedExecutionStatus"], "passed")
+        self.assertFalse(row["metadata"]["deterministicChecks"]["nativePersistence"])
+        self.assertEqual(row["output"], "The writer claimed success.")
+
+    def test_nonboolean_checks_are_rejected_instead_of_coerced_to_truth(self):
+        for value in ("false", 0, None):
+            with self.subTest(value=value), self.assertRaisesRegex(
+                ValueError, "boolean"
+            ):
+                normalize_report(
+                    {
+                        "results": [
+                            {
+                                "caseId": "source-grounding",
+                                "status": "passed",
+                                "output": "Actual synthetic response",
+                                "checks": {"nativePersistence": value},
+                            }
+                        ]
+                    },
+                    manifest(),
+                )
+
     def test_changed_inputs_are_explicitly_marked_instead_of_rewritten(self):
         row = normalize_report(
             {

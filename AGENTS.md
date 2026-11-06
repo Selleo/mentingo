@@ -47,6 +47,7 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - API tests: `pnpm test:api`.
 - Deterministic AI regressions: `pnpm test:ai:regression` (no running app or provider credentials).
 - Manual AI model/application experiments: `pnpm eval:ai --mode list`; see `docs/langfuse/core-evaluation-runbook.md`.
+- Run and record a real dataset experiment: `pnpm eval:ai:experiment --config PATH`; add `--check` for local prerequisite validation only. See `docs/langfuse/README.md`.
 - Normalize/record an actual experiment report: `pnpm eval:ai:record` with explicit report/run/receipt arguments; remote upload additionally requires `--apply`.
 - Web unit tests: `pnpm test:web`.
 - Web E2E tests: `pnpm test:web:e2e`.

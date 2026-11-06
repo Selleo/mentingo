@@ -89,6 +89,47 @@ export type FeatureTaskResult = {
   promptFragments: PromptFragmentRecord[];
   reason?: string;
 };
+export type CapturedFeatureModelRequest = {
+  request: {
+    kind: FeatureModelRequest["kind"];
+    messages: FeatureModelRequest["messages"];
+    schema?: Record<string, unknown>;
+    texts?: string[];
+  };
+  requestSha256: string;
+  outcome: "returned" | "failed";
+  outputSha256?: string;
+};
+/** The published fixture is separate from observations at the model/native adapter boundaries. */
+export type CapturedFeatureTaskResult = FeatureTaskResult & {
+  input: FeatureItem["input"];
+  expectedOutput: FeatureItem["expectedOutput"];
+  metadata: {
+    caseId: string;
+    featureId: string;
+    scope: string;
+    inputProvenance: "declared_published_fixture";
+    declaredInputSha256: string;
+    expectedOutputProvenance: "versioned_catalogue";
+    effectiveModelRequests: CapturedFeatureModelRequest[];
+    modelRequestCaptureBoundary: "FeatureModel_arguments";
+    modelProvenance:
+      | "explicit_cli_provider_configuration"
+      | "model_call_observed_configuration_unavailable"
+      | "native_runtime_not_observed"
+      | "no_model_request_observed";
+    effectiveProviderConfig?: Record<string, unknown>;
+    nativeEvidenceProvenance:
+      | "adapter_returned_checks_and_output"
+      | "not_observed"
+      | "not_applicable";
+    rawHttpRequestsCaptured: false;
+    rawProviderResponsesCaptured: false;
+    synthetic: true;
+    runnerFailureCategory?: string;
+    runnerFailureStatus?: number;
+  };
+};
 export type FeatureRunOptions = {
   run: boolean;
   allowModelRequests?: boolean;

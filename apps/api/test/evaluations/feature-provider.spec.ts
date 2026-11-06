@@ -32,6 +32,7 @@ describe("explicit manual feature model SDK adapter (transport mocked)", () => {
     ).toBe("Badge issue is free.");
     expect(generateText).toHaveBeenCalledWith(
       expect.objectContaining({
+        allowSystemInMessages: true,
         maxRetries: 0,
         telemetry: { isEnabled: false },
         providerOptions: { openai: { store: false } },

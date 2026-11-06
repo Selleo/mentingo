@@ -9,10 +9,157 @@ import { sha256 } from "./semantic-evaluator";
 
 import type { HttpRunConfig } from "./evaluation.types";
 import type {
+  CapturedFeatureModelRequest,
+  CapturedFeatureTaskResult,
+  CoreAiFeature,
   FeatureCatalogue,
+  FeatureItem,
   FeatureProviderConfiguration,
+  FeatureRunOptions,
   FeatureTaskResult,
 } from "./feature-catalogue.types";
+
+/** Capture exact model arguments without mistaking the declared dataset fixture for a raw request. */
+export async function captureFeatureTask(
+  feature: CoreAiFeature,
+  item: FeatureItem,
+  options: FeatureRunOptions,
+  providerMetadata?: Record<string, unknown>,
+): Promise<CapturedFeatureTaskResult> {
+  const input = JSON.parse(JSON.stringify(item.input)) as FeatureItem["input"];
+  const expectedOutput = JSON.parse(
+    JSON.stringify(item.expectedOutput),
+  ) as FeatureItem["expectedOutput"];
+  const effectiveModelRequests: CapturedFeatureModelRequest[] = [];
+  const model = options.model;
+  const capturedModel: FeatureRunOptions["model"] = model
+    ? async (request) => {
+        const captured: CapturedFeatureModelRequest = {
+          request: {
+            kind: request.kind,
+            messages: request.messages.map(({ role, content }) => ({ role, content })),
+            ...(request.schema
+              ? { schema: JSON.parse(JSON.stringify(request.schema)) as Record<string, unknown> }
+              : {}),
+            ...(request.texts ? { texts: [...request.texts] } : {}),
+          },
+          requestSha256: "",
+          outcome: "failed",
+        };
+        captured.requestSha256 = sha256(JSON.stringify(captured.request));
+        effectiveModelRequests.push(captured);
+        const output = await model(request);
+        captured.outcome = "returned";
+        captured.outputSha256 = sha256(JSON.stringify(output) ?? "undefined");
+        return output;
+      }
+    : undefined;
+  let result: FeatureTaskResult;
+  let runnerFailureCategory: string | undefined;
+  let runnerFailureStatus: number | undefined;
+  try {
+    result = await runFeatureTask(feature, item, { ...options, model: capturedModel });
+  } catch (error: unknown) {
+    const knownNames = [
+      "Error",
+      "TypeError",
+      "SyntaxError",
+      "AbortError",
+      "TimeoutError",
+      "AI_APICallError",
+      "AI_NoOutputGeneratedError",
+      "AI_NoObjectGeneratedError",
+      "AI_InvalidArgumentError",
+      "AI_InvalidPromptError",
+      "AI_LoadAPIKeyError",
+      "AI_UnsupportedFunctionalityError",
+      "AI_RetryError",
+      "AI_TypeValidationError",
+      "AI_JSONParseError",
+      "AI_InvalidResponseDataError",
+      "AI_EmptyResponseBodyError",
+      "AI_TooManyEmbeddingValuesForCallError",
+    ];
+    const details =
+      error && typeof error === "object"
+        ? (error as { name?: unknown; statusCode?: unknown; status?: unknown })
+        : {};
+    runnerFailureCategory =
+      typeof details.name === "string" && knownNames.includes(details.name)
+        ? details.name
+        : "UnclassifiedError";
+    const status = details.statusCode ?? details.status;
+    if (typeof status === "number" && Number.isInteger(status) && status >= 100 && status <= 599)
+      runnerFailureStatus = status;
+    result = {
+      caseId: item.id,
+      featureId: feature.featureId,
+      status: "failed",
+      executionLevel: item.metadata.executionLevel,
+      checks: {},
+      promptFragments: [],
+      reason:
+        "Task failed: verify snapshot completeness, explicit opt-in/config, output contract, isolated fixtures and provider availability. No provider or application error body was recorded.",
+    };
+  }
+  if (Object.values(result.checks).some((check) => check === false)) result.status = "failed";
+  const nativeTask = ["app", "assistant", "audio"].includes(item.input.task.kind);
+  let modelProvenance: CapturedFeatureTaskResult["metadata"]["modelProvenance"] =
+    "no_model_request_observed";
+  if (nativeTask && options.run) modelProvenance = "native_runtime_not_observed";
+  const publicProviderConfig = providerMetadata
+    ? Object.fromEntries(
+        [
+          "model",
+          "baseURL",
+          "timeoutMs",
+          "maxOutputTokens",
+          "maxRetries",
+          "configSha256",
+          "telemetryEnabled",
+        ]
+          .filter((key) => providerMetadata[key] !== undefined)
+          .map((key) => [key, providerMetadata[key]]),
+      )
+    : undefined;
+  if (effectiveModelRequests.length)
+    modelProvenance = publicProviderConfig
+      ? "explicit_cli_provider_configuration"
+      : "model_call_observed_configuration_unavailable";
+  let nativeEvidenceProvenance: CapturedFeatureTaskResult["metadata"]["nativeEvidenceProvenance"] =
+    "not_applicable";
+  if (nativeTask && options.run) {
+    nativeEvidenceProvenance =
+      result.output !== undefined || Object.keys(result.checks).length
+        ? "adapter_returned_checks_and_output"
+        : "not_observed";
+  }
+  return {
+    ...result,
+    input,
+    expectedOutput,
+    metadata: {
+      caseId: item.id,
+      featureId: feature.featureId,
+      scope: result.executionLevel,
+      inputProvenance: "declared_published_fixture",
+      declaredInputSha256: sha256(JSON.stringify(input)),
+      expectedOutputProvenance: "versioned_catalogue",
+      effectiveModelRequests,
+      modelRequestCaptureBoundary: "FeatureModel_arguments",
+      modelProvenance,
+      ...(effectiveModelRequests.length && publicProviderConfig
+        ? { effectiveProviderConfig: publicProviderConfig }
+        : {}),
+      nativeEvidenceProvenance,
+      rawHttpRequestsCaptured: false,
+      rawProviderResponsesCaptured: false,
+      synthetic: true,
+      ...(runnerFailureCategory ? { runnerFailureCategory } : {}),
+      ...(runnerFailureStatus !== undefined ? { runnerFailureStatus } : {}),
+    },
+  };
+}
 
 async function main() {
   const { values } = parseArgs({
@@ -84,33 +231,25 @@ async function main() {
           ) as FeatureProviderConfiguration,
         )
       : undefined;
-  const results: FeatureTaskResult[] = [];
+  const results: CapturedFeatureTaskResult[] = [];
   for (const feature of features)
     for (const item of feature.items) {
       if (values.case?.length && !values.case.includes(item.id)) continue;
-      try {
-        results.push(
-          await runFeatureTask(feature, item, {
+      results.push(
+        await captureFeatureTask(
+          feature,
+          item,
+          {
             run: values.mode === "run",
             allowModelRequests: values["allow-model-requests"],
             allowAppRequests: values["allow-app-requests"],
             appConfig,
             model: provider?.model,
             promptSnapshots,
-          }),
-        );
-      } catch {
-        results.push({
-          caseId: item.id,
-          featureId: feature.featureId,
-          status: "failed",
-          executionLevel: item.metadata.executionLevel,
-          checks: {},
-          promptFragments: [],
-          reason:
-            "Task failed: verify snapshot completeness, explicit opt-in/config, output contract, isolated fixtures and provider availability. No provider or application error body was recorded.",
-        });
-      }
+          },
+          provider?.metadata,
+        ),
+      );
     }
   const summary = {
     total: results.length,
@@ -148,9 +287,10 @@ async function main() {
   process.exitCode = exitCode;
 }
 
-main().catch(() => {
-  process.stderr.write(
-    "Feature task setup failed; check explicit arguments and catalogue. No credentials or provider details printed.\n",
-  );
-  process.exitCode = 1;
-});
+if (require.main === module)
+  main().catch(() => {
+    process.stderr.write(
+      "Feature task setup failed; check explicit arguments and catalogue. No credentials or provider details printed.\n",
+    );
+    process.exitCode = 1;
+  });

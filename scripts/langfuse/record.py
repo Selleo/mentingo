@@ -16,6 +16,12 @@ from pathlib import Path
 from manage import OWNER, ProjectClient, digest, validate_manifest
 
 
+def item_identity(profile, feature_id, case_id):
+    """Keep published dataset-item correlation identical across setup, preflight and export."""
+    value = OWNER + ":" + profile + ":" + feature_id + ":" + case_id
+    return value if len(value) <= 255 else OWNER + ":" + digest(value)
+
+
 def otlp_headers(client):
     """Select observations-first ingestion required for experiment synthesis."""
     return {
@@ -78,15 +84,34 @@ def normalize_report(report, manifest):
             and actual is None
         ):
             raise ValueError("Successful execution needs actual output evidence")
-        actual_input = row.get("input", item["input"])
-        expected = row.get("expectedOutput", item["expectedOutput"])
+        actual_input = row.get("input")
+        expected = item["expectedOutput"]
+        if "expectedOutput" in row and digest(row["expectedOutput"]) != digest(
+            expected
+        ):
+            raise ValueError(
+                "Captured expected output differs from the versioned oracle"
+            )
         checks = (
             row.get("checks")
             or native.get("checks")
             or row.get("deterministic", {}).get("checks", {})
         )
+        if not isinstance(checks, dict) or any(
+            not isinstance(value, bool) for value in checks.values()
+        ):
+            raise ValueError("Deterministic checks must be boolean assertions")
+        raw_status = status
+        if any(value is False for value in checks.values()):
+            status = "failed"
         metadata = {
             **metadata,
+            "reportedExecutionStatus": raw_status,
+            "inputProvenance": (
+                metadata.get("inputProvenance", "runner_supplied")
+                if actual_input is not None
+                else "missing"
+            ),
             "featureId": feature_id,
             "caseId": case_id,
             "scope": metadata.get(
@@ -95,7 +120,8 @@ def normalize_report(report, manifest):
             "executionStatus": status,
             "capturedInputSha256": digest(actual_input),
             "publishedItemInputSha256": digest(item["input"]),
-            "inputMatchesPublishedItem": digest(actual_input) == digest(item["input"]),
+            "inputMatchesPublishedItem": actual_input is not None
+            and digest(actual_input) == digest(item["input"]),
             "deterministicChecks": checks,
             "providerResponses": row.get("providerResponses", []),
             "effectivePromptRecords": native.get(
@@ -187,17 +213,11 @@ def record_report(client, setup, manifest, report, run_name):
             )
             if dataset is None:
                 raise ValueError("Feature dataset has not been provisioned")
-            stable_item = (
-                OWNER
-                + ":"
-                + setup.get("profile", manifest.get("project"))
-                + ":"
-                + row["featureId"]
-                + ":"
-                + row["caseId"]
+            stable_item = item_identity(
+                setup.get("profile", manifest.get("project")),
+                row["featureId"],
+                row["caseId"],
             )
-            if len(stable_item) > 255:
-                stable_item = OWNER + ":" + digest(stable_item)
             # Item lookup guards against silently linking a captured response to a different fixture.
             published = client.request(
                 "GET", "/api/public/dataset-items/" + urllib_quote(stable_item)
