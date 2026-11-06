@@ -27,6 +27,7 @@ export const QUEUE_NAMES = {
   VIDEO_METADATA: "video-metadata",
   REPORT_EXPORT: "report-export",
   CONTENT_MARKETPLACE_EVENTS: "content-marketplace-events",
+  GAMIFICATION: "gamification",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

@@ -511,6 +511,11 @@
             "ready": "Dzisiejszy trening jest gotowy.",
             "failed": "Nie udało się wygenerować scenariusza. Otwórz go, aby ponowić."
           }
+        },
+        "gamification": {
+          "description": "Twój poziom, XP i najnowsze osiągnięcia",
+          "empty": "Ukończ lekcje i kursy, aby zdobyć pierwsze osiągnięcie.",
+          "recentRewards": "Ostatnie osiągnięcia"
         }
       },
       "commonDescription": "Najważniejsze informacje w jednym miejscu",
@@ -617,6 +622,9 @@
           "reorderSuccess": "Zapisano kolejność zadań.",
           "reorderError": "Nie udało się zapisać kolejności zadań."
         }
+      },
+      "gamification": {
+        "title": "Poziom i osiągnięcia"
       }
     }
   },
@@ -2560,7 +2568,8 @@
         "live_training": "szkolenia live",
         "activity_log": "dziennik aktywności",
         "competencies": "kompetencje",
-        "other": "funkcje platformy"
+        "other": "funkcje platformy",
+        "gamification": "grywalizację"
       },
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
@@ -2654,7 +2663,9 @@
         "activity_log_read": "Może przeglądać dziennik aktywności.",
         "competencies_use": "Korzystanie z kompetencji w dozwolonym zakresie.",
         "competencies_manage": "Zarządzanie definicjami kompetencji i profilami stanowiskowymi.",
-        "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI."
+        "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI.",
+        "gamification_read": "Wyświetlanie poziomów, XP i osiągnięć.",
+        "gamification_earn_hidden": "Zdobywanie ukrytych osiągnięć."
       }
     },
     "dropdown": {
@@ -9312,5 +9323,22 @@
       "groupIdsEmpty": "Wybierz co najmniej jedną grupę.",
       "featureDisabled": "Ścieżki Rozwoju są wyłączone na tej platformie."
     }
+  },
+  "gamification": {
+    "level": "Poziom {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP do poziomu {{level}}",
+    "levelOf": "Poziom {{level}} z {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Zdobyto {{date}}",
+    "achievements": "Osiągnięcia",
+    "achievementsEmpty": "Brak dostępnych osiągnięć.",
+    "toast": {
+      "title": "Odblokowano osiągnięcie!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Nie udało się wczytać osiągnięć.",
+    "retry": "Spróbuj ponownie"
   }
 }

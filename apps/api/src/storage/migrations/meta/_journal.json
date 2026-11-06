@@ -1611,6 +1611,27 @@
       "when": 1793879230342,
       "tag": "0229_certificate_share_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1793968920474,
+      "tag": "0230_create_gamification_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1793968932438,
+      "tag": "0231_enable_gamification_tenant_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1793968935241,
+      "tag": "0232_add_gamification_check_constraints",
+      "breakpoints": true
     }
   ]
 }

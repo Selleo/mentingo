@@ -24,6 +24,8 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   publicCoursePreviewEnabled: false,
   featuredCourseId: null,
   courseDiscussionsEnabled: false,
+  // No UI toggle yet; enabled per tenant by updating the global settings directly.
+  gamificationEnabled: false,
   calendarEnabled: true,
   liveTrainingEnabled: false,
   liveTrainingMaxParallelSessions: DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS,

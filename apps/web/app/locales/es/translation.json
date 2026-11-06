@@ -511,6 +511,11 @@
             "ready": "La práctica de hoy está lista.",
             "failed": "La generación falló. Ábrela para reintentar."
           }
+        },
+        "gamification": {
+          "description": "Tu nivel, XP y logros más recientes",
+          "empty": "Completa lecciones y cursos para obtener tu primer logro.",
+          "recentRewards": "Logros recientes"
         }
       },
       "todoTasks": {
@@ -615,6 +620,9 @@
       "ai_mentor_practice": {
         "title": "Práctica con Mentor IA",
         "aiNotConfigured": "Mentor IA no está configurado para esta organización."
+      },
+      "gamification": {
+        "title": "Nivel y logros"
       }
     }
   },
@@ -2304,7 +2312,8 @@
         "live_training": "entrenamientos en vivo",
         "activity_log": "registro de actividad",
         "competencies": "competencias",
-        "other": "capacidades de la plataforma"
+        "other": "capacidades de la plataforma",
+        "gamification": "gamificación"
       },
       "descriptions": {
         "phishing_manage": "Crear y gestionar simulaciones de phishing.",
@@ -2398,7 +2407,9 @@
         "activity_log_read": "Ver registros de actividad.",
         "competencies_use": "Usar las competencias dentro del ámbito permitido.",
         "competencies_manage": "Gestionar definiciones de competencias y perfiles de puesto.",
-        "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial."
+        "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial.",
+        "gamification_read": "Ver niveles, XP y logros.",
+        "gamification_earn_hidden": "Obtener logros ocultos."
       }
     },
     "dropdown": {
@@ -9113,5 +9124,22 @@
       "groupIdsEmpty": "Selecciona al menos un grupo.",
       "featureDisabled": "Las rutas de desarrollo están desactivadas en esta plataforma."
     }
+  },
+  "gamification": {
+    "level": "Nivel {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP para el nivel {{level}}",
+    "levelOf": "Nivel {{level}} de {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Obtenido el {{date}}",
+    "achievements": "Logros",
+    "achievementsEmpty": "Todavía no hay logros disponibles.",
+    "toast": {
+      "title": "¡Logro desbloqueado!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "No se pudieron cargar los logros.",
+    "retry": "Reintentar"
   }
 }

@@ -511,6 +511,11 @@
             "ready": "Šiandienos praktika paruošta.",
             "failed": "Scenarijaus sukurti nepavyko. Atidarykite ir bandykite dar kartą."
           }
+        },
+        "gamification": {
+          "description": "Jūsų lygis, XP ir naujausi pasiekimai",
+          "empty": "Baikite pamokas ir kursus, kad gautumėte pirmąjį pasiekimą.",
+          "recentRewards": "Naujausi pasiekimai"
         }
       },
       "commonDescription": "Svarbiausia informacija vienu žvilgsniu",
@@ -615,6 +620,9 @@
           "reorderSuccess": "Užduočių tvarka išsaugota.",
           "reorderError": "Nepavyko išsaugoti užduočių tvarkos."
         }
+      },
+      "gamification": {
+        "title": "Lygis ir pasiekimai"
       }
     }
   },
@@ -2311,7 +2319,8 @@
         "live_training": "gyvus mokymus",
         "activity_log": "veiklos žurnalą",
         "competencies": "kompetencijos",
-        "other": "platformos funkcijas"
+        "other": "platformos funkcijas",
+        "gamification": "žaidybinimą"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -2405,7 +2414,9 @@
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
         "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
         "ai_thread_read": "Gali peržiūrėti visus pokalbius su DI ir jų išsaugotus vertinimus.",
-        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
+        "gamification_read": "Peržiūrėti lygius, XP ir pasiekimus.",
+        "gamification_earn_hidden": "Gauti paslėptus pasiekimus."
       }
     },
     "dropdown": {
@@ -9226,5 +9237,22 @@
       "groupIdsEmpty": "Pasirinkite bent vieną grupę.",
       "featureDisabled": "Tobulėjimo keliai šioje platformoje išjungti."
     }
+  },
+  "gamification": {
+    "level": "Lygis {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP iki {{level}} lygio",
+    "levelOf": "Lygis {{level}} iš {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Gauta {{date}}",
+    "achievements": "Pasiekimai",
+    "achievementsEmpty": "Pasiekimų dar nėra.",
+    "toast": {
+      "title": "Pasiekimas atrakintas!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Nepavyko įkelti pasiekimų.",
+    "retry": "Bandyti dar kartą"
   }
 }

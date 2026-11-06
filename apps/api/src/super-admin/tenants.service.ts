@@ -12,6 +12,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { DatabasePg } from "src/common";
 import { SampleEmailTemplateSetupService } from "src/email-templates/services/sample-email-template-setup.service";
+import { GamificationSetupService } from "src/gamification/gamification-setup.service";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
@@ -43,6 +44,7 @@ export class TenantsService {
     private readonly sampleEmailTemplateSetupService: SampleEmailTemplateSetupService,
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
     private readonly configService: ConfigService,
+    private readonly gamificationSetupService: GamificationSetupService,
   ) {}
 
   async findAllTenants(
@@ -110,6 +112,7 @@ export class TenantsService {
       }
 
       await this.defaultAutomationSetupService.ensureTenantDefaultAutomations();
+      await this.gamificationSetupService.seedNewTenantPredefinedAchievements();
 
       const adminUser = {
         email: input.adminEmail,

@@ -7,6 +7,7 @@ type QuizCompletedData = {
   correctAnswers: number;
   wrongAnswers: number;
   score: number;
+  isSupportMode: boolean;
 };
 
 export class QuizCompletedEvent {
@@ -16,6 +17,7 @@ export class QuizCompletedEvent {
   public readonly correctAnswers: number;
   public readonly wrongAnswers: number;
   public readonly score: number;
+  public readonly isSupportMode: boolean;
 
   constructor(data: QuizCompletedData) {
     this.userId = data.userId;
@@ -24,5 +26,6 @@ export class QuizCompletedEvent {
     this.correctAnswers = data.correctAnswers;
     this.wrongAnswers = data.wrongAnswers;
     this.score = data.score;
+    this.isSupportMode = data.isSupportMode;
   }
 }

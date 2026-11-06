@@ -50,6 +50,9 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettingsSuspense: () => ({ data: {} }),
 }));
 vi.mock("~/modules/Dashboard/Dashboard", () => ({ Dashboard: () => <Outlet /> }));
+vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
+  GamificationRewardToasts: () => null,
+}));
 
 function Trace({ paths }: { paths: string[] }) {
   useNavigationTracker();

@@ -511,6 +511,11 @@
             "ready": "Today's practice is ready.",
             "failed": "Scenario generation failed. Open it to retry."
           }
+        },
+        "gamification": {
+          "description": "Your level, XP and latest achievements",
+          "empty": "Complete lessons and courses to earn your first achievement.",
+          "recentRewards": "Recent achievements"
         }
       },
       "commonDescription": "Key information at a glance",
@@ -615,6 +620,9 @@
           "reorderSuccess": "Task order saved.",
           "reorderError": "We could not save the task order."
         }
+      },
+      "gamification": {
+        "title": "Level and achievements"
       }
     }
   },
@@ -2312,7 +2320,8 @@
         "live_training": "live trainings",
         "activity_log": "activity log",
         "competencies": "competencies",
-        "other": "platform capabilities"
+        "other": "platform capabilities",
+        "gamification": "gamification"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -2406,7 +2415,9 @@
         "activity_log_read": "View activity logs.",
         "competencies_use": "Use competencies within the permitted scope.",
         "competencies_manage": "Manage competency definitions and job profiles.",
-        "course_ai_generation": "Generate course structure and content with AI tools."
+        "course_ai_generation": "Generate course structure and content with AI tools.",
+        "gamification_read": "View levels, XP and achievements.",
+        "gamification_earn_hidden": "Earn hidden achievements."
       }
     },
     "dropdown": {
@@ -9205,5 +9216,22 @@
       "groupIdsEmpty": "Select at least one group.",
       "featureDisabled": "Development paths are turned off on this platform."
     }
+  },
+  "gamification": {
+    "level": "Level {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP to level {{level}}",
+    "levelOf": "Level {{level}} of {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Earned {{date}}",
+    "achievements": "Achievements",
+    "achievementsEmpty": "No achievements available yet.",
+    "toast": {
+      "title": "Achievement unlocked!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Achievements could not be loaded.",
+    "retry": "Try again"
   }
 }
