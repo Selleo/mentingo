@@ -126,7 +126,7 @@ export default function LessonPreviewDialog({
           onOpenChange={setShowEvaluationDialog}
         />
       )}
-      {isAiMentorLesson && hasTaskDescription && (
+      {isAiMentorLesson && (
         <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
           <DialogContent className="flex max-h-[82vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
             <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
@@ -139,7 +139,11 @@ export default function LessonPreviewDialog({
             </DialogHeader>
             <div className="min-h-0 px-6 py-5">
               <div className="max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800">
-                <Viewer content={lesson.description ?? ""} style="prose" />
+                {hasTaskDescription ? (
+                  <Viewer content={lesson.description ?? ""} style="prose" />
+                ) : (
+                  <p>{t("studentCourseView.lesson.aiMentorLesson.taskDescriptionEmpty")}</p>
+                )}
               </div>
             </div>
           </DialogContent>
@@ -209,7 +213,6 @@ export default function LessonPreviewDialog({
                   type="button"
                   variant="outline"
                   className="h-9 min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 sm:text-sm"
-                  disabled={!hasTaskDescription}
                   onClick={() => setShowTaskDialog(true)}
                 >
                   <BookOpen className="size-4 shrink-0" />

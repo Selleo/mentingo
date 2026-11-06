@@ -231,8 +231,15 @@ export class LessonController {
       });
     });
     const { response, readOnly } = result;
-    if (!readOnly && response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
-      await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
+    if (response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
+      const canInitializeWelcome =
+        !readOnly ||
+        (learnerId === currentUser.userId &&
+          hasAnyPermission(currentUser.permissions, [PERMISSIONS.AI_USE]) &&
+          (await this.aiService.hasPublicLessonPreviewAccess(id, learnerId)));
+      if (canInitializeWelcome) {
+        await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
+      }
     }
     return response;
   }

@@ -4452,8 +4452,8 @@
     },
     "preview": {
       "title": "Peržiūrite kurso turinį",
-      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus, dalyvauti veiklose ir išsaugoti pažangą.",
-      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus, dalyvauti veiklose ir stebėti pažangą."
+      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus ir išsaugoti pažangą.",
+      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus ir stebėti pažangą."
     }
   },
   "studentCourseView": {
@@ -4492,6 +4492,7 @@
         "stopVoiceRecording": "Sustabdyti balso įrašymą",
         "taskDescription": "Užduoties aprašymas",
         "taskButton": "Užduoties aprašymas",
+        "taskDescriptionEmpty": "Šiai pamokai nepridėtas užduoties aprašymas.",
         "resultButton": "Rezultatas",
         "resultButtonDisabledTooltip": "Pirmiausia patikrinkite pamoką, kad pamatytumėte rezultatą.",
         "taskDescriptionExpand": "Spustelėkite norėdami išplėsti",
@@ -4750,7 +4751,7 @@
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
       "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
       "publicCoursePreview": "Viešų kursų peržiūra prieš registraciją",
-      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus neužsiregistravus. Testams, veikloms ir pažangos išsaugojimui reikia registracijos. Mokamų kursų prieigos taisyklės nesikeičia."
+      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus ir kalbėtis su DI mentoriais neužsiregistravus į kursą. Testams ir mokymosi pažangai reikia registracijos. Mokamiems kursams lieka tos pačios prieigos taisyklės."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",

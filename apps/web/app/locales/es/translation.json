@@ -4395,8 +4395,8 @@
     },
     "preview": {
       "title": "Estás viendo una vista previa del curso",
-      "enrollmentDescription": "Inscríbete para responder cuestionarios, participar en actividades y guardar tu progreso.",
-      "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios, participar en actividades y registrar tu progreso."
+      "enrollmentDescription": "Inscríbete para responder cuestionarios y guardar tu progreso.",
+      "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios y registrar tu progreso."
     }
   },
   "studentCourseView": {
@@ -4435,6 +4435,7 @@
         "stopVoiceRecording": "Detener grabación de voz",
         "taskDescription": "Descripción de la tarea",
         "taskButton": "Descripción de la tarea",
+        "taskDescriptionEmpty": "No se ha añadido una descripción de la tarea a esta lección.",
         "resultButton": "Resultado",
         "resultButtonDisabledTooltip": "Consulte la lección primero para ver el resultado.",
         "taskDescriptionExpand": "Haga clic para expandir",
@@ -4685,7 +4686,7 @@
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
       "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
       "publicCoursePreview": "Vista previa de cursos públicos antes de inscribirse",
-      "publicCoursePreviewDescription": "Permite a los usuarios conectados explorar cursos públicos gratuitos sin inscribirse. Los cuestionarios, las actividades y el progreso requieren inscripción. Los cursos de pago mantienen sus reglas de acceso."
+      "publicCoursePreviewDescription": "Permite a los usuarios registrados explorar cursos públicos gratuitos y conversar con mentores de IA sin inscribirse. Los cuestionarios y el progreso requieren inscripción. Los cursos de pago mantienen sus reglas de acceso actuales."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",

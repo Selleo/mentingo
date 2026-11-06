@@ -4720,8 +4720,8 @@
     },
     "preview": {
       "title": "Przeglądasz podgląd kursu",
-      "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy, uczestniczyć w aktywnościach i zapisywać postępy.",
-      "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy, uczestniczyć w aktywnościach i śledzić postępy."
+      "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy i zapisywać postępy.",
+      "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy i śledzić postępy."
     }
   },
   "studentCourseView": {
@@ -4760,6 +4760,7 @@
         "stopVoiceRecording": "Zatrzymaj nagrywanie głosu",
         "taskDescription": "Opis zadania",
         "taskButton": "Opis zadania",
+        "taskDescriptionEmpty": "Do tej lekcji nie dodano opisu zadania.",
         "resultButton": "Wynik",
         "resultButtonDisabledTooltip": "Najpierw sprawdź lekcję, aby zobaczyć wynik.",
         "taskDescriptionExpand": "Kliknij, aby rozwinąć",
@@ -5060,7 +5061,7 @@
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
       "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
-      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne publiczne kursy bez zapisu. Quizy, aktywności i zapisywanie postępów wymagają zapisu. Zasady dostępu do płatnych kursów pozostają bez zmian."
+      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne kursy publiczne i rozmawiać z mentorami AI bez zapisu. Quizy i postępy w nauce wymagają zapisu. Płatne kursy zachowują dotychczasowe zasady dostępu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
