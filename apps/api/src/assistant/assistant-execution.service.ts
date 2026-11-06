@@ -9,9 +9,11 @@ import {
 } from "@repo/shared";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
+import { PromptService } from "src/ai/services/prompt.service";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
+import { MCP_HELPDESK_TOOL_NAMES } from "src/mcp/mcp-self-onboarding.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import {
@@ -22,6 +24,7 @@ import {
 } from "./assistant-links";
 import { getAssistantReadActivity } from "./assistant-progress";
 import { AssistantRepository } from "./assistant.repository";
+import { assistantProductTutorialSearchSchema } from "./schemas/assistant-product-tutorial.schema";
 import { validateAssistantOutcome } from "./workflow/assistant-outcome";
 
 import type { AssistantRunIdentity, AssistantSource } from "./assistant.types";
@@ -35,6 +38,7 @@ export class AssistantExecutionService {
     private readonly mcpHttpService: McpHttpService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly aiRuntimeService: AiRuntimeService,
+    private readonly promptService: PromptService,
   ) {}
 
   private async requireActive(input: AssistantRunIdentity) {
@@ -88,12 +92,43 @@ export class AssistantExecutionService {
         this.assistantRepository.getHistory(input),
         this.mcpHttpService.listNativeReadTools(run.userId, input.tenantId, run.origin),
       ]);
+      // Resolve managed text inside a durable step; workflow replay keeps this snapshot.
+      // Availability and schemas still come exclusively from authenticated tool discovery.
+      const [instructions, assistantTools] = await Promise.all([
+        this.promptService.loadPrompt("coreAssistantPrompt", {
+          interfaceLanguage: run.language,
+          moduleCapabilities: JSON.stringify(capabilities),
+        }),
+        Promise.all(
+          tools.map(async (definition) => {
+            if (definition.name === MCP_HELPDESK_TOOL_NAMES.SEARCH)
+              return {
+                ...definition,
+                inputSchema: JSON.parse(JSON.stringify(assistantProductTutorialSearchSchema)),
+                description: await this.promptService.loadPrompt(
+                  "coreAssistantTutorialSearchTool",
+                  {},
+                ),
+              };
+            if (definition.name === MCP_HELPDESK_TOOL_NAMES.TUTORIAL)
+              return {
+                ...definition,
+                description: await this.promptService.loadPrompt(
+                  "coreAssistantTutorialReadTool",
+                  {},
+                ),
+              };
+            return definition;
+          }),
+        ),
+      ]);
       return {
         run,
         sources: run.sources,
         capabilities,
+        instructions,
         messages: history.map((message) => ({ role: message.role, content: message.text })),
-        tools,
+        tools: assistantTools,
       };
     });
   }

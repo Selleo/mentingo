@@ -1,0 +1,6 @@
+id: coreAssistantTutorialSearchTool
+description: Search product tutorial tool guidance for the Mentingo Assistant
+version: 2
+
+template: |
+  Search Mentingo's Help & Tutorials self-onboarding video library for product usage instructions, including how to create or invite a user, manage groups or create courses. This is the same published product tutorial catalog visible in Help & Tutorials, not support tickets or tenant learning content. Use a short task query in an explicit supported language and mode=hybrid first. Native Assistant search accepts query, language, mode and limit only; never invent catalog filters or placeholder values. External MCP callers may supply domain and pageKey only from verified catalog or page context. If results are empty or irrelevant, try a concise alternative task query with mode=keyword before concluding no matching tutorial was found. A service error does not mean no video exists. Returns verified tutorial descriptions, CDN video URLs, chapter timestamps and exact tutorial/chapter links. Core supplies installed version and enabled features; tutorials cannot establish tenant records, permissions or completion. Never send private tenant records or conversation history.
