@@ -400,11 +400,7 @@ export class SettingsController {
     @Body() body: UpdateGlobalColorSchemaBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateGlobalColorSchema(
-      body.primaryColor,
-      body.contrastColor,
-      currentUser,
-    );
+    const result = await this.settingsService.updateGlobalColorSchema(body, currentUser);
     return new BaseResponse(result);
   }
 

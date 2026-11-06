@@ -4,7 +4,7 @@ export type Matrix3 = readonly [
   readonly [number, number, number],
 ];
 
-export const PRIMARY_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
+export const PALETTE_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
 // WCAG 2 AA contrast for normal text
 export const MIN_TEXT_CONTRAST = 4.5;
@@ -17,6 +17,8 @@ export const SURFACE_SHADES = {
   50: { lightness: 0.975, maxChroma: 0.015 },
   100: { lightness: 0.945, maxChroma: 0.03 },
 } as const;
+
+export const SURFACE_LIGHTNESS_STEP = SURFACE_SHADES[50].lightness - SURFACE_SHADES[100].lightness;
 
 // Position between the 700 anchor (0) and the 100 surface (1)
 export const LIGHT_SHADES = {

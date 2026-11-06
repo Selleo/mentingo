@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import {
-  buildPrimaryPalette,
+  buildColorPalette,
   getContrastRatio,
   getRelativeLuminance,
   hexToRgb,
@@ -9,7 +9,7 @@ import {
   rgbToHex,
   rgbToOklch,
 } from "../helpers";
-import { MIN_TEXT_CONTRAST, PRIMARY_SHADES } from "../theme.constants";
+import { MIN_TEXT_CONTRAST, PALETTE_SHADES } from "../theme.constants";
 
 const DEFAULT_BRAND = "#3f58b6";
 const PROBLEMATIC_BRANDS = ["#fffb00", "#00ff00", "#ffd6e7", "#00e5ff", "#ffffff"];
@@ -38,15 +38,15 @@ describe("getContrastRatio", () => {
   });
 });
 
-describe("buildPrimaryPalette", () => {
+describe("buildColorPalette", () => {
   it("should keep an already readable brand color as the 700 shade", () => {
-    expect(buildPrimaryPalette(DEFAULT_BRAND)[700]).toBe(DEFAULT_BRAND);
+    expect(buildColorPalette(DEFAULT_BRAND)[700]).toBe(DEFAULT_BRAND);
   });
 
   it.each([DEFAULT_BRAND, ...PROBLEMATIC_BRANDS])(
     "should keep 700 and darker shades readable on light surfaces for %s",
     (brand) => {
-      const palette = buildPrimaryPalette(brand);
+      const palette = buildColorPalette(brand);
 
       [700, 800, 900, 950].forEach((shade) => {
         expect(getContrastRatio(palette[shade as 700], palette[100])).toBeGreaterThanOrEqual(
@@ -62,8 +62,8 @@ describe("buildPrimaryPalette", () => {
   it.each([DEFAULT_BRAND, ...PROBLEMATIC_BRANDS, "#000000", "#121212"])(
     "should produce a scale that gets darker with every step for %s",
     (brand) => {
-      const palette = buildPrimaryPalette(brand);
-      const luminances = PRIMARY_SHADES.map((shade) => getRelativeLuminance(palette[shade]));
+      const palette = buildColorPalette(brand);
+      const luminances = PALETTE_SHADES.map((shade) => getRelativeLuminance(palette[shade]));
 
       luminances.slice(1).forEach((luminance, index) => {
         expect(luminance).toBeLessThanOrEqual(luminances[index]);
@@ -72,7 +72,7 @@ describe("buildPrimaryPalette", () => {
   );
 
   it.each(PROBLEMATIC_BRANDS)("should keep surface shades lightly tinted for %s", (brand) => {
-    const palette = buildPrimaryPalette(brand);
+    const palette = buildColorPalette(brand);
 
     expect(rgbToOklch(hexToRgb(palette[50])).chroma).toBeLessThanOrEqual(0.02);
     expect(rgbToOklch(hexToRgb(palette[100])).chroma).toBeLessThanOrEqual(0.035);

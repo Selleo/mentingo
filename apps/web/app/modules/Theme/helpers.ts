@@ -14,17 +14,24 @@ import {
   MIN_TEXT_CONTRAST,
   OKLAB_TO_LMS,
   SRGB_TRANSFER,
+  SURFACE_LIGHTNESS_STEP,
   SURFACE_SHADES,
 } from "./theme.constants";
 
-import type { Matrix3, PRIMARY_SHADES } from "./theme.constants";
+import type { Matrix3, PALETTE_SHADES } from "./theme.constants";
+import type { ColorSchema } from "./theme.types";
 
 type Vector3 = [number, number, number];
 type Oklch = { lightness: number; chroma: number; hue: number };
 
-export type PrimaryShade = (typeof PRIMARY_SHADES)[number];
+export type PaletteShade = (typeof PALETTE_SHADES)[number];
 
-export type PrimaryPalette = Record<PrimaryShade, string>;
+export type ColorPalette = Record<PaletteShade, string>;
+
+type PaletteOverrides = Partial<Pick<ColorSchema, "backgroundColor" | "accentColor">>;
+
+export const readCssVariable = (name: string) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 const clampUnit = (value: number) => Math.min(1, Math.max(0, value));
 
@@ -145,6 +152,13 @@ export const getContrastRatio = (firstHex: string, secondHex: string) => {
   return (Math.max(first, second) + CONTRAST_FLARE) / (Math.min(first, second) + CONTRAST_FLARE);
 };
 
+export const pickMostReadableColor = (backgroundHex: string, candidateHexes: string[]) =>
+  candidateHexes.reduce((mostReadable, candidate) =>
+    getContrastRatio(candidate, backgroundHex) > getContrastRatio(mostReadable, backgroundHex)
+      ? candidate
+      : mostReadable,
+  );
+
 // Brand colors that are already readable are returned unchanged
 const getReadableAnchor = (brand: Oklch, brandHex: string, surfaceHex: string) => {
   if (getContrastRatio(brandHex, surfaceHex) >= MIN_TEXT_CONTRAST) {
@@ -168,13 +182,19 @@ const getReadableAnchor = (brand: Oklch, brandHex: string, surfaceHex: string) =
   };
 };
 
+const hexToOklch = (hex: string) => rgbToOklch(hexToRgb(hex));
+
 /**
- * - 50/100 are soft surfaces with capped chroma.
- * - 700 is the brand color, darkened only when needed to stay readable on 100.
+ * - 50/100 are soft surfaces with capped chroma, or the custom background and a step darker.
+ * - 700 is the custom accent, or the brand darkened only when needed to stay readable on 100.
  * - Every other shade sits between those anchors, so the scale always gets darker.
  */
-export const buildPrimaryPalette = (brandHex: string): PrimaryPalette => {
-  const brand = rgbToOklch(hexToRgb(brandHex));
+export const buildColorPalette = (
+  brandHex: string,
+  { backgroundColor, accentColor }: PaletteOverrides = {},
+): ColorPalette => {
+  const brand = hexToOklch(brandHex);
+  const accent = accentColor ? hexToOklch(accentColor) : brand;
 
   const buildSurfaceShade = (shade: keyof typeof SURFACE_SHADES) =>
     oklchToHex({
@@ -183,21 +203,29 @@ export const buildPrimaryPalette = (brandHex: string): PrimaryPalette => {
       chroma: Math.min(brand.chroma, SURFACE_SHADES[shade].maxChroma),
     });
 
-  const shade50 = buildSurfaceShade(50);
-  const shade100 = buildSurfaceShade(100);
-  const anchor = getReadableAnchor(brand, brandHex.toLowerCase(), shade100);
+  const buildCustomSurfaceShade = (background: Oklch) =>
+    oklchToHex({ ...background, lightness: background.lightness - SURFACE_LIGHTNESS_STEP });
+
+  const shade50 = backgroundColor ? backgroundColor.toLowerCase() : buildSurfaceShade(50);
+  const shade100 = backgroundColor
+    ? buildCustomSurfaceShade(hexToOklch(backgroundColor))
+    : buildSurfaceShade(100);
+  const surfaceLightness = hexToOklch(shade100).lightness;
+
+  const anchor = accentColor
+    ? { hex: accentColor.toLowerCase(), lightness: accent.lightness }
+    : getReadableAnchor(brand, brandHex.toLowerCase(), shade100);
 
   const buildLightShade = (shade: keyof typeof LIGHT_SHADES) =>
     oklchToHex({
-      ...brand,
+      ...accent,
       lightness:
-        anchor.lightness +
-        (SURFACE_SHADES[100].lightness - anchor.lightness) * LIGHT_SHADES[shade].position,
-      chroma: Math.min(brand.chroma, LIGHT_SHADES[shade].maxChroma),
+        anchor.lightness + (surfaceLightness - anchor.lightness) * LIGHT_SHADES[shade].position,
+      chroma: Math.min(accent.chroma, LIGHT_SHADES[shade].maxChroma),
     });
 
   const buildDarkShade = (shade: keyof typeof DARK_SHADES) =>
-    oklchToHex({ ...brand, lightness: anchor.lightness * DARK_SHADES[shade] });
+    oklchToHex({ ...accent, lightness: anchor.lightness * DARK_SHADES[shade] });
 
   return {
     50: shade50,

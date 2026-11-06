@@ -494,6 +494,8 @@ export interface GetPublicGlobalSettingsResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -776,6 +778,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -820,6 +824,8 @@ export interface UpdateEnforceSSOResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -864,6 +870,8 @@ export interface UpdateModernCourseListEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -908,6 +916,8 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -956,6 +966,8 @@ export interface UpdateFeaturedCourseResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1000,6 +1012,8 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1044,6 +1058,8 @@ export interface UpdateCalendarEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1088,6 +1104,8 @@ export interface UpdateLiveTrainingEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1137,6 +1155,8 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1181,6 +1201,8 @@ export interface UpdateLearningPathsEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1197,6 +1219,7 @@ export interface UpdateGamificationEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
@@ -1224,6 +1247,8 @@ export interface UpdateGamificationEnabledResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;
@@ -1263,6 +1288,8 @@ export interface UpdateColorSchemaBody {
   primaryColor: string;
   /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
   contrastColor: string;
+  backgroundColor?: string | null;
+  accentColor?: string | null;
 }
 
 export interface UpdateColorSchemaResponse {
@@ -1297,6 +1324,8 @@ export interface UpdateColorSchemaResponse {
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
     contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
     unregisteredUserNewsAccessibility: boolean;

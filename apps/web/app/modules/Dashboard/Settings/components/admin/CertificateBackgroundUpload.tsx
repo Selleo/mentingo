@@ -3,15 +3,16 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadCertificateBackgroundImage } from "~/api/mutations/admin/useUploadCertificateBackgroundImage";
+import { IMAGE_UPLOAD_SIZES } from "~/components/FileUploadInput/imageUpload.constants";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
+import { BrandingImageAction, BrandingImageTile } from "./BrandingImageTile";
 
 interface CertificateBackgroundUploadProps {
   certificateBackgroundImage: string | null;
@@ -57,61 +58,51 @@ export function CertificateBackgroundUpload({
 
   return (
     <>
-      <Card
+      <BrandingImageTile
         id="certificate-background-upload"
-        className="flex h-full flex-col border-neutral-200 bg-white shadow-sm"
-        data-testid={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_CARD}
+        testId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_CARD}
+        title={t("certificateBackgroundUpload.title")}
+        description={t("certificateBackgroundUpload.description")}
       >
-        <CardHeader className="min-h-24 space-y-1 pb-2">
-          <CardTitle className="text-base font-semibold">
-            {t("certificateBackgroundUpload.title")}
-          </CardTitle>
-          <CardDescription className="text-sm leading-5 text-neutral-700">
-            {t("certificateBackgroundUpload.description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-0">
-          <ImageUploadInput
-            field={{ value: certificateBackgroundImage || undefined }}
-            handleImageUpload={handleImageUpload}
-            isUploading={isUploading || isPending}
-            imageUrl={certificateBackgroundImage}
-            fileInputRef={fileInputRef}
-            variant="video"
-            detailsText={t("certificateBackgroundUpload.field.imageRequirements", {
-              maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
-            })}
-            inputTestId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_INPUT}
-          />
-          {isUploading && (
-            <p className="text-xs font-medium text-neutral-500">
-              {t("certificateBackgroundUpload.other.uploading")}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {certificateBackgroundImage && (
-              <Button
-                onClick={removeImage}
-                variant="destructive"
-                size="sm"
-                data-testid={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_REMOVE}
+        <ImageUploadInput
+          field={{ value: certificateBackgroundImage || undefined }}
+          handleImageUpload={handleImageUpload}
+          isUploading={isUploading || isPending}
+          imageUrl={certificateBackgroundImage}
+          fileInputRef={fileInputRef}
+          variant="video"
+          size={IMAGE_UPLOAD_SIZES.COMPACT}
+          detailsText={t("certificateBackgroundUpload.field.imageRequirements", {
+            maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
+          })}
+          inputTestId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_INPUT}
+          actions={
+            <>
+              <BrandingImageAction
+                label={t("certificateBackgroundUpload.button.preview")}
+                onClick={() => setIsPreviewOpen(true)}
               >
-                <Icon name="TrashIcon" className="mr-2" />
-                {t("certificateBackgroundUpload.button.removeCertificateBackgroundImage")}
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsPreviewOpen(true)}
-            >
-              <Icon name="Eye" className="mr-2 size-4" />
-              {t("certificateBackgroundUpload.button.preview")}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+                <Icon name="Eye" className="size-4" />
+              </BrandingImageAction>
+              {certificateBackgroundImage && (
+                <BrandingImageAction
+                  label={t("certificateBackgroundUpload.button.removeCertificateBackgroundImage")}
+                  onClick={removeImage}
+                  testId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_REMOVE}
+                  isDestructive
+                >
+                  <Icon name="TrashIcon" className="size-4" />
+                </BrandingImageAction>
+              )}
+            </>
+          }
+        />
+        {isUploading && (
+          <p className="details-md text-neutral-500">
+            {t("certificateBackgroundUpload.other.uploading")}
+          </p>
+        )}
+      </BrandingImageTile>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent

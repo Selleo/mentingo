@@ -44,6 +44,8 @@ export const globalSettingsJSONSchema = Type.Object({
   inviteOnlyRegistration: Type.Boolean(),
   primaryColor: Type.Union([Type.String(), Type.Null()]),
   contrastColor: Type.Union([Type.String(), Type.Null()]),
+  backgroundColor: Type.Union([Type.String(), Type.Null()]),
+  accentColor: Type.Union([Type.String(), Type.Null()]),
   unregisteredUserQAAccessibility: Type.Boolean(),
   QAEnabled: Type.Boolean(),
   unregisteredUserNewsAccessibility: Type.Boolean(),

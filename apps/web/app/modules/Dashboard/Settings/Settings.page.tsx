@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
   return (
     <PageWrapper
-      className="flex flex-col *:h-min"
+      className="flex flex-col pb-12 *:h-min md:pb-12 3xl:pb-12"
       breadcrumbs={[{ title: t("settings.breadcrumbs.settings"), href: "/settings" }]}
     >
       <Suspense
