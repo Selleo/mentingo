@@ -5629,7 +5629,7 @@
     "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
     "emptyDescription": "Popis zatím nebyl přidán.",
     "status": {
-      "draft": "Koncept",
+      "draft": "Návrh",
       "published": "Publikováno",
       "private": "Soukromé",
       "not_started": "Nezahájeno",

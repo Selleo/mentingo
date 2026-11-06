@@ -1526,8 +1526,8 @@
     "emptyDescription": "Nie dodano jeszcze opisu.",
     "status": {
       "draft": "Wersja robocza",
-      "published": "Opublikowano",
-      "private": "Prywatna",
+      "published": "Opublikowany",
+      "private": "Niepubliczny",
       "not_started": "Nie rozpoczęto",
       "in_progress": "W toku",
       "completed": "Ukończono",
