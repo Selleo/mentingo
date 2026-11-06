@@ -162,6 +162,9 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
         autonomousControlEpoch: 3,
       }),
     });
+    expect(test.client.authoring.prepareExport.mock.calls[0][0].request).not.toHaveProperty(
+      "manualApply",
+    );
   });
 
   it("uses the same autonomous export identity after another receipt is recorded", async () => {
@@ -342,11 +345,21 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     );
     expect(test.client.authoring.prepareExport).toHaveBeenNthCalledWith(1, {
       sessionId,
-      request: { commandId: selectionId, proposalIds: [proposalId], actorId: actor.userId },
+      request: {
+        commandId: selectionId,
+        proposalIds: [proposalId],
+        actorId: actor.userId,
+        manualApply: true,
+      },
     });
     expect(test.client.authoring.prepareExport).toHaveBeenNthCalledWith(2, {
       sessionId,
-      request: { commandId: selectionId, proposalIds: [proposalId], actorId: actor.userId },
+      request: {
+        commandId: selectionId,
+        proposalIds: [proposalId],
+        actorId: actor.userId,
+        manualApply: true,
+      },
     });
     expect(test.enqueue).toHaveBeenNthCalledWith(
       1,

@@ -17,6 +17,80 @@ import type {
 } from "./courseAuthoring.types";
 
 describe("course authoring record projection", () => {
+  it("includes image-only lesson edits in the curriculum without requiring rewritten title or prose", () => {
+    const proposal: ProposalView = {
+      id: "image-only",
+      revision: 1,
+      taskId: "image-task",
+      summary: "Insert image",
+      rationale: "",
+      warnings: [],
+      blockedQuality: false,
+      qualityConcernsAccepted: false,
+      evidenceCount: 1,
+      outline: null,
+      decision: "pending",
+      parentProposalId: null,
+      manual: false,
+      protectedEdits: [],
+      operations: [
+        {
+          operationId: "image-op",
+          type: "lesson.image.insert",
+          targetId: "lesson",
+          dependencies: [],
+          payload: {
+            assetId: "asset",
+            anchorBlockId: "anchor",
+            position: "after",
+            caption: null,
+            altText: "Chart",
+          },
+        },
+      ],
+    };
+    const context: CourseContext = {
+      courseId: "course",
+      language: "en",
+      title: "Course",
+      description: "",
+      baselineHash: "course-hash",
+      fieldHashes: {},
+      chapters: [
+        {
+          id: "chapter",
+          title: "Chapter",
+          baselineHash: "chapter-hash",
+          displayOrder: 1,
+          lessons: [
+            {
+              id: "lesson",
+              title: "Unchanged lesson title",
+              lessonType: "content",
+              displayOrder: 2,
+              baselineHash: "lesson-hash",
+            },
+          ],
+        },
+      ],
+    };
+    expect(curriculumPreviewFromProposal(proposal, context)).toMatchObject({
+      operations: proposal.operations,
+      outline: [
+        {
+          id: "chapter",
+          lessons: [
+            {
+              id: "lesson",
+              title: "Unchanged lesson title",
+              lessonType: "content",
+              displayOrder: 2,
+            },
+          ],
+        },
+      ],
+    });
+  });
   it("opens an operation-only curriculum preview for removals", () => {
     const preview = curriculumPreviewFromProposal({
       id: "delete-preview",
@@ -746,6 +820,33 @@ describe("course authoring record projection", () => {
     expect(result.sources[0]).toMatchObject({ status: "ready", readableSections: 1 });
   });
 
+  it.each([
+    { sectionStatus: "unprocessed", pending: 1, expectedStatus: "processing" },
+    { sectionStatus: "ready", pending: 0, expectedStatus: "ready" },
+    { sectionStatus: "unreadable", pending: 0, expectedStatus: "failed" },
+    { sectionStatus: "ready", pending: 1, expectedStatus: "ready" },
+  ])(
+    "projects visual attachment $sectionStatus with $pending pending jobs as $expectedStatus",
+    ({ sectionStatus, pending, expectedStatus }) => {
+      const result = projectWorkspaceRecords([
+        {
+          id: "image-source",
+          kind: "source",
+          payload: {
+            sourceVersionId: "image-source",
+            filename: "cover.jpg",
+            mediaType: "image/jpeg",
+            status: "partial",
+            vision: { total: 1, pending },
+            sections: [{ id: "image", kind: "visual", sequence: 0, status: sectionStatus }],
+          },
+        },
+      ]);
+
+      expect(result.sources[0].status).toBe(expectedStatus);
+    },
+  );
+
   it("keeps only the latest provisional preview per task and renders content as text", () => {
     const result = projectWorkspaceRecords(
       [
@@ -1188,6 +1289,127 @@ describe("course authoring record projection", () => {
         answered: false,
       },
     ]);
+  });
+
+  it.each(["Quarterly revenue", null, undefined])(
+    "preserves a required ready source image with caption %j through proposal and task projection",
+    (caption) => {
+      const request = {
+        assetId: "source-figure-asset",
+        operationId: "lesson-operation",
+        purpose: "lesson",
+        required: true,
+        altText: "Revenue increased in the second quarter",
+        source: {
+          type: "source_image",
+          sourceVersionId: "source-version",
+          sectionId: "source-figure-section",
+          interpretationId: "source-interpretation-v2",
+        },
+        placement: {
+          anchorBlockId: "revenue-explanation",
+          position: "after",
+          ...(caption === undefined ? {} : { caption }),
+          relevance: "Shows the trend discussed in this lesson example",
+        },
+      };
+      const result = projectWorkspaceRecords(
+        [
+          {
+            id: "source-image-proposal",
+            kind: "proposal",
+            payload: { revision: 1, assetRequests: [request], assetIds: [request.assetId] },
+          },
+          {
+            id: "source-image-task-record",
+            kind: "asset_task",
+            payload: { taskId: "source-image-task", request },
+          },
+          {
+            id: "source-image-ready",
+            kind: "asset",
+            payload: {
+              status: "ready",
+              manifest: { assetId: request.assetId, mimeType: "image/png" },
+            },
+          },
+        ],
+        [
+          {
+            taskId: "source-image-task",
+            requestId: "request-1",
+            status: "succeeded",
+            errorCode: null,
+            outputId: request.assetId,
+          },
+        ],
+      );
+
+      const expectedRequest = {
+        ...request,
+        placement: { ...request.placement, caption: caption ?? null },
+      };
+      expect(result.proposals[0].assetRequests).toEqual([expectedRequest]);
+      expect(result.assetTasks[0]).toMatchObject({ request: expectedRequest, ready: true });
+      expect(result.readyAssetIds).toContain(request.assetId);
+      expect(result.unsupportedRecordCount).toBe(0);
+    },
+  );
+
+  it.each([
+    { placement: null },
+    ...["", " ", 42, "x".repeat(1001)].map((caption) => ({
+      placement: { anchorBlockId: "intro", position: "after", caption, relevance: "Relevant" },
+    })),
+    {
+      placement: {
+        anchorBlockId: "intro",
+        position: "somewhere",
+        caption: "Caption",
+        relevance: "Relevant",
+      },
+    },
+    {
+      placement: {
+        anchorBlockId: "",
+        position: "after",
+        caption: "Caption",
+        relevance: "Relevant",
+      },
+    },
+    { source: { type: "source_image", sourceVersionId: "source", sectionId: "section" } },
+  ])("does not project an incomplete or ambiguous source-image request: %j", (override) => {
+    const result = projectWorkspaceRecords([
+      {
+        id: "invalid-source-image-task",
+        kind: "asset_task",
+        payload: {
+          taskId: "task-image",
+          request: {
+            assetId: "asset-image",
+            operationId: "operation-1",
+            purpose: "lesson",
+            required: false,
+            altText: "Source figure",
+            source: {
+              type: "source_image",
+              sourceVersionId: "source",
+              sectionId: "section",
+              interpretationId: "interpretation",
+            },
+            placement: {
+              anchorBlockId: "intro",
+              position: "after",
+              caption: "Caption",
+              relevance: "Relevant",
+            },
+            ...override,
+          },
+        },
+      },
+    ]);
+    expect(result.assetTasks).toHaveLength(0);
+    expect(result.unsupportedRecordCount).toBe(1);
   });
 
   it("rejects retired web-image assets instead of rendering them", () => {

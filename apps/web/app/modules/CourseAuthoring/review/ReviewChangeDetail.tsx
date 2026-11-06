@@ -20,6 +20,7 @@ import {
   REVIEW_CHANGE_KIND,
   REVIEW_NODE_TYPE,
 } from "./curriculumReview.constants";
+import { proposedLesson } from "./proposedLesson";
 import { currentQuestion, proposedQuestion } from "./quizDiff";
 import { QuizDiffView } from "./QuizDiffView";
 import { ReviewKindBadge } from "./ReviewChangeBadge";
@@ -100,13 +101,19 @@ const EditedLessonBody = ({
   const current = node.current;
   const lessonType = stringOf(update?.payload.lessonType) ?? node.lessonType;
 
-  if (lessonType === LessonType.CONTENT && (update || blockReplacements.length > 0)) {
+  const imageInsertion = node.operations.some(
+    (operation) => operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT,
+  );
+  if (
+    lessonType === LessonType.CONTENT &&
+    (update || blockReplacements.length > 0 || imageInsertion)
+  ) {
     const before = current?.description ?? "";
     const base = stringOf(update?.payload.description) ?? before;
     return (
       <ContentDiffView
         before={before}
-        after={applyBlockReplacements(base, blockReplacements)}
+        after={proposedLesson(node)?.description ?? applyBlockReplacements(base, blockReplacements)}
         assetPreviewUrls={assetPreviewUrls}
       />
     );

@@ -6,6 +6,7 @@ import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 
 import {
   AUTHORING_APPLICATION_STATUS,
+  AUTHORING_ASSET_SOURCE_TYPE,
   AUTHORING_LESSON_KIND,
   AUTHORING_SOURCE_REFRESH_STATUS,
   AUTHORING_SOURCE_STATUS,
@@ -83,7 +84,7 @@ const assetPurposes = new Set<AssetRequestView["purpose"]>([
   "signature",
 ]);
 
-/** Projects one generated visual request from a durable record. */
+/** Projects one generated or source-image visual request from a durable record. */
 const parseAssetRequest = (value: unknown): AssetRequestView | null => {
   if (!isObject(value)) return null;
   const assetId = stringValue(value.assetId);
@@ -102,7 +103,7 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
   ) {
     return null;
   }
-  if (source.type === "generated") {
+  if (source.type === AUTHORING_ASSET_SOURCE_TYPE.GENERATED) {
     const content = stringValue(source.content);
     const visualQuery = stringValue(source.visualQuery);
     return content && visualQuery
@@ -112,9 +113,46 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
           purpose: purpose as AssetRequestView["purpose"],
           required: value.required,
           altText,
-          source: { type: "generated", content, visualQuery },
+          source: { type: AUTHORING_ASSET_SOURCE_TYPE.GENERATED, content, visualQuery },
         }
       : null;
+  }
+  if (source.type === AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE && isObject(value.placement)) {
+    const sourceVersionId = stringValue(source.sourceVersionId);
+    const sectionId = stringValue(source.sectionId);
+    const interpretationId = stringValue(source.interpretationId);
+    const anchorBlockId = stringValue(value.placement.anchorBlockId);
+    const rawCaption = value.placement.caption;
+    const caption =
+      rawCaption === null || rawCaption === undefined ? null : stringValue(rawCaption);
+    const relevance = stringValue(value.placement.relevance);
+    const position = value.placement.position;
+    if (
+      !sourceVersionId ||
+      !sectionId ||
+      !interpretationId ||
+      !anchorBlockId ||
+      (rawCaption !== null &&
+        rawCaption !== undefined &&
+        (!caption || !caption.trim() || caption.length > 1000)) ||
+      !relevance ||
+      (position !== "before" && position !== "after")
+    )
+      return null;
+    return {
+      assetId,
+      operationId,
+      purpose: purpose as AssetRequestView["purpose"],
+      required: value.required,
+      altText,
+      source: {
+        type: AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE,
+        sourceVersionId,
+        sectionId,
+        interpretationId,
+      },
+      placement: { anchorBlockId, position, caption, relevance },
+    };
   }
   return null;
 };
@@ -165,6 +203,7 @@ const curriculumOperationTypes = new Set<string>([
   AUTHORING_OPERATION_TYPE.LESSON_CREATE,
   AUTHORING_OPERATION_TYPE.LESSON_UPDATE,
   AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+  AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT,
 ]);
 
 const normalizePreviewProposal = (
@@ -266,7 +305,10 @@ export const curriculumPreviewFromProposal = (
       return;
     }
 
-    if (operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) {
+    if (
+      operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE ||
+      operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT
+    ) {
       const parent = [...contextChapters.values()].find((chapter) =>
         chapter.lessons.some((lesson) => lesson.id === operation.targetId),
       );
@@ -653,12 +695,15 @@ const parseSource = (record: AuthoringRecord): SourceView => {
   ].some((value) => value === status)
     ? (status as SourceView["status"])
     : AUTHORING_SOURCE_STATUS.UNKNOWN;
-  const completedStatus =
-    knownStatus === AUTHORING_SOURCE_STATUS.PARTIAL
-      ? readableSections > 0
-        ? AUTHORING_SOURCE_STATUS.READY
-        : AUTHORING_SOURCE_STATUS.FAILED
-      : knownStatus;
+  const pendingVision = isObject(record.payload.vision)
+    ? (numberValue(record.payload.vision.pending) ?? 0)
+    : 0;
+  let completedStatus = knownStatus;
+  if (knownStatus === AUTHORING_SOURCE_STATUS.PARTIAL) {
+    if (readableSections > 0) completedStatus = AUTHORING_SOURCE_STATUS.READY;
+    else if (pendingVision > 0) completedStatus = AUTHORING_SOURCE_STATUS.PROCESSING;
+    else completedStatus = AUTHORING_SOURCE_STATUS.FAILED;
+  }
   return {
     id: stringValue(record.payload.sourceVersionId) ?? record.id,
     taskId: stringValue(record.payload.taskId),

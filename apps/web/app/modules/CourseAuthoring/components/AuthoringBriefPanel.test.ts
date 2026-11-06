@@ -1,9 +1,14 @@
 import { MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES } from "@repo/shared";
-import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { describe, expect, it, vi } from "vitest";
+
+import { renderWith } from "~/utils/testUtils";
 
 import { buildAuthoringTargets, getCourseAuthoringSourceError } from "./AuthoringBriefPanel";
+import { AuthoringSourcePopover } from "./AuthoringSourcePopover";
+import { AuthoringToolsPopover } from "./AuthoringToolsPopover";
 
-import type { CourseContext } from "../courseAuthoring.types";
+import type { CourseContext, SourcePolicy } from "../courseAuthoring.types";
 
 describe("course authoring source upload validation", () => {
   it("accepts the supported authoring source formats", () => {
@@ -17,6 +22,29 @@ describe("course authoring source upload validation", () => {
         }),
       ),
     ).toBeNull();
+  });
+
+  it.each([
+    ["figure.png", "image/png"],
+    ["photo.jpg", "image/jpeg"],
+    ["photo.jpeg", "image/jpeg"],
+    ["diagram.webp", "image/webp"],
+    ["FIGURE.PNG", ""],
+    ["photo.JPEG", ""],
+    ["diagram.webp", ""],
+  ])("accepts supported source image %s (%s)", (name, type) => {
+    expect(getCourseAuthoringSourceError(new File(["image"], name, { type }))).toBeNull();
+  });
+
+  it.each([
+    ["animation.gif", "image/gif"],
+    ["diagram.svg", "image/svg+xml"],
+    ["animation.gif", ""],
+    ["diagram.svg", ""],
+  ])("rejects unsupported image %s (%s)", (name, type) => {
+    expect(getCourseAuthoringSourceError(new File(["image"], name, { type }))).toBe(
+      "courseAuthoring.sources.unsupportedFile",
+    );
   });
 
   it("rejects legacy DOC, unsupported files and sources over 25 MiB", () => {
@@ -35,6 +63,68 @@ describe("course authoring source upload validation", () => {
     Object.defineProperty(oversized, "size", { value: MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES + 1 });
     expect(getCourseAuthoringSourceError(oversized)).toBe("courseAuthoring.sources.tooLarge");
   });
+
+  it.each(["source", "tools"])(
+    "offers the supported image extensions in the %s file picker",
+    (picker) => {
+      const policy: SourcePolicy = {
+        sourceVersionIds: [],
+        webEnabled: false,
+        generalKnowledgeEnabled: false,
+        researchDepth: "standard",
+        requiredSectionIds: [],
+        excludedSectionIds: [],
+      };
+      const common = {
+        policy,
+        sources: [],
+        sourceRefreshes: [],
+        open: true,
+        onPolicyChange: vi.fn(),
+        onUploadSource: vi.fn(),
+      };
+      const component =
+        picker === "source"
+          ? createElement(AuthoringSourcePopover, { ...common, sourceUploadError: null })
+          : createElement(AuthoringToolsPopover, {
+              ...common,
+              strictSourceMode: false,
+              selectedTargetIds: [],
+              selectedBlockIds: [],
+              course: {
+                courseId: "course-1",
+                language: "en",
+                title: "Course",
+                description: "",
+                baselineHash: "baseline",
+                fieldHashes: {},
+                chapters: [],
+              },
+              onStrictSourceModeChange: vi.fn(),
+              onSelectedTargetIdsChange: vi.fn(),
+              onSelectedBlockIdsChange: vi.fn(),
+            });
+      renderWith().render(component);
+      const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+      expect(input).not.toBeNull();
+      const accepted = input?.accept.split(",") ?? [];
+      expect(accepted).toEqual(
+        expect.arrayContaining([
+          ".png",
+          ".jpg",
+          ".jpeg",
+          ".webp",
+          "image/png",
+          "image/jpeg",
+          "image/webp",
+        ]),
+      );
+      expect(accepted).not.toContain(".gif");
+      expect(accepted).not.toContain(".svg");
+      expect(accepted).not.toContain("image/gif");
+      expect(accepted).not.toContain("image/svg+xml");
+    },
+  );
 
   it("binds a selected stable block to its lesson with the block baseline", () => {
     const course: CourseContext = {

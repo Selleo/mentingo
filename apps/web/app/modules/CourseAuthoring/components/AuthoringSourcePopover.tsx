@@ -1,5 +1,6 @@
 /** Keeps source authority, uploads, and replacement review behind one compact control. */
 import {
+  COURSE_AUTHORING_SOURCE_FILE_EXTENSIONS,
   COURSE_AUTHORING_SOURCE_FILE_TYPES,
   MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
 } from "@repo/shared";
@@ -40,7 +41,7 @@ type Props = {
   ) => void;
 };
 
-const AUTHORING_SOURCE_EXTENSIONS = [".pdf", ".docx", ".txt", ".md"] as const;
+const AUTHORING_SOURCE_EXTENSIONS = COURSE_AUTHORING_SOURCE_FILE_EXTENSIONS;
 const AUTHORING_SOURCE_ACCEPT = [
   ...COURSE_AUTHORING_SOURCE_FILE_TYPES,
   ...AUTHORING_SOURCE_EXTENSIONS,

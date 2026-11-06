@@ -6815,13 +6815,13 @@
       "uploading": "Subiendo {{name}}...",
       "description": "Elige material aprobado o permite explícitamente fuentes públicas.",
       "library": "Fuentes del curso",
-      "fileHint": "PDF, DOCX, texto plano o Markdown · hasta 25 MiB",
+      "fileHint": "PDF, DOCX, texto, Markdown, PNG, JPEG o WebP · hasta 25 MiB",
       "use": "Usar fuente {{name}}",
       "required": "Obligatorio",
       "exclude": "Excluir",
       "emptyLibrary": "Adjunta material aprobado o activa un permiso de fuente.",
       "tooLarge": "La fuente supera el límite de subida de 25 MiB.",
-      "unsupportedFile": "Elige un archivo PDF, DOCX, de texto plano o Markdown.",
+      "unsupportedFile": "Elige un archivo PDF, DOCX, de texto, Markdown, PNG, JPEG o WebP.",
       "status": {
         "queued": "En cola",
         "processing": "Procesando",
@@ -6957,6 +6957,7 @@
       "assetDecisionFallback": "Este recurso necesita una decisión explícita.",
       "generatedVisualTitle": "Imagen generada",
       "restoreAsset": "Deshacer omisión",
+      "sourceImageTitle": "Imagen del material fuente",
       "assetDetails": "Detalles",
       "retryApprovalExplanation": "La solicitud anterior puede haberse aceptado. Reintentar podría generar otro cargo.",
       "assetStatus": {

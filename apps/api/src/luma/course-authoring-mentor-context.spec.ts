@@ -6,6 +6,47 @@ import {
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
 
 describe("course authoring Mentor context", () => {
+  it("projects inserted image labels beside their anchor without replacing the lesson text", () => {
+    const id = "00000000-0000-4000-8000-000000000001";
+    const anchor = "00000000-0000-4000-8000-000000000002";
+    const assetId = "00000000-0000-4000-8000-000000000003";
+    const result = buildMentorCourseContextDocument(
+      "Coach",
+      [
+        {
+          id,
+          chapterId: id,
+          chapterTitle: "Chapter",
+          title: "Safety",
+          description: `<p data-authoring-block-id="${anchor}">Original explanation.</p>`,
+        },
+      ],
+      [
+        {
+          type: "lesson.image.insert",
+          operationId: assetId,
+          targetId: id,
+          language: "en",
+          baselineHash: "a".repeat(64),
+          dependencies: [],
+          payload: {
+            assetId,
+            anchorBlockId: anchor,
+            position: "after",
+            caption: "Safety overview",
+            altText: "Safety diagram",
+          },
+        },
+      ],
+      "en",
+    );
+    expect(result).toContain("Original explanation.");
+    expect(result).toContain("Safety diagram");
+    expect(result).toContain("Safety overview");
+    expect(result?.indexOf("Original explanation.")).toBeLessThan(
+      result?.indexOf("Safety diagram") ?? 0,
+    );
+  });
   it("combines same-export content with current course bodies and omits non-content lesson types", () => {
     const content: AuthoringOperation = {
       type: "lesson.create",

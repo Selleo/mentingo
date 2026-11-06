@@ -6878,13 +6878,13 @@
       "uploading": "Uploading {{name}}...",
       "description": "Choose approved material or explicitly allow public sources.",
       "library": "Course sources",
-      "fileHint": "PDF, DOCX, plain text or Markdown · up to 25 MiB",
+      "fileHint": "PDF, DOCX, text, Markdown, PNG, JPEG or WebP · up to 25 MiB",
       "use": "Use source {{name}}",
       "required": "Required",
       "exclude": "Exclude",
       "emptyLibrary": "Attach approved material or enable a source permission.",
       "tooLarge": "The source exceeds the 25 MiB upload limit.",
-      "unsupportedFile": "Choose a PDF, DOCX, plain text or Markdown file.",
+      "unsupportedFile": "Choose a PDF, DOCX, text, Markdown, PNG, JPEG or WebP file.",
       "status": {
         "queued": "Queued",
         "processing": "Processing",
@@ -7020,6 +7020,7 @@
       "assetDecisionFallback": "This asset needs an explicit decision.",
       "generatedVisualTitle": "Generated visual",
       "restoreAsset": "Undo skip",
+      "sourceImageTitle": "Source image",
       "assetDetails": "Details",
       "retryApprovalExplanation": "The previous request may already have been accepted. Retrying could charge you again.",
       "assetStatus": {

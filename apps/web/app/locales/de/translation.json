@@ -6857,13 +6857,13 @@
       "uploading": "{{name}} wird hochgeladen...",
       "description": "Wähle freigegebenes Material oder erlaube öffentliche Quellen ausdrücklich.",
       "library": "Kursquellen",
-      "fileHint": "PDF, DOCX, Klartext oder Markdown · bis zu 25 MiB",
+      "fileHint": "PDF, DOCX, Text, Markdown, PNG, JPEG oder WebP · bis zu 25 MiB",
       "use": "Quelle {{name}} verwenden",
       "required": "Erforderlich",
       "exclude": "Ausschließen",
       "emptyLibrary": "Füge freigegebenes Material an oder erlaube eine Quelle.",
       "tooLarge": "Die Quelle überschreitet das Upload-Limit von 25 MiB.",
-      "unsupportedFile": "Wählen Sie eine PDF-, DOCX-, Text- oder Markdown-Datei.",
+      "unsupportedFile": "Wählen Sie eine PDF-, DOCX-, Text-, Markdown-, PNG-, JPEG- oder WebP-Datei.",
       "status": {
         "queued": "In der Warteschlange",
         "processing": "Wird verarbeitet",
@@ -6999,6 +6999,7 @@
       "assetDecisionFallback": "Für dieses Medium ist Ihre Entscheidung erforderlich.",
       "generatedVisualTitle": "Generierte Grafik",
       "restoreAsset": "Überspringen rückgängig",
+      "sourceImageTitle": "Bild aus dem Quellmaterial",
       "assetDetails": "Details",
       "retryApprovalExplanation": "Die vorherige Anfrage wurde möglicherweise bereits angenommen. Ein erneuter Versuch kann weitere Kosten verursachen.",
       "assetStatus": {

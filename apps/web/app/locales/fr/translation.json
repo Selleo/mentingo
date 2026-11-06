@@ -6605,13 +6605,13 @@
       "uploading": "Importation de {{name}}...",
       "description": "Choisissez du contenu approuvé ou autorisez explicitement les sources publiques.",
       "library": "Sources du cours",
-      "fileHint": "PDF, DOCX, texte brut ou Markdown · 25 Mio maximum",
+      "fileHint": "PDF, DOCX, texte, Markdown, PNG, JPEG ou WebP · 25 Mio maximum",
       "use": "Utiliser la source {{name}}",
       "required": "Obligatoire",
       "exclude": "Exclure",
       "emptyLibrary": "Joignez du contenu approuvé ou activez une autorisation de source.",
       "tooLarge": "La source dépasse la limite d’importation de 25 Mio.",
-      "unsupportedFile": "Choisissez un fichier PDF, DOCX, texte brut ou Markdown.",
+      "unsupportedFile": "Choisissez un fichier PDF, DOCX, texte, Markdown, PNG, JPEG ou WebP.",
       "status": {
         "queued": "En file d’attente",
         "processing": "Traitement en cours",
@@ -6747,6 +6747,7 @@
       "assetDecisionFallback": "Cette ressource nécessite une décision explicite.",
       "generatedVisualTitle": "Illustration générée",
       "restoreAsset": "Annuler l’omission",
+      "sourceImageTitle": "Image du document source",
       "assetDetails": "Détails",
       "retryApprovalExplanation": "La demande précédente a peut-être été acceptée. Réessayer pourrait entraîner une nouvelle facturation.",
       "assetStatus": {

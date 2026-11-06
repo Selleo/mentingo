@@ -59,6 +59,7 @@ export const AUTHORING_OPERATION_TYPE = {
   LESSON_DELETE: "lesson.delete",
   LESSON_REORDER: "lesson.reorder",
   LESSON_BLOCK_REPLACE: "lesson.block.replace",
+  LESSON_IMAGE_INSERT: "lesson.image.insert",
   COURSE_LESSON_CREATE: "course.lesson.create",
   COURSE_LESSON_UPDATE: "course.lesson.update",
 } as const;

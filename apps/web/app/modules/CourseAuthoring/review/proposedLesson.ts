@@ -11,6 +11,7 @@ import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { applyBlockReplacements } from "./contentDiff";
 import { AUTHORING_OPERATION_TYPE } from "./curriculumReview.constants";
+import { applyImageInsertion } from "./imageInsertion";
 
 import type { ReviewLessonNode } from "./curriculumReview.types";
 import type { AiMentorTTSPreset, AiMentorVoiceMode } from "@repo/shared";
@@ -245,6 +246,11 @@ export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
         ...(typeof operation.payload.description === "string"
           ? { description: operation.payload.description }
           : {}),
+      };
+    } else if (lesson && operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT) {
+      lesson = {
+        ...lesson,
+        description: applyImageInsertion(lesson.description, operation.payload),
       };
     } else if (lesson && operation.type === AUTHORING_OPERATION_TYPE.LESSON_BLOCK_REPLACE) {
       lesson = {
