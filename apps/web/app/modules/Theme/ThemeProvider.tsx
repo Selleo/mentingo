@@ -1,7 +1,7 @@
 import { createContext, useEffect, type ReactNode, useState, useCallback } from "react";
 import { match } from "ts-pattern";
 
-import { getContrastColor, hexToHslTuple, hslToHex } from "./helpers";
+import { buildPrimaryPalette, getContrastRatio } from "./helpers";
 import { useThemeStore } from "./themeStore";
 
 type ThemeContextType = {
@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useThemeStore((state) => state.theme);
 
   const [primaryColor, setPrimaryColor] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue("--primary-700").trim(),
+    getComputedStyle(document.documentElement).getPropertyValue("--brand").trim(),
   );
   const [contrastColor, setContrastColor] = useState(
     getComputedStyle(document.documentElement).getPropertyValue("--color-white").trim(),
@@ -26,34 +26,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setPrimaryColor(primaryColor);
     setContrastColor(contrastColor);
 
-    const [h, s, l] = hexToHslTuple(primaryColor);
+    const palette = buildPrimaryPalette(primaryColor);
 
-    const shades = {
-      50: 97,
-      100: 90,
-      200: 80,
-      300: 70,
-      400: 60,
-      500: 50,
-      600: 40,
-      700: l, // selected color
-      800: 25,
-      900: 15,
-      950: 10,
-    };
-
-    Object.entries(shades).forEach(([key, lightness]) => {
-      const hexShade = hslToHex(h, s, lightness);
-
-      document.documentElement.style.setProperty(`--primary-${key}`, hexShade);
+    Object.entries(palette).forEach(([shade, hex]) => {
+      document.documentElement.style.setProperty(`--primary-${shade}`, hex);
     });
 
+    document.documentElement.style.setProperty(`--brand`, primaryColor);
     document.documentElement.style.setProperty(`--contrast`, contrastColor);
     document.documentElement.style.setProperty(
       `--color-contrast`,
-      getComputedStyle(document.documentElement)
-        .getPropertyValue(getContrastColor(primaryColor, "--primary-800", "--primary-100"))
-        .trim(),
+      getContrastRatio(primaryColor, palette[800]) >= getContrastRatio(primaryColor, palette[100])
+        ? palette[800]
+        : palette[100],
     );
   }, []);
 

@@ -63,6 +63,7 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - Keep edits scoped. Do not reformat unrelated files.
 - Do not use nested ternaries; prefer `match` from `ts-pattern` for multi-branch expressions.
 - Do not introduce non-null assertions (`value!`); validate or narrow optional values before using them.
+- Do not use single-letter names for variables, parameters, or callback arguments (e.g. `a`, `b`, `x`, `e`); name them after what they hold, even in math-heavy code.
 
 ## Shared Conventions
 

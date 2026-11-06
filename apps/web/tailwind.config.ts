@@ -36,6 +36,7 @@ const config = {
       colors: {
         black: "var(--color-black)",
         white: "var(--color-white)",
+        brand: "var(--brand)",
         contrast: "var(--contrast)",
         "color-contrast": "var(--color-contrast)",
         neutral: {
