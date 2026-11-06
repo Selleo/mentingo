@@ -9,7 +9,7 @@
   "trigger": "experiments_manual__new_root_traces_100_percent",
   "model": {
     "provider": "openai",
-    "model": "gpt-4.1-mini",
+    "model": "gpt-6-luna",
     "onlineEnabled": true
   },
   "datasets": [
@@ -241,206 +241,206 @@
     {
       "id": "cmw0lgxst001ead0eo6vicqnk",
       "name": "regression/mentingo/live-task_completion/v1",
-      "version": 1,
-      "definitionSha256": "451e59e6560420b4b658899dc220e8e233b7ded708afe87d7f4bde0483d1e8a9"
+      "version": 2,
+      "definitionSha256": "1b3fd99dbf724b531d06008f96d6577d78efd86043d73cb006637ffaf059debe"
     },
     {
       "id": "cmw0lgyqu000kad0myn0smu5z",
       "name": "regression/mentingo/live-grounding/v1",
-      "version": 1,
-      "definitionSha256": "6aba554733c4f74986642a4a43da61a66919bc52a8e619088828c5706e736d3f"
+      "version": 2,
+      "definitionSha256": "cac0249c7734d8d55b3d9bf4efba1661de1d206d38c1feeb73c5a1f18b96706b"
     },
     {
       "id": "cmw0lgzu2001bad0ehn1vpub5",
       "name": "regression/mentingo/live-safety_and_scope/v1",
-      "version": 1,
-      "definitionSha256": "c37922ca15c0dad5a5fb1aad6f1b5e3a7412a64d0710573cf8b4e787be0155d1"
+      "version": 2,
+      "definitionSha256": "5fedd8a24f3fb180b8980a2d57b0a06e9f159f3cb4a4bd78331644581f2d61ed"
     },
     {
       "id": "cmw0li6v8001vad0d4v79kzc9",
       "name": "regression/mentingo/experiment-mentor-welcome/v1",
-      "version": 1,
-      "definitionSha256": "88f8a21eb8d9b9751356654c6b20d72afb6099a1219ff34495561d844a356992"
+      "version": 2,
+      "definitionSha256": "8c1b83cc83a4169784b550533cf6df4d004159adcbad972344c061c72495a1b5"
     },
     {
       "id": "cmw0li827002yad0eish3vq66",
       "name": "regression/mentingo/experiment-mentor-teacher-chat/v1",
-      "version": 1,
-      "definitionSha256": "2ecec89064e6dfb9318d37cd01b01c08d78bd58c877f5ca44679e905b033209e"
+      "version": 2,
+      "definitionSha256": "fd4c68a09b5a8a0d078e06b9a0f4a057bba6f5cd2e843ee7a61a786a2f64326f"
     },
     {
       "id": "cmw0li95b0033ad0eoona89r7",
       "name": "regression/mentingo/experiment-mentor-roleplay-chat/v1",
-      "version": 1,
-      "definitionSha256": "644b82e7cf019e37ca18f9742aade67c438af55e5ddb6845ae409e83a04eb501"
+      "version": 2,
+      "definitionSha256": "1e38ebe7d6a5996fb1d5f917ce06cf559426c288252e18c6062512e4178e2c82"
     },
     {
       "id": "cmw0lia0l000xad0ja5wsedfm",
       "name": "regression/mentingo/experiment-mentor-learner-name/v1",
-      "version": 1,
-      "definitionSha256": "6c11dd73af5458281d6128634d5d88cc83ec32053c14a1e717596db906d917ec"
+      "version": 2,
+      "definitionSha256": "0206e22698c9eda2fc0669fac3c112ba5fdf40de3f4e540033375fbf7658bfea"
     },
     {
       "id": "cmw0liath0038ad0ezadrhbm4",
       "name": "regression/mentingo/experiment-mentor-rag-grounding/v1",
-      "version": 1,
-      "definitionSha256": "010c151447208816aeaa44b4d5a890be643053bb3901f279e97968ec90f97ef1"
+      "version": 2,
+      "definitionSha256": "ca70d40684aaf7035d3a3b6afe350e1e3442749143da5b51117554130147f755"
     },
     {
       "id": "cmw0liblo003ead0e34afqz8o",
       "name": "regression/mentingo/experiment-mentor-voice-spoken-display/v1",
-      "version": 1,
-      "definitionSha256": "84c69ceac0dc04b1b0b1f154860d7127468dde241dd72da4a0dbdc51cf0dafd9"
+      "version": 2,
+      "definitionSha256": "cae317361214f89379b94fa7d35639f784544b0a8c1bf1120f34f63de97ce66c"
     },
     {
       "id": "cmw0lica90029ad0ddab2us4x",
       "name": "regression/mentingo/experiment-mentor-voice-elevenlabs/v1",
-      "version": 1,
-      "definitionSha256": "48c8f2bca659943d8c6adc0709da88eaf04ed4fbe2483c4906b00ef789c03e7e"
+      "version": 2,
+      "definitionSha256": "55f977bff7c25caca395224a8b2ccb4c0d759d7197b4c1850d7716842039b02a"
     },
     {
       "id": "cmw0lid4f003jad0egu3gye9p",
       "name": "regression/mentingo/experiment-mentor-voice-interruption/v1",
-      "version": 1,
-      "definitionSha256": "083b386666ab3232bc0afc4802e57d7daad335333f88069aaf61fa8bd94849d7"
+      "version": 2,
+      "definitionSha256": "18143ecee8401b4ae70f3bdad9c809ab178890e993a079eac4faf7df9f938a95"
     },
     {
       "id": "cmw0liebg002gad0el6ywfmz9",
       "name": "regression/mentingo/experiment-mentor-transcription/v1",
-      "version": 1,
-      "definitionSha256": "4b2eb07fa57135cff887f78a8fe01843031f59090060514cd136e00dd8d97993"
+      "version": 2,
+      "definitionSha256": "8e6dc460cef34722de6cf29841303b235676e5c862d115858f771423d6863c8e"
     },
     {
       "id": "cmw0lifbd002oad0dyximhlt8",
       "name": "regression/mentingo/experiment-mentor-summary/v1",
-      "version": 1,
-      "definitionSha256": "ec83dc2c438c58dd796a6d3a64d4ea1fb86fe7c6a2fa36fc2e7115a72d22e105"
+      "version": 2,
+      "definitionSha256": "a5d9a39070fa85cd04bf94f9d625e11b77e38dae8e4faab139584fec0010a922"
     },
     {
       "id": "cmw0ligbo002xad0e41ppf2hr",
       "name": "regression/mentingo/experiment-course-translation/v1",
-      "version": 1,
-      "definitionSha256": "988e12b417f0aee9369d09e483dadd60e91c0ceee90f0a65b1e3c886d41a6386"
+      "version": 2,
+      "definitionSha256": "905344daf869d4b85af14517e78bbd563338d0b501b0ee68917e72153370c8b9"
     },
     {
       "id": "cmw0ljhk6002lad0js92j5pxk",
       "name": "regression/mentingo/experiment-mentor-config-create/v1",
-      "version": 1,
-      "definitionSha256": "6b343de74fc64efd0102720d828365a159046f0f1c54c87fb75d62a4cae2e74c"
+      "version": 2,
+      "definitionSha256": "2227a8db69617185f2fe68cbc530b2a09980257793182f44ffa08ba8ce0a06db"
     },
     {
       "id": "cmw0ljir8003vad0d8yry2ejp",
       "name": "regression/mentingo/experiment-mentor-config-improve/v1",
-      "version": 1,
-      "definitionSha256": "aae8d8d1e3daafb068d7f62a23415ba4f15915c73ba0eab495a67a760f578fcc"
+      "version": 2,
+      "definitionSha256": "6aa27e91cf495b19d5d414450a98ff7edc46d526dd37ec27e757773881ec945a"
     },
     {
       "id": "cmw0ljjm5003bad0jbvourm8h",
       "name": "regression/mentingo/experiment-mentor-config-repair/v1",
-      "version": 1,
-      "definitionSha256": "ab484a39a09b3bc4d9299f0a4e2402d671d7cfbf27ce6421fedeb05fb39a2006"
+      "version": 2,
+      "definitionSha256": "1b5d78d4c9c64b64dd48ef5f5ae34a6e9213793fb5cfbe843efd249d044e7901"
     },
     {
       "id": "cmw0lks55002sad0d3xxak5x6",
       "name": "regression/mentingo/experiment-mentor-config-validate/v1",
-      "version": 1,
-      "definitionSha256": "f3b0dd584dc646a9a2fd443c115201c80da44587904e3756a512f6ed70b2c7bc"
+      "version": 2,
+      "definitionSha256": "e0f99462599c87aba2c406e038c9a4e0cfcf21708bb49fb62203e9527250d49a"
     },
     {
       "id": "cmw0lkswo002xad0ddqfnmxdc",
       "name": "regression/mentingo/experiment-judge-config-create/v1",
-      "version": 1,
-      "definitionSha256": "7274f9ef69e811a82201262b648965c48d82efa6fd362801c8881bb4b8e56761"
+      "version": 2,
+      "definitionSha256": "c9a4d33ce7b7c18d122ef62d917e681f866674ffcb5601b3f13f4a423831ee46"
     },
     {
       "id": "cmw0lktl7001aad0j4aq76zzg",
       "name": "regression/mentingo/experiment-judge-config-improve/v1",
-      "version": 1,
-      "definitionSha256": "95c5dc94b15d2e83e38a20a728d9999c645d0712c4aaed14cdf182903c7c7544"
+      "version": 2,
+      "definitionSha256": "b085d622f61043b845f4754036ba1507eba8a50bb1513b317ac72bd5e29622b5"
     },
     {
       "id": "cmw0lkui9002uad0gxmo4bwve",
       "name": "regression/mentingo/experiment-judge-config-repair/v1",
-      "version": 1,
-      "definitionSha256": "fad37236c9e59e5839ddb865b3cf1f15718372c8021574a7bd114e7405f03f2c"
+      "version": 2,
+      "definitionSha256": "7bf6d74cbe2c3ff76492cf984cfb8b8d3efc629a7f2f13106d228df13fa64b1c"
     },
     {
       "id": "cmw0lkva0002zad0gcdcj15fz",
       "name": "regression/mentingo/experiment-judge-config-validate/v1",
-      "version": 1,
-      "definitionSha256": "b98a4a44bbea69b2eee4daba263a5cc675237a08f210a26c15fb56cfd2775d7b"
+      "version": 2,
+      "definitionSha256": "1b6751b85d33ecc10d8515b0b585bc4582c484e02b4b0c92e4c01b74a596c58e"
     },
     {
       "id": "cmw0lkw3l004xad0dknrlzen2",
       "name": "regression/mentingo/experiment-daily-practice/v1",
-      "version": 1,
-      "definitionSha256": "474a2f5eb3f9328bdfbe985d0f2c5ae56758a0629159e9f2ac9a5869a7637a94"
+      "version": 2,
+      "definitionSha256": "22d24bdddfb22bc41e249eefaad5fdd2f420b0bcfe40488e63f06a6623dc0bb6"
     },
     {
       "id": "cmw0lkws50034ad0d6nn1bc55",
       "name": "regression/mentingo/experiment-mentor-rag-embeddings/v1",
-      "version": 1,
-      "definitionSha256": "ca3c016330fc7c7a211354e1ceaf1115e10f83e0043a4434d228957ed2f80b28"
+      "version": 2,
+      "definitionSha256": "d08c84821ef55b691ae40ed2c1a1585270829ce06477fbbf751338b2d87ecbb4"
     },
     {
       "id": "cmw0lkxss0058ad0ef389kvo2",
       "name": "regression/mentingo/experiment-global-search-embeddings/v1",
-      "version": 1,
-      "definitionSha256": "b3bfc0e52dfc72cec27bca0809e8332cae95bb3927cf8c802b401b7f42078f79"
+      "version": 2,
+      "definitionSha256": "2fa6fed69fc94e95d6af06ada59a9628b58e5b11b636a4872112a4744ac2c8c7"
     },
     {
       "id": "cmw0lm37j002zad0mtnt0dbzb",
       "name": "regression/mentingo/experiment-global-search-native/v1",
-      "version": 1,
-      "definitionSha256": "e524a64db3d3b0e3a1e04288ec2d21963cec13445c8b32618d3958d83eaaf24a"
+      "version": 2,
+      "definitionSha256": "a00e6adc2acd3921f876cc6c5e64ce2a9b5ecb1d8e55af612f760a863233c121"
     },
     {
       "id": "cmw0lm3xj006gad0d97ig4n3x",
       "name": "regression/mentingo/experiment-mentor-native-chat/v1",
-      "version": 1,
-      "definitionSha256": "f69d6cb23eadf2bfcb704736a5d33499eed311775275b1a42ddbea3b28d38ce9"
+      "version": 2,
+      "definitionSha256": "c7f2d30012064c6eb184c8c62a7b6922b7b044d5193e34b4be8e8d2d0f40a059"
     },
     {
       "id": "cmw0lm4yc0061ad0ewl5j2pjw",
       "name": "regression/mentingo/experiment-core-luma-authoring-proposal/v1",
-      "version": 1,
-      "definitionSha256": "4dd0e6693fd1859466173c942319af0ddca910cf891ea69136fa00ea469016a3"
+      "version": 2,
+      "definitionSha256": "0c434c24dbda549839bcb5c71d59a49e53292becd4479aaec744823c54f6d66a"
     },
     {
       "id": "cmw0lm5xn004vad0hihchv833",
       "name": "regression/mentingo/experiment-core-luma-authoring-apply/v1",
-      "version": 1,
-      "definitionSha256": "a7534fc68c84c1ad47f1ef39c9842176d6c4c44db4f41d6f63dec7d2ede6bb64"
+      "version": 2,
+      "definitionSha256": "ffbfe641e78a41619aeb5b152eb75dc0402b2b57c62587a827e2c711d0f4c3a5"
     },
     {
       "id": "cmw0lm6xy008ead0ixo14jy5i",
       "name": "regression/mentingo/experiment-assistant-conversation/v1",
-      "version": 1,
-      "definitionSha256": "6af1d03844340923ce47cdd137fd274d103341adcd5976bd0c59285cf4bef549"
+      "version": 2,
+      "definitionSha256": "7dcb7093963534b271d5a3a006c8cc03a3777083f3d9514ecef6ecf33693236d"
     },
     {
       "id": "cmw0lm7us003qad0m74v3xz3r",
       "name": "regression/mentingo/experiment-assistant-authorized-read-tools/v1",
-      "version": 1,
-      "definitionSha256": "b623398fe6158a2002180a8703cd6c5918cbe9ee2bc2ada715558da38c5f5c90"
+      "version": 2,
+      "definitionSha256": "967e1763c23d3756be26d0746b3c30a1bc988b957f18830d4d78f548726347f5"
     },
     {
       "id": "cmw0lm8l2008jad0i8co7i9ib",
       "name": "regression/mentingo/experiment-assistant-readonly-failure/v1",
-      "version": 1,
-      "definitionSha256": "9563ac8f59abdf4ae42d466af4fe95208a81fbac05a3e675890e2d26c3798e47"
+      "version": 2,
+      "definitionSha256": "74ed5ebff99269219e96e945bc00daf6ecfff6c9b227c0ed5d5cc71b31dd5f1e"
     },
     {
       "id": "cmw0lm9di008pad0ib6xlnxs6",
       "name": "regression/mentingo/experiment-mentor-verified-judge/v1",
-      "version": 1,
-      "definitionSha256": "b3a8c1b376b4638643de45cc49e40ad745cfeb18eb82d95d151d90d32e402905"
+      "version": 2,
+      "definitionSha256": "fba7329234c5d48e4c1ac17a75e55cbf36d279abfe3dd72c4e49cbb2da1ea7dc"
     },
     {
       "id": "cmw0lma3m003wad0megj8tx1j",
       "name": "regression/mentingo/experiment-mentor-blocker-verification/v1",
-      "version": 1,
-      "definitionSha256": "9bc380aedd365328a30e7203ba1eaf64f6a5665ea1a0115385b646bca78d4dce"
+      "version": 2,
+      "definitionSha256": "ed61ebe104311303268c95b73e13a35e30389363af437c3f088d2463aec90444"
     }
   ],
   "rules": [
@@ -1615,6 +1615,16 @@
     "credentialStorageChanges": false,
     "manualExperimentsNotAutomaticallyLaunched": true,
     "qualityAwaitingUserConnection": false,
-    "allRulesReadBack": true
+    "allRulesReadBack": true,
+    "llmModelUpdate": {
+      "verifiedAt": "2026-11-06T10:36:19.388345+00:00",
+      "llmEvaluatorsVerified": 34,
+      "changed": 34,
+      "model": "gpt-6-luna",
+      "rulesUnchanged": true,
+      "rubricsAndMappingsUnchanged": true,
+      "credentialStorageChanges": false,
+      "datasetExperimentsLaunched": false
+    }
   }
 }

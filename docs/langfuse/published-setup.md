@@ -8,6 +8,8 @@ Project: [mentingo](https://cloud.langfuse.com/project/cmiitc20o00qtad07rwd8bx29
 
 [Shared configuration and recording instructions](https://github.com/Selleo/mentingo/blob/jh_feat_ai_regression_evaluations/docs/langfuse/remote-evaluation-setup.md) explain manual experiment triggers, every-new-trace monitoring, score meanings, comparison and rollback.
 
-Online judges and experiment scoring are enabled using the already-stored `openai` connection with `gpt-4.1-mini`. Root and known nested operation rules sample 100% of new matching observations. This is asynchronous monitoring, not a request blocker.
+Online judges and experiment scoring are enabled using the already-stored `openai` connection with `gpt-6-luna`. Root and known nested operation rules sample 100% of new matching observations. This is asynchronous monitoring, not a request blocker.
 
 No Core live model or deployed application experiment was run during this configuration step. Offline case preparation and local tests do not prove full runtime behavior.
+
+Model-only update on 2026-11-06: all 34 owned LLM judges were switched to `gpt-6-luna` using the existing `openai` connection. The readback is recorded in `remote-setup.json`; rubrics, mappings and evaluation rules were preserved. No dataset experiment or credential-storage change was made. See the [exact check reference](core-evaluator-checks.md).

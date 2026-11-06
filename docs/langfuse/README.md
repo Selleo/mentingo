@@ -3,6 +3,7 @@
 Start here to decide what to run and how to interpret the result. These documents describe Core PR #2105; they are not a claim that every dataset has passed against a live model.
 
 - [Coverage and individual case matrix](core-test-case-matrix.md): every feature, all 103 feature items, the 54 underlying regression cases and 16 evaluator calibration candidates. Execution evidence and gaps are explicit.
+- [Exact checks](core-evaluator-checks.md): hosted LLM rubrics, executable assertions, local evidence validation and explicit limits.
 - [Runbook](core-evaluation-runbook.md): copyable commands, prerequisites, local versus remote effects and Langfuse trigger behavior.
 - [Feature implementation details](core-ai-feature-coverage.md): adapters, prompt snapshots, source paths and fixture configuration.
 - [Historical regressions](regression-history.md): issue-to-expectation mapping.

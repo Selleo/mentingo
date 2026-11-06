@@ -94,6 +94,8 @@ Prepared/reference data cannot be submitted as successful execution. Use a new r
 
 Repeat the same cases with the new pinned prompt snapshot, same fixture/source/model configuration and a new run name such as `teacher-candidate-v2`. In the [Core Langfuse project](https://cloud.langfuse.com/project/cmiitc20o00qtad07rwd8bx29), inspect the dataset's experiment runs, actual responses, invariant checks, expected outputs and evaluator scores. Record failures, missing evidence, skipped cases and provider errors separately from passes. Do not compare a prompt-only run with an application run as if they proved the same behavior.
 
+Core hosted judges use `gpt-6-luna`. For comparable local judging, explicitly set that model in the judge configuration; this does not change the application model under test. See [exact checks](core-evaluator-checks.md).
+
 The separate local semantic judge supports captured legacy application reports and calibration. It does not consume arbitrary prepared feature JSON. After making an explicit judge config with `model`, `apiKeyEnv` and optional HTTPS `baseURL`:
 
 ```sh
