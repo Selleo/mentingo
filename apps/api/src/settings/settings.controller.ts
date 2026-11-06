@@ -253,7 +253,6 @@ export class SettingsController {
   }
 
   @Patch("admin/public-course-preview")
-  @UseGuards(DisallowInSupportModeGuard)
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({ response: baseResponse(globalSettingsJSONSchema) })
   async updatePublicCoursePreviewEnabled(

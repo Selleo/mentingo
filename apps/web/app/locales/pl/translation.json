@@ -5956,7 +5956,8 @@
       "generic": "Nie można uruchomić trybu wsparcia",
       "targetUserRequired": "Wybierz aktywnego użytkownika z wybranej organizacji",
       "invalidSession": "Sesja wsparcia jest nieprawidłowa",
-      "sessionExpired": "Sesja wsparcia wygasła. Rozpocznij nową sesję wsparcia."
+      "sessionExpired": "Sesja wsparcia wygasła. Rozpocznij nową sesję wsparcia.",
+      "personalSettingsBlocked": "Nie można zmieniać ustawień osobistych w trybie wsparcia."
     }
   },
   "superAdminTenantsView": {

@@ -5907,7 +5907,8 @@
       "generic": "Could not start support mode",
       "targetUserRequired": "Choose an active user from the selected organization",
       "invalidSession": "Support session is invalid",
-      "sessionExpired": "Your support session has expired. Start a new support session."
+      "sessionExpired": "Your support session has expired. Start a new support session.",
+      "personalSettingsBlocked": "Personal settings cannot be changed in support mode."
     }
   },
   "superAdminTenantsView": {

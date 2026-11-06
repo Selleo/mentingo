@@ -5633,7 +5633,8 @@
       "generic": "Impossible de démarrer le mode support",
       "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
       "invalidSession": "La session d'assistance n'est pas valide",
-      "sessionExpired": "Votre session d’assistance a expiré. Démarrez une nouvelle session d’assistance."
+      "sessionExpired": "Votre session d’assistance a expiré. Démarrez une nouvelle session d’assistance.",
+      "personalSettingsBlocked": "Les paramètres personnels ne peuvent pas être modifiés en mode assistance."
     }
   },
   "superAdminTenantsView": {
