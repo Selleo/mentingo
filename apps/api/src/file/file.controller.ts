@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Head,
   Inject,
@@ -167,7 +166,7 @@ export class FileController {
   async createTusUpload(
     @Req() req: McpRequest,
     @Res() res: Response,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     this.ensureTusVersion(req);
 
@@ -181,7 +180,7 @@ export class FileController {
 
     if (req.mcpUploadGrant)
       assertVideoTusGrant(req.mcpUploadGrant, uploadId, uploadLength, metadata);
-    await this.tusUploadService.createSession(uploadId, uploadLength, currentUserId);
+    await this.tusUploadService.createSession(uploadId, uploadLength, currentUser);
 
     const location = `/api/file/videos/tus/${uploadId}`;
 
@@ -203,16 +202,14 @@ export class FileController {
     @Param("id") uploadId: string,
     @Req() req: McpRequest,
     @Res() res: Response,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     this.ensureTusVersion(req);
 
-    const session = await this.tusUploadService.getSession(uploadId);
+    const session = await this.tusUploadService.getSession(uploadId, currentUser);
     if (!session) {
       throw new BadRequestException("Upload session not found");
     }
-    if (session.userId !== currentUserId)
-      throw new ForbiddenException("uploadFile.errors.uploadForbidden");
     if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, uploadId);
 
     this.setTusHeaders(res, {
@@ -236,7 +233,7 @@ export class FileController {
     @Param("id") uploadId: string,
     @Req() req: McpRequest,
     @Res() res: Response,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     this.ensureTusVersion(req);
     if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, uploadId);
@@ -256,7 +253,7 @@ export class FileController {
       uploadId,
       uploadOffset,
       chunk,
-      currentUserId,
+      currentUser,
     );
 
     this.setTusHeaders(res, { "Upload-Offset": String(result.offset) });

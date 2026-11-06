@@ -341,16 +341,15 @@ export class FileService {
     uploadId: string,
     placeholderKey: string,
     fileType: string | undefined,
-    currentUserId?: UUIDType,
-    tenantId?: UUIDType,
+    currentUser: CurrentUserType | undefined,
     maxUploadSize?: number,
   ) {
     await this.videoProcessingStateService.initializeState(
       uploadId,
       placeholderKey,
       fileType,
-      currentUserId,
-      { maxUploadSize, tenantId },
+      currentUser?.userId,
+      { maxUploadSize, tenantId: currentUser?.tenantId },
     );
   }
 
@@ -501,8 +500,7 @@ export class FileService {
       uploadId,
       placeholderKey,
       fileType,
-      currentUser?.userId,
-      currentUser?.tenantId,
+      currentUser,
       maxUploadSize,
     );
 

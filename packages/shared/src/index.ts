@@ -14,6 +14,7 @@ export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
 export * from "./constants/assessment";
 export * from "./constants/assistant";
+export * from "./constants/auth";
 export * from "./constants/automationEmailBranches";
 export * from "./constants/automationEventVariables";
 export * from "./constants/automationTriggers";

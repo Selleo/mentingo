@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { QALanguageSelector } from "~/modules/QA/components/QALanguageSelector";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
@@ -73,6 +74,21 @@ export default function EditQAPage() {
 
   if (!(qa || isLoading)) throw new Error(t("qaView.toast.notFound"));
 
+  const breadcrumbs = [
+    { title: t("navigationSideBar.qa"), href: "/qa" },
+    { title: qa?.title ?? "", href: `/qa/${qaId}` },
+  ];
+
+  if (!qa) {
+    return (
+      <PageWrapper breadcrumbs={breadcrumbs}>
+        <div className="flex justify-center py-10">
+          <Loader />
+        </div>
+      </PageWrapper>
+    );
+  }
+
   const onSubmit = async (values: QAFormValues) => {
     if (!qaId) return;
     await updateQA({ qaId, ...values, language: qaLanguage }).then(() => navigate("/qa"));
@@ -87,12 +103,7 @@ export default function EditQAPage() {
   });
 
   return (
-    <PageWrapper
-      breadcrumbs={[
-        { title: t("navigationSideBar.qa"), href: "/qa" },
-        { title: qa?.title ?? "", href: `/qa/${qaId}` },
-      ]}
-    >
+    <PageWrapper breadcrumbs={breadcrumbs}>
       <div className="mt-8 flex justify-center">
         <form
           onSubmit={handleSubmit(onSubmit)}

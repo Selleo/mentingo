@@ -4839,6 +4839,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Nastavení vynucení MFA byla úspěšně aktualizována.",
+      "mfaVerificationRequired": "Pro vaši roli je nyní vyžadováno MFA. Pro pokračování jej nastavte nebo ověřte.",
       "mfaEnforcementUpdateFailed": "Aktualizace nastavení vynucení MFA se nezdařila."
     }
   },
@@ -6228,7 +6229,13 @@
       "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
-      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."
+      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci.",
+      "mfaRequired": "Chcete-li pokračovat, dokončete dvoufaktorové ověření.",
+      "sessionExpired": "Platnost přihlašovací relace vypršela. Přihlaste se znovu.",
+      "mfaAlreadyEnabled": "Dvoufaktorové ověření je již zapnuté.",
+      "mfaCodeAlreadyUsed": "Tento kód již byl použit. Počkejte na nový kód v ověřovací aplikaci a zkuste to znovu.",
+      "invalidMfaCode": "Zadejte platný šestimístný ověřovací kód.",
+      "invalidSettingsUpdate": "Tato bezpečnostní nastavení zde nelze změnit."
     }
   },
   "sessionRevocation": {

@@ -16,4 +16,6 @@ export const passwordValidationRules = {
 };
 
 export const LOGIN_REDIRECT_URL = "/dashboard";
+export const LOGIN_URL = "/auth/login";
+export const MFA_URL = "/auth/mfa";
 export const REQUIRED_PASSWORD_CHANGE_URL = "/auth/change-password";

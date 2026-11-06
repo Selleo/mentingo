@@ -1,3 +1,4 @@
+import { AUTH_SESSION_STATUS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,6 +23,7 @@ import type { CurrentUserResponse } from "~/api/generated-api";
 vi.mock("~/api/api-client", () => ({
   ApiClient: {
     api: {
+      authControllerSession: vi.fn(),
       authControllerCurrentUser: vi.fn(),
       assistantControllerListThreads: vi.fn(),
       assistantControllerListMessages: vi.fn(),
@@ -100,6 +102,9 @@ beforeEach(() => {
   login(userA);
   vi.mocked(ApiClient.api.assistantControllerListThreads).mockResolvedValue(response(page([])));
   vi.mocked(ApiClient.api.assistantControllerListMessages).mockResolvedValue(response(page([])));
+  vi.mocked(ApiClient.api.authControllerSession).mockResolvedValue(
+    response({ status: AUTH_SESSION_STATUS.AUTHENTICATED }),
+  );
 });
 afterEach(() => {
   cleanup();

@@ -1,4 +1,4 @@
-import { act, render, renderHook } from "@testing-library/react";
+import { render, renderHook } from "@testing-library/react";
 import { StrictMode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -10,12 +10,12 @@ import { useSyncUserAfterLogin } from "./useSyncUserAfterLogin";
 import type { CurrentUserResponse } from "~/api/generated-api";
 
 type User = CurrentUserResponse["data"];
-const user = { id: "user-1", firstName: "Before", shouldVerifyMFA: true } as User;
+const user = { id: "user-1", firstName: "Before" } as User;
 
 describe("useSyncUserAfterLogin", () => {
   beforeEach(() => {
     useAuthStore.setState({ isLoggedIn: false });
-    useCurrentUserStore.setState({ currentUser: undefined, hasVerifiedMFA: false });
+    useCurrentUserStore.setState({ currentUser: undefined });
   });
 
   it("bounds writes from concurrent distinct references to the same user", () => {
@@ -52,22 +52,17 @@ describe("useSyncUserAfterLogin", () => {
       { initialProps: { value: user as User | null | undefined } },
     );
     expect(useCurrentUserStore.getState().currentUser).toBe(user);
-    expect(useCurrentUserStore.getState().hasVerifiedMFA).toBe(false);
-    act(() => useCurrentUserStore.getState().setHasVerifiedMFA(true));
     const updated = { ...user, firstName: "After", requiresPasswordChange: true };
     rerender({ value: updated });
     expect(useCurrentUserStore.getState().currentUser).toBe(updated);
-    expect(useCurrentUserStore.getState().hasVerifiedMFA).toBe(true);
     rerender({ value: undefined });
     expect(useCurrentUserStore.getState().currentUser).toBe(updated);
     rerender({ value: null });
     expect(useCurrentUserStore.getState().currentUser).toBeUndefined();
-    expect(useCurrentUserStore.getState().hasVerifiedMFA).toBe(false);
     expect(useAuthStore.getState().isLoggedIn).toBe(false);
-    const noMFA = { ...updated, shouldVerifyMFA: false };
-    rerender({ value: noMFA });
-    expect(useCurrentUserStore.getState().currentUser).toBe(noMFA);
-    expect(useCurrentUserStore.getState().hasVerifiedMFA).toBe(true);
+    const signedInAgain = { ...updated, firstName: "Again" };
+    rerender({ value: signedInAgain });
+    expect(useCurrentUserStore.getState().currentUser).toBe(signedInAgain);
     expect(useAuthStore.getState().isLoggedIn).toBe(true);
   });
 });

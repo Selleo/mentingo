@@ -541,6 +541,40 @@
         }
       }
     },
+    "/api/auth/session": {
+      "get": {
+        "operationId": "AuthController_session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mfa/challenge": {
+      "post": {
+        "operationId": "AuthController_mfaChallenge",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaChallengeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",
@@ -26563,6 +26597,74 @@
           "resetToken"
         ]
       },
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "authenticated",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mfa_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "setupRequired": {
+                "type": "boolean"
+              },
+              "expiresAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MfaChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "authenticated",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mfa_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "setupRequired": {
+                "type": "boolean"
+              },
+              "expiresAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "MFASetupResponse": {
         "type": "object",
         "properties": {
@@ -26590,6 +26692,9 @@
         "type": "object",
         "properties": {
           "token": {
+            "pattern": "^[0-9]{6}$",
+            "minLength": 6,
+            "maxLength": 6,
             "type": "string"
           }
         },
@@ -27246,23 +27351,11 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
                   }
                 },
                 "required": [
                   "language",
-                  "isMFAEnabled",
-                  "MFASecret"
+                  "isMFAEnabled"
                 ]
               },
               {
@@ -27304,17 +27397,6 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -27328,7 +27410,6 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
@@ -27342,121 +27423,51 @@
         ]
       },
       "UpdateUserSettingsBody": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  },
-                  {
-                    "const": "es",
-                    "type": "string"
-                  },
-                  {
-                    "const": "fr",
-                    "type": "string"
-                  }
-                ]
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
               },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
+              {
+                "const": "pl",
+                "type": "string"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
-            }
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  },
-                  {
-                    "const": "es",
-                    "type": "string"
-                  },
-                  {
-                    "const": "fr",
-                    "type": "string"
-                  }
-                ]
-              },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
-              },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              },
-              "adminFinishedCourseNotification": {
-                "type": "boolean"
-              },
-              "configWarningDismissed": {
-                "type": "boolean"
-              }
-            }
+          "adminNewUserNotification": {
+            "type": "boolean"
+          },
+          "adminFinishedCourseNotification": {
+            "type": "boolean"
+          },
+          "configWarningDismissed": {
+            "type": "boolean"
           }
-        ]
+        }
       },
       "UpdateUserSettingsResponse": {
         "type": "object",
@@ -27501,23 +27512,11 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
                   }
                 },
                 "required": [
                   "language",
-                  "isMFAEnabled",
-                  "MFASecret"
+                  "isMFAEnabled"
                 ]
               },
               {
@@ -27559,17 +27558,6 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -27583,7 +27571,6 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
@@ -28535,17 +28522,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -28559,7 +28535,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -31003,17 +30978,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -31027,7 +30991,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -31080,17 +31043,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -31104,7 +31056,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -32084,17 +32035,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -32108,7 +32048,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"

@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { PERMISSIONS } from "@repo/shared";
+import { AUTH_TOKEN_PURPOSE, PERMISSIONS } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 import { type Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -50,6 +50,7 @@ import {
   createMagicLinkSchema,
 } from "./schemas/magic-link.schema";
 import {
+  sessionResponseSchema,
   MFASetupResponseSchema,
   MFAVerifyBody,
   MFAVerifyResponseSchema,
@@ -61,6 +62,8 @@ import {
   ResetPasswordBody,
   resetPasswordSchema,
 } from "./schemas/reset-password.schema";
+import { AllowMfa } from "./session/allow-mfa.decorator";
+import { SessionService } from "./session/session.service";
 import { TokenService } from "./token.service";
 
 import type { LoginResponse } from "./schemas/login.schema";
@@ -72,6 +75,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly sessionService: SessionService,
     private readonly tokenService: TokenService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
@@ -127,16 +131,14 @@ export class AuthController {
     data: LoginBody,
     response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
-    const { enforceSSO, MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+    const { enforceSSO } = await this.settingsService.getGlobalSettings();
 
     if (enforceSSO) {
       throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
     }
 
-    const { accessToken, refreshToken, shouldVerifyMFA, ...account } = await this.authService.login(
-      data,
-      MFAEnforcedRoles,
-    );
+    const { accessToken, refreshToken, shouldVerifyMFA, ...account } =
+      await this.authService.login(data);
 
     shouldVerifyMFA
       ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
@@ -145,9 +147,9 @@ export class AuthController {
     return new BaseResponse({ ...account, shouldVerifyMFA });
   }
 
+  @AllowMfa()
   @Post("logout")
   @AllowPasswordChangeRequired()
-  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: nullResponse(),
   })
@@ -155,6 +157,14 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<null> {
+    if (currentUser.tokenPurpose === AUTH_TOKEN_PURPOSE.MFA) {
+      await this.sessionService.revokeMfaChallenge(currentUser);
+      this.tokenService.clearTokenCookies(response);
+      return null;
+    }
+
+    await this.sessionService.revokeSession(currentUser);
+
     if (isSupportModeSession(currentUser)) {
       await this.authService.revokeSupportSession(currentUser.supportSessionId);
       this.tokenService.clearTokenCookies(response);
@@ -179,6 +189,7 @@ export class AuthController {
   async refreshTokens(
     @Res({ passthrough: true }) response: Response,
     @Req() request: Request & { refreshToken: UUIDType },
+    @CurrentUser("rememberMe") rememberMe?: boolean,
   ): Promise<null> {
     const refreshToken = request["refreshToken"];
 
@@ -190,11 +201,10 @@ export class AuthController {
       const { accessToken, refreshToken: newRefreshToken } =
         await this.authService.refreshTokens(refreshToken);
 
-      this.tokenService.setTokenCookies(response, accessToken, newRefreshToken);
+      this.tokenService.setTokenCookies(response, accessToken, newRefreshToken, rememberMe);
 
       return null;
     } catch (error) {
-      console.error(error);
       throw new UnauthorizedException("Invalid refresh token");
     }
   }
@@ -460,12 +470,37 @@ export class AuthController {
     }
   }
 
+  @AllowMfa()
+  @Get("session")
+  @AllowPasswordChangeRequired()
+  @Validate({ response: baseResponse(sessionResponseSchema) })
+  async session(@CurrentUser() user: CurrentUserType) {
+    return new BaseResponse(await this.authService.getSessionStatus(user));
+  }
+
+  @AllowMfa()
+  @Post("mfa/challenge")
+  @AllowPasswordChangeRequired()
+  @Validate({ response: baseResponse(sessionResponseSchema) })
+  async mfaChallenge(
+    @CurrentUser() user: CurrentUserType,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const pending = await this.authService.startMfaChallenge(user, response);
+    return new BaseResponse(await this.authService.getSessionStatus(pending));
+  }
+
+  @AllowMfa()
   @Post("mfa/setup")
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(MFASetupResponseSchema),
   })
-  async MFASetup(@CurrentUser("userId") userId: UUIDType) {
-    const { secret, otpauth } = await this.authService.generateMFASecret(userId);
+  async MFASetup(
+    @CurrentUser() user: CurrentUserType,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { secret, otpauth } = await this.authService.generateMFASecret(user, response);
 
     return new BaseResponse({
       secret,
@@ -473,6 +508,7 @@ export class AuthController {
     });
   }
 
+  @AllowMfa()
   @Post("mfa/verify")
   @AllowPasswordChangeRequired()
   @Validate({
@@ -481,10 +517,10 @@ export class AuthController {
   })
   async MFAVerify(
     @Body() body: MFAVerifyBody,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const isValid = await this.authService.verifyMFACode(userId, body.token, response);
+    const isValid = await this.authService.verifyMFACode(currentUser, body.token, response);
 
     return new BaseResponse({ isValid });
   }

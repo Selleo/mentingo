@@ -4831,6 +4831,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaVerificationRequired": "MFA is now required for your role. Set it up or verify it to continue.",
       "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
     }
   },
@@ -6038,7 +6039,13 @@
       "invalidRefreshToken": "Invalid refresh token",
       "adminRoleRequired": "Admin role required",
       "missingPermission": "You do not have permission to access this resource",
-      "sessionRevoked": "Your session was revoked. Please refresh your session."
+      "sessionRevoked": "Your session was revoked. Please refresh your session.",
+      "mfaRequired": "Complete two-factor authentication to continue.",
+      "sessionExpired": "Your sign-in session expired. Please sign in again.",
+      "mfaAlreadyEnabled": "Two-factor authentication is already enabled.",
+      "mfaCodeAlreadyUsed": "This code has already been used. Wait for a new code in your authenticator app and try again.",
+      "invalidMfaCode": "Enter a valid six-digit authentication code.",
+      "invalidSettingsUpdate": "These security settings cannot be changed here."
     }
   },
   "sessionRevocation": {

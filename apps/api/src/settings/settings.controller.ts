@@ -63,14 +63,15 @@ import {
   type UpdateRegistrationFormBody,
 } from "./schemas/registration-form.schema";
 import {
-  adminSettingsJSONContentSchema,
+  publicAdminSettingsSchema as adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
   dashboardSettingsResponseSchema,
   globalSettingsJSONSchema,
   loginPageResourceResponseSchema,
-  settingsJSONContentSchema,
+  publicUserSettingsSchema as settingsJSONContentSchema,
   UploadFilesToLoginPageBody,
-  userSettingsJSONContentSchema,
+  publicUserSettingsSchema as userSettingsJSONContentSchema,
+  toPublicUserSettings,
 } from "./schemas/settings.schema";
 import {
   UpdateDefaultCourseCurrencyBody,
@@ -97,9 +98,9 @@ import {
 import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
-  AdminSettingsJSONContentSchema,
+  PublicAdminSettings as AdminSettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
-  SettingsJSONContentSchema,
+  PublicUserSettings as SettingsJSONContentSchema,
   DashboardSettingsResponseSchema,
 } from "./schemas/settings.schema";
 
@@ -145,7 +146,9 @@ export class SettingsController {
   async getUserSettings(
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getCurrentUserSettings(currentUser));
+    return new BaseResponse(
+      toPublicUserSettings(await this.settingsService.getCurrentUserSettings(currentUser)),
+    );
   }
 
   @Put()
@@ -159,7 +162,9 @@ export class SettingsController {
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
+    return new BaseResponse(
+      toPublicUserSettings(await this.settingsService.updateUserSettings(userId, updatedSettings)),
+    );
   }
 
   @Get("dashboard")
@@ -211,7 +216,7 @@ export class SettingsController {
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminNewUserNotification(currentUserId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/unregistered-user-courses-accessibility")
@@ -356,7 +361,7 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminFinishedCourseNotification(userId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/overdue-course-notification")
@@ -370,7 +375,7 @@ export class SettingsController {
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result =
       await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(userId);
-    return new BaseResponse(result);
+    return new BaseResponse(toPublicUserSettings(result));
   }
 
   @Patch("admin/color-schema")
@@ -761,7 +766,7 @@ export class SettingsController {
       userId,
       body.dismissed,
     );
-    return new BaseResponse(updatedSettings);
+    return new BaseResponse(toPublicUserSettings(updatedSettings));
   }
 
   @Patch("admin/qa/:setting")

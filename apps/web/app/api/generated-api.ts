@@ -382,6 +382,22 @@ export interface ResetPasswordBody {
   resetToken: string;
 }
 
+export interface SessionResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
+export interface MfaChallengeResponse {
+  data: {
+    status: "authenticated" | "mfa_required";
+    setupRequired?: boolean;
+    expiresAt?: number;
+  };
+}
+
 export interface MFASetupResponse {
   data: {
     secret: string;
@@ -390,6 +406,11 @@ export interface MFASetupResponse {
 }
 
 export interface MFAVerifyBody {
+  /**
+   * @minLength 6
+   * @maxLength 6
+   * @pattern ^[0-9]{6}$
+   */
   token: string;
 }
 
@@ -522,35 +543,23 @@ export interface GetUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
 }
 
-export type UpdateUserSettingsBody =
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-    }
-  | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-      adminNewUserNotification?: boolean;
-      adminFinishedCourseNotification?: boolean;
-      configWarningDismissed?: boolean;
-    };
+export interface UpdateUserSettingsBody {
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  adminNewUserNotification?: boolean;
+  adminFinishedCourseNotification?: boolean;
+  configWarningDismissed?: boolean;
+}
 
 export interface UpdateUserSettingsResponse {
   data:
@@ -558,13 +567,11 @@ export interface UpdateUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
-        MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -720,7 +727,6 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1171,7 +1177,6 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1183,7 +1188,6 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1402,7 +1406,6 @@ export interface UpdateConfigWarningDismissedResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
-    MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -8738,7 +8741,7 @@ export interface GetLoginMethodSetupResponse {
 }
 
 export interface UpdateLoginMethodBody {
-  method: "google" | "microsoft" | "slack" | "entraId" | "magicLink" | "password";
+  method: "google" | "microsoft" | "entraId" | "slack" | "magicLink" | "password";
   enabled: boolean;
 }
 
@@ -37670,6 +37673,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/auth/entra-id/callback`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSession
+     * @request GET:/api/auth/session
+     */
+    authControllerSession: (params: RequestParams = {}) =>
+      this.request<SessionResponse, any>({
+        path: `/api/auth/session`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaChallenge
+     * @request POST:/api/auth/mfa/challenge
+     */
+    authControllerMfaChallenge: (params: RequestParams = {}) =>
+      this.request<MfaChallengeResponse, any>({
+        path: `/api/auth/mfa/challenge`,
+        method: "POST",
+        format: "json",
         ...params,
       }),
 

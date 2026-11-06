@@ -3,7 +3,8 @@ import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { ScormContentGrantsService } from "./scorm-content-grants.service";
 
 import type { ScormContentGrant } from "./scorm-content.types";
-import type { RedisClient, SessionRevocationService } from "src/redis";
+import type { SessionService } from "src/auth/session/session.service";
+import type { RedisClient } from "src/redis";
 
 describe("SCORM content grants", () => {
   const actor: ScormContentGrant["actor"] = {
@@ -25,8 +26,10 @@ describe("SCORM content grants", () => {
       set: jest.fn(async (key: string, value: string) => data.set(key, value)),
     } as unknown as RedisClient;
     scormContentGrantsService = new ScormContentGrantsService(redis, {
-      isUserRevoked: async () => revoked,
-    } as unknown as SessionRevocationService);
+      assertDerivedSessionAssurance: async () => {
+        if (revoked) throw new UnauthorizedException();
+      },
+    } as unknown as SessionService);
   });
 
   const create = async () => {

@@ -72,6 +72,7 @@ import type {
   McpLessonUploadGrant,
   McpScormTusGrant,
   McpScormUploadGrant,
+  McpStoredUploadGrant,
   McpUploadGrant,
   McpVideoTusGrant,
 } from "./mcp.types";
@@ -180,7 +181,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: upload.path,
       method: "PATCH" as const,
@@ -209,7 +210,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: "/api/user/profile",
       method: "PATCH" as const,
@@ -226,7 +227,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     permission: PermissionKey,
   ): Promise<void> {
-    const email = await this.tokenService.resolveIdentity(actor.userId, actor.tenantId);
+    const email = await this.tokenService.resolveIdentity(actor);
     if (!email) throw new UnauthorizedException("Upload user is no longer active");
     const access = await this.tenantDbRunnerService.runWithTenantContext(actor.tenantId, () =>
       this.permissionsService.getUserAccess(actor.userId),
@@ -252,7 +253,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
 
     return {
       uploadPath: LESSON_UPLOAD_ROUTE,
@@ -287,7 +288,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: `/api/${grant.targetType}/${grant.targetId}/upload`,
       method: "POST" as const,
@@ -336,7 +337,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath:
         input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
@@ -373,7 +374,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: `/api/learning-path/${input.targetId}`,
       method: "PATCH" as const,
@@ -405,7 +406,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: `/api/${input.targetType}/${input.targetId}`,
       method: "PATCH" as const,
@@ -433,7 +434,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: "/api/lesson/ai-mentor/avatar",
       method: "POST" as const,
@@ -472,7 +473,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     return {
       uploadPath: GENERIC_FILE_UPLOAD_ROUTE,
       method: "POST" as const,
@@ -497,7 +498,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    await this.storeGrant(token, grant, actor, GRANT_TTL_SECONDS);
     let uploadPath: string;
     let fields: Record<string, string | undefined>;
     let method: "POST" | "PATCH" = "POST";
@@ -646,9 +647,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + SCORM_TUS_STATE_TTL,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), {
-      EX: Math.ceil(SCORM_TUS_STATE_TTL / 1000),
-    });
+    await this.storeGrant(token, grant, actor, Math.ceil(SCORM_TUS_STATE_TTL / 1000));
     return {
       packageId: upload.packageId,
       uploadId: upload.uploadId,
@@ -705,9 +704,7 @@ export class McpUploadGrantService {
       tenantId: actor.tenantId,
       expiresAt: Date.now() + DEFAULT_TUS_TTL_MS,
     };
-    await this.redis.set(this.key(token), JSON.stringify(grant), {
-      EX: Math.ceil(DEFAULT_TUS_TTL_MS / 1000),
-    });
+    await this.storeGrant(token, grant, actor, Math.ceil(DEFAULT_TUS_TTL_MS / 1000));
     return {
       ...upload,
       tusHeaders: { ...upload.tusHeaders, Authorization: `Bearer ${token}` },
@@ -734,9 +731,9 @@ export class McpUploadGrantService {
     const grantKey = this.key(token);
     const storedGrant = await this.redis.get(grantKey);
     if (!storedGrant) throw new UnauthorizedException("Upload grant expired or already used");
-    let grant: McpUploadGrant;
+    let grant: McpStoredUploadGrant;
     try {
-      grant = JSON.parse(storedGrant) as McpUploadGrant;
+      grant = JSON.parse(storedGrant) as McpStoredUploadGrant;
     } catch {
       throw new UnauthorizedException("Invalid upload grant");
     }
@@ -809,7 +806,7 @@ export class McpUploadGrantService {
     if (resource.tenantId !== grant.tenantId)
       throw new UnauthorizedException("Upload grant is for another tenant host");
 
-    const email = await this.tokenService.resolveIdentity(grant.userId, grant.tenantId);
+    const email = await this.tokenService.resolveIdentity(grant);
     if (!email) throw new UnauthorizedException("Upload user is no longer active");
 
     const access = await this.tenantDbRunnerService.runWithTenantContext(grant.tenantId, () =>
@@ -984,6 +981,21 @@ export class McpUploadGrantService {
     if (!actor.permissions.includes(PERMISSIONS.NEWS_MANAGE) && news.authorId !== actor.userId) {
       throw new ForbiddenException("News post is not manageable");
     }
+  }
+
+  /** Binds the grant to the issuer's session version and MFA assurance, so revocation or newly required MFA voids it. */
+  private async storeGrant(
+    token: string,
+    grant: McpUploadGrant,
+    actor: CurrentUserType,
+    ttlSeconds: number,
+  ): Promise<void> {
+    const storedGrant: McpStoredUploadGrant = {
+      ...grant,
+      sessionVersion: actor.sessionVersion,
+      mfaVerified: actor.mfaVerified,
+    };
+    await this.redis.set(this.key(token), JSON.stringify(storedGrant), { EX: ttlSeconds });
   }
 
   private key(token: string): string {

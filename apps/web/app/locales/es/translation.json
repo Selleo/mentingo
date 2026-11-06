@@ -4768,6 +4768,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "La configuración de cumplimiento de MFA se ha actualizado correctamente.",
+      "mfaVerificationRequired": "Ahora se requiere MFA para tu rol. Configúralo o verifícalo para continuar.",
       "mfaEnforcementUpdateFailed": "No se pudo actualizar la configuración de cumplimiento de MFA."
     }
   },
@@ -5975,7 +5976,13 @@
       "invalidRefreshToken": "Token de actualización no válido",
       "adminRoleRequired": "Se requiere rol de administrador",
       "missingPermission": "No tienes permiso para acceder a este recurso.",
-      "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión."
+      "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión.",
+      "mfaRequired": "Completa la autenticación en dos pasos para continuar.",
+      "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+      "mfaAlreadyEnabled": "La autenticación en dos pasos ya está activada.",
+      "mfaCodeAlreadyUsed": "Este código ya se ha utilizado. Espera un nuevo código en tu aplicación de autenticación e inténtalo de nuevo.",
+      "invalidMfaCode": "Introduce un código de autenticación válido de seis dígitos.",
+      "invalidSettingsUpdate": "Esta configuración de seguridad no se puede cambiar aquí."
     }
   },
   "sessionRevocation": {
