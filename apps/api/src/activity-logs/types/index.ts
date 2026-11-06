@@ -200,6 +200,8 @@ export type SettingsActivityLogSnapshot = {
   enforceSSO?: boolean;
   primaryColor?: string | null;
   contrastColor?: string | null;
+  backgroundColor?: string | null;
+  accentColor?: string | null;
   companyInformation?: Record<string, unknown> | null;
   platformLogoS3Key?: string | null;
   platformSimpleLogoS3Key?: string | null;

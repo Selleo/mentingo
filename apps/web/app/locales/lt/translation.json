@@ -4697,7 +4697,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Foninis sertifikato įkėlimas",
-    "description": "Įkelkite sertifikato fono paveikslėlį.",
+    "description": "Fonas už sertifikato turinio.",
     "button": {
       "removeCertificateBackgroundImage": "Ištrinkite sertifikato foną",
       "preview": "Peržiūra"
@@ -4984,7 +4984,7 @@
   },
   "platformLogo": {
     "header": "Platformos logotipas",
-    "subHeader": "Įkelkite tinkintą logotipą savo platformai. Palaikomi formatai: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Pagrindinis platformos logotipas.",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
       "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
@@ -5000,7 +5000,7 @@
   },
   "platformSimpleLogo": {
     "header": "Platformos paprastas logotipas (piktograma)",
-    "subHeader": "Įkelkite tinkintą logotipą, kuris bus naudojamas kaip ženklas ir favicon. Palaikomi formatai: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Kompaktiškas logotipas ir naršyklės favicon.",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
       "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
@@ -5014,13 +5014,54 @@
       "logoFetchError": "Gaunant paprastą platformos logotipą įvyko klaida"
     }
   },
+  "brandingImages": {
+    "title": "Prekės ženklo vaizdai",
+    "description": "Logotipai ir fono vaizdai, naudojami platformoje, prisijungimo puslapyje ir sertifikatuose."
+  },
   "organizationTheme": {
     "title": "Organizacijos tema",
-    "description": "Tinkinkite savo platformos išvaizdą pasirinkdami temos spalvą, kuri atspindi jūsų organizacijos prekės ženklą."
+    "description": "Tinkinkite savo platformos išvaizdą pasirinkdami temos spalvą, kuri atspindi jūsų organizacijos prekės ženklą.",
+    "primaryColor": {
+      "label": "Pagrindinė spalva",
+      "description": "Mygtukai ir svarbiausi akcentai"
+    },
+    "contrastColor": {
+      "label": "Tekstas ant pagrindinės spalvos",
+      "description": "Tekstas ir piktogramos ant pagrindinių mygtukų"
+    },
+    "backgroundColor": {
+      "label": "Fonas",
+      "description": "Puslapio fonas už turinio"
+    },
+    "accentColor": {
+      "label": "Akcentas",
+      "description": "Nuorodos, skirtukai, kontūriniai mygtukai ir ženkleliai",
+      "adjustedDescription": "Patamsinta pagrindinė spalva, kad liktų įskaitoma"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Atkurti auto",
+    "pickColor": "Pasirinkti: {{label}}",
+    "contrastTooltip": {
+      "passes": "Kontrasto santykis atitinka WCAG 2 AA (bent {{minimum}}:1 įprastam tekstui).",
+      "fails": "Kontrasto santykis neatitinka WCAG 2 AA, kuris reikalauja bent {{minimum}}:1 įprastam tekstui."
+    },
+    "lowContrast": "Sunku perskaityti. Rekomenduojamas kontrastas – bent {{minimum}}:1",
+    "preview": {
+      "title": "Peržiūra",
+      "courseTitle": "Įvadas į dizainą",
+      "courseDetails": "12 pamokų · 3 valandos",
+      "badge": "Vykdoma",
+      "overviewTab": "Apžvalga",
+      "lessonsTab": "Pamokos",
+      "progress": "Pažanga",
+      "primaryButton": "Tęsti mokymąsi",
+      "outlineButton": "Išsaugoti vėlesniam laikui",
+      "link": "Peržiūrėti programą"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Prisijungimo fono paveikslėlio įkėlimas",
-    "description": "Įkelkite tinkintą organizacijos prisijungimo puslapio fono paveikslėlį.",
+    "description": "Prisijungimo puslapio fonas.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },

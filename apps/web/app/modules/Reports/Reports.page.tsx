@@ -687,7 +687,7 @@ export default function ReportsPage() {
                   <SlidersHorizontal className="size-4" />
                   {t("reports.filters.toggle")}
                   {draftConditionCount > 0 && (
-                    <span className="details-md rounded-full bg-primary-700 px-1.5 text-contrast">
+                    <span className="details-md rounded-full bg-brand px-1.5 text-contrast">
                       {draftConditionCount}
                     </span>
                   )}

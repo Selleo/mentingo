@@ -100,6 +100,7 @@ import type {
   UpdateSettingsBody,
   UpdateDashboardSettingsBody,
   ResetDashboardSettingsBody,
+  UpdateGlobalColorSchemaBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
@@ -1120,17 +1121,17 @@ export class SettingsService {
   }
 
   public async updateGlobalColorSchema(
-    primaryColor: string,
-    contrastColor: string,
+    { primaryColor, contrastColor, backgroundColor, accentColor }: UpdateGlobalColorSchemaBody,
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
+    const colorSchema = { primaryColor, contrastColor, backgroundColor, accentColor };
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
-          settings.settings || to_jsonb(${{ primaryColor, contrastColor }}::jsonb)
+          settings.settings || to_jsonb(${colorSchema}::jsonb)
         `,
       })
       .where(isNull(settings.userId))
@@ -2489,6 +2490,8 @@ export class SettingsService {
         ? settings.loginPageFiles
         : JSON.parse(settings.loginPageFiles ?? "[]"),
       ageLimit: settings.ageLimit ?? null,
+      backgroundColor: settings.backgroundColor ?? DEFAULT_GLOBAL_SETTINGS.backgroundColor,
+      accentColor: settings.accentColor ?? DEFAULT_GLOBAL_SETTINGS.accentColor,
       featuredCourseId: settings.featuredCourseId ?? DEFAULT_GLOBAL_SETTINGS.featuredCourseId,
     };
   }

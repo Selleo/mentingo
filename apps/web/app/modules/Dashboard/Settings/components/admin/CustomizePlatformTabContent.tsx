@@ -1,4 +1,5 @@
 import ArticlesPreferences from "~/modules/Dashboard/Settings/components/admin/ArticlesPreferences";
+import { BrandingImagesCard } from "~/modules/Dashboard/Settings/components/admin/BrandingImagesCard";
 import { CertificateBackgroundUpload } from "~/modules/Dashboard/Settings/components/admin/CertificateBackgroundUpload";
 import LearningPathsPreferences from "~/modules/Dashboard/Settings/components/admin/LearningPathsPreferences";
 import NewsPreferences from "~/modules/Dashboard/Settings/components/admin/NewsPreferences";
@@ -29,7 +30,7 @@ export default function CustomizePlatformTabContent({
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />
       <LearningPathsPreferences globalSettings={globalSettings} />
-      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+      <BrandingImagesCard>
         <CertificateBackgroundUpload
           certificateBackgroundImage={globalSettings.certificateBackgroundImage}
           platformLogo={globalSettings.platformLogoS3Key}
@@ -39,7 +40,7 @@ export default function CustomizePlatformTabContent({
         />
         <PlatformLogoForm />
         <PlatformSimpleLogoForm />
-      </div>
+      </BrandingImagesCard>
       <OrganizationTheme />
     </>
   );

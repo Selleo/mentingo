@@ -54,6 +54,12 @@ export const updateGlobalColorSchema = Type.Object({
   contrastColor: Type.String({
     pattern: HEX_COLOR_REGEX.source,
   }),
+  backgroundColor: Type.Optional(
+    Type.Union([Type.String({ pattern: HEX_COLOR_REGEX.source }), Type.Null()]),
+  ),
+  accentColor: Type.Optional(
+    Type.Union([Type.String({ pattern: HEX_COLOR_REGEX.source }), Type.Null()]),
+  ),
 });
 
 export const updateConfigWarningDismissedSchema = Type.Object({

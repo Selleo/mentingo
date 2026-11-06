@@ -4632,7 +4632,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Carga de antecedentes del certificado",
-    "description": "Cargue una imagen de fondo para el certificado.",
+    "description": "Fondo detrás del contenido del certificado.",
     "button": {
       "removeCertificateBackgroundImage": "Eliminar fondo del certificado",
       "preview": "Vista previa"
@@ -4937,7 +4937,7 @@
   },
   "platformLogo": {
     "header": "Logotipo de la plataforma",
-    "subHeader": "Cargue un logotipo personalizado para su plataforma. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Logotipo principal de la plataforma.",
     "field": {
       "uploadLabel": "Imagen del logotipo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
@@ -4953,7 +4953,7 @@
   },
   "platformSimpleLogo": {
     "header": "Logotipo simple de plataforma (icono)",
-    "subHeader": "Cargue un logotipo personalizado que se utilizará como sello y favicon. Formatos soportados: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Logotipo compacto y favicon del navegador.",
     "field": {
       "uploadLabel": "Imagen del logotipo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
@@ -4967,13 +4967,54 @@
       "logoFetchError": "Error al buscar el logotipo simple de la plataforma"
     }
   },
+  "brandingImages": {
+    "title": "Imágenes de marca",
+    "description": "Logotipos e imágenes de fondo usados en la plataforma, la página de inicio de sesión y los certificados."
+  },
   "organizationTheme": {
     "title": "Tema de organización",
-    "description": "Personalice la apariencia de su plataforma seleccionando un color de tema que refleje la marca de su organización."
+    "description": "Personalice la apariencia de su plataforma seleccionando un color de tema que refleje la marca de su organización.",
+    "primaryColor": {
+      "label": "Color principal",
+      "description": "Botones y elementos destacados"
+    },
+    "contrastColor": {
+      "label": "Texto sobre el color principal",
+      "description": "Texto e iconos en los botones principales"
+    },
+    "backgroundColor": {
+      "label": "Fondo",
+      "description": "Fondo de la página detrás del contenido"
+    },
+    "accentColor": {
+      "label": "Acento",
+      "description": "Enlaces, pestañas, botones con contorno e insignias",
+      "adjustedDescription": "Oscurecido a partir del color principal para que siga siendo legible"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Restablecer a auto",
+    "pickColor": "Elegir {{label}}",
+    "contrastTooltip": {
+      "passes": "La relación de contraste cumple WCAG 2 AA (al menos {{minimum}}:1 para texto normal).",
+      "fails": "La relación de contraste no cumple WCAG 2 AA, que exige al menos {{minimum}}:1 para texto normal."
+    },
+    "lowContrast": "Difícil de leer. Se recomienda un contraste de al menos {{minimum}}:1",
+    "preview": {
+      "title": "Vista previa",
+      "courseTitle": "Introducción al diseño",
+      "courseDetails": "12 lecciones · 3 horas",
+      "badge": "En curso",
+      "overviewTab": "Resumen",
+      "lessonsTab": "Lecciones",
+      "progress": "Progreso",
+      "primaryButton": "Continuar aprendiendo",
+      "outlineButton": "Guardar para después",
+      "link": "Ver temario"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Iniciar sesión Subir imagen de fondo",
-    "description": "Cargue una imagen de fondo personalizada para la página de inicio de sesión de la organización.",
+    "description": "Fondo de la página de inicio de sesión.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP o SVG (máx. {{maxSize}})"
     },

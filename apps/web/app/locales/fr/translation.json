@@ -4431,7 +4431,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Téléchargement en arrière-plan du certificat",
-    "description": "Importez une image d'arrière-plan pour le certificat.",
+    "description": "Arrière-plan derrière le contenu du certificat.",
     "button": {
       "removeCertificateBackgroundImage": "Supprimer l'arrière-plan du certificat",
       "preview": "Aperçu"
@@ -4726,7 +4726,7 @@
   },
   "platformLogo": {
     "header": "Logo de la plateforme",
-    "subHeader": "Importez un logo personnalisé pour votre plateforme. Formats acceptés : PNG, JPG/JPEG, WEBP et SVG.",
+    "subHeader": "Logo principal de la plateforme.",
     "field": {
       "uploadLabel": "Image du logo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP ou SVG (max. {{maxSize}})"
@@ -4742,7 +4742,7 @@
   },
   "platformSimpleLogo": {
     "header": "Logo simple de la plateforme (icône)",
-    "subHeader": "Importez un logo qui servira de symbole et de favicon. Formats acceptés : PNG, JPG/JPEG, WEBP et SVG.",
+    "subHeader": "Logo compact et favicon du navigateur.",
     "field": {
       "uploadLabel": "Image du logo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP ou SVG (max. {{maxSize}})"
@@ -4756,13 +4756,54 @@
       "logoFetchError": "Erreur lors de la récupération du logo simple de la plateforme"
     }
   },
+  "brandingImages": {
+    "title": "Images de marque",
+    "description": "Logos et images d'arrière-plan utilisés sur la plateforme, la page de connexion et les certificats."
+  },
   "organizationTheme": {
     "title": "Thème de l'organisation",
-    "description": "Personnalisez l'apparence de votre plateforme en sélectionnant une couleur de thème qui reflète l'image de marque de votre organisation."
+    "description": "Personnalisez l'apparence de votre plateforme en sélectionnant une couleur de thème qui reflète l'image de marque de votre organisation.",
+    "primaryColor": {
+      "label": "Couleur principale",
+      "description": "Boutons et éléments clés"
+    },
+    "contrastColor": {
+      "label": "Texte sur la couleur principale",
+      "description": "Texte et icônes des boutons principaux"
+    },
+    "backgroundColor": {
+      "label": "Arrière-plan",
+      "description": "Fond de page derrière le contenu"
+    },
+    "accentColor": {
+      "label": "Accent",
+      "description": "Liens, onglets, boutons contour et badges",
+      "adjustedDescription": "Assombri à partir de la couleur principale pour rester lisible"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Revenir à auto",
+    "pickColor": "Choisir : {{label}}",
+    "contrastTooltip": {
+      "passes": "Le rapport de contraste respecte WCAG 2 AA (au moins {{minimum}}:1 pour le texte normal).",
+      "fails": "Le rapport de contraste est inférieur à WCAG 2 AA, qui exige au moins {{minimum}}:1 pour le texte normal."
+    },
+    "lowContrast": "Difficile à lire. Visez un contraste d'au moins {{minimum}}:1",
+    "preview": {
+      "title": "Aperçu",
+      "courseTitle": "Introduction au design",
+      "courseDetails": "12 leçons · 3 heures",
+      "badge": "En cours",
+      "overviewTab": "Vue d'ensemble",
+      "lessonsTab": "Leçons",
+      "progress": "Progression",
+      "primaryButton": "Continuer",
+      "outlineButton": "Enregistrer pour plus tard",
+      "link": "Voir le programme"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Téléchargement de l'image d'arrière-plan",
-    "description": "Importez une image d'arrière-plan pour la page de connexion de l'organisation.",
+    "description": "Arrière-plan de la page de connexion.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP ou SVG (max. {{maxSize}})"
     },

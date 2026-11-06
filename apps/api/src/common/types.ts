@@ -17,6 +17,8 @@ export type GlobalSettings = {
   platformSimpleLogoS3Key: string | null;
   primaryColor: string | null;
   contrastColor: string | null;
+  backgroundColor: string | null;
+  accentColor: string | null;
   loginBackgroundImageS3Key: string | null;
 };
 
