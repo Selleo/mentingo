@@ -396,7 +396,12 @@ describe("AssistantExecutionService", () => {
       return model;
     });
     Object.assign(service, { aiRuntimeService: { getAssistantLanguageModel } });
-    await expect(service.getModel(identity)).resolves.toBe(model);
+    const resolved = await service.getModel(identity);
+    expect(resolved).not.toBe(model);
+    expect(tenantDbRunnerService.runWithTenant).toHaveBeenCalledWith(
+      identity.tenantId,
+      expect.any(Function),
+    );
   });
 
   it("persists search progress only when an authorized read is actually running", async () => {

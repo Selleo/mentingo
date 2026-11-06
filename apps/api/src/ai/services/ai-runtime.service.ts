@@ -24,8 +24,6 @@ import { Value } from "@sinclair/typebox/value";
 import {
   AI_MENTOR_RAG_EMBEDDING_DIMENSIONS,
   LUMA_CONFIGURATION_CACHE_TTL_MS,
-  LUMA_OPENAI_COMPATIBLE_MODEL,
-  LUMA_OPENAI_COMPATIBLE_PATH,
 } from "src/ai/ai-runtime.constants";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import {
@@ -42,6 +40,7 @@ import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-tel
 import { aiJudgeJudgementSchema, generateTranslationSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { FallbackLanguageModel } from "src/ai/utils/fallback-language-model";
+import { NativeLumaLanguageModel } from "src/ai/utils/native-luma-language-model";
 import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
 
@@ -62,6 +61,7 @@ import type {
   AiMentorConfigurationValidatorModelResult,
   GeneratedAiMentorConfigurationFields,
 } from "src/ai/mentor-configuration-generation/schemas/ai-mentor-configuration-generation.schema";
+import type { NativeLumaMentorClient } from "src/ai/native-luma-chat.types";
 
 @Injectable()
 export class AiRuntimeService {
@@ -278,8 +278,8 @@ export class AiRuntimeService {
   }
 
   /**
-   * The Core assistant needs OpenAI tool calling, so Luma is reached through its
-   * OpenAI-compatible relay, which runs the AI Mentor chat Custom profile.
+   * Native Mentor SDK calls preserve tools and structured history for the Core assistant.
+   * The existing OpenAI fallback remains available before a call returns a stream.
    */
   async getAssistantLanguageModel(): Promise<LanguageModelV4> {
     const createCoreModel = async () => (await this.getAISdkOpenAI())(OPENAI_MODELS.BASIC);
@@ -287,9 +287,13 @@ export class AiRuntimeService {
     return this.runWithLumaFallback<LanguageModelV4>({
       capability: AiCapability.AiMentorChat,
       operation: "Core assistant model",
-      runLuma: async () =>
+      runLuma: async (luma) =>
         new FallbackLanguageModel(
-          (await this.getLumaOpenAiCompatibleProvider()).chat(LUMA_OPENAI_COMPATIBLE_MODEL),
+          new NativeLumaLanguageModel(async () => {
+            // SDK 0.4 forwards native additions verbatim; this bridge is removed once
+            // generated SDK types expose tool/event chat requests and responses.
+            return luma.mentor as unknown as NativeLumaMentorClient;
+          }),
           createCoreModel,
           (error) => this.logFallback("Core assistant", error),
         ),
@@ -479,18 +483,6 @@ export class AiRuntimeService {
         }`,
       );
       return null;
-    });
-  }
-
-  private async getLumaOpenAiCompatibleProvider(): Promise<OpenAIProvider> {
-    const { apiKey, baseURL } = await this.getLumaCredentials();
-    if (!apiKey || !baseURL) throw new Error("Luma is not configured");
-
-    const { createOpenAI } = await loadOpenAiSdk();
-    return createOpenAI({
-      apiKey,
-      baseURL: `${baseURL.replace(/\/+$/, "")}${LUMA_OPENAI_COMPATIBLE_PATH}`,
-      headers: { "X-API-Key": apiKey },
     });
   }
 

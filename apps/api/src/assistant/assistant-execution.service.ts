@@ -9,6 +9,7 @@ import {
 } from "@repo/shared";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
+import { TenantBoundLanguageModel } from "src/ai/utils/tenant-bound-language-model";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -103,7 +104,8 @@ export class AssistantExecutionService {
       await this.assistantRepository.updateRun(input, {
         activity: ASSISTANT_RUN_ACTIVITIES.THINKING,
       });
-      return this.aiRuntimeService.getAssistantLanguageModel();
+      const model = await this.aiRuntimeService.getAssistantLanguageModel();
+      return new TenantBoundLanguageModel(model, input.tenantId, this.tenantDbRunnerService);
     });
   }
 

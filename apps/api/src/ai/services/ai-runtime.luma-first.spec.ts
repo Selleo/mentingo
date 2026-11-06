@@ -10,13 +10,8 @@ import type { EnvService } from "src/env/services/env.service";
 
 jest.mock("src/ai/utils/ai-esm", () => ({ loadAiSdk: jest.fn(), loadOpenAiSdk: jest.fn() }));
 
-const lumaChatModel = {
-  provider: "luma",
-  modelId: "luma-custom-profile",
-  supportedUrls: {},
-  doGenerate: jest.fn(),
-  doStream: jest.fn(),
-};
+const nativeGenerateChat = jest.fn();
+const nativeStreamChat = jest.fn();
 const openAiChatModel = {
   provider: "openai",
   modelId: "gpt",
@@ -25,9 +20,6 @@ const openAiChatModel = {
 };
 const openAiEmbedding = { id: "openai-embedding" };
 
-const createLumaProvider = jest.fn().mockReturnValue({
-  chat: jest.fn().mockReturnValue(lumaChatModel),
-});
 const openAiProvider = Object.assign(jest.fn().mockReturnValue(openAiChatModel), {
   embedding: jest.fn().mockReturnValue(openAiEmbedding),
   embeddingModel: jest.fn().mockReturnValue(openAiEmbedding),
@@ -43,7 +35,10 @@ const createService = (source: (typeof AI_RUNTIME_SOURCES)[keyof typeof AI_RUNTI
   jest.spyOn(service, "getAISdkOpenAI").mockResolvedValue(openAiProvider as never);
   Object.defineProperty(service, "getLumaClient", {
     configurable: true,
-    value: jest.fn().mockResolvedValue({ ai: { createEmbeddings } }),
+    value: jest.fn().mockResolvedValue({
+      ai: { createEmbeddings },
+      mentor: { generateChat: nativeGenerateChat, streamChat: nativeStreamChat },
+    }),
   });
   return service;
 };
@@ -60,12 +55,10 @@ describe("AiRuntimeService Luma-first paths", () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    createLumaProvider.mockReturnValue({ chat: jest.fn().mockReturnValue(lumaChatModel) });
     openAiProvider.mockReturnValue(openAiChatModel);
     openAiProvider.embedding.mockReturnValue(openAiEmbedding);
     openAiProvider.embeddingModel.mockReturnValue(openAiEmbedding);
     process.env.LUMA_BASE_URL = "https://luma.internal/";
-    jest.mocked(loadOpenAiSdk).mockResolvedValue({ createOpenAI: createLumaProvider } as never);
     jest.mocked(loadAiSdk).mockResolvedValue({ embedMany } as never);
   });
 
@@ -73,20 +66,27 @@ describe("AiRuntimeService Luma-first paths", () => {
     process.env = { ...originalEnv };
   });
 
-  it("routes the Core assistant through Luma's OpenAI-compatible relay", async () => {
-    const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
-
-    expect(model).toBeInstanceOf(FallbackLanguageModel);
-    expect(createLumaProvider).toHaveBeenCalledWith({
-      apiKey: "luma-key",
-      baseURL: "https://luma.internal/api/public/v1/ai/openai",
-      headers: { "X-API-Key": "luma-key" },
+  it("routes the Core assistant through the existing native Mentor SDK", async () => {
+    nativeGenerateChat.mockResolvedValue({
+      message: "Native answer",
+      toolCalls: [],
+      finishReason: "stop",
     });
+    const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
+    expect(model).toBeInstanceOf(FallbackLanguageModel);
+    await expect(
+      model.doGenerate({ prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }] }),
+    ).resolves.toMatchObject({ content: [{ type: "text", text: "Native answer" }] });
+    expect(nativeGenerateChat).toHaveBeenCalledWith({
+      messages: [{ role: "user", content: "Hello" }],
+      streamFormat: "events",
+    });
+    expect(loadOpenAiSdk).not.toHaveBeenCalled();
   });
 
   it("runs an assistant step on OpenAI when the Luma call fails", async () => {
     const generated = { content: [] };
-    lumaChatModel.doGenerate.mockRejectedValue(new Error("Luma 409 core_mode_not_executed"));
+    nativeGenerateChat.mockRejectedValue(new Error("Luma 409 core_mode_not_executed"));
     openAiChatModel.doGenerate.mockResolvedValue(generated);
     const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
 
@@ -96,9 +96,9 @@ describe("AiRuntimeService Luma-first paths", () => {
 
   it("does not retry an aborted assistant step on OpenAI", async () => {
     const abort = new AbortController();
-    abort.abort();
     const cancellation = new Error("aborted");
-    lumaChatModel.doStream.mockRejectedValue(cancellation);
+    abort.abort(cancellation);
+    nativeStreamChat.mockRejectedValue(cancellation);
     const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
 
     await expect(model.doStream({ prompt: [], abortSignal: abort.signal } as never)).rejects.toBe(
@@ -111,31 +111,40 @@ describe("AiRuntimeService Luma-first paths", () => {
     const streamed = { stream: new ReadableStream() };
     const options = {
       prompt: [],
-      tools: [{ type: "function", name: "read_course", parameters: {} }],
+      tools: [{ type: "function", name: "read_course", inputSchema: {} }],
       toolChoice: { type: "required" },
     };
-    lumaChatModel.doStream.mockRejectedValue(new Error("Luma unavailable"));
+    nativeStreamChat.mockRejectedValue(new Error("Luma unavailable"));
     openAiChatModel.doStream.mockResolvedValue(streamed);
     const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
 
     await expect(model.doStream(options as never)).resolves.toBe(streamed);
-    expect(lumaChatModel.doStream).toHaveBeenCalledWith(options);
+    expect(nativeStreamChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        streamFormat: "events",
+        tools: [{ name: "read_course", inputSchema: {} }],
+        toolChoice: "required",
+      }),
+      { signal: expect.any(AbortSignal) },
+    );
     expect(openAiChatModel.doStream).toHaveBeenCalledWith(options);
   });
 
   it("does not repeat a tool-capable assistant call after its stream has opened", async () => {
     const failure = new Error("upstream connection interrupted");
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue({ type: "text-delta", id: "message", delta: "Already emitted" });
-        controller.error(failure);
-      },
-    });
-    lumaChatModel.doStream.mockResolvedValue({ stream });
+    async function* failedStream() {
+      yield Buffer.from(JSON.stringify({ type: "text-delta", text: "Already emitted" }) + "\n");
+      throw failure;
+    }
+    nativeStreamChat.mockResolvedValue({ data: failedStream() });
     const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
     const result = await model.doStream({ prompt: [] } as never);
 
-    await expect(result.stream.getReader().read()).rejects.toBe(failure);
+    const reader = result.stream.getReader();
+    await reader.read(); // stream-start
+    await reader.read(); // text-start
+    await reader.read(); // text-delta
+    await expect(reader.read()).rejects.toBe(failure);
     expect(openAiChatModel.doStream).not.toHaveBeenCalled();
     expect(openAiProvider).not.toHaveBeenCalled();
   });
@@ -146,7 +155,7 @@ describe("AiRuntimeService Luma-first paths", () => {
     ).getAssistantLanguageModel();
 
     expect(model).toBe(openAiChatModel);
-    expect(createLumaProvider).not.toHaveBeenCalled();
+    expect(loadOpenAiSdk).not.toHaveBeenCalled();
   });
 
   it("reports the Luma profile model for search embeddings", async () => {
@@ -162,7 +171,7 @@ describe("AiRuntimeService Luma-first paths", () => {
       model: "Qwen/Qwen3-Embedding-4B",
     });
     expect(createEmbeddings).toHaveBeenCalledWith({ texts: ["policy"], dimensions: 1536 });
-    expect(createLumaProvider).not.toHaveBeenCalled();
+    expect(loadOpenAiSdk).not.toHaveBeenCalled();
     expect(embedMany).not.toHaveBeenCalled();
   });
 
@@ -239,6 +248,6 @@ describe("AiRuntimeService Luma-first paths", () => {
 
     await expect(service.createEmbeddings(["policy"])).resolves.toEqual([Array(1536).fill(0.2)]);
     expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiMentorRagEmbeddings);
-    expect(createLumaProvider).not.toHaveBeenCalled();
+    expect(loadOpenAiSdk).not.toHaveBeenCalled();
   });
 });

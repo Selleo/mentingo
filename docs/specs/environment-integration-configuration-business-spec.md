@@ -54,6 +54,7 @@ Tenant lifecycle automation is available only to integration keys owned by a man
 - Tenant lifecycle behavior reuses the super-admin tenant service in `apps/api/src/super-admin/tenants.service.ts`.
 - Key permissions are `PERMISSIONS.ENV_MANAGE`, `PERMISSIONS.INTEGRATION_KEY_MANAGE`, `PERMISSIONS.INTEGRATION_API_USE`, and `PERMISSIONS.TENANT_MANAGE` for integration tenant lifecycle calls.
 - Every AI feature, including the Core assistant and global search, calls Luma first when Luma runs the capability on a Custom profile and falls back to the OpenAI key otherwise, so organisations can move AI traffic onto self-hosted models without losing availability. See `docs/configuration.md`.
+- The assistant uses the existing native Luma Mentor SDK for tool-capable chat. Core retains permission-checked read tools and their results across model steps; the integration does not grant additional access or change the existing OpenAI fallback. Course-source vision remains independently configured in Luma.
 - Supported environment metadata includes OAuth providers, Microsoft Calendar client credentials, OpenAI, Bunny Stream, Stripe, Slack, Luma, and LiveKit values. Microsoft Calendar authentication reads its credentials exclusively from tenant-managed secrets.
 
 ## Test Evidence
@@ -62,3 +63,7 @@ Tenant lifecycle automation is available only to integration keys owned by a man
 - API unit coverage verifies that Microsoft Calendar configuration ignores deployment-level client credential fallbacks.
 - API E2E coverage verifies integration key generation, raw-key-once behavior, hash/prefix storage, rotation rate limiting, missing API key rejection, tenant header enforcement, old-key rejection after rotation, tenant scope restrictions, localized/paginated groups, tenant creation, tenant deactivation, rejection for non-managing tenant keys, and training-results filtering.
 - Activity-log E2E coverage verifies that environment updates are recorded.
+
+Native-runtime regression coverage verifies assistant tool history, schemas, complete arguments, usage, UTF-8 event streams, cancellation and the existing fallback policy. Installed-SDK loopback tests execute real AI SDK generation/streaming tool loops against controlled native HTTP responses. A combined local check also ran those loops against the actual Luma controller and runtime service, with synthetic authentication and provider outputs. These checks establish service/transport compatibility; live provider quality, database-backed workflow execution and browser behavior remain separate checks.
+
+Assistant model invocations and any delayed fallback resolve credentials inside the original authorized tenant context, without carrying a completed database transaction into model I/O. Tenant-context regressions cover deferred invocation, same-tenant fallback and rejection of another tenant’s active transaction.
