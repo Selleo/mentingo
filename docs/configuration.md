@@ -40,6 +40,55 @@ Each provider is enabled independently, and the corresponding flag must be set i
 
 Model choice and provider configuration are also exposed in the admin interface, so you do not need a redeploy to change them.
 
+### Luma first, OpenAI fallback
+
+Every AI feature calls Luma first when Luma runs that capability on a Custom profile, and falls back to `OPENAI_API_KEY` when Luma is not configured, reports the capability as Core or Disabled, or the call fails. This covers:
+
+- mentor chat, the judge, configuration generators and validators, translations, dictation and AI Mentor RAG embeddings
+- the Core assistant and global search embeddings
+
+Embeddings use the existing `luma.ai.createEmbeddings({ texts, dimensions })` SDK method and native `/api/public/v1/ai/embeddings` endpoint. Luma returns the model from the same resolved profile that produced the vectors. Core validates vector count, finite values, dimensions and model identity before using the result; an older Luma response without model metadata falls back safely. SDK 0.4 forwards the additive request/response fields unchanged, so this does not require an unpublished SDK dependency. The companion SDK update exposes those fields in its generated public types.
+
+The Core assistant uses the existing native Luma Mentor SDK methods: `mentor.generateChat()`
+and `mentor.streamChat()`. It opts into the native tool/event extension to preserve tool schemas,
+complete call arguments, tool-result history, finish reasons and usage. The configured AI Mentor
+Custom model must support tool calling. The ordinary Mentor text API keeps its existing response
+shape unless the caller requests the extension.
+
+Global search bounds its wait for the SDK response. SDK 0.4 cannot cancel an in-flight HTTP request, so a timed-out embedding request can finish remotely after Core has used its fallback. It cannot mutate application state; its late response is ignored.
+
+Global search records which model embedded each chunk and compares a query only with chunks from the same model. When a query falls back to OpenAI against a Luma-indexed corpus, search returns keyword results instead of mixing vector spaces.
+
+AI Mentor lesson documents do not record their embedding model. Re-upload them after the embedding model changes or after documents were embedded during a Luma outage.
+
+The native embeddings and assistant chat integration is independent of course-source image
+reading. Luma's source vision continues to use its dedicated `courseGenerationVision`
+configuration and bounded PNG reader; the native assistant chat integration does not select its vision model.
+
+Generation through published SDK 0.4 has no upstream cancellation option. Core rejects an
+aborted generation immediately, ignores its late response and does not fall back or execute its
+tools. The upstream request may continue. Native streaming passes the caller's signal through
+the existing SDK and closes the response on cancellation. The first real native stream event is validated before the model call returns: legacy plain-text
+HTTP200 responses and an initial error still use the ordinary Core fallback. After validated
+output starts, errors are surfaced rather than replaying potentially emitted work on OpenAI.
+
+### Local contract verification
+
+The runtime suite covers malformed embedding responses, model metadata, bounded waits,
+assistant tool-call fallback before a stream opens, and preservation of errors after a stream
+opens. A loopback HTTP test uses the installed published SDK to verify the native path,
+`X-API-Key`, raw Unicode text, dimensions and returned model without a paid provider. Native chat
+HTTP tests use the installed SDK and the actual AI SDK tool loop to prove that a completed read
+returns its structured tool history to the next model step. Streaming tests cover Unicode text,
+complete tool calls and finish metadata.
+
+A combined local check also ran Core's runtime service and the published SDK against the
+actual Luma FastAPI embeddings controller and runtime service after alignment with the
+current PDF vision implementation. It verified two raw texts, 1536-dimensional finite vectors,
+the model reported by that same invocation and absence of Core fallback. Authentication and
+provider output were controlled fixtures; this is transport/service-contract evidence, not a
+live model-quality, database integration, browser or deployment check.
+
 ## Storage and media
 
 | Variable                                                                                                                                      | Purpose                                                         |
@@ -79,3 +128,50 @@ Model choice and provider configuration are also exposed in the admin interface,
 - [ ] Object storage bucket is private; files are served through pre-signed URLs.
 - [ ] Backups configured and a restore tested.
 - [ ] AI provider and its data-processing terms reviewed before enabling AI features.
+
+## Local-model alignment validation (2026-11-06)
+
+Core PR #2111 was merged with current `main` (`a0df13891`) before checking the
+Luma PR #63 contract against the newer PDF vision implementation. The initial focused
+runtime, search, assistant and telemetry suite passed 89 tests across eight files before
+switching the assistant from the compatibility relay to the native Mentor SDK. The final native
+adapter checks below cover the updated integration.
+`pnpm lint-tsc-api` passed, including the full API TypeScript, workflow TypeScript
+and ESLint checks. Workspace packages were built locally first; the previous
+email-template export compilation blocker is resolved in the current main branch.
+No additional generated API changes, database migrations, provider calls or
+production mutations were required for this alignment.
+
+### Native assistant contract update
+
+The assistant now uses only native Mentor SDK generation and streaming. A local adapter maps
+AI SDK tool schemas and system/user/assistant/tool messages into native requests, validates
+complete tool calls and finish metadata, and preserves Core's existing tool execution loop.
+It buffers streamed tool calls until the native response finishes successfully, so an interrupted
+or failed response cannot execute a partial tool request. Unsupported prompt parts/settings
+fail before transport and follow the existing fallback policy rather than being discarded.
+The companion Luma contract must deploy before Core; legacy message-only extended calls fail
+validation and use the same existing fallback. No unpublished SDK dependency is needed.
+
+The combined Core/SDK/Luma check exercised both native generation and streaming with real AI
+SDK multi-step tool execution and structured tool-result history. It also verified default
+text-only Mentor compatibility and Core fallback after native authentication rejection. Model
+responses and authentication were controlled local fixtures; no real model or production
+request was used.
+
+Returned assistant models re-enter the trusted tenant context when generation or streaming
+actually starts, including delayed fallback credential lookup. The model captures only its
+authorized tenant ID and runner, not an AsyncLocalStorage snapshot or transaction handle.
+The existing runner rejects a switch from another tenant's active transaction and opens no
+transaction across provider I/O.
+
+Final native alignment validation merged the PR's actual `staging` target at `de2371f92`,
+preserving its managed tutorial prompts and current source-size limits. All 122 focused
+runtime, native SDK transport, tenant, assistant, search and telemetry regressions passed
+across 12 suites. The combined actual Core/SDK/Luma tool-loop checks remain provider-free;
+their authentication and model outputs are controlled local fixtures.
+
+The final merged-state `pnpm lint-tsc-api` gate also passed (API TypeScript,
+workflow TypeScript and full API ESLint). Focused Prettier and PR-diff whitespace
+checks passed. No live provider, PostgreSQL workflow, authenticated browser or
+production deployment validation is claimed.
