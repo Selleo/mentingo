@@ -1091,6 +1091,7 @@
     "tenants": "Organisations",
     "activityLogs": "Journaux d'activité",
     "reports": "Rapports",
+    "leaderboards": "Classements",
     "gamification": "Gamification"
   },
   "microsoftCalendar": {
@@ -2416,6 +2417,8 @@
         "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
         "gamification_read": "Afficher les niveaux, XP et succès.",
         "gamification_earn_hidden": "Obtenir des succès cachés.",
+        "gamification_leaderboard_read": "Voir les classements de ses groupes, et celui de l'organisation lorsqu'il est public.",
+        "gamification_leaderboard_read_all": "Voir le classement de l'organisation et ceux de tous les groupes.",
         "gamification_manage": "Configurer les succès et les paramètres de gamification.",
         "quiz_grading_read": "Afficher la file des réponses ouvertes en attente de correction.",
         "quiz_grading_grade": "Corriger les réponses ouvertes et rédiger des commentaires pour les apprenants."
@@ -8773,6 +8776,56 @@
     },
     "loadError": "Impossible de charger les succès.",
     "retry": "Réessayer",
+    "leaderboard": {
+      "title": "Classements",
+      "description": "Comparez XP et succès avec les autres apprenants.",
+      "scope": "Classement",
+      "organization": "Toute l'organisation",
+      "metricLabel": "Trier par",
+      "periodLabel": "Période",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Succès"
+      },
+      "period": {
+        "week": "Cette semaine",
+        "month": "Ce mois-ci",
+        "allTime": "Depuis le début",
+        "custom": "Période personnalisée"
+      },
+      "from": "Du",
+      "to": "Au",
+      "rank": "Rang",
+      "user": "Apprenant",
+      "yourPosition": "Votre position",
+      "empty": "Aucun apprenant à classer pour le moment.",
+      "noGroups": "Vous n'appartenez encore à aucun groupe, il n'y a donc aucun classement à afficher.",
+      "unavailable": "Les classements ne sont pas activés dans votre organisation.",
+      "loadError": "Le classement n'a pas pu être chargé.",
+      "invalidRange": "Choisissez une date de début qui n'est pas après la date de fin.",
+      "chooseRange": "Choisissez une date de début et une date de fin.",
+      "settings": {
+        "header": "Classements",
+        "subHeader": "Permettez aux apprenants de comparer XP et succès.",
+        "updated": "Paramètres des classements mis à jour.",
+        "enabled": {
+          "label": "Activer les classements",
+          "description": "Affiche la page des classements. Désactivé, personne ne peut ouvrir les classements."
+        },
+        "visibility": {
+          "label": "Visibilité pour les apprenants",
+          "description": "Les administrateurs voient toujours tous les classements.",
+          "closed": {
+            "label": "Fermé",
+            "description": "Les apprenants ne voient que les classements de leurs groupes."
+          },
+          "public": {
+            "label": "Public",
+            "description": "Les apprenants voient aussi le classement de toute l'organisation."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Gamification",
       "description": "Activez la gamification pour votre organisation et configurez les succès que les apprenants peuvent obtenir.",

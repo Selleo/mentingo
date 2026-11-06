@@ -1091,6 +1091,7 @@
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
     "reports": "Ataskaitos",
+    "leaderboards": "Lyderių lentelės",
     "gamification": "Žaidybinimas"
   },
   "microsoftCalendar": {
@@ -2421,6 +2422,8 @@
         "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
         "gamification_read": "Peržiūrėti lygius, XP ir pasiekimus.",
         "gamification_earn_hidden": "Gauti paslėptus pasiekimus.",
+        "gamification_leaderboard_read": "Peržiūrėti savo grupių lyderių lenteles ir organizacijos lentelę, kai ji vieša.",
+        "gamification_leaderboard_read_all": "Peržiūrėti organizacijos ir visų grupių lyderių lenteles.",
         "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus.",
         "quiz_grading_read": "Peržiūrėti atvirų atsakymų, laukiančių įvertinimo, eilę.",
         "quiz_grading_grade": "Vertinti atvirus atsakymus ir rašyti komentarus besimokantiesiems."
@@ -9306,6 +9309,56 @@
     },
     "loadError": "Nepavyko įkelti pasiekimų.",
     "retry": "Bandyti dar kartą",
+    "leaderboard": {
+      "title": "Lyderių lentelės",
+      "description": "Palyginkite XP ir pasiekimus su kitais besimokančiaisiais.",
+      "scope": "Lyderių lentelė",
+      "organization": "Visa organizacija",
+      "metricLabel": "Reitingavimas",
+      "periodLabel": "Laikotarpis",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Pasiekimai"
+      },
+      "period": {
+        "week": "Ši savaitė",
+        "month": "Šis mėnuo",
+        "allTime": "Visas laikas",
+        "custom": "Pasirinktas laikotarpis"
+      },
+      "from": "Nuo",
+      "to": "Iki",
+      "rank": "Vieta",
+      "user": "Besimokantysis",
+      "yourPosition": "Jūsų vieta",
+      "empty": "Kol kas nėra ką reitinguoti.",
+      "noGroups": "Dar nepriklausote jokiai grupei, todėl lyderių lentelės nėra.",
+      "unavailable": "Lyderių lentelės jūsų organizacijoje neįjungtos.",
+      "loadError": "Nepavyko įkelti lyderių lentelės.",
+      "invalidRange": "Pasirinkite pradžios datą, kuri nėra vėlesnė už pabaigos datą.",
+      "chooseRange": "Pasirinkite pradžios ir pabaigos datas.",
+      "settings": {
+        "header": "Lyderių lentelės",
+        "subHeader": "Leiskite besimokantiesiems palyginti XP ir pasiekimus.",
+        "updated": "Lyderių lentelių nustatymai atnaujinti.",
+        "enabled": {
+          "label": "Įjungti lyderių lenteles",
+          "description": "Rodo lyderių lentelių puslapį. Išjungus niekas negali jų atidaryti."
+        },
+        "visibility": {
+          "label": "Matomumas besimokantiesiems",
+          "description": "Administratoriai visada mato visas lyderių lenteles.",
+          "closed": {
+            "label": "Uždaros",
+            "description": "Besimokantieji mato tik savo grupių lyderių lenteles."
+          },
+          "public": {
+            "label": "Viešos",
+            "description": "Besimokantieji mato ir visos organizacijos lyderių lentelę."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Žaidybinimas",
       "description": "Įjunkite žaidybinimą savo organizacijoje ir sukonfigūruokite pasiekimus, kuriuos gali gauti besimokantieji.",

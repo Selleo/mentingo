@@ -1095,6 +1095,7 @@
     "tenants": "Organizaciones",
     "activityLogs": "Registros de actividad",
     "reports": "Informes",
+    "leaderboards": "Clasificaciones",
     "gamification": "Gamificación"
   },
   "microsoftCalendar": {
@@ -2414,6 +2415,8 @@
         "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial.",
         "gamification_read": "Ver niveles, XP y logros.",
         "gamification_earn_hidden": "Obtener logros ocultos.",
+        "gamification_leaderboard_read": "Ver las clasificaciones de sus grupos y la de la organización cuando es pública.",
+        "gamification_leaderboard_read_all": "Ver la clasificación de la organización y las de todos los grupos.",
         "gamification_manage": "Configurar logros y ajustes de gamificación.",
         "quiz_grading_read": "Ver la cola de respuestas abiertas pendientes de calificación.",
         "quiz_grading_grade": "Calificar respuestas abiertas y escribir comentarios para los estudiantes."
@@ -9193,6 +9196,56 @@
     },
     "loadError": "No se pudieron cargar los logros.",
     "retry": "Reintentar",
+    "leaderboard": {
+      "title": "Clasificaciones",
+      "description": "Compara XP y logros con otros estudiantes.",
+      "scope": "Clasificación",
+      "organization": "Toda la organización",
+      "metricLabel": "Ordenar por",
+      "periodLabel": "Periodo",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Logros"
+      },
+      "period": {
+        "week": "Esta semana",
+        "month": "Este mes",
+        "allTime": "Todo el tiempo",
+        "custom": "Rango personalizado"
+      },
+      "from": "Desde",
+      "to": "Hasta",
+      "rank": "Puesto",
+      "user": "Estudiante",
+      "yourPosition": "Tu posición",
+      "empty": "Todavía no hay estudiantes en la clasificación.",
+      "noGroups": "Todavía no perteneces a ningún grupo, así que no hay clasificación que mostrar.",
+      "unavailable": "Las clasificaciones no están activadas en tu organización.",
+      "loadError": "No se pudo cargar la clasificación.",
+      "invalidRange": "Elige una fecha de inicio que no sea posterior a la de fin.",
+      "chooseRange": "Elige una fecha de inicio y una de fin.",
+      "settings": {
+        "header": "Clasificaciones",
+        "subHeader": "Permite que los estudiantes comparen XP y logros.",
+        "updated": "Configuración de clasificaciones actualizada.",
+        "enabled": {
+          "label": "Activar clasificaciones",
+          "description": "Muestra la página de clasificaciones. Si está desactivado, nadie puede abrirlas."
+        },
+        "visibility": {
+          "label": "Visibilidad para estudiantes",
+          "description": "Los administradores siempre ven todas las clasificaciones.",
+          "closed": {
+            "label": "Cerrada",
+            "description": "Los estudiantes solo ven las clasificaciones de sus grupos."
+          },
+          "public": {
+            "label": "Pública",
+            "description": "Los estudiantes también ven la clasificación de toda la organización."
+          }
+        }
+      }
+    },
     "admin": {
       "title": "Gamificación",
       "description": "Activa la gamificación en tu organización y configura los logros que pueden obtener los alumnos.",

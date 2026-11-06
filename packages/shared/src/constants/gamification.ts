@@ -1,3 +1,5 @@
+import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "./permissions";
+
 export const GAMIFICATION_EVENT_TYPES = {
   LOGIN: "login",
   LESSON_COMPLETED: "lesson_completed",
@@ -154,3 +156,35 @@ export const getLevelFromXp = (lifetimeXp: number) =>
 
 /** Upload resource for custom achievement badge images; the API only accepts keys under it. */
 export const ACHIEVEMENT_BADGE_FILE_RESOURCE = "achievement-badges";
+
+export const LEADERBOARD_METRICS = {
+  XP: "xp",
+  ACHIEVEMENTS: "achievements",
+} as const;
+
+export type LeaderboardMetric = (typeof LEADERBOARD_METRICS)[keyof typeof LEADERBOARD_METRICS];
+
+export const LEADERBOARD_PERIODS = {
+  WEEK: "week",
+  MONTH: "month",
+  ALL_TIME: "all_time",
+  CUSTOM: "custom",
+} as const;
+
+export type LeaderboardPeriod = (typeof LEADERBOARD_PERIODS)[keyof typeof LEADERBOARD_PERIODS];
+
+/** Closed: learners see only their groups' leaderboards. Public: also the organization-wide one. */
+export const LEADERBOARD_VISIBILITY = {
+  CLOSED: "closed",
+  PUBLIC: "public",
+} as const;
+
+export type LeaderboardVisibility =
+  (typeof LEADERBOARD_VISIBILITY)[keyof typeof LEADERBOARD_VISIBILITY];
+
+/** Users with any of these roles are never ranked. Add the reviewer role here once it exists. */
+export const LEADERBOARD_EXCLUDED_ROLE_SLUGS = [
+  SYSTEM_ROLE_SLUGS.ADMIN,
+  SYSTEM_ROLE_SLUGS.TRAINER,
+  SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+] as const satisfies readonly SystemRoleSlug[];

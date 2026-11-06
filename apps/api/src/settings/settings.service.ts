@@ -101,6 +101,7 @@ import type {
   UpdateDashboardSettingsBody,
   ResetDashboardSettingsBody,
   UpdateGlobalColorSchemaBody,
+  UpdateLeaderboardSettingsBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
@@ -1339,6 +1340,31 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalLeaderboardSettings(
+    body: UpdateLeaderboardSettingsBody,
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({ settings: sql`${settings.settings} || ${JSON.stringify(body)}::text::jsonb` })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalCalendarEnabled(
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
@@ -2476,6 +2502,10 @@ export class SettingsService {
         settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
       gamificationEnabled:
         settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled,
+      leaderboardsEnabled:
+        settings.leaderboardsEnabled ?? DEFAULT_GLOBAL_SETTINGS.leaderboardsEnabled,
+      leaderboardVisibility:
+        settings.leaderboardVisibility ?? DEFAULT_GLOBAL_SETTINGS.leaderboardVisibility,
       learningPathsEnabled:
         settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       calendarEnabled: true,
