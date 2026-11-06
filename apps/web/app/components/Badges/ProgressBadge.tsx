@@ -5,12 +5,12 @@ import { Badge } from "~/components/ui/badge";
 import type { IconName } from "~/types/shared";
 
 type ProgressBadgeProps = {
-  progress: "completed" | "inProgress" | "notStarted" | "blocked";
+  progress: "completed" | "inProgress" | "notStarted" | "blocked" | "awaitingReview";
   className?: string;
 };
 
 type ProgressConfig = {
-  [key in "completed" | "inProgress" | "notStarted" | "blocked"]: {
+  [key in ProgressBadgeProps["progress"]]: {
     variant: "successFilled" | "inProgressFilled" | "notStartedFilled" | "blockedFilled";
     icon: IconName;
     label: string;
@@ -40,6 +40,11 @@ export const ProgressBadge = ({ progress, className }: ProgressBadgeProps) => {
       variant: "blockedFilled",
       icon: "Blocked",
       label: t("progressBadge.blocked"),
+    },
+    awaitingReview: {
+      variant: "inProgressFilled",
+      icon: "InProgress",
+      label: t("progressBadge.awaitingReview"),
     },
   };
 

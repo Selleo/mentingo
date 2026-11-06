@@ -1,4 +1,9 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_VOICE_MODE,
+  LEARNER_PROGRESS_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
@@ -239,6 +244,7 @@ export const lessonShowSchema = Type.Object({
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
+  isQuizAwaitingReview: Type.Optional(Type.Boolean()),
   attempts: Type.Union([Type.Number(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
@@ -317,7 +323,10 @@ export const lessonForChapterSchema = Type.Array(
     title: Type.String(),
     type: Type.Enum(LESSON_TYPES),
     displayOrder: Type.Number(),
-    status: Type.Enum(PROGRESS_STATUSES),
+    status: Type.Union([
+      Type.Enum(PROGRESS_STATUSES),
+      Type.Literal(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW),
+    ]),
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),
     lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),

@@ -1,4 +1,8 @@
-import { ASSESSMENT_ATTEMPT_RESULTS, ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
+import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_QUESTION_TYPES,
+} from "@repo/shared";
 import { match } from "ts-pattern";
 
 import type { QuizAuthoringLocalizedQuestion } from "../types/quiz-authoring.types";
@@ -34,6 +38,7 @@ export const mapQuizAttemptToRuntimeSubmissionResult = (
     questionCount,
     score: Math.floor(Number(attemptData.scorePercentage)),
     passed: attemptData.result === ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+    awaitingReview: attemptData.gradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
     ...persistedAttempt,
   };
 };

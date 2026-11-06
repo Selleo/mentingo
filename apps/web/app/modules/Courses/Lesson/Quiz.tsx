@@ -59,7 +59,9 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     [lesson.quizDetails?.questions],
   );
   const [isRetakingQuiz, setIsRetakingQuiz] = useState(false);
-  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted) && !isRetakingQuiz;
+  const isAwaitingReview = Boolean(lesson.isQuizAwaitingReview);
+  const isUserSubmittedAnswer =
+    (Boolean(lesson.lessonCompleted) || isAwaitingReview) && !isRetakingQuiz;
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
@@ -144,13 +146,19 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
           {!isPreviewMode && (
             <div className="flex w-full justify-between">
               <span className="group relative">
-                <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>
-                  {t("studentLessonView.other.score", {
-                    score: lesson.quizDetails?.score ?? 0,
-                    correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                    questionsNumber: questions.length,
-                  })}
-                </span>
+                {isAwaitingReview ? (
+                  <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
+                    {t("studentLessonView.other.awaitingReview")}
+                  </span>
+                ) : (
+                  <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>
+                    {t("studentLessonView.other.score", {
+                      score: lesson.quizDetails?.score ?? 0,
+                      correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                      questionsNumber: questions.length,
+                    })}
+                  </span>
+                )}
               </span>
               <span data-testid={LEARNING_HANDLES.QUIZ_PASSING_THRESHOLD}>
                 {t("studentLessonView.other.passingThreshold", {
@@ -182,7 +190,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                           type="button"
                           onClick={handleRetake}
                           className="gap-x-1"
-                          disabled={!isUserSubmittedAnswer || !canRetake}
+                          disabled={!isUserSubmittedAnswer || !canRetake || isAwaitingReview}
                         >
                           <span>
                             {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
@@ -200,12 +208,14 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                       align="center"
                       className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {getQuizTooltipText(
-                        isUserSubmittedAnswer,
-                        canRetake,
-                        hoursLeft,
-                        lesson.quizCooldownInHours,
-                      )}
+                      {isAwaitingReview
+                        ? t("studentLessonView.tooltip.awaitingReview")
+                        : getQuizTooltipText(
+                            isUserSubmittedAnswer,
+                            canRetake,
+                            hoursLeft,
+                            lesson.quizCooldownInHours,
+                          )}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   </Tooltip>

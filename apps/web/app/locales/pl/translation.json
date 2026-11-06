@@ -4611,7 +4611,8 @@
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",
-      "scale_1_5": "Pytanie typu skala (1-5)"
+      "scale_1_5": "Pytanie typu skala (1-5)",
+      "awaitingReview": "Twoje odpowiedzi otwarte czekają na ocenę. Wynik pojawi się po ocenie przez recenzenta."
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -4685,7 +4686,8 @@
       "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
       "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
       "noCooldown": "Brak okresu oczekiwania.",
-      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
+      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
+      "awaitingReview": "Quiz można powtórzyć po jego ocenie."
     },
     "breadcrumbs": {
       "availableCourses": "Dostępne kursy",
@@ -4723,7 +4725,8 @@
       "quizNotAnsweredYet": "Ten quiz nie został jeszcze rozwiązany.",
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
-      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
+      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie.",
+      "quizAwaitingReview": "Ten quiz oczekuje na ocenę."
     },
     "preview": {
       "title": "Przeglądasz podgląd kursu",
@@ -5174,7 +5177,8 @@
     "completed": "Ukończone",
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
-    "blocked": "Zablokowane"
+    "blocked": "Zablokowane",
+    "awaitingReview": "Oczekuje na ocenę"
   },
   "studentCertificateView": {
     "header": "Certyfikaty",
@@ -6572,7 +6576,8 @@
         "started": "Rozpoczęto",
         "completed": "Ukończono",
         "inProgress": "W toku",
-        "notStarted": "Nie rozpoczęto"
+        "notStarted": "Nie rozpoczęto",
+        "awaitingReview": "Oczekuje na ocenę"
       },
       "lessonTypes": {
         "content": "Treść",

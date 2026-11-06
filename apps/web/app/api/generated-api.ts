@@ -2522,7 +2522,7 @@ export interface GetCourseResponse {
         title: string;
         type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
-        status: "not_started" | "in_progress" | "completed" | "blocked";
+        status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
         quizQuestionCount: number | null;
         isExternal?: boolean;
         lessonResources?: {
@@ -3232,7 +3232,7 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
-      status: "not_started" | "in_progress" | "completed" | "blocked";
+      status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
       quizQuestionCount: number | null;
       isExternal?: boolean;
       lessonResources?: {
@@ -3536,6 +3536,7 @@ export interface GetLessonByIdResponse {
     attemptsLimit: number | null;
     quizCooldownInHours: number | null;
     isQuizPassed: boolean | null;
+    isQuizAwaitingReview?: boolean;
     attempts: number | null;
     updatedAt: string | null;
     displayOrder: number;
@@ -4305,6 +4306,7 @@ export interface EvaluationQuizResponse {
       wrongAnswerCount: number;
       questionCount: number;
       score: number;
+      awaitingReview: boolean;
     };
   };
 }

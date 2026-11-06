@@ -350,12 +350,13 @@ export class LessonService {
               lesson.id,
               questionLanguage,
               isPublicCoursePreview ? undefined : effectiveUserId,
-              !isPublicCoursePreview && lesson.lessonCompleted,
+              !isPublicCoursePreview && (lesson.lessonCompleted || lesson.isQuizAwaitingReview),
             )
           ).questions
         : [];
 
-    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted =
+      isPublicCoursePreview || !lesson.quizFeedbackEnabled || Boolean(lesson.isQuizAwaitingReview);
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -439,6 +440,7 @@ export class LessonService {
     wrongAnswerCount: number;
     questionCount: number;
     score: number;
+    awaitingReview: boolean;
   }> {
     const { userId } = currentUser;
 
@@ -457,6 +459,10 @@ export class LessonService {
       throw new ConflictException("studentLessonView.validation.quizAlreadyAnswered");
     }
 
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
+    }
+
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
 
@@ -469,7 +475,9 @@ export class LessonService {
         );
 
         const isQuizPassed = evaluationResult.passed;
+        const { awaitingReview } = evaluationResult;
 
+        // A pending attempt keeps the lesson incomplete; grading completes it and emits the events.
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
@@ -478,10 +486,20 @@ export class LessonService {
           evaluationResult.score,
           evaluationResult.attemptNumber,
           isQuizPassed,
-          true,
+          !awaitingReview,
           trx,
           studentQuizAnswers.language,
         );
+
+        if (awaitingReview) {
+          return {
+            correctAnswerCount: 0,
+            wrongAnswerCount: 0,
+            questionCount: evaluationResult.questionCount,
+            score: 0,
+            awaitingReview,
+          };
+        }
 
         if (isQuizPassed) {
           await this.studentLessonProgressService.markLessonAsCompleted({
@@ -515,6 +533,7 @@ export class LessonService {
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
           questionCount: evaluationResult.questionCount,
           score: evaluationResult.score,
+          awaitingReview,
         };
       } catch (error) {
         throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
@@ -534,6 +553,10 @@ export class LessonService {
 
     if (!accessCourseLessonWithDetails) {
       throw new NotFoundException("common.toast.notFound");
+    }
+
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
     }
 
     if (!accessCourseLessonWithDetails.lessonIsCompleted) {

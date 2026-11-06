@@ -38188,19 +38188,27 @@
                           "status": {
                             "anyOf": [
                               {
-                                "const": "not_started",
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "const": "not_started",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "in_progress",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "completed",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "blocked",
+                                    "type": "string"
+                                  }
+                                ]
                               },
                               {
-                                "const": "in_progress",
-                                "type": "string"
-                              },
-                              {
-                                "const": "completed",
-                                "type": "string"
-                              },
-                              {
-                                "const": "blocked",
+                                "const": "awaiting_review",
                                 "type": "string"
                               }
                             ]
@@ -41424,19 +41432,27 @@
                     "status": {
                       "anyOf": [
                         {
-                          "const": "not_started",
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "const": "not_started",
+                              "type": "string"
+                            },
+                            {
+                              "const": "in_progress",
+                              "type": "string"
+                            },
+                            {
+                              "const": "completed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "blocked",
+                              "type": "string"
+                            }
+                          ]
                         },
                         {
-                          "const": "in_progress",
-                          "type": "string"
-                        },
-                        {
-                          "const": "completed",
-                          "type": "string"
-                        },
-                        {
-                          "const": "blocked",
+                          "const": "awaiting_review",
                           "type": "string"
                         }
                       ]
@@ -43166,6 +43182,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "isQuizAwaitingReview": {
+                "type": "boolean"
               },
               "attempts": {
                 "anyOf": [
@@ -47319,13 +47338,17 @@
                   },
                   "score": {
                     "type": "number"
+                  },
+                  "awaitingReview": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "correctAnswerCount",
                   "wrongAnswerCount",
                   "questionCount",
-                  "score"
+                  "score",
+                  "awaitingReview"
                 ]
               }
             },
