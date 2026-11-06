@@ -71,9 +71,12 @@ test("admin can switch between embed lessons and save only the selected lesson",
     await title.fill("Second embed updated");
     await page.getByTestId(EMBED_LESSON_FORM_HANDLES.SAVE_BUTTON).click();
     await expect(page.getByTestId(EMBED_LESSON_FORM_HANDLES.ROOT)).toBeHidden();
-    const saved = await curriculum.getChapter(chapter.id);
-    expect(saved.lessons.find((lesson) => lesson.id === first.id)?.title).toBe(first.title);
-    expect(saved.lessons.find((lesson) => lesson.id === second.id)?.title).toBe(
+    // Read back through the authoring endpoint used by this editor.
+    const savedCourse = await curriculum.getCourse(course.id);
+    const saved = savedCourse.chapters.find((item) => item.id === chapter.id);
+    expect(saved).toBeDefined();
+    expect(saved?.lessons?.find((lesson) => lesson.id === first.id)?.title).toBe(first.title);
+    expect(saved?.lessons?.find((lesson) => lesson.id === second.id)?.title).toBe(
       "Second embed updated",
     );
     await page.reload();
