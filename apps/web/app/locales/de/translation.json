@@ -4479,6 +4479,7 @@
         "stopVoiceRecording": "Stoppen Sie die Sprachaufzeichnung",
         "taskDescription": "Aufgabenbeschreibung",
         "taskButton": "Aufgabenbeschreibung",
+        "taskDescriptionEmpty": "Für diese Lektion wurde keine Aufgabenbeschreibung hinzugefügt.",
         "resultButton": "Ergebnis",
         "resultButtonDisabledTooltip": "Prüfen Sie zuerst die Lektion, um Ihr Ergebnis zu sehen.",
         "taskDescriptionExpand": "Klicken Sie zum Erweitern",

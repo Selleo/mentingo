@@ -4480,6 +4480,7 @@
         "stopVoiceRecording": "Stop voice recording",
         "taskDescription": "Task description",
         "taskButton": "Task description",
+        "taskDescriptionEmpty": "No task description has been added to this lesson.",
         "resultButton": "Result",
         "resultButtonDisabledTooltip": "Check the lesson first to see your result.",
         "taskDescriptionExpand": "Click to expand",

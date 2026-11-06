@@ -4424,6 +4424,7 @@
         "stopVoiceRecording": "Detener grabación de voz",
         "taskDescription": "Descripción de la tarea",
         "taskButton": "Descripción de la tarea",
+        "taskDescriptionEmpty": "No se ha añadido una descripción de la tarea a esta lección.",
         "resultButton": "Resultado",
         "resultButtonDisabledTooltip": "Consulte la lección primero para ver el resultado.",
         "taskDescriptionExpand": "Haga clic para expandir",

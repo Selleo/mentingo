@@ -83,6 +83,7 @@ const AiMentorLesson = ({
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
   const isReadOnly = isPreviewMode || hideControls;
+  const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(lesson.id);
   const { mutateAsync: retakeLesson, isPending: isRetakePending } = useRetakeLesson(
@@ -177,11 +178,11 @@ const AiMentorLesson = ({
 
   const handleSubmit = useCallback(() => {
     const message = input.trim();
-    if (!message || !lesson.threadId || isReadOnly) return;
+    if (!message || !lesson.threadId || isChatReadOnly) return;
 
     setInput("");
     void sendMessage({ text: message });
-  }, [input, isReadOnly, lesson.threadId, sendMessage]);
+  }, [input, isChatReadOnly, lesson.threadId, sendMessage]);
 
   const handleVoiceLearnerTranscription = useCallback(
     (text: string, turnId?: string) => {
@@ -354,7 +355,7 @@ const AiMentorLesson = ({
           />
         ) : (
           <>
-            {hasTaskDescription && !lessonLoading && (
+            {!lessonLoading && (
               <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
                 <DialogContent
                   variant="mobileDrawer"
@@ -371,7 +372,11 @@ const AiMentorLesson = ({
                   </DialogHeader>
                   <div className="min-h-0 px-6 py-5">
                     <div className={taskDescriptionViewerClassName}>
-                      <Viewer content={lesson.description ?? ""} style="prose" />
+                      {hasTaskDescription ? (
+                        <Viewer content={lesson.description ?? ""} style="prose" />
+                      ) : (
+                        <p>{t("studentCourseView.lesson.aiMentorLesson.taskDescriptionEmpty")}</p>
+                      )}
                     </div>
                   </div>
                 </DialogContent>
@@ -389,7 +394,6 @@ const AiMentorLesson = ({
                   type="button"
                   variant="outline"
                   className="h-9 min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 sm:text-sm"
-                  disabled={!hasTaskDescription}
                   onClick={() => setShowTaskDialog(true)}
                 >
                   <BookOpen className="size-4 shrink-0" />
@@ -474,7 +478,7 @@ const AiMentorLesson = ({
             {isJudgePending && <AiMentorEvaluationLoader />}
 
             {(isThreadActive || isPreviewMode) && !isJudgePending && !hideControls && (
-              <fieldset disabled={isReadOnly} className="w-full min-w-0">
+              <fieldset disabled={isChatReadOnly} className="w-full min-w-0">
                 <LessonForm
                   voiceTarget={{ lessonId: lesson.id }}
                   allowVoiceMentor={!isReadOnly}

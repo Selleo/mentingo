@@ -4749,6 +4749,7 @@
         "stopVoiceRecording": "Zatrzymaj nagrywanie głosu",
         "taskDescription": "Opis zadania",
         "taskButton": "Opis zadania",
+        "taskDescriptionEmpty": "Do tej lekcji nie dodano opisu zadania.",
         "resultButton": "Wynik",
         "resultButtonDisabledTooltip": "Najpierw sprawdź lekcję, aby zobaczyć wynik.",
         "taskDescriptionExpand": "Kliknij, aby rozwinąć",

@@ -4222,6 +4222,7 @@
         "stopVoiceRecording": "Arrêter l'enregistrement vocal",
         "taskDescription": "Description de la tâche",
         "taskButton": "Description de la tâche",
+        "taskDescriptionEmpty": "Aucune description de la tâche n’a été ajoutée à cette leçon.",
         "resultButton": "Résultat",
         "resultButtonDisabledTooltip": "Vérifiez d'abord la leçon pour voir votre résultat.",
         "taskDescriptionExpand": "Cliquez pour agrandir",

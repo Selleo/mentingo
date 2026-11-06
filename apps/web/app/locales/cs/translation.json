@@ -4486,6 +4486,7 @@
         "stopVoiceRecording": "Zastavit nahrávání hlasu",
         "taskDescription": "Popis úkolu",
         "taskButton": "Popis úkolu",
+        "taskDescriptionEmpty": "K této lekci nebyl přidán popis úkolu.",
         "resultButton": "Výsledek",
         "resultButtonDisabledTooltip": "Nejprve zkontrolujte lekci, abyste viděli výsledek.",
         "taskDescriptionExpand": "Kliknutím rozbalíte",

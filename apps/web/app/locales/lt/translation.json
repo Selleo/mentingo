@@ -4481,6 +4481,7 @@
         "stopVoiceRecording": "Sustabdyti balso įrašymą",
         "taskDescription": "Užduoties aprašymas",
         "taskButton": "Užduoties aprašymas",
+        "taskDescriptionEmpty": "Šiai pamokai nepridėtas užduoties aprašymas.",
         "resultButton": "Rezultatas",
         "resultButtonDisabledTooltip": "Pirmiausia patikrinkite pamoką, kad pamatytumėte rezultatą.",
         "taskDescriptionExpand": "Spustelėkite norėdami išplėsti",

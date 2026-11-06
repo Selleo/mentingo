@@ -39,9 +39,17 @@ vi.mock("./components/ChatMessage", () => ({
   default: ({ parts }: { parts: { text: string }[] }) => <p>{parts[0]?.text}</p>,
 }));
 vi.mock("./components/LessonForm", () => ({
-  LessonForm: ({ handleSubmit }: { handleSubmit: () => void }) => (
+  LessonForm: ({
+    handleSubmit,
+    input,
+    handleInputChange,
+  }: {
+    handleSubmit: () => void;
+    input: string;
+    handleInputChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+  }) => (
     <div>
-      <textarea aria-label="Message" />
+      <textarea aria-label="Message" value={input} onChange={handleInputChange} />
       <button onClick={handleSubmit}>Send</button>
       <button>Microphone</button>
     </div>
@@ -92,6 +100,26 @@ describe("AI Mentor preview", () => {
     expect(state.sendMessage).not.toHaveBeenCalled();
     expect(state.judge).not.toHaveBeenCalled();
     expect(state.retake).not.toHaveBeenCalled();
+  });
+
+  it("allows typing and sending on an active preview thread while grading stays disabled", async () => {
+    renderLesson({ status: "active", threadId: "thread-1" });
+    const input = screen.getByRole("textbox", { name: "Message" });
+    expect(input).toBeEnabled();
+    await userEvent.type(input, "Explain opening tags");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    expect(state.sendMessage).toHaveBeenCalledWith({ text: "Explain opening tags" });
+    expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
+    expect(state.judge).not.toHaveBeenCalled();
+  });
+
+  it("opens the task dialog with an explanation when no description was saved", async () => {
+    renderLesson({ description: null });
+    await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByText("No task description has been added to this lesson."),
+    ).toBeInTheDocument();
   });
 
   it("enables the composer for an active learning thread", () => {
