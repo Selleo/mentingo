@@ -60,6 +60,7 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiPracticeWorker,
   ],
   exports: [
+    PromptService,
     AiRuntimeModule,
     AiJudgeConfigurationGenerationWorkflowService,
     AiJudgeConfigurationValidatorService,

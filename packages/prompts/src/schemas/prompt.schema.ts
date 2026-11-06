@@ -127,6 +127,12 @@ export const aiMentorConfigurationValidatorSchema = Type.Object(
 );
 
 export const PROMPT_MAP = {
+  coreAssistantPrompt: Type.Object(
+    { interfaceLanguage: Type.String(), moduleCapabilities: Type.String() },
+    { additionalProperties: false },
+  ),
+  coreAssistantTutorialSearchTool: Type.Object({}, { additionalProperties: false }),
+  coreAssistantTutorialReadTool: Type.Object({}, { additionalProperties: false }),
   judgePrompt: judgePromptSchema,
   judgeBlockingErrorVerificationPrompt: judgeBlockingErrorVerificationPromptSchema,
   roleplayPrompt: roleplayPromptSchema,

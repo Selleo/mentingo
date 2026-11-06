@@ -7,11 +7,14 @@ import {
   ASSISTANT_OUTCOME_VALIDATION_CODES,
   TENANT_STATUSES,
 } from "@repo/shared";
+import { Value } from "@sinclair/typebox/value";
 
 import { AssistantExecutionService } from "./assistant-execution.service";
+import { assistantProductTutorialSearchSchema } from "./schemas/assistant-product-tutorial.schema";
 
 import type { AssistantRepository } from "./assistant.repository";
 import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
+import type { PromptService } from "src/ai/services/prompt.service";
 import type { McpHttpService } from "src/mcp/mcp-http.service";
 import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
@@ -26,6 +29,7 @@ describe("AssistantExecutionService", () => {
     successfulToolCalls: 1,
     readableToolCalls: 1,
     origin: "https://tenant.example",
+    language: "en",
     sources: [{ title: "Verified", url: "https://tenant.example/course/real" }],
   };
   let assistantRepository: {
@@ -38,6 +42,7 @@ describe("AssistantExecutionService", () => {
   let activeAccount: jest.Mock;
   let currentTenant: { status: string } | undefined;
   let modelProvider: jest.Mock;
+  let promptService: { loadPrompt: jest.Mock };
   let mcpHttpService: { executeNativeReadTool: jest.Mock; listNativeReadTools: jest.Mock };
   let service: AssistantExecutionService;
   let tenantDbRunnerService: { runWithTenant: jest.Mock };
@@ -69,12 +74,14 @@ describe("AssistantExecutionService", () => {
         })),
       listNativeReadTools: jest.fn().mockResolvedValue([]),
     };
+    promptService = { loadPrompt: jest.fn(async (id) => `Managed ${id}`) };
     tenantDbRunnerService = { runWithTenant: jest.fn((_tenantId, callback) => callback()) };
     service = new AssistantExecutionService(
       assistantRepository as unknown as AssistantRepository,
       mcpHttpService as unknown as McpHttpService,
       tenantDbRunnerService as unknown as TenantDbRunnerService,
       { getAISdkOpenAI: modelProvider } as unknown as AiRuntimeService,
+      promptService as unknown as PromptService,
     );
   });
 
@@ -183,6 +190,77 @@ describe("AssistantExecutionService", () => {
       status: ASSISTANT_RUN_STATUSES.RUNNING,
     });
     expect(modelProvider).not.toHaveBeenCalled();
+  });
+
+  it("loads managed instructions with fresh capability data and preserves authorized tool schemas", async () => {
+    const schema = { type: "object", properties: { query: { type: "string" } } };
+    mcpHttpService.listNativeReadTools.mockResolvedValue([
+      { name: "search_helpdesk", description: "Bundled search", inputSchema: schema },
+      { name: "get_helpdesk_tutorial", description: "Bundled read", inputSchema: schema },
+      { name: "global_search", description: "Tenant search", inputSchema: schema },
+    ]);
+    const context = await service.loadContext(identity);
+    expect(context.instructions).toBe("Managed coreAssistantPrompt");
+    expect(promptService.loadPrompt).toHaveBeenCalledWith("coreAssistantPrompt", {
+      interfaceLanguage: "en",
+      moduleCapabilities: JSON.stringify(capabilities),
+    });
+    expect(context.tools).toEqual([
+      {
+        name: "search_helpdesk",
+        description: "Managed coreAssistantTutorialSearchTool",
+        inputSchema: JSON.parse(JSON.stringify(assistantProductTutorialSearchSchema)),
+      },
+      {
+        name: "get_helpdesk_tutorial",
+        description: "Managed coreAssistantTutorialReadTool",
+        inputSchema: schema,
+      },
+      { name: "global_search", description: "Tenant search", inputSchema: schema },
+    ]);
+    promptService.loadPrompt.mockClear();
+    mcpHttpService.listNativeReadTools.mockResolvedValue([]);
+    expect((await service.loadContext(identity)).tools).toEqual([]);
+    expect(promptService.loadPrompt).toHaveBeenCalledTimes(1);
+  });
+
+  it("excludes invented catalog filters from the model's tutorial search contract", async () => {
+    mcpHttpService.listNativeReadTools.mockResolvedValue([
+      {
+        name: "search_helpdesk",
+        description: "Tutorial search",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: { type: "string" },
+            domain: { type: "string" },
+            pageKey: { type: "string" },
+          },
+        },
+      },
+    ]);
+    const context = await service.loadContext(identity);
+    expect(context.tools[0].inputSchema).toMatchObject({ additionalProperties: false });
+    expect(Object.keys(context.tools[0].inputSchema.properties)).toEqual([
+      "query",
+      "language",
+      "mode",
+      "limit",
+    ]);
+    const valid = { query: "create a user", language: "en", mode: "keyword", limit: 10 };
+    expect(Value.Check(assistantProductTutorialSearchSchema, valid)).toBe(true);
+    expect(
+      Value.Check(assistantProductTutorialSearchSchema, { ...valid, domain: "0", pageKey: "0" }),
+    ).toBe(false);
+    await service.executeTool(identity, "search_helpdesk", valid);
+    expect(mcpHttpService.executeNativeReadTool).toHaveBeenCalledWith(
+      run.userId,
+      identity.tenantId,
+      run.origin,
+      "search_helpdesk",
+      valid,
+      expect.any(Function),
+    );
   });
 
   it("fails closed when the tenant row is absent", async () => {

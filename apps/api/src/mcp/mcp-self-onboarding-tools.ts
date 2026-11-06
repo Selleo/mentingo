@@ -1,3 +1,4 @@
+import { promptTemplates } from "@repo/prompts";
 import { ASSISTANT_SOURCE_TYPES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
@@ -56,8 +57,7 @@ export function registerMcpHelpdeskTools(
   server.registerTool(
     MCP_HELPDESK_TOOL_NAMES.SEARCH,
     {
-      description:
-        "Find Mentingo product help videos in an explicit language. Choose mode=keyword for exact topic lookups using FTS only, or mode=hybrid (the default) for semantic and keyword retrieval. Use for how to use the app, not for facts about this tenant's courses, learners or authored lesson content. Returns verified public guidance, CDN video URLs, chapter timestamps and exact tenant Helpdesk links. Core supplies the installed version and enabled features; never infer tenant content or completion from a product guide.",
+      description: promptTemplates.coreAssistantTutorialSearchTool.template.trim(),
       inputSchema: asMcpInputSchema(helpdeskSearchRequestSchema),
       annotations: { readOnlyHint: true, destructiveHint: false },
     },
@@ -86,8 +86,7 @@ export function registerMcpHelpdeskTools(
   server.registerTool(
     MCP_HELPDESK_TOOL_NAMES.TUTORIAL,
     {
-      description:
-        "Read a Mentingo product help tutorial by its exact key returned by search_helpdesk. Returns verified public video metadata, chapter timeline and exact tenant Helpdesk links. This is product usage guidance and cannot establish what a tenant's course or lesson contains. For tenant learning content use the corresponding authorized course/lesson read tools.",
+      description: promptTemplates.coreAssistantTutorialReadTool.template.trim(),
       inputSchema: asMcpInputSchema(
         Type.Object(
           { key: helpdeskTutorialKeySchema, ...helpdeskTutorialQuerySchema.properties },
