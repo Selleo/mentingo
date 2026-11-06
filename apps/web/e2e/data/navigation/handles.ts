@@ -16,6 +16,7 @@ export const NAVIGATION_HANDLES = {
   AUTOMATIONS_LINK: "navigation-automations",
   GROUPS_LINK: "navigation-groups-link",
   CATEGORIES_LINK: "navigation-categories-link",
+  GAMIFICATION_LINK: "navigation-gamification-link",
   SUPER_ADMIN_GROUP: "navigation-super-admin-group",
   TENANTS_LINK: "navigation-tenants-link",
   PROMOTION_CODES_LINK: "navigation-promotion-codes-link",

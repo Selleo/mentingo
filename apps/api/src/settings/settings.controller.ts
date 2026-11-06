@@ -351,6 +351,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/gamification-enabled")
+  @RequirePermission(PERMISSIONS.GAMIFICATION_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateGamificationEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalGamificationEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/finished-course-notification")
   @UseGuards(DisallowInSupportModeGuard)
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)

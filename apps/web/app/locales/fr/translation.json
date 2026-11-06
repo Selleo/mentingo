@@ -828,6 +828,7 @@
     "replace": "Cliquez pour remplacer",
     "toast": {
       "fileUploadedSuccessfully": "Fichier importé avec succès",
+      "uploadFailed": "Échec de l’envoi du fichier. Vérifiez le type et la taille du fichier, puis réessayez.",
       "videoFailed": "Échec de l'importation de la vidéo",
       "videoTooLarge": "Le fichier vidéo dépasse la taille maximale autorisée",
       "videoReady": "La vidéo est prête à être utilisée",
@@ -1088,7 +1089,8 @@
     "qa": "Questions et réponses",
     "tenants": "Organisations",
     "activityLogs": "Journaux d'activité",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "gamification": "Gamification"
   },
   "microsoftCalendar": {
     "title": "Calendrier Microsoft",
@@ -2411,7 +2413,8 @@
         "competencies_manage": "Gérer les définitions de compétences et les profils de poste.",
         "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
         "gamification_read": "Afficher les niveaux, XP et succès.",
-        "gamification_earn_hidden": "Obtenir des succès cachés."
+        "gamification_earn_hidden": "Obtenir des succès cachés.",
+        "gamification_manage": "Configurer les succès et les paramètres de gamification."
       }
     },
     "dropdown": {
@@ -5066,8 +5069,7 @@
       "insert": "Insérer",
       "delete": "Supprimer",
       "columns": {
-        "asset": "Ressource",
-        "actions": "Actions"
+        "asset": "Ressource"
       },
       "visibility": {
         "public": "Public",
@@ -5157,7 +5159,8 @@
     "tenants": "Organisations",
     "learningPaths": "Parcours de développement",
     "adminLearningPaths": "Parcours de développement",
-    "adminLearningPathEditor": "Éditeur de parcours de développement"
+    "adminLearningPathEditor": "Éditeur de parcours de développement",
+    "gamification": "Gamification"
   },
   "learningPathsView": {
     "hero": {
@@ -8720,6 +8723,161 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Impossible de charger les succès.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "admin": {
+      "title": "Gamification",
+      "description": "Activez la gamification pour votre organisation et configurez les succès que les apprenants peuvent obtenir.",
+      "enabled": {
+        "label": "Activer la gamification",
+        "description": "Affiche aux utilisateurs les niveaux, l’XP, les succès et les notifications de récompense. Les récompenses sont calculées même lorsque cette option est désactivée."
+      },
+      "achievements": {
+        "title": "Succès",
+        "description": "Succès prédéfinis et personnalisés. Désactiver un succès arrête la nouvelle progression mais conserve les récompenses déjà obtenues.",
+        "create": "Nouveau succès"
+      },
+      "columns": {
+        "achievement": "Succès",
+        "event": "Événement",
+        "levels": "Niveaux",
+        "visibility": "Visibilité",
+        "enabled": "Actif"
+      },
+      "predefined": "Prédéfini",
+      "events": {
+        "login": "Connexion",
+        "lesson_completed": "Leçon terminée",
+        "course_completed": "Cours terminé",
+        "quiz_completed": "Quiz terminé"
+      },
+      "visibilityHints": {
+        "visible": "Les apprenants le voient avant de l'obtenir.",
+        "hidden": "Les apprenants ne le voient qu'après l'avoir obtenu."
+      },
+      "icons": {
+        "trophy": "Trophée",
+        "star": "Étoile",
+        "flame": "Flamme",
+        "zap": "Éclair",
+        "target": "Cible",
+        "award": "Récompense",
+        "medal": "Médaille",
+        "crown": "Couronne",
+        "rocket": "Fusée",
+        "book_open": "Livre",
+        "graduation_cap": "Toque de diplômé",
+        "log_in": "Connexion",
+        "calendar_check": "Calendrier",
+        "clock": "Horloge",
+        "brain": "Cerveau",
+        "lightbulb": "Ampoule",
+        "puzzle": "Puzzle",
+        "message_circle": "Bulle",
+        "heart": "Cœur",
+        "thumbs_up": "Pouce levé",
+        "sparkles": "Étincelles",
+        "circle_check": "Coche"
+      },
+      "requirementHints": {
+        "first_time": "Attribué la première fois que l'activité a lieu. Il n'y a qu'un niveau.",
+        "count": "Compte chaque occurrence de l'activité, au total.",
+        "streak": "Compte la plus longue série de jours consécutifs avec l'activité.",
+        "time_window": "Compte le maximum d'activités sur toute période de la durée choisie."
+      },
+      "requirements": {
+        "first_time": "Première fois",
+        "count": "Nombre",
+        "streak": "Série de jours",
+        "time_window": "Sur une période"
+      },
+      "levelsSummary": "Niveaux : {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Visible",
+        "hidden": "Masqué jusqu’à obtention"
+      },
+      "language": {
+        "label": "Langue",
+        "baseLanguage": "Par défaut",
+        "notAddedLanguages": "Langues à ajouter",
+        "setBaseLanguage": "Définir par défaut",
+        "setBaseTitle": "Changer la langue par défaut",
+        "setBaseDescription": "Utiliser {{language}} comme langue par défaut pour ce succès ?",
+        "createTitle": "Créer une traduction",
+        "createDescription": "Créer une traduction pour ce succès en {{language}} ?",
+        "deleteTitle": "Supprimer la traduction",
+        "deleteDescription": "Supprimer la traduction en {{language}} ? Son contenu sera supprimé."
+      },
+      "form": {
+        "createTitle": "Nouveau succès",
+        "editTitle": "Modifier le succès",
+        "viewTitle": "Succès par défaut",
+        "predefinedReadOnly": "Les succès par défaut sont fournis avec la plateforme et ne peuvent pas être modifiés. Vous pouvez toutefois activer ou désactiver celui-ci.",
+        "name": "Nom",
+        "description": "Description",
+        "requirement": "Condition",
+        "event": "Événement",
+        "requirementType": "Type de condition",
+        "windowDays": "Durée de la période (jours)",
+        "course": "Cours",
+        "anyCourse": "N’importe quel cours",
+        "minScore": "Score minimum au quiz (%)",
+        "levels": "Niveaux et récompenses XP",
+        "thresholdLabels": {
+          "count": {
+            "login": "Nombre de connexions",
+            "lesson_completed": "Nombre de leçons terminées",
+            "course_completed": "Nombre de cours terminés",
+            "quiz_completed": "Nombre de quiz terminés"
+          },
+          "streak": {
+            "login": "Jours d'affilée avec une connexion",
+            "lesson_completed": "Jours d'affilée avec une leçon terminée",
+            "course_completed": "Jours d'affilée avec un cours terminé",
+            "quiz_completed": "Jours d'affilée avec un quiz terminé"
+          },
+          "time_window": {
+            "login": "Connexions dans la période",
+            "lesson_completed": "Leçons terminées dans la période",
+            "course_completed": "Cours terminés dans la période",
+            "quiz_completed": "Quiz terminés dans la période"
+          }
+        },
+        "xpReward": "Récompense XP",
+        "addLevel": "Ajouter un niveau",
+        "inactive": "Inactif",
+        "statusHint": "Les succès inactifs n'accordent plus de nouveaux niveaux. Les niveaux déjà obtenus sont conservés.",
+        "badge": "Badge",
+        "icon": "Icône",
+        "badgePreview": "Aperçu du badge",
+        "iconHint": "L’icône n’apparaît que sur les badges par défaut. Les niveaux avec un badge importé affichent l’image telle quelle.",
+        "resetBadge": "Utiliser le badge par défaut"
+      },
+      "validation": {
+        "threshold": "Saisissez une valeur d’au moins 1.",
+        "xpReward": "Saisissez un nombre entier d’XP entre 0 et {{max}}.",
+        "titleRequired": "Saisissez un nom dans la langue de base.",
+        "windowDays": "Saisissez un nombre entier de jours entre 1 et {{max}}.",
+        "thresholdsAscending": "Chaque niveau doit exiger plus que le précédent.",
+        "minScore": "Saisissez un score entre 0 et 100.",
+        "textTooLong": "Utilisez au maximum {{max}} caractères."
+      },
+      "loadFailed": "Impossible de charger le succès.",
+      "loadListFailed": "Impossible de charger les succès.",
+      "toast": {
+        "achievementSaved": "Succès enregistré.",
+        "achievementNotSaved": "Impossible d’enregistrer le succès.",
+        "settingsSaved": "Paramètres de gamification enregistrés.",
+        "achievementNotFound": "Succès introuvable.",
+        "predefinedNotEditable": "Les succès prédéfinis peuvent seulement être activés ou désactivés.",
+        "earnedLevelRemoved": "Les niveaux déjà obtenus par des utilisateurs ne peuvent pas être supprimés.",
+        "baseLanguageTitleRequired": "Saisissez un nom dans la langue de base.",
+        "unsupportedFilter": "L’événement sélectionné ne prend pas en charge ce filtre.",
+        "courseNotFound": "Le cours sélectionné n’existe pas.",
+        "invalidTimeWindow": "La durée de période ne s’applique qu’aux succès sur une période.",
+        "invalidFirstTimeLevels": "Les succès « Première fois » ont exactement un niveau de valeur 1.",
+        "thresholdsNotAscending": "Chaque niveau doit exiger plus que le précédent.",
+        "invalidBadgeImage": "L’image du badge n’est pas valide. Importez-la à nouveau."
+      }
+    }
   }
 }

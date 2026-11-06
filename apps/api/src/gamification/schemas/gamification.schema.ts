@@ -1,4 +1,5 @@
 import {
+  ACHIEVEMENT_ICONS,
   ACHIEVEMENT_REQUIREMENT_TYPES,
   ACHIEVEMENT_VISIBILITY,
   GAMIFICATION_EVENT_TYPES,
@@ -12,6 +13,8 @@ export const achievementLevelProgressSchema = Type.Object({
   threshold: Type.Integer({ minimum: 1 }),
   xpReward: Type.Integer({ minimum: 0 }),
   earnedAt: Type.Union([Type.String(), Type.Null()]),
+  // Null means the level shows the badge tier matching its number.
+  badgeImageUrl: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const userAchievementSchema = Type.Object({
@@ -21,6 +24,7 @@ export const userAchievementSchema = Type.Object({
   eventType: Type.Enum(GAMIFICATION_EVENT_TYPES),
   requirementType: Type.Enum(ACHIEVEMENT_REQUIREMENT_TYPES),
   visibility: Type.Enum(ACHIEVEMENT_VISIBILITY),
+  icon: Type.Enum(ACHIEVEMENT_ICONS),
   progress: Type.Integer({ minimum: 0 }),
   levels: Type.Array(achievementLevelProgressSchema),
 });

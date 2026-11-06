@@ -829,6 +829,7 @@
     "replace": "Spustelėkite, kad pakeistumėte",
     "toast": {
       "fileUploadedSuccessfully": "Failas sėkmingai įkeltas",
+      "uploadFailed": "Nepavyko įkelti failo. Patikrinkite failo tipą ir dydį, tada bandykite dar kartą.",
       "videoFailed": "Vaizdo įrašo įkėlimas nepavyko",
       "videoTooLarge": "Vaizdo failas viršija didžiausią leistiną dydį",
       "videoReady": "Vaizdo įrašas paruoštas naudoti",
@@ -1088,7 +1089,8 @@
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
-    "reports": "Ataskaitos"
+    "reports": "Ataskaitos",
+    "gamification": "Žaidybinimas"
   },
   "microsoftCalendar": {
     "title": "Microsoft kalendorius",
@@ -2416,7 +2418,8 @@
         "ai_thread_read": "Gali peržiūrėti visus pokalbius su DI ir jų išsaugotus vertinimus.",
         "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
         "gamification_read": "Peržiūrėti lygius, XP ir pasiekimus.",
-        "gamification_earn_hidden": "Gauti paslėptus pasiekimus."
+        "gamification_earn_hidden": "Gauti paslėptus pasiekimus.",
+        "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus."
       }
     },
     "dropdown": {
@@ -5324,8 +5327,7 @@
       "insert": "Įterpti",
       "delete": "Ištrinti",
       "columns": {
-        "asset": "Failas",
-        "actions": "Veiksmai"
+        "asset": "Failas"
       },
       "visibility": {
         "public": "Viešas",
@@ -5416,7 +5418,8 @@
     "activityLogs": "Veiklos žurnalas",
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
-    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
+    "gamification": "Žaidybinimas"
   },
   "courseDuplication": {
     "error": {
@@ -9253,6 +9256,161 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Nepavyko įkelti pasiekimų.",
-    "retry": "Bandyti dar kartą"
+    "retry": "Bandyti dar kartą",
+    "admin": {
+      "title": "Žaidybinimas",
+      "description": "Įjunkite žaidybinimą savo organizacijoje ir sukonfigūruokite pasiekimus, kuriuos gali gauti besimokantieji.",
+      "enabled": {
+        "label": "Įjungti žaidybinimą",
+        "description": "Rodyti naudotojams lygius, XP, pasiekimus ir pranešimus apie apdovanojimus. Apdovanojimai skaičiuojami net kai ši parinktis išjungta."
+      },
+      "achievements": {
+        "title": "Pasiekimai",
+        "description": "Iš anksto nustatyti ir pasirinktiniai pasiekimai. Išjungus pasiekimą sustabdoma nauja pažanga, bet jau gauti apdovanojimai išlieka.",
+        "create": "Naujas pasiekimas"
+      },
+      "columns": {
+        "achievement": "Pasiekimas",
+        "event": "Įvykis",
+        "levels": "Lygiai",
+        "visibility": "Matomumas",
+        "enabled": "Aktyvus"
+      },
+      "predefined": "Iš anksto nustatytas",
+      "events": {
+        "login": "Prisijungimas",
+        "lesson_completed": "Užbaigta pamoka",
+        "course_completed": "Užbaigtas kursas",
+        "quiz_completed": "Užbaigtas testas"
+      },
+      "visibilityHints": {
+        "visible": "Besimokantieji jį mato dar prieš pasiekdami.",
+        "hidden": "Besimokantieji jį mato tik jį pasiekę."
+      },
+      "icons": {
+        "trophy": "Taurė",
+        "star": "Žvaigždė",
+        "flame": "Liepsna",
+        "zap": "Žaibas",
+        "target": "Taikinys",
+        "award": "Apdovanojimas",
+        "medal": "Medalis",
+        "crown": "Karūna",
+        "rocket": "Raketa",
+        "book_open": "Knyga",
+        "graduation_cap": "Absolvento kepurė",
+        "log_in": "Prisijungimas",
+        "calendar_check": "Kalendorius",
+        "clock": "Laikrodis",
+        "brain": "Smegenys",
+        "lightbulb": "Lemputė",
+        "puzzle": "Dėlionė",
+        "message_circle": "Pokalbio burbulas",
+        "heart": "Širdis",
+        "thumbs_up": "Nykštys aukštyn",
+        "sparkles": "Kibirkštys",
+        "circle_check": "Varnelė"
+      },
+      "requirementHints": {
+        "first_time": "Suteikiama pirmą kartą atlikus veiklą. Turi vieną lygį.",
+        "count": "Skaičiuoja kiekvieną veiklos kartą iš viso.",
+        "streak": "Skaičiuoja ilgiausią iš eilės einančių dienų su veikla seriją.",
+        "time_window": "Skaičiuoja daugiausia veiklų bet kuriuo pasirinktos trukmės laikotarpiu."
+      },
+      "requirements": {
+        "first_time": "Pirmą kartą",
+        "count": "Kiekis",
+        "streak": "Dienų serija",
+        "time_window": "Per laikotarpį"
+      },
+      "levelsSummary": "Lygiai: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Matomas",
+        "hidden": "Paslėptas, kol bus gautas"
+      },
+      "language": {
+        "label": "Kalba",
+        "baseLanguage": "Numatytoji",
+        "notAddedLanguages": "Kalbos, kurias galima pridėti",
+        "setBaseLanguage": "Nustatyti kaip numatytąją",
+        "setBaseTitle": "Pakeisti numatytąją kalbą",
+        "setBaseDescription": "Naudoti {{language}} kaip numatytąją šio pasiekimo kalbą?",
+        "createTitle": "Sukurti vertimą",
+        "createDescription": "Sukurti šio pasiekimo vertimą {{language}} kalba?",
+        "deleteTitle": "Ištrinti vertimą",
+        "deleteDescription": "Ištrinti {{language}} vertimą? Jo turinys bus pašalintas."
+      },
+      "form": {
+        "createTitle": "Naujas pasiekimas",
+        "editTitle": "Redaguoti pasiekimą",
+        "viewTitle": "Numatytasis pasiekimas",
+        "predefinedReadOnly": "Numatytieji pasiekimai pateikiami su platforma, todėl jų redaguoti negalima. Tačiau šį pasiekimą galite įjungti arba išjungti.",
+        "name": "Pavadinimas",
+        "description": "Aprašymas",
+        "requirement": "Reikalavimas",
+        "event": "Įvykis",
+        "requirementType": "Reikalavimo tipas",
+        "windowDays": "Laikotarpio trukmė (dienomis)",
+        "course": "Kursas",
+        "anyCourse": "Bet kuris kursas",
+        "minScore": "Mažiausias testo rezultatas (%)",
+        "levels": "Lygiai ir XP apdovanojimai",
+        "thresholdLabels": {
+          "count": {
+            "login": "Prisijungimų skaičius",
+            "lesson_completed": "Užbaigtų pamokų skaičius",
+            "course_completed": "Užbaigtų kursų skaičius",
+            "quiz_completed": "Užbaigtų testų skaičius"
+          },
+          "streak": {
+            "login": "Dienos iš eilės su prisijungimu",
+            "lesson_completed": "Dienos iš eilės su užbaigta pamoka",
+            "course_completed": "Dienos iš eilės su užbaigtu kursu",
+            "quiz_completed": "Dienos iš eilės su užbaigtu testu"
+          },
+          "time_window": {
+            "login": "Prisijungimai per laikotarpį",
+            "lesson_completed": "Pamokos, užbaigtos per laikotarpį",
+            "course_completed": "Kursai, užbaigti per laikotarpį",
+            "quiz_completed": "Testai, užbaigti per laikotarpį"
+          }
+        },
+        "xpReward": "XP apdovanojimas",
+        "addLevel": "Pridėti lygį",
+        "inactive": "Neaktyvus",
+        "statusHint": "Neaktyvūs pasiekimai nebesuteikia naujų lygių. Jau pasiekti lygiai išlieka.",
+        "badge": "Ženklelis",
+        "icon": "Piktograma",
+        "badgePreview": "Ženklelio peržiūra",
+        "iconHint": "Piktograma rodoma tik numatytuosiuose ženkleliuose. Lygiai su įkeltu ženkleliu rodo paveikslėlį be pakeitimų.",
+        "resetBadge": "Naudoti numatytąjį ženklelį"
+      },
+      "validation": {
+        "threshold": "Įveskite bent 1.",
+        "xpReward": "Įveskite sveikąjį XP skaičių nuo 0 iki {{max}}.",
+        "titleRequired": "Įveskite pavadinimą pagrindine kalba.",
+        "windowDays": "Įveskite sveikąjį dienų skaičių nuo 1 iki {{max}}.",
+        "thresholdsAscending": "Kiekvienas lygis turi reikalauti daugiau nei ankstesnis.",
+        "minScore": "Įveskite rezultatą nuo 0 iki 100.",
+        "textTooLong": "Naudokite ne daugiau kaip {{max}} simbolių."
+      },
+      "loadFailed": "Nepavyko įkelti pasiekimo.",
+      "loadListFailed": "Nepavyko įkelti pasiekimų.",
+      "toast": {
+        "achievementSaved": "Pasiekimas išsaugotas.",
+        "achievementNotSaved": "Nepavyko išsaugoti pasiekimo.",
+        "settingsSaved": "Žaidybinimo nustatymai išsaugoti.",
+        "achievementNotFound": "Pasiekimas nerastas.",
+        "predefinedNotEditable": "Iš anksto nustatytus pasiekimus galima tik įjungti arba išjungti.",
+        "earnedLevelRemoved": "Negalima pašalinti lygių, kuriuos naudotojai jau gavo.",
+        "baseLanguageTitleRequired": "Įveskite pavadinimą pagrindine kalba.",
+        "unsupportedFilter": "Pasirinktas įvykis nepalaiko šio filtro.",
+        "courseNotFound": "Pasirinktas kursas neegzistuoja.",
+        "invalidTimeWindow": "Laikotarpio trukmė nustatoma tik laikotarpio pasiekimams.",
+        "invalidFirstTimeLevels": "„Pirmą kartą“ pasiekimai turi lygiai vieną lygį, kurio reikšmė 1.",
+        "thresholdsNotAscending": "Kiekvienas lygis turi reikalauti daugiau nei ankstesnis.",
+        "invalidBadgeImage": "Ženklelio paveikslėlis netinkamas. Įkelkite jį iš naujo."
+      }
+    }
   }
 }

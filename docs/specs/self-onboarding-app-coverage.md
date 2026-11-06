@@ -1,9 +1,9 @@
 # App-wide self-onboarding coverage
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
-The catalog covers all 30 user-facing route areas and the 59 app business specifications currently
-in `docs/specs`. It contains 224 explicit flows, assigned exactly once to 91 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 182
+The catalog covers all 31 user-facing route areas and the 60 app business specifications currently
+in `docs/specs`. It contains 226 explicit flows, assigned exactly once to 92 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 184
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -46,6 +46,7 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `tenants`                   |                5 |                   2 | `tenant-administration`                                                                                                                                                                                                                                                          |
 
 | `competencies` | 15 | 5 | `competencies` |
+| `gamification` | 2 | 1 | `gamification` |
 
 ## Evidence and boundaries
 

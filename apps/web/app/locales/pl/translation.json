@@ -832,6 +832,7 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
+      "uploadFailed": "Nie udało się przesłać pliku. Sprawdź typ i rozmiar pliku, a następnie spróbuj ponownie.",
       "videoFailed": "Nie udało się przesłać wideo",
       "videoTooLarge": "Plik wideo przekracza maksymalny dozwolony rozmiar",
       "videoReady": "Wideo jest gotowe do użycia",
@@ -1094,7 +1095,8 @@
     "learningPaths": "Ścieżki Rozwoju",
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju",
-    "reports": "Raporty"
+    "reports": "Raporty",
+    "gamification": "Grywalizacja"
   },
   "microsoftCalendar": {
     "title": "Kalendarz Microsoft",
@@ -2665,7 +2667,8 @@
         "competencies_manage": "Zarządzanie definicjami kompetencji i profilami stanowiskowymi.",
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI.",
         "gamification_read": "Wyświetlanie poziomów, XP i osiągnięć.",
-        "gamification_earn_hidden": "Zdobywanie ukrytych osiągnięć."
+        "gamification_earn_hidden": "Zdobywanie ukrytych osiągnięć.",
+        "gamification_manage": "Konfigurowanie osiągnięć i ustawień grywalizacji."
       }
     },
     "dropdown": {
@@ -5638,8 +5641,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Zasób",
-        "actions": "Akcje"
+        "asset": "Zasób"
       },
       "visibility": {
         "public": "Public",
@@ -5729,7 +5731,8 @@
     "activityLogs": "Dziennik zdarzeń",
     "tenant": "Szczegóły organizacji",
     "createTenant": "Utwórz organizację",
-    "tenants": "Organizacje"
+    "tenants": "Organizacje",
+    "gamification": "Grywalizacja"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -9339,6 +9342,161 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Nie udało się wczytać osiągnięć.",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "admin": {
+      "title": "Grywalizacja",
+      "description": "Włącz grywalizację w organizacji i skonfiguruj osiągnięcia, które mogą zdobywać uczestnicy.",
+      "enabled": {
+        "label": "Włącz grywalizację",
+        "description": "Pokazuj użytkownikom poziomy, XP, osiągnięcia i powiadomienia o nagrodach. Nagrody są naliczane także wtedy, gdy ta opcja jest wyłączona."
+      },
+      "achievements": {
+        "title": "Osiągnięcia",
+        "description": "Osiągnięcia predefiniowane i własne. Wyłączenie osiągnięcia zatrzymuje nowy postęp, ale zachowuje zdobyte już nagrody.",
+        "create": "Nowe osiągnięcie"
+      },
+      "columns": {
+        "achievement": "Osiągnięcie",
+        "event": "Zdarzenie",
+        "levels": "Poziomy",
+        "visibility": "Widoczność",
+        "enabled": "Aktywne"
+      },
+      "predefined": "Predefiniowane",
+      "events": {
+        "login": "Logowanie",
+        "lesson_completed": "Ukończenie lekcji",
+        "course_completed": "Ukończenie kursu",
+        "quiz_completed": "Ukończenie quizu"
+      },
+      "visibilityHints": {
+        "visible": "Uczestnicy widzą je, zanim je zdobędą.",
+        "hidden": "Uczestnicy widzą je dopiero po zdobyciu."
+      },
+      "icons": {
+        "trophy": "Puchar",
+        "star": "Gwiazda",
+        "flame": "Płomień",
+        "zap": "Błyskawica",
+        "target": "Cel",
+        "award": "Nagroda",
+        "medal": "Medal",
+        "crown": "Korona",
+        "rocket": "Rakieta",
+        "book_open": "Książka",
+        "graduation_cap": "Biret",
+        "log_in": "Logowanie",
+        "calendar_check": "Kalendarz",
+        "clock": "Zegar",
+        "brain": "Mózg",
+        "lightbulb": "Żarówka",
+        "puzzle": "Puzzle",
+        "message_circle": "Dymek",
+        "heart": "Serce",
+        "thumbs_up": "Kciuk w górę",
+        "sparkles": "Iskry",
+        "circle_check": "Znacznik"
+      },
+      "requirementHints": {
+        "first_time": "Przyznawane przy pierwszym wystąpieniu aktywności. Ma jeden poziom.",
+        "count": "Liczy każde wystąpienie aktywności łącznie.",
+        "streak": "Liczy najdłuższą serię kolejnych dni z aktywnością.",
+        "time_window": "Liczy najwięcej aktywności w dowolnym okresie o wybranej długości."
+      },
+      "requirements": {
+        "first_time": "Pierwszy raz",
+        "count": "Liczba",
+        "streak": "Seria dni",
+        "time_window": "W określonym czasie"
+      },
+      "levelsSummary": "Poziomy: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Widoczne",
+        "hidden": "Ukryte do zdobycia"
+      },
+      "language": {
+        "label": "Język",
+        "baseLanguage": "Domyślny",
+        "notAddedLanguages": "Języki do dodania",
+        "setBaseLanguage": "Ustaw jako domyślny",
+        "setBaseTitle": "Zmień język domyślny",
+        "setBaseDescription": "Użyć języka {{language}} jako domyślnego dla tego osiągnięcia?",
+        "createTitle": "Utwórz tłumaczenie",
+        "createDescription": "Utworzyć tłumaczenie tego osiągnięcia w języku {{language}}?",
+        "deleteTitle": "Usuń tłumaczenie",
+        "deleteDescription": "Usunąć tłumaczenie w języku {{language}}? Jego treść zostanie usunięta."
+      },
+      "form": {
+        "createTitle": "Nowe osiągnięcie",
+        "editTitle": "Edytuj osiągnięcie",
+        "viewTitle": "Osiągnięcie domyślne",
+        "predefinedReadOnly": "Osiągnięcia domyślne są dostarczane z platformą, więc nie można ich edytować. Nadal możesz je włączyć lub wyłączyć.",
+        "name": "Nazwa",
+        "description": "Opis",
+        "requirement": "Wymaganie",
+        "event": "Zdarzenie",
+        "requirementType": "Typ wymagania",
+        "windowDays": "Długość okna (dni)",
+        "course": "Kurs",
+        "anyCourse": "Dowolny kurs",
+        "minScore": "Minimalny wynik quizu (%)",
+        "levels": "Poziomy i nagrody XP",
+        "thresholdLabels": {
+          "count": {
+            "login": "Liczba logowań",
+            "lesson_completed": "Liczba ukończonych lekcji",
+            "course_completed": "Liczba ukończonych kursów",
+            "quiz_completed": "Liczba ukończonych quizów"
+          },
+          "streak": {
+            "login": "Dni z rzędu z logowaniem",
+            "lesson_completed": "Dni z rzędu z ukończoną lekcją",
+            "course_completed": "Dni z rzędu z ukończonym kursem",
+            "quiz_completed": "Dni z rzędu z ukończonym quizem"
+          },
+          "time_window": {
+            "login": "Logowania w oknie czasowym",
+            "lesson_completed": "Lekcje ukończone w oknie czasowym",
+            "course_completed": "Kursy ukończone w oknie czasowym",
+            "quiz_completed": "Quizy ukończone w oknie czasowym"
+          }
+        },
+        "xpReward": "Nagroda XP",
+        "addLevel": "Dodaj poziom",
+        "inactive": "Nieaktywne",
+        "statusHint": "Nieaktywne osiągnięcia przestają przyznawać nowe poziomy. Zdobyte poziomy zostają zachowane.",
+        "badge": "Odznaka",
+        "icon": "Ikona",
+        "badgePreview": "Podgląd odznaki",
+        "iconHint": "Ikona jest widoczna tylko na domyślnych odznakach. Poziomy z przesłaną odznaką pokazują sam obraz.",
+        "resetBadge": "Użyj domyślnej odznaki"
+      },
+      "validation": {
+        "threshold": "Podaj wartość co najmniej 1.",
+        "xpReward": "Wpisz liczbę całkowitą XP od 0 do {{max}}.",
+        "titleRequired": "Podaj nazwę w języku bazowym.",
+        "windowDays": "Wpisz liczbę całkowitą dni od 1 do {{max}}.",
+        "thresholdsAscending": "Każdy poziom musi wymagać więcej niż poprzedni.",
+        "minScore": "Podaj wynik od 0 do 100.",
+        "textTooLong": "Użyj maksymalnie {{max}} znaków."
+      },
+      "loadFailed": "Nie udało się wczytać osiągnięcia.",
+      "loadListFailed": "Nie udało się wczytać osiągnięć.",
+      "toast": {
+        "achievementSaved": "Osiągnięcie zapisane.",
+        "achievementNotSaved": "Nie udało się zapisać osiągnięcia.",
+        "settingsSaved": "Ustawienia grywalizacji zapisane.",
+        "achievementNotFound": "Nie znaleziono osiągnięcia.",
+        "predefinedNotEditable": "Osiągnięcia predefiniowane można tylko włączać i wyłączać.",
+        "earnedLevelRemoved": "Nie można usunąć poziomów, które użytkownicy już zdobyli.",
+        "baseLanguageTitleRequired": "Podaj nazwę w języku bazowym.",
+        "unsupportedFilter": "Wybrane zdarzenie nie obsługuje tego filtra.",
+        "courseNotFound": "Wybrany kurs nie istnieje.",
+        "invalidTimeWindow": "Długość okna ustawia się tylko dla osiągnięć czasowych.",
+        "invalidFirstTimeLevels": "Osiągnięcia „pierwszy raz” mają dokładnie jeden poziom o wartości 1.",
+        "thresholdsNotAscending": "Każdy poziom musi wymagać więcej niż poprzedni.",
+        "invalidBadgeImage": "Obraz odznaki jest nieprawidłowy. Prześlij go ponownie."
+      }
+    }
   }
 }

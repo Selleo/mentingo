@@ -102,6 +102,7 @@ export const PERMISSIONS = {
   ACTIVITY_LOG_READ: "activity_log.read",
   GAMIFICATION_READ: "gamification.read",
   GAMIFICATION_EARN_HIDDEN: "gamification.earn_hidden",
+  GAMIFICATION_MANAGE: "gamification.manage",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -328,6 +329,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.COURSE_EXPORT,
     PERMISSIONS.ACTIVITY_LOG_READ,
     PERMISSIONS.GAMIFICATION_READ,
+    PERMISSIONS.GAMIFICATION_MANAGE,
   ],
 };
 

@@ -1,10 +1,9 @@
-import { Trophy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Progress } from "~/components/ui/progress";
-import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { AchievementBadge } from "./AchievementBadge";
 import { getAchievementProgress } from "./gamification.utils";
 
 import type { UserAchievement } from "./gamification.types";
@@ -20,12 +19,16 @@ export function AchievementCard({ achievement }: AchievementCardProps) {
     getAchievementProgress(achievement);
   const isEarned = earnedLevelCount > 0;
   const hasLevels = achievement.levels.length > 1;
+  // Show the highest earned level's badge, or the first level's greyed out before any is earned.
+  const badgeLevel = Math.max(earnedLevelCount, 1);
 
   return (
     <li className="flex gap-3 rounded-lg border border-neutral-200 p-4">
-      <Trophy
-        aria-hidden
-        className={cn("size-6 shrink-0 text-neutral-300", isEarned && "text-warning-500")}
+      <AchievementBadge
+        level={badgeLevel}
+        icon={achievement.icon}
+        badgeImageUrl={achievement.levels[badgeLevel - 1]?.badgeImageUrl}
+        isEarned={isEarned}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-baseline justify-between gap-2">

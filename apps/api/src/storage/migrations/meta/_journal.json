@@ -1632,6 +1632,20 @@
       "when": 1793968935241,
       "tag": "0232_add_gamification_check_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1793969458600,
+      "tag": "0233_add_achievement_badges_and_time_windows",
+      "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1793969468346,
+      "tag": "0234_add_achievement_admin_check_constraints",
+      "breakpoints": true
     }
   ]
 }

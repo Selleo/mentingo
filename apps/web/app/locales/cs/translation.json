@@ -835,6 +835,7 @@
     "replace": "Kliknutím nahradíte",
     "toast": {
       "fileUploadedSuccessfully": "Soubor byl úspěšně nahrán",
+      "uploadFailed": "Nahrání souboru se nezdařilo. Zkontrolujte typ a velikost souboru a zkuste to znovu.",
       "videoFailed": "Nahrání videa se nezdařilo",
       "videoTooLarge": "Video soubor překračuje maximální povolenou velikost",
       "videoReady": "Video je připraveno k použití",
@@ -1094,7 +1095,8 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
-    "reports": "Přehledy"
+    "reports": "Přehledy",
+    "gamification": "Gamifikace"
   },
   "microsoftCalendar": {
     "title": "Kalendář Microsoft",
@@ -2422,7 +2424,8 @@
         "ai_thread_read": "Může zobrazit všechny konverzace s AI a jejich uložená hodnocení.",
         "activity_log_read": "Může zobrazit protokoly aktivit.",
         "gamification_read": "Zobrazit úrovně, XP a úspěchy.",
-        "gamification_earn_hidden": "Získávat skryté úspěchy."
+        "gamification_earn_hidden": "Získávat skryté úspěchy.",
+        "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace."
       }
     },
     "dropdown": {
@@ -5329,8 +5332,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Asset",
-        "actions": "Actions"
+        "asset": "Asset"
       },
       "visibility": {
         "public": "Public",
@@ -5420,7 +5422,8 @@
     "activityLogs": "Log aktivit",
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
-    "adminLearningPathEditor": "Editor rozvojové cesty"
+    "adminLearningPathEditor": "Editor rozvojové cesty",
+    "gamification": "Gamifikace"
   },
   "courseDuplication": {
     "error": {
@@ -9255,6 +9258,161 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Úspěchy se nepodařilo načíst.",
-    "retry": "Zkusit znovu"
+    "retry": "Zkusit znovu",
+    "admin": {
+      "title": "Gamifikace",
+      "description": "Zapněte gamifikaci pro svou organizaci a nastavte úspěchy, které mohou studenti získat.",
+      "enabled": {
+        "label": "Zapnout gamifikaci",
+        "description": "Zobrazovat uživatelům úrovně, XP, úspěchy a oznámení o odměnách. Odměny se počítají, i když je tato možnost vypnutá."
+      },
+      "achievements": {
+        "title": "Úspěchy",
+        "description": "Předdefinované a vlastní úspěchy. Vypnutí úspěchu zastaví nový postup, ale zachová již získané odměny.",
+        "create": "Nový úspěch"
+      },
+      "columns": {
+        "achievement": "Úspěch",
+        "event": "Událost",
+        "levels": "Úrovně",
+        "visibility": "Viditelnost",
+        "enabled": "Aktivní"
+      },
+      "predefined": "Předdefinovaný",
+      "events": {
+        "login": "Přihlášení",
+        "lesson_completed": "Dokončená lekce",
+        "course_completed": "Dokončený kurz",
+        "quiz_completed": "Dokončený kvíz"
+      },
+      "visibilityHints": {
+        "visible": "Studující ho vidí ještě před získáním.",
+        "hidden": "Studující ho vidí až po získání."
+      },
+      "icons": {
+        "trophy": "Pohár",
+        "star": "Hvězda",
+        "flame": "Plamen",
+        "zap": "Blesk",
+        "target": "Terč",
+        "award": "Ocenění",
+        "medal": "Medaile",
+        "crown": "Koruna",
+        "rocket": "Raketa",
+        "book_open": "Kniha",
+        "graduation_cap": "Absolventská čepice",
+        "log_in": "Přihlášení",
+        "calendar_check": "Kalendář",
+        "clock": "Hodiny",
+        "brain": "Mozek",
+        "lightbulb": "Žárovka",
+        "puzzle": "Puzzle",
+        "message_circle": "Bublina",
+        "heart": "Srdce",
+        "thumbs_up": "Palec nahoru",
+        "sparkles": "Jiskry",
+        "circle_check": "Zaškrtnutí"
+      },
+      "requirementHints": {
+        "first_time": "Udělí se při prvním výskytu aktivity. Má jednu úroveň.",
+        "count": "Počítá každý výskyt aktivity celkem.",
+        "streak": "Počítá nejdelší sérii po sobě jdoucích dnů s aktivitou.",
+        "time_window": "Počítá nejvíce aktivit v libovolném období zvolené délky."
+      },
+      "requirements": {
+        "first_time": "Poprvé",
+        "count": "Počet",
+        "streak": "Série dní",
+        "time_window": "V časovém okně"
+      },
+      "levelsSummary": "Úrovně: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Viditelný",
+        "hidden": "Skrytý do získání"
+      },
+      "language": {
+        "label": "Jazyk",
+        "baseLanguage": "Výchozí",
+        "notAddedLanguages": "Jazyky k přidání",
+        "setBaseLanguage": "Nastavit jako výchozí",
+        "setBaseTitle": "Změnit výchozí jazyk",
+        "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tento úspěch?",
+        "createTitle": "Vytvořit překlad",
+        "createDescription": "Vytvořit překlad tohoto úspěchu do jazyka {{language}}?",
+        "deleteTitle": "Smazat překlad",
+        "deleteDescription": "Smazat překlad do jazyka {{language}}? Jeho obsah bude odstraněn."
+      },
+      "form": {
+        "createTitle": "Nový úspěch",
+        "editTitle": "Upravit úspěch",
+        "viewTitle": "Výchozí úspěch",
+        "predefinedReadOnly": "Výchozí úspěchy jsou součástí platformy, a proto je nelze upravovat. Tento úspěch ale můžete zapnout nebo vypnout.",
+        "name": "Název",
+        "description": "Popis",
+        "requirement": "Požadavek",
+        "event": "Událost",
+        "requirementType": "Typ požadavku",
+        "windowDays": "Délka okna (dny)",
+        "course": "Kurz",
+        "anyCourse": "Jakýkoli kurz",
+        "minScore": "Minimální skóre kvízu (%)",
+        "levels": "Úrovně a odměny XP",
+        "thresholdLabels": {
+          "count": {
+            "login": "Počet přihlášení",
+            "lesson_completed": "Počet dokončených lekcí",
+            "course_completed": "Počet dokončených kurzů",
+            "quiz_completed": "Počet dokončených kvízů"
+          },
+          "streak": {
+            "login": "Dny v řadě s přihlášením",
+            "lesson_completed": "Dny v řadě s dokončenou lekcí",
+            "course_completed": "Dny v řadě s dokončeným kurzem",
+            "quiz_completed": "Dny v řadě s dokončeným kvízem"
+          },
+          "time_window": {
+            "login": "Přihlášení v časovém okně",
+            "lesson_completed": "Lekce dokončené v časovém okně",
+            "course_completed": "Kurzy dokončené v časovém okně",
+            "quiz_completed": "Kvízy dokončené v časovém okně"
+          }
+        },
+        "xpReward": "Odměna XP",
+        "addLevel": "Přidat úroveň",
+        "inactive": "Neaktivní",
+        "statusHint": "Neaktivní úspěchy přestanou udělovat nové úrovně. Již získané úrovně zůstanou zachovány.",
+        "badge": "Odznak",
+        "icon": "Ikona",
+        "badgePreview": "Náhled odznaku",
+        "iconHint": "Ikona se zobrazuje pouze na výchozích odznacích. Úrovně s nahraným odznakem zobrazují obrázek beze změny.",
+        "resetBadge": "Použít výchozí odznak"
+      },
+      "validation": {
+        "threshold": "Zadejte hodnotu alespoň 1.",
+        "xpReward": "Zadejte celé číslo XP od 0 do {{max}}.",
+        "titleRequired": "Zadejte název v základním jazyce.",
+        "windowDays": "Zadejte celý počet dní od 1 do {{max}}.",
+        "thresholdsAscending": "Každá úroveň musí vyžadovat více než předchozí.",
+        "minScore": "Zadejte skóre od 0 do 100.",
+        "textTooLong": "Použijte nejvýše {{max}} znaků."
+      },
+      "loadFailed": "Úspěch se nepodařilo načíst.",
+      "loadListFailed": "Úspěchy se nepodařilo načíst.",
+      "toast": {
+        "achievementSaved": "Úspěch uložen.",
+        "achievementNotSaved": "Úspěch se nepodařilo uložit.",
+        "settingsSaved": "Nastavení gamifikace uloženo.",
+        "achievementNotFound": "Úspěch nebyl nalezen.",
+        "predefinedNotEditable": "Předdefinované úspěchy lze pouze zapnout nebo vypnout.",
+        "earnedLevelRemoved": "Úrovně, které uživatelé již získali, nelze odebrat.",
+        "baseLanguageTitleRequired": "Zadejte název v základním jazyce.",
+        "unsupportedFilter": "Vybraná událost tento filtr nepodporuje.",
+        "courseNotFound": "Vybraný kurz neexistuje.",
+        "invalidTimeWindow": "Délku okna lze nastavit jen u úspěchů s časovým oknem.",
+        "invalidFirstTimeLevels": "Úspěchy typu „Poprvé“ mají přesně jednu úroveň s hodnotou 1.",
+        "thresholdsNotAscending": "Každá úroveň musí vyžadovat více než předchozí.",
+        "invalidBadgeImage": "Obrázek odznaku je neplatný. Nahrajte ho znovu."
+      }
+    }
   }
 }

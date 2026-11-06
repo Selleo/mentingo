@@ -114,6 +114,21 @@ export const routes: (
           route("categories", "modules/Admin/Categories/Categories.page.tsx");
           route("categories/:id", "modules/Admin/Categories/Category.page.tsx");
           route("categories/new", "modules/Admin/Categories/CreateNewCategory.page.tsx");
+          route("gamification", "modules/Admin/Gamification/GamificationAdmin.page.tsx");
+          route(
+            "gamification/achievements/new",
+            "modules/Admin/Gamification/AchievementForm.page.tsx",
+            {
+              id: "admin-achievement-new",
+            },
+          );
+          route(
+            "gamification/achievements/:id",
+            "modules/Admin/Gamification/AchievementForm.page.tsx",
+            {
+              id: "admin-achievement-edit",
+            },
+          );
           route("groups", "modules/Admin/Groups/Groups.page.tsx");
           route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
           route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");

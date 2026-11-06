@@ -295,6 +295,7 @@ export interface CurrentUserResponse {
       | "activity_log.read"
       | "gamification.read"
       | "gamification.earn_hidden"
+      | "gamification.manage"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -1153,6 +1154,49 @@ export interface UpdateLearningPathsEnabledResponse {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
     publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    gamificationEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateGamificationEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;
@@ -33670,8 +33714,31 @@ export interface GetUserGamificationProfileResponse {
       title: string;
       description: string;
       eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
-      requirementType: "first_time" | "count" | "streak";
+      requirementType: "first_time" | "count" | "streak" | "time_window";
       visibility: "visible" | "hidden";
+      icon:
+        | "trophy"
+        | "star"
+        | "flame"
+        | "zap"
+        | "target"
+        | "award"
+        | "medal"
+        | "crown"
+        | "rocket"
+        | "book_open"
+        | "graduation_cap"
+        | "log_in"
+        | "calendar_check"
+        | "clock"
+        | "brain"
+        | "lightbulb"
+        | "puzzle"
+        | "message_circle"
+        | "heart"
+        | "thumbs_up"
+        | "sparkles"
+        | "circle_check";
       /** @min 0 */
       progress: number;
       levels: {
@@ -33682,6 +33749,7 @@ export interface GetUserGamificationProfileResponse {
         /** @min 0 */
         xpReward: number;
         earnedAt: string | null;
+        badgeImageUrl: string | null;
       }[];
     }[];
     recentRewards: {
@@ -33696,6 +33764,352 @@ export interface GetUserGamificationProfileResponse {
       xpReward: number;
       earnedAt: string;
     }[];
+  };
+}
+
+export interface GetAdminAchievementsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    isPredefined: boolean;
+    title: string;
+    description: string;
+    eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+    requirementType: "first_time" | "count" | "streak" | "time_window";
+    windowDays: number | null;
+    filters: {
+      /** @format uuid */
+      courseId?: string;
+      /**
+       * @min 0
+       * @max 100
+       */
+      minScore?: number;
+    };
+    visibility: "visible" | "hidden";
+    icon:
+      | "trophy"
+      | "star"
+      | "flame"
+      | "zap"
+      | "target"
+      | "award"
+      | "medal"
+      | "crown"
+      | "rocket"
+      | "book_open"
+      | "graduation_cap"
+      | "log_in"
+      | "calendar_check"
+      | "clock"
+      | "brain"
+      | "lightbulb"
+      | "puzzle"
+      | "message_circle"
+      | "heart"
+      | "thumbs_up"
+      | "sparkles"
+      | "circle_check";
+    isEnabled: boolean;
+    levels: {
+      /** @min 1 */
+      level: number;
+      /** @min 1 */
+      threshold: number;
+      /** @min 0 */
+      xpReward: number;
+      /** @min 0 */
+      earnedCount: number;
+      badgeImageKey: string | null;
+      badgeImageUrl: string | null;
+    }[];
+  }[];
+}
+
+export interface GetAdminAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    isPredefined: boolean;
+    eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+    requirementType: "first_time" | "count" | "streak" | "time_window";
+    windowDays: number | null;
+    filters: {
+      /** @format uuid */
+      courseId?: string;
+      /**
+       * @min 0
+       * @max 100
+       */
+      minScore?: number;
+    };
+    visibility: "visible" | "hidden";
+    icon:
+      | "trophy"
+      | "star"
+      | "flame"
+      | "zap"
+      | "target"
+      | "award"
+      | "medal"
+      | "crown"
+      | "rocket"
+      | "book_open"
+      | "graduation_cap"
+      | "log_in"
+      | "calendar_check"
+      | "clock"
+      | "brain"
+      | "lightbulb"
+      | "puzzle"
+      | "message_circle"
+      | "heart"
+      | "thumbs_up"
+      | "sparkles"
+      | "circle_check";
+    isEnabled: boolean;
+    levels: {
+      /** @min 1 */
+      level: number;
+      /** @min 1 */
+      threshold: number;
+      /** @min 0 */
+      xpReward: number;
+      /** @min 0 */
+      earnedCount: number;
+      badgeImageKey: string | null;
+      badgeImageUrl: string | null;
+    }[];
+    title: {
+      /** @maxLength 500 */
+      en?: string;
+      /** @maxLength 500 */
+      pl?: string;
+      /** @maxLength 500 */
+      de?: string;
+      /** @maxLength 500 */
+      lt?: string;
+      /** @maxLength 500 */
+      cs?: string;
+      /** @maxLength 500 */
+      es?: string;
+      /** @maxLength 500 */
+      fr?: string;
+    };
+    description: {
+      /** @maxLength 500 */
+      en?: string;
+      /** @maxLength 500 */
+      pl?: string;
+      /** @maxLength 500 */
+      de?: string;
+      /** @maxLength 500 */
+      lt?: string;
+      /** @maxLength 500 */
+      cs?: string;
+      /** @maxLength 500 */
+      es?: string;
+      /** @maxLength 500 */
+      fr?: string;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  };
+}
+
+export interface CreateAchievementBody {
+  title: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  description: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+  requirementType: "first_time" | "count" | "streak" | "time_window";
+  windowDays: number | null;
+  filters: {
+    /** @format uuid */
+    courseId?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minScore?: number;
+  };
+  visibility: "visible" | "hidden";
+  icon:
+    | "trophy"
+    | "star"
+    | "flame"
+    | "zap"
+    | "target"
+    | "award"
+    | "medal"
+    | "crown"
+    | "rocket"
+    | "book_open"
+    | "graduation_cap"
+    | "log_in"
+    | "calendar_check"
+    | "clock"
+    | "brain"
+    | "lightbulb"
+    | "puzzle"
+    | "message_circle"
+    | "heart"
+    | "thumbs_up"
+    | "sparkles"
+    | "circle_check";
+  isEnabled: boolean;
+  /**
+   * @maxItems 3
+   * @minItems 1
+   */
+  levels: {
+    /** @min 1 */
+    threshold: number;
+    /**
+     * @min 0
+     * @max 100000
+     */
+    xpReward: number;
+    badgeImageKey: string | null;
+  }[];
+}
+
+export interface CreateAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UpdateAchievementBody {
+  title: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  description: {
+    /** @maxLength 500 */
+    en?: string;
+    /** @maxLength 500 */
+    pl?: string;
+    /** @maxLength 500 */
+    de?: string;
+    /** @maxLength 500 */
+    lt?: string;
+    /** @maxLength 500 */
+    cs?: string;
+    /** @maxLength 500 */
+    es?: string;
+    /** @maxLength 500 */
+    fr?: string;
+  };
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  eventType: "login" | "lesson_completed" | "course_completed" | "quiz_completed";
+  requirementType: "first_time" | "count" | "streak" | "time_window";
+  windowDays: number | null;
+  filters: {
+    /** @format uuid */
+    courseId?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minScore?: number;
+  };
+  visibility: "visible" | "hidden";
+  icon:
+    | "trophy"
+    | "star"
+    | "flame"
+    | "zap"
+    | "target"
+    | "award"
+    | "medal"
+    | "crown"
+    | "rocket"
+    | "book_open"
+    | "graduation_cap"
+    | "log_in"
+    | "calendar_check"
+    | "clock"
+    | "brain"
+    | "lightbulb"
+    | "puzzle"
+    | "message_circle"
+    | "heart"
+    | "thumbs_up"
+    | "sparkles"
+    | "circle_check";
+  isEnabled: boolean;
+  /**
+   * @maxItems 3
+   * @minItems 1
+   */
+  levels: {
+    /** @min 1 */
+    threshold: number;
+    /**
+     * @min 0
+     * @max 100000
+     */
+    xpReward: number;
+    badgeImageKey: string | null;
+  }[];
+}
+
+export interface UpdateAchievementResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateAchievementStatusBody {
+  isEnabled: boolean;
+}
+
+export interface UpdateAchievementStatusResponse {
+  data: {
+    message: string;
   };
 }
 
@@ -38139,6 +38553,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateLearningPathsEnabled: (params: RequestParams = {}) =>
       this.request<UpdateLearningPathsEnabledResponse, any>({
         path: `/api/settings/admin/learning-paths-enabled`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateGamificationEnabled
+     * @request PATCH:/api/settings/admin/gamification-enabled
+     */
+    settingsControllerUpdateGamificationEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateGamificationEnabledResponse, any>({
+        path: `/api/settings/admin/gamification-enabled`,
         method: "PATCH",
         format: "json",
         ...params,
@@ -47352,6 +47780,108 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/gamification/users/${userId}`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerGetAdminAchievements
+     * @request GET:/api/gamification/admin/achievements
+     */
+    achievementAdminControllerGetAdminAchievements: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAchievementsResponse, any>({
+        path: `/api/gamification/admin/achievements`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerCreateAchievement
+     * @request POST:/api/gamification/admin/achievements
+     */
+    achievementAdminControllerCreateAchievement: (
+      data: CreateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerGetAdminAchievement
+     * @request GET:/api/gamification/admin/achievements/{id}
+     */
+    achievementAdminControllerGetAdminAchievement: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerUpdateAchievement
+     * @request PUT:/api/gamification/admin/achievements/{id}
+     */
+    achievementAdminControllerUpdateAchievement: (
+      id: string,
+      data: UpdateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAchievementResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementAdminControllerUpdateAchievementStatus
+     * @request PATCH:/api/gamification/admin/achievements/{id}/status
+     */
+    achievementAdminControllerUpdateAchievementStatus: (
+      id: string,
+      data: UpdateAchievementStatusBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAchievementStatusResponse, any>({
+        path: `/api/gamification/admin/achievements/${id}/status`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

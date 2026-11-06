@@ -7,6 +7,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 
+import { FileService } from "src/file/file.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
@@ -24,6 +25,7 @@ export class GamificationService {
     private readonly gamificationRepository: GamificationRepository,
     private readonly permissionsService: PermissionsService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly fileService: FileService,
   ) {}
 
   /**
@@ -137,7 +139,19 @@ export class GamificationService {
       level,
       currentLevelXp: getXpRequiredForLevel(level),
       nextLevelXp: getXpRequiredForLevel(level + 1),
-      achievements,
+      achievements: await Promise.all(
+        achievements.map(async (achievement) => ({
+          ...achievement,
+          levels: await Promise.all(
+            achievement.levels.map(async ({ badgeImageKey, ...level }) => ({
+              ...level,
+              badgeImageUrl: badgeImageKey
+                ? await this.fileService.getFileUrl(badgeImageKey)
+                : null,
+            })),
+          ),
+        })),
+      ),
       recentRewards,
     };
   }

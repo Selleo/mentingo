@@ -78,6 +78,7 @@ export class GamificationRepository {
         id: achievements.id,
         eventType: achievements.eventType,
         requirementType: achievements.requirementType,
+        windowDays: achievements.windowDays,
         filters: achievements.filters,
         levels: sql<EvaluableAchievement["levels"]>`
           COALESCE(
@@ -135,6 +136,13 @@ export class GamificationRepository {
     }
 
     const subject = source.subjectPath ? outboxPayloadText(source.subjectPath) : outboxEventDay;
+
+    if (
+      achievement.requirementType === ACHIEVEMENT_REQUIREMENT_TYPES.TIME_WINDOW &&
+      achievement.windowDays
+    ) {
+      return this.measureBestTimeWindow(where, subject, achievement.windowDays);
+    }
 
     const [row] = await this.db
       .select({ value: sql<number>`COUNT(DISTINCT ${subject})::int` })
@@ -250,14 +258,22 @@ export class GamificationRepository {
         eventType: achievements.eventType,
         requirementType: achievements.requirementType,
         visibility: achievements.visibility,
+        icon: achievements.icon,
         progress: sql<number>`COALESCE(${userAchievementProgress.value}, 0)`,
         levels: sql<
-          { level: number; threshold: number; xpReward: number; earnedAt: string | null }[]
+          {
+            level: number;
+            threshold: number;
+            xpReward: number;
+            earnedAt: string | null;
+            badgeImageKey: string | null;
+          }[]
         >`json_agg(json_build_object(
             'level', ${achievementLevels.level},
             'threshold', ${achievementLevels.threshold},
             'xpReward', ${achievementLevels.xpReward},
-            'earnedAt', ${userAchievementLevels.createdAt}
+            'earnedAt', ${userAchievementLevels.createdAt},
+            'badgeImageKey', ${achievementLevels.badgeImageKey}
           ) ORDER BY ${achievementLevels.level})`,
       })
       .from(achievements)
@@ -321,6 +337,7 @@ export class GamificationRepository {
         // The text cast keeps postgres.js from encoding the JSON parameter as a JSONB string.
         filters: sql`${JSON.stringify(definition.filters)}::text::jsonb`,
         visibility: definition.visibility,
+        icon: definition.icon,
         availableLocales: Object.keys(definition.title) as SupportedLanguages[],
       })
       .onConflictDoNothing({ target: [achievements.tenantId, achievements.key] })
@@ -333,6 +350,35 @@ export class GamificationRepository {
       .values(definition.levels.map((level) => ({ ...level, achievementId: row.id })));
 
     return row.id;
+  }
+
+  /** Most distinct subjects within any rolling window of `windowDays` days ending at one of the events. */
+  private async measureBestTimeWindow(where: SQL | undefined, subject: SQL, windowDays: number) {
+    const events = this.db.$with("window_events").as(
+      this.db
+        .select({
+          occurredAt: sql<Date>`${outboxEvents.createdAt}`.as("occurred_at"),
+          subject: sql<string>`(${subject})::text`.as("subject"),
+        })
+        .from(outboxEvents)
+        .where(where),
+    );
+
+    const [row] = await this.db
+      .with(events)
+      .select({ value: sql<number>`COALESCE(MAX(window_count), 0)::int` })
+      .from(
+        sql`(
+          SELECT COUNT(DISTINCT later.subject) AS window_count
+          FROM window_events window_end
+          JOIN window_events later
+            ON later.occurred_at > window_end.occurred_at - make_interval(days => ${windowDays}::int)
+           AND later.occurred_at <= window_end.occurred_at
+          GROUP BY window_end.occurred_at
+        ) windows`,
+      );
+
+    return row?.value ?? 0;
   }
 
   private async measureLongestDailyStreak(where: SQL | undefined) {
