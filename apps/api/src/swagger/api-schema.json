@@ -173565,6 +173565,10 @@
                           "type": "string"
                         },
                         {
+                          "const": "door_open",
+                          "type": "string"
+                        },
+                        {
                           "const": "calendar_check",
                           "type": "string"
                         },
@@ -173602,6 +173606,218 @@
                         },
                         {
                           "const": "circle_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gem",
+                          "type": "string"
+                        },
+                        {
+                          "const": "diamond",
+                          "type": "string"
+                        },
+                        {
+                          "const": "shield_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "badge_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "flag",
+                          "type": "string"
+                        },
+                        {
+                          "const": "mountain",
+                          "type": "string"
+                        },
+                        {
+                          "const": "footprints",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gauge",
+                          "type": "string"
+                        },
+                        {
+                          "const": "timer",
+                          "type": "string"
+                        },
+                        {
+                          "const": "hourglass",
+                          "type": "string"
+                        },
+                        {
+                          "const": "alarm_clock",
+                          "type": "string"
+                        },
+                        {
+                          "const": "calendar_days",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sunrise",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sun",
+                          "type": "string"
+                        },
+                        {
+                          "const": "moon",
+                          "type": "string"
+                        },
+                        {
+                          "const": "coffee",
+                          "type": "string"
+                        },
+                        {
+                          "const": "book",
+                          "type": "string"
+                        },
+                        {
+                          "const": "library",
+                          "type": "string"
+                        },
+                        {
+                          "const": "notebook_pen",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pencil",
+                          "type": "string"
+                        },
+                        {
+                          "const": "clipboard_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "list_checks",
+                          "type": "string"
+                        },
+                        {
+                          "const": "check_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "glasses",
+                          "type": "string"
+                        },
+                        {
+                          "const": "microscope",
+                          "type": "string"
+                        },
+                        {
+                          "const": "flask_conical",
+                          "type": "string"
+                        },
+                        {
+                          "const": "atom",
+                          "type": "string"
+                        },
+                        {
+                          "const": "calculator",
+                          "type": "string"
+                        },
+                        {
+                          "const": "languages",
+                          "type": "string"
+                        },
+                        {
+                          "const": "globe",
+                          "type": "string"
+                        },
+                        {
+                          "const": "compass",
+                          "type": "string"
+                        },
+                        {
+                          "const": "map",
+                          "type": "string"
+                        },
+                        {
+                          "const": "route",
+                          "type": "string"
+                        },
+                        {
+                          "const": "telescope",
+                          "type": "string"
+                        },
+                        {
+                          "const": "headphones",
+                          "type": "string"
+                        },
+                        {
+                          "const": "mic",
+                          "type": "string"
+                        },
+                        {
+                          "const": "palette",
+                          "type": "string"
+                        },
+                        {
+                          "const": "users",
+                          "type": "string"
+                        },
+                        {
+                          "const": "handshake",
+                          "type": "string"
+                        },
+                        {
+                          "const": "smile",
+                          "type": "string"
+                        },
+                        {
+                          "const": "party_popper",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gift",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sprout",
+                          "type": "string"
+                        },
+                        {
+                          "const": "leaf",
+                          "type": "string"
+                        },
+                        {
+                          "const": "infinity",
+                          "type": "string"
+                        },
+                        {
+                          "const": "repeat",
+                          "type": "string"
+                        },
+                        {
+                          "const": "trending_up",
+                          "type": "string"
+                        },
+                        {
+                          "const": "activity",
+                          "type": "string"
+                        },
+                        {
+                          "const": "dumbbell",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamepad_2",
+                          "type": "string"
+                        },
+                        {
+                          "const": "key",
+                          "type": "string"
+                        },
+                        {
+                          "const": "anchor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "plane",
                           "type": "string"
                         }
                       ]
@@ -173875,6 +174091,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "door_open",
+                      "type": "string"
+                    },
+                    {
                       "const": "calendar_check",
                       "type": "string"
                     },
@@ -173912,6 +174132,218 @@
                     },
                     {
                       "const": "circle_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gem",
+                      "type": "string"
+                    },
+                    {
+                      "const": "diamond",
+                      "type": "string"
+                    },
+                    {
+                      "const": "shield_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "badge_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "flag",
+                      "type": "string"
+                    },
+                    {
+                      "const": "mountain",
+                      "type": "string"
+                    },
+                    {
+                      "const": "footprints",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gauge",
+                      "type": "string"
+                    },
+                    {
+                      "const": "timer",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hourglass",
+                      "type": "string"
+                    },
+                    {
+                      "const": "alarm_clock",
+                      "type": "string"
+                    },
+                    {
+                      "const": "calendar_days",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sunrise",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sun",
+                      "type": "string"
+                    },
+                    {
+                      "const": "moon",
+                      "type": "string"
+                    },
+                    {
+                      "const": "coffee",
+                      "type": "string"
+                    },
+                    {
+                      "const": "book",
+                      "type": "string"
+                    },
+                    {
+                      "const": "library",
+                      "type": "string"
+                    },
+                    {
+                      "const": "notebook_pen",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pencil",
+                      "type": "string"
+                    },
+                    {
+                      "const": "clipboard_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "list_checks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "check_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "glasses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "microscope",
+                      "type": "string"
+                    },
+                    {
+                      "const": "flask_conical",
+                      "type": "string"
+                    },
+                    {
+                      "const": "atom",
+                      "type": "string"
+                    },
+                    {
+                      "const": "calculator",
+                      "type": "string"
+                    },
+                    {
+                      "const": "languages",
+                      "type": "string"
+                    },
+                    {
+                      "const": "globe",
+                      "type": "string"
+                    },
+                    {
+                      "const": "compass",
+                      "type": "string"
+                    },
+                    {
+                      "const": "map",
+                      "type": "string"
+                    },
+                    {
+                      "const": "route",
+                      "type": "string"
+                    },
+                    {
+                      "const": "telescope",
+                      "type": "string"
+                    },
+                    {
+                      "const": "headphones",
+                      "type": "string"
+                    },
+                    {
+                      "const": "mic",
+                      "type": "string"
+                    },
+                    {
+                      "const": "palette",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users",
+                      "type": "string"
+                    },
+                    {
+                      "const": "handshake",
+                      "type": "string"
+                    },
+                    {
+                      "const": "smile",
+                      "type": "string"
+                    },
+                    {
+                      "const": "party_popper",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gift",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sprout",
+                      "type": "string"
+                    },
+                    {
+                      "const": "leaf",
+                      "type": "string"
+                    },
+                    {
+                      "const": "infinity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "repeat",
+                      "type": "string"
+                    },
+                    {
+                      "const": "trending_up",
+                      "type": "string"
+                    },
+                    {
+                      "const": "activity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "dumbbell",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamepad_2",
+                      "type": "string"
+                    },
+                    {
+                      "const": "key",
+                      "type": "string"
+                    },
+                    {
+                      "const": "anchor",
+                      "type": "string"
+                    },
+                    {
+                      "const": "plane",
                       "type": "string"
                     }
                   ]
@@ -174134,6 +174566,10 @@
                     "type": "string"
                   },
                   {
+                    "const": "door_open",
+                    "type": "string"
+                  },
+                  {
                     "const": "calendar_check",
                     "type": "string"
                   },
@@ -174171,6 +174607,218 @@
                   },
                   {
                     "const": "circle_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gem",
+                    "type": "string"
+                  },
+                  {
+                    "const": "diamond",
+                    "type": "string"
+                  },
+                  {
+                    "const": "shield_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "badge_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "flag",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mountain",
+                    "type": "string"
+                  },
+                  {
+                    "const": "footprints",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gauge",
+                    "type": "string"
+                  },
+                  {
+                    "const": "timer",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hourglass",
+                    "type": "string"
+                  },
+                  {
+                    "const": "alarm_clock",
+                    "type": "string"
+                  },
+                  {
+                    "const": "calendar_days",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sunrise",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sun",
+                    "type": "string"
+                  },
+                  {
+                    "const": "moon",
+                    "type": "string"
+                  },
+                  {
+                    "const": "coffee",
+                    "type": "string"
+                  },
+                  {
+                    "const": "book",
+                    "type": "string"
+                  },
+                  {
+                    "const": "library",
+                    "type": "string"
+                  },
+                  {
+                    "const": "notebook_pen",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pencil",
+                    "type": "string"
+                  },
+                  {
+                    "const": "clipboard_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "list_checks",
+                    "type": "string"
+                  },
+                  {
+                    "const": "check_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "glasses",
+                    "type": "string"
+                  },
+                  {
+                    "const": "microscope",
+                    "type": "string"
+                  },
+                  {
+                    "const": "flask_conical",
+                    "type": "string"
+                  },
+                  {
+                    "const": "atom",
+                    "type": "string"
+                  },
+                  {
+                    "const": "calculator",
+                    "type": "string"
+                  },
+                  {
+                    "const": "languages",
+                    "type": "string"
+                  },
+                  {
+                    "const": "globe",
+                    "type": "string"
+                  },
+                  {
+                    "const": "compass",
+                    "type": "string"
+                  },
+                  {
+                    "const": "map",
+                    "type": "string"
+                  },
+                  {
+                    "const": "route",
+                    "type": "string"
+                  },
+                  {
+                    "const": "telescope",
+                    "type": "string"
+                  },
+                  {
+                    "const": "headphones",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mic",
+                    "type": "string"
+                  },
+                  {
+                    "const": "palette",
+                    "type": "string"
+                  },
+                  {
+                    "const": "users",
+                    "type": "string"
+                  },
+                  {
+                    "const": "handshake",
+                    "type": "string"
+                  },
+                  {
+                    "const": "smile",
+                    "type": "string"
+                  },
+                  {
+                    "const": "party_popper",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gift",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sprout",
+                    "type": "string"
+                  },
+                  {
+                    "const": "leaf",
+                    "type": "string"
+                  },
+                  {
+                    "const": "infinity",
+                    "type": "string"
+                  },
+                  {
+                    "const": "repeat",
+                    "type": "string"
+                  },
+                  {
+                    "const": "trending_up",
+                    "type": "string"
+                  },
+                  {
+                    "const": "activity",
+                    "type": "string"
+                  },
+                  {
+                    "const": "dumbbell",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gamepad_2",
+                    "type": "string"
+                  },
+                  {
+                    "const": "key",
+                    "type": "string"
+                  },
+                  {
+                    "const": "anchor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "plane",
                     "type": "string"
                   }
                 ]
@@ -174581,6 +175229,10 @@
                 "type": "string"
               },
               {
+                "const": "door_open",
+                "type": "string"
+              },
+              {
                 "const": "calendar_check",
                 "type": "string"
               },
@@ -174618,6 +175270,218 @@
               },
               {
                 "const": "circle_check",
+                "type": "string"
+              },
+              {
+                "const": "gem",
+                "type": "string"
+              },
+              {
+                "const": "diamond",
+                "type": "string"
+              },
+              {
+                "const": "shield_check",
+                "type": "string"
+              },
+              {
+                "const": "badge_check",
+                "type": "string"
+              },
+              {
+                "const": "flag",
+                "type": "string"
+              },
+              {
+                "const": "mountain",
+                "type": "string"
+              },
+              {
+                "const": "footprints",
+                "type": "string"
+              },
+              {
+                "const": "gauge",
+                "type": "string"
+              },
+              {
+                "const": "timer",
+                "type": "string"
+              },
+              {
+                "const": "hourglass",
+                "type": "string"
+              },
+              {
+                "const": "alarm_clock",
+                "type": "string"
+              },
+              {
+                "const": "calendar_days",
+                "type": "string"
+              },
+              {
+                "const": "sunrise",
+                "type": "string"
+              },
+              {
+                "const": "sun",
+                "type": "string"
+              },
+              {
+                "const": "moon",
+                "type": "string"
+              },
+              {
+                "const": "coffee",
+                "type": "string"
+              },
+              {
+                "const": "book",
+                "type": "string"
+              },
+              {
+                "const": "library",
+                "type": "string"
+              },
+              {
+                "const": "notebook_pen",
+                "type": "string"
+              },
+              {
+                "const": "pencil",
+                "type": "string"
+              },
+              {
+                "const": "clipboard_check",
+                "type": "string"
+              },
+              {
+                "const": "list_checks",
+                "type": "string"
+              },
+              {
+                "const": "check_check",
+                "type": "string"
+              },
+              {
+                "const": "glasses",
+                "type": "string"
+              },
+              {
+                "const": "microscope",
+                "type": "string"
+              },
+              {
+                "const": "flask_conical",
+                "type": "string"
+              },
+              {
+                "const": "atom",
+                "type": "string"
+              },
+              {
+                "const": "calculator",
+                "type": "string"
+              },
+              {
+                "const": "languages",
+                "type": "string"
+              },
+              {
+                "const": "globe",
+                "type": "string"
+              },
+              {
+                "const": "compass",
+                "type": "string"
+              },
+              {
+                "const": "map",
+                "type": "string"
+              },
+              {
+                "const": "route",
+                "type": "string"
+              },
+              {
+                "const": "telescope",
+                "type": "string"
+              },
+              {
+                "const": "headphones",
+                "type": "string"
+              },
+              {
+                "const": "mic",
+                "type": "string"
+              },
+              {
+                "const": "palette",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              },
+              {
+                "const": "handshake",
+                "type": "string"
+              },
+              {
+                "const": "smile",
+                "type": "string"
+              },
+              {
+                "const": "party_popper",
+                "type": "string"
+              },
+              {
+                "const": "gift",
+                "type": "string"
+              },
+              {
+                "const": "sprout",
+                "type": "string"
+              },
+              {
+                "const": "leaf",
+                "type": "string"
+              },
+              {
+                "const": "infinity",
+                "type": "string"
+              },
+              {
+                "const": "repeat",
+                "type": "string"
+              },
+              {
+                "const": "trending_up",
+                "type": "string"
+              },
+              {
+                "const": "activity",
+                "type": "string"
+              },
+              {
+                "const": "dumbbell",
+                "type": "string"
+              },
+              {
+                "const": "gamepad_2",
+                "type": "string"
+              },
+              {
+                "const": "key",
+                "type": "string"
+              },
+              {
+                "const": "anchor",
+                "type": "string"
+              },
+              {
+                "const": "plane",
                 "type": "string"
               }
             ]
@@ -174926,6 +175790,10 @@
                 "type": "string"
               },
               {
+                "const": "door_open",
+                "type": "string"
+              },
+              {
                 "const": "calendar_check",
                 "type": "string"
               },
@@ -174963,6 +175831,218 @@
               },
               {
                 "const": "circle_check",
+                "type": "string"
+              },
+              {
+                "const": "gem",
+                "type": "string"
+              },
+              {
+                "const": "diamond",
+                "type": "string"
+              },
+              {
+                "const": "shield_check",
+                "type": "string"
+              },
+              {
+                "const": "badge_check",
+                "type": "string"
+              },
+              {
+                "const": "flag",
+                "type": "string"
+              },
+              {
+                "const": "mountain",
+                "type": "string"
+              },
+              {
+                "const": "footprints",
+                "type": "string"
+              },
+              {
+                "const": "gauge",
+                "type": "string"
+              },
+              {
+                "const": "timer",
+                "type": "string"
+              },
+              {
+                "const": "hourglass",
+                "type": "string"
+              },
+              {
+                "const": "alarm_clock",
+                "type": "string"
+              },
+              {
+                "const": "calendar_days",
+                "type": "string"
+              },
+              {
+                "const": "sunrise",
+                "type": "string"
+              },
+              {
+                "const": "sun",
+                "type": "string"
+              },
+              {
+                "const": "moon",
+                "type": "string"
+              },
+              {
+                "const": "coffee",
+                "type": "string"
+              },
+              {
+                "const": "book",
+                "type": "string"
+              },
+              {
+                "const": "library",
+                "type": "string"
+              },
+              {
+                "const": "notebook_pen",
+                "type": "string"
+              },
+              {
+                "const": "pencil",
+                "type": "string"
+              },
+              {
+                "const": "clipboard_check",
+                "type": "string"
+              },
+              {
+                "const": "list_checks",
+                "type": "string"
+              },
+              {
+                "const": "check_check",
+                "type": "string"
+              },
+              {
+                "const": "glasses",
+                "type": "string"
+              },
+              {
+                "const": "microscope",
+                "type": "string"
+              },
+              {
+                "const": "flask_conical",
+                "type": "string"
+              },
+              {
+                "const": "atom",
+                "type": "string"
+              },
+              {
+                "const": "calculator",
+                "type": "string"
+              },
+              {
+                "const": "languages",
+                "type": "string"
+              },
+              {
+                "const": "globe",
+                "type": "string"
+              },
+              {
+                "const": "compass",
+                "type": "string"
+              },
+              {
+                "const": "map",
+                "type": "string"
+              },
+              {
+                "const": "route",
+                "type": "string"
+              },
+              {
+                "const": "telescope",
+                "type": "string"
+              },
+              {
+                "const": "headphones",
+                "type": "string"
+              },
+              {
+                "const": "mic",
+                "type": "string"
+              },
+              {
+                "const": "palette",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              },
+              {
+                "const": "handshake",
+                "type": "string"
+              },
+              {
+                "const": "smile",
+                "type": "string"
+              },
+              {
+                "const": "party_popper",
+                "type": "string"
+              },
+              {
+                "const": "gift",
+                "type": "string"
+              },
+              {
+                "const": "sprout",
+                "type": "string"
+              },
+              {
+                "const": "leaf",
+                "type": "string"
+              },
+              {
+                "const": "infinity",
+                "type": "string"
+              },
+              {
+                "const": "repeat",
+                "type": "string"
+              },
+              {
+                "const": "trending_up",
+                "type": "string"
+              },
+              {
+                "const": "activity",
+                "type": "string"
+              },
+              {
+                "const": "dumbbell",
+                "type": "string"
+              },
+              {
+                "const": "gamepad_2",
+                "type": "string"
+              },
+              {
+                "const": "key",
+                "type": "string"
+              },
+              {
+                "const": "anchor",
+                "type": "string"
+              },
+              {
+                "const": "plane",
                 "type": "string"
               }
             ]

@@ -48,6 +48,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useToast } from "~/components/ui/use-toast";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -136,6 +137,9 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
   const levels = useFieldArray({ control: form.control, name: "levels" });
 
   const baseLanguage = form.watch("baseLanguage");
+  // A translation only covers the texts; everything else belongs to the base-language version.
+  const isTranslating = editingLanguage !== baseLanguage;
+  const isStructureLocked = isReadOnly || isTranslating;
   const translatedTitle = form.watch("title");
   const translatedDescription = form.watch("description");
   // A language counts as added once it has a title or description entry, even an empty one.
@@ -145,6 +149,13 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
       ...(Object.keys({ ...translatedTitle, ...translatedDescription }) as SupportedLanguages[]),
     ]),
   ];
+
+  const baseTitle = translatedTitle[baseLanguage] ?? "";
+  const baseDescription = translatedDescription[baseLanguage] ?? "";
+  const hasMissingTranslations =
+    isTranslating &&
+    (!translatedTitle[editingLanguage]?.trim() ||
+      (Boolean(baseDescription.trim()) && !translatedDescription[editingLanguage]?.trim()));
 
   const createLanguage = (newLanguage: SupportedLanguages) => {
     form.setValue("title", { ...form.getValues("title"), [newLanguage]: "" });
@@ -246,7 +257,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                         <Switch
                           id="achievement-enabled"
                           checked={field.value}
-                          disabled={isUpdatingStatus}
+                          disabled={isUpdatingStatus || (isTranslating && !isReadOnly)}
                           onCheckedChange={(isEnabled) => {
                             // Read-only achievements save their status right away; others on submit.
                             if (!isReadOnly || !id) return field.onChange(isEnabled);
@@ -304,8 +315,24 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                   </AlertDescription>
                 </Alert>
               )}
+              {isTranslating && !isReadOnly && (
+                <Alert className="md:col-span-2">
+                  <AlertDescription>
+                    {t("gamification.admin.form.translationMode", {
+                      language: t(`common.languages.${editingLanguage}`),
+                    })}
+                  </AlertDescription>
+                </Alert>
+              )}
+              {hasMissingTranslations && !isReadOnly && (
+                <div className="md:col-span-2">
+                  <MissingTranslationsAlert />
+                </div>
+              )}
               <fieldset disabled={isReadOnly} className="contents">
                 <FormField
+                  // Remount per language: a reused controller keeps the previous language's binding.
+                  key={`title-${editingLanguage}`}
                   control={form.control}
                   name={`title.${editingLanguage}`}
                   render={({ field }) => (
@@ -314,6 +341,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                       <FormControl>
                         <Input
                           id="achievement-title"
+                          placeholder={isTranslating ? baseTitle : undefined}
                           maxLength={ACHIEVEMENT_TEXT_MAX_LENGTH}
                           data-testid={ACHIEVEMENT_FORM_HANDLES.TITLE_INPUT}
                           {...field}
@@ -325,6 +353,8 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                   )}
                 />
                 <FormField
+                  // Remount per language: a reused controller keeps the previous language's binding.
+                  key={`description-${editingLanguage}`}
                   control={form.control}
                   name={`description.${editingLanguage}`}
                   render={({ field }) => (
@@ -335,6 +365,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                       <FormControl>
                         <Textarea
                           id="achievement-description"
+                          placeholder={isTranslating ? baseDescription : undefined}
                           maxLength={ACHIEVEMENT_TEXT_MAX_LENGTH}
                           data-testid={ACHIEVEMENT_FORM_HANDLES.DESCRIPTION_INPUT}
                           {...field}
@@ -345,6 +376,8 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                     </FormItem>
                   )}
                 />
+              </fieldset>
+              <fieldset disabled={isStructureLocked} className="contents">
                 <FormField
                   control={form.control}
                   name="visibility"
@@ -354,7 +387,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={isReadOnly}
+                        disabled={isStructureLocked}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -384,6 +417,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                         value={field.value}
                         onChange={field.onChange}
                         levels={isFirstTime ? watchedLevels.slice(0, 1) : watchedLevels}
+                        disabled={isStructureLocked}
                       />
                     </FormItem>
                   )}
@@ -397,7 +431,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
               <CardTitle className="h6">{t("gamification.admin.form.requirement")}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              <fieldset disabled={isReadOnly} className="contents">
+              <fieldset disabled={isStructureLocked} className="contents">
                 <FormField
                   control={form.control}
                   name="eventType"
@@ -407,7 +441,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={isReadOnly}
+                        disabled={isStructureLocked}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -434,7 +468,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={isReadOnly}
+                        disabled={isStructureLocked}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -489,7 +523,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                         <Label>{t("gamification.admin.form.course")}</Label>
                         <Select
                           value={field.value ?? NO_COURSE}
-                          disabled={isReadOnly}
+                          disabled={isStructureLocked}
                           onValueChange={(value) =>
                             field.onChange(value === NO_COURSE ? null : value)
                           }
@@ -548,7 +582,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
               <CardTitle className="h6">{t("gamification.admin.form.levels")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <fieldset disabled={isReadOnly} className="contents">
+              <fieldset disabled={isStructureLocked} className="contents">
                 {visibleLevels.map((level, index) => (
                   <div
                     key={level.id}
@@ -614,7 +648,7 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                         </FormItem>
                       )}
                     />
-                    {!isReadOnly && !isFirstTime && levels.fields.length > 1 && (
+                    {!isStructureLocked && !isFirstTime && levels.fields.length > 1 && (
                       <Button
                         type="button"
                         size="icon"
@@ -630,25 +664,27 @@ function AchievementForm({ achievement }: { achievement?: GetAdminAchievementRes
                     )}
                   </div>
                 ))}
-                {!isReadOnly && !isFirstTime && levels.fields.length < ACHIEVEMENT_MAX_LEVELS && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="self-start"
-                    data-testid={ACHIEVEMENT_FORM_HANDLES.ADD_LEVEL_BUTTON}
-                    onClick={() => {
-                      const last = form.getValues("levels").at(-1);
-                      levels.append({
-                        threshold: (last?.threshold ?? 0) + 1,
-                        xpReward: last?.xpReward ?? 10,
-                        badgeImageKey: null,
-                        badgeImageUrl: null,
-                      });
-                    }}
-                  >
-                    {t("gamification.admin.form.addLevel")}
-                  </Button>
-                )}
+                {!isStructureLocked &&
+                  !isFirstTime &&
+                  levels.fields.length < ACHIEVEMENT_MAX_LEVELS && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="self-start"
+                      data-testid={ACHIEVEMENT_FORM_HANDLES.ADD_LEVEL_BUTTON}
+                      onClick={() => {
+                        const last = form.getValues("levels").at(-1);
+                        levels.append({
+                          threshold: (last?.threshold ?? 0) + 1,
+                          xpReward: last?.xpReward ?? 10,
+                          badgeImageKey: null,
+                          badgeImageUrl: null,
+                        });
+                      }}
+                    >
+                      {t("gamification.admin.form.addLevel")}
+                    </Button>
+                  )}
               </fieldset>
             </CardContent>
           </Card>

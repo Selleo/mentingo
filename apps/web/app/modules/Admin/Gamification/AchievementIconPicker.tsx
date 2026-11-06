@@ -1,8 +1,18 @@
 import { ACHIEVEMENT_ICONS, type AchievementIcon } from "@repo/shared";
+import { Check, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import { Label } from "~/components/ui/label";
-import { cn } from "~/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { AchievementBadge } from "~/modules/Gamification/AchievementBadge";
 import { ACHIEVEMENT_ICON_COMPONENTS } from "~/modules/Gamification/achievementIcons";
 
@@ -21,41 +31,70 @@ export function AchievementIconPicker({
   disabled,
 }: AchievementIconPickerProps) {
   const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const SelectedIcon = ACHIEVEMENT_ICON_COMPONENTS[value];
 
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-start">
       <div className="flex flex-1 flex-col gap-y-1.5">
-        <Label id="achievement-icon-label">{t("gamification.admin.form.icon")}</Label>
-        <div
-          role="radiogroup"
-          aria-labelledby="achievement-icon-label"
-          aria-describedby="achievement-icon-hint"
-          className="flex flex-wrap gap-1.5"
-        >
-          {Object.values(ACHIEVEMENT_ICONS).map((icon) => {
-            const Icon = ACHIEVEMENT_ICON_COMPONENTS[icon];
-            const isSelected = value === icon;
+        <Label htmlFor="achievement-icon">{t("gamification.admin.form.icon")}</Label>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <button
+              id="achievement-icon"
+              type="button"
+              role="combobox"
+              aria-expanded={isOpen}
+              aria-controls="achievement-icon-options"
+              aria-describedby="achievement-icon-hint"
+              disabled={disabled}
+              className="flex h-[42px] w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 md:max-w-sm"
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <SelectedIcon className="size-4 shrink-0" />
+                <span className="truncate">{t(`gamification.admin.icons.${value}`)}</span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            id="achievement-icon-options"
+            align="start"
+            className="w-[min(92vw,24rem)] p-0"
+          >
+            <Command className="[&_[cmdk-input]]:outline-none">
+              <CommandInput
+                className="outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+                placeholder={t("gamification.admin.form.searchIcon")}
+              />
+              <CommandList>
+                <CommandEmpty>{t("gamification.admin.form.noIconFound")}</CommandEmpty>
+                <CommandGroup>
+                  {Object.values(ACHIEVEMENT_ICONS).map((icon) => {
+                    const Icon = ACHIEVEMENT_ICON_COMPONENTS[icon];
+                    const name = t(`gamification.admin.icons.${icon}`);
 
-            return (
-              <button
-                key={icon}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
-                aria-label={t(`gamification.admin.icons.${icon}`)}
-                title={t(`gamification.admin.icons.${icon}`)}
-                disabled={disabled}
-                className={cn(
-                  "flex size-9 items-center justify-center rounded-lg border border-neutral-300 bg-white text-neutral-700 transition hover:border-primary-500 hover:text-primary-700 disabled:pointer-events-none disabled:opacity-50",
-                  isSelected && "border-primary-500 bg-primary-50 text-primary-700",
-                )}
-                onClick={() => onChange(icon)}
-              >
-                <Icon className="size-5" />
-              </button>
-            );
-          })}
-        </div>
+                    return (
+                      <CommandItem
+                        key={icon}
+                        // cmdk filters on this value, so search matches the translated name.
+                        value={`${name} ${icon}`}
+                        onSelect={() => {
+                          onChange(icon);
+                          setIsOpen(false);
+                        }}
+                      >
+                        <Icon className="size-4 shrink-0" />
+                        <span className="flex-1 truncate">{name}</span>
+                        {icon === value && <Check className="size-4 text-primary-700" />}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
         <p id="achievement-icon-hint" className="text-sm text-muted-foreground">
           {t("gamification.admin.form.iconHint")}
         </p>

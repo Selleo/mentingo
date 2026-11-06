@@ -36,7 +36,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.FIRST_TIME,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
-    icon: ACHIEVEMENT_ICONS.LOG_IN,
+    icon: ACHIEVEMENT_ICONS.DOOR_OPEN,
     levels: [{ level: 1, threshold: 1, xpReward: 10 }],
   },
   {
