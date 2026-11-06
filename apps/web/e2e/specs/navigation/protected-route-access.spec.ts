@@ -81,12 +81,16 @@ const expectReportApiAllowed = async (client: FixtureApiClient) => {
   expect((await client.api.reportControllerRunReport(reportQuery)).status).toBe(201);
 };
 
+// The reviewer has no dashboard, course, calendar or path access, so it falls back to settings.
+const deniedRouteRedirect = (role: string) =>
+  role === SYSTEM_ROLE_SLUGS.REVIEWER ? /\/settings$/ : /\/(dashboard|courses)$/;
+
 const expectDeniedRoutes = async (page: Page, role: string) => {
   for (const { path, requirement } of protectedRoutes) {
     if (matchesRequirement(SYSTEM_ROLE_PERMISSIONS[role], requirement)) continue;
     await test.step(path, async () => {
       await page.goto(`${path}?language=en`);
-      await expect(page).toHaveURL(/\/(dashboard|courses)$/);
+      await expect(page).toHaveURL(deniedRouteRedirect(role));
       await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
     });
   }
@@ -107,7 +111,7 @@ const expectReportsAccessFollowsPermissions = async (
       await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
       await expect(page).toHaveURL(/\/reports\?language=en$/);
     } else {
-      await expect(page).toHaveURL(/\/(dashboard|courses)$/);
+      await expect(page).toHaveURL(deniedRouteRedirect(role));
       await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
     }
   }
@@ -216,36 +220,38 @@ test(`${SYSTEM_ROLE_SLUGS.TRAINER} reports access follows its permissions on dir
   });
 });
 
-test(`${SYSTEM_ROLE_SLUGS.GROUP_MANAGER} reports access follows its permissions on direct entry and reload`, async ({
-  browser,
-  baseURL,
-}) => {
-  test.slow();
-  const adminContext = await browser.newContext();
-  const context = await browser.newContext();
-  const adminClient = createFixtureApiClient();
-  const factory = new UserFactory(adminClient);
-  let userId: string | undefined;
-  try {
-    await authenticateContext(
-      adminContext,
-      baseURL!,
-      SEEDED_ROLE_EMAILS[SYSTEM_ROLE_SLUGS.ADMIN],
-      SEEDED_PASSWORD,
-    );
-    await adminClient.syncFromContext(adminContext, baseURL!);
-    const user = await factory.register({ password: REGISTERED_USER_PASSWORD });
-    userId = user.id;
-    await factory.update(user.id, { roleSlugs: [SYSTEM_ROLE_SLUGS.GROUP_MANAGER] });
+for (const role of [SYSTEM_ROLE_SLUGS.GROUP_MANAGER, SYSTEM_ROLE_SLUGS.REVIEWER] as const) {
+  test(`${role} reports access follows its permissions on direct entry and reload`, async ({
+    browser,
+    baseURL,
+  }) => {
+    test.slow();
+    const adminContext = await browser.newContext();
+    const context = await browser.newContext();
+    const adminClient = createFixtureApiClient();
+    const factory = new UserFactory(adminClient);
+    let userId: string | undefined;
+    try {
+      await authenticateContext(
+        adminContext,
+        baseURL!,
+        SEEDED_ROLE_EMAILS[SYSTEM_ROLE_SLUGS.ADMIN],
+        SEEDED_PASSWORD,
+      );
+      await adminClient.syncFromContext(adminContext, baseURL!);
+      const user = await factory.register({ password: REGISTERED_USER_PASSWORD });
+      userId = user.id;
+      await factory.update(user.id, { roleSlugs: [role] });
 
-    await authenticateContext(context, baseURL!, user.email, REGISTERED_USER_PASSWORD);
-    const client = createFixtureApiClient();
-    await client.syncFromContext(context, baseURL!);
-    const page = await context.newPage();
-    await expectReportsAccessFollowsPermissions(page, client, SYSTEM_ROLE_SLUGS.GROUP_MANAGER);
-  } finally {
-    if (userId) await factory.delete(userId);
-    await context.close();
-    await adminContext.close();
-  }
-});
+      await authenticateContext(context, baseURL!, user.email, REGISTERED_USER_PASSWORD);
+      const client = createFixtureApiClient();
+      await client.syncFromContext(context, baseURL!);
+      const page = await context.newPage();
+      await expectReportsAccessFollowsPermissions(page, client, role);
+    } finally {
+      if (userId) await factory.delete(userId);
+      await context.close();
+      await adminContext.close();
+    }
+  });
+}

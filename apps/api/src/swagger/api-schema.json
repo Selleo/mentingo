@@ -26618,6 +26618,14 @@
                     {
                       "const": "gamification.manage",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.grade",
+                      "type": "string"
                     }
                   ]
                 }
@@ -31456,6 +31464,9 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
               "featuredCourseId": {
                 "anyOf": [
                   {
@@ -31648,6 +31659,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "gamificationEnabled",
