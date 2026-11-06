@@ -1,7 +1,13 @@
 import {
+  ACHIEVEMENT_ICONS,
+  ACHIEVEMENT_MAX_LEVELS,
+  ACHIEVEMENT_MAX_WINDOW_DAYS,
+  ACHIEVEMENT_MAX_XP_REWARD,
   ACHIEVEMENT_REQUIREMENT_TYPES,
   ACHIEVEMENT_VISIBILITY,
+  DEFAULT_ACHIEVEMENT_ICON,
   GAMIFICATION_EVENT_TYPES,
+  type AchievementIcon,
   type AchievementRequirementType,
   type AchievementVisibility,
   type GamificationEventType,
@@ -47,12 +53,15 @@ export const achievements = pgTable(
     description: jsonb("description").$type<LocalizedText>().notNull().default({}),
     eventType: text("event_type").$type<GamificationEventType>().notNull(),
     requirementType: text("requirement_type").$type<AchievementRequirementType>().notNull(),
+    // Rolling window length for time-window achievements; null for every other requirement type.
+    windowDays: integer("window_days"),
     filters: jsonb("filters").$type<AchievementFilters>().notNull().default({}),
     visibility: text("visibility")
       .$type<AchievementVisibility>()
       .notNull()
       .default(ACHIEVEMENT_VISIBILITY.VISIBLE),
     isEnabled: boolean("is_enabled").notNull().default(true),
+    icon: text("icon").$type<AchievementIcon>().notNull().default(DEFAULT_ACHIEVEMENT_ICON),
     baseLanguage,
     availableLocales,
   },
@@ -70,6 +79,18 @@ export const achievements = pgTable(
       "achievements_visibility_check",
       sql`${table.visibility} IN (${sqlValueList(ACHIEVEMENT_VISIBILITY)})`,
     ),
+    iconCheck: check(
+      "achievements_icon_check",
+      sql`${table.icon} IN (${sqlValueList(ACHIEVEMENT_ICONS)})`,
+    ),
+    windowDaysCheck: check(
+      "achievements_window_days_check",
+      sql`(${table.requirementType} = ${sql.raw(
+        `'${ACHIEVEMENT_REQUIREMENT_TYPES.TIME_WINDOW}'`,
+      )}) = (${table.windowDays} IS NOT NULL) AND (${table.windowDays} IS NULL OR ${
+        table.windowDays
+      } BETWEEN 1 AND ${sql.raw(String(ACHIEVEMENT_MAX_WINDOW_DAYS))})`,
+    ),
   })),
 );
 
@@ -85,16 +106,25 @@ export const achievementLevels = pgTable(
     level: integer("level").notNull(),
     threshold: integer("threshold").notNull(),
     xpReward: integer("xp_reward").notNull(),
+    // Uploaded badge for this level; without it the level shows the badge tier matching its number.
+    badgeImageKey: text("badge_image_key"),
   },
   withTenantIdIndex("achievement_levels", (table) => ({
     achievementLevelUnique: unique("achievement_levels_achievement_level_unique").on(
       table.achievementId,
       table.level,
     ),
+    // Each level maps to a badge tier, so the level count is capped.
+    levelCheck: check(
+      "achievement_levels_level_check",
+      sql`${table.level} BETWEEN 1 AND ${sql.raw(String(ACHIEVEMENT_MAX_LEVELS))}`,
+    ),
     // A threshold below 1 would grant the level to every user on the next evaluation.
-    levelCheck: check("achievement_levels_level_check", sql`${table.level} >= 1`),
     thresholdCheck: check("achievement_levels_threshold_check", sql`${table.threshold} >= 1`),
-    xpRewardCheck: check("achievement_levels_xp_reward_check", sql`${table.xpReward} >= 0`),
+    xpRewardCheck: check(
+      "achievement_levels_xp_reward_check",
+      sql`${table.xpReward} BETWEEN 0 AND ${sql.raw(String(ACHIEVEMENT_MAX_XP_REWARD))}`,
+    ),
   })),
 );
 

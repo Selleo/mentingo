@@ -832,6 +832,7 @@
     "replace": "Haz clic para reemplazar",
     "toast": {
       "fileUploadedSuccessfully": "Archivo subido correctamente",
+      "uploadFailed": "No se pudo subir el archivo. Comprueba el tipo y el tamaño del archivo e inténtalo de nuevo.",
       "videoFailed": "Error al subir el vídeo",
       "videoTooLarge": "El archivo de vídeo supera el tamaño máximo permitido",
       "videoReady": "El vídeo está listo para usarse",
@@ -1092,7 +1093,8 @@
     "qa": "Preguntas y respuestas",
     "tenants": "Organizaciones",
     "activityLogs": "Registros de actividad",
-    "reports": "Informes"
+    "reports": "Informes",
+    "gamification": "Gamificación"
   },
   "microsoftCalendar": {
     "title": "Calendario de Microsoft",
@@ -2409,7 +2411,8 @@
         "competencies_manage": "Gestionar definiciones de competencias y perfiles de puesto.",
         "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial.",
         "gamification_read": "Ver niveles, XP y logros.",
-        "gamification_earn_hidden": "Obtener logros ocultos."
+        "gamification_earn_hidden": "Obtener logros ocultos.",
+        "gamification_manage": "Configurar logros y ajustes de gamificación."
       }
     },
     "dropdown": {
@@ -5278,8 +5281,7 @@
       "insert": "Insertar",
       "delete": "Eliminar",
       "columns": {
-        "asset": "Recurso",
-        "actions": "Acciones"
+        "asset": "Recurso"
       },
       "visibility": {
         "public": "Público",
@@ -5369,7 +5371,8 @@
     "tenants": "Organizaciones",
     "learningPaths": "Rutas de desarrollo",
     "adminLearningPaths": "Rutas de desarrollo",
-    "adminLearningPathEditor": "Editor de ruta de desarrollo"
+    "adminLearningPathEditor": "Editor de ruta de desarrollo",
+    "gamification": "Gamificación"
   },
   "learningPathsView": {
     "hero": {
@@ -9142,6 +9145,218 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "No se pudieron cargar los logros.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "admin": {
+      "title": "Gamificación",
+      "description": "Activa la gamificación en tu organización y configura los logros que pueden obtener los alumnos.",
+      "enabled": {
+        "label": "Activar gamificación",
+        "description": "Muestra a los usuarios niveles, XP, logros y notificaciones de recompensas. Las recompensas se calculan aunque esta opción esté desactivada."
+      },
+      "achievements": {
+        "title": "Logros",
+        "description": "Logros predefinidos y personalizados. Desactivar un logro detiene el progreso nuevo, pero conserva las recompensas ya obtenidas.",
+        "create": "Nuevo logro"
+      },
+      "columns": {
+        "achievement": "Logro",
+        "event": "Evento",
+        "levels": "Niveles",
+        "visibility": "Visibilidad",
+        "enabled": "Activo"
+      },
+      "predefined": "Predefinido",
+      "events": {
+        "login": "Inicio de sesión",
+        "lesson_completed": "Lección completada",
+        "course_completed": "Curso completado",
+        "quiz_completed": "Cuestionario completado"
+      },
+      "visibilityHints": {
+        "visible": "Los participantes lo ven antes de obtenerlo.",
+        "hidden": "Los participantes solo lo ven después de obtenerlo."
+      },
+      "icons": {
+        "trophy": "Trofeo",
+        "star": "Estrella",
+        "flame": "Llama",
+        "zap": "Rayo",
+        "target": "Diana",
+        "award": "Premio",
+        "medal": "Medalla",
+        "crown": "Corona",
+        "rocket": "Cohete",
+        "book_open": "Libro",
+        "graduation_cap": "Birrete",
+        "log_in": "Iniciar sesión",
+        "door_open": "Puerta abierta",
+        "calendar_check": "Calendario",
+        "clock": "Reloj",
+        "brain": "Cerebro",
+        "lightbulb": "Bombilla",
+        "puzzle": "Rompecabezas",
+        "message_circle": "Bocadillo",
+        "heart": "Corazón",
+        "thumbs_up": "Pulgar arriba",
+        "sparkles": "Destellos",
+        "circle_check": "Marca de verificación",
+        "gem": "Gema",
+        "diamond": "Diamante",
+        "shield_check": "Escudo",
+        "badge_check": "Insignia verificada",
+        "flag": "Bandera",
+        "mountain": "Montaña",
+        "footprints": "Huellas",
+        "gauge": "Indicador",
+        "timer": "Temporizador",
+        "hourglass": "Reloj de arena",
+        "alarm_clock": "Despertador",
+        "calendar_days": "Calendario",
+        "sunrise": "Amanecer",
+        "sun": "Sol",
+        "moon": "Luna",
+        "coffee": "Café",
+        "book": "Libro",
+        "library": "Biblioteca",
+        "notebook_pen": "Cuaderno",
+        "pencil": "Lápiz",
+        "clipboard_check": "Lista de control",
+        "list_checks": "Lista de tareas",
+        "check_check": "Doble marca",
+        "glasses": "Gafas",
+        "microscope": "Microscopio",
+        "flask_conical": "Matraz",
+        "atom": "Átomo",
+        "calculator": "Calculadora",
+        "languages": "Idiomas",
+        "globe": "Globo",
+        "compass": "Brújula",
+        "map": "Mapa",
+        "route": "Ruta",
+        "telescope": "Telescopio",
+        "headphones": "Auriculares",
+        "mic": "Micrófono",
+        "palette": "Paleta",
+        "users": "Personas",
+        "handshake": "Apretón de manos",
+        "smile": "Sonrisa",
+        "party_popper": "Celebración",
+        "gift": "Regalo",
+        "sprout": "Brote",
+        "leaf": "Hoja",
+        "infinity": "Infinito",
+        "repeat": "Repetir",
+        "trending_up": "Crecimiento",
+        "activity": "Actividad",
+        "dumbbell": "Mancuerna",
+        "gamepad_2": "Mando",
+        "key": "Llave",
+        "anchor": "Ancla",
+        "plane": "Avión"
+      },
+      "requirementHints": {
+        "first_time": "Se otorga la primera vez que ocurre la actividad. Tiene un solo nivel.",
+        "count": "Cuenta cada vez que ocurre la actividad, en total.",
+        "streak": "Cuenta la racha más larga de días consecutivos con la actividad.",
+        "time_window": "Cuenta el máximo de actividades en cualquier periodo de la duración elegida."
+      },
+      "requirements": {
+        "first_time": "Primera vez",
+        "count": "Cantidad",
+        "streak": "Racha diaria",
+        "time_window": "Dentro de un periodo"
+      },
+      "levelsSummary": "Niveles: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Visible",
+        "hidden": "Oculto hasta obtenerlo"
+      },
+      "language": {
+        "label": "Idioma",
+        "baseLanguage": "Predeterminado",
+        "notAddedLanguages": "Idiomas para agregar",
+        "setBaseLanguage": "Establecer como predeterminado",
+        "setBaseTitle": "Cambiar idioma predeterminado",
+        "setBaseDescription": "¿Utilizar {{language}} como idioma predeterminado para este logro?",
+        "createTitle": "Crear traducción",
+        "createDescription": "¿Crear una traducción para este logro en {{language}}?",
+        "deleteTitle": "Eliminar traducción",
+        "deleteDescription": "¿Eliminar la traducción {{language}}? Su contenido será eliminado."
+      },
+      "form": {
+        "createTitle": "Nuevo logro",
+        "editTitle": "Editar logro",
+        "viewTitle": "Logro predeterminado",
+        "predefinedReadOnly": "Los logros predeterminados vienen con la plataforma, por lo que no se pueden editar. Aun así, puedes activar o desactivar este.",
+        "translationMode": "Estás editando la traducción: {{language}}. Aquí solo se pueden cambiar el nombre y la descripción; cambia al idioma predeterminado para editar el resto.",
+        "name": "Nombre",
+        "description": "Descripción",
+        "requirement": "Requisito",
+        "event": "Evento",
+        "requirementType": "Tipo de requisito",
+        "windowDays": "Duración del periodo (días)",
+        "course": "Curso",
+        "anyCourse": "Cualquier curso",
+        "minScore": "Puntuación mínima del cuestionario (%)",
+        "levels": "Niveles y recompensas de XP",
+        "thresholdLabels": {
+          "count": {
+            "login": "Número de inicios de sesión",
+            "lesson_completed": "Número de lecciones completadas",
+            "course_completed": "Número de cursos completados",
+            "quiz_completed": "Número de cuestionarios completados"
+          },
+          "streak": {
+            "login": "Días seguidos con un inicio de sesión",
+            "lesson_completed": "Días seguidos con una lección completada",
+            "course_completed": "Días seguidos con un curso completado",
+            "quiz_completed": "Días seguidos con un cuestionario completado"
+          },
+          "time_window": {
+            "login": "Inicios de sesión dentro del periodo",
+            "lesson_completed": "Lecciones completadas dentro del periodo",
+            "course_completed": "Cursos completados dentro del periodo",
+            "quiz_completed": "Cuestionarios completados dentro del periodo"
+          }
+        },
+        "xpReward": "Recompensa de XP",
+        "addLevel": "Añadir nivel",
+        "inactive": "Inactivo",
+        "statusHint": "Los logros inactivos dejan de otorgar nuevos niveles. Los niveles ya obtenidos se conservan.",
+        "badge": "Insignia",
+        "icon": "Icono",
+        "badgePreview": "Vista previa de la insignia",
+        "iconHint": "El icono solo se muestra en las insignias predeterminadas. Los niveles con una insignia subida muestran la imagen tal cual.",
+        "searchIcon": "Buscar iconos",
+        "noIconFound": "No se encontró ningún icono.",
+        "resetBadge": "Usar insignia predeterminada"
+      },
+      "validation": {
+        "threshold": "Introduce un valor de al menos 1.",
+        "xpReward": "Introduce un número entero de XP entre 0 y {{max}}.",
+        "titleRequired": "Introduce un nombre en el idioma base.",
+        "windowDays": "Introduce un número entero de días entre 1 y {{max}}.",
+        "thresholdsAscending": "Cada nivel debe requerir más que el anterior.",
+        "minScore": "Introduce una puntuación entre 0 y 100.",
+        "textTooLong": "Usa como máximo {{max}} caracteres."
+      },
+      "loadFailed": "No se pudo cargar el logro.",
+      "loadListFailed": "No se pudieron cargar los logros.",
+      "toast": {
+        "achievementSaved": "Logro guardado.",
+        "achievementNotSaved": "No se pudo guardar el logro.",
+        "settingsSaved": "Ajustes de gamificación guardados.",
+        "achievementNotFound": "No se encontró el logro.",
+        "predefinedNotEditable": "Los logros predefinidos solo se pueden activar o desactivar.",
+        "earnedLevelRemoved": "No se pueden eliminar niveles que los usuarios ya han obtenido.",
+        "baseLanguageTitleRequired": "Introduce un nombre en el idioma base.",
+        "unsupportedFilter": "El evento seleccionado no admite este filtro.",
+        "courseNotFound": "El curso seleccionado no existe.",
+        "invalidTimeWindow": "La duración del periodo solo se usa en logros por periodo.",
+        "invalidFirstTimeLevels": "Los logros de «Primera vez» tienen exactamente un nivel con valor 1.",
+        "thresholdsNotAscending": "Cada nivel debe requerir más que el anterior.",
+        "invalidBadgeImage": "La imagen de la insignia no es válida. Vuelve a subirla."
+      }
+    }
   }
 }

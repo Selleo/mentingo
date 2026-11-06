@@ -1,4 +1,5 @@
 import {
+  ACHIEVEMENT_ICONS,
   ACHIEVEMENT_REQUIREMENT_TYPES,
   ACHIEVEMENT_VISIBILITY,
   GAMIFICATION_EVENT_TYPES,
@@ -35,6 +36,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.FIRST_TIME,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.DOOR_OPEN,
     levels: [{ level: 1, threshold: 1, xpReward: 10 }],
   },
   {
@@ -61,6 +63,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.STREAK,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.FLAME,
     levels: [
       { level: 1, threshold: 3, xpReward: 30 },
       { level: 2, threshold: 7, xpReward: 70 },
@@ -91,6 +94,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.FIRST_TIME,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.BOOK_OPEN,
     levels: [{ level: 1, threshold: 1, xpReward: 20 }],
   },
   {
@@ -117,6 +121,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.COUNT,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.STAR,
     levels: [
       { level: 1, threshold: 5, xpReward: 50 },
       { level: 2, threshold: 25, xpReward: 100 },
@@ -147,6 +152,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.FIRST_TIME,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.GRADUATION_CAP,
     levels: [{ level: 1, threshold: 1, xpReward: 100 }],
   },
   {
@@ -173,6 +179,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.COUNT,
     filters: {},
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.TROPHY,
     levels: [
       { level: 1, threshold: 3, xpReward: 150 },
       { level: 2, threshold: 10, xpReward: 400 },
@@ -202,6 +209,7 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
     requirementType: ACHIEVEMENT_REQUIREMENT_TYPES.FIRST_TIME,
     filters: { minScore: 100 },
     visibility: ACHIEVEMENT_VISIBILITY.VISIBLE,
+    icon: ACHIEVEMENT_ICONS.TARGET,
     levels: [{ level: 1, threshold: 1, xpReward: 50 }],
   },
 ];

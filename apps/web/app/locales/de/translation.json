@@ -829,6 +829,7 @@
     "replace": "Klicken Sie zum Ersetzen",
     "toast": {
       "fileUploadedSuccessfully": "Datei erfolgreich hochgeladen",
+      "uploadFailed": "Datei-Upload fehlgeschlagen. Prüfe Dateityp und -größe und versuche es erneut.",
       "videoFailed": "Das Hochladen des Videos ist fehlgeschlagen",
       "videoTooLarge": "Die Videodatei überschreitet die maximal zulässige Größe",
       "videoReady": "Das Video ist einsatzbereit",
@@ -1088,7 +1089,8 @@
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
-    "reports": "Berichte"
+    "reports": "Berichte",
+    "gamification": "Gamification"
   },
   "microsoftCalendar": {
     "title": "Microsoft-Kalender",
@@ -2416,7 +2418,8 @@
         "ai_thread_read": "Alle KI-Unterhaltungen und ihre gespeicherten Bewertungen anzeigen.",
         "activity_log_read": "Aktivitätsprotokolle anzeigen.",
         "gamification_read": "Level, XP und Erfolge anzeigen.",
-        "gamification_earn_hidden": "Versteckte Erfolge erhalten."
+        "gamification_earn_hidden": "Versteckte Erfolge erhalten.",
+        "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren."
       }
     },
     "dropdown": {
@@ -5321,8 +5324,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Asset",
-        "actions": "Actions"
+        "asset": "Asset"
       },
       "visibility": {
         "public": "Public",
@@ -5412,7 +5414,8 @@
     "activityLogs": "Aktivitätsprotokoll",
     "learningPaths": "Entwicklungspfade",
     "adminLearningPaths": "Entwicklungspfade",
-    "adminLearningPathEditor": "Entwicklungspfad Editor"
+    "adminLearningPathEditor": "Entwicklungspfad Editor",
+    "gamification": "Gamification"
   },
   "courseDuplication": {
     "error": {
@@ -9192,6 +9195,218 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Erfolge konnten nicht geladen werden.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "admin": {
+      "title": "Gamification",
+      "description": "Aktiviere Gamification für deine Organisation und konfiguriere die Erfolge, die Lernende erhalten können.",
+      "enabled": {
+        "label": "Gamification aktivieren",
+        "description": "Zeige Nutzern Level, XP, Erfolge und Belohnungsbenachrichtigungen. Belohnungen werden auch berechnet, wenn dies deaktiviert ist."
+      },
+      "achievements": {
+        "title": "Erfolge",
+        "description": "Vordefinierte und eigene Erfolge. Das Deaktivieren eines Erfolgs stoppt neuen Fortschritt, behält aber bereits erhaltene Belohnungen.",
+        "create": "Neuer Erfolg"
+      },
+      "columns": {
+        "achievement": "Erfolg",
+        "event": "Ereignis",
+        "levels": "Stufen",
+        "visibility": "Sichtbarkeit",
+        "enabled": "Aktiv"
+      },
+      "predefined": "Vordefiniert",
+      "events": {
+        "login": "Anmeldung",
+        "lesson_completed": "Lektion abgeschlossen",
+        "course_completed": "Kurs abgeschlossen",
+        "quiz_completed": "Quiz abgeschlossen"
+      },
+      "visibilityHints": {
+        "visible": "Lernende sehen ihn, bevor sie ihn erreichen.",
+        "hidden": "Lernende sehen ihn erst, nachdem sie ihn erreicht haben."
+      },
+      "icons": {
+        "trophy": "Pokal",
+        "star": "Stern",
+        "flame": "Flamme",
+        "zap": "Blitz",
+        "target": "Ziel",
+        "award": "Auszeichnung",
+        "medal": "Medaille",
+        "crown": "Krone",
+        "rocket": "Rakete",
+        "book_open": "Buch",
+        "graduation_cap": "Doktorhut",
+        "log_in": "Anmelden",
+        "door_open": "Offene Tür",
+        "calendar_check": "Kalender",
+        "clock": "Uhr",
+        "brain": "Gehirn",
+        "lightbulb": "Glühbirne",
+        "puzzle": "Puzzle",
+        "message_circle": "Sprechblase",
+        "heart": "Herz",
+        "thumbs_up": "Daumen hoch",
+        "sparkles": "Funkeln",
+        "circle_check": "Häkchen",
+        "gem": "Edelstein",
+        "diamond": "Diamant",
+        "shield_check": "Schild",
+        "badge_check": "Verifiziert-Abzeichen",
+        "flag": "Flagge",
+        "mountain": "Berg",
+        "footprints": "Fußspuren",
+        "gauge": "Tacho",
+        "timer": "Timer",
+        "hourglass": "Sanduhr",
+        "alarm_clock": "Wecker",
+        "calendar_days": "Kalender",
+        "sunrise": "Sonnenaufgang",
+        "sun": "Sonne",
+        "moon": "Mond",
+        "coffee": "Kaffee",
+        "book": "Buch",
+        "library": "Bibliothek",
+        "notebook_pen": "Notizbuch",
+        "pencil": "Bleistift",
+        "clipboard_check": "Checkliste",
+        "list_checks": "Aufgabenliste",
+        "check_check": "Doppelhaken",
+        "glasses": "Brille",
+        "microscope": "Mikroskop",
+        "flask_conical": "Kolben",
+        "atom": "Atom",
+        "calculator": "Taschenrechner",
+        "languages": "Sprachen",
+        "globe": "Globus",
+        "compass": "Kompass",
+        "map": "Karte",
+        "route": "Route",
+        "telescope": "Teleskop",
+        "headphones": "Kopfhörer",
+        "mic": "Mikrofon",
+        "palette": "Palette",
+        "users": "Personen",
+        "handshake": "Händedruck",
+        "smile": "Lächeln",
+        "party_popper": "Feier",
+        "gift": "Geschenk",
+        "sprout": "Spross",
+        "leaf": "Blatt",
+        "infinity": "Unendlichkeit",
+        "repeat": "Wiederholung",
+        "trending_up": "Wachstum",
+        "activity": "Aktivität",
+        "dumbbell": "Hantel",
+        "gamepad_2": "Gamepad",
+        "key": "Schlüssel",
+        "anchor": "Anker",
+        "plane": "Flugzeug"
+      },
+      "requirementHints": {
+        "first_time": "Wird beim ersten Auftreten der Aktivität vergeben. Es gibt nur eine Stufe.",
+        "count": "Zählt jedes Auftreten der Aktivität insgesamt.",
+        "streak": "Zählt die längste Serie aufeinanderfolgender Tage mit der Aktivität.",
+        "time_window": "Zählt die meisten Aktivitäten in einem beliebigen Zeitraum der gewählten Länge."
+      },
+      "requirements": {
+        "first_time": "Erstes Mal",
+        "count": "Anzahl",
+        "streak": "Tagesserie",
+        "time_window": "Innerhalb eines Zeitfensters"
+      },
+      "levelsSummary": "Stufen: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Sichtbar",
+        "hidden": "Verborgen bis erhalten"
+      },
+      "language": {
+        "label": "Sprache",
+        "baseLanguage": "Standard",
+        "notAddedLanguages": "Sprachen zum Hinzufügen",
+        "setBaseLanguage": "Als Standard festlegen",
+        "setBaseTitle": "Standardsprache ändern",
+        "setBaseDescription": "{{language}} als Standardsprache für diesen Erfolg verwenden?",
+        "createTitle": "Übersetzung erstellen",
+        "createDescription": "Eine Übersetzung für diesen Erfolg auf {{language}} erstellen?",
+        "deleteTitle": "Übersetzung löschen",
+        "deleteDescription": "Die Übersetzung auf {{language}} löschen? Ihr Inhalt wird entfernt."
+      },
+      "form": {
+        "createTitle": "Neuer Erfolg",
+        "editTitle": "Erfolg bearbeiten",
+        "viewTitle": "Standarderfolg",
+        "predefinedReadOnly": "Standarderfolge werden mit der Plattform ausgeliefert und können nicht bearbeitet werden. Du kannst diesen Erfolg aber ein- oder ausschalten.",
+        "translationMode": "Du bearbeitest die Übersetzung: {{language}}. Hier lassen sich nur Name und Beschreibung ändern; alles andere bearbeitest du in der Standardsprache.",
+        "name": "Name",
+        "description": "Beschreibung",
+        "requirement": "Anforderung",
+        "event": "Ereignis",
+        "requirementType": "Anforderungstyp",
+        "windowDays": "Fensterlänge (Tage)",
+        "course": "Kurs",
+        "anyCourse": "Beliebiger Kurs",
+        "minScore": "Mindestpunktzahl im Quiz (%)",
+        "levels": "Stufen und XP-Belohnungen",
+        "thresholdLabels": {
+          "count": {
+            "login": "Anzahl der Anmeldungen",
+            "lesson_completed": "Anzahl abgeschlossener Lektionen",
+            "course_completed": "Anzahl abgeschlossener Kurse",
+            "quiz_completed": "Anzahl abgeschlossener Quizze"
+          },
+          "streak": {
+            "login": "Tage in Folge mit einer Anmeldung",
+            "lesson_completed": "Tage in Folge mit einer abgeschlossenen Lektion",
+            "course_completed": "Tage in Folge mit einem abgeschlossenen Kurs",
+            "quiz_completed": "Tage in Folge mit einem abgeschlossenen Quiz"
+          },
+          "time_window": {
+            "login": "Anmeldungen im Zeitfenster",
+            "lesson_completed": "Abgeschlossene Lektionen im Zeitfenster",
+            "course_completed": "Abgeschlossene Kurse im Zeitfenster",
+            "quiz_completed": "Abgeschlossene Quizze im Zeitfenster"
+          }
+        },
+        "xpReward": "XP-Belohnung",
+        "addLevel": "Stufe hinzufügen",
+        "inactive": "Inaktiv",
+        "statusHint": "Inaktive Erfolge vergeben keine neuen Stufen mehr. Bereits erreichte Stufen bleiben erhalten.",
+        "badge": "Abzeichen",
+        "icon": "Symbol",
+        "badgePreview": "Abzeichenvorschau",
+        "iconHint": "Das Symbol wird nur auf Standardabzeichen angezeigt. Stufen mit hochgeladenem Abzeichen zeigen das Bild unverändert.",
+        "searchIcon": "Symbole suchen",
+        "noIconFound": "Kein Symbol gefunden.",
+        "resetBadge": "Standardabzeichen verwenden"
+      },
+      "validation": {
+        "threshold": "Gib einen Wert von mindestens 1 ein.",
+        "xpReward": "Gib eine ganze Zahl an XP von 0 bis {{max}} ein.",
+        "titleRequired": "Gib einen Namen in der Basissprache ein.",
+        "windowDays": "Gib eine ganze Zahl an Tagen von 1 bis {{max}} ein.",
+        "thresholdsAscending": "Jede Stufe muss mehr erfordern als die vorherige.",
+        "minScore": "Gib eine Punktzahl zwischen 0 und 100 ein.",
+        "textTooLong": "Verwende höchstens {{max}} Zeichen."
+      },
+      "loadFailed": "Die Errungenschaft konnte nicht geladen werden.",
+      "loadListFailed": "Errungenschaften konnten nicht geladen werden.",
+      "toast": {
+        "achievementSaved": "Erfolg gespeichert.",
+        "achievementNotSaved": "Erfolg konnte nicht gespeichert werden.",
+        "settingsSaved": "Gamification-Einstellungen gespeichert.",
+        "achievementNotFound": "Erfolg nicht gefunden.",
+        "predefinedNotEditable": "Vordefinierte Erfolge können nur aktiviert oder deaktiviert werden.",
+        "earnedLevelRemoved": "Stufen, die Nutzer bereits erhalten haben, können nicht entfernt werden.",
+        "baseLanguageTitleRequired": "Gib einen Namen in der Basissprache ein.",
+        "unsupportedFilter": "Das gewählte Ereignis unterstützt diesen Filter nicht.",
+        "courseNotFound": "Der gewählte Kurs existiert nicht.",
+        "invalidTimeWindow": "Eine Fensterlänge gibt es nur bei Zeitfenster-Erfolgen.",
+        "invalidFirstTimeLevels": "Erfolge vom Typ „Erstes Mal“ haben genau eine Stufe mit dem Wert 1.",
+        "thresholdsNotAscending": "Jede Stufe muss mehr erfordern als die vorherige.",
+        "invalidBadgeImage": "Das Abzeichenbild ist ungültig. Lade es erneut hoch."
+      }
+    }
   }
 }

@@ -407,6 +407,19 @@
           "pageKey": "competencies"
         }
       ]
+    },
+    {
+      "key": "gamification",
+      "title": "Gamification",
+      "specPaths": [
+        "docs/specs/gamification-business-spec.md"
+      ],
+      "routes": [
+        {
+          "prefix": "/admin/gamification",
+          "pageKey": "gamification"
+        }
+      ]
     }
   ],
   "excludedRoutes": [

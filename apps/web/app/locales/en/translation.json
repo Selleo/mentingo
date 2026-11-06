@@ -829,6 +829,7 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully",
+      "uploadFailed": "File upload failed. Check the file type and size, then try again.",
       "videoFailed": "Video upload failed",
       "videoTooLarge": "Video file exceeds the maximum allowed size",
       "videoReady": "Video is ready to use",
@@ -1089,7 +1090,8 @@
     "qa": "Q&A",
     "tenants": "Organizations",
     "activityLogs": "Activity Logs",
-    "reports": "Reports"
+    "reports": "Reports",
+    "gamification": "Gamification"
   },
   "microsoftCalendar": {
     "title": "Microsoft Calendar",
@@ -2417,7 +2419,8 @@
         "competencies_manage": "Manage competency definitions and job profiles.",
         "course_ai_generation": "Generate course structure and content with AI tools.",
         "gamification_read": "View levels, XP and achievements.",
-        "gamification_earn_hidden": "Earn hidden achievements."
+        "gamification_earn_hidden": "Earn hidden achievements.",
+        "gamification_manage": "Configure achievements and gamification settings."
       }
     },
     "dropdown": {
@@ -5341,8 +5344,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Asset",
-        "actions": "Actions"
+        "asset": "Asset"
       },
       "visibility": {
         "public": "Public",
@@ -5432,7 +5434,8 @@
     "tenants": "Organizations",
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
-    "adminLearningPathEditor": "Development Path Editor"
+    "adminLearningPathEditor": "Development Path Editor",
+    "gamification": "Gamification"
   },
   "learningPathsView": {
     "hero": {
@@ -9234,6 +9237,218 @@
       "description": "{{title}} · +{{xp}} XP"
     },
     "loadError": "Achievements could not be loaded.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "admin": {
+      "title": "Gamification",
+      "description": "Turn gamification on for your organization and configure the achievements learners can earn.",
+      "enabled": {
+        "label": "Enable gamification",
+        "description": "Show levels, XP, achievements and reward notifications to users. Rewards are calculated even while this is off."
+      },
+      "achievements": {
+        "title": "Achievements",
+        "description": "Predefined and custom achievements. Disabling an achievement stops new progress but keeps rewards already earned.",
+        "create": "New achievement"
+      },
+      "columns": {
+        "achievement": "Achievement",
+        "event": "Event",
+        "levels": "Levels",
+        "visibility": "Visibility",
+        "enabled": "Active"
+      },
+      "predefined": "Predefined",
+      "events": {
+        "login": "Login",
+        "lesson_completed": "Lesson completed",
+        "course_completed": "Course completed",
+        "quiz_completed": "Quiz completed"
+      },
+      "visibilityHints": {
+        "visible": "Learners see it before they earn it.",
+        "hidden": "Learners see it only after they earn it."
+      },
+      "icons": {
+        "trophy": "Trophy",
+        "star": "Star",
+        "flame": "Flame",
+        "zap": "Lightning",
+        "target": "Target",
+        "award": "Award",
+        "medal": "Medal",
+        "crown": "Crown",
+        "rocket": "Rocket",
+        "book_open": "Book",
+        "graduation_cap": "Graduation cap",
+        "log_in": "Sign in",
+        "door_open": "Open door",
+        "calendar_check": "Calendar",
+        "clock": "Clock",
+        "brain": "Brain",
+        "lightbulb": "Light bulb",
+        "puzzle": "Puzzle",
+        "message_circle": "Speech bubble",
+        "heart": "Heart",
+        "thumbs_up": "Thumbs up",
+        "sparkles": "Sparkles",
+        "circle_check": "Check mark",
+        "gem": "Gem",
+        "diamond": "Diamond",
+        "shield_check": "Shield",
+        "badge_check": "Verified badge",
+        "flag": "Flag",
+        "mountain": "Mountain",
+        "footprints": "Footprints",
+        "gauge": "Gauge",
+        "timer": "Timer",
+        "hourglass": "Hourglass",
+        "alarm_clock": "Alarm clock",
+        "calendar_days": "Calendar",
+        "sunrise": "Sunrise",
+        "sun": "Sun",
+        "moon": "Moon",
+        "coffee": "Coffee",
+        "book": "Book",
+        "library": "Library",
+        "notebook_pen": "Notebook",
+        "pencil": "Pencil",
+        "clipboard_check": "Checklist",
+        "list_checks": "Task list",
+        "check_check": "Double check",
+        "glasses": "Glasses",
+        "microscope": "Microscope",
+        "flask_conical": "Flask",
+        "atom": "Atom",
+        "calculator": "Calculator",
+        "languages": "Languages",
+        "globe": "Globe",
+        "compass": "Compass",
+        "map": "Map",
+        "route": "Route",
+        "telescope": "Telescope",
+        "headphones": "Headphones",
+        "mic": "Microphone",
+        "palette": "Palette",
+        "users": "People",
+        "handshake": "Handshake",
+        "smile": "Smile",
+        "party_popper": "Celebration",
+        "gift": "Gift",
+        "sprout": "Sprout",
+        "leaf": "Leaf",
+        "infinity": "Infinity",
+        "repeat": "Repeat",
+        "trending_up": "Growth",
+        "activity": "Activity",
+        "dumbbell": "Dumbbell",
+        "gamepad_2": "Gamepad",
+        "key": "Key",
+        "anchor": "Anchor",
+        "plane": "Plane"
+      },
+      "requirementHints": {
+        "first_time": "Granted the first time the activity happens. There is a single level.",
+        "count": "Counts every time the activity happens, in total.",
+        "streak": "Counts the longest run of consecutive days with the activity.",
+        "time_window": "Counts the most activities within any period of the chosen length."
+      },
+      "requirements": {
+        "first_time": "First time",
+        "count": "Count",
+        "streak": "Daily streak",
+        "time_window": "Within a time window"
+      },
+      "levelsSummary": "Levels: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Visible",
+        "hidden": "Hidden until earned"
+      },
+      "language": {
+        "label": "Language",
+        "baseLanguage": "Default",
+        "notAddedLanguages": "Languages to add",
+        "setBaseLanguage": "Set as default",
+        "setBaseTitle": "Change default language",
+        "setBaseDescription": "Use {{language}} as the default language for this achievement?",
+        "createTitle": "Create translation",
+        "createDescription": "Create a translation for this achievement in {{language}}?",
+        "deleteTitle": "Delete translation",
+        "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+      },
+      "form": {
+        "createTitle": "New achievement",
+        "editTitle": "Edit achievement",
+        "viewTitle": "Default achievement",
+        "predefinedReadOnly": "Default achievements ship with the platform, so they can't be edited. You can still turn this one on or off.",
+        "translationMode": "You're editing the {{language}} translation. Only the name and description can be changed here; switch to the default language to edit everything else.",
+        "name": "Name",
+        "description": "Description",
+        "requirement": "Requirement",
+        "event": "Event",
+        "requirementType": "Requirement type",
+        "windowDays": "Window length (days)",
+        "course": "Course",
+        "anyCourse": "Any course",
+        "minScore": "Minimum quiz score (%)",
+        "levels": "Levels and XP rewards",
+        "thresholdLabels": {
+          "count": {
+            "login": "Number of logins",
+            "lesson_completed": "Number of completed lessons",
+            "course_completed": "Number of completed courses",
+            "quiz_completed": "Number of completed quizzes"
+          },
+          "streak": {
+            "login": "Days in a row with a login",
+            "lesson_completed": "Days in a row with a completed lesson",
+            "course_completed": "Days in a row with a completed course",
+            "quiz_completed": "Days in a row with a completed quiz"
+          },
+          "time_window": {
+            "login": "Logins within the window",
+            "lesson_completed": "Lessons completed within the window",
+            "course_completed": "Courses completed within the window",
+            "quiz_completed": "Quizzes completed within the window"
+          }
+        },
+        "xpReward": "XP reward",
+        "addLevel": "Add level",
+        "inactive": "Inactive",
+        "statusHint": "Inactive achievements stop granting new levels. Levels already earned are kept.",
+        "badge": "Badge",
+        "icon": "Icon",
+        "badgePreview": "Badge preview",
+        "iconHint": "The icon is shown only on default badges. Levels with an uploaded badge show the image as it is.",
+        "searchIcon": "Search icons",
+        "noIconFound": "No icon found.",
+        "resetBadge": "Use default badge"
+      },
+      "validation": {
+        "threshold": "Enter a value of at least 1.",
+        "xpReward": "Enter a whole number of XP from 0 to {{max}}.",
+        "titleRequired": "Enter a name in the base language.",
+        "windowDays": "Enter a whole number of days from 1 to {{max}}.",
+        "thresholdsAscending": "Each level must require more than the previous one.",
+        "minScore": "Enter a score between 0 and 100.",
+        "textTooLong": "Use at most {{max}} characters."
+      },
+      "loadFailed": "Could not load the achievement.",
+      "loadListFailed": "Could not load achievements.",
+      "toast": {
+        "achievementSaved": "Achievement saved.",
+        "achievementNotSaved": "Achievement could not be saved.",
+        "settingsSaved": "Gamification settings saved.",
+        "achievementNotFound": "Achievement not found.",
+        "predefinedNotEditable": "Predefined achievements can only be enabled or disabled.",
+        "earnedLevelRemoved": "Levels that users have already earned cannot be removed.",
+        "baseLanguageTitleRequired": "Enter a name in the base language.",
+        "unsupportedFilter": "The selected event does not support this filter.",
+        "courseNotFound": "The selected course does not exist.",
+        "invalidTimeWindow": "Set a window length only for time-window achievements.",
+        "invalidFirstTimeLevels": "First-time achievements have exactly one level with value 1.",
+        "thresholdsNotAscending": "Each level must require more than the previous one.",
+        "invalidBadgeImage": "The badge image is invalid. Upload it again."
+      }
+    }
   }
 }

@@ -1,9 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
+
+import type { ACHIEVEMENT_BADGE_FILE_RESOURCE } from "@repo/shared";
 
 interface UploadFileOptions {
   file: File;
@@ -15,7 +18,8 @@ interface UploadFileOptions {
     | "learning-path"
     | "user"
     | "category"
-    | "certificate";
+    | "certificate"
+    | typeof ACHIEVEMENT_BADGE_FILE_RESOURCE;
   lessonId?: string;
 }
 
@@ -49,7 +53,10 @@ export function useUploadFile() {
     },
     onError: (error) => {
       toast({
-        description: error.message,
+        description: getTranslatedApiErrorMessage(error, t, t("uploadFile.toast.uploadFailed"), {
+          // Proxy rejections (e.g. 413) only carry Axios' English status text.
+          allowUntranslatedMessage: false,
+        }),
         variant: "destructive",
       });
     },
