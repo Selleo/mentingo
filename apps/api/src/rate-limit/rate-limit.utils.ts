@@ -1,3 +1,5 @@
+import { SCORM_CONTENT_PATHS } from "@repo/shared";
+
 import {
   EMAIL_TEMPLATE_TEST_PATH,
   EMAIL_TEMPLATE_TEST_POLICY,
@@ -10,6 +12,7 @@ import {
   GENERAL_WRITE_POLICY,
   INTEGRATION_READ_POLICY,
   INTEGRATION_WRITE_POLICY,
+  SCORM_DELIVERY_POLICY,
   TECHNICAL_PATH_MATCHERS,
 } from "./rate-limit.policy";
 
@@ -52,6 +55,8 @@ export const resolveRateLimitPolicy = (
   if (normalizedPath.startsWith("/api/integration")) {
     return normalizedMethod === "GET" ? INTEGRATION_READ_POLICY : INTEGRATION_WRITE_POLICY;
   }
+
+  if (normalizedPath.startsWith(SCORM_CONTENT_PATHS.PREFIX)) return SCORM_DELIVERY_POLICY;
 
   return normalizedMethod === "GET" ? GENERAL_GET_POLICY : GENERAL_WRITE_POLICY;
 };

@@ -32880,6 +32880,21 @@ export interface LaunchScormAttemptResponse {
   };
 }
 
+export interface RenewScormContentBody {
+  /**
+   * @minLength 64
+   * @maxLength 64
+   * @pattern ^[a-f0-9]{64}$
+   */
+  token: string;
+}
+
+export interface RenewScormContentResponse {
+  data: {
+    renewed: boolean;
+  };
+}
+
 export interface CommitScormAttemptBody {
   /** @format uuid */
   attemptId: string;
@@ -38480,6 +38495,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/settings/login-page-files`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerStreamLoginPageFile
+     * @request GET:/api/settings/login-page-files/{id}/content
+     */
+    settingsControllerStreamLoginPageFile: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-page-files/${id}/content`,
+        method: "GET",
         ...params,
       }),
 
@@ -46289,6 +46317,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/scorm/runtime/launch`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerRenewScormContent
+     * @request POST:/api/scorm/runtime/content/renew
+     */
+    scormControllerRenewScormContent: (data: RenewScormContentBody, params: RequestParams = {}) =>
+      this.request<RenewScormContentResponse, any>({
+        path: `/api/scorm/runtime/content/renew`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

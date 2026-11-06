@@ -958,7 +958,8 @@
         "invalidAttempt": "SCORM attempt is invalid.",
         "invalidCmiValue": "SCORM runtime data is invalid.",
         "contentNotFound": "SCORM content was not found.",
-        "contentForbidden": "You do not have access to this SCORM content."
+        "contentForbidden": "You do not have access to this SCORM content.",
+        "contentUnavailable": "SCORM content is temporarily unavailable. Please contact your administrator."
       }
     },
     "coursePlaceholder": {
@@ -4332,6 +4333,7 @@
       "loading": "Loading SCORM content...",
       "launchFailed": "SCORM content could not be launched.",
       "launchFailedBody": "Please try again. If the problem continues, the SCORM package may need to be reuploaded.",
+      "contentAccessExpired": "Access to SCORM content could not be renewed. Reopen the lesson to continue.",
       "saveFailed": "SCORM progress could not be saved.",
       "saving": "Saving progress",
       "previousSco": "Previous section",
@@ -6023,6 +6025,7 @@
       "hostAlreadyExists": "Organization host already exists",
       "notFound": "Organization not found",
       "invalidHost": "Invalid organization host URL",
+      "reservedHost": "This organization host is reserved and can't be used",
       "managingTenantRequired": "Managing organization admin required",
       "currentTenantSupportNotAllowed": "Support mode is not available for the current organization",
       "currentTenantDeleteNotAllowed": "The current managing organization cannot be deleted"

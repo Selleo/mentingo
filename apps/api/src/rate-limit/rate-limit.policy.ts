@@ -62,6 +62,12 @@ export const INTEGRATION_WRITE_POLICY: ResolvedRateLimitPolicy = {
   windowSec: RATE_LIMIT_WINDOW_SEC,
 };
 
+export const SCORM_DELIVERY_POLICY: ResolvedRateLimitPolicy = {
+  key: "scorm.delivery",
+  limit: RATE_LIMITS.SCORM_DELIVERY_REQUESTS_PER_MINUTE,
+  windowSec: RATE_LIMIT_WINDOW_SEC,
+};
+
 export const GENERAL_GET_POLICY: ResolvedRateLimitPolicy = {
   key: "general.get",
   limit: RATE_LIMITS.GENERAL_GET_REQUESTS_PER_MINUTE,

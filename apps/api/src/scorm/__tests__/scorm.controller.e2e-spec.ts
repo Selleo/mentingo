@@ -633,6 +633,43 @@ describe("ScormController (e2e)", () => {
       expect(finishedState.completionStatus).toBe("completed");
       expect(finishedState.totalTime).toBe("0000:01:05.00");
       expect(progress.completedAt).toBeTruthy();
+
+      for (const lessonStatus of ["incomplete", "failed", "not attempted"]) {
+        const lateCommit = await request(app.getHttpServer())
+          .post("/api/scorm/runtime/commit")
+          .set("Cookie", studentCookies)
+          .send({
+            ...commitBody,
+            values: {
+              "cmi.core.lesson_status": lessonStatus,
+              "cmi.core.lesson_location": `after-${lessonStatus}`,
+            },
+          })
+          .expect(201);
+
+        expect(lateCommit.body.data).toEqual(
+          expect.objectContaining({ lessonCompleted: true, scormStatus: "completed" }),
+        );
+      }
+
+      const [stateAfterLateCommit] = await db
+        .select()
+        .from(scormRuntimeState)
+        .where(eq(scormRuntimeState.attemptId, launch.attemptId));
+      const [progressAfterLateCommit] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, imported.lessonId),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+
+      expect(stateAfterLateCommit.completionStatus).toBe("completed");
+      expect(stateAfterLateCommit.successStatus).not.toBe(SCORM_SUCCESS_STATUS.FAILED);
+      expect(stateAfterLateCommit.lessonLocation).toBe("after-not attempted");
+      expect(progressAfterLateCommit.completedAt).toBeTruthy();
       expect(repeatedFinishResponse.body.data.lessonCompleted).toBe(true);
       expect(
         publishSpy.mock.calls.filter(([event]) => event instanceof UserCourseFinishedEvent),
@@ -739,6 +776,32 @@ describe("ScormController (e2e)", () => {
         nextScoId: null,
       });
 
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/commit")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: secondLaunch.attemptId,
+          packageId: secondLaunch.packageId,
+          scoId: secondLaunch.scoId,
+          lessonId: secondLaunch.lessonId,
+          courseId: secondLaunch.courseId,
+          values: { "cmi.core.lesson_status": "not attempted" },
+          language: "en",
+        })
+        .expect(201);
+
+      const [progressAfterSecondLaunch] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lessonId),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+
+      expect(progressAfterSecondLaunch.completedAt).toBeNull();
+
       const secondFinishResponse = await request(app.getHttpServer())
         .post("/api/scorm/runtime/finish")
         .set("Cookie", studentCookies)
@@ -824,6 +887,24 @@ describe("ScormController (e2e)", () => {
 
       expect(progressAfterPassedRetake.completedAt).toBeTruthy();
 
+      const lateCompletedCommit = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/commit")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: resumedFirstScoResponse.body.data.attemptId,
+          packageId: resumedFirstScoResponse.body.data.packageId,
+          scoId: resumedFirstScoResponse.body.data.scoId,
+          lessonId: resumedFirstScoResponse.body.data.lessonId,
+          courseId: resumedFirstScoResponse.body.data.courseId,
+          values: { "cmi.core.lesson_status": "completed" },
+          language: "en",
+        })
+        .expect(201);
+
+      expect(lateCompletedCommit.body.data).toEqual(
+        expect.objectContaining({ lessonCompleted: true, scormStatus: "passed" }),
+      );
+
       const firstRetakeResponse = await request(app.getHttpServer())
         .post("/api/scorm/runtime/commit")
         .set("Cookie", studentCookies)
@@ -883,8 +964,102 @@ describe("ScormController (e2e)", () => {
     });
   });
 
-  describe("GET /api/scorm/content/:packageId/*", () => {
-    it("serves existing SCORM HTML inline when storage has a generic MIME type", async () => {
+  describe("isolated SCORM content", () => {
+    it("serves scoped assets without application cookies and blocks the application route", async () => {
+      const admin = await createAdmin();
+      const student = await createStudent();
+      const otherStudent = await createStudent();
+      const imported = await importScormCourse(admin);
+      await enrollStudent(student.id, imported.courseId);
+      const cookies = await cookieFor(student, app);
+      const launched = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const url = new URL(launched.body.data.launchUrl);
+      expect(url.origin).toBe("https://scorm.lms.localhost");
+      const prefix = url.pathname.replace(/\/player$/, "");
+      const token = prefix.split("/")[4];
+      const player = await request(app.getHttpServer())
+        .get(url.pathname)
+        .set("Host", url.host)
+        .expect(200);
+      expect(player.headers["cache-control"]).toBe("private, no-store");
+      expect(player.headers["content-security-policy"]).toContain(
+        "sandbox allow-scripts allow-same-origin allow-forms allow-modals",
+      );
+      expect(player.headers["set-cookie"]).toBeUndefined();
+      const asset = await request(app.getHttpServer())
+        .get(`${prefix}/assets/scripts/runtime.js`)
+        .set("Host", url.host)
+        .expect(200);
+      expect(asset.text).toContain("window.__SCORM_FIXTURE__ = true");
+      const bootstrap = await request(app.getHttpServer())
+        .get(`${prefix}/bootstrap.js`)
+        .set("Host", url.host)
+        .expect(200);
+      expect(bootstrap.text).toContain("https://tenant.local");
+      await request(app.getHttpServer())
+        .get(`${prefix}/runtime.js`)
+        .set("Host", url.host)
+        .expect(200);
+      await request(app.getHttpServer()).get(url.pathname).set("Cookie", cookies).expect(404);
+      await request(app.getHttpServer())
+        .get(`/api/scorm/content/${imported.packageId}/index.html`)
+        .set("Cookie", cookies)
+        .expect(404);
+      await request(app.getHttpServer())
+        .get(`/api/scorm/delivery/${"0".repeat(64)}/player`)
+        .set("Host", url.host)
+        .expect(401);
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/content/renew")
+        .set("Cookie", await cookieFor(otherStudent, app))
+        .send({ token })
+        .expect(403);
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/content/renew")
+        .set("Cookie", cookies)
+        .send({ token })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/content/renew")
+        .set("Host", url.host)
+        .set("Cookie", cookies)
+        .send({ token })
+        .expect(404);
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/content/renew")
+        .set("Origin", url.origin)
+        .set("Cookie", cookies)
+        .send({ token })
+        .expect(403);
+
+      await db
+        .delete(studentCourses)
+        .where(
+          and(
+            eq(studentCourses.studentId, student.id),
+            eq(studentCourses.courseId, imported.courseId),
+          ),
+        );
+      await request(app.getHttpServer())
+        .get(`${prefix}/assets/index.html`)
+        .set("Host", url.host)
+        .expect(403);
+    });
+
+    it("denies launch for an unenrolled learner", async () => {
+      const admin = await createAdmin();
+      const student = await createStudent();
+      const imported = await importScormCourse(admin);
+      await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", await cookieFor(student, app))
+        .expect(403);
+    });
+
+    it("serves existing SCORM HTML through delivery when storage has a generic MIME type", async () => {
       const admin = await createAdmin();
       const imported = await importScormCourse(admin);
       const [pkg] = await db
@@ -898,49 +1073,20 @@ describe("ScormController (e2e)", () => {
         "application/octet-stream",
       );
 
-      const response = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/index.html`)
+      const launched = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+      const url = new URL(launched.body.data.launchUrl);
+      const prefix = url.pathname.replace(/\/player$/, "");
+
+      const response = await request(app.getHttpServer())
+        .get(`${prefix}/assets/index.html`)
+        .set("Host", url.host)
         .expect(200);
 
       expect(response.headers["content-type"]).toContain("text/html");
       expect(response.text).toContain("SCORM index");
-    });
-
-    it("serves extracted content to an authorized learner and admin", async () => {
-      const admin = await createAdmin();
-      const student = await createStudent();
-      const imported = await importScormCourse(admin);
-      await enrollStudent(student.id, imported.courseId);
-
-      const learnerResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/scripts/runtime.js`)
-        .set("Cookie", await cookieFor(student, app))
-        .expect(200);
-
-      expect(learnerResponse.headers["content-type"]).toContain("javascript");
-      expect(learnerResponse.text).toContain("window.__SCORM_FIXTURE__ = true");
-
-      const adminResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/index.html`)
-        .set("Cookie", await cookieFor(admin, app))
-        .expect(200);
-
-      expect(adminResponse.text).toContain("SCORM index");
-      expect(adminResponse.text).not.toContain("mentingo:scorm-dialog");
-    });
-
-    it("denies content access for an unenrolled learner", async () => {
-      const admin = await createAdmin();
-      const student = await createStudent();
-      const imported = await importScormCourse(admin);
-
-      const response = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/index.html`)
-        .set("Cookie", await cookieFor(student, app))
-        .expect(403);
-
-      expect(response.body.message).toBe("adminScorm.errors.runtime.contentForbidden");
     });
   });
 });

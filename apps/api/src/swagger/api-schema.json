@@ -19413,6 +19413,33 @@
         }
       }
     },
+    "/api/scorm/runtime/content/renew": {
+      "post": {
+        "operationId": "ScormController_renewScormContent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewScormContentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewScormContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/runtime/commit": {
       "post": {
         "operationId": "ScormController_commitScormAttempt",
@@ -169645,6 +169672,39 @@
               "scoTitle",
               "navigation",
               "runtime"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RenewScormContentBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "pattern": "^[a-f0-9]{64}$",
+            "minLength": 64,
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RenewScormContentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "renewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "renewed"
             ]
           }
         },
