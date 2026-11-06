@@ -51,12 +51,12 @@ describe("native Luma adapter in the assistant model", () => {
       } as unknown as AssistantExecutionPort);
       const identity = { tenantId: "tenant", runId: "run" };
       const model = new AssistantModel(identity);
-      const result = await model.doStream({
-        prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
-        tools: [{ type: "function", name: "respond", inputSchema: { type: "object" } }],
-        toolChoice: { type: "required" },
-      });
       const consume = async () => {
+        const result = await model.doStream({
+          prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
+          tools: [{ type: "function", name: "respond", inputSchema: { type: "object" } }],
+          toolChoice: { type: "required" },
+        });
         const reader = result.stream.getReader();
         while (!(await reader.read()).done) {
           /* Drain production checkpoint transform. */

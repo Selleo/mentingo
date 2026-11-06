@@ -68,8 +68,9 @@ configuration and bounded PNG reader; the native assistant chat integration does
 Generation through published SDK 0.4 has no upstream cancellation option. Core rejects an
 aborted generation immediately, ignores its late response and does not fall back or execute its
 tools. The upstream request may continue. Native streaming passes the caller's signal through
-the existing SDK and closes the response on cancellation. Errors after a stream opens are
-surfaced rather than replaying potentially emitted work on OpenAI.
+the existing SDK and closes the response on cancellation. The first real native stream event is validated before the model call returns: legacy plain-text
+HTTP200 responses and an initial error still use the ordinary Core fallback. After validated
+output starts, errors are surfaced rather than replaying potentially emitted work on OpenAI.
 
 ### Local contract verification
 

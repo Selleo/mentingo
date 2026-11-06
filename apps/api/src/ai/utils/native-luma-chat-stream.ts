@@ -62,6 +62,7 @@ async function* parts(
         case "error":
           throw nativeChatError();
         case "text-delta":
+          if (!event.text) break;
           if (!textOpen) {
             yield { type: "text-start", id: "text" };
             textOpen = true;
@@ -97,32 +98,90 @@ async function* parts(
 }
 
 /** Backpressure and cancellation propagate to the SDK stream instead of retrying emitted work. */
-export function nativeLumaStream(
+function nativeLumaStream(
   chunks: AsyncIterable<Uint8Array>,
   request: NativeLumaChatRequest,
   signal: AbortSignal,
-  cancel: () => void,
+  cancel: (reason?: unknown) => void,
+  cleanup: () => void,
 ): ReadableStream<LanguageModelV4StreamPart> {
-  const iterator = parts(chunks, request, signal, cancel);
+  const iterator = parts(chunks, request, signal, cleanup);
+  return new ReadableStream(
+    {
+      async pull(controller) {
+        try {
+          signal.throwIfAborted();
+          const next = await iterator.next();
+          if (next.done) controller.close();
+          else {
+            signal.throwIfAborted();
+            controller.enqueue(next.value);
+          }
+        } catch (error) {
+          cancel(error);
+          controller.error(error);
+          await iterator.return(undefined);
+        }
+      },
+      async cancel(reason) {
+        cancel(reason);
+        await iterator.return(undefined);
+      },
+    },
+    { highWaterMark: 0 },
+  );
+}
+
+/** Validate real native output before returning a stream, preserving ordinary startup fallback.
+ * A legacy text response or initial error rejects here; later failures remain stream errors.
+ */
+export async function openNativeLumaStream(
+  chunks: AsyncIterable<Uint8Array>,
+  request: NativeLumaChatRequest,
+  signal: AbortSignal,
+  cancel: (reason?: unknown) => void,
+  cleanup: () => void,
+): Promise<ReadableStream<LanguageModelV4StreamPart>> {
+  const reader = nativeLumaStream(chunks, request, signal, cancel, cleanup).getReader();
+  const buffered: LanguageModelV4StreamPart[] = [];
+  try {
+    while (true) {
+      const part = await reader.read();
+      if (part.done) throw nativeChatError();
+      buffered.push(part.value);
+      if (part.value.type !== "stream-start") break;
+    }
+  } catch (error) {
+    await reader.cancel(error).catch(() => undefined);
+    reader.releaseLock();
+    throw error;
+  }
   return new ReadableStream({
     async pull(controller) {
       try {
         signal.throwIfAborted();
-        const next = await iterator.next();
-        if (next.done) controller.close();
-        else {
+        const part = buffered.shift();
+        if (part) {
+          controller.enqueue(part);
+          return;
+        }
+        const next = await reader.read();
+        if (next.done) {
+          reader.releaseLock();
+          controller.close();
+        } else {
           signal.throwIfAborted();
           controller.enqueue(next.value);
         }
       } catch (error) {
-        cancel();
+        await reader.cancel(error).catch(() => undefined);
+        reader.releaseLock();
         controller.error(error);
-        await iterator.return(undefined);
       }
     },
-    async cancel() {
-      cancel();
-      await iterator.return(undefined);
+    async cancel(reason) {
+      await reader.cancel(reason);
+      reader.releaseLock();
     },
   });
 }

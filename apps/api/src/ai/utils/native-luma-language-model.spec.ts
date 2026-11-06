@@ -313,8 +313,6 @@ describe("NativeLumaLanguageModel", () => {
   ])("never exposes a tool call from an incomplete or failed stream", async (...events) => {
     const { model, streamChat } = setup();
     streamChat.mockResolvedValueOnce({ data: bytes(events) });
-    const reader = (await model.doStream(options)).stream.getReader();
-    expect((await reader.read()).value?.type).toBe("stream-start");
-    await expect(reader.read()).rejects.toThrow();
+    await expect(model.doStream(options)).rejects.toThrow();
   });
 });

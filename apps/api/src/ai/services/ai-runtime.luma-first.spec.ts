@@ -130,6 +130,21 @@ describe("AiRuntimeService Luma-first paths", () => {
     expect(openAiChatModel.doStream).toHaveBeenCalledWith(options);
   });
 
+  it.each([
+    "Legacy plain text",
+    JSON.stringify({ type: "error", code: "provider_request_failed" }) + "\n",
+  ])("uses existing Core fallback for incompatible native startup output (%s)", async (body) => {
+    async function* response() {
+      yield Buffer.from(body);
+    }
+    nativeStreamChat.mockResolvedValue({ data: response() });
+    const streamed = { stream: new ReadableStream() };
+    openAiChatModel.doStream.mockResolvedValue(streamed);
+    const model = await createService(AI_RUNTIME_SOURCES.LUMA).getAssistantLanguageModel();
+    await expect(model.doStream({ prompt: [] })).resolves.toBe(streamed);
+    expect(openAiChatModel.doStream).toHaveBeenCalledTimes(1);
+  });
+
   it("does not repeat a tool-capable assistant call after its stream has opened", async () => {
     const failure = new Error("upstream connection interrupted");
     async function* failedStream() {

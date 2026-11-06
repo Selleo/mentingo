@@ -15,11 +15,13 @@ import type { EnvService } from "src/env/services/env.service";
 describe("Core native Mentor SDK contract", () => {
   let server: Server;
   let service: AiRuntimeService;
+  let streamMode: "events" | "legacy" | "error" | "late-error";
   const originalBaseUrl = process.env.LUMA_BASE_URL;
   const requests: { path?: string; key?: string | string[]; body: NativeLumaChatRequest }[] = [];
 
   beforeEach(async () => {
     requests.length = 0;
+    streamMode = "events";
     server = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
       for await (const chunk of request) chunks.push(Buffer.from(chunk));
@@ -47,6 +49,17 @@ describe("Core native Mentor SDK contract", () => {
         );
       } else if (request.url === "/api/public/v1/ai/mentor/chat") {
         response.setHeader("Content-Type", "application/x-ndjson");
+        if (streamMode === "legacy") {
+          response.setHeader("Content-Type", "text/plain");
+          response.end("Legacy native text");
+          return;
+        }
+        if (streamMode === "error" || streamMode === "late-error") {
+          if (streamMode === "late-error")
+            response.write(JSON.stringify({ type: "text-delta", text: "Validated prefix" }) + "\n");
+          response.end(JSON.stringify({ type: "error", code: "provider_request_failed" }) + "\n");
+          return;
+        }
         const bytes = Buffer.from(
           [
             { type: "text-delta", text: "Źródło" },
@@ -165,6 +178,43 @@ describe("Core native Mentor SDK contract", () => {
         body: expect.objectContaining({ streamFormat: "events", toolChoice: "required" }),
       }),
     ]);
+    expect(service.getAISdkOpenAI).not.toHaveBeenCalled();
+  });
+
+  it.each(["legacy", "error"] as const)(
+    "keeps Core fallback for HTTP200 native %s before valid output",
+    async (mode) => {
+      streamMode = mode;
+      const fallback = { stream: new ReadableStream() };
+      const fallbackProvider = Object.assign(
+        jest.fn().mockReturnValue({ doStream: jest.fn().mockResolvedValue(fallback) }),
+      );
+      jest.mocked(service.getAISdkOpenAI).mockResolvedValue(fallbackProvider as never);
+      const model = await service.getAssistantLanguageModel();
+      await expect(
+        model.doStream({ prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }] }),
+      ).resolves.toBe(fallback);
+      expect(requests).toHaveLength(1);
+      expect(requests[0].path).toBe("/api/public/v1/ai/mentor/chat");
+      expect(fallbackProvider).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("does not retry a native HTTP stream after a validated text prefix", async () => {
+    streamMode = "late-error";
+    const model = await service.getAssistantLanguageModel();
+    const result = await model.doStream({
+      prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
+    });
+    const reader = result.stream.getReader();
+    expect((await reader.read()).value?.type).toBe("stream-start");
+    expect((await reader.read()).value?.type).toBe("text-start");
+    expect((await reader.read()).value).toEqual({
+      type: "text-delta",
+      id: "text",
+      delta: "Validated prefix",
+    });
+    await expect(reader.read()).rejects.toThrow();
     expect(service.getAISdkOpenAI).not.toHaveBeenCalled();
   });
 });

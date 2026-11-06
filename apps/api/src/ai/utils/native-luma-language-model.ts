@@ -1,7 +1,7 @@
 /** Adapt the existing native Luma Mentor SDK methods to the AI SDK's tool-capable model. */
 import { nativeLumaRequest } from "./native-luma-chat-input";
 import { nativeChatResult, nativeUsage, sdkToolCall } from "./native-luma-chat-response";
-import { nativeLumaStream } from "./native-luma-chat-stream";
+import { openNativeLumaStream } from "./native-luma-chat-stream";
 
 import type {
   LanguageModelV4,
@@ -70,15 +70,24 @@ export class NativeLumaLanguageModel implements LanguageModelV4 {
     const controller = new AbortController();
     const abort = () => controller.abort(options.abortSignal?.reason);
     options.abortSignal?.addEventListener("abort", abort, { once: true });
-    const cleanup = () => {
-      options.abortSignal?.removeEventListener("abort", abort);
-      controller.abort();
+    const cleanup = () => options.abortSignal?.removeEventListener("abort", abort);
+    const cancel = (reason?: unknown) => {
+      cleanup();
+      controller.abort(reason);
     };
     try {
       const response = await client.streamChat(request, { signal: controller.signal });
-      return { stream: nativeLumaStream(response.data, request, controller.signal, cleanup) };
+      return {
+        stream: await openNativeLumaStream(
+          response.data,
+          request,
+          controller.signal,
+          cancel,
+          cleanup,
+        ),
+      };
     } catch (error) {
-      cleanup();
+      cancel();
       throw error;
     }
   }
