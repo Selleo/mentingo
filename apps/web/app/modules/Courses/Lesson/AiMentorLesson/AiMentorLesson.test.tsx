@@ -58,7 +58,6 @@ vi.mock("./components/LessonForm", () => ({
 vi.mock("~/components/RichText/Viever", () => ({
   default: ({ content }: { content: string }) => <p>{content}</p>,
 }));
-vi.mock("./components/RetakeModal", () => ({ default: () => null }));
 
 const renderLesson = (
   overrides: Partial<GetLessonByIdResponse["data"]> = {},
@@ -122,6 +121,21 @@ describe("AI Mentor preview", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers a confirmed retake for a completed preview instead of a disabled composer", async () => {
+    renderLesson({ status: "completed", threadId: "thread-1", lessonCompleted: true });
+    expect(screen.queryByRole("textbox", { name: "Message" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON));
+    expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL)).toBeInTheDocument();
+    expect(state.retake).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_CANCEL_BUTTON));
+    expect(state.retake).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON));
+    await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_CONFIRM_BUTTON));
+    expect(state.retake).toHaveBeenCalledWith({ lessonId: "lesson-1", learningStateId: undefined });
+    expect(state.sendMessage).not.toHaveBeenCalled();
+  });
+
   it("enables the composer for an active learning thread", () => {
     state.preview = false;
     renderLesson({ status: "active", threadId: "thread-1", description: "" });
@@ -140,6 +154,7 @@ describe("AI Mentor preview", () => {
     renderLesson({ threadId: "thread-1", status: "active" }, true);
     expect(screen.getByText("Recorded mentor reply")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

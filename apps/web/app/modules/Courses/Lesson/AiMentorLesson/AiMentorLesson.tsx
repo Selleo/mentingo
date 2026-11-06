@@ -264,7 +264,7 @@ const AiMentorLesson = ({
   }, [isReadOnly, judgeLesson, lesson.threadId, lesson.learningStateId]);
 
   const handleRetakeLesson = async () => {
-    if (!lesson.threadId || isReadOnly) return;
+    if (!lesson.threadId || hideControls) return;
 
     setShowRetakeModal(false);
     setLatestEvaluation(null);
@@ -276,6 +276,8 @@ const AiMentorLesson = ({
   const isProcessing =
     status === AI_CHAT_STATUSES.SUBMITTED || status === AI_CHAT_STATUSES.STREAMING;
   const isThreadActive = lesson.status === "active";
+  const isPreviewWithoutThread = isPreviewMode && !lesson.threadId;
+  const shouldShowComposer = isThreadActive || isPreviewWithoutThread;
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -477,7 +479,7 @@ const AiMentorLesson = ({
 
             {isJudgePending && <AiMentorEvaluationLoader />}
 
-            {(isThreadActive || isPreviewMode) && !isJudgePending && !hideControls && (
+            {shouldShowComposer && !isJudgePending && !hideControls && (
               <fieldset disabled={isChatReadOnly} className="w-full min-w-0">
                 <LessonForm
                   voiceTarget={{ lessonId: lesson.id }}
@@ -509,7 +511,7 @@ const AiMentorLesson = ({
               <>
                 <hr className="mt-4 w-full border-t border-neutral-100" />
                 <div className="mt-4 flex w-full justify-center">
-                  {(isThreadActive || isPreviewMode) && !isJudgePending && (
+                  {shouldShowComposer && !isJudgePending && (
                     <Button
                       disabled={isReadOnly}
                       data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
@@ -522,7 +524,7 @@ const AiMentorLesson = ({
                       <Icon name="ArrowRight" className="size-5" />
                     </Button>
                   )}
-                  {!isThreadActive && !isPreviewMode && !isJudgePending && (
+                  {!shouldShowComposer && !isJudgePending && (
                     <Button
                       data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
                       variant="outline"
