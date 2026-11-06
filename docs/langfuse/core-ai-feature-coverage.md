@@ -1,5 +1,7 @@
 # Core AI feature experiment coverage
 
+For test ownership, ordinary voice/integration tests, per-case execution status and exact trigger commands, start with the [testing guide](README.md), [case matrix](core-test-case-matrix.md) and [runbook](core-evaluation-runbook.md).
+
 The versioned manifest is `apps/api/test/evaluations/feature-catalogue.v1.json`: 31 feature datasets and 103 synthetic items. Each item exposes normalized `input`, `expectedOutput`, and `metadata` for Langfuse upload. Expectations are developer-authored and pending domain review. A successful transport or nonempty output is never reported as semantic acceptance.
 
 ## Source inventory

@@ -1,5 +1,7 @@
 # Langfuse regression setup
 
+For test ownership, ordinary voice/integration tests, per-case execution status and exact trigger commands, start with the [testing guide](README.md), [case matrix](core-test-case-matrix.md) and [runbook](core-evaluation-runbook.md).
+
 Experiments run only through an explicit local CLI invocation. Updating a prompt does not launch an experiment. Dataset-specific evaluator rules score submitted experiment items; they do not call the application. Online rules use sampling `1` for new root traces and known nested feature observations, excluding evaluator-internal spans. They cannot evaluate requests that the application does not trace.
 
 Three independent live LLM judges assess task completion, grounding, and safety/scope. Feature experiment judges compare actual output with each case's expected outcome and invariants. Categories are `pass`, `fail`, and `insufficient_evidence`. A separate code evaluator checks whether an output was captured; `present` is not a correctness score. Judgments are not calibrated release gates. Missing source, receipt, media, or state evidence must not be treated as proof of success.

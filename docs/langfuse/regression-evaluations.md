@@ -1,5 +1,7 @@
 # AI regression evaluations
 
+For test ownership, ordinary voice/integration tests, per-case execution status and exact trigger commands, start with the [testing guide](README.md), [case matrix](core-test-case-matrix.md) and [runbook](core-evaluation-runbook.md).
+
 This is the cross-repository evaluation policy for Mentingo Core, Luma
 (`mentingo-ai`) and the Slackbot (`mentingo-plugins`). The first datasets are
 synthetic candidate benchmarks. Passing their deterministic checks does not

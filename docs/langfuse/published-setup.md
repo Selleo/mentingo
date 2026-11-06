@@ -1,5 +1,7 @@
 # Published regression configuration
 
+For test ownership, ordinary voice/integration tests, per-case execution status and exact trigger commands, start with the [testing guide](README.md), [case matrix](core-test-case-matrix.md) and [runbook](core-evaluation-runbook.md).
+
 Project: [mentingo](https://cloud.langfuse.com/project/cmiitc20o00qtad07rwd8bx29). Published on 2026-11-03. Machine-readable IDs, filters, assignments and hashes: [remote-setup.json](remote-setup.json).
 
 31 datasets / 103 synthetic items / 35 evaluators / 34 rules. See [core-ai-feature-coverage.md](core-ai-feature-coverage.md) for feature-by-feature scope and execution prerequisites.
