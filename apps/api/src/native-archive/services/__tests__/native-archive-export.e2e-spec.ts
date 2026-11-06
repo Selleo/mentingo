@@ -10,7 +10,6 @@ import { createE2ETest } from "../../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../../test/factory/course.factory";
 import { createLearningPathFactory } from "../../../../test/factory/learningPath.factory";
-import { createSettingsFactory } from "../../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../../test/factory/user.factory";
 import { getNativeArchiveExportPrefix } from "../../native-archive-storage-paths";
 
@@ -326,7 +325,6 @@ describe("NativeArchive export (e2e)", () => {
   it("rejects access to an export job from another user and reports a missing course as failed", async () => {
     const { admin, cookie } = await createAdmin();
     const other = await createAdmin();
-    await runAsTenant(foreignTenant.id, () => createSettingsFactory(db).create({ userId: null }));
     const { cookie: foreignCookie } = await createNativeArchiveTestUser({
       app,
       db,
