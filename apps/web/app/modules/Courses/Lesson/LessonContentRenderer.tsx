@@ -45,8 +45,7 @@ export const LessonContentRenderer = memo(
   }: LessonContentRendererProps) => {
     const courseExperience = useOptionalCourseAccessProvider();
     const isRestrictedPreviewActivity =
-      courseExperience?.isPreviewMode &&
-      ["ai_mentor", "scorm", "live_training"].includes(lesson.type);
+      courseExperience?.isPreviewMode && ["scorm", "live_training"].includes(lesson.type);
 
     if (isRestrictedPreviewActivity) {
       return (

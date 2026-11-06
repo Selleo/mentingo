@@ -82,6 +82,8 @@ const AiMentorLesson = ({
   const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
+  const isReadOnly = isPreviewMode || hideControls;
+
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(lesson.id);
   const { mutateAsync: retakeLesson, isPending: isRetakePending } = useRetakeLesson(
     lesson.id,
@@ -175,11 +177,11 @@ const AiMentorLesson = ({
 
   const handleSubmit = useCallback(() => {
     const message = input.trim();
-    if (!message || !lesson.threadId) return;
+    if (!message || !lesson.threadId || isReadOnly) return;
 
     setInput("");
     void sendMessage({ text: message });
-  }, [input, lesson.threadId, sendMessage]);
+  }, [input, isReadOnly, lesson.threadId, sendMessage]);
 
   const handleVoiceLearnerTranscription = useCallback(
     (text: string, turnId?: string) => {
@@ -251,17 +253,17 @@ const AiMentorLesson = ({
   );
 
   const handleJudge = useCallback(async () => {
-    if (!lesson.threadId) return;
+    if (!lesson.threadId || isReadOnly) return;
     const response = await judgeLesson({
       threadId: lesson.threadId,
       learningStateId: lesson.learningStateId,
     });
     setLatestEvaluation(response.data);
     setShowEvaluationDialog(true);
-  }, [judgeLesson, lesson.threadId, lesson.learningStateId]);
+  }, [isReadOnly, judgeLesson, lesson.threadId, lesson.learningStateId]);
 
   const handleRetakeLesson = async () => {
-    if (!lesson.threadId) return;
+    if (!lesson.threadId || isReadOnly) return;
 
     setShowRetakeModal(false);
     setLatestEvaluation(null);
@@ -294,7 +296,7 @@ const AiMentorLesson = ({
   const evaluation = latestEvaluation ?? persistedEvaluation;
   const shouldShowEvaluation = hasEvaluationData(evaluation);
   const shouldAutoOpenTaskDescription =
-    !isLessonCompleted && !shouldShowEvaluation && hasTaskDescription;
+    !isReadOnly && !isLessonCompleted && !shouldShowEvaluation && hasTaskDescription;
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -471,36 +473,41 @@ const AiMentorLesson = ({
 
             {isJudgePending && <AiMentorEvaluationLoader />}
 
-            {isThreadActive && !isJudgePending && !hideControls && (
-              <LessonForm
-                voiceTarget={{ lessonId: lesson.id }}
-                mentorName={
-                  lesson.aiMentor?.name || t("studentCourseView.lesson.aiMentorLesson.aiMentorName")
-                }
-                mentorAvatarUrl={lesson.aiMentor?.avatarReferenceUrl}
-                handleSubmit={handleSubmit}
-                onLearnerTranscription={handleVoiceLearnerTranscription}
-                onMentorResponseDelta={handleVoiceMentorResponseDelta}
-                onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
-                onAudioInterrupted={invalidateCurrentThreadMessages}
-                onAudioOutputCompleted={invalidateCurrentThreadMessages}
-                onJudge={handleJudge}
-                isJudgePending={isJudgePending}
-                handleInputChange={handleInputChange}
-                messages={messages}
-                input={input}
-                setInput={setInput}
-                hasTaskDescription={hasTaskDescription}
-                taskDescription={lesson.description ?? ""}
-              />
+            {(isThreadActive || isPreviewMode) && !isJudgePending && !hideControls && (
+              <fieldset disabled={isReadOnly} className="w-full min-w-0">
+                <LessonForm
+                  voiceTarget={{ lessonId: lesson.id }}
+                  allowVoiceMentor={!isReadOnly}
+                  mentorName={
+                    lesson.aiMentor?.name ||
+                    t("studentCourseView.lesson.aiMentorLesson.aiMentorName")
+                  }
+                  mentorAvatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+                  handleSubmit={handleSubmit}
+                  onLearnerTranscription={handleVoiceLearnerTranscription}
+                  onMentorResponseDelta={handleVoiceMentorResponseDelta}
+                  onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
+                  onAudioInterrupted={invalidateCurrentThreadMessages}
+                  onAudioOutputCompleted={invalidateCurrentThreadMessages}
+                  onJudge={handleJudge}
+                  isJudgePending={isJudgePending}
+                  handleInputChange={handleInputChange}
+                  messages={messages}
+                  input={input}
+                  setInput={setInput}
+                  hasTaskDescription={hasTaskDescription}
+                  taskDescription={lesson.description ?? ""}
+                />
+              </fieldset>
             )}
 
             {!hideControls && (
               <>
                 <hr className="mt-4 w-full border-t border-neutral-100" />
                 <div className="mt-4 flex w-full justify-center">
-                  {isThreadActive && !isJudgePending && (
+                  {(isThreadActive || isPreviewMode) && !isJudgePending && (
                     <Button
+                      disabled={isReadOnly}
                       data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
                       variant="primary"
                       size="lg"
@@ -511,7 +518,7 @@ const AiMentorLesson = ({
                       <Icon name="ArrowRight" className="size-5" />
                     </Button>
                   )}
-                  {!isThreadActive && !isJudgePending && (
+                  {!isThreadActive && !isPreviewMode && !isJudgePending && (
                     <Button
                       data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
                       variant="outline"
