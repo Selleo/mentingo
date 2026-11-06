@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
-import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { MAX_USER_NAME_LENGTH, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Info, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -32,19 +32,33 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { CREATE_USER_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
 
 import type { MetaFunction } from "@remix-run/react";
+import type { TFunction } from "i18next";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewUser");
 
-const formSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters."),
-  lastName: z.string().min(2, "Last name must be at least 2 characters."),
-  email: z.string().email("Please enter a valid email address."),
-  roleSlugs: z.array(z.string()).min(1, "Please select at least one role."),
-  language: z.nativeEnum(SUPPORTED_LANGUAGES),
-  managedGroupIds: z.array(z.string()).optional(),
-});
+const createUserFormSchema = (t: TFunction) =>
+  z.object({
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters.")
+      .max(
+        MAX_USER_NAME_LENGTH,
+        t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+      ),
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters.")
+      .max(
+        MAX_USER_NAME_LENGTH,
+        t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+      ),
+    email: z.string().email("Please enter a valid email address."),
+    roleSlugs: z.array(z.string()).min(1, "Please select at least one role."),
+    language: z.nativeEnum(SUPPORTED_LANGUAGES),
+    managedGroupIds: z.array(z.string()).optional(),
+  });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof createUserFormSchema>>;
 
 export default function CreateNewUserPage() {
   const navigate = useNavigate();
@@ -57,7 +71,7 @@ export default function CreateNewUserPage() {
   const { mutateAsync: createUser } = useCreateUser();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createUserFormSchema(t)),
     defaultValues: {
       firstName: "",
       lastName: "",

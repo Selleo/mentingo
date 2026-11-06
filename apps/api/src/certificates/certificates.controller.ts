@@ -1,7 +1,7 @@
-import { Controller, Get, Query, UseGuards, Post, Body, Res, Req, Param } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Post, Body, Res, Param } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -16,7 +16,6 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
@@ -190,17 +189,14 @@ export class CertificatesController {
   async downloadCertificate(
     @Body() body: DownloadCertificateBody,
     @CurrentUser() currentUser: CurrentUserType,
-    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const { certificateId, language } = body;
-    const requestBaseUrl = getRequestBaseUrl(req);
 
     const { pdfBuffer, filename } = await this.certificatesService.downloadCertificate(
       currentUser,
       certificateId,
       language,
-      requestBaseUrl,
     );
 
     const asciiFilename =
@@ -324,12 +320,18 @@ export class CertificatesController {
 
   @Public()
   @Get("share")
+  @Validate({
+    request: [
+      { type: "query", name: "token", schema: UUIDSchema, required: true },
+      { type: "query", name: "lang", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+  })
   async getCertificateSharePage(
-    @Query("certificateId") certificateId: UUIDType,
+    @Query("token") token: UUIDType,
     @Query("lang") language: SupportedLanguages,
     @Res() res: Response,
   ): Promise<void> {
-    const html = await this.certificatesService.getPublicSharePage(certificateId, language);
+    const html = await this.certificatesService.getPublicSharePageByToken(token, language);
 
     res.set({
       "Content-Type": "text/html; charset=utf-8",
@@ -341,12 +343,18 @@ export class CertificatesController {
 
   @Public()
   @Get("share-image")
+  @Validate({
+    request: [
+      { type: "query", name: "token", schema: UUIDSchema, required: true },
+      { type: "query", name: "lang", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+  })
   async getCertificateShareImage(
-    @Query("certificateId") certificateId: UUIDType,
+    @Query("token") token: UUIDType,
     @Query("lang") language: SupportedLanguages,
     @Res() res: Response,
   ): Promise<void> {
-    const imageBuffer = await this.certificatesService.getPublicShareImage(certificateId, language);
+    const imageBuffer = await this.certificatesService.getPublicShareImageByToken(token, language);
 
     res.set({
       "Content-Type": "image/png",

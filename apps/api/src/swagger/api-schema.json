@@ -9337,19 +9337,50 @@
         "operationId": "CertificatesController_getCertificateSharePage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -9365,19 +9396,50 @@
         "operationId": "CertificatesController_getCertificateShareImage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16579,19 +16641,50 @@
         "operationId": "LearningPathCertificateController_getCertificateSharePage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16607,19 +16700,50 @@
         "operationId": "LearningPathCertificateController_getCertificateShareImage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -33218,9 +33342,11 @@
         "type": "object",
         "properties": {
           "firstName": {
+            "maxLength": 64,
             "type": "string"
           },
           "lastName": {
+            "maxLength": 64,
             "type": "string"
           },
           "groups": {
@@ -33369,9 +33495,11 @@
         "type": "object",
         "properties": {
           "firstName": {
+            "maxLength": 64,
             "type": "string"
           },
           "lastName": {
+            "maxLength": 64,
             "type": "string"
           },
           "groups": {
@@ -38562,6 +38690,7 @@
             "type": "object",
             "properties": {
               "title": {
+                "maxLength": 255,
                 "type": "string"
               },
               "description": {
@@ -38963,6 +39092,7 @@
         "type": "object",
         "properties": {
           "title": {
+            "maxLength": 255,
             "type": "string"
           },
           "description": {

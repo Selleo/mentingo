@@ -801,7 +801,8 @@
     "exitFullscreen": "Exit fullscreen",
     "refreshPage": "Refresh page",
     "validation": {
-      "messageRequired": "Message is required."
+      "messageRequired": "Message is required.",
+      "nameMaxLength": "Must be at most {{max}} characters."
     }
   },
   "lessons": {
@@ -3044,7 +3045,7 @@
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
-        "titleMaxLength": "Title must be at most 250 characters.",
+        "titleMaxLength": "Title must be at most {{max}} characters.",
         "descriptionMinLength": "Description must be at least 2 characters.",
         "categoryRequired": "Category is required",
         "certificateManageDenied": "You cannot manage certificates for this course.",

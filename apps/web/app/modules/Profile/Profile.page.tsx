@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useParams } from "@remix-run/react";
-import { OnboardingPages, PERMISSIONS } from "@repo/shared";
+import { MAX_USER_NAME_LENGTH, OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,18 +32,32 @@ import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components
 
 import type { UpdateUserProfileBody } from "./types";
 import type { MetaFunction } from "@remix-run/react";
+import type { TFunction } from "i18next";
 import type { CurrentUserResponse } from "~/api/generated-api";
 import type { CertificateType } from "~/types/certificate";
 
-const updateUserProfileSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  description: z.string().optional(),
-  contactEmail: z.string().email().optional(),
-  contactPhone: z.string().optional(),
-  jobTitle: z.string().optional(),
-  userAvatar: z.instanceof(File).nullable().optional(),
-});
+const updateUserProfileSchema = (t: TFunction) =>
+  z.object({
+    firstName: z
+      .string()
+      .max(
+        MAX_USER_NAME_LENGTH,
+        t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+      )
+      .optional(),
+    lastName: z
+      .string()
+      .max(
+        MAX_USER_NAME_LENGTH,
+        t("common.validation.nameMaxLength", { max: MAX_USER_NAME_LENGTH }),
+      )
+      .optional(),
+    description: z.string().optional(),
+    contactEmail: z.string().email().optional(),
+    contactPhone: z.string().optional(),
+    jobTitle: z.string().optional(),
+    userAvatar: z.instanceof(File).nullable().optional(),
+  });
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.profile");
 
@@ -111,7 +125,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
     setValue,
     formState: { isDirty },
   } = useForm<UpdateUserProfileBody>({
-    resolver: zodResolver(updateUserProfileSchema),
+    resolver: zodResolver(updateUserProfileSchema(t)),
   });
 
   const { mutate: updateUserProfile } = useUpdateUserProfile({

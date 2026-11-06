@@ -801,7 +801,8 @@
     "exitFullscreen": "Beenden Sie den Vollbildmodus",
     "refreshPage": "Seite neu laden",
     "validation": {
-      "messageRequired": "Eine Nachricht ist erforderlich."
+      "messageRequired": "Eine Nachricht ist erforderlich.",
+      "nameMaxLength": "Darf höchstens {{max}} Zeichen lang sein."
     }
   },
   "lessons": {
@@ -3043,7 +3044,7 @@
       },
       "validation": {
         "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
-        "titleMaxLength": "Der Titel darf höchstens 250 Zeichen lang sein.",
+        "titleMaxLength": "Der Titel darf höchstens {{max}} Zeichen lang sein.",
         "descriptionMinLength": "Die Beschreibung muss mindestens 2 Zeichen lang sein.",
         "categoryRequired": "Kategorie ist erforderlich",
         "certificateManageDenied": "Sie können Zertifikate für diesen Kurs nicht verwalten.",

@@ -801,7 +801,8 @@
     "exitFullscreen": "Išeikite per visą ekraną",
     "refreshPage": "Atnaujinti puslapį",
     "validation": {
-      "messageRequired": "Žinutė yra privaloma."
+      "messageRequired": "Žinutė yra privaloma.",
+      "nameMaxLength": "Gali būti ne daugiau kaip {{max}} simbolių."
     }
   },
   "lessons": {
@@ -3043,7 +3044,7 @@
       },
       "validation": {
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
-        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
+        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip {{max}} simbolių.",
         "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
         "categoryRequired": "Kategorija būtina",
         "certificateManageDenied": "Negalite tvarkyti šio kurso pažymėjimų.",
