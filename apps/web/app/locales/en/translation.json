@@ -4440,8 +4440,8 @@
     },
     "preview": {
       "title": "You are previewing this course",
-      "enrollmentDescription": "Enroll to take quizzes, join activities and save your progress.",
-      "learningModeDescription": "Enable Learn mode to take quizzes, join activities and track your progress."
+      "enrollmentDescription": "Enroll to take quizzes and save your progress.",
+      "learningModeDescription": "Enable Learn mode to take quizzes and track your progress."
     }
   },
   "studentCourseView": {
@@ -4737,7 +4737,7 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "Preview public courses before enrollment",
-      "publicCoursePreviewDescription": "Let signed-in users browse free public courses without enrolling. Quizzes, activities and progress require enrollment. Paid courses keep their existing access rules."
+      "publicCoursePreviewDescription": "Let signed-in users browse free public courses and chat with AI mentors without enrolling. Quizzes and learning progress require enrollment. Paid courses keep their existing access rules."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",

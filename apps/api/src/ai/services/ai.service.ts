@@ -138,6 +138,23 @@ export class AiService {
     )();
   }
 
+  async hasPublicLessonPreviewAccess(lessonId: UUIDType, userId: UUIDType) {
+    return this.aiRepository.getHasPublicCoursePreviewAccess(lessonId, userId);
+  }
+
+  private async assertLessonConversationAccess(lessonId: UUIDType, currentUser: CurrentUserType) {
+    if (hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) return;
+    const [access] = await this.aiRepository.checkLessonAssignment(lessonId, currentUser.userId);
+    if (
+      !access ||
+      (!access.isAssigned &&
+        !access.isFreemium &&
+        !(await this.hasPublicLessonPreviewAccess(lessonId, currentUser.userId)))
+    ) {
+      throw new ForbiddenException("common.toast.lessonAccessDenied");
+    }
+  }
+
   async getExistingThreadForLesson(lessonId: UUIDType, userId: UUIDType) {
     return this.threadService.findExistingThreadForLesson(lessonId, userId);
   }
@@ -262,6 +279,11 @@ export class AiService {
     return observe(
       async () => {
         const thread = await this.isThreadActive(data.threadId, currentUser.userId);
+        if (thread.aiMentorLessonId) {
+          const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
+          if (!lessonId) throw new ForbiddenException("common.toast.lessonAccessDenied");
+          await this.assertLessonConversationAccess(lessonId, currentUser);
+        }
         const sessionId = data.voiceSessionId ?? thread.practiceSessionId ?? data.threadId;
 
         return propagateAttributes(
@@ -477,6 +499,15 @@ export class AiService {
 
     const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
     const { lessonId, courseId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
+    if (lessonId && currentUser) {
+      await this.assertLessonConversationAccess(lessonId, currentUser);
+      if (
+        !hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE) &&
+        (await this.hasPublicLessonPreviewAccess(lessonId, currentUser.userId))
+      ) {
+        throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+      }
+    }
 
     const judged = await observe(
       async () =>
@@ -595,8 +626,14 @@ export class AiService {
     const { userId, permissions } = currentUser;
 
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
+    if (!lesson) throw new UnauthorizedException("common.toast.lessonAccessDenied");
+    const isPublicPreview =
+      !hasPermission(permissions, PERMISSIONS.LEARNING_MODE_USE) &&
+      hasPermission(permissions, PERMISSIONS.AI_USE) &&
+      (await this.hasPublicLessonPreviewAccess(lessonId, userId));
 
     if (
+      !isPublicPreview &&
       !lesson.isAssigned &&
       !lesson.isFreemium &&
       !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
@@ -616,6 +653,7 @@ export class AiService {
 
     await this.db.transaction(async (trx) => {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
+      if (isPublicPreview) return;
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
       await this.outboxPublisher.publishDurable(
         new LessonProgressChangedEvent({

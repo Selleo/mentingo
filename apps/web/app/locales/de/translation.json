@@ -4439,8 +4439,8 @@
     },
     "preview": {
       "title": "Sie sehen eine Kursvorschau",
-      "enrollmentDescription": "Schreiben Sie sich ein, um Quizze zu beantworten, an Aktivitäten teilzunehmen und Ihren Fortschritt zu speichern.",
-      "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten, an Aktivitäten teilzunehmen und Ihren Fortschritt zu verfolgen."
+      "enrollmentDescription": "Schreiben Sie sich ein, um Quizze zu beantworten und Ihren Fortschritt zu speichern.",
+      "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten und Ihren Fortschritt zu verfolgen."
     }
   },
   "studentCourseView": {
@@ -4736,7 +4736,7 @@
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
       "publicCoursePreview": "Öffentliche Kurse vor der Anmeldung ansehen",
-      "publicCoursePreviewDescription": "Angemeldete Nutzer können kostenlose öffentliche Kurse ohne Einschreibung ansehen. Quizze, Aktivitäten und Lernfortschritt erfordern eine Einschreibung. Für kostenpflichtige Kurse gelten die bisherigen Zugangsregeln."
+      "publicCoursePreviewDescription": "Angemeldete Nutzer können kostenlose öffentliche Kurse ansehen und ohne Einschreibung mit KI-Mentoren chatten. Quizze und Lernfortschritt erfordern eine Einschreibung. Für kostenpflichtige Kurse gelten die bisherigen Zugriffsregeln."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",

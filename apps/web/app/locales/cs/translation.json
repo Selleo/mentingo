@@ -4446,8 +4446,8 @@
     },
     "preview": {
       "title": "Prohlížíte si náhled kurzu",
-      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy, účastnit se aktivit a ukládat svůj postup.",
-      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy, účastnit se aktivit a sledovat svůj postup."
+      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy a ukládat svůj postup.",
+      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy a sledovat svůj postup."
     }
   },
   "studentCourseView": {
@@ -4745,7 +4745,7 @@
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
       "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
       "publicCoursePreview": "Náhled veřejných kurzů před zápisem",
-      "publicCoursePreviewDescription": "Přihlášení uživatelé si mohou prohlížet bezplatné veřejné kurzy bez zápisu. Kvízy, aktivity a ukládání postupu vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
+      "publicCoursePreviewDescription": "Umožněte přihlášeným uživatelům prohlížet bezplatné veřejné kurzy a chatovat s AI mentory bez zápisu. Kvízy a postup v učení vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",

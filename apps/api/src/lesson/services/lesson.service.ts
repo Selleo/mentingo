@@ -240,7 +240,13 @@ export class LessonService {
       );
     }
 
-    if (lesson.type === LESSON_TYPES.AI_MENTOR && !isManagerPreview) {
+    if (
+      lesson.type === LESSON_TYPES.AI_MENTOR &&
+      (!isManagerPreview ||
+        (isPublicCoursePreview &&
+          effectiveUserId === currentUser.userId &&
+          hasPermission(currentUser.permissions, PERMISSIONS.AI_USE)))
+    ) {
       const { data: thread } = await this.aiService.getOrCreateLessonThread({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,

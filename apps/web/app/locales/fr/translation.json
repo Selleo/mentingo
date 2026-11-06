@@ -4182,8 +4182,8 @@
     },
     "preview": {
       "title": "Vous consultez un aperçu du cours",
-      "enrollmentDescription": "Inscrivez-vous pour répondre aux quiz, participer aux activités et enregistrer votre progression.",
-      "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz, participer aux activités et suivre votre progression."
+      "enrollmentDescription": "Inscrivez-vous pour répondre aux quiz et enregistrer votre progression.",
+      "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz et suivre votre progression."
     }
   },
   "studentCourseView": {
@@ -4463,7 +4463,7 @@
       "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
       "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard",
       "publicCoursePreview": "Aperçu des cours publics avant inscription",
-      "publicCoursePreviewDescription": "Permet aux utilisateurs connectés de consulter les cours publics gratuits sans inscription. Les quiz, les activités et le suivi de progression nécessitent une inscription. Les règles d’accès aux cours payants restent inchangées."
+      "publicCoursePreviewDescription": "Permettez aux utilisateurs connectés de consulter les cours publics gratuits et de discuter avec les mentors IA sans inscription. Les quiz et la progression nécessitent une inscription. Les cours payants conservent leurs règles d’accès actuelles."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",
