@@ -8,12 +8,14 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import { AUTH_ERROR_KEYS, AUTH_TOKEN_PURPOSE, SUPPORT_SESSION_ERROR_KEYS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
+import { UserSessionRevokedEvent } from "src/events/user/user-session-revoked.event";
 import { SessionRevocationService } from "src/redis";
 import { REDIS_CLIENT } from "src/redis/redis.tokens";
 import { RedisClient } from "src/redis/redis.types";
@@ -34,6 +36,7 @@ import type {
   AuthContext,
   MfaChallenge,
   MfaChallengeIdentity,
+  MfaAssuranceIdentity,
   MfaChallengeKeyOwner,
   SessionClaims,
   SupportMfaAssurance,
@@ -49,6 +52,7 @@ export class SessionService {
     private readonly mfaRepository: MfaRepository,
     private readonly sessionRevocationService: SessionRevocationService,
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClient,
+    private readonly eventBus: EventBus,
   ) {}
 
   getUserMfaPolicy(tenantId: string, userId: string) {
@@ -97,6 +101,28 @@ export class SessionService {
       throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
 
     return claims;
+  }
+
+  /**
+   * Re-checks a credential derived from a browser session (e.g. a SCORM content grant): the session
+   * must still be active and the MFA assurance it was issued with must satisfy the current policy.
+   */
+  async assertDerivedSessionAssurance(actor: CurrentUserType): Promise<void> {
+    await this.sessionRevocationService.assertSessionActive(actor);
+
+    if (actor.isSupportMode) {
+      await this.validateSupportModeClaims(actor);
+      return;
+    }
+
+    await this.assertMfaAssurance(actor);
+  }
+
+  /** Rejects a credential issued without MFA once the owner's current policy requires MFA. */
+  async assertMfaAssurance(identity: MfaAssuranceIdentity): Promise<void> {
+    const policy = await this.getUserMfaPolicy(identity.tenantId, identity.userId);
+    if (policy.required && !identity.mfaVerified)
+      throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
   }
 
   async storeSupportSessionMfaAssurance(
@@ -253,6 +279,11 @@ export class SessionService {
 
   async revokeSession(user: CurrentUserType) {
     await this.sessionRevocationService.revokeSession(user);
+    if (user.sessionId) {
+      this.eventBus.publish(
+        new UserSessionRevokedEvent({ userId: user.userId, sessionId: user.sessionId }),
+      );
+    }
     if (user.supportSessionId) await this.revokeSupportSessionMfaAssurance(user.supportSessionId);
   }
 
@@ -299,7 +330,7 @@ export class SessionService {
     return { ...claims, permissions: [], roleSlugs: [] };
   }
 
-  private async validateSupportModeClaims(claims: SessionClaims): Promise<SessionClaims> {
+  private async validateSupportModeClaims<T extends CurrentUserType>(claims: T): Promise<T> {
     if (
       !claims.supportSessionId ||
       !claims.originalTenantId ||

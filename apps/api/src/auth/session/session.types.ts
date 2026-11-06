@@ -34,6 +34,12 @@ export type MfaChallengeKeyOwner = {
   jti?: string;
 };
 
+export type MfaAssuranceIdentity = {
+  userId: string;
+  tenantId: string;
+  mfaVerified?: boolean;
+};
+
 export type MfaPolicy = {
   required: boolean;
   enabled: boolean;

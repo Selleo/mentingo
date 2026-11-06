@@ -11,6 +11,7 @@ import { SessionService } from "./session.service";
 import type { MfaRepository } from "./mfa.repository";
 import type { ExecutionContext } from "@nestjs/common";
 import type { Reflector } from "@nestjs/core";
+import type { EventBus } from "@nestjs/cqrs";
 import type { SessionRevocationService } from "src/redis";
 import type { RedisClient } from "src/redis/redis.types";
 
@@ -45,6 +46,7 @@ describe("Session authentication boundaries", () => {
         getOrCreateUserSessionVersion: async () => "v".repeat(32),
       } as unknown as SessionRevocationService,
       { get, set } as unknown as RedisClient,
+      { publish: jest.fn() } as unknown as EventBus,
     );
   });
 

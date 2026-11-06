@@ -3,3 +3,5 @@ export type SessionIdentity = {
   sessionId?: string;
   sessionVersion?: string;
 };
+
+export type ActiveSessionIdentity = Required<SessionIdentity>;

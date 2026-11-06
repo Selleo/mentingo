@@ -3,7 +3,8 @@ import { createHash, randomBytes } from "node:crypto";
 import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { SCORM_CONTENT_ACCESS, SCORM_CONTENT_PATHS, SCORM_CONTENT_TOKEN } from "@repo/shared";
 
-import { REDIS_CLIENT, RedisClient, SessionRevocationService } from "src/redis";
+import { SessionService } from "src/auth/session/session.service";
+import { REDIS_CLIENT, RedisClient } from "src/redis";
 
 import { getScormContentOrigin } from "./scorm-content.config";
 import { SCORM_CONTENT_CONFIG, SCORM_CONTENT_ERROR_KEYS } from "./scorm-content.constants";
@@ -18,7 +19,7 @@ const contentTokenPattern = new RegExp(SCORM_CONTENT_TOKEN.PATTERN);
 export class ScormContentGrantsService {
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
-    private readonly sessionRevocationService: SessionRevocationService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async createGrantedContentUrl(grant: ScormContentGrantInput): Promise<string> {
@@ -44,7 +45,7 @@ export class ScormContentGrantsService {
       throw new UnauthorizedException(SCORM_CONTENT_ERROR_KEYS.ACCESS_EXPIRED);
     }
 
-    await this.sessionRevocationService.assertSessionActive(grant.actor);
+    await this.sessionService.assertDerivedSessionAssurance(grant.actor);
     return grant;
   }
 

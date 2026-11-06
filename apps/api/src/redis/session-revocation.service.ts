@@ -1,12 +1,13 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AUTH_ERROR_KEYS } from "@repo/shared";
+import { chunk } from "lodash";
 import { nanoid } from "nanoid";
 
 import { REFRESH_TOKEN_EXPIRATION_SECONDS } from "src/auth/consts";
 import { REDIS_CLIENT } from "src/redis/redis.tokens";
 import { RedisClient } from "src/redis/redis.types";
 
-import type { SessionIdentity } from "./session-revocation.types";
+import type { ActiveSessionIdentity, SessionIdentity } from "./session-revocation.types";
 
 @Injectable()
 export class SessionRevocationService {
@@ -48,17 +49,32 @@ export class SessionRevocationService {
     return { sessionId, sessionVersion };
   }
 
-  async assertSessionActive(identity: SessionIdentity): Promise<void> {
-    if (!identity.sessionId || !identity.sessionVersion)
+  async assertSessionActive({ userId, sessionId, sessionVersion }: SessionIdentity): Promise<void> {
+    if (!sessionId || !sessionVersion)
       throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
 
-    const [version, session] = await this.redisClient.mGet([
-      this.getUserVersionKey(identity.userId),
-      this.getSessionKey(identity.userId, identity.sessionId),
+    const [inactiveSession] = await this.findInactiveSessions([
+      { userId, sessionId, sessionVersion },
     ]);
+    if (inactiveSession) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+  }
 
-    if (version !== identity.sessionVersion || session !== identity.sessionVersion)
-      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+  /** Returns the identities whose session was revoked or expired, checked with one Redis round-trip. */
+  async findInactiveSessions<T extends ActiveSessionIdentity>(identities: T[]): Promise<T[]> {
+    if (!identities.length) return [];
+
+    const storedValues = await this.redisClient.mGet(
+      identities.flatMap(({ userId, sessionId }) => [
+        this.getUserVersionKey(userId),
+        this.getSessionKey(userId, sessionId),
+      ]),
+    );
+    const storedVersionPairs = chunk(storedValues, 2);
+
+    return identities.filter(({ sessionVersion }, index) => {
+      const [userVersion, sessionRecordVersion] = storedVersionPairs[index];
+      return userVersion !== sessionVersion || sessionRecordVersion !== sessionVersion;
+    });
   }
 
   async extendSession(

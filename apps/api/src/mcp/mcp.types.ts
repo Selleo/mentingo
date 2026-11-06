@@ -56,6 +56,7 @@ export type McpAccessGrant = {
   userId: UUIDType;
   tenantId: UUIDType;
   sessionVersion?: string;
+  mfaVerified?: boolean;
   clientId: string;
   resource: string;
   scopes: string[];
@@ -247,8 +248,12 @@ export type McpUploadGrant =
   | McpScormUploadGrant
   | McpScormTusGrant;
 
-/** An upload grant as stored, bound to the session version of the user who requested it. */
-export type McpStoredUploadGrant = McpUploadGrant & { sessionVersion?: string };
+/** An upload grant as stored, bound to the session version and MFA assurance of its requester. */
+export type McpStoredUploadGrant = McpUploadGrant & McpCredentialAssurance;
+
+export type McpCredentialAssurance = { sessionVersion?: string; mfaVerified?: boolean };
+
+export type McpCredentialOwner = McpCredentialAssurance & { userId: UUIDType; tenantId: UUIDType };
 
 export type McpRequest = Request & {
   mcpUploadGrant?: McpUploadGrant;

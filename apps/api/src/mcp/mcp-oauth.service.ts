@@ -418,16 +418,13 @@ export class McpOAuthService {
       );
       const resource = await this.resources.fromRequest(req);
       if (payload.tenantId !== resource.tenantId) return null;
-      const email = await this.mcpTokens.resolveIdentity(
-        payload.userId,
-        payload.tenantId,
-        payload.sessionVersion,
-      );
+      const email = await this.mcpTokens.resolveIdentity(payload);
       return email
         ? {
             userId: payload.userId,
             tenantId: payload.tenantId,
             sessionVersion: payload.sessionVersion,
+            mfaVerified: payload.mfaVerified,
             resource: resource.url,
             email,
           }
@@ -483,17 +480,14 @@ export class McpOAuthService {
   ): Promise<OAuth2Server.Token> {
     if (!isMcpScopeSet(token.scope)) throw new Error("Invalid MCP token scope");
     const mcpUser = user as McpUser;
-    const email = await this.mcpTokens.resolveIdentity(
-      mcpUser.userId,
-      mcpUser.tenantId,
-      mcpUser.sessionVersion,
-    );
+    const email = await this.mcpTokens.resolveIdentity(mcpUser);
     const resource = await this.resources.forTenant(mcpUser.tenantId);
     if (!email || mcpUser.resource !== resource.url) throw new Error("MCP authorization revoked");
     await this.mcpTokens.store(token.accessToken, {
       userId: mcpUser.userId,
       tenantId: mcpUser.tenantId,
       sessionVersion: mcpUser.sessionVersion,
+      mfaVerified: mcpUser.mfaVerified,
       clientId: client.id,
       resource: mcpUser.resource,
       scopes: token.scope,
@@ -521,14 +515,7 @@ export class McpOAuthService {
     const stored = JSON.parse(raw) as StoredRefresh;
     if (!isMcpScopeSet(stored.scope)) return false;
     if (new Date(stored.refreshTokenExpiresAt).getTime() <= Date.now()) return false;
-    if (
-      !(await this.mcpTokens.resolveIdentity(
-        (stored.user as McpUser).userId,
-        (stored.user as McpUser).tenantId,
-        (stored.user as McpUser).sessionVersion,
-      ))
-    )
-      return false;
+    if (!(await this.mcpTokens.resolveIdentity(stored.user as McpUser))) return false;
     return {
       ...stored,
       refreshTokenExpiresAt: new Date(stored.refreshTokenExpiresAt),

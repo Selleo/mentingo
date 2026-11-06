@@ -15,6 +15,7 @@ export function bindToolActor(actor: BoundToolActor) {
       clientId: "native-assistant",
       scopes: [] as string[],
       sessionVersion: undefined,
+      mfaVerified: undefined,
     };
   return { ...actor.grant, email: actor.email };
 }

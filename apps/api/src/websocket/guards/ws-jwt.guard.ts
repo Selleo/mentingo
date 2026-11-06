@@ -1,9 +1,16 @@
-import { type CanActivate, type ExecutionContext, Injectable, Logger } from "@nestjs/common";
+import {
+  type CanActivate,
+  type ExecutionContext,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { WsException } from "@nestjs/websockets";
-import { AUTH_SOCKET_EVENTS, AUTH_TOKEN_PURPOSE } from "@repo/shared";
+import { AUTH_ERROR_KEYS, AUTH_SOCKET_EVENTS, AUTH_TOKEN_PURPOSE } from "@repo/shared";
 import { parse } from "cookie";
 
 import { SessionService } from "src/auth/session/session.service";
+import { getSessionRoomName, getUserRoomName } from "src/websocket/websocket.rooms";
 
 import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types";
 
@@ -33,9 +40,12 @@ export class WsJwtGuard implements CanActivate {
         token,
         AUTH_TOKEN_PURPOSE.ACCESS,
       );
+      if (!payload.sessionId) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
 
       const user: WsUser = {
         userId: payload.userId,
+        sessionId: payload.sessionId,
+        sessionVersion: payload.sessionVersion,
         email: payload.email,
         roleSlugs: payload.roleSlugs ?? [],
         permissions: payload.permissions ?? [],
@@ -44,7 +54,8 @@ export class WsJwtGuard implements CanActivate {
 
       client.data = { ...client.data, user };
 
-      await client.join(`user:${user.userId}`);
+      await client.join(getUserRoomName(user.userId));
+      await client.join(getSessionRoomName(user.sessionId));
 
       this.logger.debug(`WebSocket authenticated for user: ${user.userId}`);
 

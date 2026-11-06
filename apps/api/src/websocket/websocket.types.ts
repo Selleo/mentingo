@@ -30,6 +30,8 @@ export interface LeaveLiveTrainingPayload {
 
 export interface WsUser {
   userId: string;
+  sessionId: string;
+  sessionVersion: string;
   email: string;
   roleSlugs: string[];
   permissions: PermissionKey[];

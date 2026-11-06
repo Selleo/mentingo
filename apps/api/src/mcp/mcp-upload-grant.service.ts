@@ -227,11 +227,7 @@ export class McpUploadGrantService {
     actor: CurrentUserType,
     permission: PermissionKey,
   ): Promise<void> {
-    const email = await this.tokenService.resolveIdentity(
-      actor.userId,
-      actor.tenantId,
-      actor.sessionVersion,
-    );
+    const email = await this.tokenService.resolveIdentity(actor);
     if (!email) throw new UnauthorizedException("Upload user is no longer active");
     const access = await this.tenantDbRunnerService.runWithTenantContext(actor.tenantId, () =>
       this.permissionsService.getUserAccess(actor.userId),
@@ -810,11 +806,7 @@ export class McpUploadGrantService {
     if (resource.tenantId !== grant.tenantId)
       throw new UnauthorizedException("Upload grant is for another tenant host");
 
-    const email = await this.tokenService.resolveIdentity(
-      grant.userId,
-      grant.tenantId,
-      grant.sessionVersion,
-    );
+    const email = await this.tokenService.resolveIdentity(grant);
     if (!email) throw new UnauthorizedException("Upload user is no longer active");
 
     const access = await this.tenantDbRunnerService.runWithTenantContext(grant.tenantId, () =>
@@ -991,14 +983,18 @@ export class McpUploadGrantService {
     }
   }
 
-  /** Binds the grant to the issuer's session version, so revoking their sessions voids it. */
+  /** Binds the grant to the issuer's session version and MFA assurance, so revocation or newly required MFA voids it. */
   private async storeGrant(
     token: string,
     grant: McpUploadGrant,
     actor: CurrentUserType,
     ttlSeconds: number,
   ): Promise<void> {
-    const storedGrant: McpStoredUploadGrant = { ...grant, sessionVersion: actor.sessionVersion };
+    const storedGrant: McpStoredUploadGrant = {
+      ...grant,
+      sessionVersion: actor.sessionVersion,
+      mfaVerified: actor.mfaVerified,
+    };
     await this.redis.set(this.key(token), JSON.stringify(storedGrant), { EX: ttlSeconds });
   }
 

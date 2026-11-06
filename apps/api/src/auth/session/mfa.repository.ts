@@ -1,6 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AUTH_ERROR_KEYS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -21,11 +22,28 @@ export class MfaRepository {
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
+  /** Reads the user, their MFA settings, the tenant's enforced roles and the user's roles in one query. */
   async getUserMfaPolicy(tenantId: string, userId: string): Promise<MfaPolicy> {
+    const personalSettings = alias(settings, "personal_settings");
+    const globalSettings = alias(settings, "global_settings");
+
     return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      const [user] = await this.db
-        .select({ id: users.id })
+      const [source] = await this.db
+        .select({
+          personal: sql<SettingsJSONContentSchema | null>`${personalSettings.settings}`,
+          global: sql<GlobalSettingsJSONContentSchema | null>`${globalSettings.settings}`,
+          roleSlugs: sql<
+            string[]
+          >`coalesce(array_agg(${permissionRoles.slug}) filter (where ${permissionRoles.slug} is not null), '{}')`,
+        })
         .from(users)
+        .leftJoin(personalSettings, eq(personalSettings.userId, users.id))
+        .leftJoin(
+          globalSettings,
+          and(isNull(globalSettings.userId), eq(globalSettings.tenantId, users.tenantId)),
+        )
+        .leftJoin(permissionUserRoles, eq(permissionUserRoles.userId, users.id))
+        .leftJoin(permissionRoles, eq(permissionUserRoles.roleId, permissionRoles.id))
         .where(
           and(
             eq(users.id, userId),
@@ -33,35 +51,20 @@ export class MfaRepository {
             eq(users.archived, false),
             isNull(users.deletedAt),
           ),
-        );
+        )
+        .groupBy(users.id, personalSettings.id, globalSettings.id);
 
-      if (!user) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
-
-      const [personal] = await this.db
-        .select({ value: sql<SettingsJSONContentSchema>`${settings.settings}` })
-        .from(settings)
-        .where(eq(settings.userId, userId));
-
-      const [global] = await this.db
-        .select({ value: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
-        .from(settings)
-        .where(isNull(settings.userId));
-
-      if (!personal || !global || typeof personal.value.isMFAEnabled !== "boolean")
+      if (!source?.personal || !source.global || typeof source.personal.isMFAEnabled !== "boolean")
         throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
 
-      const roles = await this.db
-        .select({ slug: permissionRoles.slug })
-        .from(permissionUserRoles)
-        .innerJoin(permissionRoles, eq(permissionUserRoles.roleId, permissionRoles.id))
-        .where(eq(permissionUserRoles.userId, userId));
+      const enforcedRoles = source.global.MFAEnforcedRoles;
 
       return {
         required:
-          personal.value.isMFAEnabled ||
-          roles.some(({ slug }) => global.value.MFAEnforcedRoles.includes(slug)),
-        enabled: personal.value.isMFAEnabled,
-        secret: personal.value.MFASecret,
+          source.personal.isMFAEnabled ||
+          source.roleSlugs.some((slug) => enforcedRoles.includes(slug)),
+        enabled: source.personal.isMFAEnabled,
+        secret: source.personal.MFASecret,
       };
     });
   }

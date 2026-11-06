@@ -38,6 +38,7 @@ function buildService() {
     {
       assertUserSessionVersion: jest.fn().mockResolvedValue(undefined),
     } as never,
+    { assertMfaAssurance: jest.fn().mockResolvedValue(undefined) } as never,
   );
   const identity = jest.spyOn(service, "resolveIdentity").mockResolvedValue("actor@example.com");
   return { service, redis, values, resources, identity };
@@ -56,7 +57,13 @@ describe("McpTokenService integration scopes", () => {
         grant: expect.objectContaining({ ...grant, scopes: [scope] }),
       });
       expect(resources.forTenant).toHaveBeenCalledWith(grant.tenantId);
-      expect(identity).toHaveBeenCalledWith(grant.userId, grant.tenantId, grant.sessionVersion);
+      expect(identity).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: grant.userId,
+          tenantId: grant.tenantId,
+          sessionVersion: grant.sessionVersion,
+        }),
+      );
     },
   );
 
