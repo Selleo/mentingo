@@ -296,6 +296,8 @@ export interface CurrentUserResponse {
       | "gamification.read"
       | "gamification.earn_hidden"
       | "gamification.manage"
+      | "quiz_grading.read"
+      | "quiz_grading.grade"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -1197,6 +1199,7 @@ export interface UpdateGamificationEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
     gamificationEnabled: boolean;

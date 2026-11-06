@@ -746,7 +746,8 @@
       "contentCreator": "Inhaltsersteller",
       "trainer": "Trainer",
       "student": "Student",
-      "groupManager": "Gruppenmanager"
+      "groupManager": "Gruppenmanager",
+      "reviewer": "Prüfer"
     },
     "languages": {
       "en": "Englisch",
@@ -2322,7 +2323,8 @@
         "activity_log": "Aktivitätsprotokoll",
         "competencies": "Kompetenzen",
         "other": "Plattformfunktionen",
-        "gamification": "Gamification"
+        "gamification": "Gamification",
+        "quiz_grading": "Quiz-Bewertung"
       },
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
@@ -2419,7 +2421,9 @@
         "activity_log_read": "Aktivitätsprotokolle anzeigen.",
         "gamification_read": "Level, XP und Erfolge anzeigen.",
         "gamification_earn_hidden": "Versteckte Erfolge erhalten.",
-        "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren."
+        "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren.",
+        "quiz_grading_read": "Warteschlange offener Antworten anzeigen, die auf Bewertung warten.",
+        "quiz_grading_grade": "Offene Antworten bewerten und Kommentare für Lernende schreiben."
       }
     },
     "dropdown": {
@@ -4838,7 +4842,8 @@
       "student": "Student",
       "content_creator": "Inhaltsersteller",
       "trainer": "Trainer",
-      "group_manager": "Gruppenmanager"
+      "group_manager": "Gruppenmanager",
+      "reviewer": "Prüfer"
     },
     "switch": {
       "enabled": "Ermöglicht",

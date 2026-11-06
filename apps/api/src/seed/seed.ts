@@ -707,6 +707,12 @@ async function seed() {
               lastName: "Student",
               roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
             },
+            {
+              email: "reviewer@example.com",
+              firstName: faker.person.firstName(),
+              lastName: "Reviewer",
+              roleSlug: SYSTEM_ROLE_SLUGS.REVIEWER,
+            },
           ],
           tenantId,
           "password",

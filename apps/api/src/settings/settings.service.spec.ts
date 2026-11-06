@@ -100,6 +100,31 @@ describe("SettingsService dashboard normalization", () => {
     );
   });
 
+  it("uses the student dashboard profile for a student who is also a reviewer", async () => {
+    const service = Object.create(SettingsService.prototype) as SettingsService;
+    Object.defineProperty(service, "permissionsService", {
+      value: {
+        getUserAccess: jest.fn().mockResolvedValue({
+          roleSlugs: [SYSTEM_ROLE_SLUGS.REVIEWER, SYSTEM_ROLE_SLUGS.STUDENT],
+        }),
+      },
+    });
+    const getDefaultDashboardLayout = (
+      service as unknown as {
+        getDefaultDashboardLayout: (userId: string) => Promise<DashboardSettings>;
+      }
+    ).getDefaultDashboardLayout;
+
+    const layout = await getDefaultDashboardLayout.call(service, "user-id");
+
+    expect(layout.widgets).toEqual(
+      DASHBOARD_DEFAULT_LAYOUTS[SYSTEM_ROLE_SLUGS.STUDENT].map((widget) => ({
+        ...widget,
+        visible: true,
+      })),
+    );
+  });
+
   it("uses the Group Manager dashboard profile before the student profile", async () => {
     const service = Object.create(SettingsService.prototype) as SettingsService;
     Object.defineProperty(service, "permissionsService", {

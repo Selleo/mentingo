@@ -752,7 +752,8 @@
       "contentCreator": "Tvůrce obsahu",
       "trainer": "Trainer",
       "student": "Student",
-      "groupManager": "Správce skupin"
+      "groupManager": "Správce skupin",
+      "reviewer": "Hodnotitel"
     },
     "languages": {
       "en": "Angličtina",
@@ -2328,7 +2329,8 @@
         "activity_log": "protokol aktivit",
         "competencies": "kompetence",
         "other": "funkce platformy",
-        "gamification": "gamifikaci"
+        "gamification": "gamifikaci",
+        "quiz_grading": "hodnocení kvízů"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -2425,7 +2427,9 @@
         "activity_log_read": "Může zobrazit protokoly aktivit.",
         "gamification_read": "Zobrazit úrovně, XP a úspěchy.",
         "gamification_earn_hidden": "Získávat skryté úspěchy.",
-        "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace."
+        "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace.",
+        "quiz_grading_read": "Zobrazit frontu otevřených odpovědí čekajících na hodnocení.",
+        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty."
       }
     },
     "dropdown": {
@@ -4847,7 +4851,8 @@
       "student": "Student",
       "content_creator": "Tvůrce obsahu",
       "trainer": "Trenér",
-      "group_manager": "Správce skupin"
+      "group_manager": "Správce skupin",
+      "reviewer": "Hodnotitel"
     },
     "switch": {
       "enabled": "Povoleno",
