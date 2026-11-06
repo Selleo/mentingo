@@ -17,6 +17,9 @@ export const ACHIEVEMENT_REQUIREMENT_TYPES = {
 export type AchievementRequirementType =
   (typeof ACHIEVEMENT_REQUIREMENT_TYPES)[keyof typeof ACHIEVEMENT_REQUIREMENT_TYPES];
 
+/** Levels per achievement; level N shows badge tier N unless it has an uploaded badge. */
+export const ACHIEVEMENT_MAX_LEVELS = 3;
+
 export const ACHIEVEMENT_VISIBILITY = {
   VISIBLE: "visible",
   HIDDEN: "hidden",

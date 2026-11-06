@@ -65,7 +65,6 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
       { level: 1, threshold: 3, xpReward: 30 },
       { level: 2, threshold: 7, xpReward: 70 },
       { level: 3, threshold: 14, xpReward: 150 },
-      { level: 4, threshold: 30, xpReward: 300 },
     ],
   },
   {
@@ -122,7 +121,6 @@ export const PREDEFINED_ACHIEVEMENTS: PredefinedAchievement[] = [
       { level: 1, threshold: 5, xpReward: 50 },
       { level: 2, threshold: 25, xpReward: 100 },
       { level: 3, threshold: 50, xpReward: 200 },
-      { level: 4, threshold: 100, xpReward: 400 },
     ],
   },
   {

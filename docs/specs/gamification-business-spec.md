@@ -19,7 +19,7 @@ For now the gamification UI is hidden by default and is switched on per organiza
 
 - Reward learners with XP when they reach an achievement level.
 - Move learners up levels as their lifetime XP grows, and show the XP needed for the next level.
-- Track progress toward multi-level achievements, such as completing 5, 25, 50 and 100 lessons, or logging in 3, 7, 14 and 30 days in a row.
+- Track progress toward multi-level achievements, such as completing 5, 25 and 50 lessons, or logging in 3, 7 and 14 days in a row. Each achievement has at most three levels.
 - Recognize quiz excellence, such as passing a quiz with a 100% score.
 - Show the user's own achievements, level and recent rewards on their profile and in a "Level and achievements" dashboard widget.
 - Notify the learner with a toast when a new achievement level is unlocked.

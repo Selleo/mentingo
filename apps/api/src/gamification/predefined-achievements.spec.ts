@@ -1,4 +1,4 @@
-import { ACHIEVEMENT_REQUIREMENT_TYPES } from "@repo/shared";
+import { ACHIEVEMENT_MAX_LEVELS, ACHIEVEMENT_REQUIREMENT_TYPES } from "@repo/shared";
 
 import { PREDEFINED_ACHIEVEMENTS } from "./predefined-achievements";
 
@@ -14,6 +14,7 @@ describe("PREDEFINED_ACHIEVEMENTS", () => {
     (_key, definition) => {
       const { levels, requirementType, title, description } = definition;
 
+      expect(levels.length).toBeLessThanOrEqual(ACHIEVEMENT_MAX_LEVELS);
       expect(levels.map(({ level }) => level)).toEqual(levels.map((_level, index) => index + 1));
       levels.slice(1).forEach(({ threshold }, index) => {
         expect(threshold).toBeGreaterThan(levels[index].threshold);
