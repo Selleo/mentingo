@@ -1604,6 +1604,13 @@
       "when": 1793278990402,
       "tag": "0228_external_conversation_transcripts",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1793646787467,
+      "tag": "0229_normalize_shared_course_learning_outcomes",
+      "breakpoints": true
     }
   ]
 }
