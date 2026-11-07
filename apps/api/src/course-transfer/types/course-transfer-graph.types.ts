@@ -134,21 +134,23 @@ export type CourseInsert = InferInsertModel<typeof courses>;
 
 export type CourseJsonbInsert = Omit<
   CourseInsert,
-  "title" | "description" | "settings" | "authorMetadata"
+  "title" | "description" | "settings" | "authorMetadata" | "learningOutcomes"
 > & {
   title: SQL<unknown>;
   description: SQL<unknown>;
   settings: SQL<unknown>;
   authorMetadata?: SQL<unknown> | null;
+  learningOutcomes?: CourseInsert["learningOutcomes"] | SQL<unknown>;
 };
 
 export type CourseJsonbUpdate = Partial<
-  Omit<CourseInsert, "title" | "description" | "settings" | "authorMetadata">
+  Omit<CourseInsert, "title" | "description" | "settings" | "authorMetadata" | "learningOutcomes">
 > & {
   title?: SQL<unknown>;
   description?: SQL<unknown>;
   settings?: SQL<unknown>;
   authorMetadata?: SQL<unknown> | null;
+  learningOutcomes?: CourseInsert["learningOutcomes"] | SQL<unknown>;
 };
 
 export type CategorySelect = InferSelectModel<typeof categories>;
