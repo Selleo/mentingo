@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
@@ -60,6 +62,7 @@ import {
   resources,
   tenants,
 } from "src/storage/schema";
+import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -373,10 +376,10 @@ describe("Master course export and sync (e2e)", () => {
             en: "Master Source Description",
             pl: "Opis kursu zrodlowego master",
           }),
-          learningOutcomes: {
+          learningOutcomes: toJsonbBuildObject({
             en: ["Understand the source course"],
             pl: ["Zrozumiec kurs zrodlowy"],
-          },
+          }),
           authorMetadata: {
             authorId: sourceAdmin.id,
             firstName: sourceAdmin.firstName,
@@ -619,6 +622,98 @@ describe("Master course export and sync (e2e)", () => {
     }
   });
 
+  it("shows shared learning outcomes to recipient admins in every copied language", async () => {
+    const { sourceCourseId, sourceCookie, targetCourseId, targetCookie } = await setupAndExport();
+
+    for (const [language, expected] of [
+      ["en", ["Understand the source course"]],
+      ["pl", ["Zrozumiec kurs zrodlowy"]],
+    ] as const) {
+      const sourceResponse = await withTenantHost(
+        request(app.getHttpServer())
+          .get("/api/course")
+          .query({ id: sourceCourseId, language })
+          .set("Cookie", sourceCookie),
+        SOURCE_HOST,
+      ).expect(200);
+      expect(sourceResponse.body.data.learningOutcomes).toEqual(expected);
+
+      const targetResponse = await withTenantHost(
+        request(app.getHttpServer())
+          .get("/api/course")
+          .query({ id: targetCourseId, language })
+          .set("Cookie", targetCookie),
+        TARGET_HOST,
+      ).expect(200);
+      expect(targetResponse.body.data.isContentReadonly).toBe(true);
+      expect(targetResponse.body.data.learningOutcomes).toEqual(expected);
+    }
+
+    const [storedTarget] = await baseDb
+      .select({ kind: sql<string>`jsonb_typeof(${courses.learningOutcomes})` })
+      .from(courses)
+      .where(eq(courses.id, targetCourseId));
+    expect(storedTarget.kind).toBe("object");
+  });
+
+  it("repairs existing shared learning outcomes without changing valid source data", async () => {
+    const { sourceCourseId, targetCourseId, targetCookie } = await setupAndExport();
+    const outcomes = { en: ["Understand the source course"], pl: ["Zrozumiec kurs zrodlowy"] };
+    await baseDb
+      .update(courses)
+      .set({
+        learningOutcomes: sql`to_jsonb(${JSON.stringify(outcomes)}::text)`,
+      })
+      .where(eq(courses.id, targetCourseId));
+
+    const migration = readFileSync(
+      join(
+        __dirname,
+        "../../storage/migrations/0229_normalize_shared_course_learning_outcomes.sql",
+      ),
+      "utf8",
+    );
+    await baseDb.execute(sql.raw(migration));
+    await baseDb.execute(sql.raw(migration));
+
+    const stored = await baseDb
+      .select({
+        kind: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
+        outcomes: courses.learningOutcomes,
+      })
+      .from(courses)
+      .where(inArray(courses.id, [sourceCourseId, targetCourseId]));
+    expect(stored).toHaveLength(2);
+    for (const row of stored) {
+      expect(row).toEqual({ kind: "object", outcomes });
+    }
+    const response = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: targetCourseId, language: "en" })
+        .set("Cookie", targetCookie),
+      TARGET_HOST,
+    ).expect(200);
+    expect(response.body.data.learningOutcomes).toEqual(outcomes.en);
+
+    for (const value of ["not valid JSON", "[]", "null", [], null, {}]) {
+      await baseDb
+        .update(courses)
+        .set({
+          learningOutcomes: sql`${JSON.stringify(value)}::text::jsonb`,
+        })
+        .where(eq(courses.id, targetCourseId));
+      await baseDb.execute(sql.raw(migration));
+      const [unchanged] = await baseDb
+        .select({
+          raw: sql<string>`${courses.learningOutcomes}::text`,
+        })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId));
+      expect(JSON.parse(unchanged.raw)).toEqual(value);
+    }
+  });
+
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
     const {
       sourceAdmin,
@@ -799,7 +894,7 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("syncs course overview fields while preserving the target course status", async () => {
-    const { sourceAdmin, sourceCourseId, targetCourseId } = await setupAndExport();
+    const { sourceAdmin, sourceCourseId, targetCourseId, targetCookie } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
     await runAsTenant(targetTenantId, () =>
@@ -813,10 +908,10 @@ describe("Master course export and sync (e2e)", () => {
             en: updatedTitle,
             pl: "Kurs zrodlowy master",
           }),
-          learningOutcomes: {
+          learningOutcomes: toJsonbBuildObject({
             en: ["Apply the updated course"],
             pl: ["Zastosowac zaktualizowany kurs"],
-          },
+          }),
           showAuthorSection: true,
           thumbnailPositionY: 28,
           authorMetadata: {
@@ -851,6 +946,7 @@ describe("Master course export and sync (e2e)", () => {
         .select({
           title: courses.title,
           learningOutcomes: courses.learningOutcomes,
+          learningOutcomesType: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
@@ -865,6 +961,7 @@ describe("Master course export and sync (e2e)", () => {
     });
 
     expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.learningOutcomesType).toBe("object");
     expect(syncedTargetCourse?.learningOutcomes).toEqual({
       en: ["Apply the updated course"],
       pl: ["Zastosowac zaktualizowany kurs"],
@@ -878,6 +975,20 @@ describe("Master course export and sync (e2e)", () => {
       firstName: "Updated",
       lastName: "Source Author",
     });
+
+    for (const [language, expected] of [
+      ["en", ["Apply the updated course"]],
+      ["pl", ["Zastosowac zaktualizowany kurs"]],
+    ] as const) {
+      const response = await withTenantHost(
+        request(app.getHttpServer())
+          .get("/api/course")
+          .query({ id: targetCourseId, language })
+          .set("Cookie", targetCookie),
+        TARGET_HOST,
+      ).expect(200);
+      expect(response.body.data.learningOutcomes).toEqual(expected);
+    }
   });
 
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
