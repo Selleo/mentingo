@@ -1,5 +1,5 @@
 import { useSearchParams } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { DEFAULT_REPORT_SORT, PERMISSIONS } from "@repo/shared";
 import {
   AlertTriangle,
   BookOpen,
@@ -282,7 +282,7 @@ export default function ReportsPage() {
     initialConfiguration === null,
   );
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState<ReportSort>({ sortBy: "lastActivity", sortDirection: "desc" });
+  const [sort, setSort] = useState<ReportSort>(DEFAULT_REPORT_SORT);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [optionSearch, setOptionSearch] = useState("");
   const [saveName, setSaveName] = useState("");
@@ -354,11 +354,11 @@ export default function ReportsPage() {
     setDraft((current) => ({ ...current, timezone }));
   }, [searchParams]);
 
-  const applyConfiguration = () => {
+  const applyReportConfiguration = (configuration: ReportConfiguration) => {
     const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("reportConfig", JSON.stringify(draft));
+    nextParams.set("reportConfig", JSON.stringify(configuration));
     setSearchParams(nextParams, { replace: false });
-    setApplied(draft);
+    setApplied(configuration);
     setIsInvalidURLConfiguration(false);
     setInaccessibleReference(null);
     setPage(1);
@@ -374,19 +374,7 @@ export default function ReportsPage() {
     const reset = resetReportConfiguration(draft);
     setDraft(reset);
     setIncompatibleCount(0);
-    if (isInvalidURLConfiguration) {
-      setApplied(reset);
-      setIsInvalidURLConfiguration(false);
-      setInaccessibleReference(null);
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current);
-          next.delete("reportConfig");
-          return next;
-        },
-        { replace: false },
-      );
-    }
+    applyReportConfiguration(reset);
   };
 
   const selectSubject = (id: string, label: string, type: Exclude<ReportSubject, null>["type"]) => {
@@ -725,7 +713,7 @@ export default function ReportsPage() {
                     type="button"
                     className="gap-2"
                     disabled={!canApply}
-                    onClick={applyConfiguration}
+                    onClick={() => applyReportConfiguration(draft)}
                   >
                     {isDirty && (
                       <span aria-hidden className="size-1.5 rounded-full bg-warning-400" />

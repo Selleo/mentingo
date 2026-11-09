@@ -1,8 +1,9 @@
+import { REPORT_SORT_DIRECTIONS, REPORT_SORT_FIELDS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import { reportsQuerySchema } from "../schemas/reports.schema";
 
-const query = {
+const reportsQuery = {
   view: "organisation",
   timezone: "UTC",
   groupIds: [],
@@ -11,26 +12,23 @@ const query = {
   pageSize: 25,
 };
 
-it("accepts optional whitelisted report sorting and rejects arbitrary SQL identifiers/directions", () => {
-  expect(Value.Check(reportsQuerySchema, query)).toBe(true);
-  for (const sortBy of [
-    "learner",
-    "course",
-    "path",
-    "status",
-    "progress",
-    "score",
-    "attempts",
-    "lastActivity",
-  ]) {
-    for (const sortDirection of ["asc", "desc"]) {
-      expect(Value.Check(reportsQuerySchema, { ...query, sortBy, sortDirection })).toBe(true);
-    }
-  }
-  expect(Value.Check(reportsQuerySchema, { ...query, sortBy: "learner; DROP TABLE users" })).toBe(
-    false,
+describe("reports query sorting schema", () => {
+  const supportedSorts = Object.values(REPORT_SORT_FIELDS).flatMap((sortBy) =>
+    Object.values(REPORT_SORT_DIRECTIONS).map((sortDirection) => ({ sortBy, sortDirection })),
   );
-  expect(Value.Check(reportsQuerySchema, { ...query, sortDirection: "DESC NULLS FIRST" })).toBe(
-    false,
-  );
+
+  it("accepts a query without sorting", () => {
+    expect(Value.Check(reportsQuerySchema, reportsQuery)).toBe(true);
+  });
+
+  it.each(supportedSorts)("accepts sorting by $sortBy $sortDirection", (sort) => {
+    expect(Value.Check(reportsQuerySchema, { ...reportsQuery, ...sort })).toBe(true);
+  });
+
+  it.each([
+    { name: "an unknown sort column", sort: { sortBy: "learner; DROP TABLE users" } },
+    { name: "an unknown sort direction", sort: { sortDirection: "DESC NULLS FIRST" } },
+  ])("rejects $name", ({ sort }) => {
+    expect(Value.Check(reportsQuerySchema, { ...reportsQuery, ...sort })).toBe(false);
+  });
 });

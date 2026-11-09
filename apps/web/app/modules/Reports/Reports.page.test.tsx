@@ -1,9 +1,15 @@
 import { createRemixStub } from "@remix-run/testing";
+import { DEFAULT_REPORT_SORT, REPORT_SORT_DIRECTIONS, REPORT_SORT_FIELDS } from "@repo/shared";
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 
 import ReportsPage from "./Reports.page";
+
+const scoreAscending = {
+  sortBy: REPORT_SORT_FIELDS.SCORE,
+  sortDirection: REPORT_SORT_DIRECTIONS.ASC,
+};
 
 const { report, createExport } = vi.hoisted(() => ({
   report: vi.fn(),
@@ -57,9 +63,7 @@ vi.mock("~/modules/Reports/components/ReportResultsTable", () => ({
   }) => (
     <>
       <button onClick={() => onPageChange(3)}>third page</button>
-      <button onClick={() => onSortChange({ sortBy: "score", sortDirection: "asc" })}>
-        sort score
-      </button>
+      <button onClick={() => onSortChange(scoreAscending)}>sort score</button>
     </>
   ),
 }));
@@ -69,20 +73,18 @@ it("requests latest activity initially, resets pagination on sort and exports th
   render(<Stub initialEntries={["/reports"]} />);
   await waitFor(() =>
     expect(report).toHaveBeenLastCalledWith(
-      expect.objectContaining({ sortBy: "lastActivity", sortDirection: "desc", page: 1 }),
+      expect.objectContaining({ ...DEFAULT_REPORT_SORT, page: 1 }),
     ),
   );
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "third page" }));
   expect(report).toHaveBeenLastCalledWith(expect.objectContaining({ page: 3 }));
   await user.click(screen.getByRole("button", { name: "sort score" }));
-  expect(report).toHaveBeenLastCalledWith(
-    expect.objectContaining({ sortBy: "score", sortDirection: "asc", page: 1 }),
-  );
+  expect(report).toHaveBeenLastCalledWith(expect.objectContaining({ ...scoreAscending, page: 1 }));
   await user.click(screen.getByRole("button", { name: "reports.exports.exportSpreadsheet" }));
   expect(createExport).toHaveBeenCalledWith(
     expect.objectContaining({
-      query: expect.objectContaining({ sortBy: "score", sortDirection: "asc", page: 1 }),
+      query: expect.objectContaining({ ...scoreAscending, page: 1 }),
     }),
   );
 });

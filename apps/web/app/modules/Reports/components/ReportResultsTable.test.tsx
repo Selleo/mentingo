@@ -1,3 +1,4 @@
+import { DEFAULT_REPORT_SORT, REPORT_SORT_DIRECTIONS, REPORT_SORT_FIELDS } from "@repo/shared";
 import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -27,7 +28,7 @@ describe("report sorting headers", () => {
         isFetching={false}
         onPageChange={vi.fn()}
         onPageSizeChange={vi.fn()}
-        sort={{ sortBy: "lastActivity", sortDirection: "desc" }}
+        sort={DEFAULT_REPORT_SORT}
         onSortChange={onSortChange}
       />,
     );
@@ -38,9 +39,15 @@ describe("report sorting headers", () => {
     expect(headers[0].getAttribute("aria-sort")).toBe("none");
     const user = userEvent.setup();
     await user.click(within(headers[0]).getByRole("button"));
-    expect(onSortChange).toHaveBeenLastCalledWith({ sortBy: "learner", sortDirection: "asc" });
+    expect(onSortChange).toHaveBeenLastCalledWith({
+      sortBy: REPORT_SORT_FIELDS.LEARNER,
+      sortDirection: REPORT_SORT_DIRECTIONS.ASC,
+    });
     within(headers[7]).getByRole("button").focus();
     await user.keyboard("{Enter}");
-    expect(onSortChange).toHaveBeenLastCalledWith({ sortBy: "lastActivity", sortDirection: "asc" });
+    expect(onSortChange).toHaveBeenLastCalledWith({
+      sortBy: REPORT_SORT_FIELDS.LAST_ACTIVITY,
+      sortDirection: REPORT_SORT_DIRECTIONS.ASC,
+    });
   });
 });

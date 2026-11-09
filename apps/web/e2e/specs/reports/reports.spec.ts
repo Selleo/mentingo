@@ -137,8 +137,7 @@ test("reports render results, reset, switch subjects, filter nested groups, save
 
     await resetReportFlow(page);
     await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
-    await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeEnabled();
-    await applyReportFlow(page);
+    await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeDisabled();
     await expect
       .poll(() => {
         const config = new URL(page.url()).searchParams.get("reportConfig");

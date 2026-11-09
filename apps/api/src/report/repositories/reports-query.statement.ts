@@ -1,9 +1,15 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  DEFAULT_REPORT_SORT,
+  REPORT_SORT_DIRECTIONS,
+  REPORT_SORT_FIELDS,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import { sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 
-import { REPORT_VIEWS } from "../constants/reports.constants";
+import { REPORT_STATUS, REPORT_VIEWS } from "../constants/reports.constants";
 
 import type { ReportStatementContext } from "./reports-query.types";
 import type { SQL } from "drizzle-orm";
@@ -367,21 +373,32 @@ function buildBreakdownCtes(context: ReportStatementContext): SQL {
   `;
 }
 
-/** Share the exact ordering between pagination and JSON aggregation (also used by exports). */
+/**
+ * Orders report rows by the requested column, with stable record ties so pagination never
+ * skips or repeats rows. Shared by pagination and JSON aggregation (and therefore exports).
+ */
 function buildRowOrder({ query }: ReportStatementContext): SQL {
-  const columns: Record<NonNullable<typeof query.sortBy>, SQL> = {
-    learner: sql`learner_name`,
-    course: sql`course_title`,
-    path: sql`path_title`,
-    status: sql`CASE status WHEN 'notStarted' THEN 0 WHEN 'inProgress' THEN 1 WHEN 'completed' THEN 2 END`,
-    progress: sql`progress`,
-    score: sql`score`,
-    attempts: sql`attempts`,
-    lastActivity: sql`last_activity_at`,
-  };
-  const column = columns[query.sortBy ?? "lastActivity"];
-  const direction = query.sortDirection === "asc" ? sql`ASC` : sql`DESC`;
-  return sql`${column} ${direction} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
+  const sortColumn = match(query.sortBy ?? DEFAULT_REPORT_SORT.sortBy)
+    .with(REPORT_SORT_FIELDS.LEARNER, () => sql`learner_name`)
+    .with(REPORT_SORT_FIELDS.COURSE, () => sql`course_title`)
+    .with(REPORT_SORT_FIELDS.PATH, () => sql`path_title`)
+    .with(
+      REPORT_SORT_FIELDS.STATUS,
+      () =>
+        sql`CASE status WHEN ${REPORT_STATUS.NOT_STARTED} THEN 0 WHEN ${REPORT_STATUS.IN_PROGRESS} THEN 1 WHEN ${REPORT_STATUS.COMPLETED} THEN 2 END`,
+    )
+    .with(REPORT_SORT_FIELDS.PROGRESS, () => sql`progress`)
+    .with(REPORT_SORT_FIELDS.SCORE, () => sql`score`)
+    .with(REPORT_SORT_FIELDS.ATTEMPTS, () => sql`attempts`)
+    .with(REPORT_SORT_FIELDS.LAST_ACTIVITY, () => sql`last_activity_at`)
+    .exhaustive();
+
+  const sortDirection = match(query.sortDirection ?? DEFAULT_REPORT_SORT.sortDirection)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => sql`ASC`)
+    .with(REPORT_SORT_DIRECTIONS.DESC, () => sql`DESC`)
+    .exhaustive();
+
+  return sql`${sortColumn} ${sortDirection} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
 }
 
 function buildPageRowsCte(context: ReportStatementContext): SQL {

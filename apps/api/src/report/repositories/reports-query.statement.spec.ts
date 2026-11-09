@@ -1,12 +1,17 @@
+import { REPORT_SORT_DIRECTIONS } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 
 import { buildReportStatement } from "./reports-query.statement";
+import {
+  REPORT_ROW_TIE_BREAKERS,
+  REPORT_SORT_COLUMN_SCENARIOS,
+} from "./reports-query.statement.scenarios";
 
 import type { ReportStatementContext } from "./reports-query.types";
 import type { ReportsQuery } from "../schemas/reports.schema";
 
-const statement = (query: Partial<ReportsQuery> = {}) => {
+const renderReportStatementSql = (query: Partial<ReportsQuery> = {}) => {
   const context: ReportStatementContext = {
     query: {
       view: "organisation",
@@ -37,38 +42,37 @@ const statement = (query: Partial<ReportsQuery> = {}) => {
     pageLimit: sql`25`,
     pageOffset: sql`0`,
   };
-  return new PgDialect().sqlToQuery(buildReportStatement(context, [])).sql;
+  return new PgDialect().sqlToQuery(buildReportStatement(context, [])).sql.replace(/\$\d+/g, "?");
+};
+
+const expectRowOrderBeforePaginationAndInResult = (statementSql: string, rowOrder: string) => {
+  expect(statementSql).toContain(`SELECT * FROM filtered ORDER BY ${rowOrder}`);
+  expect(statementSql).toContain(`) ORDER BY ${rowOrder}) FROM page_rows`);
 };
 
 describe("report row ordering", () => {
-  it.each([
-    ["learner", "learner_name"],
-    ["course", "course_title"],
-    ["path", "path_title"],
-    [
-      "status",
-      "CASE status WHEN 'notStarted' THEN 0 WHEN 'inProgress' THEN 1 WHEN 'completed' THEN 2 END",
-    ],
-    ["progress", "progress"],
-    ["score", "score"],
-    ["attempts", "attempts"],
-    ["lastActivity", "last_activity_at"],
-  ] as const)(
-    "sorts %s in both directions before pagination and preserves result order",
-    (sortBy, column) => {
-      for (const sortDirection of ["asc", "desc"] as const) {
-        const query = statement({ sortBy, sortDirection });
-        const order = `${column} ${sortDirection.toUpperCase()} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
-        expect(query).toContain(`SELECT * FROM filtered ORDER BY ${order}`);
-        expect(query).toContain(`) ORDER BY ${order}) FROM page_rows`);
-      }
+  const sortScenarios = REPORT_SORT_COLUMN_SCENARIOS.flatMap((scenario) =>
+    Object.values(REPORT_SORT_DIRECTIONS).map((sortDirection) => ({ ...scenario, sortDirection })),
+  );
+
+  it.each(sortScenarios)(
+    "orders by $sortBy $sortDirection before pagination and in the result",
+    ({ sortBy, sortColumn, sortDirection }) => {
+      const statementSql = renderReportStatementSql({ sortBy, sortDirection });
+
+      expectRowOrderBeforePaginationAndInResult(
+        statementSql,
+        `${sortColumn} ${sortDirection.toUpperCase()} NULLS LAST, ${REPORT_ROW_TIE_BREAKERS}`,
+      );
     },
   );
-  it("defaults to latest activity with nulls last and stable record ties before pagination and in the result", () => {
-    const query = statement();
-    const order =
-      "last_activity_at DESC NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST";
-    expect(query).toContain(`SELECT * FROM filtered ORDER BY ${order}`);
-    expect(query).toContain(`) ORDER BY ${order}) FROM page_rows`);
+
+  it("defaults to latest activity first", () => {
+    const statementSql = renderReportStatementSql();
+
+    expectRowOrderBeforePaginationAndInResult(
+      statementSql,
+      `last_activity_at DESC NULLS LAST, ${REPORT_ROW_TIE_BREAKERS}`,
+    );
   });
 });

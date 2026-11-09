@@ -1,7 +1,9 @@
+import { REPORT_SORT_DIRECTIONS, REPORT_SORT_FIELDS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, TableProperties } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { Pagination } from "~/components/Pagination/Pagination";
 import {
@@ -17,9 +19,43 @@ import { cn } from "~/lib/utils";
 import { getReportResultColumns } from "./ReportResultsTable.columns";
 
 import type { ReportSort } from "../reports-api.types";
+import type { ReportSortDirection, ReportSortField } from "@repo/shared";
 import type { RunReportResponse } from "~/api/generated-api";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { ReportView } from "~/modules/Reports/reports.types";
+
+const REPORT_SORT_FIELD_VALUES: readonly string[] = Object.values(REPORT_SORT_FIELDS);
+
+const isReportSortField = (columnId: string): columnId is ReportSortField =>
+  REPORT_SORT_FIELD_VALUES.includes(columnId);
+
+const getColumnSortDirection = (sort: ReportSort, field: ReportSortField) =>
+  sort.sortBy === field ? sort.sortDirection : null;
+
+const getNextSortDirection = (currentDirection: ReportSortDirection | null) =>
+  match(currentDirection)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => REPORT_SORT_DIRECTIONS.DESC)
+    .otherwise(() => REPORT_SORT_DIRECTIONS.ASC);
+
+const getAriaSort = (currentDirection: ReportSortDirection | null) =>
+  match(currentDirection)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => "ascending" as const)
+    .with(REPORT_SORT_DIRECTIONS.DESC, () => "descending" as const)
+    .with(null, () => "none" as const)
+    .exhaustive();
+
+const getSortIcon = (currentDirection: ReportSortDirection | null) =>
+  match(currentDirection)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => ArrowUp)
+    .with(REPORT_SORT_DIRECTIONS.DESC, () => ArrowDown)
+    .with(null, () => ArrowUpDown)
+    .exhaustive();
+
+const getSortActionLabelKey = (direction: ReportSortDirection) =>
+  match(direction)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => "reports.table.sortAscending")
+    .with(REPORT_SORT_DIRECTIONS.DESC, () => "reports.table.sortDescending")
+    .exhaustive();
 
 type ReportResultsTableProps = {
   result: RunReportResponse["data"];
@@ -78,51 +114,38 @@ export function ReportResultsTable({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
-                const sortable = !header.id.startsWith("pathCourse-");
-                const active = sort.sortBy === header.id;
-                const nextDirection = active && sort.sortDirection === "asc" ? "desc" : "asc";
-                const SortIcon = active
-                  ? sort.sortDirection === "asc"
-                    ? ArrowUp
-                    : ArrowDown
-                  : ArrowUpDown;
                 const label = flexRender(header.column.columnDef.header, header.getContext());
+
+                if (!isReportSortField(header.id)) {
+                  return (
+                    <TableHead key={header.id} className="whitespace-nowrap">
+                      {label}
+                    </TableHead>
+                  );
+                }
+
+                const sortField = header.id;
+                const currentDirection = getColumnSortDirection(sort, sortField);
+                const nextDirection = getNextSortDirection(currentDirection);
+                const SortIcon = getSortIcon(currentDirection);
+
                 return (
                   <TableHead
                     key={header.id}
                     className="whitespace-nowrap"
-                    aria-sort={
-                      sortable
-                        ? active
-                          ? sort.sortDirection === "asc"
-                            ? "ascending"
-                            : "descending"
-                          : "none"
-                        : undefined
-                    }
+                    aria-sort={getAriaSort(currentDirection)}
                   >
-                    {sortable ? (
-                      <button
-                        type="button"
-                        className="flex min-h-11 w-full items-center gap-2 rounded-sm text-left hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
-                        onClick={() =>
-                          onSortChange({
-                            sortBy: header.id as ReportSort["sortBy"],
-                            sortDirection: nextDirection,
-                          })
-                        }
-                      >
-                        {label}
-                        <SortIcon className="size-4 shrink-0" aria-hidden="true" />
-                        <span className="sr-only">
-                          {t(
-                            `reports.table.sort${nextDirection === "asc" ? "Ascending" : "Descending"}`,
-                          )}
-                        </span>
-                      </button>
-                    ) : (
-                      label
-                    )}
+                    <button
+                      type="button"
+                      className="flex min-h-11 w-full items-center gap-2 rounded-sm text-left hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+                      onClick={() =>
+                        onSortChange({ sortBy: sortField, sortDirection: nextDirection })
+                      }
+                    >
+                      {label}
+                      <SortIcon className="size-4 shrink-0" aria-hidden="true" />
+                      <span className="sr-only">{t(getSortActionLabelKey(nextDirection))}</span>
+                    </button>
                   </TableHead>
                 );
               })}
