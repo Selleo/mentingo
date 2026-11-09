@@ -5921,7 +5921,8 @@
       "generic": "No se pudo iniciar el modo de soporte",
       "targetUserRequired": "Elija un usuario activo de la organización seleccionada",
       "invalidSession": "La sesión de soporte no es válida",
-      "sessionExpired": "Tu sesión de soporte ha caducado. Inicia una nueva sesión de soporte."
+      "sessionExpired": "Tu sesión de soporte ha caducado. Inicia una nueva sesión de soporte.",
+      "personalSettingsBlocked": "No se puede cambiar la configuración personal en el modo de soporte."
     }
   },
   "superAdminTenantsView": {

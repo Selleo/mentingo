@@ -6174,7 +6174,8 @@
       "generic": "Režim podpory se nepodařilo spustit",
       "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
       "invalidSession": "Relace podpory je neplatná",
-      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory."
+      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory.",
+      "personalSettingsBlocked": "V režimu podpory nelze měnit osobní nastavení."
     }
   },
   "superAdminTenantsView": {

@@ -6170,7 +6170,8 @@
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
       "invalidSession": "Palaikymo sesija netinkama",
-      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją."
+      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją.",
+      "personalSettingsBlocked": "Palaikymo režimu asmeninių nustatymų keisti negalima."
     }
   },
   "superAdminTenantsView": {

@@ -6161,7 +6161,8 @@
       "generic": "Support-Modus konnte nicht gestartet werden",
       "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation",
       "invalidSession": "Support-Sitzung ist ungültig",
-      "sessionExpired": "Deine Support-Sitzung ist abgelaufen. Starte eine neue Support-Sitzung."
+      "sessionExpired": "Deine Support-Sitzung ist abgelaufen. Starte eine neue Support-Sitzung.",
+      "personalSettingsBlocked": "Persönliche Einstellungen können im Supportmodus nicht geändert werden."
     }
   },
   "superAdminTenantsView": {
