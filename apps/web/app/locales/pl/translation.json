@@ -4623,10 +4623,6 @@
       "openInNewTab": "Otwórz w nowej karcie",
       "scale_1_5": "Pytanie typu skala (1-5)",
       "matching": "Dopasuj każdy element do jego pary.",
-      "dropMatch": "Przeciągnij tutaj dopasowanie",
-      "placeMatch": "Umieść tutaj „{{match}}”",
-      "removeMatch": "Usuń dopasowanie {{match}}",
-      "allMatchesPlaced": "Wszystkie dopasowania są umieszczone",
       "noMatchesAvailable": "To pytanie nie ma jeszcze dopasowań do ułożenia.",
       "correctMatch": "Poprawne dopasowanie:"
     },

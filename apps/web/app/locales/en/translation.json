@@ -4354,10 +4354,6 @@
       "openInNewTab": "Open in new tab",
       "scale_1_5": "Scale question (1-5)",
       "matching": "Match each item with its pair.",
-      "dropMatch": "Drag a match here",
-      "placeMatch": "Place “{{match}}” here",
-      "removeMatch": "Remove match {{match}}",
-      "allMatchesPlaced": "All matches placed",
       "noMatchesAvailable": "No matches are available for this question yet.",
       "correctMatch": "Correct match:"
     },

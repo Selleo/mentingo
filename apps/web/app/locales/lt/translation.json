@@ -4355,10 +4355,6 @@
       "openInNewTab": "Atidaryti naujame skirtuke",
       "scale_1_5": "Domanda di tipo scala (1–5)",
       "matching": "Suderinkite kiekvieną elementą su jo pora.",
-      "dropMatch": "Nutempkite atitikmenį čia",
-      "placeMatch": "Padėti „{{match}}“ čia",
-      "removeMatch": "Pašalinti atitikmenį {{match}}",
-      "allMatchesPlaced": "Visi atitikmenys padėti",
       "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
       "correctMatch": "Teisingas atitikmuo:"
     },

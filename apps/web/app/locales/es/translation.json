@@ -4298,10 +4298,6 @@
       "openInNewTab": "Abrir en nueva pestaña",
       "scale_1_5": "Escala del 1 al 5",
       "matching": "Empareja cada elemento con su pareja.",
-      "dropMatch": "Arrastra una pareja aquí",
-      "placeMatch": "Colocar «{{match}}» aquí",
-      "removeMatch": "Quitar pareja {{match}}",
-      "allMatchesPlaced": "Todas las parejas colocadas",
       "noMatchesAvailable": "Esta pregunta aún no tiene parejas disponibles.",
       "correctMatch": "Pareja correcta:"
     },

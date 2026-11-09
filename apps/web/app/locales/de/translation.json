@@ -4353,10 +4353,6 @@
       "openInNewTab": "In neuem Tab öffnen",
       "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
       "matching": "Ordne jedes Element seinem Paar zu.",
-      "dropMatch": "Zuordnung hierher ziehen",
-      "placeMatch": "„{{match}}“ hier ablegen",
-      "removeMatch": "Zuordnung {{match}} entfernen",
-      "allMatchesPlaced": "Alle Zuordnungen platziert",
       "noMatchesAvailable": "Für diese Frage sind noch keine Zuordnungen verfügbar.",
       "correctMatch": "Richtige Zuordnung:"
     },

@@ -4111,10 +4111,6 @@
       "openInNewTab": "Ouvrir dans un nouvel onglet",
       "scale_1_5": "Question sur l'échelle (1-5)",
       "matching": "Associez chaque élément à sa paire.",
-      "dropMatch": "Faites glisser une correspondance ici",
-      "placeMatch": "Placer « {{match}} » ici",
-      "removeMatch": "Retirer la correspondance {{match}}",
-      "allMatchesPlaced": "Toutes les correspondances sont placées",
       "noMatchesAvailable": "Aucune correspondance n’est encore disponible pour cette question.",
       "correctMatch": "Bonne correspondance :"
     },
