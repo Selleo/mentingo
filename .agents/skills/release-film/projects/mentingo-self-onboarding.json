@@ -6845,6 +6845,42 @@
           "outcomes": [
             "The deleted session is no longer scheduled."
           ]
+        },
+        {
+          "id": "run-offline-live-training",
+          "title": "Start and finish an offline training session",
+          "description": "Run an offline training session and inspect its completion in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "live-training"
+          ],
+          "specPaths": [
+            "docs/specs/live-training-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/LiveTraining/**",
+            "apps/api/src/live-training/**",
+            "apps/api/src/calendar/**"
+          ],
+          "goal": "Start and finish an offline session, including its linked lesson completion.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; the recording account is an authorized host.",
+            "A scheduled offline training is linked to a live-training lesson in a synthetic course with an enrolled synthetic learner; no LiveKit service or real participant accounts are needed."
+          ],
+          "actions": [
+            "Open the prepared offline training and inspect its location and scheduled state.",
+            "Start the session as its authorized host and inspect the active status and locked configuration and material management.",
+            "Finish the session and inspect the ended status and session history.",
+            "Open the linked lesson as the enrolled synthetic learner and inspect its completion."
+          ],
+          "outcomes": [
+            "The offline session moves from scheduled to active to ended and appears in session history.",
+            "Configuration and material management are locked while the session is running.",
+            "Finishing the course-linked offline session completes the linked lesson for the enrolled learner."
+          ]
         }
       ],
       "videos": [
@@ -6863,7 +6899,8 @@
           "description": "Manage materials and run a session in Mentingo.",
           "flowIds": [
             "training-materials",
-            "join-live-training"
+            "join-live-training",
+            "run-offline-live-training"
           ]
         },
         {

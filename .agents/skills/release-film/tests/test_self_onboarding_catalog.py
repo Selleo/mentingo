@@ -478,6 +478,18 @@ class RegistryTests(unittest.TestCase):
                          'assign-groups', 'remove-enrollment', 'self-enroll', 'configure-sequence',
                          'import-package', 'export-package', 'share-path'} <= ids)
 
+    def test_offline_training_has_one_assignment_without_exceeding_short_video_limit(self):
+        source = catalog.load_catalog(Path(__file__).resolve().parents[1] / 'projects/mentingo-self-onboarding.json')
+        domain = next(d for d in source['domains'] if d['domain'] == 'live-training')
+        flow = next(f for f in domain['flows'] if f['id'] == 'run-offline-live-training')
+        groups = catalog.validate_video_groups(domain)
+        self.assertEqual([v['key'] for v in groups if flow['id'] in v['flowIds']],
+                         ['live-training.materials-room'])
+        self.assertEqual(next(v['flowIds'] for v in groups if v['key'] == 'live-training.materials-room'),
+                         ['training-materials', 'join-live-training', 'run-offline-live-training'])
+        self.assertTrue(any('No LiveKit' in value or 'no LiveKit' in value for value in flow['preconditions']))
+        self.assertTrue(any('linked lesson' in value for value in flow['outcomes']))
+
     def test_section_language_removal_is_registered_once_without_changing_existing_groups(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
@@ -513,7 +525,7 @@ class RegistryTests(unittest.TestCase):
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 229, 'videos': 95})
+        self.assertEqual(report, {'areas': 30, 'specs': 59, 'flows': 230, 'videos': 95})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)
