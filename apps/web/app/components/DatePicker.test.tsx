@@ -34,4 +34,21 @@ describe("DatePicker", () => {
 
     expect(onChange).toHaveBeenCalledWith("2026-03-12");
   });
+
+  it("keeps every day selectable without a range, as report filters use it", async () => {
+    const onChange = vi.fn();
+
+    renderWith().render(
+      <DatePicker label="Date" placeholder="Pick a date" value="2026-03-15" onChange={onChange} />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Date" }));
+
+    expect(dayCell(9)).toBeEnabled();
+    expect(dayCell(21)).toBeEnabled();
+
+    await userEvent.click(dayCell(21));
+
+    expect(onChange).toHaveBeenCalledWith("2026-03-21");
+  });
 });
