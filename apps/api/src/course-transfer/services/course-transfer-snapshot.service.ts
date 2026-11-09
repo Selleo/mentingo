@@ -102,13 +102,19 @@ export class CourseTransferSnapshotService {
     const blankRows =
       await this.courseTransferSnapshotRepository.getSourceQuestionBlanks(questionIds);
     const blankIds = blankRows.map(({ id }) => id);
-    const [blankAnswerSetRows, dragAndDropOptionRows, scaleOptionRows, trueFalseStatementRows] =
-      await Promise.all([
-        this.courseTransferSnapshotRepository.getSourceBlankAnswerSets(blankIds),
-        this.courseTransferSnapshotRepository.getSourceDragAndDropOptions(questionIds),
-        this.courseTransferSnapshotRepository.getSourceScaleOptions(questionIds),
-        this.courseTransferSnapshotRepository.getSourceTrueFalseStatements(questionIds),
-      ]);
+    const [
+      blankAnswerSetRows,
+      dragAndDropOptionRows,
+      matchingPairRows,
+      scaleOptionRows,
+      trueFalseStatementRows,
+    ] = await Promise.all([
+      this.courseTransferSnapshotRepository.getSourceBlankAnswerSets(blankIds),
+      this.courseTransferSnapshotRepository.getSourceDragAndDropOptions(questionIds),
+      this.courseTransferSnapshotRepository.getSourceMatchingPairs(questionIds),
+      this.courseTransferSnapshotRepository.getSourceScaleOptions(questionIds),
+      this.courseTransferSnapshotRepository.getSourceTrueFalseStatements(questionIds),
+    ]);
     const aiMentorRows = await this.courseTransferSnapshotRepository.getSourceAiMentors(lessonIds);
     const aiMentorIds = aiMentorRows.map((row) => row.id);
     const aiMentorConfigurationRows =
@@ -186,6 +192,7 @@ export class CourseTransferSnapshotService {
       assessmentQuestionBlanks: blankRows,
       assessmentQuestionBlankAnswerSets: blankAnswerSetRows,
       assessmentQuestionDragAndDropOptions: dragAndDropOptionRows,
+      assessmentQuestionMatchingPairs: matchingPairRows,
       assessmentQuestionScaleOptions: scaleOptionRows,
       assessmentQuestionTrueFalseStatements: trueFalseStatementRows,
       questionResources: questionResourceRows,

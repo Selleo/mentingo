@@ -12,6 +12,7 @@ export const QUIZ_TRANSLATION_TARGET_TYPES = {
   TRUE_FALSE_STATEMENT: "true_false_statement",
   DRAG_AND_DROP_OPTION: "drag_and_drop_option",
   BLANK_ANSWER_SET: "blank_answer_set",
+  MATCHING_PAIR: "matching_pair",
 } as const;
 
 export const PROTECTED_COURSE_DELETE_STATUSES: CourseStatus[] = [

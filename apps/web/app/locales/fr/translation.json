@@ -3191,7 +3191,9 @@
           "maxFileNumber_other": "Vous ne pouvez pas importer plus de {{ count }} fichiers",
           "maxResources_five": "Vous ne pouvez pas ajouter plus de 5 ressources",
           "sourceUrlRequired": "L'URL source est obligatoire",
-          "sourceUrlInvalid": "Saisissez une URL HTTPS valide"
+          "sourceUrlInvalid": "Saisissez une URL HTTPS valide",
+          "matchingPairsRequired": "Ajoutez au moins 2 paires et remplissez les deux côtés de chaque paire",
+          "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "L'ordre d'affichage des leçons a été mis à jour avec succès",
@@ -3266,7 +3268,8 @@
           "ttsPreset": "Préréglage TTS",
           "customTTSReference": "Référence TTS personnalisée",
           "includeFiles_one": "Joignez jusqu'à 1 fichier inférieur à {{maxSize}} à utiliser comme contexte dans les leçons.",
-          "includeFiles_other": "Joignez jusqu'à {{ count }} fichiers inférieurs à {{maxSize}} à utiliser comme contexte dans les leçons."
+          "includeFiles_other": "Joignez jusqu'à {{ count }} fichiers inférieurs à {{maxSize}} à utiliser comme contexte dans les leçons.",
+          "matchingScoring": "Notation"
         },
         "placeholder": {
           "title": "Donnez le titre de la leçon...",
@@ -3550,7 +3553,7 @@
           "option": "Options",
           "singleChoice": "Choix unique",
           "multipleChoice": "Choix multiple",
-          "matchWords": "Correspondance",
+          "matching": "Association",
           "trueOrFalse": "Vrai ou faux",
           "fillInTheBlanks": "Comblement des espaces (glisser-déposer)",
           "photoQuestion": "Question photo",
@@ -3658,7 +3661,9 @@
           },
           "betaTooltip": "Cette fonctionnalité est fournie dans une version de test. Il peut contenir des erreurs ou ne pas fonctionner pleinement comme prévu et est utilisé à vos propres risques.",
           "dragWord": "Faites glisser le mot dans la phrase",
-          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit accomplir pendant la conversation avec l'AI Mentor."
+          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit accomplir pendant la conversation avec l'AI Mentor.",
+          "matchingScoringAllOrNothing": "Toutes les paires doivent être correctes",
+          "matchingScoringPartial": "Points pour chaque paire correcte"
         }
       }
     },
@@ -4104,7 +4109,10 @@
       "score": "Score : {{score}} % ({{correct}} sur {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "Ce contenu ne peut pas être intégré.",
       "openInNewTab": "Ouvrir dans un nouvel onglet",
-      "scale_1_5": "Question sur l'échelle (1-5)"
+      "scale_1_5": "Question sur l'échelle (1-5)",
+      "matching": "Associez chaque élément à sa paire.",
+      "selectMatch": "Choisissez une correspondance",
+      "correctMatch": "Bonne correspondance :"
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",
@@ -6919,7 +6927,8 @@
       "previewUnavailable": "Il manque des modifications requises dans cet aperçu ou leur ordre est incohérent. Actualisez la session et incluez les modifications requises avant de réessayer.",
       "applicationInProgress": "D’autres modifications sont en cours d’application. Si la mise en file a échoué, réessayez avec la sélection initiale de propositions pour reprendre.",
       "receiptSynchronizationPending": "Les modifications précédentes sont enregistrées dans l’espace de travail IA. Réessayez bientôt d’appliquer la même sélection.",
-      "appliedRefreshPending": "Les modifications ont été appliquées. Actualisez le cours si elles ne sont pas encore visibles."
+      "appliedRefreshPending": "Les modifications ont été appliquées. Actualisez le cours si elles ne sont pas encore visibles.",
+      "matchingQuestionUnsupported": "Luma ne peut pas encore modifier les quiz contenant des questions d’association. Modifiez ce quiz dans l’éditeur de quiz."
     },
     "review": {
       "generatedImage": "Image générée",

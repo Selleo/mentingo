@@ -2727,7 +2727,6 @@ export interface GetBetaCourseByIdResponse {
           type:
             | "brief_response"
             | "detailed_response"
-            | "match_words"
             | "scale_1_5"
             | "single_choice"
             | "multiple_choice"
@@ -2735,7 +2734,8 @@ export interface GetBetaCourseByIdResponse {
             | "photo_question_single_choice"
             | "photo_question_multiple_choice"
             | "fill_in_the_blanks_text"
-            | "fill_in_the_blanks_dnd";
+            | "fill_in_the_blanks_dnd"
+            | "matching";
           description?: string | null;
           title: string;
           displayOrder?: number;
@@ -2757,6 +2757,7 @@ export interface GetBetaCourseByIdResponse {
           }[];
           /** @default "en" */
           language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          scoringMode?: "all_or_nothing" | "partial";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -3389,7 +3390,6 @@ export type BetaCreateChapterBody = {
       type:
         | "brief_response"
         | "detailed_response"
-        | "match_words"
         | "scale_1_5"
         | "single_choice"
         | "multiple_choice"
@@ -3397,7 +3397,8 @@ export type BetaCreateChapterBody = {
         | "photo_question_single_choice"
         | "photo_question_multiple_choice"
         | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
+        | "fill_in_the_blanks_dnd"
+        | "matching";
       description?: string | null;
       title: string;
       displayOrder?: number;
@@ -3420,6 +3421,7 @@ export type BetaCreateChapterBody = {
       }[];
       /** @default "en" */
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      scoringMode?: "all_or_nothing" | "partial";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -3473,7 +3475,6 @@ export type UpdateChapterBody = ({
       type:
         | "brief_response"
         | "detailed_response"
-        | "match_words"
         | "scale_1_5"
         | "single_choice"
         | "multiple_choice"
@@ -3481,7 +3482,8 @@ export type UpdateChapterBody = ({
         | "photo_question_single_choice"
         | "photo_question_multiple_choice"
         | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
+        | "fill_in_the_blanks_dnd"
+        | "matching";
       description?: string | null;
       title: string;
       displayOrder?: number;
@@ -3504,6 +3506,7 @@ export type UpdateChapterBody = ({
       }[];
       /** @default "en" */
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      scoringMode?: "all_or_nothing" | "partial";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -3606,7 +3609,6 @@ export interface GetLessonByIdResponse {
         type:
           | "brief_response"
           | "detailed_response"
-          | "match_words"
           | "scale_1_5"
           | "single_choice"
           | "multiple_choice"
@@ -3614,7 +3616,8 @@ export interface GetLessonByIdResponse {
           | "photo_question_single_choice"
           | "photo_question_multiple_choice"
           | "fill_in_the_blanks_text"
-          | "fill_in_the_blanks_dnd";
+          | "fill_in_the_blanks_dnd"
+          | "matching";
         description?: string | null;
         title: string;
         displayOrder?: number;
@@ -3630,10 +3633,13 @@ export interface GetLessonByIdResponse {
           isCorrect: boolean | null;
           /** @format uuid */
           questionId?: string;
+          matchedWord?: string | null;
         }[];
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        scoringMode?: "all_or_nothing" | "partial";
         passQuestion: boolean | null;
+        matchingTargets?: string[];
       }[];
       questionCount: number;
       correctAnswerCount: number | null;
@@ -3834,7 +3840,6 @@ export type BetaCreateLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -3842,7 +3847,8 @@ export type BetaCreateLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -3865,6 +3871,7 @@ export type BetaCreateLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -4024,7 +4031,6 @@ export type BetaCreateAiMentorLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4032,7 +4038,8 @@ export type BetaCreateAiMentorLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4055,6 +4062,7 @@ export type BetaCreateAiMentorLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -4155,7 +4163,6 @@ export type BetaUpdateAiMentorLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4163,7 +4170,8 @@ export type BetaUpdateAiMentorLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4186,6 +4194,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -4222,7 +4231,6 @@ export type BetaCreateQuizLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4230,7 +4238,8 @@ export type BetaCreateQuizLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4253,6 +4262,7 @@ export type BetaCreateQuizLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
 } & {
   /** @format uuid */
@@ -4285,7 +4295,6 @@ export type BetaUpdateQuizLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4293,7 +4302,8 @@ export type BetaUpdateQuizLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4316,6 +4326,7 @@ export type BetaUpdateQuizLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
 } & {
   /** @format uuid */
@@ -4345,7 +4356,6 @@ export type BetaUpdateLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4353,7 +4363,8 @@ export type BetaUpdateLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4376,6 +4387,7 @@ export type BetaUpdateLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   aiMentor?: {
     /** @format uuid */

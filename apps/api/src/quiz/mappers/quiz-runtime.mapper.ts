@@ -32,9 +32,7 @@ export const mapQuizAttemptToRuntimeSubmissionResult = (
   attemptData: PreparedQuizAttempt,
   persistedAttempt: PersistedQuizAttempt,
 ): QuizRuntimeSubmissionResult => {
-  const correctAnswerCount = attemptData.questionAnswers.filter(
-    (questionAnswer) => Number(questionAnswer.awardedPoints) > 0,
-  ).length;
+  const { correctAnswerCount } = attemptData;
   const questionCount = attemptData.questionAnswers.length;
 
   return {

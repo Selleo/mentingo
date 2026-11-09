@@ -21,6 +21,7 @@ import {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestions,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -403,6 +404,35 @@ export class CourseTranslationService {
       );
     }
 
+    const translatedMatchingPairs = new Map(
+      snapshot.matchingPairs
+        .filter((pair) => pair.language === language)
+        .map((pair) => [`${pair.questionId}:${pair.displayOrder}`, pair]),
+    );
+
+    for (const pair of snapshot.matchingPairs.filter((pair) => pair.language === baseLanguage)) {
+      const translatedPair = translatedMatchingPairs.get(`${pair.questionId}:${pair.displayOrder}`);
+
+      for (const side of ["prompt", "match"] as const) {
+        if (translatedPair?.[side].length) continue;
+        addTranslation(
+          {
+            id: pair.id,
+            base: pair[side],
+            field: assessmentQuestionMatchingPairs[side],
+            idColumn: assessmentQuestionMatchingPairs.id,
+            quizTarget: {
+              type: QUIZ_TRANSLATION_TARGET_TYPES.MATCHING_PAIR,
+              questionId: pair.questionId,
+              displayOrder: pair.displayOrder,
+              side,
+            },
+          },
+          pair.questionId,
+        );
+      }
+    }
+
     const translatedAnswerSetIds = new Set(
       snapshot.answerSets
         .filter((answerSet) => answerSet.language === language && answerSet.preferredAnswer.length)
@@ -643,6 +673,9 @@ export class CourseTranslationService {
           db,
         ),
       )
+      .with({ type: QUIZ_TRANSLATION_TARGET_TYPES.MATCHING_PAIR }, (pair) =>
+        this.courseTranslationRepository.upsertMatchingPair(pair, language, translatedValue, db),
+      )
       .with({ type: QUIZ_TRANSLATION_TARGET_TYPES.BLANK_ANSWER_SET }, (answerSet) =>
         this.courseTranslationRepository.upsertBlankAnswerSet(
           answerSet,
@@ -682,6 +715,11 @@ export class CourseTranslationService {
       trx,
     );
     await this.courseTranslationRepository.deleteChoiceOptionsInLanguage(
+      questionIds,
+      language,
+      trx,
+    );
+    await this.courseTranslationRepository.deleteMatchingPairsInLanguage(
       questionIds,
       language,
       trx,

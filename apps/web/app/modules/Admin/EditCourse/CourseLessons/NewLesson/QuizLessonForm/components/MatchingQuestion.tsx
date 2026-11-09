@@ -1,4 +1,5 @@
 import * as Accordion from "@radix-ui/react-accordion";
+import { ASSESSMENT_SCORING_MODES, type AssessmentScoringMode } from "@repo/shared";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,6 +8,13 @@ import { SortableList } from "~/components/SortableList";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -18,20 +26,22 @@ import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
-type MatchWordsQuestionProps = {
+type MatchingQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   isStructureLocked?: boolean;
   baseLanguageQuestion?: Question;
 };
 
-const MatchWordsQuestion = ({
+const MatchingQuestion = ({
   form,
   questionIndex,
   isStructureLocked = false,
   baseLanguageQuestion,
-}: MatchWordsQuestionProps) => {
+}: MatchingQuestionProps) => {
   const watchedOptions = form.watch(`questions.${questionIndex}.options`);
+  const scoringMode =
+    form.watch(`questions.${questionIndex}.scoringMode`) ?? ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING;
   const errors = form.formState.errors;
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,6 +55,7 @@ const MatchWordsQuestion = ({
     const newOption: QuestionOption = {
       sortableId: crypto.randomUUID(),
       optionText: "",
+      matchedWord: "",
       isCorrect: true,
       displayOrder: currentOptions.length + 1,
     };
@@ -99,6 +110,36 @@ const MatchWordsQuestion = ({
     <Accordion.Root key={questionIndex} type="single" collapsible>
       <Accordion.Item value={`item-${questionIndex}`}>
         <div className="mt-3 rounded-xl border-0 p-2 transition-all duration-300">
+          <div className="ml-14 mb-4 flex max-w-sm flex-col gap-2">
+            <Label className="body-sm-md">
+              {t("adminCourseView.curriculum.lesson.field.matchingScoring")}
+            </Label>
+            <Select
+              value={scoringMode}
+              disabled={isStructureLocked}
+              onValueChange={(value) =>
+                form.setValue(
+                  `questions.${questionIndex}.scoringMode`,
+                  value as AssessmentScoringMode,
+                  { shouldDirty: true },
+                )
+              }
+            >
+              <SelectTrigger
+                data-testid={QUIZ_LESSON_FORM_HANDLES.matchingScoringSelect(questionIndex)}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING}>
+                  {t("adminCourseView.curriculum.lesson.other.matchingScoringAllOrNothing")}
+                </SelectItem>
+                <SelectItem value={ASSESSMENT_SCORING_MODES.PARTIAL}>
+                  {t("adminCourseView.curriculum.lesson.other.matchingScoringPartial")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="ml-14">
             {!isOptionEmpty && (
               <>
@@ -139,6 +180,10 @@ const MatchWordsQuestion = ({
                             <Input
                               type="text"
                               name={`questions.${questionIndex}.options.${index}.optionText`}
+                              data-testid={QUIZ_LESSON_FORM_HANDLES.matchingPromptInput(
+                                questionIndex,
+                                index,
+                              )}
                               value={item.optionText}
                               onChange={(e) =>
                                 handleOptionChange(index, "optionText", e.target.value)
@@ -153,6 +198,10 @@ const MatchWordsQuestion = ({
                             <Input
                               type="text"
                               name={`questions.${questionIndex}.options.${index}.matchedWord`}
+                              data-testid={QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(
+                                questionIndex,
+                                index,
+                              )}
                               value={item.matchedWord}
                               onChange={(e) =>
                                 handleOptionChange(index, "matchedWord", e.target.value)
@@ -233,4 +282,4 @@ const MatchWordsQuestion = ({
   );
 };
 
-export default MatchWordsQuestion;
+export default MatchingQuestion;

@@ -1,6 +1,7 @@
 import {
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
 } from "@repo/shared";
 
@@ -17,6 +18,7 @@ const createQuestion = (overrides: Partial<QuizAuthoringQuestion> = {}): QuizAut
   displayOrder: 1,
   maximumPoints: "1",
   gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+  scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
   prompt: "Question",
   title: "Question",
   description: null,
@@ -27,6 +29,7 @@ const createQuestion = (overrides: Partial<QuizAuthoringQuestion> = {}): QuizAut
   openTextSettings: null,
   blanks: [],
   dragAndDropOptions: [],
+  matchingPairs: [],
   ...overrides,
 });
 

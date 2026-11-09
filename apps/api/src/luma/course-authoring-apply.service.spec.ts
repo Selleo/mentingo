@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
+import { ASSESSMENT_QUESTION_TYPES, ASSESSMENT_SCORING_MODES } from "@repo/shared";
 import { FormatRegistry } from "@sinclair/typebox";
 import { load as loadHtml } from "cheerio";
 import { validate } from "uuid";
@@ -961,10 +961,19 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       await test.service.applyPreparedExport(test.input, actor);
 
       expect(expectedQuestions.map((question) => question.questionType).sort()).toEqual(
-        Object.values(ASSESSMENT_QUESTION_TYPES).sort(),
+        // Luma does not author matching questions yet.
+        Object.values(ASSESSMENT_QUESTION_TYPES)
+          .filter((type) => type !== ASSESSMENT_QUESTION_TYPES.MATCHING)
+          .sort(),
       );
       expect(test.saveQuizFromAuthoring).toHaveBeenCalledWith(
-        expect.objectContaining({ questions: expectedQuestions }),
+        expect.objectContaining({
+          questions: expectedQuestions.map((question) => ({
+            ...question,
+            scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+            matchingPairs: [],
+          })),
+        }),
         actor,
         type === "lesson.update" ? lessonId : undefined,
       );

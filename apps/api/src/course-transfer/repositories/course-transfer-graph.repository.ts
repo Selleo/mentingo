@@ -59,6 +59,7 @@ import {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -113,6 +114,7 @@ import type {
   UpsertTargetBlankAnswerSetValues,
   UpsertTargetBlankValues,
   UpsertTargetDragAndDropOptionValues,
+  UpsertTargetMatchingPairValues,
   UpsertTargetScaleOptionValues,
   UpsertTargetTrueFalseStatementValues,
 } from "src/course-transfer/types/course-transfer-graph.types";
@@ -509,6 +511,7 @@ export class CourseTransferGraphRepository {
         title: values.title,
         description: values.description,
         gradingMode: values.gradingMode,
+        scoringMode: values.scoringMode,
       })
       .returning({ id: assessmentQuestions.id });
 
@@ -525,6 +528,7 @@ export class CourseTransferGraphRepository {
         title: values.title,
         description: values.description,
         gradingMode: values.gradingMode,
+        scoringMode: values.scoringMode,
       })
       .where(eq(assessmentQuestions.id, questionId));
   }
@@ -621,6 +625,32 @@ export class CourseTransferGraphRepository {
       });
   }
 
+  // Negates kept pairs' display orders so re-ordered upserts cannot collide on the unique index.
+  async parkTargetMatchingPairs(questionIds: UUIDType[]) {
+    if (!questionIds.length) return;
+
+    await this.db
+      .update(assessmentQuestionMatchingPairs)
+      .set({ displayOrder: sql`-ABS(${assessmentQuestionMatchingPairs.displayOrder}) - 1` })
+      .where(inArray(assessmentQuestionMatchingPairs.questionId, questionIds));
+  }
+
+  async upsertTargetMatchingPair(values: UpsertTargetMatchingPairValues) {
+    await this.db
+      .insert(assessmentQuestionMatchingPairs)
+      .values(values)
+      .onConflictDoUpdate({
+        target: assessmentQuestionMatchingPairs.id,
+        set: {
+          questionId: values.questionId,
+          language: values.language,
+          displayOrder: values.displayOrder,
+          prompt: values.prompt,
+          match: values.match,
+        },
+      });
+  }
+
   async upsertTargetScaleOption(values: UpsertTargetScaleOptionValues) {
     await this.db
       .insert(assessmentQuestionScaleOptions)
@@ -678,6 +708,13 @@ export class CourseTransferGraphRepository {
       assessmentQuestionDragAndDropOptions.id,
       values.questionIds,
       values.dragAndDropOptionIds,
+    );
+    await this.deleteQuestionDetailRowsNotIn(
+      assessmentQuestionMatchingPairs,
+      assessmentQuestionMatchingPairs.questionId,
+      assessmentQuestionMatchingPairs.id,
+      values.questionIds,
+      values.matchingPairIds,
     );
 
     await this.db

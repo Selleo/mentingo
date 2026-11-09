@@ -3190,7 +3190,9 @@
           "maxFileNumber_other": "No puedes cargar más de archivos {{ count }}",
           "maxResources_five": "No puedes agregar más de 5 recursos.",
           "sourceUrlRequired": "La URL de origen es obligatoria",
-          "sourceUrlInvalid": "Introduce una URL HTTPS válida"
+          "sourceUrlInvalid": "Introduce una URL HTTPS válida",
+          "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
+          "matchingPairsUnique": "Cada par necesita una pareja única"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -3265,7 +3267,8 @@
           "ttsPreset": "Preajuste TTS",
           "customTTSReference": "Referencia TTS personalizada",
           "includeFiles_one": "Adjunte hasta 1 archivo debajo de {{maxSize}} para usarlo como contexto en las lecciones",
-          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{maxSize}} para usarlos como contexto en las lecciones"
+          "includeFiles_other": "Adjunte hasta archivos {{ count }} debajo de {{maxSize}} para usarlos como contexto en las lecciones",
+          "matchingScoring": "Puntuación"
         },
         "placeholder": {
           "title": "Proporcione el título de la lección...",
@@ -3733,7 +3736,7 @@
           "option": "Opción",
           "singleChoice": "Elección única",
           "multipleChoice": "Opción múltiple",
-          "matchWords": "Coincidencia",
+          "matching": "Emparejamiento",
           "trueOrFalse": "Verdadero o falso",
           "fillInTheBlanks": "Relleno de huecos (arrastrar y soltar)",
           "photoQuestion": "Pregunta de foto",
@@ -3841,7 +3844,9 @@
           },
           "betaTooltip": "Esta funcionalidad se proporciona en una versión de prueba. Puede contener errores o no funcionar completamente según lo previsto y se utiliza bajo su propio riesgo.",
           "dragWord": "Arrastra la palabra a la oración",
-          "taskDescriptionTooltip": "Describa brevemente lo que debe hacer el participante durante la conversación con el mentor de IA."
+          "taskDescriptionTooltip": "Describa brevemente lo que debe hacer el participante durante la conversación con el mentor de IA.",
+          "matchingScoringAllOrNothing": "Todos los pares deben ser correctos",
+          "matchingScoringPartial": "Puntos por cada par correcto"
         }
       }
     },
@@ -4291,7 +4296,10 @@
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
       "openInNewTab": "Abrir en nueva pestaña",
-      "scale_1_5": "Escala del 1 al 5"
+      "scale_1_5": "Escala del 1 al 5",
+      "matching": "Empareja cada elemento con su pareja.",
+      "selectMatch": "Selecciona una pareja",
+      "correctMatch": "Pareja correcta:"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",
@@ -7124,7 +7132,8 @@
       "previewUnavailable": "A esta vista previa le faltan cambios necesarios o el orden es incoherente. Actualiza la sesión e incluye los cambios necesarios antes de volver a intentarlo.",
       "applicationInProgress": "Se están aplicando otros cambios. Si falló la puesta en cola, vuelve a intentar la selección original de propuestas para reanudarla.",
       "receiptSynchronizationPending": "Se están guardando los cambios anteriores en el espacio de trabajo de IA. Vuelve a aplicar la misma selección en unos instantes.",
-      "appliedRefreshPending": "Los cambios se aplicaron. Actualiza el curso si aún no son visibles."
+      "appliedRefreshPending": "Los cambios se aplicaron. Actualiza el curso si aún no son visibles.",
+      "matchingQuestionUnsupported": "Luma aún no puede editar cuestionarios con preguntas de emparejamiento. Edita este cuestionario en el editor de cuestionarios."
     },
     "review": {
       "generatedImage": "Imagen generada",

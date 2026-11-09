@@ -39807,10 +39807,6 @@
                                       "type": "string"
                                     },
                                     {
-                                      "const": "match_words",
-                                      "type": "string"
-                                    },
-                                    {
                                       "const": "scale_1_5",
                                       "type": "string"
                                     },
@@ -39840,6 +39836,10 @@
                                     },
                                     {
                                       "const": "fill_in_the_blanks_dnd",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "matching",
                                       "type": "string"
                                     }
                                   ]
@@ -40002,6 +40002,18 @@
                                     },
                                     {
                                       "const": "fr",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "scoringMode": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all_or_nothing",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "partial",
                                       "type": "string"
                                     }
                                   ]
@@ -42752,10 +42764,6 @@
                                 "type": "string"
                               },
                               {
-                                "const": "match_words",
-                                "type": "string"
-                              },
-                              {
                                 "const": "scale_1_5",
                                 "type": "string"
                               },
@@ -42785,6 +42793,10 @@
                               },
                               {
                                 "const": "fill_in_the_blanks_dnd",
+                                "type": "string"
+                              },
+                              {
+                                "const": "matching",
                                 "type": "string"
                               }
                             ]
@@ -42948,6 +42960,18 @@
                               },
                               {
                                 "const": "fr",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "scoringMode": {
+                            "anyOf": [
+                              {
+                                "const": "all_or_nothing",
+                                "type": "string"
+                              },
+                              {
+                                "const": "partial",
                                 "type": "string"
                               }
                             ]
@@ -43246,10 +43270,6 @@
                                     "type": "string"
                                   },
                                   {
-                                    "const": "match_words",
-                                    "type": "string"
-                                  },
-                                  {
                                     "const": "scale_1_5",
                                     "type": "string"
                                   },
@@ -43279,6 +43299,10 @@
                                   },
                                   {
                                     "const": "fill_in_the_blanks_dnd",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "matching",
                                     "type": "string"
                                   }
                                 ]
@@ -43442,6 +43466,18 @@
                                   },
                                   {
                                     "const": "fr",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "scoringMode": {
+                                "anyOf": [
+                                  {
+                                    "const": "all_or_nothing",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "partial",
                                     "type": "string"
                                   }
                                 ]
@@ -43963,10 +43999,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -43996,6 +44028,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -44098,6 +44134,16 @@
                               "questionId": {
                                 "format": "uuid",
                                 "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -44143,6 +44189,18 @@
                             }
                           ]
                         },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
+                              "type": "string"
+                            }
+                          ]
+                        },
                         "passQuestion": {
                           "anyOf": [
                             {
@@ -44152,6 +44210,12 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "matchingTargets": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -45418,10 +45482,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -45451,6 +45511,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -45614,6 +45678,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -46244,10 +46320,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -46277,6 +46349,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -46440,6 +46516,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -46889,10 +46977,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -46922,6 +47006,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -47085,6 +47173,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -47300,10 +47400,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -47333,6 +47429,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -47499,6 +47599,18 @@
                           "type": "string"
                         }
                       ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -47638,10 +47750,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -47671,6 +47779,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -47834,6 +47946,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -48015,10 +48139,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -48048,6 +48168,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -48211,6 +48335,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]

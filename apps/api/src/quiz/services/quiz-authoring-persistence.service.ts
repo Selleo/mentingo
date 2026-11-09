@@ -70,6 +70,7 @@ export class QuizAuthoringPersistenceService {
       displayOrder: question.displayOrder,
       maximumPoints: question.maximumPoints,
       gradingMode: question.gradingMode,
+      scoringMode: question.scoringMode,
       prompt: question.prompt,
       title: question.title,
       description: question.description,
@@ -125,6 +126,10 @@ export class QuizAuthoringPersistenceService {
       })),
     );
 
+    const matchingPairRows = questions.flatMap((question) =>
+      question.matchingPairs.map((pair) => ({ ...pair, language, questionId: question.id })),
+    );
+
     if (questionRows.length)
       await this.quizAuthoringRepository.insertQuestions(questionRows, language, trx);
     if (choiceRows.length) await this.quizAuthoringRepository.insertChoiceOptions(choiceRows, trx);
@@ -139,6 +144,7 @@ export class QuizAuthoringPersistenceService {
       await this.quizAuthoringRepository.insertBlankAnswerSets(answerSetRows, trx);
     if (dragAndDropRows.length)
       await this.quizAuthoringRepository.insertDragAndDropOptions(dragAndDropRows, trx);
+    await this.quizAuthoringRepository.insertMatchingPairs(matchingPairRows, trx);
 
     await this.clearPromptImageRelations(questions, trx);
   }
@@ -307,6 +313,7 @@ export class QuizAuthoringPersistenceService {
     }
 
     await this.syncScaleOptions(questions, language, trx);
+    await this.syncMatchingPairs(questions, language, trx);
 
     await this.clearPromptImageRelations(questions, trx);
   }
@@ -339,6 +346,52 @@ export class QuizAuthoringPersistenceService {
 
     for (const option of optionsToUpdate) {
       await this.quizAuthoringRepository.updateScaleOption(option, language, trx);
+    }
+  }
+
+  private async syncMatchingPairs(
+    questions: QuizAuthoringQuestion[],
+    language: SupportedLanguages,
+    trx: DatabasePg,
+  ) {
+    const questionIds = questions.map(({ id }) => id);
+    const incomingRows = questions.flatMap((question) =>
+      question.matchingPairs.map((pair) => ({ ...pair, language, questionId: question.id })),
+    );
+    const existingRows = await this.quizAuthoringRepository.findMatchingPairs(
+      questionIds,
+      language,
+      trx,
+    );
+    const { rowsToCreate, rowsToUpdate, rowsToDelete } = mapLocalizedQuestionChildChanges(
+      existingRows,
+      incomingRows,
+    );
+
+    await this.quizAuthoringRepository.deleteMatchingPairs(
+      questionIds,
+      rowsToDelete.map(({ id }) => id),
+      trx,
+    );
+
+    // Park kept pairs at negative display orders so reordered and new pairs cannot collide
+    // on the unique (question, language, display_order) index.
+    for (const [temporaryIndex, pair] of rowsToUpdate.entries()) {
+      await this.quizAuthoringRepository.updateMatchingPair(
+        pair.id,
+        { displayOrder: -(temporaryIndex + 1) },
+        trx,
+      );
+    }
+
+    await this.quizAuthoringRepository.insertMatchingPairs(rowsToCreate, trx);
+
+    for (const pair of rowsToUpdate) {
+      await this.quizAuthoringRepository.updateMatchingPair(
+        pair.id,
+        { displayOrder: pair.displayOrder, prompt: pair.prompt, match: pair.match },
+        trx,
+      );
     }
   }
 

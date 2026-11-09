@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
@@ -6,10 +6,11 @@ import {
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   type SupportedLanguages,
 } from "@repo/shared";
-import { escape } from "lodash";
+import { escape, sortBy } from "lodash";
 import { match } from "ts-pattern";
 
 import { BLANK_ANSWER_MARKER_REGEX } from "src/questions/fill-in-the-blanks.utils";
@@ -242,6 +243,9 @@ export class QuizRuntimeService {
     const scaleSelection = attemptFeedback?.scaleSelections.find(
       (selection) => selection.questionAnswerId === questionAnswer?.id,
     );
+    const matchingAnswers = attemptFeedback?.matchingAnswers.filter(
+      (answer) => answer.questionAnswerId === questionAnswer?.id,
+    );
     const openTextAnswer = attemptFeedback?.openTextAnswers.find(
       (answer) => answer.questionAnswerId === questionAnswer?.id,
     );
@@ -346,6 +350,25 @@ export class QuizRuntimeService {
             : null,
         ),
       ),
+      ...question.matchingPairs.map((pair) => {
+        const submittedMatch =
+          matchingAnswers?.find(({ pairId }) => pairId === pair.id)?.submittedMatch ?? null;
+
+        return {
+          ...this.mapDeliveryOption(
+            question.id,
+            pair.id,
+            pair.prompt,
+            pair.displayOrder,
+            undefined,
+            hasFeedback,
+            submittedMatch !== null,
+            submittedMatch === pair.match,
+            submittedMatch,
+          ),
+          matchedWord: hasFeedback ? pair.match : null,
+        };
+      }),
       ...(openTextFeedbackOption ? [openTextFeedbackOption] : []),
     ];
 
@@ -358,8 +381,22 @@ export class QuizRuntimeService {
       solutionExplanation: hasFeedback ? this.buildSolutionExplanation(deliveryQuestion) : null,
       photoS3Key: question.photoS3Key,
       options: deliveryOptions,
-      passQuestion: hasFeedback ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
+      passQuestion: hasFeedback
+        ? Number(questionAnswer?.awardedPoints ?? 0) >= Number(question.maximumPoints)
+        : null,
+      ...(question.questionType === ASSESSMENT_QUESTION_TYPES.MATCHING
+        ? { matchingTargets: this.shuffleMatchingTargets(question) }
+        : {}),
     };
+  }
+
+  // Deterministic per question and match text, so refetches keep the order; independent of pair order.
+  private shuffleMatchingTargets(question: QuizAuthoringLocalizedQuestion) {
+    return sortBy(
+      // Untranslated pairs have empty matches, which are not selectable.
+      question.matchingPairs.map(({ match }) => match).filter((match) => match !== ""),
+      (match) => createHash("sha256").update(`${question.id}:${match}`).digest("hex"),
+    );
   }
 
   private mapDeliveryOption(
@@ -413,6 +450,7 @@ export class QuizRuntimeService {
       ...question.blanks
         .map((blank) => blank.answerSets[0]?.preferredAnswer)
         .filter((answer): answer is string => Boolean(answer)),
+      ...question.matchingPairs.map((pair) => `${pair.prompt} – ${pair.match}`),
     ];
 
     return correctAnswers.length ? correctAnswers.join(", ") : null;
@@ -512,6 +550,7 @@ export class QuizRuntimeService {
   ): PreparedQuizAttempt {
     return {
       assessmentId: quizDefinition.assessment.id,
+      correctAnswerCount: 0,
       learnerId,
       language: submission.language,
       availablePoints: this.sumAvailablePoints(quizDefinition).toString(),
@@ -527,6 +566,7 @@ export class QuizRuntimeService {
       blankAnswers: [],
       openTextAnswers: [],
       scaleSelections: [],
+      matchingAnswers: [],
     };
   }
 
@@ -557,8 +597,8 @@ export class QuizRuntimeService {
       if (allowUnanswered && !submittedQuestion.answers.length) continue;
 
       const questionAnswerId = randomUUID();
-      const questionIsCorrect = this.gradeQuestionAnswer(quizQuestion, submittedQuestion.answers);
-      const awardedPoints = questionIsCorrect ? Number(quizQuestion.maximumPoints) : 0;
+      const awardedPoints = this.scoreQuestionAnswer(quizQuestion, submittedQuestion.answers);
+      if (awardedPoints >= Number(quizQuestion.maximumPoints)) attemptData.correctAnswerCount += 1;
 
       attemptData.questionAnswers.push({
         id: questionAnswerId,
@@ -612,6 +652,37 @@ export class QuizRuntimeService {
         : ASSESSMENT_ATTEMPT_RESULTS.FAILED;
 
     return attemptData;
+  }
+
+  private scoreQuestionAnswer(
+    quizQuestion: QuizAuthoringLocalizedQuestion,
+    answers: QuizSubmission["questionsAnswers"][number]["answers"],
+  ) {
+    const maximumPoints = Number(quizQuestion.maximumPoints);
+
+    if (quizQuestion.questionType !== ASSESSMENT_QUESTION_TYPES.MATCHING)
+      return this.gradeQuestionAnswer(quizQuestion, answers) ? maximumPoints : 0;
+
+    const correctPairs = quizQuestion.matchingPairs.filter(
+      (pair) =>
+        pair.match !== "" &&
+        answers.some(
+          (answer) =>
+            "answerId" in answer &&
+            "value" in answer &&
+            answer.answerId === pair.id &&
+            answer.value === pair.match,
+        ),
+    ).length;
+    const totalPairs = quizQuestion.matchingPairs.length;
+
+    // Imported or untranslated questions may have no pairs; never award free points.
+    if (!totalPairs) return 0;
+
+    if (quizQuestion.scoringMode === ASSESSMENT_SCORING_MODES.PARTIAL)
+      return Math.round((maximumPoints * correctPairs * 100) / totalPairs) / 100;
+
+    return correctPairs === totalPairs ? maximumPoints : 0;
   }
 
   private gradeQuestionAnswer(
@@ -792,6 +863,9 @@ export class QuizRuntimeService {
         ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE,
         () => this.mapOpenTextAnswer(attemptData, questionAnswerId, answers),
       )
+      .with(ASSESSMENT_QUESTION_TYPES.MATCHING, () =>
+        this.mapMatchingAnswers(attemptData, quizQuestion, questionAnswerId, answers),
+      )
       .otherwise(() => {
         throw this.invalidSubmission();
       });
@@ -906,6 +980,33 @@ export class QuizRuntimeService {
       questionAnswerId,
       submittedText: openTextAnswer.value,
     });
+  }
+
+  private mapMatchingAnswers(
+    attemptData: PreparedQuizAttempt,
+    quizQuestion: QuizAuthoringLocalizedQuestion,
+    questionAnswerId: UUIDType,
+    answers: QuizSubmission["questionsAnswers"][number]["answers"],
+  ) {
+    const answeredPairIds = new Set<UUIDType>();
+    const matches = new Set(
+      quizQuestion.matchingPairs.map(({ match }) => match).filter((match) => match !== ""),
+    );
+
+    for (const answer of answers) {
+      if (!("answerId" in answer) || !("value" in answer)) throw this.invalidSubmission();
+      if (answeredPairIds.has(answer.answerId) || !matches.has(answer.value))
+        throw this.invalidSubmission();
+
+      this.assertIdBelongsToQuestion(answer.answerId, quizQuestion.matchingPairs);
+      answeredPairIds.add(answer.answerId);
+
+      attemptData.matchingAnswers.push({
+        questionAnswerId,
+        pairId: answer.answerId,
+        submittedMatch: answer.value,
+      });
+    }
   }
 
   private assertIdBelongsToQuestion(id: UUIDType, rows: Array<{ id: UUIDType }>) {

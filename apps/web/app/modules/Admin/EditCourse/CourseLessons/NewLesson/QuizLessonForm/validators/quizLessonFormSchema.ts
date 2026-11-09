@@ -1,3 +1,4 @@
+import { ASSESSMENT_SCORING_MODES } from "@repo/shared";
 import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
@@ -27,6 +28,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             }),
           ),
           title: z.string().min(2).max(250),
+          scoringMode: z.optional(z.nativeEnum(ASSESSMENT_SCORING_MODES)),
           options: z
             .array(
               z.object({
@@ -55,6 +57,27 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             ctx.addIssue({
               path: [index, "options"],
               message: t("adminCourseView.curriculum.lesson.validation.atLeastOneOptionRequired"),
+              code: z.ZodIssueCode.custom,
+            });
+          }
+
+          if (
+            question.type === QuestionType.MATCHING &&
+            ((question.options?.length ?? 0) < 2 ||
+              question.options?.some((option) => !option.matchedWord?.trim()))
+          ) {
+            ctx.addIssue({
+              path: [index, "options"],
+              message: t("adminCourseView.curriculum.lesson.validation.matchingPairsRequired"),
+              code: z.ZodIssueCode.custom,
+            });
+          }
+
+          const matches = question.options?.map((option) => option.matchedWord?.trim()) ?? [];
+          if (question.type === QuestionType.MATCHING && new Set(matches).size !== matches.length) {
+            ctx.addIssue({
+              path: [index, "options"],
+              message: t("adminCourseView.curriculum.lesson.validation.matchingPairsUnique"),
               code: z.ZodIssueCode.custom,
             });
           }

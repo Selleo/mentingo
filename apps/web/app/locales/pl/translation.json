@@ -3452,7 +3452,9 @@
           "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxResources": "Nie możesz dodać więcej niż {{ count }} zasobów do lekcji",
           "sourceUrlRequired": "Adres URL źródła jest wymagany",
-          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS"
+          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS",
+          "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
+          "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -3529,7 +3531,8 @@
           "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{maxSize}}, który będzie używany jako kontekst w lekcjach",
           "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
           "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
-          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach"
+          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
+          "matchingScoring": "Punktacja"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -4049,7 +4052,7 @@
           "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
           "allowedFormats": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
           "multipleChoice": "Wielokrotny wybór",
-          "matchWords": "Dopasowanie",
+          "matching": "Dopasowanie",
           "trueOrFalse": "Prawda/fałsz",
           "fillInTheBlanks": "Uzupełnij luki (drag&drop)",
           "photoQuestion": "Pytanie z obrazkiem",
@@ -4155,7 +4158,9 @@
             }
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
-          "dragWord": "Przeciągnij słowo do zdania"
+          "dragWord": "Przeciągnij słowo do zdania",
+          "matchingScoringAllOrNothing": "Wszystkie pary muszą być poprawne",
+          "matchingScoringPartial": "Punkty za każdą poprawną parę"
         }
       },
       "validation": {
@@ -4616,7 +4621,10 @@
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",
-      "scale_1_5": "Pytanie typu skala (1-5)"
+      "scale_1_5": "Pytanie typu skala (1-5)",
+      "matching": "Dopasuj każdy element do jego pary.",
+      "selectMatch": "Wybierz dopasowanie",
+      "correctMatch": "Poprawne dopasowanie:"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -7244,7 +7252,8 @@
       "receiptSynchronizationPending": "Trwa zapisywanie poprzednich zmian w przestrzeni AI. Za chwilę spróbuj ponownie zastosować ten sam wybór.",
       "appliedRefreshPending": "Zmiany zostały zastosowane. Odśwież kurs, jeśli nie są jeszcze widoczne.",
       "deepResearchPreferenceNotSaved": "Włączono pogłębiony research dla tej prośby, ale nie udało się zapisać ustawienia dla kolejnych wiadomości.",
-      "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości."
+      "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości.",
+      "matchingQuestionUnsupported": "Luma nie może jeszcze edytować quizów z pytaniami typu dopasowanie. Edytuj ten quiz w edytorze quizów."
     },
     "review": {
       "generatedImage": "Wygenerowana grafika",

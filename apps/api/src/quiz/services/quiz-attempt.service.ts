@@ -120,6 +120,7 @@ export class QuizAttemptService {
     await this.quizRuntimeRepository.insertBlankAnswers(attemptData.blankAnswers, trx);
     await this.quizRuntimeRepository.insertOpenTextAnswers(attemptData.openTextAnswers, trx);
     await this.quizRuntimeRepository.insertScaleSelections(attemptData.scaleSelections, trx);
+    await this.quizRuntimeRepository.insertMatchingAnswers(attemptData.matchingAnswers, trx);
   }
 
   async findLatestAttemptFeedback(
@@ -149,17 +150,25 @@ export class QuizAttemptService {
         blankAnswers: [],
         scaleSelections: [],
         openTextAnswers: [],
+        matchingAnswers: [],
       };
     }
 
-    const [choiceSelections, statementAnswers, blankAnswers, scaleSelections, openTextAnswers] =
-      await Promise.all([
-        this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
-        this.quizRuntimeRepository.findStatementAnswers(questionAnswerIds, db),
-        this.quizRuntimeRepository.findBlankAnswers(questionAnswerIds, db),
-        this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
-        this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
-      ]);
+    const [
+      choiceSelections,
+      statementAnswers,
+      blankAnswers,
+      scaleSelections,
+      openTextAnswers,
+      matchingAnswers,
+    ] = await Promise.all([
+      this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
+      this.quizRuntimeRepository.findStatementAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findBlankAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
+      this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findMatchingAnswers(questionAnswerIds, db),
+    ]);
 
     return {
       attempt,
@@ -169,6 +178,7 @@ export class QuizAttemptService {
       blankAnswers,
       scaleSelections,
       openTextAnswers,
+      matchingAnswers,
     };
   }
 }

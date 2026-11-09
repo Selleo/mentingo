@@ -32,6 +32,7 @@ export const getUserAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareMatchingAnswers(groupedQuestions.matching),
   } as const;
 };
 
@@ -53,6 +54,7 @@ export const getEmptyQuizAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareEmptyOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareEmptyOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareEmptyOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareEmptyOptionAnswers(groupedQuestions.matching),
   };
 };
 
@@ -69,7 +71,7 @@ const groupQuestionsByType = (questions: Questions) => {
     ),
     fill_in_the_blanks_text: questions.filter(({ type }) => type === "fill_in_the_blanks_text"),
     fill_in_the_blanks_dnd: questions.filter(({ type }) => type === "fill_in_the_blanks_dnd"),
-    match_words: questions.filter(({ type }) => type === "match_words"),
+    matching: questions.filter(({ type }) => type === "matching"),
     scale_1_5: questions.filter(({ type }) => type === "scale_1_5"),
     brief_response: questions.filter(({ type }) => type === "brief_response"),
     detailed_response: questions.filter(({ type }) => type === "detailed_response"),
@@ -202,6 +204,17 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
   }, {} as AnswersMap);
 }
 
+function prepareMatchingAnswers(questions: Questions): AnswersMap {
+  return Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      Object.fromEntries(
+        (question.options ?? []).map((option) => [option.id, option.studentAnswer ?? null]),
+      ),
+    ]),
+  );
+}
+
 function prepareOpenAnswers(questions: Questions): OpenAnswersMap {
   return questions.reduce((result, question) => {
     const studentAnswer = question.options?.[0]?.studentAnswer || "";
@@ -290,6 +303,7 @@ export const parseQuizFormData = (input: QuizForm) => {
   processSingleAnswerQuestions(input.multiAnswerQuestions);
   processFillInTheBlanks(input.fillInTheBlanksText);
   processFillInTheBlanks(input.fillInTheBlanksDnd);
+  processFillInTheBlanks(input.matchingQuestions);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
 

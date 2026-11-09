@@ -1660,6 +1660,20 @@
       "when": 1794215273004,
       "tag": "0236_add_quiz_attempt_check_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1794306928111,
+      "tag": "0237_add_matching_questions",
+      "breakpoints": true
+    },
+    {
+      "idx": 238,
+      "version": "7",
+      "when": 1794306935957,
+      "tag": "0238_enable_matching_questions_tenant_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
   ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
@@ -56,6 +57,7 @@ import {
   assessments,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
+  assessmentQuestionMatchingPairs,
   resourceEntity,
   resources,
   tenants,
@@ -1919,6 +1921,123 @@ describe("Master course export and sync (e2e)", () => {
     ]);
     await sync();
     expect(await readOptions()).toEqual(replaced);
+  });
+
+  it("syncs matching pairs and scoring mode, including reorders and deletions", async () => {
+    const questionId = faker.string.uuid();
+    const catId = faker.string.uuid();
+    const dogId = faker.string.uuid();
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceLessonId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .returning();
+          await db.insert(assessmentQuestions).values({
+            id: questionId,
+            assessmentId: assessment.id,
+            questionType: ASSESSMENT_QUESTION_TYPES.MATCHING,
+            gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+            scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+            prompt: { en: "Match" },
+            title: { en: "Match" },
+            displayOrder: 1,
+          });
+          await db.insert(assessmentQuestionMatchingPairs).values([
+            {
+              id: catId,
+              questionId,
+              language: "en",
+              prompt: "Cat",
+              match: "Meow",
+              displayOrder: 1,
+            },
+            {
+              id: dogId,
+              questionId,
+              language: "en",
+              prompt: "Dog",
+              match: "Woof",
+              displayOrder: 2,
+            },
+          ]);
+        });
+      },
+    });
+    const readTarget = () =>
+      runAsTenant(targetTenantId, () =>
+        db
+          .select({
+            scoringMode: assessmentQuestions.scoringMode,
+            prompt: assessmentQuestionMatchingPairs.prompt,
+            match: assessmentQuestionMatchingPairs.match,
+            displayOrder: assessmentQuestionMatchingPairs.displayOrder,
+          })
+          .from(assessmentQuestionMatchingPairs)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionMatchingPairs.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .orderBy(asc(assessmentQuestionMatchingPairs.displayOrder)),
+      );
+
+    expect(await readTarget()).toEqual([
+      {
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+        prompt: "Cat",
+        match: "Meow",
+        displayOrder: 1,
+      },
+      {
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+        prompt: "Dog",
+        match: "Woof",
+        displayOrder: 2,
+      },
+    ]);
+
+    const [exportLink] = await baseDb
+      .select()
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
+    const sync = () =>
+      masterCourseService.transferFromSyncJob({
+        exportId: exportLink.id,
+        sourceCourseId,
+        sourceTenantId,
+        targetTenantId,
+        triggerEventType: "UpdateCourseEvent",
+      });
+
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: -1 })
+        .where(eq(assessmentQuestionMatchingPairs.id, catId));
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: 1 })
+        .where(eq(assessmentQuestionMatchingPairs.id, dogId));
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: 2 })
+        .where(eq(assessmentQuestionMatchingPairs.id, catId));
+    });
+    await sync();
+    expect((await readTarget()).map(({ prompt }) => prompt)).toEqual(["Dog", "Cat"]);
+
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .delete(assessmentQuestionMatchingPairs)
+        .where(eq(assessmentQuestionMatchingPairs.id, dogId)),
+    );
+    await sync();
+    expect((await readTarget()).map(({ prompt }) => prompt)).toEqual(["Cat"]);
   });
 
   it("rewrites fill-in-the-blanks option markers for every localized question description", async () => {

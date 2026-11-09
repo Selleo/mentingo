@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
@@ -137,6 +138,15 @@ const mapScaleOptions = (options: AdminQuestionBody["options"]) =>
     label: option.optionText,
   }));
 
+const mapMatchingPairs = (options: AdminQuestionBody["options"]) =>
+  (options ?? []).map((option, index) => ({
+    id: option.id ?? randomUUID(),
+    // The submitted order is the authored pair order.
+    displayOrder: index + 1,
+    prompt: option.optionText.trim(),
+    match: option.matchedWord?.trim() ?? "",
+  }));
+
 const mapOpenTextSettings = (type: AdminQuestionBody["type"]) =>
   isManualQuestion(type)
     ? { minimumCharacters: null, maximumCharacters: null, reviewerInstructions: null }
@@ -199,6 +209,7 @@ const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQ
     questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND
       ? mapDragAndDropOptions(options, blankIdMap)
       : [];
+  const isMatchingQuestion = question.type === QUESTION_TYPE.MATCHING;
 
   return {
     id: question.id ?? randomUUID(),
@@ -208,6 +219,10 @@ const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQ
     gradingMode: isManualQuestion(question.type)
       ? ASSESSMENT_GRADING_MODES.MANUAL
       : ASSESSMENT_GRADING_MODES.AUTOMATIC,
+    scoringMode:
+      isMatchingQuestion && question.scoringMode
+        ? question.scoringMode
+        : ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
     prompt: normalizedPrompt,
     title: question.title,
     description: question.description ?? null,
@@ -218,6 +233,7 @@ const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQ
     openTextSettings: mapOpenTextSettings(question.type),
     blanks,
     dragAndDropOptions,
+    matchingPairs: isMatchingQuestion ? mapMatchingPairs(options) : [],
   };
 };
 

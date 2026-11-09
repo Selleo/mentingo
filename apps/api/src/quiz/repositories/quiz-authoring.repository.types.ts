@@ -8,6 +8,7 @@ import type {
   assessmentQuestionBlanks,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
 } from "src/storage/schema";
 
 export type QuizQuestionInsert = Omit<
@@ -45,3 +46,6 @@ export type QuizDragAndDropOptionUpdate = PgUpdateSetSource<
   typeof assessmentQuestionDragAndDropOptions
 >;
 export type QuizBlankUpdate = PgUpdateSetSource<typeof assessmentQuestionBlanks>;
+
+export type QuizMatchingPairInsert = PgInsertValue<typeof assessmentQuestionMatchingPairs>;
+export type QuizMatchingPairUpdate = PgUpdateSetSource<typeof assessmentQuestionMatchingPairs>;

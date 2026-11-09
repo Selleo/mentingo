@@ -3198,7 +3198,9 @@
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
           "sourceUrlRequired": "Source URL is required",
-          "sourceUrlInvalid": "Enter a valid HTTPS URL"
+          "sourceUrlInvalid": "Enter a valid HTTPS URL",
+          "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
+          "matchingPairsUnique": "Each pair needs a unique match"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -3273,7 +3275,8 @@
           "ttsPreset": "TTS Preset",
           "customTTSReference": "Custom TTS Reference",
           "includeFiles_one": "Attach up to 1 file below {{maxSize}} to be used as context in lessons",
-          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons"
+          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons",
+          "matchingScoring": "Scoring"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -3789,7 +3792,7 @@
           "option": "Option",
           "singleChoice": "Single choice",
           "multipleChoice": "Multiple choice",
-          "matchWords": "Matching",
+          "matching": "Matching",
           "trueOrFalse": "True or false",
           "fillInTheBlanks": "Gap filling (drag&drop)",
           "photoQuestion": "Photo question",
@@ -3897,7 +3900,9 @@
           },
           "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
           "dragWord": "Drag word into sentence",
-          "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor."
+          "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor.",
+          "matchingScoringAllOrNothing": "All pairs must be correct",
+          "matchingScoringPartial": "Points for each correct pair"
         }
       }
     },
@@ -4347,7 +4352,10 @@
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
       "openInNewTab": "Open in new tab",
-      "scale_1_5": "Scale question (1-5)"
+      "scale_1_5": "Scale question (1-5)",
+      "matching": "Match each item with its pair.",
+      "selectMatch": "Select a match",
+      "correctMatch": "Correct match:"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -7187,7 +7195,8 @@
       "receiptSynchronizationPending": "Saving previous changes to the AI workspace. Try applying this same selection again shortly.",
       "appliedRefreshPending": "Changes were applied. Refresh the course if they are not visible yet.",
       "deepResearchPreferenceNotSaved": "Deep research was enabled for this request, but the preference could not be saved for future messages.",
-      "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages."
+      "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages.",
+      "matchingQuestionUnsupported": "Luma cannot edit quizzes with matching questions yet. Edit this quiz in the quiz editor."
     },
     "review": {
       "generatedImage": "Generated image",

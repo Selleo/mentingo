@@ -3,7 +3,7 @@ import type {
   ScormExportCourseSnapshot,
   ScormExportPackageFile,
 } from "@repo/scorm-export-generator";
-import type { SupportedLanguages } from "@repo/shared";
+import type { AssessmentScoringMode, SupportedLanguages } from "@repo/shared";
 import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
 import type { scormScos } from "src/storage/schema";
@@ -54,6 +54,7 @@ export type CourseScormQuizQuestionRow = {
   solutionExplanation: string | null;
   displayOrder: number | null;
   photoS3Key: string | null;
+  scoringMode: AssessmentScoringMode;
 };
 
 export type CourseScormQuizOptionRow = {

@@ -26,6 +26,7 @@ import {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionTrueFalseStatements,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestions,
   assessments,
   resourceEntity,
@@ -309,6 +310,7 @@ export class CourseScormSnapshotService {
         solutionExplanation: sql<string | null>`NULL`,
         displayOrder: assessmentQuestions.displayOrder,
         photoS3Key: resources.reference,
+        scoringMode: assessmentQuestions.scoringMode,
       })
       .from(assessmentQuestions)
       .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
@@ -334,104 +336,131 @@ export class CourseScormSnapshotService {
   private async getQuizOptions(lessonIds: UUIDType[], language: SupportedLanguages) {
     if (!lessonIds.length) return [];
 
-    const [choiceOptions, trueFalseStatements, blankAnswers, dragOptions] = await Promise.all([
-      this.db
-        .select({
-          id: assessmentQuestionChoiceOptions.id,
-          questionId: assessmentQuestionChoiceOptions.questionId,
-          title: assessmentQuestionChoiceOptions.label,
-          isCorrect: assessmentQuestionChoiceOptions.isCorrect,
-          displayOrder: assessmentQuestionChoiceOptions.displayOrder,
-          matchedWord: sql<string | null>`NULL`,
-          targetBlankId: sql<UUIDType | null>`NULL`,
-        })
-        .from(assessmentQuestionChoiceOptions)
-        .innerJoin(
-          assessmentQuestions,
-          eq(assessmentQuestions.id, assessmentQuestionChoiceOptions.questionId),
-        )
-        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
-        .where(
-          and(
-            inArray(assessments.lessonId, lessonIds),
-            eq(assessmentQuestionChoiceOptions.language, language),
+    const [choiceOptions, trueFalseStatements, blankAnswers, dragOptions, matchingPairs] =
+      await Promise.all([
+        this.db
+          .select({
+            id: assessmentQuestionChoiceOptions.id,
+            questionId: assessmentQuestionChoiceOptions.questionId,
+            title: assessmentQuestionChoiceOptions.label,
+            isCorrect: assessmentQuestionChoiceOptions.isCorrect,
+            displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+            matchedWord: sql<string | null>`NULL`,
+            targetBlankId: sql<UUIDType | null>`NULL`,
+          })
+          .from(assessmentQuestionChoiceOptions)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionChoiceOptions.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .where(
+            and(
+              inArray(assessments.lessonId, lessonIds),
+              eq(assessmentQuestionChoiceOptions.language, language),
+            ),
           ),
-        ),
-      this.db
-        .select({
-          id: assessmentQuestionBlanks.id,
-          questionId: assessmentQuestionBlanks.questionId,
-          title: assessmentQuestionBlankAnswerSets.preferredAnswer,
-          isCorrect: sql<boolean>`TRUE`,
-          displayOrder: sql<number>`0`,
-          matchedWord: assessmentQuestionBlankAnswerSets.preferredAnswer,
-          targetBlankId: assessmentQuestionBlanks.id,
-        })
-        .from(assessmentQuestionBlankAnswerSets)
-        .innerJoin(
-          assessmentQuestionBlanks,
-          eq(assessmentQuestionBlanks.id, assessmentQuestionBlankAnswerSets.blankId),
-        )
-        .innerJoin(
-          assessmentQuestions,
-          eq(assessmentQuestions.id, assessmentQuestionBlanks.questionId),
-        )
-        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
-        .where(
-          and(
-            inArray(assessments.lessonId, lessonIds),
-            eq(assessmentQuestionBlankAnswerSets.language, language),
+        this.db
+          .select({
+            id: assessmentQuestionBlanks.id,
+            questionId: assessmentQuestionBlanks.questionId,
+            title: assessmentQuestionBlankAnswerSets.preferredAnswer,
+            isCorrect: sql<boolean>`TRUE`,
+            displayOrder: sql<number>`0`,
+            matchedWord: assessmentQuestionBlankAnswerSets.preferredAnswer,
+            targetBlankId: assessmentQuestionBlanks.id,
+          })
+          .from(assessmentQuestionBlankAnswerSets)
+          .innerJoin(
+            assessmentQuestionBlanks,
+            eq(assessmentQuestionBlanks.id, assessmentQuestionBlankAnswerSets.blankId),
+          )
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionBlanks.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .where(
+            and(
+              inArray(assessments.lessonId, lessonIds),
+              eq(assessmentQuestionBlankAnswerSets.language, language),
+            ),
           ),
-        ),
-      this.db
-        .select({
-          id: assessmentQuestionTrueFalseStatements.id,
-          questionId: assessmentQuestionTrueFalseStatements.questionId,
-          title: assessmentQuestionTrueFalseStatements.statement,
-          isCorrect: assessmentQuestionTrueFalseStatements.correctValue,
-          displayOrder: assessmentQuestionTrueFalseStatements.displayOrder,
-          matchedWord: sql<string | null>`NULL`,
-          targetBlankId: sql<UUIDType | null>`NULL`,
-        })
-        .from(assessmentQuestionTrueFalseStatements)
-        .innerJoin(
-          assessmentQuestions,
-          eq(assessmentQuestions.id, assessmentQuestionTrueFalseStatements.questionId),
-        )
-        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
-        .where(
-          and(
-            inArray(assessments.lessonId, lessonIds),
-            eq(assessmentQuestionTrueFalseStatements.language, language),
+        this.db
+          .select({
+            id: assessmentQuestionTrueFalseStatements.id,
+            questionId: assessmentQuestionTrueFalseStatements.questionId,
+            title: assessmentQuestionTrueFalseStatements.statement,
+            isCorrect: assessmentQuestionTrueFalseStatements.correctValue,
+            displayOrder: assessmentQuestionTrueFalseStatements.displayOrder,
+            matchedWord: sql<string | null>`NULL`,
+            targetBlankId: sql<UUIDType | null>`NULL`,
+          })
+          .from(assessmentQuestionTrueFalseStatements)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionTrueFalseStatements.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .where(
+            and(
+              inArray(assessments.lessonId, lessonIds),
+              eq(assessmentQuestionTrueFalseStatements.language, language),
+            ),
           ),
-        ),
-      this.db
-        .select({
-          id: assessmentQuestionDragAndDropOptions.id,
-          questionId: assessmentQuestionDragAndDropOptions.questionId,
-          title: assessmentQuestionDragAndDropOptions.label,
-          isCorrect: sql<boolean>`false`,
-          displayOrder: assessmentQuestionDragAndDropOptions.displayOrder,
-          matchedWord: sql<string | null>`NULL`,
-          targetBlankId: assessmentQuestionDragAndDropOptions.targetBlankId,
-        })
-        .from(assessmentQuestionDragAndDropOptions)
-        .innerJoin(
-          assessmentQuestions,
-          eq(assessmentQuestions.id, assessmentQuestionDragAndDropOptions.questionId),
-        )
-        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
-        .where(
-          and(
-            inArray(assessments.lessonId, lessonIds),
-            eq(assessmentQuestionDragAndDropOptions.language, language),
+        this.db
+          .select({
+            id: assessmentQuestionDragAndDropOptions.id,
+            questionId: assessmentQuestionDragAndDropOptions.questionId,
+            title: assessmentQuestionDragAndDropOptions.label,
+            isCorrect: sql<boolean>`false`,
+            displayOrder: assessmentQuestionDragAndDropOptions.displayOrder,
+            matchedWord: sql<string | null>`NULL`,
+            targetBlankId: assessmentQuestionDragAndDropOptions.targetBlankId,
+          })
+          .from(assessmentQuestionDragAndDropOptions)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionDragAndDropOptions.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .where(
+            and(
+              inArray(assessments.lessonId, lessonIds),
+              eq(assessmentQuestionDragAndDropOptions.language, language),
+            ),
           ),
-        ),
-    ]);
+        this.db
+          .select({
+            id: assessmentQuestionMatchingPairs.id,
+            questionId: assessmentQuestionMatchingPairs.questionId,
+            title: assessmentQuestionMatchingPairs.prompt,
+            isCorrect: sql<boolean>`TRUE`,
+            displayOrder: assessmentQuestionMatchingPairs.displayOrder,
+            matchedWord: assessmentQuestionMatchingPairs.match,
+            targetBlankId: sql<UUIDType | null>`NULL`,
+          })
+          .from(assessmentQuestionMatchingPairs)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionMatchingPairs.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .where(
+            and(
+              inArray(assessments.lessonId, lessonIds),
+              eq(assessmentQuestionMatchingPairs.language, language),
+            ),
+          ),
+      ]);
 
-    return [...choiceOptions, ...trueFalseStatements, ...blankAnswers, ...dragOptions].sort(
-      (first, second) => (first.displayOrder ?? 0) - (second.displayOrder ?? 0),
-    );
+    return [
+      ...choiceOptions,
+      ...trueFalseStatements,
+      ...blankAnswers,
+      ...dragOptions,
+      ...matchingPairs,
+    ].sort((first, second) => (first.displayOrder ?? 0) - (second.displayOrder ?? 0));
   }
 
   private buildQuizSolutionExplanation(
@@ -471,7 +500,11 @@ export class CourseScormSnapshotService {
 
     const correctAnswers = options
       .filter((option) => option.isCorrect)
-      .map((option) => option.title);
+      .map((option) =>
+        question.type === ASSESSMENT_QUESTION_TYPES.MATCHING
+          ? `${option.title} – ${option.matchedWord ?? ""}`
+          : option.title,
+      );
     return correctAnswers.length ? `Correct answer: ${correctAnswers.join(", ")}` : null;
   }
 
@@ -548,6 +581,7 @@ export class CourseScormSnapshotService {
             .map((question) => ({
               id: question.id,
               type: question.type,
+              scoringMode: question.scoringMode,
               title: question.title,
               description: question.description,
               solutionExplanation:

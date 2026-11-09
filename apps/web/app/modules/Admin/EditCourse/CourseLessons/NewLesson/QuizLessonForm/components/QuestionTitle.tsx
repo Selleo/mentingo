@@ -49,7 +49,7 @@ const QuestionTitle = ({
     [QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE]: QuestionIcons.PhotoQuestion,
     [QuestionType.FILL_IN_THE_BLANKS_TEXT]: QuestionIcons.GapFill,
     [QuestionType.FILL_IN_THE_BLANKS_DND]: QuestionIcons.FillInTheBlanks,
-    [QuestionType.MATCH_WORDS]: QuestionIcons.MatchWords,
+    [QuestionType.MATCHING]: QuestionIcons.Matching,
     [QuestionType.SCALE_1_5]: QuestionIcons.Scale_1_5,
   };
 

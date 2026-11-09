@@ -502,6 +502,7 @@ describe("parseQuizFormData", () => {
         },
       },
       scaleQuestions: {},
+      matchingQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);
@@ -603,6 +604,7 @@ describe("fill in the blanks text mapping", () => {
       },
       fillInTheBlanksDnd: {},
       scaleQuestions: {},
+      matchingQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);
@@ -613,6 +615,49 @@ describe("fill in the blanks text mapping", () => {
         answers: [
           { answerId: "o2", value: "go" },
           { answerId: "o1", value: "park" },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("matching mapping", () => {
+  const questions = [
+    {
+      id: "question-matching",
+      type: "matching",
+      options: [
+        { id: "pair-1", studentAnswer: "Meow" },
+        { id: "pair-2", studentAnswer: null },
+      ],
+    },
+  ] as unknown as NonNullable<
+    import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+  >["questions"];
+
+  it("prepares one answer per pair", () => {
+    expect(getEmptyQuizAnswers(questions).matchingQuestions["question-matching"]).toEqual({
+      "pair-1": null,
+      "pair-2": null,
+    });
+    expect(getUserAnswers(questions).matchingQuestions["question-matching"]).toEqual({
+      "pair-1": "Meow",
+      "pair-2": null,
+    });
+  });
+
+  it("submits the selected match for each answered pair", () => {
+    const parsed = parseQuizFormData({
+      ...getEmptyQuizAnswers([]),
+      matchingQuestions: { "question-matching": { "pair-1": "Meow", "pair-2": "Woof" } },
+    });
+
+    expect(parsed).toEqual([
+      {
+        questionId: "question-matching",
+        answers: [
+          { answerId: "pair-1", value: "Meow" },
+          { answerId: "pair-2", value: "Woof" },
         ],
       },
     ]);

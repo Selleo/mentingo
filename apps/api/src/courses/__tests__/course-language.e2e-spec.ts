@@ -16,6 +16,7 @@ import {
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
   assessmentQuestionChoiceOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestions,
   chapters,
   courses,
@@ -279,10 +280,21 @@ describe("Course language deletion (e2e)", () => {
       );
     });
 
-    it("removes the translation from quiz questions and drops its answer options", async () => {
+    it("removes the translation from quiz questions and drops its answer options and matching pairs", async () => {
       const { admin, cookie } = await arrangeSignedInAdmin();
       const course = await arrangeBilingualCourse(admin.id);
       const { question } = await arrangeBilingualCourseContent(course.id, admin.id);
+      await inTenant(() =>
+        db.insert(assessmentQuestionMatchingPairs).values(
+          [COURSE_LANGUAGES.BASE, COURSE_LANGUAGES.TRANSLATION].map((language) => ({
+            questionId: question.id,
+            language,
+            prompt: TRANSLATED_TEXT_BY_LANGUAGE[language],
+            match: TRANSLATED_TEXT_BY_LANGUAGE[language],
+            displayOrder: 1,
+          })),
+        ),
+      );
 
       await deleteLanguage(course.id, COURSE_LANGUAGES.TRANSLATION, cookie).expect(200);
 
@@ -307,6 +319,13 @@ describe("Course language deletion (e2e)", () => {
 
       expect(updatedQuestion).toEqual({ title: BASE_TEXT_ONLY, description: BASE_TEXT_ONLY });
       expect(remainingOptions).toEqual([{ language: COURSE_LANGUAGES.BASE, label: BASE_TEXT }]);
+      const remainingPairs = await inTenant(() =>
+        db
+          .select({ language: assessmentQuestionMatchingPairs.language })
+          .from(assessmentQuestionMatchingPairs)
+          .where(eq(assessmentQuestionMatchingPairs.questionId, question.id)),
+      );
+      expect(remainingPairs).toEqual([{ language: COURSE_LANGUAGES.BASE }]);
     });
 
     it("removes the translation from AI mentor and AI judge configurations", async () => {

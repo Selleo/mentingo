@@ -37,6 +37,11 @@ export type QuizForm = {
       [key: string]: string | null;
     };
   };
+  matchingQuestions: {
+    [key: string]: {
+      [key: string]: string | null;
+    };
+  };
 };
 
 export type LessonPreviewUser = {

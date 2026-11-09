@@ -425,9 +425,11 @@ export class LessonService {
       ? questionListWithUrls.map((question) => ({
           ...question,
           passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+          solutionExplanation: null,
           options: question.options?.map((option) => ({
             ...option,
             isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
+            matchedWord: null,
           })),
         }))
       : questionListWithUrls;

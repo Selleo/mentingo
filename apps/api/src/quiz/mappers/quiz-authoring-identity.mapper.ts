@@ -151,6 +151,10 @@ const preserveQuestionConfigurationIds = (
       incomingQuestion.scaleOptions,
       existingQuestion.scaleOptions,
     ),
+    matchingPairs: preserveOrderedConfigurationIds(
+      incomingQuestion.matchingPairs,
+      existingQuestion.matchingPairs,
+    ),
   };
 
   const isFillQuestion =

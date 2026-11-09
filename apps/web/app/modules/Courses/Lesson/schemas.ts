@@ -41,6 +41,7 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           ),
         )
         .optional(),
+      matchingQuestions: z.record(z.record(z.string().nullable())).optional(),
       fillInTheBlanksDnd: z
         .record(
           z.record(
@@ -103,6 +104,16 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           }
         });
       }
+
+      Object.entries(data.matchingQuestions ?? {}).forEach(([questionId, answers]) => {
+        if (Object.values(answers).some((value) => !value)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["matchingQuestions", questionId],
+            message: t("studentLessonView.validation.answerCannotBeEmpty"),
+          });
+        }
+      });
 
       const trueOrFalseQuestions = data.trueOrFalseQuestions;
       if (trueOrFalseQuestions) {

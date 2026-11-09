@@ -974,6 +974,7 @@ export class CourseTransferMaterializerService {
               title: toJsonbBuildObject(sourceQuestion.title),
               displayOrder: sourceQuestion.displayOrder,
               gradingMode: sourceQuestion.gradingMode,
+              scoringMode: sourceQuestion.scoringMode,
               solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
               photoS3Key: getCopiedInternalReference(
                 params.resourceCollection,
@@ -998,6 +999,7 @@ export class CourseTransferMaterializerService {
         title: toJsonbBuildObject(sourceQuestion.title),
         displayOrder: sourceQuestion.displayOrder,
         gradingMode: sourceQuestion.gradingMode,
+        scoringMode: sourceQuestion.scoringMode,
         solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
         photoS3Key: getCopiedInternalReference(
           params.resourceCollection,
@@ -1222,13 +1224,34 @@ export class CourseTransferMaterializerService {
         ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
       );
 
+    const targetMatchingPairIds = params.sourceSnapshot.assessmentQuestionMatchingPairs.map(
+      ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+    );
+
     await this.courseTransferGraphRepository.deleteStaleTargetQuestionDetails({
       questionIds: targetQuestionIds,
       scaleOptionIds: targetScaleOptionIds,
       trueFalseStatementIds: targetTrueFalseStatementIds,
       blankIds: targetBlankIds,
       dragAndDropOptionIds: targetDragAndDropOptionIds,
+      matchingPairIds: targetMatchingPairIds,
     });
+    await this.courseTransferGraphRepository.parkTargetMatchingPairs(targetQuestionIds);
+
+    for (const sourcePair of params.sourceSnapshot.assessmentQuestionMatchingPairs) {
+      const targetQuestionId = params.questionMap.get(sourcePair.questionId);
+
+      if (!targetQuestionId) continue;
+
+      await this.courseTransferGraphRepository.upsertTargetMatchingPair({
+        id: uuidv5(sourcePair.id, params.targetCourseId) as UUIDType,
+        questionId: targetQuestionId,
+        language: sourcePair.language,
+        displayOrder: sourcePair.displayOrder,
+        prompt: sourcePair.prompt,
+        match: sourcePair.match,
+      });
+    }
 
     for (const sourceOption of params.sourceSnapshot.assessmentQuestionScaleOptions) {
       const targetQuestionId = params.questionMap.get(sourceOption.questionId);

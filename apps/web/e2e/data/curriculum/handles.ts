@@ -62,6 +62,12 @@ export const QUIZ_LESSON_FORM_HANDLES = {
     `curriculum-quiz-question-add-option-button-${questionIndex}`,
   optionInput: (questionIndex: number, optionIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-option-${optionIndex}-input`,
+  matchingScoringSelect: (questionIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-matching-scoring-select`,
+  matchingPromptInput: (questionIndex: number, pairIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-pair-${pairIndex}-prompt-input`,
+  matchingMatchInput: (questionIndex: number, pairIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-pair-${pairIndex}-match-input`,
   correctOptionControl: (questionIndex: number, optionIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-option-${optionIndex}-correct`,
   fillBlanksEditor: (questionIndex: number) =>

@@ -3197,7 +3197,9 @@
           "maxFileNumber_other": "Sie können nicht mehr als {{ count }} Dateien hochladen",
           "maxResources_five": "Sie können nicht mehr als 5 Ressourcen hinzufügen",
           "sourceUrlRequired": "Quell-URL ist erforderlich",
-          "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein"
+          "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein",
+          "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
+          "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
@@ -3272,7 +3274,8 @@
           "ttsPreset": "TTS-Voreinstellung",
           "customTTSReference": "Benutzerdefinierte TTS-Referenz",
           "includeFiles_one": "Hängen Sie bis zu 1 Datei mit weniger als {{maxSize}} an, um sie als Kontext im Unterricht zu verwenden",
-          "includeFiles_other": "Hängen Sie bis zu {{ count }} Dateien mit weniger als {{maxSize}} an, um sie als Kontext in Lektionen zu verwenden"
+          "includeFiles_other": "Hängen Sie bis zu {{ count }} Dateien mit weniger als {{maxSize}} an, um sie als Kontext in Lektionen zu verwenden",
+          "matchingScoring": "Bewertung"
         },
         "placeholder": {
           "title": "Unterrichtstitel angeben...",
@@ -3788,7 +3791,7 @@
           "option": "Option",
           "singleChoice": "Einzelauswahl",
           "multipleChoice": "Multiple Choice",
-          "matchWords": "Passend",
+          "matching": "Zuordnung",
           "trueOrFalse": "Richtig oder falsch",
           "fillInTheBlanks": "Lückentext (Drag & Drop)",
           "photoQuestion": "Fotofrage",
@@ -3896,7 +3899,9 @@
           },
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
           "dragWord": "Ziehen Sie ein Wort in einen Satz",
-          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll."
+          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll.",
+          "matchingScoringAllOrNothing": "Alle Paare müssen richtig sein",
+          "matchingScoringPartial": "Punkte für jedes richtige Paar"
         }
       }
     },
@@ -4346,7 +4351,10 @@
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
       "openInNewTab": "In neuem Tab öffnen",
-      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
+      "matching": "Ordne jedes Element seinem Paar zu.",
+      "selectMatch": "Zuordnung auswählen",
+      "correctMatch": "Richtige Zuordnung:"
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -7166,7 +7174,8 @@
       "receiptSynchronizationPending": "Die vorherigen Änderungen werden im AI-Arbeitsbereich gespeichert. Versuchen Sie dieselbe Auswahl gleich erneut anzuwenden.",
       "appliedRefreshPending": "Die Änderungen wurden angewendet. Aktualisieren Sie den Kurs, falls sie noch nicht sichtbar sind.",
       "deepResearchPreferenceNotSaved": "Die vertiefte Recherche wurde für diese Anfrage aktiviert, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden.",
-      "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden."
+      "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden.",
+      "matchingQuestionUnsupported": "Luma kann Quiz mit Zuordnungsfragen noch nicht bearbeiten. Bearbeite dieses Quiz im Quiz-Editor."
     },
     "review": {
       "generatedImage": "Generiertes Bild",
