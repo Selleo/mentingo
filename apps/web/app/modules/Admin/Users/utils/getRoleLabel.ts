@@ -1,4 +1,4 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "@repo/shared";
 
 import type { TFunction } from "i18next";
 import type { RoleOption } from "~/api/queries/admin/useRoles";
@@ -9,7 +9,8 @@ const SYSTEM_ROLE_TRANSLATION_KEYS = {
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "common.roles.contentCreator",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "common.roles.trainer",
   [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "common.roles.groupManager",
-} as const;
+  [SYSTEM_ROLE_SLUGS.REVIEWER]: "common.roles.reviewer",
+} as const satisfies Record<SystemRoleSlug, string>;
 
 export const getRoleLabel = (roleSlug: string, t: TFunction, roles?: RoleOption[]): string => {
   const role = roles?.find((item) => item.slug === roleSlug);

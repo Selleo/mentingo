@@ -1,6 +1,9 @@
+import { isAllowedIframeUrl } from "@repo/shared";
 import { Node, mergeAttributes } from "@tiptap/core";
 
-import { safeEmbedUrl } from "./utils/embedUrl";
+const IFRAME_SANDBOX = "allow-scripts allow-presentation";
+
+const toAllowedIframeUrl = (value: unknown) => (isAllowedIframeUrl(value) ? value : null);
 
 /**
  * Minimal iframe node so embeds (e.g. videos) are preserved in read-only renders.
@@ -16,6 +19,7 @@ export const Iframe = Node.create({
     return [
       {
         tag: "iframe",
+        getAttrs: (element) => isAllowedIframeUrl(element.getAttribute("src")) && null,
       },
     ];
   },
@@ -24,8 +28,8 @@ export const Iframe = Node.create({
     return {
       src: {
         default: null,
-        parseHTML: (element) => safeEmbedUrl(element.getAttribute("src")),
-        renderHTML: (attrs) => ({ src: safeEmbedUrl(attrs.src) }),
+        parseHTML: (element) => toAllowedIframeUrl(element.getAttribute("src")),
+        renderHTML: (attrs) => ({ src: toAllowedIframeUrl(attrs.src) }),
       },
       title: {
         default: null,
@@ -55,17 +59,13 @@ export const Iframe = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
+    if (!isAllowedIframeUrl(HTMLAttributes.src)) return ["span"];
+
     return [
       "iframe",
       mergeAttributes(
-        {
-          class: "w-full aspect-video",
-        },
-        {
-          ...HTMLAttributes,
-          src: safeEmbedUrl(HTMLAttributes.src),
-          sandbox: "allow-scripts allow-presentation",
-        },
+        { class: "w-full aspect-video" },
+        { ...HTMLAttributes, sandbox: IFRAME_SANDBOX },
       ),
     ];
   },

@@ -20,7 +20,9 @@ import { CertificateArchivedEmailEvent } from "src/events/certificate/certificat
 import { LearningSourceWithdrawnEvent } from "src/events/learning/learning-source-withdrawn.event";
 import { LessonCompletedEvent } from "src/events/lesson/lesson-completed.event";
 import { LessonProgressChangedEvent } from "src/events/lesson/lesson-progress-changed.event";
+import { QuizCompletedEvent } from "src/events/quiz/quiz-completed.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
+import { UserLoginEvent } from "src/events/user/user-login.event";
 import { LearningPathExportAppliedEvent } from "src/learning-path/events/learning-path-export-applied.event";
 import { NativeArchiveImportFinishedEvent } from "src/native-archive/events/native-archive-import-finished.event";
 
@@ -35,6 +37,8 @@ export const OUTBOX_DIRECT_HANDLER_EVENT_TYPES = [
   LessonCompletedEvent.name,
   LessonProgressChangedEvent.name,
   UserCourseFinishedEvent.name,
+  UserLoginEvent.name,
+  QuizCompletedEvent.name,
 
   AutomationEmailDeliveryRequestedEvent.name,
   LearningPathExportAppliedEvent.name,

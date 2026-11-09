@@ -2,37 +2,29 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
+import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
-import type { ApiErrorResponse } from "../types";
-import type { AxiosError } from "axios";
+import { handleAuthSuccess } from "./helpers/handleAuthSuccess";
 
 export function useVerifyMFA() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
-
   return useMutation({
     mutationFn: async (token: string) => {
       const response = await ApiClient.api.authControllerMfaVerify({ token });
-
+      if (!response.data.data.isValid) throw new Error(t("auth.error.invalidMfaCode"));
       return response.data;
     },
-    onSuccess: () => {
-      toast({
-        description: t("mfa.verify.toast.success"),
-      });
-
-      setHasVerifiedMFA(true);
+    onSuccess: async () => {
+      await handleAuthSuccess();
+      toast({ description: t("mfa.verify.toast.success") });
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as ApiErrorResponse;
-
+    onError: (error) => {
       toast({
-        description: t(message),
+        description: getTranslatedApiErrorMessage(error, t, "auth.error.invalidMfaCode"),
         variant: "destructive",
       });
     },

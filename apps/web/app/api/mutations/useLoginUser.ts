@@ -2,8 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
-import { useAuthStore } from "~/modules/Auth/authStore";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
 
@@ -18,11 +16,8 @@ type LoginUserOptions = {
 };
 
 export function useLoginUser() {
-  const { t } = useTranslation();
   const { toast } = useToast();
-  const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
-  const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
-  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (options: LoginUserOptions) => {
@@ -30,9 +25,7 @@ export function useLoginUser() {
 
       return response.data;
     },
-    onSuccess: async ({ data }) => {
-      await handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
-    },
+    onSuccess: handleAuthSuccess,
     onError: (error: AxiosError) => {
       const { message } = error.response?.data as ApiErrorResponse;
 

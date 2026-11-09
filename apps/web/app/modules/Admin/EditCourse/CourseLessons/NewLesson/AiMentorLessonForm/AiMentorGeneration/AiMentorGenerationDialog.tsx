@@ -1,4 +1,8 @@
-import { AI_MENTOR_CONFIGURATION_GENERATION_STATUS, AI_MENTOR_TYPE } from "@repo/shared";
+import {
+  AI_MENTOR_CONFIGURATION_GENERATION_STATUS,
+  AI_MENTOR_TYPE,
+  stripHtmlTags,
+} from "@repo/shared";
 import { AlertCircle, CircleAlert, Drama, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,7 +20,6 @@ import {
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { AI_MENTOR_GENERATION_MODE } from "./aiMentorGeneration.types";
 import { AiMentorGenerationProgressView } from "./AiMentorGenerationProgressView";

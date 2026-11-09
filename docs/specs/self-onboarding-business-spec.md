@@ -113,7 +113,6 @@ monoliths or retired keys require a migration rather than leaving both old and n
 These changes are locally verified with provider mocks, temporary Git histories and bundle validation.
 They have not triggered a new hosted recording or production publication. Successful generation artifacts alone do not establish provider processing, search indexing, publication or playback.
 
-
 ## App-wide contextual guidance
 
 Contextual help uses one shared area registry across navigation, Core retrieval and assistant tools.

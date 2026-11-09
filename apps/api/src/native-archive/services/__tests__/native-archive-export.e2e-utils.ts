@@ -15,8 +15,10 @@ import request from "supertest";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { S3Service } from "src/s3/s3.service";
-import { lessons, scormPackages, scormScos, tenants } from "src/storage/schema";
+import { lessons, scormPackages, scormScos, settings, tenants } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
+import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../../test/helpers/e2e-settings";
 import { cookieFor } from "../../../../test/helpers/test-helpers";
 import { readNativeArchive } from "../native-archive-zip.service";
 
@@ -329,6 +331,11 @@ export async function createNativeArchiveTestTenant(dbAdmin: DatabasePg) {
     .insert(tenants)
     .values({ name: "Native Archive Export Foreign Tenant", host })
     .returning({ id: tenants.id });
+  await dbAdmin.insert(settings).values({
+    userId: null,
+    tenantId: tenant.id,
+    settings: settingsToJSONBuildObject(DEFAULT_E2E_GLOBAL_SETTINGS),
+  });
 
   return { id: tenant.id, host };
 }

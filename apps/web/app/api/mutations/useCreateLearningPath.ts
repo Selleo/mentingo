@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -22,6 +23,17 @@ export function useCreateLearningPath() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: LEARNING_PATHS_QUERY_KEY });
       toast({ description: t("adminLearningPathsView.toast.created") });
+    },
+    onError: (error) => {
+      toast({
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("learningPathView.toast.createError"),
+          { allowUntranslatedMessage: false },
+        ),
+        variant: "destructive",
+      });
     },
   });
 }

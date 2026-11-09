@@ -1,48 +1,29 @@
 import { FileValidator } from "@nestjs/common";
-import { Jimp } from "jimp";
 
-import type { IFile } from "@nestjs/common/pipes/file/interfaces";
+import { FileGuard } from "src/file/guards/file.guard";
 
-export type ImageConstraintsValidatorOptions = {
-  maxResolution?: {
-    width: number;
-    height: number;
-  };
-  aspectRatio?: number;
-};
+import type { FileValidationOptions } from "src/file/guards/file.guard";
 
-export class ImageConstraintsValidator extends FileValidator<ImageConstraintsValidatorOptions> {
-  private errorMessage = "common.toast.somethingWentWrong";
+export type ImageConstraintsValidatorOptions = Pick<
+  FileValidationOptions,
+  "maxResolution" | "aspectRatio"
+>;
 
-  async isValid<TFile extends IFile = any>(file?: TFile): Promise<boolean> {
+export class ImageConstraintsValidator extends FileValidator<
+  ImageConstraintsValidatorOptions,
+  Express.Multer.File
+> {
+  // Throws a translated, parameterized error instead of returning false, because ParseFilePipe
+  // only forwards a static message and the user needs to see which limit was exceeded.
+  async isValid(file?: Express.Multer.File): Promise<boolean> {
     if (!file) return true;
 
-    const { maxResolution, aspectRatio } = this.validationOptions;
-
-    if (!maxResolution && aspectRatio === undefined) {
-      return true;
-    }
-
-    const {
-      bitmap: { width, height },
-    } = await Jimp.read((file as unknown as Express.Multer.File).buffer);
-
-    if (maxResolution) {
-      if (width > maxResolution.width || height > maxResolution.height) {
-        return false;
-      }
-    }
-
-    if (aspectRatio !== undefined) {
-      if ((width / height).toFixed(2) !== aspectRatio.toFixed(2)) {
-        return false;
-      }
-    }
+    await FileGuard.validateImageConstraints(file, this.validationOptions);
 
     return true;
   }
 
   buildErrorMessage(): string {
-    return this.errorMessage;
+    return "files.toast.invalidFileType";
   }
 }

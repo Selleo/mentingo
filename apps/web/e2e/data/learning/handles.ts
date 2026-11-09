@@ -1,4 +1,7 @@
+import { SCORM_PLAYER_ATTRIBUTES } from "@repo/shared";
+
 export const LEARNING_HANDLES = {
+  SCORM_PACKAGE_IFRAME: SCORM_PLAYER_ATTRIBUTES.CONTENT_FRAME_TEST_ID,
   LESSON_TITLE: "learning-lesson-title",
   NEXT_LESSON_BUTTON: "learning-next-lesson-button",
   QUIZ_FORM: "learning-quiz-form",

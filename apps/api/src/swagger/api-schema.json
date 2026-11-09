@@ -541,6 +541,40 @@
         }
       }
     },
+    "/api/auth/session": {
+      "get": {
+        "operationId": "AuthController_session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mfa/challenge": {
+      "post": {
+        "operationId": "AuthController_mfaChallenge",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaChallengeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",
@@ -968,6 +1002,33 @@
         }
       }
     },
+    "/api/settings/admin/leaderboards": {
+      "patch": {
+        "operationId": "SettingsController_updateLeaderboardSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeaderboardSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLeaderboardSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/calendar": {
       "patch": {
         "operationId": "SettingsController_updateCalendarEnabled",
@@ -1039,6 +1100,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateLearningPathsEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/gamification-enabled": {
+      "patch": {
+        "operationId": "SettingsController_updateGamificationEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGamificationEnabledResponse"
                 }
               }
             }
@@ -1632,6 +1710,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/settings/login-page-files/{id}/content": {
+      "get": {
+        "operationId": "SettingsController_streamLoginPageFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -9282,19 +9381,50 @@
         "operationId": "CertificatesController_getCertificateSharePage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -9310,19 +9440,50 @@
         "operationId": "CertificatesController_getCertificateShareImage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16524,19 +16685,50 @@
         "operationId": "LearningPathCertificateController_getCertificateSharePage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16552,19 +16744,50 @@
         "operationId": "LearningPathCertificateController_getCertificateShareImage",
         "parameters": [
           {
-            "name": "certificateId",
+            "name": "token",
             "required": true,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
             "name": "lang",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -19392,6 +19615,33 @@
         }
       }
     },
+    "/api/scorm/runtime/content/renew": {
+      "post": {
+        "operationId": "ScormController_renewScormContent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewScormContentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewScormContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/runtime/commit": {
       "post": {
         "operationId": "ScormController_commitScormAttempt",
@@ -21858,6 +22108,432 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateSupportSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/users/{userId}": {
+      "get": {
+        "operationId": "GamificationController_getUserGamificationProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserGamificationProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/admin/achievements": {
+      "get": {
+        "operationId": "AchievementAdminController_getAdminAchievements",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminAchievementsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AchievementAdminController_createAchievement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/admin/achievements/{id}": {
+      "get": {
+        "operationId": "AchievementAdminController_getAdminAchievement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AchievementAdminController_updateAchievement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/admin/achievements/{id}/status": {
+      "patch": {
+        "operationId": "AchievementAdminController_updateAchievementStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAchievementStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/leaderboards/scopes": {
+      "get": {
+        "operationId": "LeaderboardController_getLeaderboardScopes",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLeaderboardScopesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gamification/leaderboards": {
+      "get": {
+        "operationId": "LeaderboardController_getLeaderboard",
+        "parameters": [
+          {
+            "name": "metric",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "xp",
+                  "type": "string"
+                },
+                {
+                  "const": "achievements",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "week",
+                  "type": "string"
+                },
+                {
+                  "const": "month",
+                  "type": "string"
+                },
+                {
+                  "const": "all_time",
+                  "type": "string"
+                },
+                {
+                  "const": "custom",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLeaderboardResponse"
                 }
               }
             }
@@ -26100,6 +26776,34 @@
                     {
                       "const": "activity_log.read",
                       "type": "string"
+                    },
+                    {
+                      "const": "gamification.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamification.earn_hidden",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamification.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.grade",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamification.leaderboard_read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamification.leaderboard_read_all",
+                      "type": "string"
                     }
                   ]
                 }
@@ -26515,6 +27219,74 @@
           "resetToken"
         ]
       },
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "authenticated",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mfa_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "setupRequired": {
+                "type": "boolean"
+              },
+              "expiresAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MfaChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "authenticated",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mfa_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "setupRequired": {
+                "type": "boolean"
+              },
+              "expiresAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "MFASetupResponse": {
         "type": "object",
         "properties": {
@@ -26542,6 +27314,9 @@
         "type": "object",
         "properties": {
           "token": {
+            "pattern": "^[0-9]{6}$",
+            "minLength": 6,
+            "maxLength": 6,
             "type": "string"
           }
         },
@@ -26752,6 +27527,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -26881,6 +27674,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -26930,6 +27743,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -26943,6 +27759,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -27198,23 +28016,11 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
                   }
                 },
                 "required": [
                   "language",
-                  "isMFAEnabled",
-                  "MFASecret"
+                  "isMFAEnabled"
                 ]
               },
               {
@@ -27256,17 +28062,6 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -27280,7 +28075,6 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
@@ -27294,121 +28088,51 @@
         ]
       },
       "UpdateUserSettingsBody": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  },
-                  {
-                    "const": "es",
-                    "type": "string"
-                  },
-                  {
-                    "const": "fr",
-                    "type": "string"
-                  }
-                ]
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
               },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
+              {
+                "const": "pl",
+                "type": "string"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
-            }
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  },
-                  {
-                    "const": "es",
-                    "type": "string"
-                  },
-                  {
-                    "const": "fr",
-                    "type": "string"
-                  }
-                ]
-              },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
-              },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              },
-              "adminFinishedCourseNotification": {
-                "type": "boolean"
-              },
-              "configWarningDismissed": {
-                "type": "boolean"
-              }
-            }
+          "adminNewUserNotification": {
+            "type": "boolean"
+          },
+          "adminFinishedCourseNotification": {
+            "type": "boolean"
+          },
+          "configWarningDismissed": {
+            "type": "boolean"
           }
-        ]
+        }
       },
       "UpdateUserSettingsResponse": {
         "type": "object",
@@ -27453,23 +28177,11 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
                   }
                 },
                 "required": [
                   "language",
-                  "isMFAEnabled",
-                  "MFASecret"
+                  "isMFAEnabled"
                 ]
               },
               {
@@ -27511,17 +28223,6 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -27535,7 +28236,6 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
@@ -27606,6 +28306,10 @@
                             },
                             {
                               "const": "certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "gamification",
                               "type": "string"
                             }
                           ]
@@ -27705,6 +28409,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -27857,6 +28565,10 @@
                     {
                       "const": "certificates",
                       "type": "string"
+                    },
+                    {
+                      "const": "gamification",
+                      "type": "string"
                     }
                   ]
                 },
@@ -27972,6 +28684,10 @@
                             {
                               "const": "certificates",
                               "type": "string"
+                            },
+                            {
+                              "const": "gamification",
+                              "type": "string"
                             }
                           ]
                         },
@@ -28070,6 +28786,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -28244,6 +28964,10 @@
                             {
                               "const": "certificates",
                               "type": "string"
+                            },
+                            {
+                              "const": "gamification",
+                              "type": "string"
                             }
                           ]
                         },
@@ -28342,6 +29066,10 @@
                         },
                         {
                           "const": "certificates",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamification",
                           "type": "string"
                         }
                       ]
@@ -28487,17 +29215,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -28511,7 +29228,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -28550,6 +29266,24 @@
               },
               "courseDiscussionsEnabled": {
                 "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
               },
               "calendarEnabled": {
                 "type": "boolean"
@@ -28680,6 +29414,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -28729,6 +29483,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -28742,6 +29499,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -28787,6 +29546,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -28916,6 +29693,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -28965,6 +29762,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -28978,6 +29778,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29023,6 +29825,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29152,6 +29972,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29201,6 +30041,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29214,6 +30057,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29259,6 +30104,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29388,6 +30251,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29437,6 +30320,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29450,6 +30336,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29514,6 +30402,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29643,6 +30549,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29692,6 +30618,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29705,6 +30634,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29750,6 +30681,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -29879,6 +30828,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29928,6 +30897,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -29941,6 +30913,308 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLeaderboardSettingsBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "leaderboardsEnabled": {
+            "type": "boolean"
+          },
+          "leaderboardVisibility": {
+            "anyOf": [
+              {
+                "const": "closed",
+                "type": "string"
+              },
+              {
+                "const": "public",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateLeaderboardSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29986,6 +31260,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30115,6 +31407,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30164,6 +31476,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30177,6 +31492,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30222,6 +31539,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30351,6 +31686,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30400,6 +31755,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30413,6 +31771,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30470,6 +31830,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30599,6 +31977,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30648,6 +32046,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30661,6 +32062,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30706,6 +32109,24 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
               "calendarEnabled": {
                 "type": "boolean"
               },
@@ -30835,6 +32256,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30884,6 +32325,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -30897,6 +32341,287 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateGamificationEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30955,17 +32680,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -30979,7 +32693,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -31032,17 +32745,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -31056,7 +32758,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -31077,6 +32778,28 @@
           "contrastColor": {
             "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
             "type": "string"
+          },
+          "backgroundColor": {
+            "anyOf": [
+              {
+                "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accentColor": {
+            "anyOf": [
+              {
+                "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -31112,6 +32835,24 @@
               },
               "courseDiscussionsEnabled": {
                 "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
               },
               "calendarEnabled": {
                 "type": "boolean"
@@ -31242,6 +32983,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -31291,6 +33052,9 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
@@ -31304,6 +33068,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -32036,17 +33802,6 @@
                 "default": false,
                 "type": "boolean"
               },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -32060,7 +33815,6 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -33231,9 +34985,11 @@
         "type": "object",
         "properties": {
           "firstName": {
+            "maxLength": 64,
             "type": "string"
           },
           "lastName": {
+            "maxLength": 64,
             "type": "string"
           },
           "groups": {
@@ -33382,9 +35138,11 @@
         "type": "object",
         "properties": {
           "firstName": {
+            "maxLength": 64,
             "type": "string"
           },
           "lastName": {
+            "maxLength": 64,
             "type": "string"
           },
           "groups": {
@@ -38575,6 +40333,7 @@
             "type": "object",
             "properties": {
               "title": {
+                "maxLength": 255,
                 "type": "string"
               },
               "description": {
@@ -38976,6 +40735,7 @@
         "type": "object",
         "properties": {
           "title": {
+            "maxLength": 255,
             "type": "string"
           },
           "description": {
@@ -169631,6 +171391,39 @@
           "data"
         ]
       },
+      "RenewScormContentBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "pattern": "^[a-f0-9]{64}$",
+            "minLength": 64,
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RenewScormContentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "renewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "renewed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CommitScormAttemptBody": {
         "type": "object",
         "properties": {
@@ -172636,6 +174429,2968 @@
             "required": [
               "redirectUrl",
               "expiresAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserGamificationProfileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lifetimeXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "spendableXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "level": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "currentLevelXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "nextLevelXp": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "achievements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "eventType": {
+                      "anyOf": [
+                        {
+                          "const": "login",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lesson_completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "course_completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_completed",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "requirementType": {
+                      "anyOf": [
+                        {
+                          "const": "first_time",
+                          "type": "string"
+                        },
+                        {
+                          "const": "count",
+                          "type": "string"
+                        },
+                        {
+                          "const": "streak",
+                          "type": "string"
+                        },
+                        {
+                          "const": "time_window",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "visibility": {
+                      "anyOf": [
+                        {
+                          "const": "visible",
+                          "type": "string"
+                        },
+                        {
+                          "const": "hidden",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "icon": {
+                      "anyOf": [
+                        {
+                          "const": "trophy",
+                          "type": "string"
+                        },
+                        {
+                          "const": "star",
+                          "type": "string"
+                        },
+                        {
+                          "const": "flame",
+                          "type": "string"
+                        },
+                        {
+                          "const": "zap",
+                          "type": "string"
+                        },
+                        {
+                          "const": "target",
+                          "type": "string"
+                        },
+                        {
+                          "const": "award",
+                          "type": "string"
+                        },
+                        {
+                          "const": "medal",
+                          "type": "string"
+                        },
+                        {
+                          "const": "crown",
+                          "type": "string"
+                        },
+                        {
+                          "const": "rocket",
+                          "type": "string"
+                        },
+                        {
+                          "const": "book_open",
+                          "type": "string"
+                        },
+                        {
+                          "const": "graduation_cap",
+                          "type": "string"
+                        },
+                        {
+                          "const": "log_in",
+                          "type": "string"
+                        },
+                        {
+                          "const": "door_open",
+                          "type": "string"
+                        },
+                        {
+                          "const": "calendar_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "clock",
+                          "type": "string"
+                        },
+                        {
+                          "const": "brain",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lightbulb",
+                          "type": "string"
+                        },
+                        {
+                          "const": "puzzle",
+                          "type": "string"
+                        },
+                        {
+                          "const": "message_circle",
+                          "type": "string"
+                        },
+                        {
+                          "const": "heart",
+                          "type": "string"
+                        },
+                        {
+                          "const": "thumbs_up",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sparkles",
+                          "type": "string"
+                        },
+                        {
+                          "const": "circle_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gem",
+                          "type": "string"
+                        },
+                        {
+                          "const": "diamond",
+                          "type": "string"
+                        },
+                        {
+                          "const": "shield_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "badge_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "flag",
+                          "type": "string"
+                        },
+                        {
+                          "const": "mountain",
+                          "type": "string"
+                        },
+                        {
+                          "const": "footprints",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gauge",
+                          "type": "string"
+                        },
+                        {
+                          "const": "timer",
+                          "type": "string"
+                        },
+                        {
+                          "const": "hourglass",
+                          "type": "string"
+                        },
+                        {
+                          "const": "alarm_clock",
+                          "type": "string"
+                        },
+                        {
+                          "const": "calendar_days",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sunrise",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sun",
+                          "type": "string"
+                        },
+                        {
+                          "const": "moon",
+                          "type": "string"
+                        },
+                        {
+                          "const": "coffee",
+                          "type": "string"
+                        },
+                        {
+                          "const": "book",
+                          "type": "string"
+                        },
+                        {
+                          "const": "library",
+                          "type": "string"
+                        },
+                        {
+                          "const": "notebook_pen",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pencil",
+                          "type": "string"
+                        },
+                        {
+                          "const": "clipboard_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "list_checks",
+                          "type": "string"
+                        },
+                        {
+                          "const": "check_check",
+                          "type": "string"
+                        },
+                        {
+                          "const": "glasses",
+                          "type": "string"
+                        },
+                        {
+                          "const": "microscope",
+                          "type": "string"
+                        },
+                        {
+                          "const": "flask_conical",
+                          "type": "string"
+                        },
+                        {
+                          "const": "atom",
+                          "type": "string"
+                        },
+                        {
+                          "const": "calculator",
+                          "type": "string"
+                        },
+                        {
+                          "const": "languages",
+                          "type": "string"
+                        },
+                        {
+                          "const": "globe",
+                          "type": "string"
+                        },
+                        {
+                          "const": "compass",
+                          "type": "string"
+                        },
+                        {
+                          "const": "map",
+                          "type": "string"
+                        },
+                        {
+                          "const": "route",
+                          "type": "string"
+                        },
+                        {
+                          "const": "telescope",
+                          "type": "string"
+                        },
+                        {
+                          "const": "headphones",
+                          "type": "string"
+                        },
+                        {
+                          "const": "mic",
+                          "type": "string"
+                        },
+                        {
+                          "const": "palette",
+                          "type": "string"
+                        },
+                        {
+                          "const": "users",
+                          "type": "string"
+                        },
+                        {
+                          "const": "handshake",
+                          "type": "string"
+                        },
+                        {
+                          "const": "smile",
+                          "type": "string"
+                        },
+                        {
+                          "const": "party_popper",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gift",
+                          "type": "string"
+                        },
+                        {
+                          "const": "sprout",
+                          "type": "string"
+                        },
+                        {
+                          "const": "leaf",
+                          "type": "string"
+                        },
+                        {
+                          "const": "infinity",
+                          "type": "string"
+                        },
+                        {
+                          "const": "repeat",
+                          "type": "string"
+                        },
+                        {
+                          "const": "trending_up",
+                          "type": "string"
+                        },
+                        {
+                          "const": "activity",
+                          "type": "string"
+                        },
+                        {
+                          "const": "dumbbell",
+                          "type": "string"
+                        },
+                        {
+                          "const": "gamepad_2",
+                          "type": "string"
+                        },
+                        {
+                          "const": "key",
+                          "type": "string"
+                        },
+                        {
+                          "const": "anchor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "plane",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "progress": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "levels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "level": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "threshold": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "xpReward": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "earnedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "badgeImageUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "level",
+                          "threshold",
+                          "xpReward",
+                          "earnedAt",
+                          "badgeImageUrl"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "eventType",
+                    "requirementType",
+                    "visibility",
+                    "icon",
+                    "progress",
+                    "levels"
+                  ]
+                }
+              },
+              "recentRewards": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "achievementId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "achievementTitle": {
+                      "type": "string"
+                    },
+                    "level": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "xpReward": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "earnedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "achievementId",
+                    "achievementTitle",
+                    "level",
+                    "xpReward",
+                    "earnedAt"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "userId",
+              "lifetimeXp",
+              "spendableXp",
+              "level",
+              "currentLevelXp",
+              "nextLevelXp",
+              "achievements",
+              "recentRewards"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAdminAchievementsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "isPredefined": {
+                  "type": "boolean"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "eventType": {
+                  "anyOf": [
+                    {
+                      "const": "login",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lesson_completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_completed",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "requirementType": {
+                  "anyOf": [
+                    {
+                      "const": "first_time",
+                      "type": "string"
+                    },
+                    {
+                      "const": "count",
+                      "type": "string"
+                    },
+                    {
+                      "const": "streak",
+                      "type": "string"
+                    },
+                    {
+                      "const": "time_window",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "windowDays": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "filters": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "minScore": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "number"
+                    }
+                  }
+                },
+                "visibility": {
+                  "anyOf": [
+                    {
+                      "const": "visible",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hidden",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "icon": {
+                  "anyOf": [
+                    {
+                      "const": "trophy",
+                      "type": "string"
+                    },
+                    {
+                      "const": "star",
+                      "type": "string"
+                    },
+                    {
+                      "const": "flame",
+                      "type": "string"
+                    },
+                    {
+                      "const": "zap",
+                      "type": "string"
+                    },
+                    {
+                      "const": "target",
+                      "type": "string"
+                    },
+                    {
+                      "const": "award",
+                      "type": "string"
+                    },
+                    {
+                      "const": "medal",
+                      "type": "string"
+                    },
+                    {
+                      "const": "crown",
+                      "type": "string"
+                    },
+                    {
+                      "const": "rocket",
+                      "type": "string"
+                    },
+                    {
+                      "const": "book_open",
+                      "type": "string"
+                    },
+                    {
+                      "const": "graduation_cap",
+                      "type": "string"
+                    },
+                    {
+                      "const": "log_in",
+                      "type": "string"
+                    },
+                    {
+                      "const": "door_open",
+                      "type": "string"
+                    },
+                    {
+                      "const": "calendar_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "clock",
+                      "type": "string"
+                    },
+                    {
+                      "const": "brain",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lightbulb",
+                      "type": "string"
+                    },
+                    {
+                      "const": "puzzle",
+                      "type": "string"
+                    },
+                    {
+                      "const": "message_circle",
+                      "type": "string"
+                    },
+                    {
+                      "const": "heart",
+                      "type": "string"
+                    },
+                    {
+                      "const": "thumbs_up",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sparkles",
+                      "type": "string"
+                    },
+                    {
+                      "const": "circle_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gem",
+                      "type": "string"
+                    },
+                    {
+                      "const": "diamond",
+                      "type": "string"
+                    },
+                    {
+                      "const": "shield_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "badge_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "flag",
+                      "type": "string"
+                    },
+                    {
+                      "const": "mountain",
+                      "type": "string"
+                    },
+                    {
+                      "const": "footprints",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gauge",
+                      "type": "string"
+                    },
+                    {
+                      "const": "timer",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hourglass",
+                      "type": "string"
+                    },
+                    {
+                      "const": "alarm_clock",
+                      "type": "string"
+                    },
+                    {
+                      "const": "calendar_days",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sunrise",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sun",
+                      "type": "string"
+                    },
+                    {
+                      "const": "moon",
+                      "type": "string"
+                    },
+                    {
+                      "const": "coffee",
+                      "type": "string"
+                    },
+                    {
+                      "const": "book",
+                      "type": "string"
+                    },
+                    {
+                      "const": "library",
+                      "type": "string"
+                    },
+                    {
+                      "const": "notebook_pen",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pencil",
+                      "type": "string"
+                    },
+                    {
+                      "const": "clipboard_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "list_checks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "check_check",
+                      "type": "string"
+                    },
+                    {
+                      "const": "glasses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "microscope",
+                      "type": "string"
+                    },
+                    {
+                      "const": "flask_conical",
+                      "type": "string"
+                    },
+                    {
+                      "const": "atom",
+                      "type": "string"
+                    },
+                    {
+                      "const": "calculator",
+                      "type": "string"
+                    },
+                    {
+                      "const": "languages",
+                      "type": "string"
+                    },
+                    {
+                      "const": "globe",
+                      "type": "string"
+                    },
+                    {
+                      "const": "compass",
+                      "type": "string"
+                    },
+                    {
+                      "const": "map",
+                      "type": "string"
+                    },
+                    {
+                      "const": "route",
+                      "type": "string"
+                    },
+                    {
+                      "const": "telescope",
+                      "type": "string"
+                    },
+                    {
+                      "const": "headphones",
+                      "type": "string"
+                    },
+                    {
+                      "const": "mic",
+                      "type": "string"
+                    },
+                    {
+                      "const": "palette",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users",
+                      "type": "string"
+                    },
+                    {
+                      "const": "handshake",
+                      "type": "string"
+                    },
+                    {
+                      "const": "smile",
+                      "type": "string"
+                    },
+                    {
+                      "const": "party_popper",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gift",
+                      "type": "string"
+                    },
+                    {
+                      "const": "sprout",
+                      "type": "string"
+                    },
+                    {
+                      "const": "leaf",
+                      "type": "string"
+                    },
+                    {
+                      "const": "infinity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "repeat",
+                      "type": "string"
+                    },
+                    {
+                      "const": "trending_up",
+                      "type": "string"
+                    },
+                    {
+                      "const": "activity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "dumbbell",
+                      "type": "string"
+                    },
+                    {
+                      "const": "gamepad_2",
+                      "type": "string"
+                    },
+                    {
+                      "const": "key",
+                      "type": "string"
+                    },
+                    {
+                      "const": "anchor",
+                      "type": "string"
+                    },
+                    {
+                      "const": "plane",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isEnabled": {
+                  "type": "boolean"
+                },
+                "levels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "threshold": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "xpReward": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "earnedCount": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "badgeImageKey": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "badgeImageUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "threshold",
+                      "xpReward",
+                      "earnedCount",
+                      "badgeImageKey",
+                      "badgeImageUrl"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "isPredefined",
+                "title",
+                "description",
+                "eventType",
+                "requirementType",
+                "windowDays",
+                "filters",
+                "visibility",
+                "icon",
+                "isEnabled",
+                "levels"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAdminAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isPredefined": {
+                "type": "boolean"
+              },
+              "eventType": {
+                "anyOf": [
+                  {
+                    "const": "login",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lesson_completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course_completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "quiz_completed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "requirementType": {
+                "anyOf": [
+                  {
+                    "const": "first_time",
+                    "type": "string"
+                  },
+                  {
+                    "const": "count",
+                    "type": "string"
+                  },
+                  {
+                    "const": "streak",
+                    "type": "string"
+                  },
+                  {
+                    "const": "time_window",
+                    "type": "string"
+                  }
+                ]
+              },
+              "windowDays": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "filters": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "courseId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "minScore": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "number"
+                  }
+                }
+              },
+              "visibility": {
+                "anyOf": [
+                  {
+                    "const": "visible",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hidden",
+                    "type": "string"
+                  }
+                ]
+              },
+              "icon": {
+                "anyOf": [
+                  {
+                    "const": "trophy",
+                    "type": "string"
+                  },
+                  {
+                    "const": "star",
+                    "type": "string"
+                  },
+                  {
+                    "const": "flame",
+                    "type": "string"
+                  },
+                  {
+                    "const": "zap",
+                    "type": "string"
+                  },
+                  {
+                    "const": "target",
+                    "type": "string"
+                  },
+                  {
+                    "const": "award",
+                    "type": "string"
+                  },
+                  {
+                    "const": "medal",
+                    "type": "string"
+                  },
+                  {
+                    "const": "crown",
+                    "type": "string"
+                  },
+                  {
+                    "const": "rocket",
+                    "type": "string"
+                  },
+                  {
+                    "const": "book_open",
+                    "type": "string"
+                  },
+                  {
+                    "const": "graduation_cap",
+                    "type": "string"
+                  },
+                  {
+                    "const": "log_in",
+                    "type": "string"
+                  },
+                  {
+                    "const": "door_open",
+                    "type": "string"
+                  },
+                  {
+                    "const": "calendar_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "clock",
+                    "type": "string"
+                  },
+                  {
+                    "const": "brain",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lightbulb",
+                    "type": "string"
+                  },
+                  {
+                    "const": "puzzle",
+                    "type": "string"
+                  },
+                  {
+                    "const": "message_circle",
+                    "type": "string"
+                  },
+                  {
+                    "const": "heart",
+                    "type": "string"
+                  },
+                  {
+                    "const": "thumbs_up",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sparkles",
+                    "type": "string"
+                  },
+                  {
+                    "const": "circle_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gem",
+                    "type": "string"
+                  },
+                  {
+                    "const": "diamond",
+                    "type": "string"
+                  },
+                  {
+                    "const": "shield_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "badge_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "flag",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mountain",
+                    "type": "string"
+                  },
+                  {
+                    "const": "footprints",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gauge",
+                    "type": "string"
+                  },
+                  {
+                    "const": "timer",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hourglass",
+                    "type": "string"
+                  },
+                  {
+                    "const": "alarm_clock",
+                    "type": "string"
+                  },
+                  {
+                    "const": "calendar_days",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sunrise",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sun",
+                    "type": "string"
+                  },
+                  {
+                    "const": "moon",
+                    "type": "string"
+                  },
+                  {
+                    "const": "coffee",
+                    "type": "string"
+                  },
+                  {
+                    "const": "book",
+                    "type": "string"
+                  },
+                  {
+                    "const": "library",
+                    "type": "string"
+                  },
+                  {
+                    "const": "notebook_pen",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pencil",
+                    "type": "string"
+                  },
+                  {
+                    "const": "clipboard_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "list_checks",
+                    "type": "string"
+                  },
+                  {
+                    "const": "check_check",
+                    "type": "string"
+                  },
+                  {
+                    "const": "glasses",
+                    "type": "string"
+                  },
+                  {
+                    "const": "microscope",
+                    "type": "string"
+                  },
+                  {
+                    "const": "flask_conical",
+                    "type": "string"
+                  },
+                  {
+                    "const": "atom",
+                    "type": "string"
+                  },
+                  {
+                    "const": "calculator",
+                    "type": "string"
+                  },
+                  {
+                    "const": "languages",
+                    "type": "string"
+                  },
+                  {
+                    "const": "globe",
+                    "type": "string"
+                  },
+                  {
+                    "const": "compass",
+                    "type": "string"
+                  },
+                  {
+                    "const": "map",
+                    "type": "string"
+                  },
+                  {
+                    "const": "route",
+                    "type": "string"
+                  },
+                  {
+                    "const": "telescope",
+                    "type": "string"
+                  },
+                  {
+                    "const": "headphones",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mic",
+                    "type": "string"
+                  },
+                  {
+                    "const": "palette",
+                    "type": "string"
+                  },
+                  {
+                    "const": "users",
+                    "type": "string"
+                  },
+                  {
+                    "const": "handshake",
+                    "type": "string"
+                  },
+                  {
+                    "const": "smile",
+                    "type": "string"
+                  },
+                  {
+                    "const": "party_popper",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gift",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sprout",
+                    "type": "string"
+                  },
+                  {
+                    "const": "leaf",
+                    "type": "string"
+                  },
+                  {
+                    "const": "infinity",
+                    "type": "string"
+                  },
+                  {
+                    "const": "repeat",
+                    "type": "string"
+                  },
+                  {
+                    "const": "trending_up",
+                    "type": "string"
+                  },
+                  {
+                    "const": "activity",
+                    "type": "string"
+                  },
+                  {
+                    "const": "dumbbell",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gamepad_2",
+                    "type": "string"
+                  },
+                  {
+                    "const": "key",
+                    "type": "string"
+                  },
+                  {
+                    "const": "anchor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "plane",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isEnabled": {
+                "type": "boolean"
+              },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "level": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "threshold": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "xpReward": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "earnedCount": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "badgeImageKey": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "badgeImageUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "level",
+                    "threshold",
+                    "xpReward",
+                    "earnedCount",
+                    "badgeImageKey",
+                    "badgeImageUrl"
+                  ]
+                }
+              },
+              "title": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "pl": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "de": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "lt": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "cs": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "es": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 500,
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "pl": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "de": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "lt": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "cs": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "es": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 500,
+                    "type": "string"
+                  }
+                }
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "isPredefined",
+              "eventType",
+              "requirementType",
+              "windowDays",
+              "filters",
+              "visibility",
+              "icon",
+              "isEnabled",
+              "levels",
+              "title",
+              "description",
+              "baseLanguage"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "pl": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "de": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "lt": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "cs": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "es": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "pl": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "de": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "lt": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "cs": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "es": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            }
+          },
+          "baseLanguage": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "eventType": {
+            "anyOf": [
+              {
+                "const": "login",
+                "type": "string"
+              },
+              {
+                "const": "lesson_completed",
+                "type": "string"
+              },
+              {
+                "const": "course_completed",
+                "type": "string"
+              },
+              {
+                "const": "quiz_completed",
+                "type": "string"
+              }
+            ]
+          },
+          "requirementType": {
+            "anyOf": [
+              {
+                "const": "first_time",
+                "type": "string"
+              },
+              {
+                "const": "count",
+                "type": "string"
+              },
+              {
+                "const": "streak",
+                "type": "string"
+              },
+              {
+                "const": "time_window",
+                "type": "string"
+              }
+            ]
+          },
+          "windowDays": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "maximum": 365,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filters": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "minScore": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "number"
+              }
+            }
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "visible",
+                "type": "string"
+              },
+              {
+                "const": "hidden",
+                "type": "string"
+              }
+            ]
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "const": "trophy",
+                "type": "string"
+              },
+              {
+                "const": "star",
+                "type": "string"
+              },
+              {
+                "const": "flame",
+                "type": "string"
+              },
+              {
+                "const": "zap",
+                "type": "string"
+              },
+              {
+                "const": "target",
+                "type": "string"
+              },
+              {
+                "const": "award",
+                "type": "string"
+              },
+              {
+                "const": "medal",
+                "type": "string"
+              },
+              {
+                "const": "crown",
+                "type": "string"
+              },
+              {
+                "const": "rocket",
+                "type": "string"
+              },
+              {
+                "const": "book_open",
+                "type": "string"
+              },
+              {
+                "const": "graduation_cap",
+                "type": "string"
+              },
+              {
+                "const": "log_in",
+                "type": "string"
+              },
+              {
+                "const": "door_open",
+                "type": "string"
+              },
+              {
+                "const": "calendar_check",
+                "type": "string"
+              },
+              {
+                "const": "clock",
+                "type": "string"
+              },
+              {
+                "const": "brain",
+                "type": "string"
+              },
+              {
+                "const": "lightbulb",
+                "type": "string"
+              },
+              {
+                "const": "puzzle",
+                "type": "string"
+              },
+              {
+                "const": "message_circle",
+                "type": "string"
+              },
+              {
+                "const": "heart",
+                "type": "string"
+              },
+              {
+                "const": "thumbs_up",
+                "type": "string"
+              },
+              {
+                "const": "sparkles",
+                "type": "string"
+              },
+              {
+                "const": "circle_check",
+                "type": "string"
+              },
+              {
+                "const": "gem",
+                "type": "string"
+              },
+              {
+                "const": "diamond",
+                "type": "string"
+              },
+              {
+                "const": "shield_check",
+                "type": "string"
+              },
+              {
+                "const": "badge_check",
+                "type": "string"
+              },
+              {
+                "const": "flag",
+                "type": "string"
+              },
+              {
+                "const": "mountain",
+                "type": "string"
+              },
+              {
+                "const": "footprints",
+                "type": "string"
+              },
+              {
+                "const": "gauge",
+                "type": "string"
+              },
+              {
+                "const": "timer",
+                "type": "string"
+              },
+              {
+                "const": "hourglass",
+                "type": "string"
+              },
+              {
+                "const": "alarm_clock",
+                "type": "string"
+              },
+              {
+                "const": "calendar_days",
+                "type": "string"
+              },
+              {
+                "const": "sunrise",
+                "type": "string"
+              },
+              {
+                "const": "sun",
+                "type": "string"
+              },
+              {
+                "const": "moon",
+                "type": "string"
+              },
+              {
+                "const": "coffee",
+                "type": "string"
+              },
+              {
+                "const": "book",
+                "type": "string"
+              },
+              {
+                "const": "library",
+                "type": "string"
+              },
+              {
+                "const": "notebook_pen",
+                "type": "string"
+              },
+              {
+                "const": "pencil",
+                "type": "string"
+              },
+              {
+                "const": "clipboard_check",
+                "type": "string"
+              },
+              {
+                "const": "list_checks",
+                "type": "string"
+              },
+              {
+                "const": "check_check",
+                "type": "string"
+              },
+              {
+                "const": "glasses",
+                "type": "string"
+              },
+              {
+                "const": "microscope",
+                "type": "string"
+              },
+              {
+                "const": "flask_conical",
+                "type": "string"
+              },
+              {
+                "const": "atom",
+                "type": "string"
+              },
+              {
+                "const": "calculator",
+                "type": "string"
+              },
+              {
+                "const": "languages",
+                "type": "string"
+              },
+              {
+                "const": "globe",
+                "type": "string"
+              },
+              {
+                "const": "compass",
+                "type": "string"
+              },
+              {
+                "const": "map",
+                "type": "string"
+              },
+              {
+                "const": "route",
+                "type": "string"
+              },
+              {
+                "const": "telescope",
+                "type": "string"
+              },
+              {
+                "const": "headphones",
+                "type": "string"
+              },
+              {
+                "const": "mic",
+                "type": "string"
+              },
+              {
+                "const": "palette",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              },
+              {
+                "const": "handshake",
+                "type": "string"
+              },
+              {
+                "const": "smile",
+                "type": "string"
+              },
+              {
+                "const": "party_popper",
+                "type": "string"
+              },
+              {
+                "const": "gift",
+                "type": "string"
+              },
+              {
+                "const": "sprout",
+                "type": "string"
+              },
+              {
+                "const": "leaf",
+                "type": "string"
+              },
+              {
+                "const": "infinity",
+                "type": "string"
+              },
+              {
+                "const": "repeat",
+                "type": "string"
+              },
+              {
+                "const": "trending_up",
+                "type": "string"
+              },
+              {
+                "const": "activity",
+                "type": "string"
+              },
+              {
+                "const": "dumbbell",
+                "type": "string"
+              },
+              {
+                "const": "gamepad_2",
+                "type": "string"
+              },
+              {
+                "const": "key",
+                "type": "string"
+              },
+              {
+                "const": "anchor",
+                "type": "string"
+              },
+              {
+                "const": "plane",
+                "type": "string"
+              }
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "levels": {
+            "minItems": 1,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "threshold": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "xpReward": {
+                  "minimum": 0,
+                  "maximum": 100000,
+                  "type": "integer"
+                },
+                "badgeImageKey": {
+                  "anyOf": [
+                    {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "threshold",
+                "xpReward",
+                "badgeImageKey"
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "baseLanguage",
+          "eventType",
+          "requirementType",
+          "windowDays",
+          "filters",
+          "visibility",
+          "icon",
+          "isEnabled",
+          "levels"
+        ]
+      },
+      "CreateAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "pl": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "de": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "lt": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "cs": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "es": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "pl": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "de": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "lt": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "cs": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "es": {
+                "maxLength": 500,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 500,
+                "type": "string"
+              }
+            }
+          },
+          "baseLanguage": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "eventType": {
+            "anyOf": [
+              {
+                "const": "login",
+                "type": "string"
+              },
+              {
+                "const": "lesson_completed",
+                "type": "string"
+              },
+              {
+                "const": "course_completed",
+                "type": "string"
+              },
+              {
+                "const": "quiz_completed",
+                "type": "string"
+              }
+            ]
+          },
+          "requirementType": {
+            "anyOf": [
+              {
+                "const": "first_time",
+                "type": "string"
+              },
+              {
+                "const": "count",
+                "type": "string"
+              },
+              {
+                "const": "streak",
+                "type": "string"
+              },
+              {
+                "const": "time_window",
+                "type": "string"
+              }
+            ]
+          },
+          "windowDays": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "maximum": 365,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filters": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "minScore": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "number"
+              }
+            }
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "visible",
+                "type": "string"
+              },
+              {
+                "const": "hidden",
+                "type": "string"
+              }
+            ]
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "const": "trophy",
+                "type": "string"
+              },
+              {
+                "const": "star",
+                "type": "string"
+              },
+              {
+                "const": "flame",
+                "type": "string"
+              },
+              {
+                "const": "zap",
+                "type": "string"
+              },
+              {
+                "const": "target",
+                "type": "string"
+              },
+              {
+                "const": "award",
+                "type": "string"
+              },
+              {
+                "const": "medal",
+                "type": "string"
+              },
+              {
+                "const": "crown",
+                "type": "string"
+              },
+              {
+                "const": "rocket",
+                "type": "string"
+              },
+              {
+                "const": "book_open",
+                "type": "string"
+              },
+              {
+                "const": "graduation_cap",
+                "type": "string"
+              },
+              {
+                "const": "log_in",
+                "type": "string"
+              },
+              {
+                "const": "door_open",
+                "type": "string"
+              },
+              {
+                "const": "calendar_check",
+                "type": "string"
+              },
+              {
+                "const": "clock",
+                "type": "string"
+              },
+              {
+                "const": "brain",
+                "type": "string"
+              },
+              {
+                "const": "lightbulb",
+                "type": "string"
+              },
+              {
+                "const": "puzzle",
+                "type": "string"
+              },
+              {
+                "const": "message_circle",
+                "type": "string"
+              },
+              {
+                "const": "heart",
+                "type": "string"
+              },
+              {
+                "const": "thumbs_up",
+                "type": "string"
+              },
+              {
+                "const": "sparkles",
+                "type": "string"
+              },
+              {
+                "const": "circle_check",
+                "type": "string"
+              },
+              {
+                "const": "gem",
+                "type": "string"
+              },
+              {
+                "const": "diamond",
+                "type": "string"
+              },
+              {
+                "const": "shield_check",
+                "type": "string"
+              },
+              {
+                "const": "badge_check",
+                "type": "string"
+              },
+              {
+                "const": "flag",
+                "type": "string"
+              },
+              {
+                "const": "mountain",
+                "type": "string"
+              },
+              {
+                "const": "footprints",
+                "type": "string"
+              },
+              {
+                "const": "gauge",
+                "type": "string"
+              },
+              {
+                "const": "timer",
+                "type": "string"
+              },
+              {
+                "const": "hourglass",
+                "type": "string"
+              },
+              {
+                "const": "alarm_clock",
+                "type": "string"
+              },
+              {
+                "const": "calendar_days",
+                "type": "string"
+              },
+              {
+                "const": "sunrise",
+                "type": "string"
+              },
+              {
+                "const": "sun",
+                "type": "string"
+              },
+              {
+                "const": "moon",
+                "type": "string"
+              },
+              {
+                "const": "coffee",
+                "type": "string"
+              },
+              {
+                "const": "book",
+                "type": "string"
+              },
+              {
+                "const": "library",
+                "type": "string"
+              },
+              {
+                "const": "notebook_pen",
+                "type": "string"
+              },
+              {
+                "const": "pencil",
+                "type": "string"
+              },
+              {
+                "const": "clipboard_check",
+                "type": "string"
+              },
+              {
+                "const": "list_checks",
+                "type": "string"
+              },
+              {
+                "const": "check_check",
+                "type": "string"
+              },
+              {
+                "const": "glasses",
+                "type": "string"
+              },
+              {
+                "const": "microscope",
+                "type": "string"
+              },
+              {
+                "const": "flask_conical",
+                "type": "string"
+              },
+              {
+                "const": "atom",
+                "type": "string"
+              },
+              {
+                "const": "calculator",
+                "type": "string"
+              },
+              {
+                "const": "languages",
+                "type": "string"
+              },
+              {
+                "const": "globe",
+                "type": "string"
+              },
+              {
+                "const": "compass",
+                "type": "string"
+              },
+              {
+                "const": "map",
+                "type": "string"
+              },
+              {
+                "const": "route",
+                "type": "string"
+              },
+              {
+                "const": "telescope",
+                "type": "string"
+              },
+              {
+                "const": "headphones",
+                "type": "string"
+              },
+              {
+                "const": "mic",
+                "type": "string"
+              },
+              {
+                "const": "palette",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              },
+              {
+                "const": "handshake",
+                "type": "string"
+              },
+              {
+                "const": "smile",
+                "type": "string"
+              },
+              {
+                "const": "party_popper",
+                "type": "string"
+              },
+              {
+                "const": "gift",
+                "type": "string"
+              },
+              {
+                "const": "sprout",
+                "type": "string"
+              },
+              {
+                "const": "leaf",
+                "type": "string"
+              },
+              {
+                "const": "infinity",
+                "type": "string"
+              },
+              {
+                "const": "repeat",
+                "type": "string"
+              },
+              {
+                "const": "trending_up",
+                "type": "string"
+              },
+              {
+                "const": "activity",
+                "type": "string"
+              },
+              {
+                "const": "dumbbell",
+                "type": "string"
+              },
+              {
+                "const": "gamepad_2",
+                "type": "string"
+              },
+              {
+                "const": "key",
+                "type": "string"
+              },
+              {
+                "const": "anchor",
+                "type": "string"
+              },
+              {
+                "const": "plane",
+                "type": "string"
+              }
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "levels": {
+            "minItems": 1,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "threshold": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "xpReward": {
+                  "minimum": 0,
+                  "maximum": 100000,
+                  "type": "integer"
+                },
+                "badgeImageKey": {
+                  "anyOf": [
+                    {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "threshold",
+                "xpReward",
+                "badgeImageKey"
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "baseLanguage",
+          "eventType",
+          "requirementType",
+          "windowDays",
+          "filters",
+          "visibility",
+          "icon",
+          "isEnabled",
+          "levels"
+        ]
+      },
+      "UpdateAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAchievementStatusBody": {
+        "type": "object",
+        "properties": {
+          "isEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isEnabled"
+        ]
+      },
+      "UpdateAchievementStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLeaderboardScopesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantWide": {
+                "type": "boolean"
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "tenantWide",
+              "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLeaderboardResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "metric": {
+                "anyOf": [
+                  {
+                    "const": "xp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "achievements",
+                    "type": "string"
+                  }
+                ]
+              },
+              "period": {
+                "anyOf": [
+                  {
+                    "const": "week",
+                    "type": "string"
+                  },
+                  {
+                    "const": "month",
+                    "type": "string"
+                  },
+                  {
+                    "const": "all_time",
+                    "type": "string"
+                  },
+                  {
+                    "const": "custom",
+                    "type": "string"
+                  }
+                ]
+              },
+              "groupId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "startsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "endsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "rank": {
+                      "minimum": 1,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "firstName",
+                    "lastName",
+                    "score",
+                    "rank"
+                  ]
+                }
+              },
+              "currentUser": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "score": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "rank": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "userId",
+                      "firstName",
+                      "lastName",
+                      "score",
+                      "rank"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nearby": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "rank": {
+                      "minimum": 1,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "firstName",
+                    "lastName",
+                    "score",
+                    "rank"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "metric",
+              "period",
+              "groupId",
+              "startsAt",
+              "endsAt",
+              "entries",
+              "currentUser",
+              "nearby"
             ]
           }
         },

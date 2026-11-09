@@ -22,6 +22,9 @@ export const scormLaunchQueryOptions = ({
 }: ScormLaunchParams) =>
   queryOptions({
     enabled: Boolean(lessonId),
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     queryKey: ["scorm", "launch", lessonId, scoId ?? null, language, learningStateId ?? null],
     queryFn: async () => {
       const response = await ApiClient.api.scormControllerLaunchScormAttempt(

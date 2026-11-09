@@ -15,29 +15,25 @@ const createContext = (request: unknown, isPublic = false) =>
 function buildGuard({
   isPublic = false,
   jwtPayload,
-  isRevoked = false,
   mcpAuthenticate,
 }: {
   isPublic?: boolean;
   jwtPayload?: Record<string, unknown>;
-  isRevoked?: boolean;
   mcpAuthenticate?: jest.Mock;
 } = {}) {
-  const jwtService = {
-    verifyAsync: jest.fn(() =>
-      jwtPayload ? Promise.resolve(jwtPayload) : Promise.reject(new Error("invalid token")),
+  const sessionService = {
+    verifySessionToken: jest.fn(() =>
+      jwtPayload
+        ? Promise.resolve(jwtPayload)
+        : Promise.reject(new UnauthorizedException("auth.error.sessionExpired")),
     ),
   };
   const reflector = { getAllAndOverride: jest.fn(() => isPublic) };
-  const configService = { get: jest.fn(() => "secret") };
-  const sessionRevocationService = { isUserRevoked: jest.fn(() => Promise.resolve(isRevoked)) };
   const mcpUploadGrants = { authenticate: mcpAuthenticate ?? jest.fn() };
 
   const guard = new JwtAuthGuard(
-    jwtService as never,
+    sessionService as never,
     reflector as never,
-    configService as never,
-    sessionRevocationService as never,
     mcpUploadGrants as never,
     { resolveTenantId: jest.fn().mockResolvedValue("known-tenant") } as never,
   );

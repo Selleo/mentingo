@@ -6,6 +6,8 @@ export const FEATURES = {
   CALENDAR: "calendar",
   LIVE_TRAINING: "live_training",
   COURSE_DISCUSSIONS: "course_discussions",
+  GAMIFICATION: "gamification",
+  LEADERBOARDS: "leaderboards",
 } as const;
 
 export type FeatureKey = (typeof FEATURES)[keyof typeof FEATURES];
@@ -18,6 +20,8 @@ export const FEATURE_SETTINGS_KEYS = {
   [FEATURES.CALENDAR]: "calendarEnabled",
   [FEATURES.LIVE_TRAINING]: "liveTrainingEnabled",
   [FEATURES.COURSE_DISCUSSIONS]: "courseDiscussionsEnabled",
+  [FEATURES.GAMIFICATION]: "gamificationEnabled",
+  [FEATURES.LEADERBOARDS]: "leaderboardsEnabled",
 } as const satisfies Record<FeatureKey, string>;
 
 export type FeatureSettingKey = (typeof FEATURE_SETTINGS_KEYS)[keyof typeof FEATURE_SETTINGS_KEYS];

@@ -18,7 +18,7 @@ import {
   PERMISSIONS,
   SupportedLanguages,
   COURSE_AUTHORING_SOURCE_FILE_TYPES,
-  MAX_COURSE_AUTHORING_SOURCE_SIZE,
+  MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -266,7 +266,9 @@ export class CourseAuthoringController {
   @Post("sessions/:sessionId/sources")
   @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @UseInterceptors(
-    FileInterceptor("file", { limits: { fileSize: MAX_COURSE_AUTHORING_SOURCE_SIZE, files: 1 } }),
+    FileInterceptor("file", {
+      limits: { fileSize: MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES, files: 1 },
+    }),
   )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -293,8 +295,7 @@ export class CourseAuthoringController {
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex(COURSE_AUTHORING_SOURCE_FILE_TYPES),
-        MAX_COURSE_AUTHORING_SOURCE_SIZE,
-        true,
+        MAX_COURSE_AUTHORING_SOURCE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,

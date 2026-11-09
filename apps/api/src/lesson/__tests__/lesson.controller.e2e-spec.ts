@@ -25,6 +25,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiService } from "src/ai/services/ai.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
@@ -241,6 +242,58 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .where(eq(studentCourses.studentId, student.id));
       expect(progress).toHaveLength(0);
       expect(enrollment).toHaveLength(0);
+    });
+
+    it("opens and retakes an owned AI Mentor preview without enrollment, Learn mode, or progress", async () => {
+      const { lesson, student, cookies } = await createPreview(true, LESSON_TYPES.AI_MENTOR);
+      await db.insert(aiMentorLessons).values({
+        lessonId: lesson.id,
+        name: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Preview mentor"),
+      });
+      const welcome = jest
+        .spyOn(app.get(AiService), "initializeLessonWelcome")
+        .mockResolvedValue(undefined);
+      try {
+        const first = await request(app.getHttpServer())
+          .get(`/api/lesson/${lesson.id}?language=en`)
+          .set("Cookie", cookies)
+          .expect(200);
+        expect(first.body.data.status).toBe(THREAD_STATUS.ACTIVE);
+        expect(welcome).toHaveBeenCalledWith(first.body.data.threadId, student.id);
+        const [thread] = await db
+          .select()
+          .from(aiMentorThreads)
+          .where(eq(aiMentorThreads.id, first.body.data.threadId));
+        expect(thread).toMatchObject({ userId: student.id, status: THREAD_STATUS.ACTIVE });
+        await request(app.getHttpServer())
+          .post(`/api/ai/retake/${lesson.id}`)
+          .set("Cookie", cookies)
+          .expect(201);
+        const second = await request(app.getHttpServer())
+          .get(`/api/lesson/${lesson.id}?language=en`)
+          .set("Cookie", cookies)
+          .expect(200);
+        expect(second.body.data.threadId).not.toBe(first.body.data.threadId);
+        const [previous] = await db
+          .select()
+          .from(aiMentorThreads)
+          .where(eq(aiMentorThreads.id, first.body.data.threadId));
+        expect(previous.status).toBe(THREAD_STATUS.ARCHIVED);
+        expect(
+          await db
+            .select()
+            .from(studentLessonProgress)
+            .where(eq(studentLessonProgress.studentId, student.id)),
+        ).toHaveLength(0);
+        expect(
+          await db.select().from(studentCourses).where(eq(studentCourses.studentId, student.id)),
+        ).toHaveLength(0);
+        expect(
+          await db.select().from(courseStudentMode).where(eq(courseStudentMode.userId, student.id)),
+        ).toHaveLength(0);
+      } finally {
+        welcome.mockRestore();
+      }
     });
 
     it.each([

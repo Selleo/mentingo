@@ -1,11 +1,12 @@
-export const ALLOWED_LESSON_IMAGE_FILE_TYPES = [
+// SVG uploads are accepted but rasterized to WebP by the API before storage.
+export const ALLOWED_LESSON_IMAGE_FILE_TYPES: readonly string[] = [
   "image/jpeg",
   "image/png",
-  "image/gif",
   "image/webp",
-  "image/bmp",
-  "image/tiff",
+  "image/svg+xml",
 ];
+
+export const ALLOWED_IMAGE_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".svg"] as const;
 
 export const SUPPORTED_IMAGE_VARIANT_MIME_TYPES = [
   "image/jpeg",
@@ -40,8 +41,6 @@ export const AUDIO_FILE_EXTENSIONS = [
   ".webm",
 ] as const;
 
-export const AUDIO_UPLOAD_MAX_BYTES = 200 * 1024 * 1024;
-
 /** Browser upload classification only, never a substitute for content validation. */
 export const isAudioFile = (file: { type: string; name: string }): boolean => {
   const mime = file.type.toLowerCase().split(";")[0].trim();
@@ -53,47 +52,57 @@ export const isAudioFile = (file: { type: string; name: string }): boolean => {
   );
 };
 
-export const ALLOWED_VIDEO_FILE_TYPES = [
+export const ALLOWED_VIDEO_FILE_TYPES: readonly string[] = [
   "video/mp4",
   "video/quicktime",
   "video/webm",
   "video/ogg",
-  "video/avi",
   "video/mov",
-  "video/wmv",
 ];
 
-export const ALLOWED_PRESENTATION_FILE_TYPES = [
-  "application/vnd.ms-powerpoint",
+export const ALLOWED_VIDEO_FILE_EXTENSIONS = [".mp4", ".mov", ".qt", ".webm", ".ogg"] as const;
+
+export const ALLOWED_PRESENTATION_FILE_TYPES: readonly string[] = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   "application/vnd.oasis.opendocument.presentation",
 ];
 
-export const ALLOWED_EXCEL_FILE_TYPES = [
-  "application/vnd.ms-excel",
+export const ALLOWED_PRESENTATION_FILE_EXTENSIONS = [".pptx", ".odp"] as const;
+
+export const ALLOWED_EXCEL_FILE_TYPES: readonly string[] = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "text/csv",
 ];
 
-export const ALLOWED_WORD_FILE_TYPES = [
-  "application/msword",
+export const ALLOWED_SPREADSHEET_FILE_EXTENSIONS = [".xlsx", ".csv"] as const;
+
+export const ALLOWED_WORD_FILE_TYPES: readonly string[] = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-export const ALLOWED_PDF_FILE_TYPES = ["application/pdf"];
+export const ALLOWED_WORD_FILE_EXTENSIONS = [".docx"] as const;
 
-export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = [
-  "image/png",
-  "image/svg+xml",
-  "application/xml",
-] as const;
+export const ALLOWED_PDF_FILE_TYPES: readonly string[] = ["application/pdf"];
+
+export const ALLOWED_PDF_FILE_EXTENSIONS = [".pdf"] as const;
 
 /** File ingestion supported by the durable course-authoring source pipeline. */
 export const COURSE_AUTHORING_SOURCE_FILE_TYPES = [
   ...ALLOWED_PDF_FILE_TYPES,
-  ...ALLOWED_WORD_FILE_TYPES.filter((type) => type !== "application/msword"),
+  ...SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
+  ...ALLOWED_WORD_FILE_TYPES,
   "text/plain",
   "text/markdown",
   "text/x-markdown",
 ] as const;
-export const MAX_COURSE_AUTHORING_SOURCE_SIZE = 25 * 1024 * 1024;
+/** File picker extensions matching the source ingestion MIME allowlist. */
+export const COURSE_AUTHORING_SOURCE_FILE_EXTENSIONS = [
+  ".pdf",
+  ".docx",
+  ".txt",
+  ".md",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+] as const;

@@ -10,17 +10,18 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  AUTH_ERROR_KEYS,
   COURSE_STATUSES,
   DASHBOARD_DEFAULT_LAYOUTS,
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_CATALOG,
   ENTITY_TYPES,
+  FEATURE_SETTINGS_KEYS,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
-  FEATURE_SETTINGS_KEYS,
 } from "@repo/shared";
 import { and, asc, count, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -73,6 +74,7 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "./constants/settings.constants";
+import { updateSettingsBodySchema } from "./schemas/update-settings.schema";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type { PwaManifest } from "./schemas/pwa-manifest.schema";
@@ -98,6 +100,8 @@ import type {
   UpdateSettingsBody,
   UpdateDashboardSettingsBody,
   ResetDashboardSettingsBody,
+  UpdateGlobalColorSchemaBody,
+  UpdateLeaderboardSettingsBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
@@ -233,7 +237,22 @@ export class SettingsService {
       throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  public async getImageS3KeysByTenantId(tenantId: UUIDType): Promise<SettingsImageS3Keys> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
+
+    return this.toImageS3Keys(globalSettings.settings);
+  }
+
+  private toImageS3Keys(settings: GlobalSettingsJSONContentSchema): SettingsImageS3Keys {
+    const parsedSettings = this.parseGlobalSettings(settings);
 
     return {
       platformLogoS3Key: parsedSettings.platformLogoS3Key ?? null,
@@ -826,6 +845,7 @@ export class SettingsService {
       SYSTEM_ROLE_SLUGS.TRAINER,
       SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
       SYSTEM_ROLE_SLUGS.STUDENT,
+      SYSTEM_ROLE_SLUGS.REVIEWER,
     ];
     const primaryRole = rolePriority.find((roleSlug) => roleSet.has(roleSlug));
     const defaultWidgets = primaryRole ? DASHBOARD_DEFAULT_LAYOUTS[primaryRole] : [];
@@ -998,6 +1018,12 @@ export class SettingsService {
       throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
+    const allowedKeys = Object.keys(updateSettingsBodySchema.properties);
+
+    if (Object.keys(updatedSettings).some((key) => !allowedKeys.includes(key))) {
+      throw new BadRequestException(AUTH_ERROR_KEYS.INVALID_SETTINGS_UPDATE);
+    }
+
     const mergedSettings = {
       ...currentSettings,
       ...updatedSettings,
@@ -1097,17 +1123,17 @@ export class SettingsService {
   }
 
   public async updateGlobalColorSchema(
-    primaryColor: string,
-    contrastColor: string,
+    { primaryColor, contrastColor, backgroundColor, accentColor }: UpdateGlobalColorSchemaBody,
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
+    const colorSchema = { primaryColor, contrastColor, backgroundColor, accentColor };
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
-          settings.settings || to_jsonb(${{ primaryColor, contrastColor }}::jsonb)
+          settings.settings || to_jsonb(${colorSchema}::jsonb)
         `,
       })
       .where(isNull(settings.userId))
@@ -1314,6 +1340,31 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalLeaderboardSettings(
+    body: UpdateLeaderboardSettingsBody,
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({ settings: sql`${settings.settings} || ${JSON.stringify(body)}::text::jsonb` })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalCalendarEnabled(
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
@@ -1440,6 +1491,35 @@ export class SettingsService {
       .update(settings)
       .set({
         settings: setJsonbField(settings.settings, "learningPathsEnabled", !current),
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalGamificationEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current =
+      previousRecord.settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "gamificationEnabled", !current),
       })
       .where(isNull(settings.userId))
       .returning({
@@ -2273,6 +2353,28 @@ export class SettingsService {
     });
   }
 
+  async streamLoginPageFile(id: UUIDType, req: Request, res: Response): Promise<void> {
+    const { resourceIds } = await this.getExistingLoginPageResourceIds();
+    if (!resourceIds.includes(id))
+      throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const [resource] = await this.db
+      .select({ reference: resources.reference })
+      .from(resources)
+      .where(eq(resources.id, id));
+
+    if (!resource) throw new NotFoundException("loginFilesUpload.toast.resourceNotFound");
+
+    const file = await this.fileService.getFileDelivery(resource.reference, req.headers.range);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      res.redirect(file.url);
+      return;
+    }
+
+    streamFileToResponse(res, file);
+  }
+
   async getLoginPageFiles(): Promise<LoginPageResourceResponseBody> {
     const existingResourceIds = await this.getExistingLoginPageResourceIds();
 
@@ -2398,6 +2500,12 @@ export class SettingsService {
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:
         settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
+      gamificationEnabled:
+        settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled,
+      leaderboardsEnabled:
+        settings.leaderboardsEnabled ?? DEFAULT_GLOBAL_SETTINGS.leaderboardsEnabled,
+      leaderboardVisibility:
+        settings.leaderboardVisibility ?? DEFAULT_GLOBAL_SETTINGS.leaderboardVisibility,
       learningPathsEnabled:
         settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       calendarEnabled: true,
@@ -2413,6 +2521,8 @@ export class SettingsService {
         ? settings.loginPageFiles
         : JSON.parse(settings.loginPageFiles ?? "[]"),
       ageLimit: settings.ageLimit ?? null,
+      backgroundColor: settings.backgroundColor ?? DEFAULT_GLOBAL_SETTINGS.backgroundColor,
+      accentColor: settings.accentColor ?? DEFAULT_GLOBAL_SETTINGS.accentColor,
       featuredCourseId: settings.featuredCourseId ?? DEFAULT_GLOBAL_SETTINGS.featuredCourseId,
     };
   }

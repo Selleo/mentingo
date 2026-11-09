@@ -4,8 +4,8 @@ import {
   Controller,
   Get,
   Head,
-  Headers,
   Inject,
+  NotFoundException,
   Options,
   Param,
   Patch,
@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   SCORM_IMPORT_ACTION,
   type SupportedLanguages,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -39,13 +40,14 @@ import {
 } from "src/course-repetition/course-learning-write.constants";
 import { CourseLearningWrite } from "src/course-repetition/course-learning-write.interceptor";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
 import { assertScormTusGrant, assertScormUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
 import { REDIS_CLIENT, type RedisClient } from "src/redis";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
+import { ScormContentAccessService } from "./content/scorm-content-access.service";
+import { SCORM_CONTENT_ERROR_KEYS } from "./content/scorm-content.constants";
 import {
   CreateScormCourseFiles,
   SCORM_PACKAGE_FIELD,
@@ -59,6 +61,11 @@ import {
   CreateScormLessonBody,
   createScormLessonSchema,
 } from "./schemas/createScormLesson.schema";
+import {
+  renewScormContentSchema,
+  renewScormContentResponseSchema,
+  RenewScormContentBody,
+} from "./schemas/scormContent.schema";
 import {
   completeScormImportResponseSchema,
   initScormImportResponseSchema,
@@ -78,6 +85,7 @@ import { SCORM_TUS_STATE_TTL } from "./scorm-tus-upload.constants";
 import { ScormTusUploadService } from "./scorm-tus-upload.service";
 import { ScormService } from "./scorm.service";
 
+import type { RenewScormContentResponse } from "./schemas/scormContent.schema";
 import type {
   CompleteScormImportResponse,
   InitScormImportResponse,
@@ -93,6 +101,7 @@ export class ScormController {
   constructor(
     private readonly scormService: ScormService,
     private readonly scormTusUploadService: ScormTusUploadService,
+    private readonly scormContentAccessService: ScormContentAccessService,
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
   ) {}
 
@@ -270,10 +279,13 @@ export class ScormController {
   @Post("course")
   @RequirePermission(PERMISSIONS.COURSE_CREATE)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -343,7 +355,11 @@ export class ScormController {
 
   @Post("lesson")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
-  @UseInterceptors(FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }]))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }], {
+      limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES },
+    }),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -389,10 +405,13 @@ export class ScormController {
 
   @Patch("lesson/:lessonId/package")
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @ApiConsumes("multipart/form-data")
@@ -461,10 +480,28 @@ export class ScormController {
     @Query("scoId") scoId: UUIDType | undefined,
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: Request,
   ): Promise<BaseResponse<ScormLaunchResponse>> {
-    return new BaseResponse(
-      await this.scormService.launchRuntime({ lessonId, scoId, language, currentUser }),
+    const launch = await this.scormContentAccessService.launchIsolatedRuntime(
+      { lessonId, scoId, language, currentUser },
+      request,
     );
+
+    return new BaseResponse(launch);
+  }
+
+  @Post("runtime/content/renew")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Validate({
+    request: [{ type: "body", schema: renewScormContentSchema }],
+    response: baseResponse(renewScormContentResponseSchema),
+  })
+  async renewScormContent(
+    @Body() body: RenewScormContentBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<RenewScormContentResponse>> {
+    const result = await this.scormContentAccessService.renewContentAccess(body.token, currentUser);
+    return new BaseResponse(result);
   }
 
   @CourseLearningWrite({
@@ -518,21 +555,7 @@ export class ScormController {
   @Validate({
     request: [{ type: "param", name: "packageId", schema: UUIDSchema }],
   })
-  async streamScormContent(
-    @Param("packageId") packageId: UUIDType,
-    @Req() request: Request,
-    @Res() response: Response,
-    @Headers("range") range: string | undefined,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    const relativePath = request.params[0];
-    const file = await this.scormService.getContentFile({
-      packageId,
-      relativePath,
-      range,
-      currentUser,
-    });
-
-    streamFileToResponse(response, file);
+  async streamScormContent(@Param("packageId") _packageId: UUIDType) {
+    throw new NotFoundException(SCORM_CONTENT_ERROR_KEYS.NOT_FOUND);
   }
 }

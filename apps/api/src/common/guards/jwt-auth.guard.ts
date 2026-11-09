@@ -1,15 +1,16 @@
 import {
+  ForbiddenException,
   Injectable,
   type CanActivate,
   type ExecutionContext,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
-import { JwtService } from "@nestjs/jwt";
+import { AUTH_TOKEN_PURPOSE } from "@repo/shared";
 
+import { ALLOW_MFA } from "src/auth/session/allow-mfa.decorator";
+import { SessionService } from "src/auth/session/session.service";
 import { MCP_UPLOAD_TOKEN_PREFIX, McpUploadGrantService } from "src/mcp/mcp-upload-grant.service";
-import { SessionRevocationService } from "src/redis";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { extractToken } from "src/utils/extract-token";
 
@@ -18,19 +19,16 @@ import type { McpRequest } from "src/mcp/mcp.types";
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private reflector: Reflector,
-    private configService: ConfigService,
-    private readonly sessionRevocationService: SessionRevocationService,
+    private readonly sessionService: SessionService,
+    private readonly reflector: Reflector,
     private readonly mcpUploadGrants: McpUploadGrantService,
     private readonly tenantResolverService: TenantResolverService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>("isPublic", [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const targets = [context.getHandler(), context.getClass()];
+    const isPublic = this.reflector.getAllAndOverride<boolean>("isPublic", targets);
+    const allowMfa = this.reflector.getAllAndOverride<boolean>(ALLOW_MFA, targets) ?? false;
 
     const request = context.switchToHttp().getRequest();
     if (this.isMcpUploadGrantRequest(request)) {
@@ -39,60 +37,32 @@ export class JwtAuthGuard implements CanActivate {
 
     const token = extractToken(request, "access_token");
 
-    if (isPublic) {
-      // For public endpoints, try to populate user if token exists, but don't fail if missing
-      if (token) {
-        try {
-          const payload = await this.jwtService.verifyAsync(token, {
-            secret: this.configService.get<string>("jwt.secret"),
-          });
-
-          const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
-
-          request["user"] = isRevoked ? null : payload;
-        } catch {
-          // Silently ignore invalid tokens for public endpoints
-          request["user"] = null;
-        }
-      } else {
-        request["user"] = null;
-      }
-      return true;
-    }
-
-    // For protected endpoints, require valid token
+    request.user = null;
     if (!token) {
+      if (isPublic) return true;
+
       // An unknown tenant is a missing resource; auth failures on known tenants remain 401.
       await this.tenantResolverService.resolveTenantId(request, true);
       throw new UnauthorizedException("Access token not found");
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>("jwt.secret"),
-      });
-
-      if (
-        payload.isSupportMode &&
-        payload.supportExpiresAt &&
-        new Date(payload.supportExpiresAt).getTime() <= Date.now()
-      ) {
-        throw new UnauthorizedException("supportMode.errors.sessionExpired");
-      }
-
-      const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
-
-      if (isRevoked) throw new UnauthorizedException("auth.error.sessionRevoked");
-
-      request["user"] = payload;
-
-      return true;
+      request.user = await this.sessionService.verifySessionToken(
+        token,
+        AUTH_TOKEN_PURPOSE.ACCESS,
+        allowMfa,
+      );
     } catch (error) {
+      if (isPublic) return true;
+
       await this.tenantResolverService.resolveTenantId(request, true);
-      if (error instanceof UnauthorizedException) throw error;
+      if (error instanceof UnauthorizedException || error instanceof ForbiddenException)
+        throw error;
 
       throw new UnauthorizedException("Invalid access token");
     }
+
+    return true;
   }
 
   private isMcpUploadGrantRequest(request: McpRequest): boolean {

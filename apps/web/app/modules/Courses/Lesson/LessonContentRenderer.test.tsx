@@ -46,7 +46,7 @@ describe("LessonContentRenderer preview activities", () => {
     state.preview = true;
   });
 
-  it.each(["ai_mentor", "scorm", "live_training"] as const)(
+  it.each(["scorm", "live_training"] as const)(
     "shows the description without mounting the interactive %s activity in preview",
     (type) => {
       renderLesson(type);
@@ -54,6 +54,12 @@ describe("LessonContentRenderer preview activities", () => {
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
     },
   );
+
+  it("shows the full AI Mentor lesson in preview", () => {
+    renderLesson("ai_mentor");
+    expect(screen.getByRole("button", { name: "Start AI activity" })).toBeInTheDocument();
+    expect(screen.queryByText("Activity description")).not.toBeInTheDocument();
+  });
 
   it("shows quiz questions in preview", () => {
     renderLesson("quiz");

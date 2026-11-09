@@ -5,12 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { DatabasePg } from "src/common";
 import { SampleEmailTemplateSetupService } from "src/email-templates/services/sample-email-template-setup.service";
+import { GamificationSetupService } from "src/gamification/gamification-setup.service";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
@@ -20,6 +22,7 @@ import { invalidateCorsCache } from "src/utils/cors";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { TenantsRepository } from "./tenants.repository";
+import { isReservedTenantHost } from "./utils/reserved-tenant-subdomains";
 
 import type {
   CreateTenantOptions,
@@ -40,6 +43,8 @@ export class TenantsService {
     private readonly userService: UserService,
     private readonly sampleEmailTemplateSetupService: SampleEmailTemplateSetupService,
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
+    private readonly configService: ConfigService,
+    private readonly gamificationSetupService: GamificationSetupService,
   ) {}
 
   async findAllTenants(
@@ -107,6 +112,7 @@ export class TenantsService {
       }
 
       await this.defaultAutomationSetupService.ensureTenantDefaultAutomations();
+      await this.gamificationSetupService.seedNewTenantPredefinedAchievements();
 
       const adminUser = {
         email: input.adminEmail,
@@ -173,6 +179,20 @@ export class TenantsService {
   }
 
   private normalizeHost(host: string) {
+    const origin = this.parseHostOrigin(host);
+
+    const reservedSubdomains = this.configService.getOrThrow<string[]>(
+      "tenants.reservedSubdomains",
+    );
+
+    if (isReservedTenantHost(origin, reservedSubdomains)) {
+      throw new BadRequestException("superAdminTenants.error.reservedHost");
+    }
+
+    return origin;
+  }
+
+  private parseHostOrigin(host: string) {
     try {
       return new URL(host).origin.replace(/\/$/, "");
     } catch {

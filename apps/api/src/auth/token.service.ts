@@ -39,7 +39,7 @@ export class TokenService {
     });
   }
 
-  setTemporaryTokenCookies(response: Response, accessToken: string, refreshToken: string) {
+  setTemporaryTokenCookies(response: Response, accessToken: string, _refreshToken?: string) {
     const fiveMinutesExpirationTime = 5 * 60 * 1000;
 
     response.cookie("access_token", accessToken, {
@@ -49,13 +49,7 @@ export class TokenService {
       maxAge: fiveMinutesExpirationTime,
     });
 
-    response.cookie("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: this.isProduction,
-      sameSite: "strict",
-      maxAge: fiveMinutesExpirationTime,
-      path: "/api/auth/refresh",
-    });
+    response.clearCookie("refresh_token", { path: "/api/auth/refresh" });
   }
 
   clearTokenCookies(response: Response) {

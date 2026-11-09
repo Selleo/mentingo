@@ -6,10 +6,9 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, MAX_INGESTION_FILE_COUNT } from "@repo/shared";
 
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
-import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
@@ -32,7 +31,7 @@ export class IngestionService {
   ) {}
 
   async ingest(lessonId: UUIDType, files: Express.Multer.File[], currentUser: CurrentUserType) {
-    if (files.length > MAX_NUM_OF_FILES) {
+    if (files.length > MAX_INGESTION_FILE_COUNT) {
       throw new BadRequestException("Exceeded max number of files");
     }
 
@@ -69,7 +68,7 @@ export class IngestionService {
       `Inline ingestion started: lessonId=${lessonId}, files=${files.length}, tenantId=${currentUser.tenantId}`,
     );
 
-    if (files.length > MAX_NUM_OF_FILES) {
+    if (files.length > MAX_INGESTION_FILE_COUNT) {
       throw new BadRequestException("Exceeded max number of files");
     }
 

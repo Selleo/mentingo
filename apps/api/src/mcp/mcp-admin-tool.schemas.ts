@@ -1,4 +1,4 @@
-import { ALLOWED_AVATAR_IMAGE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_AVATAR_FILE_SIZE_BYTES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -15,7 +15,6 @@ import {
   upsertUserDetailsSchema,
 } from "src/user/schemas/updateUser.schema";
 import { sortUserFieldsOptions } from "src/user/schemas/userQuery";
-import { AVATAR_MAX_SIZE } from "src/user/user.constants";
 
 const objectOptions = { additionalProperties: false };
 const pagination = {
@@ -145,8 +144,8 @@ export const updateMyUserInputSchema = Type.Object(
 export const requestMyAvatarUploadInputSchema = Type.Object(
   {
     filename: Type.String({ minLength: 1, maxLength: 255 }),
-    mimeType: Type.Union(ALLOWED_AVATAR_IMAGE_TYPES.map((mime) => Type.Literal(mime))),
-    size: Type.Integer({ minimum: 1, maximum: AVATAR_MAX_SIZE }),
+    mimeType: Type.Union(ALLOWED_LESSON_IMAGE_FILE_TYPES.map((mime) => Type.Literal(mime))),
+    size: Type.Integer({ minimum: 1, maximum: MAX_AVATAR_FILE_SIZE_BYTES }),
   },
   objectOptions,
 );

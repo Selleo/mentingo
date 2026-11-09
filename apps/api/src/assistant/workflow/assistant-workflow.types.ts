@@ -21,6 +21,7 @@ export type AssistantRuntimeInput = AssistantWorkflowInput & {
 };
 export type AssistantSource = { title: string; url: string };
 export type AssistantWorkflowContext = {
+  instructions: string;
   run: {
     id: string;
     userId: string;

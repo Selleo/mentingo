@@ -48,6 +48,7 @@ const roleDefaults: Record<string, DashboardLayoutWidget[]> = {
     { type: W.REQUIRED_COURSES, size: "2x2", visible: true },
     { type: W.COURSE_COMPLETION, size: "2x2", visible: true },
     { type: W.CERTIFICATES, size: "2x2", visible: true },
+    { type: W.GAMIFICATION, size: "2x2", visible: true },
   ],
 };
 
@@ -61,6 +62,7 @@ const catalogSizeByType: Record<string, DashboardLayoutSize[]> = {
   [W.REQUIRED_COURSES]: ["2x1", "2x2", "3x2"],
   [W.CERTIFICATES]: ["2x1", "2x2"],
   [W.COURSE_COMPLETION]: ["1x1", "2x2"],
+  [W.GAMIFICATION]: ["2x1", "2x2"],
 };
 
 const catalogFor = (widgets: DashboardLayoutWidget[]): DashboardLayoutCatalogEntry[] =>
@@ -83,6 +85,7 @@ const titleByType: Record<string, string> = {
   [W.REQUIRED_COURSES]: "Required courses",
   [W.CERTIFICATES]: "Certificates",
   [W.COURSE_COMPLETION]: "Course progress",
+  [W.GAMIFICATION]: "Level and achievements",
 };
 
 const visibleWidgetTitles = async (page: Parameters<typeof mockDashboardLayout>[0]) =>

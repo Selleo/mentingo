@@ -78,4 +78,24 @@ describe("streamFileToResponse", () => {
     expect(fileStream.destroyed).toBe(true);
     expect(loggerErrorSpy).not.toHaveBeenCalled();
   });
+  it.each([
+    ["image/png", undefined, "inline"],
+    ["image/svg+xml", undefined, "attachment"],
+    ["text/html", undefined, "attachment"],
+    ["text/html", "inline", "inline"],
+  ] as const)(
+    "serves %s with nosniff and the expected disposition",
+    (contentType, contentDisposition, expected) => {
+      const response = new MockResponse();
+
+      streamFileToResponse(response as unknown as Response, {
+        stream: new PassThrough(),
+        contentType,
+        contentDisposition,
+      });
+
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(response.headers.get("Content-Disposition")).toBe(expected);
+    },
+  );
 });

@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { JwtService } from "@nestjs/jwt";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   COURSE_ENROLLMENT,
@@ -58,7 +57,10 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
-import { assignSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
+import {
+  addSystemRoleToUserInTests,
+  assignSystemRoleToUserInTests,
+} from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
@@ -87,6 +89,7 @@ describe("CourseController (e2e)", () => {
   let groupFactory: ReturnType<typeof createGroupFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let mockFileService: {
+    assertImageReference: jest.Mock;
     getFileUrl: jest.Mock;
     getResourcesForEntity: jest.Mock;
     getRawFileBuffer: jest.Mock;
@@ -128,6 +131,7 @@ describe("CourseController (e2e)", () => {
   beforeAll(async () => {
     // It can be crashed, test and reapir it later
     mockFileService = {
+      assertImageReference: jest.fn().mockResolvedValue(undefined),
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
@@ -1205,17 +1209,11 @@ describe("CourseController (e2e)", () => {
             thumbnailS3Key: null,
           });
 
-          const accessToken = app.get(JwtService).sign({
-            userId: user.id,
-            email: user.email,
-            roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-            permissions: Object.values(PERMISSIONS),
-            tenantId: user.tenantId,
-          });
+          await addSystemRoleToUserInTests(db, user.id, user.tenantId, SYSTEM_ROLE_SLUGS.ADMIN);
 
           const response = await request(app.getHttpServer())
             .get("/api/course/all")
-            .set("Cookie", `access_token=${accessToken}`)
+            .set("Cookie", await cookieFor(user, app))
             .expect(200);
 
           expect(response.body.data).toBeDefined();

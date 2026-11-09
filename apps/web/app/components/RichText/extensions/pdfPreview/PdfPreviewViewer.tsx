@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +11,7 @@ import { initialPdfViewerState, pdfViewerReducer } from "./reducer";
 
 import type { PdfPreviewViewerProps, ReactPdfModule } from "./types";
 
-export const PdfPreviewViewer = ({ src }: PdfPreviewViewerProps) => {
+export const PdfPreviewViewer = ({ src, loadingMessage, errorMessage }: PdfPreviewViewerProps) => {
   const { t } = useTranslation();
   const [{ pageCount, currentPage, visiblePage, isPageRendering }, dispatch] = useReducer(
     pdfViewerReducer,
@@ -40,7 +41,7 @@ export const PdfPreviewViewer = ({ src }: PdfPreviewViewerProps) => {
       .then((module) => {
         if (!isMounted) return;
 
-        module.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${module.pdfjs.version}/build/pdf.worker.min.mjs`;
+        module.pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
         setReactPdf(module);
       })
@@ -245,17 +246,23 @@ export const PdfPreviewViewer = ({ src }: PdfPreviewViewerProps) => {
             dispatch({ type: PDF_VIEWER_ACTION.DOCUMENT_LOADED, pageCount: numPages });
           }}
           loading={
-            <div className="p-4 text-sm text-neutral-600">{t("richText.pdfPreview.loading")}</div>
+            <div className="p-4 text-sm text-neutral-600">
+              {loadingMessage ?? t("richText.pdfPreview.loading")}
+            </div>
           }
           error={
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 text-sm text-primary-700 underline"
-            >
-              {t("richText.pdfPreview.openFile")}
-            </a>
+            errorMessage ? (
+              <p className="p-4 text-sm text-neutral-600">{errorMessage}</p>
+            ) : (
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 text-sm text-primary-700 underline"
+              >
+                {t("richText.pdfPreview.openFile")}
+              </a>
+            )
           }
         >
           <div

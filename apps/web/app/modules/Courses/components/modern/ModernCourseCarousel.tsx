@@ -229,7 +229,7 @@ const ModernCourseCarousel = ({
             {canScrollPrev && (
               <CarouselPrevious
                 iconSize={24}
-                className=" left-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+                className="left-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200 group-data-[card-over-arrows]:pointer-events-none group-data-[card-over-arrows]:!opacity-0"
               />
             )}
             {(canScrollNext || hasNextPage) && (
@@ -238,7 +238,7 @@ const ModernCourseCarousel = ({
                 disabled={isFetchingNextPage ? true : !canScrollNext && !hasNextPage}
                 loading={isFetchingNextPage}
                 onClick={handleNextClick}
-                className="right-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+                className="right-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200 group-data-[card-over-arrows]:pointer-events-none group-data-[card-over-arrows]:!opacity-0"
               />
             )}
           </Carousel>
@@ -246,23 +246,23 @@ const ModernCourseCarousel = ({
             <div
               aria-hidden
               data-testid="course-row-arrow-block-left"
-              className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto"
+              className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto group-data-[card-over-arrows]:pointer-events-none"
             />
           )}
           {(canScrollNext || hasNextPage) && (
             <div
               aria-hidden
               data-testid="course-row-arrow-block-right"
-              className="absolute inset-y-0 right-0 z-[140] w-28 pointer-events-auto"
+              className="absolute inset-y-0 right-0 z-[140] w-28 pointer-events-auto group-data-[card-over-arrows]:pointer-events-none"
             />
           )}
           {canScrollPrev && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[card-over-arrows]:!opacity-0">
               <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
             </div>
           )}
           {(canScrollNext || hasNextPage) && (
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[card-over-arrows]:!opacity-0">
               <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
             </div>
           )}

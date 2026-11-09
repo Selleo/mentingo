@@ -1,6 +1,4 @@
 export const MAX_COURSE_LEARNING_OUTCOMES = 5;
-export const MAX_COURSE_TRAILER_VIDEO_SIZE_MB = 50;
-export const MAX_COURSE_TRAILER_VIDEO_SIZE = MAX_COURSE_TRAILER_VIDEO_SIZE_MB * 1024 * 1024;
 
 export const COURSE_STATUSES = {
   DRAFT: "draft",
@@ -72,3 +70,5 @@ export const isCourseFeatureEnabledForCourseType = (
 
   return !disabledFeatures.includes(feature);
 };
+
+export const MAX_COURSE_TITLE_LENGTH = 255;

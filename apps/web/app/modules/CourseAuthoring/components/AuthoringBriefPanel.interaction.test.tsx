@@ -698,7 +698,7 @@ describe("AuthoringBriefPanel", () => {
     expect(onUploadSource).toHaveBeenCalledOnce();
     expect(onUploadSource).toHaveBeenCalledWith(valid);
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Choose a PDF, DOCX, plain text or Markdown file.",
+      "Choose a PDF, DOCX, text, Markdown, PNG, JPEG or WebP file.",
     );
   });
 
@@ -1219,7 +1219,7 @@ describe("AuthoringBriefPanel", () => {
     });
 
     expect(
-      await screen.findByText("Choose a PDF, DOCX, plain text or Markdown file."),
+      await screen.findByText("Choose a PDF, DOCX, text, Markdown, PNG, JPEG or WebP file."),
     ).toBeInTheDocument();
     expect(onUploadSource).not.toHaveBeenCalled();
   });

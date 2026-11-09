@@ -1,14 +1,16 @@
+import { MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadBackgroundImage } from "~/api/mutations/admin/useUploadBackgroundImage";
+import { IMAGE_UPLOAD_SIZES } from "~/components/FileUploadInput/imageUpload.constants";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
+import { BrandingImageAction, BrandingImageTile } from "./BrandingImageTile";
 
 interface OrganizationLoginBackgroundUploadProps {
   backgroundImage: string | null;
@@ -44,45 +46,38 @@ export function OrganizationLoginBackgroundUpload({
   });
 
   return (
-    <Card
+    <BrandingImageTile
       id="organization-login-background-image-upload"
-      className="flex h-full flex-col border-neutral-200 bg-white shadow-sm"
-      data-testid={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_CARD}
+      testId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_CARD}
+      title={t("organizationLoginBackgroundImageUpload.title")}
+      description={t("organizationLoginBackgroundImageUpload.description")}
     >
-      <CardHeader className="min-h-24 space-y-1 pb-2">
-        <CardTitle className="text-base font-semibold">
-          {t("organizationLoginBackgroundImageUpload.title")}
-        </CardTitle>
-        <CardDescription className="text-sm leading-5 text-neutral-700">
-          {t("organizationLoginBackgroundImageUpload.description")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-0">
-        <ImageUploadInput
-          field={{ value: backgroundImage || undefined }}
-          handleImageUpload={handleImageUpload}
-          isUploading={isUploading || isPending}
-          imageUrl={backgroundImage}
-          fileInputRef={fileInputRef}
-          variant="video"
-          detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements")}
-          inputTestId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_INPUT}
-        />
-        {isUploading && (
-          <p className="text-xs font-medium text-neutral-500">{t("common.button.uploading")}</p>
-        )}
-        {backgroundImage && (
-          <Button
-            onClick={removeImage}
-            variant="destructive"
-            size="sm"
-            data-testid={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_REMOVE}
-          >
-            <Icon name="TrashIcon" className="mr-2" />
-            {t("organizationLoginBackgroundImageUpload.button.removeBackgroundImage")}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+      <ImageUploadInput
+        field={{ value: backgroundImage || undefined }}
+        handleImageUpload={handleImageUpload}
+        isUploading={isUploading || isPending}
+        imageUrl={backgroundImage}
+        fileInputRef={fileInputRef}
+        variant="video"
+        size={IMAGE_UPLOAD_SIZES.COMPACT}
+        detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements", {
+          maxSize: formatFileSize(MAX_SETTINGS_IMAGE_FILE_SIZE_BYTES),
+        })}
+        inputTestId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_INPUT}
+        actions={
+          backgroundImage && (
+            <BrandingImageAction
+              label={t("organizationLoginBackgroundImageUpload.button.removeBackgroundImage")}
+              onClick={removeImage}
+              testId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_REMOVE}
+              isDestructive
+            >
+              <Icon name="TrashIcon" className="size-4" />
+            </BrandingImageAction>
+          )
+        }
+      />
+      {isUploading && <p className="details-md text-neutral-500">{t("common.button.uploading")}</p>}
+    </BrandingImageTile>
   );
 }

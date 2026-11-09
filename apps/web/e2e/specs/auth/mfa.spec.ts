@@ -5,13 +5,14 @@ import { USER_ROLE } from "~/config/userRoles";
 import { MFA_PAGE_HANDLES } from "../../data/auth/handles";
 import { login, logout } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
-import { fillMfaTokenFlow } from "../../flows/auth/fill-mfa-token.flow";
-import { submitMfaTokenFlow } from "../../flows/auth/submit-mfa-token.flow";
+import { readMfaSetupSecretFlow } from "../../flows/auth/read-mfa-setup-secret.flow";
+import { verifyMfaCodeFlow } from "../../flows/auth/verify-mfa-code.flow";
+import { openPathAtOriginFlow } from "../../flows/navigation/open-path-at-origin.flow";
 import { generateTotpToken } from "../../utils/totp";
 
 const INITIAL_PASSWORD = "Password123@";
 
-test("admin can enable MFA and verify it on login", async ({
+test("user can enroll in enforced MFA and verify it on login", async ({
   cleanup,
   createIsolatedWorkspace,
 }) => {
@@ -19,49 +20,60 @@ test("admin can enable MFA and verify it on login", async ({
   const userFactory = workspace.factories.createUserFactory();
   const email = `mfa-${Date.now()}@example.com`;
 
-  const user = await userFactory.register({
+  const learner = await workspace.createTenantUserWithPasswordAndRole({
     email,
     firstName: "MFA",
     lastName: "User",
     password: INITIAL_PASSWORD,
+    role: USER_ROLE.student,
+  });
+  const { page, origin } = learner;
+
+  cleanup.add(async () => {
+    await userFactory.delete(learner.user.id);
   });
 
   cleanup.add(async () => {
-    await userFactory.delete(user.id);
-  });
-  cleanup.add(async () => {
     await workspace.apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
-      [SYSTEM_ROLE_SLUGS.ADMIN]: false,
+      [SYSTEM_ROLE_SLUGS.STUDENT]: false,
     });
   });
 
-  await userFactory.update(user.id, { roleSlugs: [USER_ROLE.admin] });
   await workspace.apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
-    [SYSTEM_ROLE_SLUGS.ADMIN]: true,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: true,
   });
 
-  await logout(workspace.page, { origin: workspace.origin });
+  await logout(page, { origin });
+  await login(page, email, INITIAL_PASSWORD, { origin });
+  await expect(page).toHaveURL(`${origin}/auth/mfa`);
+  await expect(page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
 
-  await login(workspace.page, email, INITIAL_PASSWORD, { origin: workspace.origin });
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/auth/mfa`);
-  await expect(workspace.page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
+  const secret = await readMfaSetupSecretFlow(page);
 
-  const secret = (await workspace.page.getByTestId(MFA_PAGE_HANDLES.SECRET).textContent())?.trim();
+  await page.reload();
+  await expect(page.getByTestId(MFA_PAGE_HANDLES.SECRET)).toHaveText(secret);
 
-  if (!secret) throw new Error("Expected MFA setup secret to be visible");
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "current-user-storage",
+      JSON.stringify({ state: { hasVerifiedMFA: true } }),
+    );
+  });
+  await openPathAtOriginFlow(page, origin, "/courses");
+  await expect(page).toHaveURL(`${origin}/auth/mfa`);
 
-  await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
-  await submitMfaTokenFlow(workspace.page);
+  const enrollmentCode = generateTotpToken(secret);
+  await verifyMfaCodeFlow(page, enrollmentCode);
 
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/dashboard`);
+  await expect(page).toHaveURL(`${origin}/courses`);
 
-  await logout(workspace.page, { origin: workspace.origin });
-  await login(workspace.page, email, INITIAL_PASSWORD, { origin: workspace.origin });
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/auth/mfa`);
-  await expect(workspace.page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
+  await logout(page, { origin });
+  await login(page, email, INITIAL_PASSWORD, { origin });
+  await expect(page).toHaveURL(`${origin}/auth/mfa`);
+  await expect(page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
 
-  await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
-  await submitMfaTokenFlow(workspace.page);
+  await expect.poll(() => generateTotpToken(secret), { timeout: 35_000 }).not.toBe(enrollmentCode);
+  await verifyMfaCodeFlow(page, generateTotpToken(secret));
 
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/dashboard`);
+  await expect(page).toHaveURL(`${origin}/dashboard`);
 });

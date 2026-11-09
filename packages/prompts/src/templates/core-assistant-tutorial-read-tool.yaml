@@ -1,0 +1,6 @@
+id: coreAssistantTutorialReadTool
+description: Read product tutorial tool guidance for the Mentingo Assistant
+version: 1
+
+template: |
+  Read a published Mentingo product tutorial from the Help & Tutorials self-onboarding video library by its exact key returned by search_helpdesk. Returns verified video metadata, description, chapter timeline and exact tutorial/chapter links. Inspect a promising guide even when its overall title is broader than the requested task. This is product usage guidance, not support tickets, and cannot establish what a tenant's course or lesson contains. For tenant learning content use the corresponding authorized course/lesson read tools.

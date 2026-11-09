@@ -7,6 +7,7 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { isAxiosError } from "axios";
 import { UnrecoverableError, Worker } from "bullmq";
 import { and, eq, isNull } from "drizzle-orm";
 
@@ -82,6 +83,18 @@ export class CourseAuthoringContextBridgeWorker implements OnModuleDestroy {
     if (error instanceof ForbiddenException) return "permission_revoked";
     if (error instanceof NotFoundException) return "course_unavailable";
     if (error instanceof BadRequestException) return "target_unavailable";
+    if (isAxiosError<unknown>(error) && error.response?.status === 409) {
+      const data = error.response.data;
+      const detail = data && typeof data === "object" && "detail" in data ? data.detail : undefined;
+      if (
+        detail === "AUTHORING_CONTEXT_CHAPTER_BASELINE_STALE" ||
+        detail === "AUTHORING_CONTEXT_LESSON_BASELINE_STALE" ||
+        detail === "AUTHORING_CONTEXT_COURSE_BASELINE_STALE"
+      ) {
+        this.logger.warn(`Course authoring context rejected: ${detail}`);
+        return "context_invalid";
+      }
+    }
     return undefined;
   }
 
@@ -146,6 +159,14 @@ export class CourseAuthoringContextBridgeWorker implements OnModuleDestroy {
       permissions: [],
     };
 
+    // Existing conversations may predate block preparation or contain legacy plain copy.
+    // Prepare selected anchors before reading either structural hashes or lesson details.
+    await this.context.prepareBlockIdentities(
+      binding.courseId,
+      binding.language,
+      actor,
+      request.lessonIds,
+    );
     // The skeleton provides structural baselines; detail is loaded separately for selected lessons only.
     const skeleton = await this.context.getContext(
       binding.courseId,

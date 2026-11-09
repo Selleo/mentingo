@@ -238,7 +238,8 @@ const settingsUpdate = Type.Object(
   },
   strict,
 );
-export const authoringOperationSchema = Type.Union([
+/** Manual commands retain the currently published SDK-compatible operation set. */
+export const manualAuthoringOperationSchema = Type.Union([
   lessonWrite,
   Type.Object(
     {
@@ -289,5 +290,29 @@ export const authoringOperationSchema = Type.Union([
   ),
 ]);
 
+/** Agent-generated frozen exports also support server-owned image placement. */
+export const authoringOperationSchema = Type.Union([
+  manualAuthoringOperationSchema,
+  Type.Object(
+    {
+      ...operationBase,
+      type: Type.Literal("lesson.image.insert"),
+      baselineHash: Type.String({ pattern: "^[0-9a-f]{64}$" }),
+      payload: Type.Object(
+        {
+          assetId: UUIDSchema,
+          anchorBlockId: UUIDSchema,
+          position: Type.Union([Type.Literal("before"), Type.Literal("after")]),
+          caption: Type.Union([Type.String({ minLength: 1, maxLength: 1000 }), Type.Null()]),
+          altText: Type.String({ minLength: 1, maxLength: 1000 }),
+        },
+        strict,
+      ),
+    },
+    strict,
+  ),
+]);
+
+export type ManualAuthoringOperation = Static<typeof manualAuthoringOperationSchema>;
 export type AuthoringOperation = Static<typeof authoringOperationSchema>;
 export type AuthoringQuestion = Static<typeof authoringQuestionSchema>;

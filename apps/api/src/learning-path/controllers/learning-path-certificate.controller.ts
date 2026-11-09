@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Res, UseGuards } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
-import { Request, Response } from "express";
+import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDSchema, type UUIDType } from "src/common";
@@ -8,7 +9,6 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
@@ -60,16 +60,13 @@ export class LearningPathCertificateController {
   async downloadCertificate(
     @Body() body: LearningPathCertificateDownloadBody,
     @CurrentUser() currentUser: CurrentUserType,
-    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
-    const requestBaseUrl = getRequestBaseUrl(req);
     const { pdfBuffer, filename } =
       await this.learningPathCertificateService.downloadLearningPathCertificate(
         currentUser.userId,
         body.certificateId,
         body.language,
-        requestBaseUrl,
       );
 
     const asciiFilename =
@@ -110,13 +107,19 @@ export class LearningPathCertificateController {
 
   @Public()
   @Get("share")
+  @Validate({
+    request: [
+      { type: "query", name: "token", schema: UUIDSchema, required: true },
+      { type: "query", name: "lang", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+  })
   async getCertificateSharePage(
-    @Query("certificateId") certificateId: UUIDType,
+    @Query("token") token: UUIDType,
     @Query("lang") language: SupportedLanguages,
     @Res() res: Response,
   ): Promise<void> {
-    const html = await this.learningPathCertificateService.getPublicSharePage(
-      certificateId,
+    const html = await this.learningPathCertificateService.getPublicSharePageByToken(
+      token,
       language,
     );
 
@@ -130,13 +133,19 @@ export class LearningPathCertificateController {
 
   @Public()
   @Get("share-image")
+  @Validate({
+    request: [
+      { type: "query", name: "token", schema: UUIDSchema, required: true },
+      { type: "query", name: "lang", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+  })
   async getCertificateShareImage(
-    @Query("certificateId") certificateId: UUIDType,
+    @Query("token") token: UUIDType,
     @Query("lang") language: SupportedLanguages,
     @Res() res: Response,
   ): Promise<void> {
-    const imageBuffer = await this.learningPathCertificateService.getPublicShareImage(
-      certificateId,
+    const imageBuffer = await this.learningPathCertificateService.getPublicShareImageByToken(
+      token,
       language,
     );
 

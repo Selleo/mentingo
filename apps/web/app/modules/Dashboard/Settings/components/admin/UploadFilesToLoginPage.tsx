@@ -1,4 +1,4 @@
-import { LOGIN_PAGE_DOCUMENTS_FILE_TYPES, MAX_LOGIN_PAGE_DOCUMENTS } from "@repo/shared";
+import { ALLOWED_PDF_FILE_TYPES, MAX_LOGIN_PAGE_DOCUMENTS } from "@repo/shared";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -113,7 +113,7 @@ export const UploadFilesToLoginPage = () => {
           ref={fileInputRef}
           type="file"
           className="sr-only"
-          accept={LOGIN_PAGE_DOCUMENTS_FILE_TYPES.join(",")}
+          accept={ALLOWED_PDF_FILE_TYPES.join(",")}
           onChange={handleFileChange}
           data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILES_INPUT}
         />
@@ -132,7 +132,7 @@ export const UploadFilesToLoginPage = () => {
       <UploadFilesToLoginPagePreviewDialog
         open={isPreviewDialogOpen}
         resourceName={previewResource?.name ?? t("loginFilesUpload.unnamedFile")}
-        resourceUrl={previewResource?.resourceUrl ?? ""}
+        resourceId={previewResource?.id ?? null}
         onClose={handleClosePreviewDialog}
       />
     </Card>

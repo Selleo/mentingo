@@ -116,6 +116,7 @@
     "lucide-react": "1.16.0",
     "morgan": "1.10.0",
     "motion": "12.23.22",
+    "pdfjs-dist": "5.4.296",
     "posthog-js": "1.273.0",
     "qrcode.react": "4.2.0",
     "radix-ui": "1.4.3",

@@ -1,3 +1,43 @@
+<a name="v4.30.0"></a>
+
+## [v4.30.0] - 09.11.2026
+
+### Features:
+
+- add reviewer role for grading open quiz answers ([#2166](https://github.com/Selleo/mentingo/issues/2166))
+
+- let admins configure gamification and custom achievements ([#2160](https://github.com/Selleo/mentingo/issues/2160))
+
+- support interactive AI Mentor course previews ([#2161](https://github.com/Selleo/mentingo/issues/2161))
+
+- place source images without rewriting lessons ([#2154](https://github.com/Selleo/mentingo/issues/2154))
+
+- build gamification core with achievements, XP and levels ([#2151](https://github.com/Selleo/mentingo/issues/2151))
+
+### Bug Fixes:
+
+- ensure the embedded lesson editor updates correctly when switching lessons ([#2164](https://github.com/Selleo/mentingo/issues/2164))
+
+- allow updating global course preview settings in support mode ([#2165](https://github.com/Selleo/mentingo/issues/2165))
+
+- find product tutorials in the assistant ([#2162](https://github.com/Selleo/mentingo/issues/2162))
+
+- make learning path statuses consistent with courses ([#2158](https://github.com/Selleo/mentingo/issues/2158))
+
+### Chores:
+
+- enhance color personalization and branding settings ([#2163](https://github.com/Selleo/mentingo/issues/2163))
+
+- allow creating new competencies directly within job profiles ([#2159](https://github.com/Selleo/mentingo/issues/2159))
+
+- secure certificate rendering and sharing ([#2155](https://github.com/Selleo/mentingo/issues/2155))
+
+- enforce MFA and session boundaries ([#2153](https://github.com/Selleo/mentingo/issues/2153))
+
+- isolate SCORM content on a dedicated origin with short-lived grants ([#2148](https://github.com/Selleo/mentingo/issues/2148))
+
+- enhance platform security for a safer user experience ([#2146](https://github.com/Selleo/mentingo/issues/2146))
+
 <a name="v4.29.0"></a>
 
 ## [v4.29.0] - 05.11.2026
@@ -37,6 +77,10 @@
 - add a user switcher to simplify testing during development ([#2152](https://github.com/Selleo/mentingo/issues/2152))
 
 - improve course package handling to increase app performance ([#2113](https://github.com/Selleo/mentingo/issues/2113))
+
+### Documentation:
+
+- update changelog for version v4.29.0
 
 <a name="v4.28.0"></a>
 
@@ -3676,7 +3720,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.29.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.30.0...HEAD
+[v4.30.0]: https://github.com/Selleo/mentingo/compare/v4.29.0...v4.30.0
 [v4.29.0]: https://github.com/Selleo/mentingo/compare/v4.28.0...v4.29.0
 [v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
 [v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0

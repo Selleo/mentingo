@@ -50,6 +50,7 @@ export const getNavigationConfig = (
   isPhishingEnabled = false,
   roleSlugs: readonly string[] = [],
   isCompetenciesEnabled = false,
+  isLeaderboardsEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -131,6 +132,16 @@ export const getNavigationConfig = (
               },
             ] satisfies NavigationItem[])
           : []),
+        ...(isLeaderboardsEnabled
+          ? ([
+              {
+                label: t("navigationSideBar.leaderboards"),
+                path: "leaderboards",
+                iconName: "Medal",
+                testId: NAVIGATION_HANDLES.LEADERBOARDS_LINK,
+              },
+            ] satisfies NavigationItem[])
+          : []),
         {
           label: t("navigationSideBar.reports"),
           path: "reports",
@@ -209,6 +220,7 @@ export const getNavigationConfig = (
           PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
           PERMISSIONS.AUTOMATION_MANAGE,
           PERMISSIONS.AUTOMATION_LOG_READ,
+          PERMISSIONS.GAMIFICATION_MANAGE,
         ],
       },
       items: [
@@ -235,6 +247,12 @@ export const getNavigationConfig = (
           path: "admin/categories",
           iconName: "Categories",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
+        },
+        {
+          label: t("navigationSideBar.gamification"),
+          path: "admin/gamification",
+          iconName: "Trophy",
+          testId: NAVIGATION_HANDLES.GAMIFICATION_LINK,
         },
         ...(isStripeConfigured
           ? [

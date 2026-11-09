@@ -14,6 +14,10 @@ export type CompetencyCatalogPage = ResponseData<
   typeof ApiClient.api.competenciesControllerGetCompetencyCatalog
 >;
 export type CompetencyCatalogItem = CompetencyCatalogPage["data"][number];
+export type CompetencyRequirementOption = Pick<
+  CompetencyCatalogItem,
+  "id" | "name" | "levels" | "categoryName" | "archived"
+>;
 export type CompetencyCategory = ResponseData<
   typeof ApiClient.api.competenciesControllerGetCompetencyCategories
 >["data"][number];

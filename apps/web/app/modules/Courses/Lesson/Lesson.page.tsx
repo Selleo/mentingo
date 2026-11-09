@@ -233,6 +233,7 @@ export default function LessonPage() {
                 </p>
               </div>
               <LessonContent
+                showPreviewNotice
                 key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}

@@ -1,6 +1,6 @@
 import {
   ALLOWED_EXCEL_FILE_TYPES,
-  AUDIO_UPLOAD_MAX_BYTES,
+  MAX_AUDIO_FILE_SIZE_BYTES,
   ENTITY_TYPES,
   isAudioFile,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
@@ -362,11 +362,11 @@ export const buildRichTextFileUploadHandler = ({
     const unsupportedAudio = file.type.startsWith("audio/") && !audio;
     if (audio || unsupportedAudio) {
       const invalidType = unsupportedAudio || entityType !== ENTITY_TYPES.LESSON;
-      const oversized = file.size > AUDIO_UPLOAD_MAX_BYTES;
+      const oversized = file.size > MAX_AUDIO_FILE_SIZE_BYTES;
       if (invalidType || oversized) {
         const message = i18n.t(
           invalidType ? "richText.audio.invalidType" : "richText.audio.tooLarge",
-          { maxMB: AUDIO_UPLOAD_MAX_BYTES / 1024 / 1024 },
+          { maxMB: MAX_AUDIO_FILE_SIZE_BYTES / 1024 / 1024 },
         );
         const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
         if (queueId)

@@ -9,10 +9,10 @@ import {
   ServiceUnavailableException,
 } from "@nestjs/common";
 import {
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   CourseAuthoringOrderError,
   ENTITY_TYPES,
   normalizeAuthoringQuizQuestionOrder,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { load as loadHtml } from "cheerio";
@@ -22,6 +22,8 @@ import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { DatabasePg } from "src/common";
 import {
   getCourseAuthoringBlocks,
+  insertCourseAuthoringBlock,
+  CourseAuthoringBlockError,
   normalizeCourseAuthoringHtml,
   replaceCourseAuthoringBlock,
 } from "src/common/utils/courseAuthoringBlocks";
@@ -54,6 +56,10 @@ import {
   validateAuthoringMedia,
   validateAuthoringHtml,
 } from "./course-authoring-html";
+import {
+  authoringImageFigure,
+  referencedAuthoringAssets,
+} from "./course-authoring-image-insertion";
 import {
   mentorCourseContextKey,
   mentorTargetedContextKey,
@@ -103,6 +109,31 @@ export class CourseAuthoringApplyService {
     const operationIds = new Set(input.operations.map((operation) => operation.operationId));
     if (operationIds.size !== input.operations.length)
       throw new BadRequestException("courseAuthoring.errors.duplicateOperation");
+    for (const operation of input.operations) {
+      if (operation.type !== "lesson.image.insert") continue;
+      const { assetId, altText } = operation.payload;
+      if (
+        !altText.trim() ||
+        (operation.payload.caption !== null && !operation.payload.caption.trim()) ||
+        !ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(input.assetMimeTypes[assetId]) ||
+        !input.assetMappings[assetId] ||
+        input.operations.some(
+          (other) =>
+            other.operationId !== operation.operationId &&
+            (referencedAuthoringAssets(other).has(assetId.toLowerCase()) ||
+              (other.targetId === operation.targetId &&
+                (other.type === "lesson.update" ||
+                  other.type === "lesson.delete" ||
+                  other.type === "lesson.block.replace" ||
+                  (other.type === "lesson.metadata.update" &&
+                    other.payload.description !== undefined) ||
+                  (other.type === "lesson.image.insert" &&
+                    other.payload.anchorBlockId === operation.payload.anchorBlockId &&
+                    other.payload.position === operation.payload.position)))),
+        )
+      )
+        throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+    }
     if (
       input.operations.some((operation) =>
         operation.dependencies.some((id) => !operationIds.has(id)),
@@ -239,6 +270,28 @@ export class CourseAuthoringApplyService {
           if (operation.type === "chapter.delete") actualHash = chapter?.deletionBaselineHash;
           if (operation.type === "lesson.metadata.update" && !lesson)
             throw new BadRequestException("courseAuthoring.errors.targetOutsideCourse");
+          if (operation.type === "lesson.image.insert") {
+            if (!lesson || lesson.lessonType !== "content" || createdIds.has(operation.targetId))
+              throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
+            const [content] = await transaction
+              .select({ description: lessons.description })
+              .from(lessons)
+              .where(eq(lessons.id, operation.targetId));
+            // Validate the anchor against the locked baseline before any resource writes.
+            try {
+              insertCourseAuthoringBlock({
+                content: content?.description?.[operation.language] ?? "",
+                anchorBlockId: operation.payload.anchorBlockId,
+                blockId: operation.payload.assetId,
+                position: operation.payload.position,
+                html: authoringImageFigure(operation.payload),
+              });
+            } catch (error) {
+              if (error instanceof CourseAuthoringBlockError)
+                throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
+              throw error;
+            }
+          }
           if (operation.type === "lesson.block.replace" && lesson) {
             if (lesson.lessonType !== "content")
               throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
@@ -388,6 +441,8 @@ export class CourseAuthoringApplyService {
             assetMappings: input.assetMappings,
           };
         } catch (error) {
+          if (error instanceof CourseAuthoringBlockError)
+            throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
           if (error instanceof CourseAuthoringOrderError)
             throw new BadRequestException(error.message);
           throw error;
@@ -465,7 +520,7 @@ export class CourseAuthoringApplyService {
         const { certificateSignatureAssetId, certificateValidity, ...settings } = operation.payload;
         if (
           certificateSignatureAssetId &&
-          !ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES.some(
+          !ALLOWED_LESSON_IMAGE_FILE_TYPES.some(
             (type) => type === input.assetMimeTypes[certificateSignatureAssetId],
           )
         )
@@ -537,6 +592,35 @@ export class CourseAuthoringApplyService {
             allowedMedia,
             false,
           ),
+        });
+        await this.lessonService.updateLesson(
+          targetId,
+          { language: operation.language, description },
+          actor,
+        );
+        return;
+      }
+      case "lesson.image.insert": {
+        const [lesson] = await this.db
+          .select({ description: lessons.description, type: lessons.type })
+          .from(lessons)
+          .where(and(eq(lessons.id, targetId), eq(lessons.tenantId, actor.tenantId)));
+        if (!lesson || lesson.type !== "content")
+          throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
+        const figure = await this.prepareHtml(
+          authoringImageFigure(operation.payload),
+          targetId,
+          input,
+          actor,
+          allowedMedia,
+          false,
+        );
+        const description = insertCourseAuthoringBlock({
+          content: lesson.description?.[operation.language] ?? "",
+          anchorBlockId: operation.payload.anchorBlockId,
+          blockId: operation.payload.assetId,
+          position: operation.payload.position,
+          html: figure,
         });
         await this.lessonService.updateLesson(
           targetId,

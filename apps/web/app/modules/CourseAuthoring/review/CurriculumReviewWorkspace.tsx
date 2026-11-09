@@ -135,7 +135,13 @@ export const CurriculumReviewWorkspace = ({
   const assetSourceHtml = useMemo(
     () =>
       (preview.operations ?? [])
-        .flatMap((operation) => collectStrings(operation.payload))
+        .flatMap((operation) => [
+          ...collectStrings(operation.payload),
+          ...(operation.type === AUTHORING_OPERATION_TYPE.LESSON_IMAGE_INSERT &&
+          typeof operation.payload.assetId === "string"
+            ? [`<img data-authoring-asset-id="${operation.payload.assetId}">`]
+            : []),
+        ])
         .join("\n"),
     [preview.operations],
   );

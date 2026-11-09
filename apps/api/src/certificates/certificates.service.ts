@@ -12,6 +12,8 @@ import {
   COURSE_LEARNING_STATE_KINDS,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  CERTIFICATE_STYLES,
+  CERTIFICATE_CONTENT_SECURITY_POLICY,
   CERTIFICATE_ARCHIVE_REASONS,
   CERTIFICATE_RESET_SCOPES,
   DEFAULT_CERTIFICATE_FONT_COLOR,
@@ -26,7 +28,6 @@ import {
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
 import { and, eq, isNotNull, or, sql } from "drizzle-orm";
-import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 import { match } from "ts-pattern";
 
@@ -43,6 +44,11 @@ import {
   shouldApplyGroupManagerScope,
 } from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import {
+  prepareCertificatePage,
+  waitForCertificateAssets,
+  getCertificateImageDataUri,
+} from "src/common/utils/certificate-renderer";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
@@ -55,6 +61,7 @@ import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { certificates, courseLearningStates, courses, studentCourses } from "src/storage/schema";
 
+import { buildCertificateSharePageHtml } from "./certificate-share-page";
 import { CertificateRepository } from "./certificate.repository";
 import {
   CERTIFICATE_ACTIVITY_TRIGGERS,
@@ -66,7 +73,12 @@ import {
   CERTIFICATE_PROGRESS_RESET_BATCH_SIZE,
 } from "./certificates.batch.constants";
 
-import type { ShareCertificateRecord, ShareRenderContext } from "./certificates.share.types";
+import type {
+  CertificateSharePageContent,
+  ShareCertificateRecord,
+  ShareRenderContext,
+  ShareImageRenderContext,
+} from "./certificates.share.types";
 import type {
   CertificatesQuery,
   AllCertificatesResponse,
@@ -556,11 +568,14 @@ export class CertificatesService implements OnModuleDestroy {
 
     const shareLanguage = this.normalizeLanguage(language);
     const publicCertificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
+    const token = await this.certificateRepository.issueShareToken(certificateId);
+    if (!token)
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
 
     await this.getPublicShareImage(certificateId, shareLanguage);
 
     const shareUrl = this.buildTenantUrl(publicCertificate.tenantHost, "/api/certificates/share", {
-      certificateId,
+      token,
       lang: shareLanguage,
     });
 
@@ -583,6 +598,29 @@ export class CertificatesService implements OnModuleDestroy {
     return this.buildSharePageHtml(context, this.toDataUri(imageBuffer, "image/png"));
   }
 
+  async getPublicSharePageByToken(token: UUIDType, language?: SupportedLanguages): Promise<string> {
+    const certificateId = await this.resolveShareToken(token);
+    return this.getPublicSharePage(certificateId, language);
+  }
+
+  async getPublicShareImageByToken(
+    token: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<Buffer> {
+    const certificateId = await this.resolveShareToken(token);
+    return this.getPublicShareImage(certificateId, language);
+  }
+
+  private async resolveShareToken(token: UUIDType): Promise<string> {
+    const certificateId = await this.certificateRepository.findCertificateIdByShareToken(token);
+
+    if (!certificateId) {
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
+    }
+
+    return certificateId;
+  }
+
   async getPublicShareImage(
     certificateId: UUIDType,
     language?: SupportedLanguages,
@@ -601,7 +639,8 @@ export class CertificatesService implements OnModuleDestroy {
     }
 
     const context = await this.buildShareRenderContext(certificateId, shareLanguage);
-    const imageBuffer = await this.renderPngFromHtml(this.buildShareImageDocument(context));
+    const html = await this.buildShareImageDocument(context);
+    const imageBuffer = await this.renderPngFromHtml(html);
 
     await this.s3Service.uploadFile(imageBuffer, imageKey, "image/png").catch((error) => {
       this.logger.warn(`Certificate share image upload failed: ${error}`);
@@ -644,7 +683,6 @@ export class CertificatesService implements OnModuleDestroy {
     currentUser: CurrentUserType,
     certificateId: UUIDType,
     language?: SupportedLanguages,
-    baseUrl?: string | null,
   ): Promise<{ pdfBuffer: Buffer; filename: string }> {
     const shareLanguage = this.normalizeLanguage(language);
     const learnerScope = getGroupManagerLearnerScopeCondition(currentUser, certificates.userId, [
@@ -674,7 +712,7 @@ export class CertificatesService implements OnModuleDestroy {
       throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
-    const imageSettings = await this.settingsService.getImageS3Keys();
+    const imageSettings = await this.settingsService.getImageS3KeysByTenantId(certificate.tenantId);
     const [platformLogoImageUrl, certificateSignatureImageUrl, backgroundImageUrl] =
       await Promise.all([
         this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
@@ -708,7 +746,7 @@ export class CertificatesService implements OnModuleDestroy {
       },
     });
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html, { baseUrl });
+    const completeHtml = buildSharedCertificateHtmlDocument(html);
     const pdfBuffer = await this.renderPdfFromHtml(completeHtml);
 
     return {
@@ -724,13 +762,10 @@ export class CertificatesService implements OnModuleDestroy {
       const browser = await this.getBrowser();
       page = await browser.newPage();
 
+      await prepareCertificatePage(page);
       await page.setContent(completeHtml, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.waitForSelector("body > *", { timeout: 5_000 });
-      await page
-        .waitForFunction(() => {
-          return !("fonts" in document) || document.fonts.status === "loaded";
-        })
-        .catch(() => {});
+      await waitForCertificateAssets(page);
 
       const pdfBuffer = await page.pdf({
         format: "A4",
@@ -773,13 +808,10 @@ export class CertificatesService implements OnModuleDestroy {
         deviceScaleFactor: 1,
       });
 
+      await prepareCertificatePage(page);
       await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.waitForSelector("body > *", { timeout: 5_000 });
-      await page
-        .waitForFunction(() => {
-          return !("fonts" in document) || document.fonts.status === "loaded";
-        })
-        .catch(() => {});
+      await waitForCertificateAssets(page);
 
       const screenshot = await page.screenshot({
         type: "png",
@@ -810,7 +842,7 @@ export class CertificatesService implements OnModuleDestroy {
     const settings = await this.settingsService.getGlobalSettingsByTenantId(certificate.tenantId);
 
     const shareUrl = this.buildTenantUrl(certificate.tenantHost, "/api/certificates/share", {
-      certificateId,
+      token: certificate.shareToken ?? undefined,
       lang: shareLanguage,
     });
 
@@ -818,23 +850,16 @@ export class CertificatesService implements OnModuleDestroy {
       certificate.tenantHost,
       "/api/certificates/share-image",
       {
-        certificateId,
+        token: certificate.shareToken ?? undefined,
         lang: shareLanguage,
       },
     );
-
-    const certificateSignatureUrl = certificate.certificateSignature
-      ? await this.fileService.getFileUrl(certificate.certificateSignature, {
-          quality: IMAGE_QUALITY.SM,
-        })
-      : null;
 
     return {
       certificate,
       shareUrl,
       shareImageUrl,
       settings,
-      certificateSignatureUrl,
       formattedDate: this.formatDate(certificate.completionDate || null),
       language: shareLanguage,
     };
@@ -857,90 +882,13 @@ export class CertificatesService implements OnModuleDestroy {
   }
 
   private buildSharePageHtml(context: ShareRenderContext, embeddedImageSrc: string): string {
-    const content = this.getSharePageContent(context, embeddedImageSrc);
-
-    return `<!DOCTYPE html>
-    <html lang="${context.language}">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${content.pageTitle}</title>
-        <meta name="description" content="${content.pageDescription}" />
-        <meta name="robots" content="noindex,noarchive" />
-        <link rel="canonical" href="${content.shareUrl}" />
-        ${content.faviconUrl ? `<link rel="icon" href="${content.faviconUrl}" />` : ""}
-        ${content.faviconUrl ? `<link rel="apple-touch-icon" href="${content.faviconUrl}" />` : ""}
-        <meta property="og:title" content="${content.pageTitle}" />
-        <meta property="og:description" content="${content.pageDescription}" />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content="${content.shareUrl}" />
-        <meta property="og:image" content="${content.shareImageUrl}" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="${SHARE_IMAGE_WIDTH}" />
-        <meta property="og:image:height" content="${SHARE_IMAGE_HEIGHT}" />
-        <meta property="og:site_name" content="${content.siteName}" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <style>
-          :root {
-            color-scheme: light;
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          }
-          * { box-sizing: border-box; }
-          body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background:
-              radial-gradient(circle at top right, rgba(63, 88, 182, 0.14), transparent 35%),
-              linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-            color: #0f172a;
-          }
-          .card {
-            width: min(100%, 860px);
-            background: rgba(255,255,255,0.92);
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-          }
-          img {
-            width: 100%;
-            display: block;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            background: #fff;
-          }
-          .actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 18px;
-          }
-          .link {
-            display: inline-flex;
-            padding: 10px 14px;
-            border-radius: 12px;
-            text-decoration: none;
-            color: ${content.contrastColor};
-            background: ${content.primaryColor};
-            font-weight: 600;
-          }
-        </style>
-      </head>
-      <body>
-        <main class="card">
-          <img src="${content.embeddedImage}" alt="${content.courseTitle}" />
-          <div class="actions">
-            <a class="link" href="${content.homeUrl}">${content.openLabel}</a>
-          </div>
-        </main>
-      </body>
-    </html>`;
+    return buildCertificateSharePageHtml(this.getSharePageContent(context, embeddedImageSrc));
   }
 
-  private getSharePageContent(context: ShareRenderContext, embeddedImageSrc: string) {
+  private getSharePageContent(
+    context: ShareRenderContext,
+    embeddedImageSrc: string,
+  ): CertificateSharePageContent {
     const translations = {
       pl: {
         openLabel: "Otwórz platformę",
@@ -983,35 +931,50 @@ export class CertificatesService implements OnModuleDestroy {
     >;
 
     const localizedContent = translations[context.language];
+    const { certificate, settings } = context;
 
     return {
-      pageTitle: escape(localizedContent.pageTitle),
-      pageDescription: escape(localizedContent.pageDescription),
-      siteName: escape(context.certificate.tenantName),
-      courseTitle: escape(context.certificate.courseTitle),
-      shareUrl: escape(context.shareUrl),
-      shareImageUrl: escape(context.shareImageUrl),
-      homeUrl: escape(this.buildTenantUrl(context.certificate.tenantHost, "/", {})),
-      openLabel: escape(localizedContent.openLabel),
-      faviconUrl: escape(
-        context.settings.platformSimpleLogoS3Key ||
-          this.buildTenantUrl(
-            context.certificate.tenantHost,
-            "/app/assets/svgs/app-signet.svg",
-            {},
-          ),
-      ),
-      primaryColor: escape(context.settings.primaryColor || "#3f58b6"),
-      contrastColor: escape(context.settings.contrastColor || "#ffffff"),
-      embeddedImage: escape(embeddedImageSrc),
+      language: context.language,
+      pageTitle: localizedContent.pageTitle,
+      pageDescription: localizedContent.pageDescription,
+      shareUrl: context.shareUrl,
+      shareImageUrl: context.shareImageUrl,
+      imageWidth: SHARE_IMAGE_WIDTH,
+      imageHeight: SHARE_IMAGE_HEIGHT,
+      homeUrl: this.buildTenantUrl(certificate.tenantHost, "/", {}),
+      openLabel: localizedContent.openLabel,
+      logoUrl: settings.platformLogoS3Key ?? null,
+      faviconUrl:
+        settings.platformSimpleLogoS3Key ||
+        this.buildTenantUrl(certificate.tenantHost, "/app/assets/svgs/app-signet.svg", {}),
+      primaryColor: settings.primaryColor,
+      contrastColor: settings.contrastColor,
+      embeddedImage: embeddedImageSrc,
     };
   }
 
-  private buildShareImageDocument(context: ShareRenderContext): string {
-    return this.buildShareImageHtmlDocument(this.buildShareImageMarkup(context));
+  private async buildShareImageDocument(context: ShareRenderContext): Promise<string> {
+    const { certificate } = context;
+    const imageSettings = await this.settingsService.getImageS3KeysByTenantId(certificate.tenantId);
+
+    const [platformLogoDataUri, certificateSignatureUrl, certificateBackgroundUrl] =
+      await Promise.all([
+        this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
+        this.getImageDataUriFromS3Key(certificate.certificateSignature),
+        this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
+      ]);
+
+    return this.buildShareImageHtmlDocument(
+      this.buildShareImageMarkup({
+        ...context,
+        platformLogoDataUri,
+        certificateSignatureUrl,
+        certificateBackgroundUrl,
+      }),
+    );
   }
 
-  private buildShareImageMarkup(context: ShareRenderContext): string {
+  private buildShareImageMarkup(context: ShareImageRenderContext): string {
     const accentColor = context.certificate.certificateFontColor || DEFAULT_CERTIFICATE_FONT_COLOR;
 
     return buildCertificateMarkup({
@@ -1019,9 +982,9 @@ export class CertificatesService implements OnModuleDestroy {
       courseName: context.certificate.courseTitle || "",
       completionDate: context.formattedDate,
       expiryDate: this.formatDate(context.certificate.expiresAt || null),
-      platformLogoUrl: context.settings.platformLogoS3Key,
+      platformLogoUrl: context.platformLogoDataUri,
       signatureImageUrl: context.certificateSignatureUrl,
-      backgroundImageUrl: context.settings.certificateBackgroundImage,
+      backgroundImageUrl: context.certificateBackgroundUrl,
       lang: context.language,
       colorTheme: {
         titleColor: accentColor,
@@ -1060,7 +1023,8 @@ export class CertificatesService implements OnModuleDestroy {
           }
         </style>
         <title>Certificate</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <style>${CERTIFICATE_STYLES}</style>
+        ${CERTIFICATE_CONTENT_SECURITY_POLICY}
       </head>
       <body>
         ${html}
@@ -1089,7 +1053,7 @@ export class CertificatesService implements OnModuleDestroy {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ): string {
-    return `${tenantId}/certificate-share/v2/${certificateId}/${language}.png`;
+    return `${tenantId}/certificate-share/v4/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
@@ -1122,25 +1086,7 @@ export class CertificatesService implements OnModuleDestroy {
   }
 
   private async getImageDataUriFromS3Key(s3Key?: string | null): Promise<string | null> {
-    if (!s3Key) {
-      return null;
-    }
-
-    try {
-      const [fileBuffer, contentType] = await Promise.all([
-        this.fileService.getRawFileBuffer(s3Key),
-        this.fileService.getFileContentType(s3Key).catch(() => null),
-      ]);
-
-      if (!fileBuffer?.length || !contentType) {
-        return null;
-      }
-
-      return this.toDataUri(fileBuffer, contentType);
-    } catch (error) {
-      this.logger.warn(`Failed to get S3 image buffer for key ${s3Key}: ${error}`);
-      return null;
-    }
+    return getCertificateImageDataUri(this.fileService, s3Key);
   }
 
   private scheduleCertificateImagePrewarm(certificateId: UUIDType): void {

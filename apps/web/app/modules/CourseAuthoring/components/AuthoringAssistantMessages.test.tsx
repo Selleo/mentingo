@@ -56,6 +56,42 @@ const authoringPart = (
 });
 
 describe("AuthoringAssistantMessages", () => {
+  it("renders paginated selected-source reads once after replaying the conversation", () => {
+    renderWith().render(
+      <AuthoringAssistantMessages
+        chatMessages={[
+          {
+            id: "request-1-assistant",
+            role: "assistant",
+            metadata: { requestId: "request-1" },
+            parts: Array.from({ length: 20 }, (_, index) =>
+              authoringPart(
+                "request-1",
+                "request-1-assistant",
+                {
+                  partId: `read-${index}`,
+                  partKind: "tool",
+                  taskId: "plan",
+                  status: "completed",
+                  tool: {
+                    toolCallId: `read-${index}`,
+                    toolName: "read_selected_sources",
+                    display: "Selected file evidence loaded",
+                    status: "completed",
+                    result: null,
+                  },
+                },
+                index + 1,
+              ),
+            ),
+          },
+        ]}
+      />,
+    );
+    expect(screen.getAllByText("Selected file evidence loaded")).toHaveLength(1);
+    expect(screen.getByTestId("course-authoring-tool-read-19")).toBeVisible();
+  });
+
   it("shows an autonomous application failure during live replay and after reopening", () => {
     const requestId = "request-1";
     const text = "The application status could not be confirmed. Check the course before retrying.";

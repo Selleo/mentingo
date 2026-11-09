@@ -317,6 +317,32 @@ describe("getNavigationConfig", () => {
     expect(phishing?.items[0].accessRequirement).toEqual(phishing?.restrictedAccessRequirement);
   });
 
+  it("shows leaderboards only when enabled and gates them by the leaderboard permission", () => {
+    const leaderboardsItem = (isLeaderboardsEnabled: boolean) =>
+      mapNavigationItems(
+        getNavigationConfig(
+          t,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          [],
+          false,
+          isLeaderboardsEnabled,
+        ),
+      )
+        .flatMap((group) => group.items)
+        .find((item) => item.path === "leaderboards");
+
+    expect(leaderboardsItem(false)).toBeUndefined();
+    expect(leaderboardsItem(true)?.accessRequirement).toEqual({
+      allOf: [PERMISSIONS.GAMIFICATION_LEADERBOARD_READ],
+    });
+  });
+
   const getCourseItems = (isLearningPathsEnabled: boolean, shouldShowLearningPaths: boolean) =>
     getNavigationConfig(
       t,

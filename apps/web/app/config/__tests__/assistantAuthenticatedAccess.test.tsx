@@ -19,8 +19,25 @@ vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUser: () => ({ data: session.user, isLoading: false }),
   useCurrentUserSuspense: () => ({ data: session.user }),
 }));
+vi.mock("~/api/queries/useAuthSession", async () => {
+  const { AUTH_SESSION_STATUS } = await import("@repo/shared");
+  return {
+    useAuthSession: () => ({
+      data: session.user && {
+        status: session.user.shouldVerifyMFA
+          ? AUTH_SESSION_STATUS.MFA_REQUIRED
+          : AUTH_SESSION_STATUS.AUTHENTICATED,
+      },
+      isLoading: false,
+      isError: false,
+    }),
+  };
+});
 vi.mock("~/api/queries/useCurrentUserSessionSuspense", () => ({
   useCurrentUserSessionSuspense: () => ({ data: session.user }),
+}));
+vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
+  GamificationRewardToasts: () => null,
 }));
 vi.mock("~/modules/Dashboard/Dashboard", () => ({
   Dashboard: () => (
@@ -48,7 +65,7 @@ function renderAssistant(path: string) {
 beforeEach(() => {
   session.user = null;
   useNavigationHistoryStore.getState().clearHistory();
-  useCurrentUserStore.setState({ currentUser: undefined, hasVerifiedMFA: false });
+  useCurrentUserStore.setState({ currentUser: undefined });
 });
 
 describe("Assistant authenticated route access", () => {

@@ -92,7 +92,9 @@ test("admin can preview an uploaded login-page document", async ({
     await expect(
       page.getByTestId(SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_PREVIEW_DIALOG),
     ).toBeVisible();
-    await expect(page.locator(`iframe[title="${displayName}"]`)).toBeVisible();
+    await expect(
+      page.getByTestId(SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_PREVIEW_DOCUMENT).locator("canvas"),
+    ).toBeVisible();
   });
 });
 

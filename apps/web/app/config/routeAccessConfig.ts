@@ -89,6 +89,7 @@ const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
 
 export const routeAccessConfig = createRouteConfig({
   competencies: { allOf: [PERMISSIONS.COMPETENCIES_USE] },
+  leaderboards: { allOf: [PERMISSIONS.GAMIFICATION_LEADERBOARD_READ] },
   phishing: { anyOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.PHISHING_REPORT_READ] },
   "phishing/new": { allOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.COURSE_ENROLLMENT] },
   "phishing/:id": { allOf: [PERMISSIONS.PHISHING_REPORT_READ] },
@@ -183,6 +184,8 @@ export const routeAccessConfig = createRouteConfig({
   "admin/categories/*": {
     allOf: [PERMISSIONS.CATEGORY_MANAGE],
   },
+  "admin/gamification": { allOf: [PERMISSIONS.GAMIFICATION_MANAGE] },
+  "admin/gamification/*": { allOf: [PERMISSIONS.GAMIFICATION_MANAGE] },
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,
   "provider-information": PUBLIC,

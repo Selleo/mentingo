@@ -128,6 +128,7 @@ export class UserService {
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
     [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
     [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "Group Manager",
+    [SYSTEM_ROLE_SLUGS.REVIEWER]: "Reviewer",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
   private readonly SYSTEM_ROLE_PRIORITY: Record<string, number> = {
@@ -135,7 +136,8 @@ export class UserService {
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: 1,
     [SYSTEM_ROLE_SLUGS.TRAINER]: 2,
     [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: 3,
-    [SYSTEM_ROLE_SLUGS.STUDENT]: 4,
+    [SYSTEM_ROLE_SLUGS.REVIEWER]: 4,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: 5,
   };
 
   constructor(
@@ -257,7 +259,8 @@ export class UserService {
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.TRAINER} THEN 2
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.GROUP_MANAGER} THEN 3
-            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 4
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.REVIEWER} THEN 4
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 5
             ELSE 999
           END
         `,
@@ -1431,6 +1434,7 @@ export class UserService {
           reason: SESSION_REVOCATION_SOCKET.REASONS.ROLES_CHANGED,
           messageKey: SESSION_REVOCATION_SOCKET.MESSAGE_KEYS.PERMISSIONS_UPDATED,
         });
+        this.wsGateway.disconnectUser(userId);
       }),
     );
   }

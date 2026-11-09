@@ -83,6 +83,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
   function setup() {
     const persistedLessonType = jest.fn().mockReturnValue("quiz");
+    const persistedLessonDescription = jest.fn().mockReturnValue("");
     let lessonRowsSelected = false;
     const readChapters = jest.fn().mockResolvedValue([{ id: chapterId }]);
     const readLessons = jest.fn().mockImplementation(async () => [
@@ -109,7 +110,11 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
         .mockImplementation(() => (lessonRowsSelected ? readLessons() : readChapters())),
       for: jest.fn().mockResolvedValue([]),
       *[Symbol.iterator]() {
-        yield { id: chapterId, description: "", type: persistedLessonType() };
+        yield {
+          id: chapterId,
+          description: persistedLessonDescription(),
+          type: persistedLessonType(),
+        };
       },
     };
     query.from.mockReturnValue(query);
@@ -214,6 +219,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       service,
       persistedLessonCount,
       persistedLessonType,
+      persistedLessonDescription,
       readChapters,
       readLessons,
       input,
@@ -476,6 +482,160 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       expect(test.updateLesson.mock.calls[0][1].description).not.toContain("attacker.example");
     },
   );
+  it("inserts a native image resource while preserving all existing prose, settings and sibling blocks", async () => {
+    const test = setup();
+    const anchorBlockId = "00000000-0000-4000-8000-000000000091";
+    const siblingBlockId = "00000000-0000-4000-8000-000000000092";
+    const assetId = "00000000-0000-4000-8000-000000000093";
+    const original = `<h2 data-authoring-block-id="${anchorBlockId}" style="color: red">Original heading</h2><p data-authoring-block-id="${siblingBlockId}">Keep <strong>every</strong> word.</p>`;
+    test.persistedLessonType.mockReturnValue("content");
+    test.persistedLessonDescription.mockReturnValue({ en: original });
+    test.context.getContext.mockResolvedValue({
+      baselineHash: "course",
+      fieldHashes: {},
+      chapters: [
+        {
+          id: chapterId,
+          baselineHash: "chapter",
+          lessons: [
+            {
+              id: lessonId,
+              baselineHash: "b".repeat(64),
+              lessonType: "content",
+              assessmentAttemptCount: 0,
+            },
+          ],
+        },
+      ],
+    });
+    test.input.assetMappings = { [assetId]: `${chapterId}/image.png` };
+    test.input.assetMimeTypes = { [assetId]: "image/png" };
+    test.input.operations = [
+      {
+        type: "lesson.image.insert",
+        operationId,
+        targetId: lessonId,
+        language: "en",
+        baselineHash: "b".repeat(64),
+        dependencies: [],
+        payload: {
+          assetId,
+          anchorBlockId,
+          position: "after",
+          caption: "Chart <caption>",
+          altText: "Source chart",
+        },
+      },
+    ];
+    await test.service.applyPreparedExport(test.input, actor);
+    expect(test.createLessonResources).toHaveBeenCalledTimes(1);
+    expect(test.createLessonResources).toHaveBeenCalledWith(lessonId, [
+      expect.objectContaining({ reference: `${chapterId}/image.png`, contentType: "image/png" }),
+    ]);
+    const patch = test.updateLesson.mock.calls[0][1];
+    expect(Object.keys(patch).sort()).toEqual(["description", "language"]);
+    const $ = loadHtml(patch.description);
+    expect($("h2").next().is("figure")).toBe(true);
+    expect($("figure [data-node-type=image]").attr("data-resource-id")).toBe(lessonId);
+    expect($("figcaption").text()).toBe("Chart <caption>");
+    $("figure").remove();
+    expect($("body").html()).toBe(original);
+
+    test.createLessonResources.mockClear();
+    test.input.operations[0].baselineHash = "c".repeat(64);
+    await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.baselineChanged",
+    );
+    expect(test.createLessonResources).not.toHaveBeenCalled();
+    test.input.operations[0].baselineHash = "b".repeat(64);
+    test.input.assetMimeTypes[assetId] = "text/html";
+    await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.invalidOperations",
+    );
+    expect(test.createLessonResources).not.toHaveBeenCalled();
+    test.input.assetMimeTypes[assetId] = "image/png";
+    test.input.operations.push({ ...test.input.operations[0], operationId: assetId });
+    await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.invalidOperations",
+    );
+  });
+
+  it.each([
+    "lesson.update",
+    "lesson.block.replace",
+    "lesson.metadata.update",
+    "lesson.delete",
+    "lesson.image.insert",
+  ] as const)("rejects conflicting %s in either input order before any write", async (type) => {
+    const assetId = "00000000-0000-4000-8000-000000000093";
+    const anchorBlockId = "00000000-0000-4000-8000-000000000091";
+    const image: Extract<AuthoringOperation, { type: "lesson.image.insert" }> = {
+      type: "lesson.image.insert",
+      operationId,
+      targetId: lessonId,
+      baselineHash: "b".repeat(64),
+      language: "en",
+      dependencies: [],
+      payload: { assetId, anchorBlockId, position: "after", caption: null, altText: "Source" },
+    };
+    const base = {
+      operationId: anchorBlockId,
+      targetId: lessonId,
+      baselineHash: "b".repeat(64),
+      language: "en" as const,
+      dependencies: [],
+    };
+    const variants: Record<typeof type, AuthoringOperation> = {
+      "lesson.update": {
+        ...base,
+        type: "lesson.update",
+        chapterId,
+        payload: {
+          lessonType: "content",
+          title: "Rewrite",
+          description: "<p>Unrequested prose</p>",
+        },
+      },
+      "lesson.block.replace": {
+        ...base,
+        type: "lesson.block.replace",
+        payload: { blockId: anchorBlockId, html: "<p>Replacement</p>" },
+      },
+      "lesson.metadata.update": {
+        ...base,
+        type: "lesson.metadata.update",
+        payload: { description: "Replacement prose" },
+      },
+      "lesson.delete": { ...base, type: "lesson.delete" },
+      "lesson.image.insert": {
+        ...image,
+        ...base,
+        payload: { ...image.payload, assetId: "00000000-0000-4000-8000-000000000094" },
+      },
+    };
+    for (const operations of [
+      [image, variants[type]],
+      [variants[type], image],
+    ]) {
+      const test = setup();
+      test.input.operations = operations;
+      test.input.assetMappings = {
+        [assetId]: "fixture/image.png",
+        "00000000-0000-4000-8000-000000000094": "fixture/second.png",
+      };
+      test.input.assetMimeTypes = {
+        [assetId]: "image/png",
+        "00000000-0000-4000-8000-000000000094": "image/png",
+      };
+      await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+        "courseAuthoring.errors.invalidOperations",
+      );
+      expect(test.createLessonResources).not.toHaveBeenCalled();
+      expect(test.updateLesson).not.toHaveBeenCalled();
+      expect(test.removeLesson).not.toHaveBeenCalled();
+    }
+  });
+
   it("preserves lesson HTML around figure images while creating native resources", async () => {
     const test = setup();
     test.persistedLessonType.mockReturnValue("content");
@@ -664,6 +824,58 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(savedImage.attr("data-src")).toBe(`/api/lesson/lesson-resource/${lessonId}`);
     expect(savedImage.attr("data-resource-id")).toBe(lessonId);
     expect(validate(savedImage.attr("data-authoring-block-id") ?? "")).toBe(true);
+  });
+
+  it("imports an explicitly placed source figure at its anchor with its caption and no staging URI", async () => {
+    const test = setup();
+    const figureId = "00000000-0000-4000-8000-000000000099";
+    const anchorId = "00000000-0000-4000-8000-000000000098";
+    test.input.operations = [
+      {
+        type: "lesson.create",
+        operationId,
+        targetId: operationId,
+        chapterId,
+        displayOrder: 0,
+        baselineHash: null,
+        language: "en",
+        dependencies: [],
+        payload: {
+          lessonType: "content",
+          title: "Quarterly revenue",
+          description:
+            `<p data-authoring-block-id="${anchorId}">Explain the revenue trend.</p>` +
+            `<figure data-authoring-block-id="${figureId}"><img src="authoring-asset:${figureId}" data-authoring-asset-id="${figureId}" alt="Revenue increases in Q2"><figcaption>Quarterly revenue from the source report</figcaption></figure>` +
+            "<p>Apply the comparison to the example.</p>",
+        },
+      },
+    ];
+    test.input.assetMappings = { [figureId]: `${chapterId}/source-figure.png` };
+    test.input.assetMimeTypes = { [figureId]: "image/png" };
+
+    await test.service.applyPreparedExport(test.input, actor);
+
+    expect(test.createLessonResources).toHaveBeenCalledTimes(1);
+    expect(test.createLessonResources).toHaveBeenCalledWith(operationId, [
+      expect.objectContaining({
+        reference: `${chapterId}/source-figure.png`,
+        contentType: "image/png",
+      }),
+    ]);
+    const savedDescription = test.updateLesson.mock.calls[0][1].description as string;
+    const $ = loadHtml(savedDescription);
+    const figure = $("figure");
+    expect(figure).toHaveLength(1);
+    expect(figure.prev("p").text()).toBe("Explain the revenue trend.");
+    expect(figure.next("p").text()).toBe("Apply the comparison to the example.");
+    expect(figure.find("figcaption").text()).toBe("Quarterly revenue from the source report");
+    const resource = figure.find('div[data-node-type="image"]');
+    expect(resource).toHaveLength(1);
+    expect(resource.attr("data-src")).toBe(`/api/lesson/lesson-resource/${lessonId}`);
+    expect(resource.attr("data-alt")).toBe("Revenue increases in Q2");
+    expect(savedDescription).not.toContain("authoring-asset:");
+    expect(savedDescription).not.toContain("data-authoring-asset-id");
+    expect(savedDescription).not.toContain(`${chapterId}/source-figure.png`);
   });
 
   it("applies an exported zero-hour quiz cooldown as no native cooldown", async () => {

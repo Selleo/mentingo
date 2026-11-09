@@ -285,7 +285,7 @@ export default function LoginPage() {
       <UploadFilesToLoginPagePreviewDialog
         open={isPreviewDialogOpen}
         resourceName={previewResource?.name ?? t("loginFilesUpload.unnamedFile")}
-        resourceUrl={previewResource?.resourceUrl ?? ""}
+        resourceId={previewResource?.id ?? null}
         onClose={handleClosePreviewDialog}
       />
     </>

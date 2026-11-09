@@ -516,6 +516,11 @@
             "ready": "Dnešní trénink je připraven.",
             "failed": "Generování selhalo. Otevřete jej a zkuste to znovu."
           }
+        },
+        "gamification": {
+          "description": "Vaše úroveň, XP a nejnovější úspěchy",
+          "empty": "Dokončete lekce a kurzy a získejte svůj první úspěch.",
+          "recentRewards": "Nejnovější úspěchy"
         }
       },
       "commonDescription": "Klíčové informace na první pohled",
@@ -621,6 +626,9 @@
           "reorderSuccess": "Pořadí úkolů bylo uloženo.",
           "reorderError": "Pořadí úkolů se nepodařilo uložit."
         }
+      },
+      "gamification": {
+        "title": "Úroveň a úspěchy"
       }
     }
   },
@@ -744,7 +752,8 @@
       "contentCreator": "Tvůrce obsahu",
       "trainer": "Trainer",
       "student": "Student",
-      "groupManager": "Správce skupin"
+      "groupManager": "Správce skupin",
+      "reviewer": "Hodnotitel"
     },
     "languages": {
       "en": "Angličtina",
@@ -807,7 +816,8 @@
     "exitFullscreen": "Ukončete celou obrazovku",
     "refreshPage": "Obnovit stránku",
     "validation": {
-      "messageRequired": "Zpráva je povinná."
+      "messageRequired": "Zpráva je povinná.",
+      "nameMaxLength": "Může mít nejvýše {{max}} znaků."
     }
   },
   "lessons": {
@@ -826,6 +836,7 @@
     "replace": "Kliknutím nahradíte",
     "toast": {
       "fileUploadedSuccessfully": "Soubor byl úspěšně nahrán",
+      "uploadFailed": "Nahrání souboru se nezdařilo. Zkontrolujte typ a velikost souboru a zkuste to znovu.",
       "videoFailed": "Nahrání videa se nezdařilo",
       "videoTooLarge": "Video soubor překračuje maximální povolenou velikost",
       "videoReady": "Video je připraveno k použití",
@@ -836,9 +847,9 @@
       "uploadForbidden": "Toto nahrání nepatří aktuálnímu uživateli."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG nebo SVG",
-      "video": "MP4, MOV, MPEG-2 nebo Hevc (max. do 5 GB)",
-      "presentation": "PPT/PPTX (max. do 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM nebo OGG (max. {{maxSize}})",
+      "presentation": "PPTX nebo ODP (max. {{maxSize}})"
     },
     "processing": {
       "title": "Video se zpracovává",
@@ -895,7 +906,7 @@
       "setUpCourse": "Nastavit kurz",
       "provideDetails": "Zadejte podrobnosti pro vytvoření nového kurzu",
       "uploadFileHeader": "Kliknutím nahrajte nebo přetáhněte",
-      "uploadFileBody": "SCORM soubor .zip (max. do 500 MB)",
+      "uploadFileBody": "SCORM soubor .zip (max. {{maxSize}})",
       "pricing": "Ceny",
       "status": "Postavení",
       "setUpPricing": "Stanovte cenu kurzu",
@@ -964,7 +975,8 @@
         "invalidAttempt": "Pokus SCORM je neplatný.",
         "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
         "contentNotFound": "Obsah SCORM nebyl nalezen.",
-        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup.",
+        "contentUnavailable": "Obsah SCORM je dočasně nedostupný. Obraťte se na správce."
       }
     },
     "coursePlaceholder": {
@@ -982,7 +994,7 @@
       "requirements": {
         "title": "Požadavky na balíček",
         "version": "Balíček SCORM 1.2",
-        "archive": "Archiv .zip do 500MB",
+        "archive": "Archiv .zip do {{maxSize}}",
         "metadata": "Metadata kurzu lze upravit před importem"
       },
       "packageSection": "Balíček SCORM",
@@ -997,11 +1009,22 @@
       "replacePackage": "Nahradit balíček",
       "removePackage": "Odebrat balíček",
       "uploadThumbnail": "Nahrát miniaturu",
-      "uploadThumbnailDescription": "PNG, JPG nebo JPEG do 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
       "thumbnailPreviewAlt": "Náhled miniatury kurzu",
       "submit": "Vytvořit kurz SCORM",
       "creating": "Vytváření kurzu SCORM...",
-      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API"
+      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API",
+      "categoryRequired": "Kategorie je povinná.",
+      "descriptionMaxLength": "Popis může obsahovat nejvýše {{maxLength}} znaků.",
+      "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
+      "languageInvalid": "Vyberte podporovaný jazyk.",
+      "packageInvalidType": "Balíček SCORM musí být soubor .zip",
+      "packageRequired": "Balíček SCORM je povinný.",
+      "packageTooLarge": "Balíček SCORM musí být menší než {{maxSize}}",
+      "thumbnailInvalid": "Miniatura musí být platný obrázek",
+      "thumbnailInvalidType": "Miniatura musí být PNG, JPG/JPEG, WEBP nebo SVG",
+      "thumbnailTooLarge": "Miniatura musí být menší než {{maxSize}}",
+      "titleMinLength": "Název musí mít alespoň 2 znaky."
     },
     "lesson": {
       "packageSection": "Balíček SCORM",
@@ -1013,7 +1036,7 @@
       "validation": {
         "titleRequired": "Název je povinný",
         "packageRequired": "Balíček SCORM je povinný",
-        "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
+        "packageTooLarge": "Balíček SCORM musí být menší než {{maxSize}}",
         "packageInvalidType": "Balíček SCORM musí být soubor .zip"
       }
     }
@@ -1073,7 +1096,9 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
-    "reports": "Přehledy"
+    "reports": "Přehledy",
+    "leaderboards": "Žebříčky",
+    "gamification": "Gamifikace"
   },
   "microsoftCalendar": {
     "title": "Kalendář Microsoft",
@@ -2304,7 +2329,9 @@
         "live_training": "živá školení",
         "activity_log": "protokol aktivit",
         "competencies": "kompetence",
-        "other": "funkce platformy"
+        "other": "funkce platformy",
+        "gamification": "gamifikaci",
+        "quiz_grading": "hodnocení kvízů"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -2398,7 +2425,14 @@
         "live_training_end": "Může ukončovat relace živého školení.",
         "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
         "ai_thread_read": "Může zobrazit všechny konverzace s AI a jejich uložená hodnocení.",
-        "activity_log_read": "Může zobrazit protokoly aktivit."
+        "activity_log_read": "Může zobrazit protokoly aktivit.",
+        "gamification_read": "Zobrazit úrovně, XP a úspěchy.",
+        "gamification_earn_hidden": "Získávat skryté úspěchy.",
+        "gamification_leaderboard_read": "Zobrazit žebříčky svých skupin a žebříček organizace, pokud je veřejný.",
+        "gamification_leaderboard_read_all": "Zobrazit žebříček organizace a žebříčky všech skupin.",
+        "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace.",
+        "quiz_grading_read": "Zobrazit frontu otevřených odpovědí čekajících na hodnocení.",
+        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty."
       }
     },
     "dropdown": {
@@ -2980,7 +3014,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
-        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM nebo OGG (max. {{maxSize}})",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",
@@ -3015,7 +3049,7 @@
           "groups": "Skupiny",
           "users": "Uživatelé"
         },
-        "certificateSignatureRequirements": "PNG nebo SVG (doporučené průhledné pozadí)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
         "certificatePreviewTitle": "Náhled certifikátu",
         "certificatePreviewDescription": "Otevřete náhled a upravte jazyk a barvu.",
         "certificatePreviewButton": "Náhled",
@@ -3037,7 +3071,7 @@
       },
       "validation": {
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
-        "titleMaxLength": "Název musí mít maximálně 250 znaků.",
+        "titleMaxLength": "Název musí mít maximálně {{max}} znaků.",
         "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
         "categoryRequired": "Kategorie je povinná",
         "certificateManageDenied": "Nemůžete spravovat certifikáty pro tento kurz.",
@@ -3164,11 +3198,12 @@
           "passThresholdMax": "Práh průchodu nesmí překročit 10",
           "titleMinLength": "Název je příliš krátký (min. 2 znaky)",
           "titleMaxLength": "Název je příliš dlouhý (max. 250 znaků)",
-          "maxFileSize": "Velikost souboru musí být menší než {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "Velikost souboru musí být menší než {{maxSize}}",
           "maxFileNumber_one": "Nemůžete nahrát více než 1 soubor",
           "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
           "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
-          "sourceUrlRequired": "Adresa URL zdroje je povinná"
+          "sourceUrlRequired": "Adresa URL zdroje je povinná",
+          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -3242,8 +3277,8 @@
           "voiceMode": "Hlasový režim",
           "ttsPreset": "Předvolba TTS",
           "customTTSReference": "Vlastní reference TTS",
-          "includeFiles_one": "Připojte až 1 soubor pod {{ MAX_FILE_SIZE }} MB, který bude použit jako kontext v lekcích",
-          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{ MAX_FILE_SIZE }} MB, které budou použity jako kontext v lekcích"
+          "includeFiles_one": "Připojte až 1 soubor pod {{maxSize}}, který bude použit jako kontext v lekcích",
+          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích"
         },
         "placeholder": {
           "title": "Uveďte název lekce...",
@@ -3784,7 +3819,7 @@
           "leaveContentCancel": "Pokračovat v úpravách",
           "leaveContentDiscard": "Opustit bez uložení",
           "dropOrClick": "Přetáhněte obrázek sem nebo jej nahrajte kliknutím",
-          "allowedFormats": "PNG, JPG nebo SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Popište, jak by se měl AI Mentor chovat během lekce. Zahrňte kontext, roli nebo scénář, který by AI měla následovat. To určuje, jak bude AI vést konverzaci.",
           "updateAiMentorAvatarDescription": "Nahrajte nový obrázek pro AI mentora nebo odeberte aktuální.",
           "updateAiMentorAvatar": "Aktualizujte avatar AI mentora",
@@ -4326,6 +4361,7 @@
       "loading": "Načítání obsahu SCORM...",
       "launchFailed": "Obsah SCORM se nepodařilo spustit.",
       "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "contentAccessExpired": "Přístup k obsahu SCORM se nepodařilo obnovit. Chcete-li pokračovat, znovu otevřete lekci.",
       "saveFailed": "Postup SCORM se nepodařilo uložit.",
       "saving": "Ukládání postupu",
       "previousSco": "Předchozí část",
@@ -4431,8 +4467,8 @@
     },
     "preview": {
       "title": "Prohlížíte si náhled kurzu",
-      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy, účastnit se aktivit a ukládat svůj postup.",
-      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy, účastnit se aktivit a sledovat svůj postup."
+      "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy a ukládat svůj postup.",
+      "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy a sledovat svůj postup."
     }
   },
   "studentCourseView": {
@@ -4471,6 +4507,7 @@
         "stopVoiceRecording": "Zastavit nahrávání hlasu",
         "taskDescription": "Popis úkolu",
         "taskButton": "Popis úkolu",
+        "taskDescriptionEmpty": "K této lekci nebyl přidán popis úkolu.",
         "resultButton": "Výsledek",
         "resultButtonDisabledTooltip": "Nejprve zkontrolujte lekci, abyste viděli výsledek.",
         "taskDescriptionExpand": "Kliknutím rozbalíte",
@@ -4672,13 +4709,13 @@
   },
   "certificateBackgroundUpload": {
     "title": "Nahrání certifikátu na pozadí",
-    "description": "Nahrajte obrázek na pozadí certifikátu.",
+    "description": "Pozadí za obsahem certifikátu.",
     "button": {
       "removeCertificateBackgroundImage": "Smazat pozadí certifikátu",
       "preview": "Náhled"
     },
     "field": {
-      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "other": {
       "uploading": "Nahrávání...",
@@ -4817,7 +4854,8 @@
       "student": "Student",
       "content_creator": "Tvůrce obsahu",
       "trainer": "Trenér",
-      "group_manager": "Správce skupin"
+      "group_manager": "Správce skupin",
+      "reviewer": "Hodnotitel"
     },
     "switch": {
       "enabled": "Povoleno",
@@ -4825,6 +4863,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "Nastavení vynucení MFA byla úspěšně aktualizována.",
+      "mfaVerificationRequired": "Pro vaši roli je nyní vyžadováno MFA. Pro pokračování jej nastavte nebo ověřte.",
       "mfaEnforcementUpdateFailed": "Aktualizace nastavení vynucení MFA se nezdařila."
     }
   },
@@ -4958,10 +4997,10 @@
   },
   "platformLogo": {
     "header": "Logo platformy",
-    "subHeader": "Nahrajte vlastní logo pro vaši platformu. Podporované formáty: PNG, SVG",
+    "subHeader": "Hlavní logo zobrazené na platformě.",
     "field": {
       "uploadLabel": "Obrázek loga",
-      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Smazat logo platformy"
@@ -4974,10 +5013,10 @@
   },
   "platformSimpleLogo": {
     "header": "Jednoduché logo platformy (ikona)",
-    "subHeader": "Nahrajte vlastní logo, které bude použito jako signet a favicon. Podporované formáty: PNG, SVG",
+    "subHeader": "Kompaktní logo a favicon prohlížeče.",
     "field": {
       "uploadLabel": "Obrázek loga",
-      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Odstranit logo ikony platformy"
@@ -4988,15 +5027,56 @@
       "logoFetchError": "Chyba při načítání jednoduchého loga platformy"
     }
   },
+  "brandingImages": {
+    "title": "Obrázky značky",
+    "description": "Loga a obrázky pozadí používané na platformě, přihlašovací stránce a certifikátech."
+  },
   "organizationTheme": {
     "title": "Téma organizace",
-    "description": "Přizpůsobte si vzhled své platformy výběrem barvy motivu, která odráží značku vaší organizace."
+    "description": "Přizpůsobte si vzhled své platformy výběrem barvy motivu, která odráží značku vaší organizace.",
+    "primaryColor": {
+      "label": "Primární barva",
+      "description": "Tlačítka a klíčová zvýraznění"
+    },
+    "contrastColor": {
+      "label": "Text na primární barvě",
+      "description": "Text a ikony na primárních tlačítkách"
+    },
+    "backgroundColor": {
+      "label": "Pozadí",
+      "description": "Pozadí stránky za obsahem"
+    },
+    "accentColor": {
+      "label": "Akcent",
+      "description": "Odkazy, karty, obrysová tlačítka a štítky",
+      "adjustedDescription": "Ztmaveno z primární barvy, aby zůstalo čitelné"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Obnovit auto",
+    "pickColor": "Vybrat: {{label}}",
+    "contrastTooltip": {
+      "passes": "Kontrastní poměr splňuje WCAG 2 AA (alespoň {{minimum}}:1 pro běžný text).",
+      "fails": "Kontrastní poměr nesplňuje WCAG 2 AA, které vyžaduje alespoň {{minimum}}:1 pro běžný text."
+    },
+    "lowContrast": "Špatně čitelné. Doporučený kontrast je alespoň {{minimum}}:1",
+    "preview": {
+      "title": "Náhled",
+      "courseTitle": "Úvod do designu",
+      "courseDetails": "12 lekcí · 3 hodiny",
+      "badge": "Probíhá",
+      "overviewTab": "Přehled",
+      "lessonsTab": "Lekce",
+      "progress": "Pokrok",
+      "primaryButton": "Pokračovat ve studiu",
+      "outlineButton": "Uložit na později",
+      "link": "Zobrazit osnovu"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Nahrání obrázku na pozadí přihlášení",
-    "description": "Nahrajte vlastní obrázek na pozadí pro přihlašovací stránku organizace.",
+    "description": "Pozadí přihlašovací stránky.",
     "field": {
-      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Smazat obrázek na pozadí přihlášení"
@@ -5019,11 +5099,16 @@
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru.",
+      "invalidFileType": "Soubor je neplatný nebo jeho formát není podporován.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
       "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}.",
-      "audioFileTooLarge": "Zvukový soubor je příliš velký. Nahrajte zvuk o velikosti do 200 MB.",
-      "rangeNotSatisfiable": "Požadovaný rozsah bajtů není k dispozici."
+      "audioFileTooLarge": "Zvukový soubor je příliš velký. Nahrajte zvuk o velikosti do {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "Požadovaný rozsah bajtů není k dispozici.",
+      "fileTooLarge": "Soubor je příliš velký. Maximální velikost je {{maxSize}}.",
+      "uploadTooLarge": "Soubor je příliš velký na nahrání.",
+      "imageResolutionTooLarge": "Obrázek je příliš velký. Maximální rozlišení je {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "Obrázek musí mít poměr stran {{aspectRatio}}.",
+      "invalidImageReference": "Vybraný obrázek není k dispozici. Nahrajte obrázek znovu."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",
@@ -5297,8 +5382,7 @@
       "insert": "Insert",
       "delete": "Delete",
       "columns": {
-        "asset": "Asset",
-        "actions": "Actions"
+        "asset": "Asset"
       },
       "visibility": {
         "public": "Public",
@@ -5388,7 +5472,8 @@
     "activityLogs": "Log aktivit",
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
-    "adminLearningPathEditor": "Editor rozvojové cesty"
+    "adminLearningPathEditor": "Editor rozvojové cesty",
+    "gamification": "Gamifikace"
   },
   "courseDuplication": {
     "error": {
@@ -5608,7 +5693,7 @@
     "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
     "emptyDescription": "Popis zatím nebyl přidán.",
     "status": {
-      "draft": "Koncept",
+      "draft": "Návrh",
       "published": "Publikováno",
       "private": "Soukromé",
       "not_started": "Nezahájeno",
@@ -5765,7 +5850,7 @@
       "titlePlaceholder": "Pojmenujte rozvojovou cestu",
       "description": "Popis",
       "descriptionPlaceholder": "Popište, co studenti v této cestě dokončí",
-      "imageHint": "PNG, JPG nebo JPEG (max. 20 MB, doporučeno 1200x1200 nebo vyšší)",
+      "imageHint": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}}, doporučeno 1200x1200 nebo vyšší)",
       "sequenceEnabled": "Sekvenční učení",
       "sequenceEnabledDescription": "Studenti musí dokončit kurzy v zobrazeném pořadí.",
       "includesCertificate": "Certifikát",
@@ -6097,7 +6182,8 @@
       "generic": "Režim podpory se nepodařilo spustit",
       "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
       "invalidSession": "Relace podpory je neplatná",
-      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory."
+      "sessionExpired": "Vaše relace podpory vypršela. Spusťte novou relaci podpory.",
+      "personalSettingsBlocked": "V režimu podpory nelze měnit osobní nastavení."
     }
   },
   "superAdminTenantsView": {
@@ -6196,6 +6282,7 @@
       "hostAlreadyExists": "Hostitel organizace již existuje",
       "notFound": "Organizace nenalezena",
       "invalidHost": "Neplatná adresa URL hostitele organizace",
+      "reservedHost": "Tento hostitel organizace je rezervován a nelze jej použít",
       "managingTenantRequired": "Je vyžadován správce spravující organizaci",
       "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici",
       "currentTenantDeleteNotAllowed": "Aktuální spravující organizaci nelze odstranit"
@@ -6208,7 +6295,13 @@
       "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
-      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."
+      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci.",
+      "mfaRequired": "Chcete-li pokračovat, dokončete dvoufaktorové ověření.",
+      "sessionExpired": "Platnost přihlašovací relace vypršela. Přihlaste se znovu.",
+      "mfaAlreadyEnabled": "Dvoufaktorové ověření je již zapnuté.",
+      "mfaCodeAlreadyUsed": "Tento kód již byl použit. Počkejte na nový kód v ověřovací aplikaci a zkuste to znovu.",
+      "invalidMfaCode": "Zadejte platný šestimístný ověřovací kód.",
+      "invalidSettingsUpdate": "Tato bezpečnostní nastavení zde nelze změnit."
     }
   },
   "sessionRevocation": {
@@ -6379,11 +6472,11 @@
       "uploadImage": "Nahrát nový hlavní obrázek",
       "dropImage": "Přetáhněte hlavní obrázek sem",
       "browse": "nebo klikněte a vyberte soubor",
-      "imageLimit": "PNG, JPG do 10 MB",
+      "imageLimit": "PNG, JPG do {{maxSize}}",
       "imageRecommendation": "Doporučeno: 1920x820 px (21:9)",
       "trailer": "Upoutávka kurzu (volitelné)",
       "dropVideo": "Přetáhněte upoutávku sem",
-      "videoLimit": "MP4, MOV do 50 MB",
+      "videoLimit": "MP4, MOV do {{maxSize}}",
       "videoRecommendation": "Doporučeno: 30–90 sekund",
       "save": "Nahrát média"
     },
@@ -6835,13 +6928,13 @@
       "uploading": "Nahrávání {{name}}...",
       "description": "Vyberte schválené materiály nebo výslovně povolte veřejné zdroje.",
       "library": "Zdroje kurzu",
-      "fileHint": "PDF, DOCX, prostý text nebo Markdown · do 25 MiB",
+      "fileHint": "PDF, DOCX, text, Markdown, PNG, JPEG nebo WebP · do 25 MiB",
       "use": "Použít zdroj {{name}}",
       "required": "Povinné",
       "exclude": "Vyloučit",
       "emptyLibrary": "Připojte schválený materiál nebo povolte zdroj.",
       "tooLarge": "Zdroj překračuje limit nahrávání 25 MiB.",
-      "unsupportedFile": "Vyberte soubor PDF, DOCX, prostý text nebo Markdown.",
+      "unsupportedFile": "Vyberte soubor PDF, DOCX, text, Markdown, PNG, JPEG nebo WebP.",
       "status": {
         "queued": "Ve frontě",
         "processing": "Zpracování",
@@ -6978,6 +7071,7 @@
       "assetDecisionFallback": "Tento prvek vyžaduje explicitní rozhodnutí.",
       "generatedVisualTitle": "Generovaný obrázek",
       "restoreAsset": "Vrátit přeskočení",
+      "sourceImageTitle": "Obrázek ze zdrojových materiálů",
       "assetDetails": "Podrobnosti",
       "retryApprovalExplanation": "Předchozí požadavek už mohl být přijat. Opakování může být znovu zpoplatněno.",
       "assetStatus": {
@@ -9181,6 +9275,303 @@
       "disabled": "Návody nápovědy nejsou v této instalaci zapnuté.",
       "notFound": "Tento návod není pro vaši verzi Mentingo dostupný.",
       "invalidRequest": "Vyberte dostupný návod nebo upravte vyhledávání a zkuste to znovu."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Rozvojová cesta nebyla nalezena.",
+      "createError": "Rozvojovou cestu se nepodařilo vytvořit.",
+      "updateError": "Rozvojovou cestu se nepodařilo aktualizovat.",
+      "updateMissingLanguage": "Tato rozvojová cesta není dostupná ve vybraném jazyce.",
+      "languageNotSupported": "Tento jazyk není podporován.",
+      "courseNotFound": "Kurz nebyl nalezen.",
+      "courseAlreadyExists": "Tento kurz už v rozvojové cestě je.",
+      "courseIdsMustBeUnique": "Každý kurz lze přidat pouze jednou.",
+      "courseIdsEmpty": "Vyberte alespoň jeden kurz.",
+      "courseIdsMismatch": "Pořadí kurzů neodpovídá kurzům v této rozvojové cestě.",
+      "courseLinkNotFound": "Tento kurz není součástí rozvojové cesty.",
+      "studentIdsEmpty": "Vyberte alespoň jednoho studenta.",
+      "groupIdsEmpty": "Vyberte alespoň jednu skupinu.",
+      "featureDisabled": "Rozvojové cesty jsou na této platformě vypnuté."
+    }
+  },
+  "gamification": {
+    "level": "Úroveň {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP do úrovně {{level}}",
+    "levelOf": "Úroveň {{level}} z {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Získáno {{date}}",
+    "achievements": "Úspěchy",
+    "achievementsEmpty": "Zatím nejsou k dispozici žádné úspěchy.",
+    "toast": {
+      "title": "Úspěch odemčen!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Úspěchy se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "leaderboard": {
+      "title": "Žebříčky",
+      "description": "Porovnejte XP a úspěchy s ostatními studenty.",
+      "scope": "Žebříček",
+      "organization": "Celá organizace",
+      "metricLabel": "Pořadí podle",
+      "periodLabel": "Období",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Úspěchy"
+      },
+      "period": {
+        "week": "Tento týden",
+        "month": "Tento měsíc",
+        "allTime": "Celkově",
+        "custom": "Vlastní rozsah"
+      },
+      "from": "Od",
+      "to": "Do",
+      "rank": "Pořadí",
+      "user": "Student",
+      "yourPosition": "Vaše pozice",
+      "empty": "Zatím nejsou žádní studenti k seřazení.",
+      "noGroups": "Zatím nejste v žádné skupině, takže není co zobrazit.",
+      "unavailable": "Žebříčky nejsou ve vaší organizaci zapnuté.",
+      "loadError": "Žebříček se nepodařilo načíst.",
+      "invalidRange": "Zvolte počáteční datum, které není po koncovém datu.",
+      "chooseRange": "Zvolte počáteční a koncové datum.",
+      "settings": {
+        "header": "Žebříčky",
+        "subHeader": "Umožněte studentům porovnávat XP a úspěchy.",
+        "updated": "Nastavení žebříčků bylo aktualizováno.",
+        "enabled": {
+          "label": "Zapnout žebříčky",
+          "description": "Zobrazí stránku žebříčků. Když je vypnuto, nikdo žebříčky neotevře."
+        },
+        "visibility": {
+          "label": "Viditelnost pro studenty",
+          "description": "Administrátoři vždy vidí všechny žebříčky.",
+          "closed": {
+            "label": "Uzavřené",
+            "description": "Studenti vidí jen žebříčky skupin, do kterých patří."
+          },
+          "public": {
+            "label": "Veřejné",
+            "description": "Studenti vidí i žebříček celé organizace."
+          }
+        }
+      }
+    },
+    "admin": {
+      "title": "Gamifikace",
+      "description": "Zapněte gamifikaci pro svou organizaci a nastavte úspěchy, které mohou studenti získat.",
+      "enabled": {
+        "label": "Zapnout gamifikaci",
+        "description": "Zobrazovat uživatelům úrovně, XP, úspěchy a oznámení o odměnách. Odměny se počítají, i když je tato možnost vypnutá."
+      },
+      "achievements": {
+        "title": "Úspěchy",
+        "description": "Předdefinované a vlastní úspěchy. Vypnutí úspěchu zastaví nový postup, ale zachová již získané odměny.",
+        "create": "Nový úspěch"
+      },
+      "columns": {
+        "achievement": "Úspěch",
+        "event": "Událost",
+        "levels": "Úrovně",
+        "visibility": "Viditelnost",
+        "enabled": "Aktivní"
+      },
+      "predefined": "Předdefinovaný",
+      "events": {
+        "login": "Přihlášení",
+        "lesson_completed": "Dokončená lekce",
+        "course_completed": "Dokončený kurz",
+        "quiz_completed": "Dokončený kvíz"
+      },
+      "visibilityHints": {
+        "visible": "Studující ho vidí ještě před získáním.",
+        "hidden": "Studující ho vidí až po získání."
+      },
+      "icons": {
+        "trophy": "Pohár",
+        "star": "Hvězda",
+        "flame": "Plamen",
+        "zap": "Blesk",
+        "target": "Terč",
+        "award": "Ocenění",
+        "medal": "Medaile",
+        "crown": "Koruna",
+        "rocket": "Raketa",
+        "book_open": "Kniha",
+        "graduation_cap": "Absolventská čepice",
+        "log_in": "Přihlášení",
+        "door_open": "Otevřené dveře",
+        "calendar_check": "Kalendář",
+        "clock": "Hodiny",
+        "brain": "Mozek",
+        "lightbulb": "Žárovka",
+        "puzzle": "Puzzle",
+        "message_circle": "Bublina",
+        "heart": "Srdce",
+        "thumbs_up": "Palec nahoru",
+        "sparkles": "Jiskry",
+        "circle_check": "Zaškrtnutí",
+        "gem": "Drahokam",
+        "diamond": "Diamant",
+        "shield_check": "Štít",
+        "badge_check": "Ověřený odznak",
+        "flag": "Vlajka",
+        "mountain": "Hora",
+        "footprints": "Stopy",
+        "gauge": "Ukazatel",
+        "timer": "Časovač",
+        "hourglass": "Přesýpací hodiny",
+        "alarm_clock": "Budík",
+        "calendar_days": "Kalendář",
+        "sunrise": "Východ slunce",
+        "sun": "Slunce",
+        "moon": "Měsíc",
+        "coffee": "Káva",
+        "book": "Kniha",
+        "library": "Knihovna",
+        "notebook_pen": "Poznámkový blok",
+        "pencil": "Tužka",
+        "clipboard_check": "Kontrolní seznam",
+        "list_checks": "Seznam úkolů",
+        "check_check": "Dvojitá fajfka",
+        "glasses": "Brýle",
+        "microscope": "Mikroskop",
+        "flask_conical": "Baňka",
+        "atom": "Atom",
+        "calculator": "Kalkulačka",
+        "languages": "Jazyky",
+        "globe": "Glóbus",
+        "compass": "Kompas",
+        "map": "Mapa",
+        "route": "Trasa",
+        "telescope": "Dalekohled",
+        "headphones": "Sluchátka",
+        "mic": "Mikrofon",
+        "palette": "Paleta",
+        "users": "Lidé",
+        "handshake": "Podání ruky",
+        "smile": "Úsměv",
+        "party_popper": "Oslava",
+        "gift": "Dárek",
+        "sprout": "Klíček",
+        "leaf": "List",
+        "infinity": "Nekonečno",
+        "repeat": "Opakování",
+        "trending_up": "Růst",
+        "activity": "Aktivita",
+        "dumbbell": "Činka",
+        "gamepad_2": "Herní ovladač",
+        "key": "Klíč",
+        "anchor": "Kotva",
+        "plane": "Letadlo"
+      },
+      "requirementHints": {
+        "first_time": "Udělí se při prvním výskytu aktivity. Má jednu úroveň.",
+        "count": "Počítá každý výskyt aktivity celkem.",
+        "streak": "Počítá nejdelší sérii po sobě jdoucích dnů s aktivitou.",
+        "time_window": "Počítá nejvíce aktivit v libovolném období zvolené délky."
+      },
+      "requirements": {
+        "first_time": "Poprvé",
+        "count": "Počet",
+        "streak": "Série dní",
+        "time_window": "V časovém okně"
+      },
+      "levelsSummary": "Úrovně: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Viditelný",
+        "hidden": "Skrytý do získání"
+      },
+      "language": {
+        "label": "Jazyk",
+        "baseLanguage": "Výchozí",
+        "notAddedLanguages": "Jazyky k přidání",
+        "setBaseLanguage": "Nastavit jako výchozí",
+        "setBaseTitle": "Změnit výchozí jazyk",
+        "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tento úspěch?",
+        "createTitle": "Vytvořit překlad",
+        "createDescription": "Vytvořit překlad tohoto úspěchu do jazyka {{language}}?",
+        "deleteTitle": "Smazat překlad",
+        "deleteDescription": "Smazat překlad do jazyka {{language}}? Jeho obsah bude odstraněn."
+      },
+      "form": {
+        "createTitle": "Nový úspěch",
+        "editTitle": "Upravit úspěch",
+        "viewTitle": "Výchozí úspěch",
+        "predefinedReadOnly": "Výchozí úspěchy jsou součástí platformy, a proto je nelze upravovat. Tento úspěch ale můžete zapnout nebo vypnout.",
+        "translationMode": "Upravujete překlad: {{language}}. Zde lze měnit jen název a popis; vše ostatní upravíte ve výchozím jazyce.",
+        "name": "Název",
+        "description": "Popis",
+        "requirement": "Požadavek",
+        "event": "Událost",
+        "requirementType": "Typ požadavku",
+        "windowDays": "Délka okna (dny)",
+        "course": "Kurz",
+        "anyCourse": "Jakýkoli kurz",
+        "minScore": "Minimální skóre kvízu (%)",
+        "levels": "Úrovně a odměny XP",
+        "thresholdLabels": {
+          "count": {
+            "login": "Počet přihlášení",
+            "lesson_completed": "Počet dokončených lekcí",
+            "course_completed": "Počet dokončených kurzů",
+            "quiz_completed": "Počet dokončených kvízů"
+          },
+          "streak": {
+            "login": "Dny v řadě s přihlášením",
+            "lesson_completed": "Dny v řadě s dokončenou lekcí",
+            "course_completed": "Dny v řadě s dokončeným kurzem",
+            "quiz_completed": "Dny v řadě s dokončeným kvízem"
+          },
+          "time_window": {
+            "login": "Přihlášení v časovém okně",
+            "lesson_completed": "Lekce dokončené v časovém okně",
+            "course_completed": "Kurzy dokončené v časovém okně",
+            "quiz_completed": "Kvízy dokončené v časovém okně"
+          }
+        },
+        "xpReward": "Odměna XP",
+        "addLevel": "Přidat úroveň",
+        "inactive": "Neaktivní",
+        "statusHint": "Neaktivní úspěchy přestanou udělovat nové úrovně. Již získané úrovně zůstanou zachovány.",
+        "badge": "Odznak",
+        "icon": "Ikona",
+        "badgePreview": "Náhled odznaku",
+        "iconHint": "Ikona se zobrazuje pouze na výchozích odznacích. Úrovně s nahraným odznakem zobrazují obrázek beze změny.",
+        "searchIcon": "Hledat ikony",
+        "noIconFound": "Žádná ikona nenalezena.",
+        "resetBadge": "Použít výchozí odznak"
+      },
+      "validation": {
+        "threshold": "Zadejte hodnotu alespoň 1.",
+        "xpReward": "Zadejte celé číslo XP od 0 do {{max}}.",
+        "titleRequired": "Zadejte název v základním jazyce.",
+        "windowDays": "Zadejte celý počet dní od 1 do {{max}}.",
+        "thresholdsAscending": "Každá úroveň musí vyžadovat více než předchozí.",
+        "minScore": "Zadejte skóre od 0 do 100.",
+        "textTooLong": "Použijte nejvýše {{max}} znaků."
+      },
+      "loadFailed": "Úspěch se nepodařilo načíst.",
+      "loadListFailed": "Úspěchy se nepodařilo načíst.",
+      "toast": {
+        "achievementSaved": "Úspěch uložen.",
+        "achievementNotSaved": "Úspěch se nepodařilo uložit.",
+        "settingsSaved": "Nastavení gamifikace uloženo.",
+        "achievementNotFound": "Úspěch nebyl nalezen.",
+        "predefinedNotEditable": "Předdefinované úspěchy lze pouze zapnout nebo vypnout.",
+        "earnedLevelRemoved": "Úrovně, které uživatelé již získali, nelze odebrat.",
+        "baseLanguageTitleRequired": "Zadejte název v základním jazyce.",
+        "unsupportedFilter": "Vybraná událost tento filtr nepodporuje.",
+        "courseNotFound": "Vybraný kurz neexistuje.",
+        "invalidTimeWindow": "Délku okna lze nastavit jen u úspěchů s časovým oknem.",
+        "invalidFirstTimeLevels": "Úspěchy typu „Poprvé“ mají přesně jednu úroveň s hodnotou 1.",
+        "thresholdsNotAscending": "Každá úroveň musí vyžadovat více než předchozí.",
+        "invalidBadgeImage": "Obrázek odznaku je neplatný. Nahrajte ho znovu."
+      }
     }
   }
 }

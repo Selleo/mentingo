@@ -3,7 +3,7 @@ import { useNavigate } from "@remix-run/react";
 import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
-  MAX_COURSE_TRAILER_VIDEO_SIZE,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
   PERMISSIONS,
 } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
@@ -173,7 +173,7 @@ export default function CourseOverview({
   };
 
   const handleTrailerSelection = (file: File) => {
-    if (file.size > MAX_COURSE_TRAILER_VIDEO_SIZE) {
+    if (file.size > MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES) {
       toast({
         description: t("uploadFile.toast.videoTooLarge"),
         variant: "destructive",

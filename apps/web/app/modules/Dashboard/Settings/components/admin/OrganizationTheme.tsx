@@ -1,10 +1,8 @@
-import lowerCase from "lodash-es/lowerCase";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
 
 import { useUpdateColorSchema } from "~/api/mutations";
-import { ColorPickerField } from "~/components/ColorPickerField";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -15,23 +13,41 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { useTheme } from "~/modules/Theme";
+import { getContrastRatio, readCssVariable } from "~/modules/Theme/helpers";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
+import { OrganizationThemeColorField } from "./OrganizationThemeColorField";
+import { OrganizationThemePreview } from "./OrganizationThemePreview";
+
+import type { ColorSchema } from "~/modules/Theme/theme.types";
+
+const COLOR_SCHEMA_KEYS = [
+  "primaryColor",
+  "contrastColor",
+  "backgroundColor",
+  "accentColor",
+] as const;
+
+const isSameColorSchema = (first: ColorSchema, second: ColorSchema) =>
+  COLOR_SCHEMA_KEYS.every((key) => first[key]?.toLowerCase() === second[key]?.toLowerCase());
 
 export const OrganizationTheme = () => {
   const { t } = useTranslation();
 
-  const { primaryColor, contrastColor, setColorSchema } = useTheme();
-  const currentPrimaryColor = useRef(primaryColor);
-  const currentContrastColor = useRef(contrastColor);
-  const disableSubmit =
-    lowerCase(primaryColor) === lowerCase(currentPrimaryColor.current) &&
-    lowerCase(contrastColor) === lowerCase(currentContrastColor.current);
+  const { colorSchema, palette, setColorSchema } = useTheme();
+  const savedColorSchema = useRef(colorSchema);
+  const disableSubmit = isSameColorSchema(colorSchema, savedColorSchema.current);
+  const isAccentAdjusted =
+    !colorSchema.accentColor && palette[700] !== colorSchema.primaryColor.toLowerCase();
 
   const { mutate: updateColorSchema } = useUpdateColorSchema();
 
+  const changeColorSchema = (changes: Partial<ColorSchema>) =>
+    setColorSchema({ ...colorSchema, ...changes });
+
   useUnmount(() => {
-    setColorSchema(currentPrimaryColor.current, currentContrastColor.current);
+    setColorSchema(savedColorSchema.current);
   });
 
   return (
@@ -42,41 +58,79 @@ export const OrganizationTheme = () => {
           {t("organizationTheme.description")}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center md:flex-row justify-center gap-4">
-          <ColorPickerField
-            color={primaryColor}
+      <CardContent className="grid gap-8 lg:grid-cols-2">
+        <div className="flex h-full flex-col divide-y divide-neutral-200">
+          <OrganizationThemeColorField
+            label={t("organizationTheme.primaryColor.label")}
+            description={t("organizationTheme.primaryColor.description")}
+            color={colorSchema.primaryColor}
             inputId="primary-color-input"
             inputTestId={SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT}
-            onChange={(color) => setColorSchema(color, contrastColor)}
+            onChange={(primaryColor) => changeColorSchema({ primaryColor })}
           />
-          <ColorPickerField
-            color={contrastColor}
+          <OrganizationThemeColorField
+            label={t("organizationTheme.contrastColor.label")}
+            description={t("organizationTheme.contrastColor.description")}
+            color={colorSchema.contrastColor}
             inputId="contrast-color-input"
             inputTestId={SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT}
-            onChange={(color) => setColorSchema(primaryColor, color)}
+            onChange={(contrastColor) => changeColorSchema({ contrastColor })}
+            contrastRatio={getContrastRatio(colorSchema.primaryColor, colorSchema.contrastColor)}
+          />
+          <OrganizationThemeColorField
+            label={t("organizationTheme.backgroundColor.label")}
+            description={t("organizationTheme.backgroundColor.description")}
+            color={colorSchema.backgroundColor ?? palette[50]}
+            inputId="background-color-input"
+            inputTestId={SETTINGS_PAGE_HANDLES.THEME_BACKGROUND_INPUT}
+            onChange={(backgroundColor) => changeColorSchema({ backgroundColor })}
+            automaticColor={{
+              isAutomatic: !colorSchema.backgroundColor,
+              resetTestId: SETTINGS_PAGE_HANDLES.THEME_BACKGROUND_RESET,
+              onResetToAutomatic: () => changeColorSchema({ backgroundColor: null }),
+            }}
+          />
+          <OrganizationThemeColorField
+            label={t("organizationTheme.accentColor.label")}
+            description={
+              isAccentAdjusted
+                ? t("organizationTheme.accentColor.adjustedDescription")
+                : t("organizationTheme.accentColor.description")
+            }
+            color={colorSchema.accentColor ?? palette[700]}
+            inputId="accent-color-input"
+            inputTestId={SETTINGS_PAGE_HANDLES.THEME_ACCENT_INPUT}
+            onChange={(accentColor) => changeColorSchema({ accentColor })}
+            contrastRatio={Math.min(
+              getContrastRatio(palette[700], palette[50]),
+              getContrastRatio(palette[700], readCssVariable("--color-white")),
+            )}
+            automaticColor={{
+              isAutomatic: !colorSchema.accentColor,
+              resetTestId: SETTINGS_PAGE_HANDLES.THEME_ACCENT_RESET,
+              onResetToAutomatic: () => changeColorSchema({ accentColor: null }),
+            }}
           />
         </div>
+        <OrganizationThemePreview />
       </CardContent>
       <CardFooter className="flex gap-4 border-t py-4">
         <Button
           data-testid={SETTINGS_PAGE_HANDLES.THEME_SAVE}
           disabled={disableSubmit}
           onClick={() => {
-            updateColorSchema(
-              { primaryColor, contrastColor },
-              {
-                onSuccess: ({ data }) => {
-                  if (data?.primaryColor) {
-                    currentPrimaryColor.current = data.primaryColor;
-                  }
+            updateColorSchema(colorSchema, {
+              onSuccess: ({ data }) => {
+                if (!data?.primaryColor || !data?.contrastColor) return;
 
-                  if (data?.contrastColor) {
-                    currentContrastColor.current = data.contrastColor;
-                  }
-                },
+                savedColorSchema.current = {
+                  primaryColor: data.primaryColor,
+                  contrastColor: data.contrastColor,
+                  backgroundColor: data.backgroundColor,
+                  accentColor: data.accentColor,
+                };
               },
-            );
+            });
           }}
         >
           {t("common.button.save")}
@@ -86,7 +140,7 @@ export const OrganizationTheme = () => {
           disabled={disableSubmit}
           data-testid={SETTINGS_PAGE_HANDLES.THEME_CANCEL}
           onClick={() => {
-            setColorSchema(currentPrimaryColor.current, currentContrastColor.current);
+            setColorSchema(savedColorSchema.current);
           }}
         >
           {t("common.button.cancel")}

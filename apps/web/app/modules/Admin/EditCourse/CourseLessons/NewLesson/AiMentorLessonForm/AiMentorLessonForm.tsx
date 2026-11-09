@@ -98,7 +98,7 @@ import {
   buildAiMentorScenarioTemplateDraft,
   type AiMentorScenarioTemplate,
 } from "./utils/AiMentorScenarioTemplate.helpers";
-import { stripHtmlTags } from "./validators/useAiMentorLessonFormSchema";
+import { toTrimmedPlainText } from "./validators/useAiMentorLessonFormSchema";
 
 import type {
   AiJudgeConfigurationDraft,
@@ -336,7 +336,7 @@ const AiMentorLessonForm = ({
 
   const handleScenarioTemplateSelect = (template: AiMentorScenarioTemplate) => {
     const hasExistingContent =
-      Boolean(stripHtmlTags(form.getValues("description") ?? "")) ||
+      Boolean(toTrimmedPlainText(form.getValues("description") ?? "")) ||
       Boolean(form.getValues("aiMentorConfiguration")) ||
       Boolean(form.getValues("aiJudgeConfiguration"));
 

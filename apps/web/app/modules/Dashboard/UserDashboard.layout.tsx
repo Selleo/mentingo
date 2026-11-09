@@ -8,7 +8,7 @@ import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 import { resolvePostAuthRedirectPath } from "../Auth/utils/resolvePostAuthRedirectPath";
-import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
+import { GamificationRewardToasts } from "../Gamification/GamificationRewardToasts";
 
 export default function UserDashboardLayout() {
   return (
@@ -23,13 +23,12 @@ function UserDashboardContent() {
   const navigate = useNavigate();
 
   const { data: user } = useCurrentUserSuspense();
-  const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
   const consumeLastUnauthorizedEntry = useNavigationHistoryStore(
     (state) => state.consumeLastUnauthorizedEntry,
   );
 
-  const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
+  const isAuthenticated = Boolean(user);
   const canReturnToDestination = isAuthenticated && !user?.requiresPasswordChange;
   const currentPath = `${location.pathname}${location.search}`;
   const returnFromPath = useRef<string | null>(null);
@@ -64,7 +63,10 @@ function UserDashboardContent() {
 
   return (
     <MFAGuard mode="app">
-      <Dashboard isAuthenticated={isAuthenticated} />
+      <>
+        {isAuthenticated && <GamificationRewardToasts />}
+        <Dashboard isAuthenticated={isAuthenticated} />
+      </>
     </MFAGuard>
   );
 }

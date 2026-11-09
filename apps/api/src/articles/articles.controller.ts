@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { AnyFilesInterceptor, FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
@@ -28,6 +29,7 @@ import {
   PERMISSIONS,
   RESOURCE_VISIBILITY,
   SupportedLanguages,
+  MAX_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -44,6 +46,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
@@ -97,6 +100,7 @@ type BooleanQuery = boolean | "true" | "false";
 
 const parseBooleanQuery = (value?: BooleanQuery) => value === true || value === "true";
 
+@UsePipes(SanitizeRichTextPipe)
 @Controller("articles")
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
@@ -344,9 +348,13 @@ export class ArticlesController {
   @RequireFeature({ features: [FEATURES.ARTICLES] })
   async updateArticle(
     @Param("id") id: string,
-    @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
+    @Body(new ValidateMultipartPipe(updateArticleSchema), SanitizeRichTextPipe)
+    updateArticleBody: UpdateArticle,
     @UploadedFiles(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_IMAGE_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
@@ -437,7 +445,8 @@ export class ArticlesController {
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async uploadFileToArticle(
     @Param("id") id: string,
-    @Body(new ValidateMultipartPipe(uploadFileSchema)) uploadFileBody: UploadFile,
+    @Body(new ValidateMultipartPipe(uploadFileSchema), SanitizeRichTextPipe)
+    uploadFileBody: UploadFile,
     @UploadedFile(
       "file",
       getBaseFileTypePipe(

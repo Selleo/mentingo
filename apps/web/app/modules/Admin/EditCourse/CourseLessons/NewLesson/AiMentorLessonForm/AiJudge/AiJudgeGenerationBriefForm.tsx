@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { stripHtmlTags } from "@repo/shared";
 import { LoaderCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -13,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { aiJudgeGenerationBriefSchema } from "./aiJudgeConfiguration.schema";
 import { AI_JUDGE_GENERATION_MODE } from "./aiJudgeConfiguration.types";

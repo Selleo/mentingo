@@ -37,7 +37,7 @@ An administrator opens Settings and uses the Organization tab to review configur
 
 Changes are saved through dedicated settings controls and immediately affect the tenant's platform behavior. Login-page documents can be added with a display name, previewed, and removed; these files are available publicly on the login page so unauthenticated learners or visitors can access the organization's supporting materials.
 
-The public course preview switch starts disabled. When enabled, signed-in learners can browse published, unarchived free courses before enrolling. Lesson pages explain that quizzes, interactive activities, and progress require enrollment and offer an enrollment action. Administrators previewing a course see a Learn-mode action instead. Paid lessons retain their existing access rules, and anonymous course access remains a separate setting.
+The public course preview switch starts disabled. When enabled, signed-in learners can browse published, unarchived free courses before enrolling. Students with AI access can chat with mentors and restart their preview conversations without enrolling or entering Learn mode. Lesson pages explain that quizzes and learning progress require enrollment and offer an enrollment action. Administrators previewing a course see a Learn-mode action instead. Paid lessons retain their existing access rules, and anonymous course access remains a separate setting.
 
 Users without settings-management access do not see administrator organization controls. The Settings navigation also adapts by showing only the tabs and cards the current user's permissions allow.
 

@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Role and Permission Management controls what each user can see and do in Mentingo. The platform defines system roles such as student, content creator, trainer, and admin, then maps those roles to detailed permissions for learning, content creation, settings, users, billing, integrations, reports, tenant administration, and support operations.
+Role and Permission Management controls what each user can see and do in Mentingo. The platform defines system roles such as student, content creator, trainer, group manager, reviewer, and admin, then maps those roles to detailed permissions for learning, content creation, settings, users, billing, integrations, reports, tenant administration, and support operations.
 
 For HR and L&D teams, this creates safe separation of duties. Administrators assign business-readable roles, while Mentingo turns those assignments into precise access rules across API endpoints, routes, navigation, settings cards, and user-management screens.
 
@@ -12,6 +12,7 @@ The main workflow lives in User Management. Administrators create or update user
 
 - HR administrators assign learner, content creator, trainer, or admin roles to match workplace responsibilities.
 - L&D administrators separate course authoring, learner access, reporting, and live-training duties.
+- Reviewers (PL: Recenzent) grade open quiz answers without any access to course, user, enrollment, or group management.
 - Platform administrators rely on tenant-management and settings permissions for operational control.
 - Learners and content creators benefit from a focused interface that hides actions outside their assigned roles.
 
@@ -42,6 +43,8 @@ The matrix also omits the technical file-upload permissions from its user-facing
 
 Every displayed permission has a dedicated description in Czech, German, English, Spanish, French, Lithuanian, and Polish. Descriptions explain organization visibility and role-dependent data scope instead of treating “public” content as necessarily available to unauthenticated visitors or describing content-creator statistics as platform-wide.
 
+The Reviewer role exists for people who grade open quiz answers. It grants only self-service account and settings access plus two grading permissions: `quiz_grading.read` (view the queue of answers waiting for grading) and `quiz_grading.grade` (grade an answer and comment on it). Admins receive both grading permissions as well. In the first version a reviewer can grade answers from every course in the tenant. A reviewer cannot read or edit courses, users, enrollments, or groups. Until the grading queue is available, a reviewer who signs in lands on their account settings.
+
 When a user's roles change, Mentingo replaces the role assignments and checks whether the effective role set changed. If it did, the platform revokes the user's active sessions and emits a permissions-updated notification so stale access does not continue silently.
 
 ## Key Technical Context
@@ -52,7 +55,8 @@ When a user's roles change, Mentingo replaces the role assignments and checks wh
 - User role assignment flows are implemented in `apps/api/src/user/user.controller.ts`, `apps/api/src/user/user.service.ts`, and `apps/web/app/modules/Admin/Users`.
 - System roles and rule sets are ensured per tenant through `ensureSystemRolesForTenant` and `PermissionsBackfillService`; the trainer role is only valid when live training is enabled.
 - Missing trainer public-content read grants are added to existing system rule sets by the system-permission backfill.
+- The Reviewer role and the grading permissions reach existing tenants through the same startup backfill; new tenants get them from system-role seeding.
 
 ## Test Evidence
 
-Focused backend E2E coverage verifies article owner/non-owner draft, preview, and TOC access (18 tests), Resource Library target ownership and multi-entity deletion behavior (11 tests), and Settings/Statistics self-permission allow/deny behavior (3 tests). Unit tests cover permission-matrix helpers, hidden implementation-only rows, all permission descriptions in every supported locale, route-guard permission matching, and the three self-permission guards. Full web unit tests and API/web typechecks are part of the validation pass; browser Playwright execution remains environment-dependent.
+Focused backend E2E coverage verifies the Reviewer role's exact permission set, admin grading permissions, reviewer denial on course, user, enrollment, and group endpoints, and admin assignment/removal of the role (4 tests), plus article owner/non-owner draft, preview, and TOC access (18 tests), Resource Library target ownership and multi-entity deletion behavior (11 tests), and Settings/Statistics self-permission allow/deny behavior (3 tests). Unit tests cover permission-matrix helpers, hidden implementation-only rows, all permission descriptions in every supported locale, route-guard permission matching, and the three self-permission guards. Full web unit tests and API/web typechecks are part of the validation pass; browser Playwright execution remains environment-dependent.

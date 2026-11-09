@@ -897,6 +897,26 @@ export const CourseGenerationSession = ({
         ? projectWorkspaceRecords(latestSession.records, latestSession.tasks)
         : projection;
       const latestProposals = latestSession ? latestProjection.proposals : proposals;
+      const latestById = new Map(latestProposals.map((proposal) => [proposal.id, proposal]));
+      if (
+        proposals.some((proposal) => {
+          const latest = latestById.get(proposal.id);
+          return latest && latest.revision !== proposal.revision;
+        })
+      ) {
+        const message = t("courseAuthoring.errors.previewUnavailable");
+        toast({ variant: "destructive", description: message });
+        throw new Error(message);
+      }
+      // Review callbacks outlive the snapshot that opened the drawer. A prior
+      // accept can succeed even if application fails; retries must use its
+      // current decision and revision rather than accepting that draft again.
+      const currentProposals = proposals.map((proposal) => latestById.get(proposal.id) ?? proposal);
+      const availableProposals = [
+        ...new Map(
+          [...projection.proposals, ...latestProposals].map((item) => [item.id, item]),
+        ).values(),
+      ];
       if (
         selectedProposalIds.length > 0 &&
         requestGenerationPending(
@@ -911,7 +931,7 @@ export const CourseGenerationSession = ({
       }
       // Withdraw an entire draft request, including an already approved outline.
       // proposal.review only accepts pending proposals; request.discard preserves applied history.
-      const discardable = proposals.filter(
+      const discardable = currentProposals.filter(
         (proposal) =>
           (proposal.decision === PROPOSAL_DECISION.PENDING ||
             proposal.decision === PROPOSAL_DECISION.ACCEPTED) &&
@@ -941,7 +961,7 @@ export const CourseGenerationSession = ({
         }
         return;
       }
-      const selected = proposals.filter(
+      const selected = currentProposals.filter(
         (proposal) =>
           selectedProposalIds.includes(proposal.id) &&
           proposal.decision !== PROPOSAL_DECISION.APPLIED &&
@@ -949,7 +969,7 @@ export const CourseGenerationSession = ({
       );
       const closure = proposalDependencyClosure(
         selected.map((proposal) => proposal.id),
-        projection.proposals,
+        availableProposals,
       );
       if (closure.missingDependencies.length > 0) {
         toast({
@@ -960,13 +980,15 @@ export const CourseGenerationSession = ({
       }
       const selectedIds = new Set(
         closure.ids.filter((proposalId) => {
-          const proposal = projection.proposals.find((item) => item.id === proposalId);
+          const proposal =
+            latestById.get(proposalId) ??
+            projection.proposals.find((item) => item.id === proposalId);
           return (
             proposal?.decision !== PROPOSAL_DECISION.APPLIED && !appliedProposalIds.has(proposalId)
           );
         }),
       );
-      const reviews = proposals
+      const reviews = currentProposals
         .filter(
           (proposal) =>
             proposal.decision === PROPOSAL_DECISION.PENDING && selectedIds.has(proposal.id),
@@ -977,7 +999,7 @@ export const CourseGenerationSession = ({
           accepted: true,
         }));
       // Rejections staged in the same review travel in the same session-locked command.
-      proposals
+      currentProposals
         .filter(
           (proposal) =>
             proposal.decision === PROPOSAL_DECISION.PENDING &&
@@ -1012,7 +1034,7 @@ export const CourseGenerationSession = ({
         }
       }
       const applicableIds = [...selectedIds].filter((proposalId) =>
-        projection.proposals.some(
+        availableProposals.some(
           (proposal) => proposal.id === proposalId && proposal.operations.length > 0,
         ),
       );
@@ -1269,9 +1291,17 @@ export const CourseGenerationSession = ({
     );
   }
 
-  const sourceTaskIds = new Set(
-    projection.sources.flatMap((source) => (source.taskId ? [source.taskId] : [])),
-  );
+  // Ingestion and its vision children belong to attachment chips, not agent work.
+  const sourceTaskIds = new Set([
+    ...projection.sources.flatMap((source) => (source.taskId ? [source.taskId] : [])),
+    ...(session?.tasks ?? [])
+      .filter((task) =>
+        [AUTHORING_TASK_KIND.SOURCE, AUTHORING_TASK_KIND.SOURCE_VISION].some(
+          (kind) => kind === task.kind,
+        ),
+      )
+      .map((task) => task.taskId),
+  ]);
   const agentTasks = attachAuthoringWorkProgress(
     session?.tasks.filter(
       (task) =>

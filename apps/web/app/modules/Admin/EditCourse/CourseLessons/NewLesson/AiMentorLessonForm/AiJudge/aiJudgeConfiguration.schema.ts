@@ -1,7 +1,5 @@
-import { AI_JUDGE_MAX_CRITERION_SCORE } from "@repo/shared";
+import { AI_JUDGE_MAX_CRITERION_SCORE, stripHtmlTags } from "@repo/shared";
 import { z } from "zod";
-
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { TFunction } from "i18next";
 

@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { COURSE_PROGRESS_STATUSES } from "@repo/shared";
+import { COURSE_PROGRESS_STATUSES, stripHtmlTags } from "@repo/shared";
 import { BookOpen, Check, GripVertical, Lock, Play, Plus, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -11,7 +11,6 @@ import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList/SortableList";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { LEARNING_PATH_TRAIL_HANDLES } from "../../../../e2e/data/learning-paths/handles";
 

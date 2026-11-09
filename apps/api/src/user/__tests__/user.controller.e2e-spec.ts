@@ -468,10 +468,7 @@ describe("UsersController (e2e)", () => {
   describe("GET /user/details?userId=:id", () => {
     let cookies: string;
 
-    beforeAll(async () => {
-      await db.delete(settings).where(isNull(settings.userId));
-      await settingsFactory.create({ userId: null });
-
+    beforeEach(async () => {
       const anotherUser = await inTenant(() =>
         authService.register({
           email: "another4@example.com",

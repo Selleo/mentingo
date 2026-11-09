@@ -49,12 +49,22 @@ export default function Root() {
 
   return (
     <Providers>
-      <ThemeWrapper>
-        <PlatformFavicon />
-        <Suspense fallback={<Loader />}>
+      <Suspense
+        fallback={
+          <div
+            role="status"
+            aria-busy="true"
+            className="flex min-h-screen items-center justify-center"
+          >
+            <Loader />
+          </div>
+        }
+      >
+        <ThemeWrapper>
+          <PlatformFavicon />
           <Outlet />
-        </Suspense>
-      </ThemeWrapper>
+        </ThemeWrapper>
+      </Suspense>
     </Providers>
   );
 }

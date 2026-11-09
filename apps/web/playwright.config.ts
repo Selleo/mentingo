@@ -109,6 +109,7 @@ if (process.env.CI) {
         REDIS_URL: "redis://localhost:6380",
         MODE: "test",
         E2E: "true",
+        SCORM_CONTENT_ORIGIN: "https://scorm.localhost:5443",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
         CORS_ORIGIN: process.env.CORS_ORIGIN || "https://localhost:5173",

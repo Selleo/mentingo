@@ -14,7 +14,6 @@ describe("useNavigationTracker", () => {
     sessionStorage.clear();
     useNavigationHistoryStore.getState().clearHistory();
     useCurrentUserStore.getState().setCurrentUser(undefined);
-    useCurrentUserStore.getState().setHasVerifiedMFA(false);
   });
 
   it("preserves the requested course when the OAuth callback lands on the home page", () => {
@@ -64,10 +63,14 @@ describe("useNavigationTracker", () => {
   );
 
   it.each([
-    { shouldVerifyMFA: true, requiresPasswordChange: false },
-    { shouldVerifyMFA: false, requiresPasswordChange: true },
-  ])("preserves matching history until authentication requirements complete", (user) => {
-    useCurrentUserStore.getState().setCurrentUser(user as CurrentUserResponse["data"]);
+    // A session awaiting MFA has no current user until verification completes.
+    { name: "MFA", user: undefined },
+    {
+      name: "password change",
+      user: { requiresPasswordChange: true } as CurrentUserResponse["data"],
+    },
+  ])("preserves matching history until $name completes", ({ user }) => {
+    useCurrentUserStore.getState().setCurrentUser(user);
     useNavigationHistoryStore
       .getState()
       .addLastUnauthorizedEntry({ pathname: "/", timestamp: Date.now() });

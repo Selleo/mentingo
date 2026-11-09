@@ -736,9 +736,8 @@ describe("Activity Logs E2E", () => {
 
     it("should record LOGIN activity log when user logs in with password", async () => {
       const { user, password } = await createUserWithPassword();
-      const { MFAEnforcedRoles } = await settingsService.getGlobalSettings();
 
-      await authService.login({ email: user.email, password }, MFAEnforcedRoles);
+      await authService.login({ email: user.email, password });
 
       const [loginLog] = await waitForLogs(
         { resourceId: user.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER },
@@ -753,12 +752,8 @@ describe("Activity Logs E2E", () => {
 
     it("should record LOGIN activity log when tokens are refreshed", async () => {
       const { user, password } = await createUserWithPassword();
-      const { MFAEnforcedRoles } = await settingsService.getGlobalSettings();
 
-      const { refreshToken } = await authService.login(
-        { email: user.email, password },
-        MFAEnforcedRoles,
-      );
+      const { refreshToken } = await authService.login({ email: user.email, password });
 
       await authService.refreshTokens(refreshToken);
 
