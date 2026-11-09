@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -74,7 +74,7 @@ export class OutboxRepository {
         claimId: sql`gen_random_uuid()`,
         updatedAt: sql`NOW()`,
       })
-      .where(inArray(outboxEvents.id, nextDueEventId))
+      .where(eq(outboxEvents.id, sql`(${nextDueEventId})`))
       .returning({
         id: outboxEvents.id,
         eventType: outboxEvents.eventType,

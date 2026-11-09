@@ -43,7 +43,6 @@ type TriggerCase = {
     | UsersLongInactivityEvent
     | UserChapterFinishedEvent
     | UserCourseFinishedEvent;
-  resolvedTenantId?: string;
 };
 
 const tenantId = "tenant-id";
@@ -58,12 +57,8 @@ describe("NotifyUsersHandler", () => {
   const settingsService = {
     getGlobalSettings: jest.fn(),
   };
-  const dbAdmin = {
-    select: jest.fn(),
-  };
-
   const handler = new NotifyUsersHandler(
-    dbAdmin as never,
+    {} as never,
     {} as never,
     {} as never,
     {} as never,
@@ -92,15 +87,13 @@ describe("NotifyUsersHandler", () => {
       name: "first login",
       trigger: "userFirstLogin",
       notificationMethod: "notifyUserAboutFirstLogin",
-      event: () => new UserFirstLoginEvent({ userId }),
-      resolvedTenantId: tenantId,
+      event: () => new UserFirstLoginEvent({ userId, tenantId }),
     },
     {
       name: "course assignment",
       trigger: "userCourseAssignment",
       notificationMethod: "notifyUserAboutCourseAssignment",
-      event: () => new UsersAssignedToCourseEvent({ courseId, studentIds: [userId] }),
-      resolvedTenantId: tenantId,
+      event: () => new UsersAssignedToCourseEvent({ courseId, studentIds: [userId], tenantId }),
     },
     {
       name: "short inactivity",
@@ -141,12 +134,6 @@ describe("NotifyUsersHandler", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    dbAdmin.select.mockReturnValue({
-      from: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockResolvedValue([{ tenantId }]),
-    });
   });
 
   const buildTriggers = (enabledTrigger?: TriggerKey): UserEmailTriggersSchema => ({
@@ -157,7 +144,7 @@ describe("NotifyUsersHandler", () => {
   it("does not prepare assignment emails when a group adds no new students", async () => {
     await expect(
       handler.notifyUserAboutCourseAssignment(
-        new UsersAssignedToCourseEvent({ courseId, studentIds: [] }),
+        new UsersAssignedToCourseEvent({ courseId, studentIds: [], tenantId }),
       ),
     ).resolves.toBeUndefined();
   });
@@ -173,10 +160,7 @@ describe("NotifyUsersHandler", () => {
 
       await handler.handleOutboxEvent(testCase.event(), { eventId: "event-1" });
 
-      expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(
-        testCase.resolvedTenantId ?? tenantId,
-        expect.any(Function),
-      );
+      expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(tenantId, expect.any(Function));
       expect(notificationSpy).toHaveBeenCalled();
       expect(settingsService.getGlobalSettings).not.toHaveBeenCalled();
     });
@@ -192,10 +176,7 @@ describe("NotifyUsersHandler", () => {
 
       await handler.handleOutboxEvent(event, { eventId: "event-1" });
 
-      expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(
-        testCase.resolvedTenantId ?? tenantId,
-        expect.any(Function),
-      );
+      expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(tenantId, expect.any(Function));
       expect(notificationSpy).toHaveBeenCalledWith(event);
     });
   });

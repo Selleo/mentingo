@@ -66,4 +66,33 @@ describe("OutboxDispatcherService", () => {
     });
     expect(tenantDbRunnerService.runForEachTenant).toHaveBeenCalledTimes(2);
   });
+
+  it("runs one more pass after a running one for calls made while it runs", async () => {
+    let finishFirstPass = () => undefined as void;
+    const firstPass = new Promise<void>((resolve) => {
+      finishFirstPass = resolve;
+    });
+    const runForEachTenant = jest
+      .fn()
+      .mockImplementationOnce(() => firstPass)
+      .mockResolvedValue(undefined);
+    const dispatcher = new OutboxDispatcherService(
+      { runForEachTenant } as never,
+      {} as never,
+      {} as never,
+    );
+
+    const runningCall = dispatcher.dispatchPendingEvents();
+    const callsDuringPass = [
+      dispatcher.dispatchPendingEvents(),
+      dispatcher.dispatchPendingEvents(),
+    ];
+
+    expect(runForEachTenant).toHaveBeenCalledTimes(1);
+
+    finishFirstPass();
+    await Promise.all([runningCall, ...callsDuringPass]);
+
+    expect(runForEachTenant).toHaveBeenCalledTimes(2);
+  });
 });

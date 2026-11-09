@@ -27,7 +27,8 @@ import type {
 @Injectable()
 export class OutboxDispatcherService {
   private readonly logger = new Logger(OutboxDispatcherService.name);
-  private isRunning = false;
+  private runningPass: Promise<void> | null = null;
+  private followUpPass: Promise<void> | null = null;
 
   constructor(
     private readonly tenantDbRunnerService: TenantDbRunnerService,
@@ -35,24 +36,42 @@ export class OutboxDispatcherService {
     private readonly outboxEventHandlerRegistry: OutboxEventHandlerRegistry,
   ) {}
 
+  /**
+   * Delivers every due event once the call returns. A call made while a pass is running waits for
+   * it and then runs one more pass, which concurrent callers share, so events committed during the
+   * running pass are never left for the next wake-up.
+   */
   async dispatchPendingEvents(): Promise<void> {
-    if (this.isRunning) return;
+    if (!this.runningPass) return this.startPass();
 
-    this.isRunning = true;
-
-    try {
-      await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
-        await this.outboxRepository.releaseStalledClaims(tenantId);
-        let event = await this.outboxRepository.claimNextDueEvent(tenantId);
-
-        while (event) {
-          await this.deliverClaimedEvent(event, tenantId);
-          event = await this.outboxRepository.claimNextDueEvent(tenantId);
-        }
+    this.followUpPass ??= this.runningPass
+      .catch(() => undefined)
+      .then(() => {
+        this.followUpPass = null;
+        return this.startPass();
       });
-    } finally {
-      this.isRunning = false;
-    }
+
+    return this.followUpPass;
+  }
+
+  private startPass(): Promise<void> {
+    this.runningPass = this.deliverDueEventsOfEveryTenant().finally(() => {
+      this.runningPass = null;
+    });
+
+    return this.runningPass;
+  }
+
+  private async deliverDueEventsOfEveryTenant(): Promise<void> {
+    await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
+      await this.outboxRepository.releaseStalledClaims(tenantId);
+      let event = await this.outboxRepository.claimNextDueEvent(tenantId);
+
+      while (event) {
+        await this.deliverClaimedEvent(event, tenantId);
+        event = await this.outboxRepository.claimNextDueEvent(tenantId);
+      }
+    });
   }
 
   private async deliverClaimedEvent(claimedEvent: OutboxEnvelope, tenantId: string): Promise<void> {

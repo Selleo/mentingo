@@ -1,6 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
-import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
@@ -20,7 +19,6 @@ import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { courses, users } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
 import type { InactiveUsers } from "src/events/user/user-short-inactivity.event";
@@ -76,16 +74,15 @@ export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
     }
 
     if (event instanceof UserFirstLoginEvent) {
-      await this.prepareForTenant(await this.getUserTenantId(event.userFirstLogin.userId), () =>
+      await this.prepareForTenant(event.userFirstLogin.tenantId, () =>
         this.notifyUserAboutFirstLogin(event),
       );
       return;
     }
 
     if (event instanceof UsersAssignedToCourseEvent) {
-      await this.prepareForTenant(
-        await this.getCourseTenantId(event.usersAssignedToCourse.courseId),
-        () => this.notifyUserAboutCourseAssignment(event),
+      await this.prepareForTenant(event.usersAssignedToCourse.tenantId, () =>
+        this.notifyUserAboutCourseAssignment(event),
       );
       return;
     }
@@ -108,30 +105,6 @@ export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
     await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       await prepare();
     });
-  }
-
-  private async getUserTenantId(userId: string) {
-    const [user] = await this.dbAdmin
-      .select({ tenantId: users.tenantId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user) throw new Error(`Cannot resolve tenant for user ${userId}`);
-
-    return user.tenantId;
-  }
-
-  private async getCourseTenantId(courseId: string) {
-    const [course] = await this.dbAdmin
-      .select({ tenantId: courses.tenantId })
-      .from(courses)
-      .where(eq(courses.id, courseId))
-      .limit(1);
-
-    if (!course) throw new Error(`Cannot resolve tenant for course ${courseId}`);
-
-    return course.tenantId;
   }
 
   async notifyUserAboutFirstLogin(event: UserFirstLoginEvent) {

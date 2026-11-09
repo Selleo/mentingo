@@ -285,6 +285,20 @@ describe("Outbox (e2e)", () => {
       },
     );
 
+    it("claims exactly the one event it returns", async () => {
+      for (let index = 0; index < 3; index++) await publishExportedEvent(defaultTenantId);
+
+      const claim = await runAsTenant(defaultTenantId, () =>
+        outboxRepository.claimNextDueEvent(defaultTenantId),
+      );
+      const processingEvents = await dbAdmin
+        .select({ id: outboxEvents.id })
+        .from(outboxEvents)
+        .where(eq(outboxEvents.status, OUTBOX_STATUSES.PROCESSING));
+
+      expect(processingEvents).toEqual([{ id: claim?.id }]);
+    });
+
     it("claims only events of the tenant it runs for", async () => {
       await publishExportedEvent(otherTenantId);
 
