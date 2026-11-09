@@ -78,20 +78,23 @@ const groupQuestionsByType = (questions: Questions) => {
   };
 };
 
-// Untranslated matching questions have no matches to place, so they cannot require answers.
-const getAnswerableMatchingPairs = (question: Questions[number]) =>
-  question.matchingTargets?.some(Boolean) ? (question.options ?? []) : [];
+/**
+ * Each match can be placed once, so a question needs as many answers as it has matches to place,
+ * capped at its pairs. Untranslated pairs have no match, which leaves their pair unanswerable.
+ */
+export const getRequiredMatchingAnswerCounts = (questions: Questions): Record<string, number> =>
+  Object.fromEntries(
+    questions
+      .filter(({ type }) => type === QuestionType.MATCHING)
+      .map((question) => {
+        const matchCount = new Set(question.matchingTargets?.filter(Boolean)).size;
+
+        return [question.id, Math.min(matchCount, question.options?.length ?? 0)];
+      }),
+  );
 
 function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
   return questions.reduce((result, question) => {
-    if (question.type === QuestionType.MATCHING) {
-      result[question.id] = Object.fromEntries(
-        getAnswerableMatchingPairs(question).map((option) => [option.id, null]),
-      );
-
-      return result;
-    }
-
     if (question.type === QuestionType.TRUE_OR_FALSE) {
       result[question.id] =
         question?.options?.reduce(
@@ -221,10 +224,7 @@ function prepareMatchingAnswers(questions: Questions): AnswersMap {
     questions.map((question) => [
       question.id,
       Object.fromEntries(
-        getAnswerableMatchingPairs(question).map((option) => [
-          option.id,
-          option.studentAnswer ?? null,
-        ]),
+        (question.options ?? []).map((option) => [option.id, option.studentAnswer ?? null]),
       ),
     ]),
   );

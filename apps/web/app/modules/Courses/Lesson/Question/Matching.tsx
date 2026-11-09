@@ -9,7 +9,6 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { uniq } from "lodash-es";
 import { useState } from "react";
 import { useController } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -41,16 +40,23 @@ export type MatchingAnswers = Record<string, string | null>;
 const BANK_ID = "blank_preset";
 const WORD_ID_PREFIX = "match:";
 
-/** Moves a match to a pair (or back to the bank), swapping out whatever the pair held. */
+const toPairId = (dropId: string) => (dropId === BANK_ID ? null : dropId);
+
+/**
+ * Moves a match to a pair, or back to the bank when `pairId` is null. A match already in the
+ * target pair moves to the dragged match's old pair, or back to the bank if it came from there.
+ */
 export const placeMatch = (
   answers: MatchingAnswers,
   target: string,
   pairId: string | null,
 ): MatchingAnswers => {
   const fromPairId = Object.keys(answers).find((key) => answers[key] === target);
+
   if (fromPairId === pairId) return answers;
 
   const next: MatchingAnswers = { ...answers };
+
   if (fromPairId) next[fromPairId] = pairId ? (answers[pairId] ?? null) : null;
   if (pairId) next[pairId] = target;
 
@@ -59,6 +65,7 @@ export const placeMatch = (
 
 const collisionDetection: CollisionDetection = (args) => {
   const pointerCollisions = pointerWithin(args);
+
   if (pointerCollisions.length > 0) return pointerCollisions;
 
   return rectIntersection(args);
@@ -87,14 +94,14 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
 
   const answers = (field.value ?? {}) as MatchingAnswers;
   // Empty matches come from untranslated pairs and cannot be placed.
-  const targets = uniq(question.matchingTargets ?? []).filter(Boolean);
+  const targets = [...new Set(question.matchingTargets)].filter(Boolean);
   const pairIds = new Set((question.options ?? []).map(({ id }) => id));
   const isDropId = (id: string | null): id is string =>
     id !== null && (id === BANK_ID || pairIds.has(id));
 
   const renderedAnswers =
     draggedTarget && isDropId(previewDropId)
-      ? placeMatch(answers, draggedTarget, previewDropId === BANK_ID ? null : previewDropId)
+      ? placeMatch(answers, draggedTarget, toPairId(previewDropId))
       : answers;
   const placedTargets = new Set(Object.values(renderedAnswers).filter(Boolean));
   const toWord = (target: string, blankId: string): DndWord => ({
@@ -115,19 +122,23 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
   const handleDragStart = ({ active }: DragStartEvent) => {
     if (isCompleted) return;
     const target = String(active.id).slice(WORD_ID_PREFIX.length);
+
     if (targets.includes(target)) setDraggedTarget(target);
   };
 
   const handleDragOver = ({ over }: DragOverEvent) => {
     const dropId = resolveDropId(over);
+
     if (isDropId(dropId)) setPreviewDropId(dropId);
   };
 
   const handleDragEnd = ({ over }: DragEndEvent) => {
     const dropId = resolveDropId(over);
+
     if (draggedTarget && isDropId(dropId)) {
-      field.onChange(placeMatch(answers, draggedTarget, dropId === BANK_ID ? null : dropId));
+      field.onChange(placeMatch(answers, draggedTarget, toPairId(dropId)));
     }
+
     resetDrag();
   };
 
@@ -152,14 +163,9 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
         </DragOverlay>
         {question.options?.map(({ id, optionText, isCorrect, matchedWord, studentAnswer }) => {
           const answer = isCompleted ? studentAnswer : renderedAnswers[id];
-          const words: DndWord[] = answer
-            ? [
-                {
-                  ...toWord(answer, id),
-                  id: isCompleted ? `answer:${id}` : `${WORD_ID_PREFIX}${answer}`,
-                },
-              ]
-            : [];
+          // Completed answers can repeat a match across pairs, so they need per-pair ids.
+          const wordId = isCompleted ? `answer:${id}` : `${WORD_ID_PREFIX}${answer}`;
+          const words: DndWord[] = answer ? [{ ...toWord(answer, id), id: wordId }] : [];
 
           return (
             <div

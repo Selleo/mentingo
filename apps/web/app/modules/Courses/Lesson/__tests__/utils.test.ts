@@ -1,15 +1,19 @@
 import { expect, describe, it } from "vitest";
 
+import i18next from "~/utils/mocks/i18next.mock";
+
 import {
   getAnswers as getFillInTheBlanksDndAnswers,
   getCompletedAnswers as getCompletedFillInTheBlanksDndAnswers,
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
+import { QuizFormSchema } from "../schemas";
 import {
   findFirstInProgressLessonId,
   findFirstLessonIdForCompletedCourse,
   findFirstNonCompletedLessonId,
   findFirstNotStartedLessonId,
   getEmptyQuizAnswers,
+  getRequiredMatchingAnswerCounts,
   getUserAnswers,
   isNextBlocked,
   isPreviousBlocked,
@@ -636,11 +640,36 @@ describe("matching mapping", () => {
     import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
   >["questions"];
 
-  it("asks for no answers when the question has no matches in this language", () => {
-    const untranslated = [{ ...questions[0], matchingTargets: ["", ""] }];
+  const validateMatching = (answers: Record<string, string | null>, matchingTargets: string[]) => {
+    const schema = QuizFormSchema(
+      i18next.t,
+      getRequiredMatchingAnswerCounts([{ ...questions[0], matchingTargets }]),
+    );
 
-    expect(getEmptyQuizAnswers(untranslated).matchingQuestions["question-matching"]).toEqual({});
-    expect(getUserAnswers(untranslated).matchingQuestions["question-matching"]).toEqual({});
+    return schema.safeParse({
+      ...getEmptyQuizAnswers([]),
+      matchingQuestions: { "question-matching": answers },
+    }).success;
+  };
+
+  it("requires one answer per pair when every pair has a match", () => {
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": null }, ["Woof", "Meow"])).toBe(false);
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": "Woof" }, ["Woof", "Meow"])).toBe(true);
+  });
+
+  it("requires only as many answers as there are matches when some pairs are untranslated", () => {
+    expect(validateMatching({ "pair-1": null, "pair-2": null }, ["Meow"])).toBe(false);
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": null }, ["Meow"])).toBe(true);
+  });
+
+  it("lets an untranslated question be submitted without answers", () => {
+    expect(validateMatching({ "pair-1": null, "pair-2": null }, [])).toBe(true);
+    expect(
+      parseQuizFormData({
+        ...getEmptyQuizAnswers([]),
+        matchingQuestions: { "question-matching": { "pair-1": null, "pair-2": null } },
+      }),
+    ).toEqual([]);
   });
 
   it("prepares one answer per pair", () => {

@@ -103,6 +103,7 @@ describe("Matching", () => {
 
     expect(within(screen.getByTestId("pair-cat")).getByText("Woof")).toBeInTheDocument();
     const bank = screen.getByTestId("blank_preset");
+
     expect(within(bank).getByText("Meow")).toBeInTheDocument();
     expect(within(bank).queryByText("Woof")).not.toBeInTheDocument();
   });
@@ -112,7 +113,9 @@ describe("Matching", () => {
 
     expect(within(screen.getByTestId("pair-cat")).getByText("Meow")).toBeInTheDocument();
     expect(within(screen.getByTestId("pair-dog")).getByText("Meow")).toBeInTheDocument();
-    expect(screen.getByText(/Woof/)).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("matching-pair-pair-dog")).getByText(/Woof/),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("blank_preset")).not.toBeInTheDocument();
   });
 
@@ -123,7 +126,7 @@ describe("Matching", () => {
   });
 
   it("says no matches are available when the question is untranslated", () => {
-    renderMatching({ isCompleted: false }, { ...question, matchingTargets: ["", ""] });
+    renderMatching({ isCompleted: false }, { ...question, matchingTargets: [] });
 
     expect(screen.queryByTestId("blank_preset")).not.toBeInTheDocument();
     expect(

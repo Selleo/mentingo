@@ -326,6 +326,7 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
     CreatePublishedLearningCourseInput<{
       dndBlankAnswer: string;
       dndBlankAnswerId: string;
+      matchingPairs: { prompt: string; match: string }[];
       quizLesson: CurriculumCourseLessonRecord;
       textBlankAnswer: string;
     }>,
@@ -340,6 +341,10 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
       const textBlankAnswerId = randomUUID();
       const dndBlankAnswer = `${prefix}-dnd-answer`;
       const dndBlankAnswerId = randomUUID();
+      const matchingPairs = [
+        { prompt: `${prefix}-matching-prompt-1`, match: `${prefix}-matching-match-1` },
+        { prompt: `${prefix}-matching-prompt-2`, match: `${prefix}-matching-match-2` },
+      ];
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
         chapterId,
         title: `${prefix}-quiz-lesson`,
@@ -425,10 +430,21 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
           },
           { type: "brief_response", title: `${prefix}-brief-response`, displayOrder: 8 },
           { type: "detailed_response", title: `${prefix}-detailed-response`, displayOrder: 9 },
+          {
+            type: "matching",
+            title: `${prefix}-matching`,
+            displayOrder: 10,
+            options: matchingPairs.map(({ prompt, match }, index) => ({
+              optionText: prompt,
+              matchedWord: match,
+              displayOrder: index + 1,
+              isCorrect: true,
+            })),
+          },
         ],
       });
 
-      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId };
+      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs };
     },
   });
 

@@ -31,6 +31,7 @@ import {
   leftAttemptsToDisplay,
   getEmptyQuizAnswers,
   getQuizTooltipText,
+  getRequiredMatchingAnswerCounts,
   getUserAnswers,
   parseQuizFormData,
 } from "./utils";
@@ -66,7 +67,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     defaultValues: (isUserSubmittedAnswer
       ? getUserAnswers(questions)
       : getEmptyQuizAnswers(questions)) as QuizForm,
-    resolver: zodResolver(QuizFormSchema(t)),
+    resolver: zodResolver(QuizFormSchema(t, getRequiredMatchingAnswerCounts(questions))),
   });
 
   const submitQuiz = useSubmitQuiz({
