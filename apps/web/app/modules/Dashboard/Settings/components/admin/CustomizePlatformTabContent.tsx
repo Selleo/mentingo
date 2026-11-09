@@ -1,6 +1,7 @@
 import ArticlesPreferences from "~/modules/Dashboard/Settings/components/admin/ArticlesPreferences";
 import { BrandingImagesCard } from "~/modules/Dashboard/Settings/components/admin/BrandingImagesCard";
 import { CertificateBackgroundUpload } from "~/modules/Dashboard/Settings/components/admin/CertificateBackgroundUpload";
+import GamificationPreferences from "~/modules/Dashboard/Settings/components/admin/GamificationPreferences";
 import { LeaderboardSettingsCard } from "~/modules/Dashboard/Settings/components/admin/LeaderboardSettingsCard";
 import LearningPathsPreferences from "~/modules/Dashboard/Settings/components/admin/LearningPathsPreferences";
 import NewsPreferences from "~/modules/Dashboard/Settings/components/admin/NewsPreferences";
@@ -31,6 +32,7 @@ export default function CustomizePlatformTabContent({
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />
       <LearningPathsPreferences globalSettings={globalSettings} />
+      <GamificationPreferences globalSettings={globalSettings} />
       <LeaderboardSettingsCard globalSettings={globalSettings} />
       <BrandingImagesCard>
         <CertificateBackgroundUpload

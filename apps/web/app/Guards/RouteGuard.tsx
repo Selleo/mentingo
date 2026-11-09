@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "@remix-run/react";
 import { match } from "ts-pattern";
 
 import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
 import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
 
@@ -43,13 +44,34 @@ export const checkRouteAccess = (path: string, permissions: PermissionKey[]) => 
   return Boolean(requirement && matchesRequirement(permissions, requirement));
 };
 
+const GamificationRouteGuard = ({ children }: { children: ReactNode }) => {
+  const { data: settings, isPending } = useGlobalSettings();
+
+  if (isPending) return null;
+  if (!settings?.gamificationEnabled) return <Navigate to="/" replace />;
+
+  return <>{children}</>;
+};
+
 export const RouteGuard = ({ children }: { children: ReactNode }) => {
   const { data: user } = useCurrentUserSessionSuspense();
   const { pathname } = useLocation();
   const hasAccess = checkRouteAccess(pathname, user?.permissions ?? []);
 
+  const path = pathname.replace(/\/$/, "").toLowerCase();
+  const isGamificationRoute =
+    path === "/admin/gamification" ||
+    path.startsWith("/admin/gamification/") ||
+    path === "/leaderboards";
+
   return match({ hasAccess, isAnonymous: !user })
-    .with({ hasAccess: true }, () => <>{children}</>)
+    .with({ hasAccess: true }, () =>
+      isGamificationRoute ? (
+        <GamificationRouteGuard>{children}</GamificationRouteGuard>
+      ) : (
+        <>{children}</>
+      ),
+    )
     .with({ isAnonymous: true }, () => (
       <RequireAuthenticatedUser>{children}</RequireAuthenticatedUser>
     ))

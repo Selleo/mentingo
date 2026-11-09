@@ -198,6 +198,33 @@ describe("mapNavigationItems", () => {
 
 describe("getNavigationConfig", () => {
   const t = ((key: string) => key) as TFunction;
+
+  it("hides gamification by default until enabled in platform settings", () => {
+    const items = getNavigationConfig(t).flatMap((group) => group.items);
+    expect(items.some((item) => item.path === "admin/gamification")).toBe(false);
+  });
+
+  it("shows enabled gamification with management permissions", () => {
+    const items = mapNavigationItems(
+      getNavigationConfig(
+        t,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        [],
+        false,
+        false,
+        true,
+      ),
+    ).flatMap((group) => group.items);
+    expect(items.find((item) => item.path === "admin/gamification")?.accessRequirement).toEqual({
+      allOf: [PERMISSIONS.GAMIFICATION_MANAGE],
+    });
+  });
   const forRoles = (roleSlugs: string[]) =>
     getNavigationConfig(t, false, false, false, false, false, false, false, roleSlugs);
 
