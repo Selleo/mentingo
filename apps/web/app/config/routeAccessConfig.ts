@@ -71,6 +71,9 @@ const CALENDAR_READ_ACCESS: PermissionRequirement = {
 const LIVE_TRAINING_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
 };
+const QUIZ_GRADING_ACCESS: PermissionRequirement = {
+  allOf: [PERMISSIONS.QUIZ_GRADING_READ],
+};
 const DASHBOARD_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.DASHBOARD_READ],
 };
@@ -94,6 +97,8 @@ export const routeAccessConfig = createRouteConfig({
   "phishing/new": { allOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.COURSE_ENROLLMENT] },
   "phishing/:id": { allOf: [PERMISSIONS.PHISHING_REPORT_READ] },
   "content-marketplace": { allOf: [PERMISSIONS.CONTENT_MARKETPLACE_BROWSE] },
+  "quiz-grading": QUIZ_GRADING_ACCESS,
+  "quiz-grading/:answerId": QUIZ_GRADING_ACCESS,
   "auth/login": PUBLIC,
   "auth/register": PUBLIC,
   "auth/create-new-password": PUBLIC,

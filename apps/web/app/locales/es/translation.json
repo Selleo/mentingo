@@ -9468,5 +9468,63 @@
         "invalidBadgeImage": "La imagen de la insignia no es válida. Vuelve a subirla."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Por calificar",
+    "answerTitle": "Calificar respuesta",
+    "pendingCount": "Pendientes: {{count}}",
+    "empty": "Ninguna respuesta coincide con los filtros seleccionados.",
+    "filters": {
+      "status": "Estado",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "allCourses": "Todos los cursos",
+      "allLessons": "Todas las lecciones",
+      "allStudents": "Todos los estudiantes"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "graded": "Calificada"
+    },
+    "columns": {
+      "question": "Pregunta",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "submittedAt": "Enviada",
+      "status": "Estado",
+      "points": "Puntos"
+    },
+    "attempt": "Intento",
+    "question": "Pregunta",
+    "reviewerInstructions": "Instrucciones para el evaluador",
+    "studentAnswer": "Respuesta del estudiante",
+    "nextAnswer": "Siguiente respuesta",
+    "points": "Puntos: {{points}} / {{max}}",
+    "form": {
+      "title": "Calificación",
+      "points": "Puntos (0–{{max}})",
+      "pointsRange": "Introduce un número entero de 0 a {{max}}.",
+      "comment": "Comentario (opcional)",
+      "commentPlaceholder": "Comentarios para el estudiante",
+      "commentTooLong": "El comentario puede tener como máximo {{max}} caracteres.",
+      "submit": "Guardar calificación",
+      "regrade": "Guardar nueva calificación"
+    },
+    "history": {
+      "title": "Historial de calificaciones",
+      "empty": "Esta respuesta aún no se ha calificado.",
+      "revision": "Revisión {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Respuesta calificada.",
+      "attemptGraded": "Respuesta calificada. El resultado del cuestionario ya está disponible para el estudiante.",
+      "gradeError": "No se pudo guardar la calificación."
+    },
+    "errors": {
+      "pointsOutOfRange": "Los puntos están fuera del rango permitido.",
+      "answerNotFound": "Esta respuesta no existe o no se puede calificar."
+    }
   }
 }

@@ -25,7 +25,12 @@ import {
   activeCourseLearningStateId,
   CourseRepetitionService,
 } from "src/course-repetition/course-repetition.service";
-import { CourseCompletedEvent, LessonCompletedEvent, LessonProgressChangedEvent } from "src/events";
+import {
+  CourseCompletedEvent,
+  LessonCompletedEvent,
+  LessonProgressChangedEvent,
+  QuizCompletedEvent,
+} from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
@@ -57,6 +62,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import {
   STUDENT_LESSON_PROGRESS_MESSAGE_KEYS,
   type EnsureDraftCourseProgressAllowedParams,
+  type FinishQuizProgressParams,
   type LessonProgressAccessResult,
   type MarkLessonAsIncompleteParams,
   type MarkLessonProgressResult,
@@ -747,6 +753,51 @@ export class StudentLessonProgressService {
           status: sql`EXCLUDED.status`,
         },
       });
+  }
+
+  // Records a graded quiz attempt: progress, lesson completion when passed and the completed event.
+  async finishQuizProgress(params: FinishQuizProgressParams) {
+    const { dbInstance, questionCount, isQuizPassed } = params;
+
+    await this.updateQuizProgress(
+      params.chapterId,
+      params.lessonId,
+      params.studentId,
+      questionCount,
+      params.score,
+      params.attemptNumber,
+      isQuizPassed,
+      true,
+      dbInstance,
+      params.language,
+    );
+
+    if (isQuizPassed) {
+      await this.markLessonAsCompleted({
+        id: params.lessonId,
+        studentId: params.studentId,
+        userPermissions: params.userPermissions,
+        actor: params.actor,
+        quizCompleted: true,
+        completedQuestionCount: questionCount,
+        dbInstance,
+        isQuizPassed,
+        language: params.language,
+      });
+    }
+
+    await this.outboxPublisher.publish(
+      new QuizCompletedEvent({
+        userId: params.studentId,
+        courseId: params.courseId,
+        lessonId: params.lessonId,
+        correctAnswers: params.correctAnswerCount,
+        wrongAnswers: questionCount - params.correctAnswerCount,
+        score: params.score,
+        isSupportMode: params.isSupportMode,
+      }),
+      dbInstance,
+    );
   }
 
   async updateQuizProgress(

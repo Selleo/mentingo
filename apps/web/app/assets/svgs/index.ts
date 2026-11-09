@@ -34,6 +34,7 @@ export {
   MailWarning,
   MessagesSquare,
   ShieldCheck,
+  ClipboardCheck,
   Medal,
   Milestone,
   Store,

@@ -9583,5 +9583,63 @@
         "invalidBadgeImage": "Obrázek odznaku je neplatný. Nahrajte ho znovu."
       }
     }
+  },
+  "quizGrading": {
+    "title": "K hodnocení",
+    "answerTitle": "Hodnocení odpovědi",
+    "pendingCount": "Čekající: {{count}}",
+    "empty": "Vybraným filtrům neodpovídají žádné odpovědi.",
+    "filters": {
+      "status": "Stav",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "allCourses": "Všechny kurzy",
+      "allLessons": "Všechny lekce",
+      "allStudents": "Všichni studenti"
+    },
+    "status": {
+      "pending": "Čeká",
+      "graded": "Ohodnoceno"
+    },
+    "columns": {
+      "question": "Otázka",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "submittedAt": "Odesláno",
+      "status": "Stav",
+      "points": "Body"
+    },
+    "attempt": "Pokus",
+    "question": "Otázka",
+    "reviewerInstructions": "Pokyny pro hodnotitele",
+    "studentAnswer": "Odpověď studenta",
+    "nextAnswer": "Další odpověď",
+    "points": "Body: {{points}} / {{max}}",
+    "form": {
+      "title": "Hodnocení",
+      "points": "Body (0–{{max}})",
+      "pointsRange": "Zadejte celé číslo od 0 do {{max}}.",
+      "comment": "Komentář (nepovinné)",
+      "commentPlaceholder": "Zpětná vazba pro studenta",
+      "commentTooLong": "Komentář může mít nejvýše {{max}} znaků.",
+      "submit": "Uložit hodnocení",
+      "regrade": "Uložit nové hodnocení"
+    },
+    "history": {
+      "title": "Historie hodnocení",
+      "empty": "Tato odpověď zatím nebyla ohodnocena.",
+      "revision": "Verze {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpověď byla ohodnocena.",
+      "attemptGraded": "Odpověď byla ohodnocena. Výsledek kvízu je nyní pro studenta dostupný.",
+      "gradeError": "Hodnocení se nepodařilo uložit."
+    },
+    "errors": {
+      "pointsOutOfRange": "Počet bodů je mimo povolený rozsah.",
+      "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit."
+    }
   }
 }

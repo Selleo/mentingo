@@ -11,6 +11,7 @@ import {
   assessmentAttemptBlankAnswers,
   assessmentAttemptChoiceSelections,
   assessmentAttemptOpenTextAnswers,
+  assessmentAttemptQuestionAnswerReviews,
   assessmentAttemptQuestionAnswers,
   assessmentAttemptScaleSelections,
   assessmentAttemptStatementAnswers,
@@ -327,5 +328,20 @@ export class QuizRuntimeRepository {
       .select()
       .from(assessmentAttemptOpenTextAnswers)
       .where(inArray(assessmentAttemptOpenTextAnswers.questionAnswerId, questionAnswerIds));
+  }
+
+  async findLatestReviews(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .selectDistinctOn([assessmentAttemptQuestionAnswerReviews.questionAnswerId], {
+        questionAnswerId: assessmentAttemptQuestionAnswerReviews.questionAnswerId,
+        explanation: assessmentAttemptQuestionAnswerReviews.explanation,
+      })
+      .from(assessmentAttemptQuestionAnswerReviews)
+      .where(inArray(assessmentAttemptQuestionAnswerReviews.questionAnswerId, questionAnswerIds))
+      .orderBy(
+        assessmentAttemptQuestionAnswerReviews.questionAnswerId,
+        desc(assessmentAttemptQuestionAnswerReviews.revisionNumber),
+      );
   }
 }

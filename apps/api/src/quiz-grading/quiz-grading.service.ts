@@ -1,0 +1,254 @@
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_GRADING_MODES,
+  PERMISSIONS,
+} from "@repo/shared";
+
+import { DatabasePg, type Pagination, type UUIDType } from "src/common";
+import { parsePagination } from "src/common/pagination";
+import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
+import { QuizAttemptGradedEvent } from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { QuizRuntimeRepository } from "src/quiz/repositories/quiz-runtime.repository";
+import { DB } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+
+import { QuizGradingRepository } from "./quiz-grading.repository";
+
+import type {
+  GradeQuizAnswerBody,
+  GradeQuizAnswerResponse,
+  QuizGradingAnswerDetailsResponse,
+  QuizGradingAnswerListResponse,
+} from "./quiz-grading.schema";
+import type { QuizAnswerForGrading, QuizGradingAnswerFilters } from "./quiz-grading.types";
+import type { CurrentUserType } from "src/common/types/current-user.type";
+
+// Reviewers complete lessons on the learner's behalf, like trainers do for live trainings.
+const LEARNER_PROGRESS_PERMISSIONS = [PERMISSIONS.LEARNING_PROGRESS_UPDATE];
+
+@Injectable()
+export class QuizGradingService {
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly quizGradingRepository: QuizGradingRepository,
+    private readonly quizRuntimeRepository: QuizRuntimeRepository,
+    private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly courseRepetitionService: CourseRepetitionService,
+    private readonly outboxPublisher: OutboxPublisher,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
+  ) {}
+
+  async getAnswers(
+    filters: QuizGradingAnswerFilters,
+    pageInput?: number,
+    perPageInput?: number,
+  ): Promise<{ data: QuizGradingAnswerListResponse; pagination: Pagination }> {
+    const { page, perPage } = parsePagination(pageInput, perPageInput);
+    const { data, totalItems } = await this.quizGradingRepository.findAnswers(
+      filters,
+      page,
+      perPage,
+    );
+
+    return { data, pagination: { totalItems, page, perPage } };
+  }
+
+  getFilterOptions() {
+    return this.quizGradingRepository.findFilterOptions();
+  }
+
+  async getAnswerDetails(answerId: UUIDType): Promise<QuizGradingAnswerDetailsResponse> {
+    const answer = await this.quizGradingRepository.findAnswerDetails(answerId);
+
+    if (!answer) throw new NotFoundException("quizGrading.errors.answerNotFound");
+
+    const [reviews, nextAnswerId] = await Promise.all([
+      this.quizGradingRepository.findReviews(answerId),
+      this.quizGradingRepository.findNextPendingAnswerId(answerId),
+    ]);
+
+    return { ...answer, reviews, nextAnswerId };
+  }
+
+  async gradeAnswer(
+    answerId: UUIDType,
+    { awardedPoints, comment }: GradeQuizAnswerBody,
+    currentUser: CurrentUserType,
+  ): Promise<GradeQuizAnswerResponse> {
+    const attemptGraded = await this.tenantDbRunnerService.transaction(async () => {
+      const lockTarget = await this.quizGradingRepository.findAnswerForGrading(answerId, this.db);
+
+      if (!lockTarget) throw new NotFoundException("quizGrading.errors.answerNotFound");
+
+      await this.courseRepetitionService.lock(lockTarget.courseId, lockTarget.studentId, this.db);
+
+      // Re-read under the lock so concurrent grades of one attempt see each other's commits.
+      const answer = await this.quizGradingRepository.findAnswerForGrading(answerId, this.db);
+
+      if (!answer || answer.gradingMode !== ASSESSMENT_GRADING_MODES.MANUAL)
+        throw new NotFoundException("quizGrading.errors.answerNotFound");
+
+      if (awardedPoints > answer.maximumPoints)
+        throw new BadRequestException("quizGrading.errors.pointsOutOfRange");
+
+      // Throws when the learner moved on to a newer learning state (e.g. repeated the course).
+      const learningStateId = await this.courseRepetitionService.resolveWritableState(
+        answer.courseId,
+        answer.studentId,
+        answer.learningStateId,
+        this.db,
+      );
+
+      return courseLearningContext.run({ learningStateId }, () =>
+        this.recordGrade(answer, awardedPoints, comment ?? "", currentUser),
+      );
+    });
+
+    const nextAnswerId = await this.quizGradingRepository.findNextPendingAnswerId(answerId);
+
+    return { attemptGraded, nextAnswerId };
+  }
+
+  private async recordGrade(
+    answer: QuizAnswerForGrading,
+    awardedPoints: number,
+    comment: string,
+    currentUser: CurrentUserType,
+  ) {
+    await this.quizGradingRepository.insertReview(
+      {
+        questionAnswerId: answer.id,
+        reviewerId: currentUser.userId,
+        awardedPoints: awardedPoints.toString(),
+        explanation: comment,
+        explanationLanguage: answer.language,
+      },
+      this.db,
+    );
+    await this.quizGradingRepository.markAnswerGraded(answer.id, awardedPoints, this.db);
+
+    const attemptAnswers = await this.quizGradingRepository.findAttemptAnswers(
+      answer.attemptId,
+      this.db,
+    );
+
+    if (
+      attemptAnswers.some(
+        ({ gradingStatus }) => gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
+      )
+    )
+      return false;
+
+    const totalPoints = attemptAnswers.reduce(
+      (total, { awardedPoints }) => total + awardedPoints,
+      0,
+    );
+    const scorePercentage = answer.availablePoints
+      ? (totalPoints / answer.availablePoints) * 100
+      : 0;
+    const isQuizPassed = scorePercentage >= answer.passingScorePercentage;
+    const isRegrade = answer.attemptGradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
+    const score = Math.floor(scorePercentage);
+
+    await this.quizGradingRepository.updateGradedAttempt(
+      answer.attemptId,
+      {
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+        result: isQuizPassed
+          ? ASSESSMENT_ATTEMPT_RESULTS.PASSED
+          : ASSESSMENT_ATTEMPT_RESULTS.FAILED,
+        awardedPoints: totalPoints.toString(),
+        scorePercentage: scorePercentage.toFixed(2),
+        ...(isRegrade ? {} : { gradedAt: new Date().toISOString() }),
+      },
+      this.db,
+    );
+
+    if (isRegrade) {
+      await this.updateRegradedProgress(answer, score, isQuizPassed, currentUser);
+    } else {
+      await this.studentLessonProgressService.finishQuizProgress({
+        chapterId: answer.chapterId,
+        courseId: answer.courseId,
+        lessonId: answer.lessonId,
+        studentId: answer.studentId,
+        questionCount: attemptAnswers.length,
+        correctAnswerCount: attemptAnswers.filter(({ awardedPoints }) => awardedPoints > 0).length,
+        score,
+        attemptNumber: answer.attemptNumber,
+        isQuizPassed,
+        language: answer.language,
+        userPermissions: LEARNER_PROGRESS_PERMISSIONS,
+        actor: currentUser,
+        isSupportMode: false,
+        dbInstance: this.db,
+      });
+    }
+
+    await this.outboxPublisher.publish(
+      new QuizAttemptGradedEvent({
+        userId: answer.studentId,
+        courseId: answer.courseId,
+        lessonId: answer.lessonId,
+        attemptId: answer.attemptId,
+        reviewerId: currentUser.userId,
+        score,
+        passed: isQuizPassed,
+        isRegrade,
+      }),
+      this.db,
+    );
+
+    return true;
+  }
+
+  // A re-grade refreshes the score of the learner's current result but never reopens a lesson.
+  private async updateRegradedProgress(
+    answer: QuizAnswerForGrading,
+    score: number,
+    isQuizPassed: boolean,
+    currentUser: CurrentUserType,
+  ) {
+    const latestAttempt = await this.quizRuntimeRepository.findLatestAttempt(
+      answer.assessmentId,
+      answer.studentId,
+      this.db,
+    );
+    const progress = await this.quizGradingRepository.findLessonProgress(
+      answer.lessonId,
+      answer.studentId,
+      this.db,
+    );
+
+    // A newer attempt or a reset for a retake owns the progress now.
+    if (latestAttempt?.id !== answer.attemptId || !progress?.completedAt) return;
+
+    const wasPassed = Boolean(progress.isQuizPassed);
+
+    await this.quizGradingRepository.updateLessonProgressScore(
+      progress.id,
+      { quizScore: score, isQuizPassed: wasPassed || isQuizPassed },
+      this.db,
+    );
+
+    if (!isQuizPassed || wasPassed) return;
+
+    await this.studentLessonProgressService.markLessonAsCompleted({
+      id: answer.lessonId,
+      studentId: answer.studentId,
+      userPermissions: LEARNER_PROGRESS_PERMISSIONS,
+      actor: currentUser,
+      quizCompleted: true,
+      completedQuestionCount: progress.completedQuestionCount ?? 0,
+      dbInstance: this.db,
+      isQuizPassed,
+      language: answer.language,
+    });
+  }
+}

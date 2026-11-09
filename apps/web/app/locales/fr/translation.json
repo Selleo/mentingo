@@ -9053,5 +9053,63 @@
         "invalidBadgeImage": "L’image du badge n’est pas valide. Importez-la à nouveau."
       }
     }
+  },
+  "quizGrading": {
+    "title": "À noter",
+    "answerTitle": "Noter la réponse",
+    "pendingCount": "En attente : {{count}}",
+    "empty": "Aucune réponse ne correspond aux filtres sélectionnés.",
+    "filters": {
+      "status": "Statut",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "allCourses": "Tous les cours",
+      "allLessons": "Toutes les leçons",
+      "allStudents": "Tous les apprenants"
+    },
+    "status": {
+      "pending": "En attente",
+      "graded": "Notée"
+    },
+    "columns": {
+      "question": "Question",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "submittedAt": "Envoyée",
+      "status": "Statut",
+      "points": "Points"
+    },
+    "attempt": "Tentative",
+    "question": "Question",
+    "reviewerInstructions": "Instructions pour le correcteur",
+    "studentAnswer": "Réponse de l'apprenant",
+    "nextAnswer": "Réponse suivante",
+    "points": "Points : {{points}} / {{max}}",
+    "form": {
+      "title": "Note",
+      "points": "Points (0–{{max}})",
+      "pointsRange": "Saisissez un nombre entier de 0 à {{max}}.",
+      "comment": "Commentaire (facultatif)",
+      "commentPlaceholder": "Retour pour l'apprenant",
+      "commentTooLong": "Le commentaire peut contenir au maximum {{max}} caractères.",
+      "submit": "Enregistrer la note",
+      "regrade": "Enregistrer la nouvelle note"
+    },
+    "history": {
+      "title": "Historique des notes",
+      "empty": "Cette réponse n'a pas encore été notée.",
+      "revision": "Révision {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Réponse notée.",
+      "attemptGraded": "Réponse notée. Le résultat du quiz est maintenant disponible pour l'apprenant.",
+      "gradeError": "Impossible d'enregistrer la note."
+    },
+    "errors": {
+      "pointsOutOfRange": "Le nombre de points est hors de la plage autorisée.",
+      "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée."
+    }
   }
 }

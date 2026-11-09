@@ -149,17 +149,25 @@ export class QuizAttemptService {
         blankAnswers: [],
         scaleSelections: [],
         openTextAnswers: [],
+        latestReviews: [],
       };
     }
 
-    const [choiceSelections, statementAnswers, blankAnswers, scaleSelections, openTextAnswers] =
-      await Promise.all([
-        this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
-        this.quizRuntimeRepository.findStatementAnswers(questionAnswerIds, db),
-        this.quizRuntimeRepository.findBlankAnswers(questionAnswerIds, db),
-        this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
-        this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
-      ]);
+    const [
+      choiceSelections,
+      statementAnswers,
+      blankAnswers,
+      scaleSelections,
+      openTextAnswers,
+      latestReviews,
+    ] = await Promise.all([
+      this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
+      this.quizRuntimeRepository.findStatementAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findBlankAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
+      this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findLatestReviews(questionAnswerIds, db),
+    ]);
 
     return {
       attempt,
@@ -169,6 +177,7 @@ export class QuizAttemptService {
       blankAnswers,
       scaleSelections,
       openTextAnswers,
+      latestReviews,
     };
   }
 }

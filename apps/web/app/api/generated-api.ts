@@ -3638,6 +3638,11 @@ export interface GetLessonByIdResponse {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         passQuestion: boolean | null;
+        reviewerFeedback?: {
+          awardedPoints: number;
+          maximumPoints: number;
+          comment: string;
+        } | null;
       }[];
       questionCount: number;
       correctAnswerCount: number | null;
@@ -31255,6 +31260,117 @@ export interface SearchResponse {
   };
 }
 
+export interface GetAnswersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    gradingStatus: "pending" | "graded";
+    awardedPoints: number | null;
+    maximumPoints: number;
+    submittedAt: string;
+    questionTitle: string;
+    course: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+    lesson: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+    student: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetFilterOptionsResponse {
+  data: {
+    courses: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+    lessons: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      /** @format uuid */
+      courseId: string;
+    }[];
+    students: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+export interface GetAnswerDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    gradingStatus: "pending" | "graded";
+    awardedPoints: number | null;
+    maximumPoints: number;
+    submittedAt: string;
+    questionTitle: string;
+    course: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+    lesson: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+    student: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    };
+  } & {
+    questionDescription: string | null;
+    reviewerInstructions: string | null;
+    studentAnswer: string;
+    attemptNumber: number;
+    reviews: {
+      /** @format uuid */
+      id: string;
+      revisionNumber: number;
+      reviewerName: string;
+      awardedPoints: number;
+      comment: string;
+      reviewedAt: string;
+    }[];
+    nextAnswerId: string | null;
+  };
+}
+
+export interface GradeAnswerBody {
+  /** @min 0 */
+  awardedPoints: number;
+  /** @maxLength 5000 */
+  comment?: string;
+}
+
+export interface GradeAnswerResponse {
+  data: {
+    attemptGraded: boolean;
+    nextAnswerId: string | null;
+  };
+}
+
 export interface RunReportBody {
   view: "organisation" | "developmentPaths" | "course" | "learner";
   /**
@@ -46186,6 +46302,84 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/global-search`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QuizGradingControllerGetAnswers
+     * @request GET:/api/quiz-grading/answers
+     */
+    quizGradingControllerGetAnswers: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        status?: "pending" | "graded";
+        /** @format uuid */
+        courseId?: string;
+        /** @format uuid */
+        lessonId?: string;
+        /** @format uuid */
+        studentId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAnswersResponse, any>({
+        path: `/api/quiz-grading/answers`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QuizGradingControllerGetFilterOptions
+     * @request GET:/api/quiz-grading/filters
+     */
+    quizGradingControllerGetFilterOptions: (params: RequestParams = {}) =>
+      this.request<GetFilterOptionsResponse, any>({
+        path: `/api/quiz-grading/filters`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QuizGradingControllerGetAnswerDetails
+     * @request GET:/api/quiz-grading/answers/{id}
+     */
+    quizGradingControllerGetAnswerDetails: (id: string, params: RequestParams = {}) =>
+      this.request<GetAnswerDetailsResponse, any>({
+        path: `/api/quiz-grading/answers/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QuizGradingControllerGradeAnswer
+     * @request POST:/api/quiz-grading/answers/{id}/grade
+     */
+    quizGradingControllerGradeAnswer: (
+      id: string,
+      data: GradeAnswerBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GradeAnswerResponse, any>({
+        path: `/api/quiz-grading/answers/${id}/grade`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

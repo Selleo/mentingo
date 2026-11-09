@@ -9581,5 +9581,63 @@
         "invalidBadgeImage": "Ženklelio paveikslėlis netinkamas. Įkelkite jį iš naujo."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Vertinti",
+    "answerTitle": "Atsakymo vertinimas",
+    "pendingCount": "Laukia: {{count}}",
+    "empty": "Pasirinktus filtrus atitinkančių atsakymų nėra.",
+    "filters": {
+      "status": "Būsena",
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "student": "Besimokantysis",
+      "allCourses": "Visi kursai",
+      "allLessons": "Visos pamokos",
+      "allStudents": "Visi besimokantieji"
+    },
+    "status": {
+      "pending": "Laukia",
+      "graded": "Įvertinta"
+    },
+    "columns": {
+      "question": "Klausimas",
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "student": "Besimokantysis",
+      "submittedAt": "Pateikta",
+      "status": "Būsena",
+      "points": "Taškai"
+    },
+    "attempt": "Bandymas",
+    "question": "Klausimas",
+    "reviewerInstructions": "Nurodymai vertintojui",
+    "studentAnswer": "Besimokančiojo atsakymas",
+    "nextAnswer": "Kitas atsakymas",
+    "points": "Taškai: {{points}} / {{max}}",
+    "form": {
+      "title": "Įvertinimas",
+      "points": "Taškai (0–{{max}})",
+      "pointsRange": "Įveskite sveikąjį skaičių nuo 0 iki {{max}}.",
+      "comment": "Komentaras (neprivalomas)",
+      "commentPlaceholder": "Grįžtamasis ryšys besimokančiajam",
+      "commentTooLong": "Komentarą gali sudaryti ne daugiau kaip {{max}} simbolių.",
+      "submit": "Išsaugoti įvertinimą",
+      "regrade": "Išsaugoti naują įvertinimą"
+    },
+    "history": {
+      "title": "Vertinimų istorija",
+      "empty": "Šis atsakymas dar neįvertintas.",
+      "revision": "Versija {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Atsakymas įvertintas.",
+      "attemptGraded": "Atsakymas įvertintas. Testo rezultatas jau matomas besimokančiajam.",
+      "gradeError": "Nepavyko išsaugoti įvertinimo."
+    },
+    "errors": {
+      "pointsOutOfRange": "Taškų skaičius nepatenka į leistiną intervalą.",
+      "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti."
+    }
   }
 }

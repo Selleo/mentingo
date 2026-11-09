@@ -9667,5 +9667,63 @@
         "invalidBadgeImage": "Obraz odznaki jest nieprawidłowy. Prześlij go ponownie."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Do oceny",
+    "answerTitle": "Ocena odpowiedzi",
+    "pendingCount": "Oczekujące: {{count}}",
+    "empty": "Brak odpowiedzi pasujących do wybranych filtrów.",
+    "filters": {
+      "status": "Status",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "allCourses": "Wszystkie kursy",
+      "allLessons": "Wszystkie lekcje",
+      "allStudents": "Wszyscy kursanci"
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "graded": "Oceniona"
+    },
+    "columns": {
+      "question": "Pytanie",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "submittedAt": "Przesłano",
+      "status": "Status",
+      "points": "Punkty"
+    },
+    "attempt": "Podejście",
+    "question": "Pytanie",
+    "reviewerInstructions": "Instrukcje dla oceniającego",
+    "studentAnswer": "Odpowiedź kursanta",
+    "nextAnswer": "Następna odpowiedź",
+    "points": "Punkty: {{points}} / {{max}}",
+    "form": {
+      "title": "Ocena",
+      "points": "Punkty (0–{{max}})",
+      "pointsRange": "Wpisz liczbę całkowitą od 0 do {{max}}.",
+      "comment": "Komentarz (opcjonalnie)",
+      "commentPlaceholder": "Informacja zwrotna dla kursanta",
+      "commentTooLong": "Komentarz może mieć maksymalnie {{max}} znaków.",
+      "submit": "Zapisz ocenę",
+      "regrade": "Zapisz nową ocenę"
+    },
+    "history": {
+      "title": "Historia ocen",
+      "empty": "Ta odpowiedź nie została jeszcze oceniona.",
+      "revision": "Wersja {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpowiedź została oceniona.",
+      "attemptGraded": "Odpowiedź została oceniona. Wynik quizu jest już dostępny dla kursanta.",
+      "gradeError": "Nie udało się zapisać oceny."
+    },
+    "errors": {
+      "pointsOutOfRange": "Liczba punktów jest poza dozwolonym zakresem.",
+      "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić."
+    }
   }
 }

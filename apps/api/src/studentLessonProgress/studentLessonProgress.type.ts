@@ -1,4 +1,4 @@
-import type { CourseStatus, PermissionKey } from "@repo/shared";
+import type { CourseStatus, PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
@@ -44,4 +44,21 @@ export type LessonProgressAccessResult = {
   isLearningModeActive: boolean;
   canTrackProgress: boolean;
   isPublicCoursePreview: boolean;
+};
+
+export type FinishQuizProgressParams = {
+  chapterId: UUIDType;
+  courseId: UUIDType;
+  lessonId: UUIDType;
+  studentId: UUIDType;
+  questionCount: number;
+  correctAnswerCount: number;
+  score: number;
+  attemptNumber: number;
+  isQuizPassed: boolean;
+  language: SupportedLanguages;
+  userPermissions: PermissionKey[];
+  actor: CurrentUserType;
+  isSupportMode: boolean;
+  dbInstance: DatabasePg;
 };

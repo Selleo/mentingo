@@ -284,6 +284,20 @@ export const getNavigationConfig = (
         },
       ],
     },
+    {
+      title: t("quizGrading.title"),
+      isExpandable: false,
+      restrictedAccessRequirement: routeAccessConfig["quiz-grading"],
+      items: [
+        {
+          label: t("quizGrading.title"),
+          path: "quiz-grading",
+          iconName: "ClipboardCheck",
+          testId: NAVIGATION_HANDLES.QUIZ_GRADING_LINK,
+          accessRequirement: routeAccessConfig["quiz-grading"],
+        },
+      ],
+    },
     ...(isPhishingEnabled
       ? ([
           {
