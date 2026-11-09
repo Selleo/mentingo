@@ -26,6 +26,7 @@ import gaps
 import harness
 import knowledge
 import self_onboarding_model
+import self_onboarding_scenes
 import language
 import llm
 import montage
@@ -496,6 +497,7 @@ def replay_flow(run, flow, domain, code, commit, repo_slug, addon, cache, refere
     base = (checkout / scenario['base']).resolve()
     if not base.is_relative_to(checkout.resolve()) or not base.is_file():
         raise ValueError('Cached scenario base is absent from this version')
+    source = self_onboarding_scenes.localized_role_labels(source, checkout, code)
     scene = base.with_name(f'rf-localized-{code}-{flow["id"]}.spec.ts')
     scene.write_text(source, encoding='utf-8')
     try:
