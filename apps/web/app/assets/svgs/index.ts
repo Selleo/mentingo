@@ -33,6 +33,7 @@ export {
   MailWarning,
   MessagesSquare,
   ShieldCheck,
+  Medal,
   Milestone,
   Store,
   User,

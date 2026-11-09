@@ -2,6 +2,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
+import { DatePicker } from "~/components/DatePicker";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -13,7 +14,6 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
-import { ReportDatePicker } from "./components/ReportDatePicker";
 import { ReportOptionPicker } from "./components/ReportOptionPicker";
 import {
   addCondition,
@@ -160,13 +160,13 @@ function RuleEditor({
     if (isDate && isRange) {
       return (
         <>
-          <ReportDatePicker
+          <DatePicker
             label={t("reports.filters.from")}
             placeholder={t("reports.filters.selectDate")}
             value={rule.value ? String(rule.value) : undefined}
             onChange={(value) => update({ value })}
           />
-          <ReportDatePicker
+          <DatePicker
             label={t("reports.filters.to")}
             placeholder={t("reports.filters.selectDate")}
             value={rule.secondValue ? String(rule.secondValue) : undefined}
@@ -177,7 +177,7 @@ function RuleEditor({
     }
     if (isDate) {
       return (
-        <ReportDatePicker
+        <DatePicker
           label={t("reports.filters.value")}
           placeholder={t("reports.filters.selectDate")}
           value={rule.value ? String(rule.value) : undefined}

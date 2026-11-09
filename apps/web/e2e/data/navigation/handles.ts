@@ -5,6 +5,7 @@ export const NAVIGATION_HANDLES = {
   COURSES_GROUP: "navigation-courses-group",
   COURSES_LINK: "navigation-courses-link",
   LEARNING_PATHS_LINK: "navigation-learning-paths-link",
+  LEADERBOARDS_LINK: "navigation-leaderboards-link",
   CALENDAR_LINK: "navigation-calendar-link",
   CONTENT_GROUP: "navigation-content-toggle",
   NEWS_LINK: "navigation-news-link",

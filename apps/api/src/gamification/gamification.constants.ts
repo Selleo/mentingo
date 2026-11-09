@@ -62,3 +62,7 @@ export const GAMIFICATION_JOB_OPTIONS = {
 } as const;
 
 export const RECENT_REWARDS_LIMIT = 5;
+
+export const LEADERBOARD_TOP_LIMIT = 10;
+/** Positions shown above and below a viewer ranked outside the top list. */
+export const LEADERBOARD_NEARBY_DISTANCE = 2;

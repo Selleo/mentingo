@@ -416,6 +416,10 @@
         {
           "prefix": "/admin/gamification",
           "pageKey": "gamification"
+        },
+        {
+          "prefix": "/leaderboards",
+          "pageKey": "leaderboards"
         }
       ]
     }
