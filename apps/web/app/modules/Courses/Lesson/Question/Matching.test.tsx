@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { I18nextProvider } from "react-i18next";
 import { describe, expect, it } from "vitest";
@@ -42,13 +42,23 @@ const question = {
   ],
 } as QuizQuestion;
 
-const renderMatching = (isQuizFeedbackRedacted: boolean) => {
+let formValues: () => unknown = () => undefined;
+
+const renderMatching = (isQuizFeedbackRedacted: boolean, isCompleted = true) => {
   const Wrapper = ({ children }: PropsWithChildren) => {
-    const form = useForm({ defaultValues: getUserAnswers([question]) });
+    const form = useForm({
+      defaultValues: isCompleted
+        ? getUserAnswers([question])
+        : { matchingQuestions: { [question.id]: { "pair-cat": null, "pair-dog": null } } },
+    });
+    formValues = () => form.getValues("matchingQuestions");
 
     return (
       <I18nextProvider i18n={i18next}>
-        <QuizContextProvider isQuizSubmitted isQuizFeedbackRedacted={isQuizFeedbackRedacted}>
+        <QuizContextProvider
+          isQuizSubmitted={isCompleted}
+          isQuizFeedbackRedacted={isQuizFeedbackRedacted}
+        >
           <FormProvider {...form}>{children}</FormProvider>
         </QuizContextProvider>
       </I18nextProvider>
@@ -57,7 +67,7 @@ const renderMatching = (isQuizFeedbackRedacted: boolean) => {
 
   return render(
     <Wrapper>
-      <Matching question={question} isCompleted />
+      <Matching question={question} isCompleted={isCompleted} />
     </Wrapper>,
   );
 };
@@ -66,13 +76,13 @@ describe("Matching", () => {
   it("shows each pair with the learner's locked answer and the correct match for wrong pairs", () => {
     renderMatching(false);
 
-    const selects = screen.getAllByRole("combobox");
-    expect(selects).toHaveLength(2);
-    selects.forEach((select) => {
-      expect(select).toBeDisabled();
-      expect(select).toHaveTextContent("Meow");
+    ["pair-cat", "pair-dog"].forEach((pairId) => {
+      const answer = within(screen.getByTestId(`matching-pair-${pairId}`)).getByRole("button", {
+        name: "Meow",
+      });
+      expect(answer).toBeDisabled();
     });
-    expect(screen.getByRole("combobox", { name: "Dog" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Remove/ })).not.toBeInTheDocument();
     expect(screen.getByText(/Woof/)).toBeInTheDocument();
   });
 
@@ -80,5 +90,21 @@ describe("Matching", () => {
     renderMatching(true);
 
     expect(screen.queryByText(/Woof/)).not.toBeInTheDocument();
+  });
+
+  it("places, moves and removes matches without drag and drop", () => {
+    renderMatching(false, false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Meow" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cat" }));
+    expect(formValues()).toEqual({ [question.id]: { "pair-cat": "Meow", "pair-dog": null } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Woof" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dog" }));
+    expect(formValues()).toEqual({ [question.id]: { "pair-cat": "Meow", "pair-dog": "Woof" } });
+
+    fireEvent.click(within(screen.getByTestId("matching-pair-pair-cat")).getAllByRole("button")[1]);
+    expect(formValues()).toEqual({ [question.id]: { "pair-cat": null, "pair-dog": "Woof" } });
+    expect(screen.getByRole("button", { name: "Meow" })).toBeInTheDocument();
   });
 });

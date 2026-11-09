@@ -4354,7 +4354,10 @@
       "openInNewTab": "Open in new tab",
       "scale_1_5": "Scale question (1-5)",
       "matching": "Match each item with its pair.",
-      "selectMatch": "Select a match",
+      "dropMatch": "Drag a match here",
+      "placeMatch": "Place “{{match}}” here",
+      "removeMatch": "Remove match {{match}}",
+      "allMatchesPlaced": "All matches placed",
       "correctMatch": "Correct match:"
     },
     "aiMentor": {

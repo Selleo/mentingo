@@ -4360,7 +4360,10 @@
       "openInNewTab": "Otevřít na nové kartě",
       "scale_1_5": "Otázka typu škála (1–5)",
       "matching": "Přiřaďte každou položku k její dvojici.",
-      "selectMatch": "Vyberte přiřazení",
+      "dropMatch": "Přetáhněte sem přiřazení",
+      "placeMatch": "Umístit sem „{{match}}“",
+      "removeMatch": "Odebrat přiřazení {{match}}",
+      "allMatchesPlaced": "Všechna přiřazení jsou umístěna",
       "correctMatch": "Správné přiřazení:"
     },
     "aiMentor": {

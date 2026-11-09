@@ -4111,7 +4111,10 @@
       "openInNewTab": "Ouvrir dans un nouvel onglet",
       "scale_1_5": "Question sur l'échelle (1-5)",
       "matching": "Associez chaque élément à sa paire.",
-      "selectMatch": "Choisissez une correspondance",
+      "dropMatch": "Faites glisser une correspondance ici",
+      "placeMatch": "Placer « {{match}} » ici",
+      "removeMatch": "Retirer la correspondance {{match}}",
+      "allMatchesPlaced": "Toutes les correspondances sont placées",
       "correctMatch": "Bonne correspondance :"
     },
     "aiMentor": {
