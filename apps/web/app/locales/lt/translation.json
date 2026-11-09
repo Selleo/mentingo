@@ -4760,8 +4760,8 @@
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
       "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
-      "publicCoursePreview": "Viešų kursų peržiūra prieš registraciją",
-      "publicCoursePreviewDescription": "Leiskite prisijungusiems naudotojams peržiūrėti nemokamus viešus kursus ir kalbėtis su DI mentoriais neužsiregistravus į kursą. Testams ir mokymosi pažangai reikia registracijos. Mokamiems kursams lieka tos pačios prieigos taisyklės."
+      "publicCoursePreview": "Pamokų peržiūra prieš registraciją į kursą",
+      "publicCoursePreviewDescription": "Leiskite naudotojams peržiūrėti nemokamų viešų kursų pamokas neužsiregistravus į kursą."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",

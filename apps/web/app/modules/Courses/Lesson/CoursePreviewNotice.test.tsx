@@ -8,6 +8,8 @@ import { renderWith } from "~/utils/testUtils";
 
 import { CoursePreviewNotice } from "./CoursePreviewNotice";
 
+import type { GetLessonByIdResponse } from "~/api/generated-api";
+
 const state = vi.hoisted(() => ({
   preview: true,
   permissions: [] as PermissionKey[],
@@ -45,10 +47,10 @@ vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
   }),
 }));
 
-const renderNotice = () =>
+const renderNotice = (lessonType: GetLessonByIdResponse["data"]["type"] = "quiz") =>
   renderWith().render(
     <MemoryRouter>
-      <CoursePreviewNotice />
+      <CoursePreviewNotice lessonType={lessonType} />
     </MemoryRouter>,
   );
 
@@ -104,5 +106,21 @@ describe("CoursePreviewNotice", () => {
     renderNotice();
 
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  });
+
+  describe.each(["learner", "administrator"] as const)("%s preview", (viewer) => {
+    it.each(["content", "embed", "ai_mentor", "scorm", "live_training"] as const)(
+      "hides the notice for %s lessons",
+      (lessonType) => {
+        if (viewer === "administrator") {
+          state.permissions.push(PERMISSIONS.LEARNING_MODE_USE);
+        }
+
+        renderNotice(lessonType);
+
+        expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      },
+    );
   });
 });

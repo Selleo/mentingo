@@ -11,7 +11,13 @@ import { useIsRegistrationEnabled } from "~/hooks/useIsRegistrationEnabled";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
-export function CoursePreviewNotice() {
+import type { GetLessonByIdResponse } from "~/api/generated-api";
+
+type CoursePreviewNoticeProps = {
+  lessonType: GetLessonByIdResponse["data"]["type"];
+};
+
+export function CoursePreviewNotice({ lessonType }: CoursePreviewNoticeProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { course, isPreviewMode } = useCourseAccessProvider();
@@ -29,7 +35,7 @@ export function CoursePreviewNotice() {
     PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   );
 
-  if (!isPreviewMode) return null;
+  if (!isPreviewMode || lessonType !== "quiz") return null;
 
   const renderAction = () => {
     if (canUseLearningMode) {

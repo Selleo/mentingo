@@ -5070,8 +5070,8 @@
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
-      "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
-      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne kursy publiczne i rozmawiać z mentorami AI bez zapisu. Quizy i postępy w nauce wymagają zapisu. Płatne kursy zachowują dotychczasowe zasady dostępu."
+      "publicCoursePreview": "Podgląd lekcji przed zapisem do kursu",
+      "publicCoursePreviewDescription": "Pozwól niezapisanym użytkownikom przeglądać lekcje w bezpłatnych kursach publicznych."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",

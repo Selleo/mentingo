@@ -4483,8 +4483,8 @@
       "finishedCourseNotificationDescription": "Recevoir des notifications lorsqu'un utilisateur termine un cours",
       "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
       "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard",
-      "publicCoursePreview": "Aperçu des cours publics avant inscription",
-      "publicCoursePreviewDescription": "Permettez aux utilisateurs connectés de consulter les cours publics gratuits et de discuter avec les mentors IA sans inscription. Les quiz et la progression nécessitent une inscription. Les cours payants conservent leurs règles d’accès actuelles."
+      "publicCoursePreview": "Consulter les leçons avant de s’inscrire à un cours",
+      "publicCoursePreviewDescription": "Permet aux utilisateurs non inscrits de consulter les leçons des cours publics gratuits."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",

@@ -284,7 +284,7 @@ export const LessonContent = ({
           )}
         </div>
 
-        {showPreviewNotice && <CoursePreviewNotice />}
+        {showPreviewNotice && <CoursePreviewNotice lessonType={lesson.type} />}
 
         <LessonVideoProgressStrip
           lessonId={lesson.id}
