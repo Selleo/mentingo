@@ -282,7 +282,7 @@ export const LessonContent = ({
           )}
         </div>
 
-        <CoursePreviewNotice />
+        <CoursePreviewNotice lessonType={lesson.type} />
 
         <LessonVideoProgressStrip
           lessonId={lesson.id}
