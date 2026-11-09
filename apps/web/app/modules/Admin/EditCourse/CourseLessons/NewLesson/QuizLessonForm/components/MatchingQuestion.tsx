@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList";
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -24,7 +24,13 @@ import { findBaseLanguageOption } from "../quizTranslationPlaceholders";
 
 import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
+import type { KeyboardEvent } from "react";
 import type { UseFormReturn } from "react-hook-form";
+
+// Pair sides are single-line labels; the textarea only exists to show long text wrapped.
+const preventNewLine = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  if (event.key === "Enter") event.preventDefault();
+};
 
 type MatchingQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
@@ -110,7 +116,7 @@ const MatchingQuestion = ({
     <Accordion.Root key={questionIndex} type="single" collapsible>
       <Accordion.Item value={`item-${questionIndex}`}>
         <div className="mt-3 rounded-xl border-0 p-2 transition-all duration-300">
-          <div className="ml-14 mb-4 flex max-w-sm flex-col gap-2">
+          <div className="sm:ml-14 mb-4 flex max-w-sm flex-col gap-2">
             <Label className="body-sm-md">
               {t("adminCourseView.curriculum.lesson.field.matchingScoring")}
             </Label>
@@ -140,7 +146,7 @@ const MatchingQuestion = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="ml-14">
+          <div className="sm:ml-14">
             {!isOptionEmpty && (
               <>
                 <span className="mr-1 text-red-500">*</span>
@@ -173,12 +179,17 @@ const MatchingQuestion = ({
                         <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
                           {!isStructureLocked && (
                             <SortableList.DragHandle>
-                              <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                              <Icon
+                                name="DragAndDropIcon"
+                                className="cursor-move sm:ml-4 sm:mr-3"
+                              />
                             </SortableList.DragHandle>
                           )}
-                          <div className="flex w-full gap-2">
-                            <Input
-                              type="text"
+                          <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row">
+                            <AutosizeTextarea
+                              minRows={1}
+                              maxRows={6}
+                              onKeyDown={preventNewLine}
                               name={`questions.${questionIndex}.options.${index}.optionText`}
                               data-testid={QUIZ_LESSON_FORM_HANDLES.matchingPromptInput(
                                 questionIndex,
@@ -193,10 +204,12 @@ const MatchingQuestion = ({
                                 t("adminCourseView.curriculum.lesson.placeholder.option")
                               }
                               required
-                              className="w-1/2"
+                              className="min-h-10 w-full text-base sm:w-1/2"
                             />
-                            <Input
-                              type="text"
+                            <AutosizeTextarea
+                              minRows={1}
+                              maxRows={6}
+                              onKeyDown={preventNewLine}
                               name={`questions.${questionIndex}.options.${index}.matchedWord`}
                               data-testid={QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(
                                 questionIndex,
@@ -211,7 +224,7 @@ const MatchingQuestion = ({
                                 t("adminCourseView.curriculum.lesson.placeholder.matchedWords")
                               }
                               required
-                              className="w-1/2"
+                              className="min-h-10 w-full text-base sm:w-1/2"
                             />
                           </div>
                           <div className="flex items-center">
@@ -222,7 +235,7 @@ const MatchingQuestion = ({
                                     <div className="group">
                                       <Icon
                                         name="TrashIcon"
-                                        className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                        className="size-7 cursor-pointer sm:ml-3 rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                                         onClick={() => handleRemoveOption(index)}
                                       />
                                     </div>
@@ -247,12 +260,12 @@ const MatchingQuestion = ({
             )}
           </div>
           {errors?.questions?.[questionIndex] && (
-            <p className="ml-14 text-sm text-red-500">
+            <p className="sm:ml-14 text-sm text-red-500">
               {errors?.questions?.[questionIndex]?.options?.message}
             </p>
           )}
           {!isStructureLocked && (
-            <div className="ml-14 mt-4 flex gap-2">
+            <div className="sm:ml-14 mt-4 flex gap-2">
               <Button
                 type="button"
                 data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
