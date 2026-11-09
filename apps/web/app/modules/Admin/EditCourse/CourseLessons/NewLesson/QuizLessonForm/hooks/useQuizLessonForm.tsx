@@ -121,6 +121,7 @@ export const useQuizLessonForm = ({
               type: question.type as QuestionType,
               description: processedDescription || undefined,
               photoS3Key: question.photoS3Key || undefined,
+              requiresReview: question.requiresReview,
               title: question.title,
               displayOrder: question.displayOrder,
               options: question.options?.map((option: QuestionOption) => ({

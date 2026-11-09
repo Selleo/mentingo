@@ -3658,7 +3658,8 @@
           },
           "betaTooltip": "Cette fonctionnalité est fournie dans une version de test. Il peut contenir des erreurs ou ne pas fonctionner pleinement comme prévu et est utilisé à vos propres risques.",
           "dragWord": "Faites glisser le mot dans la phrase",
-          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit accomplir pendant la conversation avec l'AI Mentor."
+          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit accomplir pendant la conversation avec l'AI Mentor.",
+          "requiresReview": "Notée par le correcteur"
         }
       }
     },
@@ -4104,8 +4105,7 @@
       "score": "Score : {{score}} % ({{correct}} sur {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "Ce contenu ne peut pas être intégré.",
       "openInNewTab": "Ouvrir dans un nouvel onglet",
-      "scale_1_5": "Question sur l'échelle (1-5)",
-      "awaitingReview": "Vos réponses ouvertes sont en attente d'évaluation. Le score apparaîtra une fois qu'elles auront été évaluées."
+      "scale_1_5": "Question sur l'échelle (1-5)"
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",

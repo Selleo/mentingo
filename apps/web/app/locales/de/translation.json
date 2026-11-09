@@ -3896,7 +3896,8 @@
           },
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
           "dragWord": "Ziehen Sie ein Wort in einen Satz",
-          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll."
+          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll.",
+          "requiresReview": "Vom Prüfer bewertet"
         }
       }
     },
@@ -4346,8 +4347,7 @@
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
       "openInNewTab": "In neuem Tab öffnen",
-      "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
-      "awaitingReview": "Deine offenen Antworten warten auf eine Bewertung. Das Ergebnis erscheint, sobald sie bewertet wurden."
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",

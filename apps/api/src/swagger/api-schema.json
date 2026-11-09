@@ -39881,6 +39881,9 @@
                                     }
                                   ]
                                 },
+                                "requiresReview": {
+                                  "type": "boolean"
+                                },
                                 "options": {
                                   "type": "array",
                                   "items": {
@@ -42834,6 +42837,9 @@
                               }
                             ]
                           },
+                          "requiresReview": {
+                            "type": "boolean"
+                          },
                           "options": {
                             "type": "array",
                             "items": {
@@ -43327,6 +43333,9 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "requiresReview": {
+                                "type": "boolean"
                               },
                               "options": {
                                 "type": "array",
@@ -44051,6 +44060,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -45503,6 +45515,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -46329,6 +46344,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -46974,6 +46992,9 @@
                             }
                           ]
                         },
+                        "requiresReview": {
+                          "type": "boolean"
+                        },
                         "options": {
                           "type": "array",
                           "items": {
@@ -47385,6 +47406,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -47722,6 +47746,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -48099,6 +48126,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",

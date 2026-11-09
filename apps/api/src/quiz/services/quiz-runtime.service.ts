@@ -364,6 +364,7 @@ export class QuizRuntimeService {
         ? this.buildSolutionExplanation(deliveryQuestion)
         : null,
       photoS3Key: question.photoS3Key,
+      requiresReview: question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL,
       options: deliveryOptions,
       passQuestion: showsCorrectness ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
     };

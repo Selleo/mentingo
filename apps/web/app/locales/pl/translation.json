@@ -4155,7 +4155,8 @@
             }
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
-          "dragWord": "Przeciągnij słowo do zdania"
+          "dragWord": "Przeciągnij słowo do zdania",
+          "requiresReview": "Oceniane przez recenzenta"
         }
       },
       "validation": {
@@ -4616,8 +4617,7 @@
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",
-      "scale_1_5": "Pytanie typu skala (1-5)",
-      "awaitingReview": "Twoje odpowiedzi otwarte czekają na ocenę. Wynik pojawi się po ocenie przez recenzenta."
+      "scale_1_5": "Pytanie typu skala (1-5)"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",

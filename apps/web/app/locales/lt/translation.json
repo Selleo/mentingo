@@ -3898,7 +3898,8 @@
           },
           "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
           "dragWord": "Vilkite žodį į sakinį",
-          "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu."
+          "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu.",
+          "requiresReview": "Vertina vertintojas"
         }
       }
     },
@@ -4348,8 +4349,7 @@
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
-      "scale_1_5": "Domanda di tipo scala (1–5)",
-      "awaitingReview": "Jūsų atviri atsakymai laukia įvertinimo. Rezultatas bus parodytas, kai juos įvertins."
+      "scale_1_5": "Domanda di tipo scala (1–5)"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",

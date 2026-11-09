@@ -2741,6 +2741,7 @@ export interface GetBetaCourseByIdResponse {
           displayOrder?: number;
           solutionExplanation?: string;
           photoS3Key?: string | null;
+          requiresReview?: boolean;
           options?: {
             /** @format uuid */
             id?: string;
@@ -3403,6 +3404,7 @@ export type BetaCreateChapterBody = {
       displayOrder?: number;
       solutionExplanation?: string;
       photoS3Key?: string | null;
+      requiresReview?: boolean;
       options?: {
         /** @format uuid */
         id?: string;
@@ -3487,6 +3489,7 @@ export type UpdateChapterBody = ({
       displayOrder?: number;
       solutionExplanation?: string;
       photoS3Key?: string | null;
+      requiresReview?: boolean;
       options?: {
         /** @format uuid */
         id?: string;
@@ -3620,6 +3623,7 @@ export interface GetLessonByIdResponse {
         displayOrder?: number;
         solutionExplanation: string | null;
         photoS3Key?: string | null;
+        requiresReview?: boolean;
         options?: {
           /** @format uuid */
           id: string;
@@ -3849,6 +3853,7 @@ export type BetaCreateLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4039,6 +4044,7 @@ export type BetaCreateAiMentorLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4170,6 +4176,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4237,6 +4244,7 @@ export type BetaCreateQuizLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4300,6 +4308,7 @@ export type BetaUpdateQuizLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4360,6 +4369,7 @@ export type BetaUpdateLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;

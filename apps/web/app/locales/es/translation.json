@@ -3841,7 +3841,8 @@
           },
           "betaTooltip": "Esta funcionalidad se proporciona en una versión de prueba. Puede contener errores o no funcionar completamente según lo previsto y se utiliza bajo su propio riesgo.",
           "dragWord": "Arrastra la palabra a la oración",
-          "taskDescriptionTooltip": "Describa brevemente lo que debe hacer el participante durante la conversación con el mentor de IA."
+          "taskDescriptionTooltip": "Describa brevemente lo que debe hacer el participante durante la conversación con el mentor de IA.",
+          "requiresReview": "Calificada por el revisor"
         }
       }
     },
@@ -4291,8 +4292,7 @@
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
       "openInNewTab": "Abrir en nueva pestaña",
-      "scale_1_5": "Escala del 1 al 5",
-      "awaitingReview": "Tus respuestas abiertas están pendientes de revisión. La puntuación aparecerá cuando se califiquen."
+      "scale_1_5": "Escala del 1 al 5"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",

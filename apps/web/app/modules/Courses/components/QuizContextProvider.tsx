@@ -3,6 +3,7 @@ import { createContext, useContext, type PropsWithChildren } from "react";
 const defaultValue = {
   isQuizFeedbackRedacted: false,
   isQuizSubmitted: false,
+  isQuizAwaitingReview: false,
 };
 
 type QuizContextValue = typeof defaultValue;

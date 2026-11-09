@@ -9,6 +9,7 @@ import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
+import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import {
@@ -132,6 +133,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
       <QuizContextProvider
         isQuizFeedbackRedacted={lesson.isQuizFeedbackRedacted}
         isQuizSubmitted={isUserSubmittedAnswer}
+        isQuizAwaitingReview={isAwaitingReview}
       >
         <form
           data-testid={LEARNING_HANDLES.QUIZ_FORM}
@@ -148,7 +150,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
               <span className="group relative">
                 {isAwaitingReview ? (
                   <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
-                    {t("studentLessonView.other.awaitingReview")}
+                    <ProgressBadge progress="awaitingReview" />
                   </span>
                 ) : (
                   <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>

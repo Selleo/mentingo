@@ -44,6 +44,8 @@ export const adminQuestionSchema = Type.Object({
   displayOrder: Type.Optional(Type.Number()),
   solutionExplanation: Type.Optional(Type.String()),
   photoS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  // Open questions only: true = reviewer grading, false/omitted = participation (always correct); recomputed on every save.
+  requiresReview: Type.Optional(Type.Boolean()),
   options: Type.Optional(Type.Array(adminOptionSchema)),
   language: Type.Optional(supportedLanguagesSchema),
 });

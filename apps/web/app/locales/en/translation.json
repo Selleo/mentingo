@@ -3897,7 +3897,8 @@
           },
           "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
           "dragWord": "Drag word into sentence",
-          "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor."
+          "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor.",
+          "requiresReview": "Graded by reviewer"
         }
       }
     },
@@ -4347,8 +4348,7 @@
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
       "openInNewTab": "Open in new tab",
-      "scale_1_5": "Scale question (1-5)",
-      "awaitingReview": "Your open answers are waiting for review. The score will appear once a reviewer grades them."
+      "scale_1_5": "Scale question (1-5)"
     },
     "aiMentor": {
       "title": "AI Mentor Session",

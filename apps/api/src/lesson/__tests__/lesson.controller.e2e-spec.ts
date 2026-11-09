@@ -76,6 +76,7 @@ import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
+import type { AdminQuestionBody } from "src/lesson/lesson.schema";
 
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
@@ -1620,6 +1621,56 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       );
     },
   );
+
+  it("keeps the reviewer grading choice of open questions across an editor save round trip", async () => {
+    const authoring = app.get(QuizAuthoringService);
+    const course = await courseFactory.create();
+    const chapter = await chapterFactory.create({ courseId: course.id });
+    const lesson = await authoring.createQuizLesson({
+      chapterId: chapter.id,
+      title: "Open questions grading",
+      type: LESSON_TYPES.QUIZ,
+      thresholdScore: 0,
+      attemptsLimit: null,
+      quizCooldownInHours: null,
+      questions: [
+        { type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE, title: "Reviewed", requiresReview: true },
+        { type: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE, title: "Participation" },
+      ],
+    });
+    const readBack = async () => {
+      const legacy = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      const questions = legacy?.questions ?? [];
+      const gradingModes = await db
+        .select({ gradingMode: assessmentQuestions.gradingMode })
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(eq(assessments.lessonId, lesson.id))
+        .orderBy(assessmentQuestions.displayOrder);
+
+      return { questions, gradingModes: gradingModes.map(({ gradingMode }) => gradingMode) };
+    };
+    const saveQuestions = (questions: AdminQuestionBody[]) =>
+      authoring.updateQuizLesson(lesson.id, { language: SUPPORTED_LANGUAGES.EN, questions });
+
+    const created = await readBack();
+    expect(created.questions.map(({ requiresReview }) => requiresReview)).toEqual([true, false]);
+    expect(created.gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.MANUAL,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+
+    await saveQuestions(created.questions);
+    expect((await readBack()).gradingModes).toEqual(created.gradingModes);
+
+    await saveQuestions(
+      created.questions.map((question) => ({ ...question, requiresReview: false })),
+    );
+    expect((await readBack()).gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+  });
 
   it.each(Object.values(ASSESSMENT_QUESTION_TYPES))(
     "preserves %s configuration and identity when editing and deleting questions",

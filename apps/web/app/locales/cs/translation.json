@@ -3903,7 +3903,8 @@
           },
           "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
           "dragWord": "Přetáhněte slovo do věty",
-          "taskDescriptionTooltip": "Stručně popište, co by měl účastník dělat během rozhovoru s mentorem AI."
+          "taskDescriptionTooltip": "Stručně popište, co by měl účastník dělat během rozhovoru s mentorem AI.",
+          "requiresReview": "Hodnotí hodnotitel"
         }
       }
     },
@@ -4353,8 +4354,7 @@
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
       "openInNewTab": "Otevřít na nové kartě",
-      "scale_1_5": "Otázka typu škála (1–5)",
-      "awaitingReview": "Vaše otevřené odpovědi čekají na hodnocení. Výsledek se zobrazí po jejich ohodnocení."
+      "scale_1_5": "Otázka typu škála (1–5)"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",

@@ -7,6 +7,7 @@ export const LEARNING_HANDLES = {
   QUIZ_FORM: "learning-quiz-form",
   QUIZ_SCORE: "learning-quiz-score",
   QUIZ_AWAITING_REVIEW: "learning-quiz-awaiting-review",
+  QUESTION_AWAITING_REVIEW: "learning-question-awaiting-review",
   QUIZ_PASSING_THRESHOLD: "learning-quiz-passing-threshold",
   QUIZ_SUBMIT_BUTTON: "learning-quiz-submit-button",
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
