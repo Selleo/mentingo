@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_TIME_LIMIT_MINUTES,
   ENTITY_TYPES,
   LESSON_TYPES,
   type SupportedLanguages,
@@ -96,6 +97,9 @@ export class QuizAuthoringService {
           attemptLimitMode: assessment.attemptLimitMode,
           maximumAttempts: assessment.maximumAttempts,
           attemptCooldown: assessment.attemptCooldown,
+          ...(input.timeLimitMinutes === undefined
+            ? {}
+            : { timeLimitMinutes: input.timeLimitMinutes }),
         },
         questions,
       });
@@ -234,6 +238,9 @@ export class QuizAuthoringService {
           ? {}
           : { passingScorePercentage: String(input.thresholdScore) }),
         ...attemptLimitUpdate,
+        ...(input.timeLimitMinutes === undefined
+          ? {}
+          : { timeLimitMinutes: input.timeLimitMinutes }),
       },
       ...(input.questions === undefined ? {} : { questions: quizAuthoringInput.questions ?? [] }),
     };
@@ -352,6 +359,7 @@ export class QuizAuthoringService {
         attemptLimitMode: assessment.attemptLimitMode,
         maximumAttempts: assessment.maximumAttempts,
         attemptCooldown: assessment.attemptCooldown,
+        timeLimitMinutes: assessment.timeLimitMinutes,
         baseLanguage: assessment.baseLanguage,
         availableLocales: assessment.availableLocales,
       },
@@ -431,6 +439,13 @@ export class QuizAuthoringService {
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
     if (input.quizCooldownInHours !== null && input.quizCooldownInHours <= 0)
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    if (
+      typeof input.timeLimitMinutes === "number" &&
+      (!Number.isInteger(input.timeLimitMinutes) ||
+        input.timeLimitMinutes < ASSESSMENT_TIME_LIMIT_MINUTES.MIN ||
+        input.timeLimitMinutes > ASSESSMENT_TIME_LIMIT_MINUTES.MAX)
+    )
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
   }
 
   private validateQuestionTypes(
@@ -469,6 +484,7 @@ export class QuizAuthoringService {
         input.attemptsLimit === null || input.quizCooldownInHours === null
           ? null
           : `${input.quizCooldownInHours} hours`,
+      timeLimitMinutes: input.timeLimitMinutes ?? null,
       baseLanguage: input.language,
       availableLocales: [input.language],
     };

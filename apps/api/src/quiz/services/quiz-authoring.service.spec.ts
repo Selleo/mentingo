@@ -86,12 +86,33 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
         attemptLimitMode: ASSESSMENT_ATTEMPT_LIMIT_MODES.LIFETIME,
         maximumAttempts: 3,
         attemptCooldown: "6 hours",
+        timeLimitMinutes: null,
         baseLanguage: language,
         availableLocales: [language],
       },
       questions,
     });
     expect(updateQuizLesson).not.toHaveBeenCalled();
+  });
+
+  it("stores a quiz time limit within the allowed range", async () => {
+    const { service, createQuizLesson } = setup();
+    createQuizLesson.mockResolvedValue({ id: lessonId });
+
+    await service.saveCanonicalLesson({ ...makeInput(), timeLimitMinutes: 45 });
+
+    expect(createQuizLesson).toHaveBeenCalledWith(
+      expect.objectContaining({ assessment: expect.objectContaining({ timeLimitMinutes: 45 }) }),
+    );
+  });
+
+  it.each([0, 601, 1.5])("rejects a quiz time limit of %p minutes", async (timeLimitMinutes) => {
+    const { service, createQuizLesson } = setup();
+
+    await expect(
+      service.saveCanonicalLesson({ ...makeInput(), timeLimitMinutes }),
+    ).rejects.toThrow();
+    expect(createQuizLesson).not.toHaveBeenCalled();
   });
 
   it("updates the existing lesson through native persistence after checking its language", async () => {

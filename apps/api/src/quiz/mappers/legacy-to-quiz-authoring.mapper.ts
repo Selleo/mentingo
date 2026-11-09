@@ -232,6 +232,7 @@ export const mapLegacyQuizAuthoringInput = (
     thresholdScore = 0,
     attemptsLimit = null,
     quizCooldownInHours = null,
+    timeLimitMinutes,
     questions,
   } = data;
 
@@ -248,6 +249,7 @@ export const mapLegacyQuizAuthoringInput = (
     thresholdScore,
     attemptsLimit,
     quizCooldownInHours,
+    timeLimitMinutes,
     displayOrder,
     language,
     questions: questions?.map((question, index) => mapQuestion(question, index)),

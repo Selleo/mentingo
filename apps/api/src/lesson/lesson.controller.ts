@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   Req,
@@ -107,6 +108,12 @@ import {
   UpdateEmbedLessonBody,
   enrolledLessonSchema,
   initializeLessonContextSchema,
+  SaveQuizAttemptDraftBody,
+  saveQuizAttemptDraftBodySchema,
+  saveQuizAttemptDraftResponseSchema,
+  StartQuizAttemptBody,
+  startQuizAttemptBodySchema,
+  startQuizAttemptResponseSchema,
 } from "./lesson.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
@@ -116,6 +123,8 @@ import type {
   EnrolledLesson,
   LessonsFilters,
   LessonShow,
+  SaveQuizAttemptDraftResponse,
+  StartQuizAttemptResponse,
 } from "./lesson.schema";
 @UsePipes(SanitizeRichTextPipe)
 @Controller("lesson")
@@ -517,6 +526,40 @@ export class LessonController {
       message: "Evaluation quiz successfully",
       data: evaluationResult,
     });
+  }
+
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
+  @Post("quiz-attempt/start")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: startQuizAttemptBodySchema, required: true }],
+    response: baseResponse(startQuizAttemptResponseSchema),
+  })
+  async startQuizAttempt(
+    @Body() body: StartQuizAttemptBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<StartQuizAttemptResponse>> {
+    return new BaseResponse(await this.lessonService.startQuizAttempt(body, currentUser));
+  }
+
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
+  @Put("quiz-attempt/draft")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: saveQuizAttemptDraftBodySchema, required: true }],
+    response: baseResponse(saveQuizAttemptDraftResponseSchema),
+  })
+  async saveQuizAttemptDraft(
+    @Body() body: SaveQuizAttemptDraftBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<SaveQuizAttemptDraftResponse>> {
+    return new BaseResponse(await this.lessonService.saveQuizAttemptDraft(body, currentUser));
   }
 
   @Post("upload-files-to-lesson")

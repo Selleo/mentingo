@@ -7686,6 +7686,80 @@
         }
       }
     },
+    "/api/lesson/quiz-attempt/start": {
+      "post": {
+        "operationId": "LessonController_startQuizAttempt",
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartQuizAttemptBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartQuizAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/quiz-attempt/draft": {
+      "put": {
+        "operationId": "LessonController_saveQuizAttemptDraft",
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveQuizAttemptDraftBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveQuizAttemptDraftResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/upload-files-to-lesson": {
       "post": {
         "operationId": "LessonController_uploadFileToLesson",
@@ -44164,6 +44238,125 @@
                   }
                 ]
               },
+              "timeLimitMinutes": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizAttempt": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "attemptId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "startedAt": {
+                        "type": "string"
+                      },
+                      "expiresAt": {
+                        "type": "string"
+                      },
+                      "serverNow": {
+                        "type": "string"
+                      },
+                      "submitGraceSeconds": {
+                        "type": "number"
+                      },
+                      "draftAnswers": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "questionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "answers": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "answerId": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "answerId"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "answerId": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "answerId",
+                                      "value"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "questionId",
+                            "answers"
+                          ]
+                        }
+                      },
+                      "draftSavedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "attemptId",
+                      "startedAt",
+                      "expiresAt",
+                      "serverNow",
+                      "submitGraceSeconds",
+                      "draftAnswers",
+                      "draftSavedAt"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "isQuizPassed": {
                 "anyOf": [
                   {
@@ -47075,6 +47268,18 @@
                   }
                 ]
               },
+              "timeLimitMinutes": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "maximum": 600,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -47395,6 +47600,18 @@
                     "anyOf": [
                       {
                         "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timeLimitMinutes": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "maximum": 600,
+                        "type": "integer"
                       },
                       {
                         "type": "null"
@@ -48339,6 +48556,288 @@
             "required": [
               "message",
               "data"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "StartQuizAttemptBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "language"
+        ]
+      },
+      "StartQuizAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "in_progress",
+                    "type": "string"
+                  },
+                  {
+                    "const": "finalized",
+                    "type": "string"
+                  }
+                ]
+              },
+              "attempt": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "attemptId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "startedAt": {
+                        "type": "string"
+                      },
+                      "expiresAt": {
+                        "type": "string"
+                      },
+                      "serverNow": {
+                        "type": "string"
+                      },
+                      "submitGraceSeconds": {
+                        "type": "number"
+                      },
+                      "draftAnswers": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "questionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "answers": {
+                              "type": "array",
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "answerId": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "answerId"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "answerId": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "answerId",
+                                      "value"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "questionId",
+                            "answers"
+                          ]
+                        }
+                      },
+                      "draftSavedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "attemptId",
+                      "startedAt",
+                      "expiresAt",
+                      "serverNow",
+                      "submitGraceSeconds",
+                      "draftAnswers",
+                      "draftSavedAt"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "attempt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SaveQuizAttemptDraftBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "attemptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "questionsAnswers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "answers": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "answerId": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "answerId"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "answerId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "answerId",
+                          "value"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "questionId",
+                "answers"
+              ]
+            }
+          }
+        },
+        "required": [
+          "lessonId",
+          "attemptId",
+          "questionsAnswers"
+        ]
+      },
+      "SaveQuizAttemptDraftResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "draftSavedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "draftSavedAt"
             ]
           }
         },

@@ -1788,12 +1788,16 @@ describe("Master course export and sync (e2e)", () => {
     const questionId = faker.string.uuid();
     const firstId = faker.string.uuid();
     const secondId = faker.string.uuid();
-    const { sourceCourseId, targetCourseId } = await setupAndExport({
+    const { sourceCourseId, targetCourseId, sourceLessonId } = await setupAndExport({
       beforeExport: async ({ sourceLessonId }) => {
         await runAsTenant(sourceTenantId, async () => {
           const [assessment] = await db
             .insert(assessments)
-            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .values({
+              lessonId: sourceLessonId,
+              passingScorePercentage: "50",
+              timeLimitMinutes: 15,
+            })
             .returning();
           await db.insert(assessmentQuestions).values({
             id: questionId,
@@ -1844,6 +1848,18 @@ describe("Master course export and sync (e2e)", () => {
           .where(eq(chapters.courseId, targetCourseId))
           .orderBy(asc(assessmentQuestionChoiceOptions.displayOrder)),
       );
+    const readTimeLimit = async () =>
+      (
+        await runAsTenant(targetTenantId, () =>
+          db
+            .select({ timeLimitMinutes: assessments.timeLimitMinutes })
+            .from(assessments)
+            .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+            .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+            .where(eq(chapters.courseId, targetCourseId)),
+        )
+      )[0]?.timeLimitMinutes;
+    expect(await readTimeLimit()).toBe(15);
     const original = await readOptions();
     const [exportLink] = await baseDb
       .select()
@@ -1871,11 +1887,18 @@ describe("Master course export and sync (e2e)", () => {
         .set({ displayOrder: 2 })
         .where(eq(assessmentQuestionChoiceOptions.id, firstId));
     });
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .update(assessments)
+        .set({ timeLimitMinutes: 25 })
+        .where(eq(assessments.lessonId, sourceLessonId)),
+    );
     await sync();
     expect(await readOptions()).toEqual([
       { ...original[1], displayOrder: 1 },
       { ...original[0], displayOrder: 2 },
     ]);
+    expect(await readTimeLimit()).toBe(25);
     await runAsTenant(sourceTenantId, async () => {
       await db
         .delete(assessmentQuestionChoiceOptions)

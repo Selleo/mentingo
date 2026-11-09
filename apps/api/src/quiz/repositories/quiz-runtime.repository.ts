@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES } from "@repo/shared";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
@@ -13,9 +14,12 @@ import {
   assessmentAttemptQuestionAnswers,
   assessmentAttemptScaleSelections,
   assessmentAttemptStatementAnswers,
+  assessments,
 } from "src/storage/schema";
 
 import type {
+  QuizAttemptDraftAnswers,
+  QuizAttemptFinalizeUpdate,
   QuizAttemptInsert,
   QuizAttemptQuestionAnswerInsert,
   QuizAttemptChoiceSelectionInsert,
@@ -42,6 +46,168 @@ export class QuizRuntimeRepository {
       })
       .returning({ id: assessmentAttempts.id });
     return attempt;
+  }
+
+  async finalizeOpenAttempt(
+    attemptId: UUIDType,
+    values: QuizAttemptFinalizeUpdate,
+    db: DatabasePg,
+  ) {
+    const [attempt] = await db
+      .update(assessmentAttempts)
+      .set({ ...values, submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED })
+      .where(
+        and(
+          eq(assessmentAttempts.id, attemptId),
+          eq(
+            assessmentAttempts.submissionStatus,
+            ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.IN_PROGRESS,
+          ),
+        ),
+      )
+      .returning({ id: assessmentAttempts.id, attemptNumber: assessmentAttempts.attemptNumber });
+
+    return attempt ?? null;
+  }
+
+  async saveDraftAnswers(
+    attemptId: UUIDType,
+    learnerId: UUIDType,
+    draftAnswers: QuizAttemptDraftAnswers,
+    db: DatabasePg = this.db,
+  ) {
+    const [attempt] = await db
+      .update(assessmentAttempts)
+      .set({
+        draftAnswers: sql`${JSON.stringify(draftAnswers)}::text::jsonb`,
+        draftSavedAt: sql`now()`,
+      })
+      .where(
+        and(
+          eq(assessmentAttempts.id, attemptId),
+          eq(assessmentAttempts.learnerId, learnerId),
+          eq(
+            assessmentAttempts.submissionStatus,
+            ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.IN_PROGRESS,
+          ),
+          gte(assessmentAttempts.expiresAt, sql`now()`),
+        ),
+      )
+      .returning({ draftSavedAt: assessmentAttempts.draftSavedAt });
+
+    return attempt ?? null;
+  }
+
+  async findOpenAttemptByLesson(lessonId: UUIDType, learnerId: UUIDType, db: DatabasePg = this.db) {
+    const [attempt] = await db
+      .select(this.openAttemptColumns())
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessments.id, assessmentAttempts.assessmentId))
+      .where(
+        and(
+          eq(assessments.lessonId, lessonId),
+          eq(assessmentAttempts.learnerId, learnerId),
+          eq(
+            assessmentAttempts.submissionStatus,
+            ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.IN_PROGRESS,
+          ),
+          activeLearningState(assessmentAttempts.learningStateId),
+        ),
+      )
+      .orderBy(desc(assessmentAttempts.attemptNumber))
+      .limit(1);
+
+    return attempt ?? null;
+  }
+
+  async findOpenAttemptById(attemptId: UUIDType, db: DatabasePg = this.db) {
+    const [attempt] = await db
+      .select(this.openAttemptColumns())
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessments.id, assessmentAttempts.assessmentId))
+      .where(
+        and(
+          eq(assessmentAttempts.id, attemptId),
+          eq(
+            assessmentAttempts.submissionStatus,
+            ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.IN_PROGRESS,
+          ),
+        ),
+      )
+      .limit(1);
+
+    return attempt ?? null;
+  }
+
+  async cancelOpenAttempt(attemptId: UUIDType, db: DatabasePg = this.db) {
+    const [attempt] = await db
+      .update(assessmentAttempts)
+      .set({ submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.CANCELLED })
+      .where(
+        and(
+          eq(assessmentAttempts.id, attemptId),
+          eq(
+            assessmentAttempts.submissionStatus,
+            ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.IN_PROGRESS,
+          ),
+        ),
+      )
+      .returning({ id: assessmentAttempts.id });
+
+    return attempt ?? null;
+  }
+
+  async findLatestAttemptByLesson(
+    lessonId: UUIDType,
+    learnerId: UUIDType,
+    db: DatabasePg = this.db,
+  ) {
+    const [attempt] = await db
+      .select({
+        submissionStatus: assessmentAttempts.submissionStatus,
+        expiresAt: assessmentAttempts.expiresAt,
+        submittedAt: assessmentAttempts.submittedAt,
+      })
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessments.id, assessmentAttempts.assessmentId))
+      .where(
+        and(
+          eq(assessments.lessonId, lessonId),
+          eq(assessmentAttempts.learnerId, learnerId),
+          activeLearningState(assessmentAttempts.learningStateId),
+        ),
+      )
+      .orderBy(desc(assessmentAttempts.attemptNumber))
+      .limit(1);
+
+    return attempt ?? null;
+  }
+
+  async findAssessmentTimeLimit(lessonId: UUIDType, db: DatabasePg = this.db) {
+    const [assessment] = await db
+      .select({ id: assessments.id, timeLimitMinutes: assessments.timeLimitMinutes })
+      .from(assessments)
+      .where(eq(assessments.lessonId, lessonId))
+      .limit(1);
+
+    return assessment ?? null;
+  }
+
+  private openAttemptColumns() {
+    return {
+      id: assessmentAttempts.id,
+      lessonId: assessments.lessonId,
+      learnerId: assessmentAttempts.learnerId,
+      learningStateId: assessmentAttempts.learningStateId,
+      language: assessmentAttempts.language,
+      attemptNumber: assessmentAttempts.attemptNumber,
+      startedAt: assessmentAttempts.startedAt,
+      // assessment_attempts_in_progress_expires_check guarantees a value for open attempts.
+      expiresAt: sql<string>`${assessmentAttempts.expiresAt}`,
+      draftAnswers: assessmentAttempts.draftAnswers,
+      draftSavedAt: assessmentAttempts.draftSavedAt,
+      serverNow: sql<string>`now()`,
+    };
   }
 
   async insertQuestionAnswers(values: QuizAttemptQuestionAnswerInsert[], db: DatabasePg) {
@@ -74,7 +240,12 @@ export class QuizRuntimeRepository {
     await db.insert(assessmentAttemptScaleSelections).values(values);
   }
 
-  async findLatestAttempt(assessmentId: UUIDType, learnerId: UUIDType, db: DatabasePg = this.db) {
+  async findLatestAttempt(
+    assessmentId: UUIDType,
+    learnerId: UUIDType,
+    db: DatabasePg = this.db,
+    submittedOnly = false,
+  ) {
     const [attempt] = await db
       .select({
         id: assessmentAttempts.id,
@@ -89,6 +260,12 @@ export class QuizRuntimeRepository {
             eq(assessmentAttempts.learnerId, learnerId),
             activeLearningState(assessmentAttempts.learningStateId),
           ),
+          submittedOnly
+            ? eq(
+                assessmentAttempts.submissionStatus,
+                ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+              )
+            : undefined,
         ),
       )
       .orderBy(desc(assessmentAttempts.attemptNumber))

@@ -1,4 +1,6 @@
+import type { PgInsertValue } from "drizzle-orm/pg-core";
 import type {
+  AssessmentAttemptDraftAnswers,
   assessmentAttempts,
   assessmentAttemptQuestionAnswers,
   assessmentAttemptChoiceSelections,
@@ -8,7 +10,8 @@ import type {
   assessmentAttemptScaleSelections,
 } from "src/storage/schema";
 
-export type QuizAttemptInsert = typeof assessmentAttempts.$inferInsert;
+// Allows SQL values such as a database-clock `expiresAt`.
+export type QuizAttemptInsert = PgInsertValue<typeof assessmentAttempts>;
 export type QuizAttemptQuestionAnswerInsert = typeof assessmentAttemptQuestionAnswers.$inferInsert;
 export type QuizAttemptChoiceSelectionInsert =
   typeof assessmentAttemptChoiceSelections.$inferInsert;
@@ -17,3 +20,8 @@ export type QuizAttemptStatementAnswerInsert =
 export type QuizAttemptBlankAnswerInsert = typeof assessmentAttemptBlankAnswers.$inferInsert;
 export type QuizAttemptOpenTextAnswerInsert = typeof assessmentAttemptOpenTextAnswers.$inferInsert;
 export type QuizAttemptScaleSelectionInsert = typeof assessmentAttemptScaleSelections.$inferInsert;
+export type QuizAttemptDraftAnswers = AssessmentAttemptDraftAnswers;
+export type QuizAttemptFinalizeUpdate = Pick<
+  typeof assessmentAttempts.$inferInsert,
+  "gradingStatus" | "result" | "availablePoints" | "awardedPoints" | "scorePercentage" | "gradedAt"
+> & { submittedAt: string };

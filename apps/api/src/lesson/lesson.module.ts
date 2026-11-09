@@ -10,6 +10,7 @@ import { LiveTrainingModule } from "src/live-training/live-training.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsModule } from "src/permissions/permissions.module";
+import { isQueueSandboxProcess } from "src/queue";
 import { QuizModule } from "src/quiz/quiz.module";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { SettingsModule } from "src/settings/settings.module";
@@ -34,6 +35,7 @@ import { AiMentorConfigurationGraphService } from "./ai-mentor-configuration/ser
 import { AiMentorConfigurationService } from "./ai-mentor-configuration/services/ai-mentor-configuration.service";
 import { AiMentorLessonTranslationService } from "./ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { LessonController } from "./lesson.controller";
+import { QuizAttemptExpirationWorker } from "./quiz-attempt-expiration.worker";
 import { AdminLessonRepository } from "./repositories/adminLesson.repository";
 import { LessonRepository } from "./repositories/lesson.repository";
 import { AdminLessonService } from "./services/adminLesson.service";
@@ -82,6 +84,7 @@ import { LessonService } from "./services/lesson.service";
     AdminLessonRepository,
     LessonService,
     LocalizationService,
+    ...(isQueueSandboxProcess() ? [] : [QuizAttemptExpirationWorker]),
   ],
   exports: [
     AiMentorConfigurationService,

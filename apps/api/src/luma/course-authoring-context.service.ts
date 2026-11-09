@@ -8,7 +8,13 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ENTITY_TYPES, PERMISSIONS, hasPermission, type LessonTypes } from "@repo/shared";
+import {
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ENTITY_TYPES,
+  PERMISSIONS,
+  hasPermission,
+  type LessonTypes,
+} from "@repo/shared";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -244,6 +250,7 @@ export class CourseAuthoringContextService {
         assessmentAttempts,
         and(
           eq(assessmentAttempts.assessmentId, assessments.id),
+          eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           currentLearningState(assessmentAttempts.learningStateId),
         ),
       )
@@ -417,6 +424,7 @@ export class CourseAuthoringContextService {
         assessmentAttempts,
         and(
           eq(assessmentAttempts.assessmentId, assessments.id),
+          eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           currentLearningState(assessmentAttempts.learningStateId),
         ),
       )

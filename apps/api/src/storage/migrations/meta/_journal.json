@@ -1646,6 +1646,20 @@
       "when": 1793969468346,
       "tag": "0234_add_achievement_admin_check_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 235,
+      "version": "7",
+      "when": 1794210860460,
+      "tag": "0235_add_quiz_time_limit_and_timed_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 236,
+      "version": "7",
+      "when": 1794215273004,
+      "tag": "0236_add_quiz_attempt_check_constraints",
+      "breakpoints": true
     }
   ]
 }
