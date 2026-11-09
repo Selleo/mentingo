@@ -91,7 +91,7 @@ export const assessments = pgTable(
     ),
     timeLimitMinutesCheck: check(
       "assessments_time_limit_minutes_check",
-      sql`${table.timeLimitMinutes} IS NULL OR ${table.timeLimitMinutes} BETWEEN 1 AND 600`,
+      sql`${table.timeLimitMinutes} IS NULL OR ${table.timeLimitMinutes} >= 1`,
     ),
   })),
 );

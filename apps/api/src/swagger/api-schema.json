@@ -47272,7 +47272,7 @@
                 "anyOf": [
                   {
                     "minimum": 1,
-                    "maximum": 600,
+                    "maximum": 300,
                     "type": "integer"
                   },
                   {
@@ -47610,7 +47610,7 @@
                     "anyOf": [
                       {
                         "minimum": 1,
-                        "maximum": 600,
+                        "maximum": 300,
                         "type": "integer"
                       },
                       {

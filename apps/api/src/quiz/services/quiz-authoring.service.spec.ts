@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_TIME_LIMIT_MINUTES,
   LESSON_TYPES,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -106,14 +107,17 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
     );
   });
 
-  it.each([0, 601, 1.5])("rejects a quiz time limit of %p minutes", async (timeLimitMinutes) => {
-    const { service, createQuizLesson } = setup();
+  it.each([0, ASSESSMENT_TIME_LIMIT_MINUTES.MAX + 1, 1.5])(
+    "rejects a quiz time limit of %p minutes",
+    async (timeLimitMinutes) => {
+      const { service, createQuizLesson } = setup();
 
-    await expect(
-      service.saveCanonicalLesson({ ...makeInput(), timeLimitMinutes }),
-    ).rejects.toThrow();
-    expect(createQuizLesson).not.toHaveBeenCalled();
-  });
+      await expect(
+        service.saveCanonicalLesson({ ...makeInput(), timeLimitMinutes }),
+      ).rejects.toThrow();
+      expect(createQuizLesson).not.toHaveBeenCalled();
+    },
+  );
 
   it("updates the existing lesson through native persistence after checking its language", async () => {
     const { service, createQuizLesson, updateQuizLesson } = setup();

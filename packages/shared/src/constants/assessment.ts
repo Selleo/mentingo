@@ -84,9 +84,10 @@ export const LEARNER_PROGRESS_STATUSES = {
 export type LearnerProgressStatus =
   (typeof LEARNER_PROGRESS_STATUSES)[keyof typeof LEARNER_PROGRESS_STATUSES];
 
+/** Single source for the quiz time limit range (API validation, editor slider); the DB only enforces >= 1, so changing MAX needs no migration. */
 export const ASSESSMENT_TIME_LIMIT_MINUTES = {
   MIN: 1,
-  MAX: 600,
+  MAX: 300,
 } as const;
 
 /** Extra time after `expiresAt` in which a timed quiz submit still accepts the sent answers. */

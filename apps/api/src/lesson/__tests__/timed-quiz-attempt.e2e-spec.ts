@@ -2,6 +2,7 @@ import {
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_TIME_LIMIT_MINUTES,
   ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS,
   COURSE_ENROLLMENT,
   QUIZ_ATTEMPT_START_STATUSES,
@@ -301,7 +302,7 @@ describe("Timed quiz attempts (e2e)", () => {
     await updateQuiz({ title: "Renamed quiz" }).expect(200);
     expect(await storedLimit()).toBe(20);
 
-    await updateQuiz({ timeLimitMinutes: 601 }).expect(400);
+    await updateQuiz({ timeLimitMinutes: ASSESSMENT_TIME_LIMIT_MINUTES.MAX + 1 }).expect(400);
     expect(await storedLimit()).toBe(20);
 
     await updateQuiz({ timeLimitMinutes: null }).expect(200);
