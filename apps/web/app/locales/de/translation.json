@@ -4520,7 +4520,9 @@
       "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten und Ihren Fortschritt zu verfolgen."
     },
     "timedQuiz": {
-      "info": "Zeitlimit: {{minutes}} Min. Der Timer startet, wenn du „Quiz starten“ wählst, und läuft weiter, auch wenn du die Seite verlässt. Deine Antworten werden automatisch gespeichert und nach Ablauf der Zeit abgegeben. Unbeantwortete Fragen werden mit 0 Punkten bewertet.",
+      "info": "Der Timer startet, wenn du „Quiz starten“ wählst, und läuft weiter, auch wenn du die Seite verlässt. Deine Antworten werden automatisch gespeichert und nach Ablauf der Zeit abgegeben. Unbeantwortete Fragen werden mit 0 Punkten bewertet.",
+      "timeLimit": "Zeitlimit",
+      "questions": "Fragen",
       "start": "Quiz starten",
       "timeLeft": "Verbleibende Zeit: {{time}}",
       "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",

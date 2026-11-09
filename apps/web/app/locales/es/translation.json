@@ -4465,7 +4465,9 @@
       "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios y registrar tu progreso."
     },
     "timedQuiz": {
-      "info": "Límite de tiempo: {{minutes}} min. El temporizador empieza al seleccionar «Iniciar cuestionario» y sigue corriendo aunque salgas de la página. Tus respuestas se guardan automáticamente y se envían cuando se acaba el tiempo. Las preguntas sin responder obtienen 0 puntos.",
+      "info": "El temporizador empieza al seleccionar «Iniciar cuestionario» y sigue corriendo aunque salgas de la página. Tus respuestas se guardan automáticamente y se envían cuando se acaba el tiempo. Las preguntas sin responder obtienen 0 puntos.",
+      "timeLimit": "Límite de tiempo",
+      "questions": "Preguntas",
       "start": "Iniciar cuestionario",
       "timeLeft": "Tiempo restante: {{time}}",
       "warning": "Queda menos de un minuto. Tus respuestas se enviarán automáticamente cuando se acabe el tiempo.",

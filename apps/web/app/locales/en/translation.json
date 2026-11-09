@@ -4521,7 +4521,9 @@
       "learningModeDescription": "Enable Learn mode to take quizzes and track your progress."
     },
     "timedQuiz": {
-      "info": "Time limit: {{minutes}} min. The timer starts when you select “Start quiz” and keeps running if you leave the page. Your answers are saved automatically and submitted when time runs out. Unanswered questions score 0 points.",
+      "info": "The timer starts when you select “Start quiz” and keeps running if you leave the page. Your answers are saved automatically and submitted when time runs out. Unanswered questions score 0 points.",
+      "timeLimit": "Time limit",
+      "questions": "Questions",
       "start": "Start quiz",
       "timeLeft": "Time left: {{time}}",
       "warning": "Less than a minute left. Your answers will be submitted automatically when time runs out.",

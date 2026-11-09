@@ -31,6 +31,7 @@ import {
 import { toast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
@@ -330,11 +331,27 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
           {isAwaitingQuizStart && (
             <div
               data-testid={LEARNING_HANDLES.QUIZ_TIME_LIMIT_INFO}
-              className="flex flex-col items-start gap-y-4 rounded-lg border border-neutral-200 p-4"
+              className="flex flex-col items-start gap-y-4"
             >
-              <p className="body-base">
-                {t("studentLessonView.timedQuiz.info", { minutes: lesson.timeLimitMinutes })}
-              </p>
+              <div className="grid w-full gap-2 border-y border-neutral-200 py-3 text-sm">
+                <dl className="grid gap-2">
+                  <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                    <dt className="text-neutral-500">
+                      {t("studentLessonView.timedQuiz.timeLimit")}
+                    </dt>
+                    <dd className="font-medium text-neutral-900">
+                      {formatDuration((lesson.timeLimitMinutes ?? 0) * 60, t)}
+                    </dd>
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                    <dt className="text-neutral-500">
+                      {t("studentLessonView.timedQuiz.questions")}
+                    </dt>
+                    <dd className="font-medium text-neutral-900">{questions.length}</dd>
+                  </div>
+                </dl>
+                <p className="text-neutral-500">{t("studentLessonView.timedQuiz.info")}</p>
+              </div>
               <Button
                 data-testid={LEARNING_HANDLES.QUIZ_START_BUTTON}
                 type="button"

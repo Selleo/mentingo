@@ -4522,7 +4522,9 @@
       "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus ir stebėti pažangą."
     },
     "timedQuiz": {
-      "info": "Laiko limitas: {{minutes}} min. Laikas pradedamas skaičiuoti pasirinkus „Pradėti viktoriną“ ir skaičiuojamas toliau, net jei paliksite puslapį. Atsakymai išsaugomi automatiškai ir pateikiami pasibaigus laikui. Neatsakyti klausimai vertinami 0 taškų.",
+      "info": "Laikas pradedamas skaičiuoti pasirinkus „Pradėti viktoriną“ ir skaičiuojamas toliau, net jei paliksite puslapį. Atsakymai išsaugomi automatiškai ir pateikiami pasibaigus laikui. Neatsakyti klausimai vertinami 0 taškų.",
+      "timeLimit": "Laiko limitas",
+      "questions": "Klausimai",
       "start": "Pradėti viktoriną",
       "timeLeft": "Liko laiko: {{time}}",
       "warning": "Liko mažiau nei minutė. Pasibaigus laikui atsakymai bus pateikti automatiškai.",

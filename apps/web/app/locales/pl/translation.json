@@ -4790,7 +4790,9 @@
       "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy i śledzić postępy."
     },
     "timedQuiz": {
-      "info": "Limit czasu: {{minutes}} min. Czas zaczyna biec po wybraniu „Rozpocznij quiz” i biegnie dalej, nawet jeśli opuścisz stronę. Odpowiedzi zapisują się automatycznie i zostaną wysłane po upływie czasu. Pytania bez odpowiedzi otrzymują 0 punktów.",
+      "info": "Czas zaczyna biec po wybraniu „Rozpocznij quiz” i biegnie dalej, nawet jeśli opuścisz stronę. Odpowiedzi zapisują się automatycznie i zostaną wysłane po upływie czasu. Pytania bez odpowiedzi otrzymują 0 punktów.",
+      "timeLimit": "Limit czasu",
+      "questions": "Pytania",
       "start": "Rozpocznij quiz",
       "timeLeft": "Pozostały czas: {{time}}",
       "warning": "Została mniej niż minuta. Odpowiedzi zostaną wysłane automatycznie po upływie czasu.",

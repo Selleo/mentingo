@@ -4268,7 +4268,9 @@
       "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz et suivre votre progression."
     },
     "timedQuiz": {
-      "info": "Limite de temps : {{minutes}} min. Le chronomètre démarre lorsque vous sélectionnez « Démarrer le quiz » et continue même si vous quittez la page. Vos réponses sont enregistrées automatiquement et envoyées à la fin du temps imparti. Les questions sans réponse valent 0 point.",
+      "info": "Le chronomètre démarre lorsque vous sélectionnez « Démarrer le quiz » et continue même si vous quittez la page. Vos réponses sont enregistrées automatiquement et envoyées à la fin du temps imparti. Les questions sans réponse valent 0 point.",
+      "timeLimit": "Limite de temps",
+      "questions": "Questions",
       "start": "Démarrer le quiz",
       "timeLeft": "Temps restant : {{time}}",
       "warning": "Il reste moins d’une minute. Vos réponses seront envoyées automatiquement à la fin du temps imparti.",

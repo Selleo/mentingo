@@ -4527,7 +4527,9 @@
       "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy a sledovat svůj postup."
     },
     "timedQuiz": {
-      "info": "Časový limit: {{minutes}} min. Čas začne běžet po výběru „Spustit kvíz“ a běží dál, i když stránku opustíte. Odpovědi se ukládají automaticky a po uplynutí času se odešlou. Nezodpovězené otázky získají 0 bodů.",
+      "info": "Čas začne běžet po výběru „Spustit kvíz“ a běží dál, i když stránku opustíte. Odpovědi se ukládají automaticky a po uplynutí času se odešlou. Nezodpovězené otázky získají 0 bodů.",
+      "timeLimit": "Časový limit",
+      "questions": "Otázky",
       "start": "Spustit kvíz",
       "timeLeft": "Zbývající čas: {{time}}",
       "warning": "Zbývá méně než minuta. Odpovědi se po uplynutí času odešlou automaticky.",
