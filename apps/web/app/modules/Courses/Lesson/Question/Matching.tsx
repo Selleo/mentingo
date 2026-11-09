@@ -60,7 +60,7 @@ const DraggableMatch = ({ id, target, disabled, isSelected, onClick }: Draggable
       onClick={onClick}
       style={{ transform: CSS.Translate.toString(transform) }}
       className={cn(
-        "body-base touch-none rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-neutral-950 disabled:cursor-default",
+        "body-base min-w-0 max-w-full touch-none [overflow-wrap:anywhere] rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-left text-neutral-950 disabled:cursor-default",
         {
           "cursor-grab": !disabled,
           "relative z-10 shadow-lg": isDragging,
@@ -172,14 +172,14 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                 },
               )}
             >
-              <span id={`matching-${id}`} className="w-full">
+              <span id={`matching-${id}`} className="w-full min-w-0 [overflow-wrap:anywhere]">
                 {optionText}
               </span>
-              <div className="flex w-full flex-col gap-1">
+              <div className="flex w-full min-w-0 flex-col gap-1">
                 <DropZone
                   id={id}
                   disabled={isCompleted}
-                  className="flex min-h-11 items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-2 py-1"
+                  className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-white px-2 py-1"
                 >
                   {answer && (
                     <>
@@ -189,7 +189,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                           type="button"
                           aria-label={t("studentLessonView.other.removeMatch", { match: answer })}
                           onClick={() => placeTarget(answer, null)}
-                          className="ml-auto rounded p-1 text-neutral-600 hover:bg-neutral-100"
+                          className="ml-auto shrink-0 rounded p-1 text-neutral-600 hover:bg-neutral-100"
                         >
                           <Icon name="X" className="size-4" />
                         </button>
@@ -201,7 +201,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                       type="button"
                       aria-labelledby={`matching-${id}`}
                       onClick={() => placeTarget(selectedTarget, id)}
-                      className="body-sm w-full text-left text-primary-700"
+                      className="body-sm w-full min-w-0 [overflow-wrap:anywhere] text-left text-primary-700"
                     >
                       {t("studentLessonView.other.placeMatch", { match: selectedTarget })}
                     </button>
@@ -213,7 +213,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                   )}
                 </DropZone>
                 {showFeedback && !isCorrect && matchedWord && (
-                  <span className="body-sm text-neutral-800">
+                  <span className="body-sm [overflow-wrap:anywhere] text-neutral-800">
                     {t("studentLessonView.other.correctMatch")} {matchedWord}
                   </span>
                 )}
