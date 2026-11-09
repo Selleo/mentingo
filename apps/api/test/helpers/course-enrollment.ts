@@ -83,6 +83,9 @@ export const createCourseEnrollmentHelpers = ({
         .with(SYSTEM_ROLE_SLUGS.GROUP_MANAGER, () =>
           userFactory.create({ roleSlug: SYSTEM_ROLE_SLUGS.GROUP_MANAGER }),
         )
+        .with(SYSTEM_ROLE_SLUGS.REVIEWER, () =>
+          userFactory.create({ roleSlug: SYSTEM_ROLE_SLUGS.REVIEWER }),
+        )
         .exhaustive();
     });
 

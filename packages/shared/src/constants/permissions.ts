@@ -4,6 +4,7 @@ export const SYSTEM_ROLE_SLUGS = {
   CONTENT_CREATOR: "content_creator",
   TRAINER: "trainer",
   GROUP_MANAGER: "group_manager",
+  REVIEWER: "reviewer",
 } as const;
 
 export type SystemRoleSlug = (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS];
@@ -103,6 +104,8 @@ export const PERMISSIONS = {
   GAMIFICATION_READ: "gamification.read",
   GAMIFICATION_EARN_HIDDEN: "gamification.earn_hidden",
   GAMIFICATION_MANAGE: "gamification.manage",
+  QUIZ_GRADING_READ: "quiz_grading.read",
+  QUIZ_GRADING_GRADE: "quiz_grading.grade",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -126,6 +129,16 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.ARTICLE_READ_PUBLIC,
     PERMISSIONS.QA_READ_PUBLIC,
     PERMISSIONS.GAMIFICATION_READ,
+  ],
+  [SYSTEM_ROLE_SLUGS.REVIEWER]: [
+    PERMISSIONS.ACCOUNT_READ_SELF,
+    PERMISSIONS.ACCOUNT_UPDATE_SELF,
+    PERMISSIONS.USER_READ_SELF,
+    PERMISSIONS.SETTINGS_READ_SELF,
+    PERMISSIONS.SETTINGS_UPDATE_SELF,
+    PERMISSIONS.ENV_READ_PUBLIC,
+    PERMISSIONS.QUIZ_GRADING_READ,
+    PERMISSIONS.QUIZ_GRADING_GRADE,
   ],
   [SYSTEM_ROLE_SLUGS.STUDENT]: [
     PERMISSIONS.COMPETENCIES_USE,
@@ -330,6 +343,8 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.ACTIVITY_LOG_READ,
     PERMISSIONS.GAMIFICATION_READ,
     PERMISSIONS.GAMIFICATION_MANAGE,
+    PERMISSIONS.QUIZ_GRADING_READ,
+    PERMISSIONS.QUIZ_GRADING_GRADE,
   ],
 };
 
@@ -338,5 +353,6 @@ export const SYSTEM_RULE_SET_SLUGS = {
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "content_creator-default",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "trainer-default",
   [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "group_manager-default",
+  [SYSTEM_ROLE_SLUGS.REVIEWER]: "reviewer-default",
   [SYSTEM_ROLE_SLUGS.ADMIN]: "admin-default",
 } as const;

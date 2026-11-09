@@ -844,6 +844,7 @@ export class SettingsService {
       SYSTEM_ROLE_SLUGS.TRAINER,
       SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
       SYSTEM_ROLE_SLUGS.STUDENT,
+      SYSTEM_ROLE_SLUGS.REVIEWER,
     ];
     const primaryRole = rolePriority.find((roleSlug) => roleSet.has(roleSlug));
     const defaultWidgets = primaryRole ? DASHBOARD_DEFAULT_LAYOUTS[primaryRole] : [];

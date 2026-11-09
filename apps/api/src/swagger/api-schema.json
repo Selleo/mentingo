@@ -26618,6 +26618,14 @@
                     {
                       "const": "gamification.manage",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading.grade",
+                      "type": "string"
                     }
                   ]
                 }

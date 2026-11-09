@@ -747,7 +747,8 @@
       "contentCreator": "Créateur de contenu",
       "trainer": "Formateur",
       "student": "Apprenant",
-      "groupManager": "Gestionnaire de groupes"
+      "groupManager": "Gestionnaire de groupes",
+      "reviewer": "Correcteur"
     },
     "languages": {
       "en": "Anglais",
@@ -2317,7 +2318,8 @@
         "activity_log": "journal d'activité",
         "competencies": "compétences",
         "other": "capacités de la plateforme",
-        "gamification": "gamification"
+        "gamification": "gamification",
+        "quiz_grading": "correction des quiz"
       },
       "descriptions": {
         "phishing_manage": "Créer et gérer des simulations de phishing.",
@@ -2414,7 +2416,9 @@
         "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
         "gamification_read": "Afficher les niveaux, XP et succès.",
         "gamification_earn_hidden": "Obtenir des succès cachés.",
-        "gamification_manage": "Configurer les succès et les paramètres de gamification."
+        "gamification_manage": "Configurer les succès et les paramètres de gamification.",
+        "quiz_grading_read": "Afficher la file des réponses ouvertes en attente de correction.",
+        "quiz_grading_grade": "Corriger les réponses ouvertes et rédiger des commentaires pour les apprenants."
       }
     },
     "dropdown": {
@@ -4565,7 +4569,8 @@
       "student": "Apprenant",
       "content_creator": "Créateur de contenu",
       "trainer": "Formateur",
-      "group_manager": "Gestionnaire de groupes"
+      "group_manager": "Gestionnaire de groupes",
+      "reviewer": "Correcteur"
     },
     "switch": {
       "enabled": "Activé",

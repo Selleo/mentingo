@@ -746,7 +746,8 @@
       "contentCreator": "Turinio kūrėjas",
       "trainer": "Trainer",
       "student": "Studentas",
-      "groupManager": "Grupių vadovas"
+      "groupManager": "Grupių vadovas",
+      "reviewer": "Vertintojas"
     },
     "languages": {
       "en": "Anglų",
@@ -2322,7 +2323,8 @@
         "activity_log": "veiklos žurnalą",
         "competencies": "kompetencijos",
         "other": "platformos funkcijas",
-        "gamification": "žaidybinimą"
+        "gamification": "žaidybinimą",
+        "quiz_grading": "testų vertinimas"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -2419,7 +2421,9 @@
         "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
         "gamification_read": "Peržiūrėti lygius, XP ir pasiekimus.",
         "gamification_earn_hidden": "Gauti paslėptus pasiekimus.",
-        "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus."
+        "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus.",
+        "quiz_grading_read": "Peržiūrėti atvirų atsakymų, laukiančių įvertinimo, eilę.",
+        "quiz_grading_grade": "Vertinti atvirus atsakymus ir rašyti komentarus besimokantiesiems."
       }
     },
     "dropdown": {
@@ -4842,7 +4846,8 @@
       "student": "Studentas",
       "content_creator": "Turinio kūrėjas",
       "trainer": "Treneris",
-      "group_manager": "Grupių vadovas"
+      "group_manager": "Grupių vadovas",
+      "reviewer": "Vertintojas"
     },
     "switch": {
       "enabled": "Įjungta",

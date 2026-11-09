@@ -749,7 +749,8 @@
       "contentCreator": "Twórca treści",
       "trainer": "Trener",
       "student": "Uczeń",
-      "groupManager": "Menedżer grup"
+      "groupManager": "Menedżer grup",
+      "reviewer": "Recenzent"
     },
     "languages": {
       "en": "Angielski",
@@ -2571,7 +2572,8 @@
         "activity_log": "dziennik aktywności",
         "competencies": "kompetencje",
         "other": "funkcje platformy",
-        "gamification": "grywalizację"
+        "gamification": "grywalizację",
+        "quiz_grading": "ocenianie quizów"
       },
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
@@ -2668,7 +2670,9 @@
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI.",
         "gamification_read": "Wyświetlanie poziomów, XP i osiągnięć.",
         "gamification_earn_hidden": "Zdobywanie ukrytych osiągnięć.",
-        "gamification_manage": "Konfigurowanie osiągnięć i ustawień grywalizacji."
+        "gamification_manage": "Konfigurowanie osiągnięć i ustawień grywalizacji.",
+        "quiz_grading_read": "Wyświetlanie kolejki odpowiedzi otwartych czekających na ocenę.",
+        "quiz_grading_grade": "Ocenianie odpowiedzi otwartych i dodawanie komentarzy dla uczestników."
       }
     },
     "dropdown": {
@@ -5153,7 +5157,8 @@
       "student": "Student",
       "content_creator": "Twórca treści",
       "trainer": "Trener",
-      "group_manager": "Menedżer grup"
+      "group_manager": "Menedżer grup",
+      "reviewer": "Recenzent"
     },
     "switch": {
       "enabled": "Włączone",
