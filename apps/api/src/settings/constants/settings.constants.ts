@@ -40,6 +40,8 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   inviteOnlyRegistration: true,
   primaryColor: null,
   contrastColor: null,
+  backgroundColor: null,
+  accentColor: null,
   loginPageFiles: [],
 };
 

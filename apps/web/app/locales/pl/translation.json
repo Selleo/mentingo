@@ -4964,7 +4964,7 @@
   },
   "platformSimpleLogo": {
     "header": "Proste logo platformy (ikona)",
-    "subHeader": "Prześlij własne logo, które będzie używane jako sygnet i favicon. Obsługiwane formaty: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Kompaktowe logo i favicon przeglądarki.",
     "field": {
       "uploadLabel": "Obraz logo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
@@ -4980,7 +4980,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Przesyłanie tła certyfikatu",
-    "description": "Prześlij obraz tła dla certyfikatu.",
+    "description": "Tło za treścią certyfikatu.",
     "button": {
       "removeCertificateBackgroundImage": "Usuń tło certyfikatu",
       "preview": "Podgląd"
@@ -5314,7 +5314,7 @@
   },
   "platformLogo": {
     "header": "Logo Platformy",
-    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Główne logo widoczne na platformie.",
     "field": {
       "uploadLabel": "Obraz Logo",
       "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
@@ -5328,13 +5328,54 @@
       "logoFetchError": "Nie udało się pobrać logo platformy"
     }
   },
+  "brandingImages": {
+    "title": "Grafiki marki",
+    "description": "Logotypy i obrazy tła używane na platformie, stronie logowania i certyfikatach."
+  },
   "organizationTheme": {
     "title": "Motyw organizacji",
-    "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki."
+    "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki.",
+    "primaryColor": {
+      "label": "Kolor główny",
+      "description": "Przyciski i kluczowe wyróżnienia"
+    },
+    "contrastColor": {
+      "label": "Tekst na kolorze głównym",
+      "description": "Tekst i ikony na przyciskach głównych"
+    },
+    "backgroundColor": {
+      "label": "Tło",
+      "description": "Tło strony za treścią"
+    },
+    "accentColor": {
+      "label": "Akcent",
+      "description": "Linki, zakładki, przyciski z obramowaniem i etykiety",
+      "adjustedDescription": "Przyciemniony kolor główny, aby pozostał czytelny"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Przywróć auto",
+    "pickColor": "Wybierz: {{label}}",
+    "contrastTooltip": {
+      "passes": "Współczynnik kontrastu spełnia WCAG 2 AA (co najmniej {{minimum}}:1 dla zwykłego tekstu).",
+      "fails": "Współczynnik kontrastu nie spełnia WCAG 2 AA, który wymaga co najmniej {{minimum}}:1 dla zwykłego tekstu."
+    },
+    "lowContrast": "Trudny do odczytania. Zalecany kontrast to co najmniej {{minimum}}:1",
+    "preview": {
+      "title": "Podgląd",
+      "courseTitle": "Wprowadzenie do projektowania",
+      "courseDetails": "12 lekcji · 3 godziny",
+      "badge": "W trakcie",
+      "overviewTab": "Przegląd",
+      "lessonsTab": "Lekcje",
+      "progress": "Postęp",
+      "primaryButton": "Kontynuuj naukę",
+      "outlineButton": "Zapisz na później",
+      "link": "Zobacz program"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Przesyłanie obrazu tła logowania",
-    "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
+    "description": "Tło strony logowania.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})"
     },

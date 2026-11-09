@@ -105,15 +105,14 @@ export function registerMcpCustomizationTools(
   server.registerTool(
     "update_platform_colors",
     {
-      description: "Set platform primary and contrast brand colors.",
+      description:
+        "Set platform primary and contrast brand colors. Optional background and accent colors override the derived ones; pass null to derive them again, omit them to keep the current values.",
       inputSchema: asMcpInputSchema(Schemas.customizationColorsInputSchema),
       annotations: write,
     },
     async (input) =>
       run(permissions, async (actor) => ({
-        settings: customizationSettings(
-          await service.updateGlobalColorSchema(input.primaryColor, input.contrastColor, actor),
-        ),
+        settings: customizationSettings(await service.updateGlobalColorSchema(input, actor)),
       })),
   );
   server.registerTool(

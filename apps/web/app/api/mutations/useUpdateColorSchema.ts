@@ -2,18 +2,12 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-type UpdateColorSchemaOptions = {
-  primaryColor: string;
-  contrastColor: string;
-};
+import type { UpdateColorSchemaBody } from "../generated-api";
 
 export function useUpdateColorSchema() {
   return useMutation({
-    mutationFn: async (options: UpdateColorSchemaOptions) => {
-      const response = await ApiClient.api.settingsControllerUpdateColorSchema({
-        primaryColor: options.primaryColor,
-        contrastColor: options.contrastColor,
-      });
+    mutationFn: async (colorSchema: UpdateColorSchemaBody) => {
+      const response = await ApiClient.api.settingsControllerUpdateColorSchema(colorSchema);
 
       return response.data;
     },

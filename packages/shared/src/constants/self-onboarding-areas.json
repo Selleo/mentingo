@@ -411,9 +411,7 @@
     {
       "key": "gamification",
       "title": "Gamification",
-      "specPaths": [
-        "docs/specs/gamification-business-spec.md"
-      ],
+      "specPaths": ["docs/specs/gamification-business-spec.md"],
       "routes": [
         {
           "prefix": "/admin/gamification",

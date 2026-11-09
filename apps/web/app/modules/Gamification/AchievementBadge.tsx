@@ -70,7 +70,9 @@ export const getAchievementBadgeUrl = (color: AchievementBadgeColor, level: numb
 
 /** The uploaded badge when there is one, otherwise the level's tier badge in the theme colour. */
 export const useAchievementBadgeUrl = (level: number, badgeImageUrl?: string | null) => {
-  const { primaryColor } = useTheme();
+  const {
+    colorSchema: { primaryColor },
+  } = useTheme();
 
   return badgeImageUrl || getAchievementBadgeUrl(getClosestBadgeColor(primaryColor), level);
 };

@@ -4702,7 +4702,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Nahrání certifikátu na pozadí",
-    "description": "Nahrajte obrázek na pozadí certifikátu.",
+    "description": "Pozadí za obsahem certifikátu.",
     "button": {
       "removeCertificateBackgroundImage": "Smazat pozadí certifikátu",
       "preview": "Náhled"
@@ -4989,7 +4989,7 @@
   },
   "platformLogo": {
     "header": "Logo platformy",
-    "subHeader": "Nahrajte vlastní logo pro vaši platformu. Podporované formáty: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Hlavní logo zobrazené na platformě.",
     "field": {
       "uploadLabel": "Obrázek loga",
       "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
@@ -5005,7 +5005,7 @@
   },
   "platformSimpleLogo": {
     "header": "Jednoduché logo platformy (ikona)",
-    "subHeader": "Nahrajte vlastní logo, které bude použito jako signet a favicon. Podporované formáty: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Kompaktní logo a favicon prohlížeče.",
     "field": {
       "uploadLabel": "Obrázek loga",
       "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
@@ -5019,13 +5019,54 @@
       "logoFetchError": "Chyba při načítání jednoduchého loga platformy"
     }
   },
+  "brandingImages": {
+    "title": "Obrázky značky",
+    "description": "Loga a obrázky pozadí používané na platformě, přihlašovací stránce a certifikátech."
+  },
   "organizationTheme": {
     "title": "Téma organizace",
-    "description": "Přizpůsobte si vzhled své platformy výběrem barvy motivu, která odráží značku vaší organizace."
+    "description": "Přizpůsobte si vzhled své platformy výběrem barvy motivu, která odráží značku vaší organizace.",
+    "primaryColor": {
+      "label": "Primární barva",
+      "description": "Tlačítka a klíčová zvýraznění"
+    },
+    "contrastColor": {
+      "label": "Text na primární barvě",
+      "description": "Text a ikony na primárních tlačítkách"
+    },
+    "backgroundColor": {
+      "label": "Pozadí",
+      "description": "Pozadí stránky za obsahem"
+    },
+    "accentColor": {
+      "label": "Akcent",
+      "description": "Odkazy, karty, obrysová tlačítka a štítky",
+      "adjustedDescription": "Ztmaveno z primární barvy, aby zůstalo čitelné"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Obnovit auto",
+    "pickColor": "Vybrat: {{label}}",
+    "contrastTooltip": {
+      "passes": "Kontrastní poměr splňuje WCAG 2 AA (alespoň {{minimum}}:1 pro běžný text).",
+      "fails": "Kontrastní poměr nesplňuje WCAG 2 AA, které vyžaduje alespoň {{minimum}}:1 pro běžný text."
+    },
+    "lowContrast": "Špatně čitelné. Doporučený kontrast je alespoň {{minimum}}:1",
+    "preview": {
+      "title": "Náhled",
+      "courseTitle": "Úvod do designu",
+      "courseDetails": "12 lekcí · 3 hodiny",
+      "badge": "Probíhá",
+      "overviewTab": "Přehled",
+      "lessonsTab": "Lekce",
+      "progress": "Pokrok",
+      "primaryButton": "Pokračovat ve studiu",
+      "outlineButton": "Uložit na později",
+      "link": "Zobrazit osnovu"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Nahrání obrázku na pozadí přihlášení",
-    "description": "Nahrajte vlastní obrázek na pozadí pro přihlašovací stránku organizace.",
+    "description": "Pozadí přihlašovací stránky.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP nebo SVG (max. {{maxSize}})"
     },

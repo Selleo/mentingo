@@ -4694,7 +4694,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Certificate Background Upload",
-    "description": "Upload a background image for the certificate.",
+    "description": "Background behind the certificate content.",
     "button": {
       "removeCertificateBackgroundImage": "Delete certificate background",
       "preview": "Preview"
@@ -5000,7 +5000,7 @@
   },
   "platformLogo": {
     "header": "Platform Logo",
-    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Main logo shown across the platform.",
     "field": {
       "uploadLabel": "Logo Image",
       "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
@@ -5016,7 +5016,7 @@
   },
   "platformSimpleLogo": {
     "header": "Platform Simple Logo (icon)",
-    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Compact logo and browser favicon.",
     "field": {
       "uploadLabel": "Logo Image",
       "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
@@ -5030,13 +5030,54 @@
       "logoFetchError": "Error fetching platform simple logo"
     }
   },
+  "brandingImages": {
+    "title": "Branding Images",
+    "description": "Logos and background images used across the platform, the login page and certificates."
+  },
   "organizationTheme": {
     "title": "Organization Theme",
-    "description": "Customize the appearance of your platform by selecting a theme color that reflects your organization's branding."
+    "description": "Customize the appearance of your platform by selecting a theme color that reflects your organization's branding.",
+    "primaryColor": {
+      "label": "Primary color",
+      "description": "Buttons and key highlights"
+    },
+    "contrastColor": {
+      "label": "Text on primary",
+      "description": "Text and icons on primary buttons"
+    },
+    "backgroundColor": {
+      "label": "Background",
+      "description": "Page background behind content"
+    },
+    "accentColor": {
+      "label": "Accent",
+      "description": "Links, tabs, outline buttons and badges",
+      "adjustedDescription": "Darkened from your primary color so it stays readable"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Reset to auto",
+    "pickColor": "Pick {{label}}",
+    "contrastTooltip": {
+      "passes": "Contrast ratio meets WCAG 2 AA (at least {{minimum}}:1 for normal text).",
+      "fails": "Contrast ratio is below WCAG 2 AA, which requires at least {{minimum}}:1 for normal text."
+    },
+    "lowContrast": "Hard to read. Aim for at least {{minimum}}:1",
+    "preview": {
+      "title": "Preview",
+      "courseTitle": "Introduction to design",
+      "courseDetails": "12 lessons · 3 hours",
+      "badge": "In progress",
+      "overviewTab": "Overview",
+      "lessonsTab": "Lessons",
+      "progress": "Progress",
+      "primaryButton": "Continue learning",
+      "outlineButton": "Save for later",
+      "link": "View syllabus"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Login Background Image Upload",
-    "description": "Upload a custom background image for the organization login page.",
+    "description": "Background of the login page.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP or SVG (max. {{maxSize}})"
     },

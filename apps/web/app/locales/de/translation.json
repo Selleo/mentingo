@@ -4693,7 +4693,7 @@
   },
   "certificateBackgroundUpload": {
     "title": "Hochladen des Zertifikathintergrunds",
-    "description": "Laden Sie ein Hintergrundbild für das Zertifikat hoch.",
+    "description": "Hintergrund hinter dem Zertifikatsinhalt.",
     "button": {
       "removeCertificateBackgroundImage": "Zertifikathintergrund löschen",
       "preview": "Vorschau"
@@ -4980,7 +4980,7 @@
   },
   "platformLogo": {
     "header": "Plattform-Logo",
-    "subHeader": "Laden Sie ein individuelles Logo für Ihre Plattform hoch. Unterstützte Formate: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Hauptlogo der Plattform.",
     "field": {
       "uploadLabel": "Logobild",
       "imageRequirements": "PNG, JPG/JPEG, WEBP oder SVG (max. {{maxSize}})"
@@ -4996,7 +4996,7 @@
   },
   "platformSimpleLogo": {
     "header": "Plattform einfaches Logo (Symbol)",
-    "subHeader": "Laden Sie ein benutzerdefiniertes Logo hoch, das als Signet und Favicon verwendet wird. Unterstützte Formate: PNG, JPG/JPEG, WEBP, SVG",
+    "subHeader": "Kompaktes Logo und Browser-Favicon.",
     "field": {
       "uploadLabel": "Logobild",
       "imageRequirements": "PNG, JPG/JPEG, WEBP oder SVG (max. {{maxSize}})"
@@ -5010,13 +5010,54 @@
       "logoFetchError": "Fehler beim Abrufen des einfachen Logos der Plattform"
     }
   },
+  "brandingImages": {
+    "title": "Markenbilder",
+    "description": "Logos und Hintergrundbilder für die Plattform, die Anmeldeseite und Zertifikate."
+  },
   "organizationTheme": {
     "title": "Organisationsthema",
-    "description": "Passen Sie das Erscheinungsbild Ihrer Plattform an, indem Sie eine Designfarbe auswählen, die das Branding Ihres Unternehmens widerspiegelt."
+    "description": "Passen Sie das Erscheinungsbild Ihrer Plattform an, indem Sie eine Designfarbe auswählen, die das Branding Ihres Unternehmens widerspiegelt.",
+    "primaryColor": {
+      "label": "Primärfarbe",
+      "description": "Schaltflächen und wichtige Hervorhebungen"
+    },
+    "contrastColor": {
+      "label": "Text auf Primärfarbe",
+      "description": "Text und Symbole auf primären Schaltflächen"
+    },
+    "backgroundColor": {
+      "label": "Hintergrund",
+      "description": "Seitenhintergrund hinter den Inhalten"
+    },
+    "accentColor": {
+      "label": "Akzent",
+      "description": "Links, Tabs, umrandete Schaltflächen und Abzeichen",
+      "adjustedDescription": "Aus Ihrer Primärfarbe abgedunkelt, damit sie lesbar bleibt"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Auf Auto zurücksetzen",
+    "pickColor": "{{label}} auswählen",
+    "contrastTooltip": {
+      "passes": "Das Kontrastverhältnis erfüllt WCAG 2 AA (mindestens {{minimum}}:1 für normalen Text).",
+      "fails": "Das Kontrastverhältnis liegt unter WCAG 2 AA, das mindestens {{minimum}}:1 für normalen Text verlangt."
+    },
+    "lowContrast": "Schwer lesbar. Empfohlen ist ein Kontrast von mindestens {{minimum}}:1",
+    "preview": {
+      "title": "Vorschau",
+      "courseTitle": "Einführung in Design",
+      "courseDetails": "12 Lektionen · 3 Stunden",
+      "badge": "In Bearbeitung",
+      "overviewTab": "Übersicht",
+      "lessonsTab": "Lektionen",
+      "progress": "Fortschritt",
+      "primaryButton": "Weiterlernen",
+      "outlineButton": "Für später speichern",
+      "link": "Lehrplan ansehen"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Anmelden Hintergrundbild hochladen",
-    "description": "Laden Sie ein benutzerdefiniertes Hintergrundbild für die Anmeldeseite der Organisation hoch.",
+    "description": "Hintergrund der Anmeldeseite.",
     "field": {
       "imageRequirements": "PNG, JPG/JPEG, WEBP oder SVG (max. {{maxSize}})"
     },

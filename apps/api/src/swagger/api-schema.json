@@ -27473,6 +27473,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -27536,6 +27556,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29174,6 +29196,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29237,6 +29279,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29414,6 +29458,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29477,6 +29541,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29654,6 +29720,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29717,6 +29803,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -29894,6 +29982,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -29957,6 +30065,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30153,6 +30263,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30216,6 +30346,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30393,6 +30525,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30456,6 +30608,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30633,6 +30787,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30696,6 +30870,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -30873,6 +31049,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -30936,6 +31132,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -31125,6 +31323,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -31188,6 +31406,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -31365,6 +31585,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -31428,6 +31668,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -31454,6 +31696,9 @@
                 "type": "boolean"
               },
               "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
                 "type": "boolean"
               },
               "featuredCourseId": {
@@ -31602,6 +31847,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -31648,6 +31913,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
               "gamificationEnabled",
@@ -31664,6 +31930,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
@@ -31820,6 +32088,28 @@
           "contrastColor": {
             "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
             "type": "string"
+          },
+          "backgroundColor": {
+            "anyOf": [
+              {
+                "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accentColor": {
+            "anyOf": [
+              {
+                "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -31988,6 +32278,26 @@
                   }
                 ]
               },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "unregisteredUserQAAccessibility": {
                 "type": "boolean"
               },
@@ -32051,6 +32361,8 @@
               "inviteOnlyRegistration",
               "primaryColor",
               "contrastColor",
+              "backgroundColor",
+              "accentColor",
               "unregisteredUserQAAccessibility",
               "QAEnabled",
               "unregisteredUserNewsAccessibility",
