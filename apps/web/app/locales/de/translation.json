@@ -4344,6 +4344,7 @@
       "multipleChoice": "Multiple-Choice-Frage.",
       "singleChoice": "Single-Choice-Frage",
       "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
+      "partialScore": "Teilergebnis: {{correct}} von {{graded}} bewerteten Fragen richtig",
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
       "openInNewTab": "In neuem Tab öffnen",

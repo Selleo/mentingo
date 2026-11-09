@@ -41,6 +41,7 @@ export type QuizAttemptFeedback = {
     id: UUIDType;
     questionId: UUIDType;
     awardedPoints: string | null;
+    gradingStatus: AssessmentAnswerGradingStatus;
   }>;
   choiceSelections: Array<{ questionAnswerId: UUIDType; selectedOptionId: UUIDType }>;
   statementAnswers: Array<{

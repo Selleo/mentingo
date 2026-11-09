@@ -4102,6 +4102,7 @@
       "multipleChoice": "Question à choix multiples.",
       "singleChoice": "Question à choix unique",
       "passingThreshold": "Seuil de réussite : {{threshold}} % ({{correct}} sur {{questionsNumber}} questions)",
+      "partialScore": "Score partiel : {{correct}} sur {{graded}} questions notées correctes",
       "score": "Score : {{score}} % ({{correct}} sur {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "Ce contenu ne peut pas être intégré.",
       "openInNewTab": "Ouvrir dans un nouvel onglet",

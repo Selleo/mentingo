@@ -149,8 +149,20 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
             <div className="flex w-full justify-between">
               <span className="group relative">
                 {isAwaitingReview ? (
-                  <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
-                    <ProgressBadge progress="awaitingReview" />
+                  <span className="flex items-center gap-x-2">
+                    <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
+                      <ProgressBadge progress="awaitingReview" />
+                    </span>
+                    {!lesson.isQuizFeedbackRedacted && (
+                      <span data-testid={LEARNING_HANDLES.QUIZ_PARTIAL_SCORE}>
+                        {t("studentLessonView.other.partialScore", {
+                          correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                          graded:
+                            (lesson.quizDetails?.correctAnswerCount ?? 0) +
+                            (lesson.quizDetails?.wrongAnswerCount ?? 0),
+                        })}
+                      </span>
+                    )}
                   </span>
                 ) : (
                   <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>

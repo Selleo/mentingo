@@ -4351,6 +4351,7 @@
       "multipleChoice": "Otázka s výběrem z více možností.",
       "singleChoice": "Otázka s jednou volbou",
       "passingThreshold": "Hranice pro splnění: {{threshold}}% ({{correct}} z {{questionsNumber}} otázek)",
+      "partialScore": "Částečné skóre: {{correct}} z {{graded}} hodnocených otázek správně",
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
       "openInNewTab": "Otevřít na nové kartě",

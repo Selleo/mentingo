@@ -2791,7 +2791,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   });
 
   describe("POST /api/lesson/evaluation-quiz - open answers awaiting review", () => {
-    const setupQuizWithOpenQuestion = async () => {
+    const setupQuizWithOpenQuestion = async ({ quizFeedbackEnabled = true } = {}) => {
       const category = await categoryFactory.create();
       const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
@@ -2803,7 +2803,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         authorId: contentCreator.id,
         categoryId: category.id,
         status: "published",
-        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled: true },
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
       });
       const chapter = await chapterFactory.create({ courseId: course.id });
       await enrollStudentToCourse(student.id, course.id);
@@ -2830,7 +2830,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         { questionId: openQuestion.id, answers: [{ value: "My open answer" }] },
       ];
 
-      return { student, cookies, course, lesson, questionsAnswers, openQuestion };
+      return { student, cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers };
     };
 
     const submit = (cookies: string, lessonId: UUIDType, questionsAnswers: unknown[]) =>
@@ -2909,8 +2909,53 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       });
     });
 
-    it("shows the lesson as awaiting review with the learner's answers and no correctness", async () => {
-      const { cookies, course, lesson, questionsAnswers } = await setupQuizWithOpenQuestion();
+    it("shows a partial result: graded questions with correctness, open answers waiting for review", async () => {
+      const { cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers } =
+        await setupQuizWithOpenQuestion();
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const lessonResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const lessonData = lessonResponse.body.data;
+      expect(lessonData).toMatchObject({
+        lessonCompleted: false,
+        isQuizAwaitingReview: true,
+        isQuizFeedbackRedacted: false,
+      });
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: choiceAnswers.length,
+        wrongAnswerCount: 0,
+      });
+      for (const question of lessonData.quizDetails.questions) {
+        if (question.id === openQuestion.id) {
+          expect(question.passQuestion).toBeNull();
+          expect(question.solutionExplanation).toBeNull();
+          expect(question.options[0]).toMatchObject({
+            isCorrect: null,
+            studentAnswer: "My open answer",
+          });
+        } else {
+          expect(question.passQuestion).toBe(true);
+        }
+      }
+
+      const courseResponse = await request(app.getHttpServer())
+        .get(`/api/course?id=${course.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const courseLesson = courseResponse.body.data.chapters
+        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
+        .find(({ id }: { id: string }) => id === lesson.id);
+      expect(courseLesson.status).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
+    });
+
+    it("hides the partial result when quiz feedback is disabled", async () => {
+      const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion({
+        quizFeedbackEnabled: false,
+      });
       await submit(cookies, lesson.id, questionsAnswers).expect(201);
 
       const lessonResponse = await request(app.getHttpServer())
@@ -2923,10 +2968,13 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         isQuizAwaitingReview: true,
         isQuizFeedbackRedacted: true,
       });
-      expect(lessonData.quizDetails.score).toBeNull();
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: null,
+        wrongAnswerCount: null,
+      });
       for (const question of lessonData.quizDetails.questions) {
-        expect(question.passQuestion).toBeNull();
-        expect(question.solutionExplanation).toBeNull();
+        expect(question.passQuestion).not.toBe(true);
         for (const option of question.options) expect(option.isCorrect).not.toBe(true);
       }
       expect(
@@ -2935,15 +2983,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
             question.options.some((option) => option.isStudentAnswer),
         ),
       ).toBe(true);
-
-      const courseResponse = await request(app.getHttpServer())
-        .get(`/api/course?id=${course.id}&language=en`)
-        .set("Cookie", cookies)
-        .expect(200);
-      const courseLesson = courseResponse.body.data.chapters
-        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
-        .find(({ id }: { id: string }) => id === lesson.id);
-      expect(courseLesson.status).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
     });
 
     it("blocks resubmitting and retaking while the quiz awaits review", async () => {

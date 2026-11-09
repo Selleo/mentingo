@@ -4614,6 +4614,7 @@
       "multipleChoice": "Pytanie wielokrotnego wyboru.",
       "singleChoice": "Pytanie jednokrotnego wyboru.",
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "partialScore": "Wynik częściowy: {{correct}} z {{graded}} ocenionych pytań poprawnie",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",

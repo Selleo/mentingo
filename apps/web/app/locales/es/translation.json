@@ -4289,6 +4289,7 @@
       "multipleChoice": "Pregunta de opción múltiple.",
       "singleChoice": "Pregunta de opción única",
       "passingThreshold": "Umbral de aprobación: {{threshold}}% ({{correct}} de preguntas {{questionsNumber}})",
+      "partialScore": "Puntuación parcial: {{correct}} de {{graded}} preguntas calificadas correctas",
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
       "openInNewTab": "Abrir en nueva pestaña",

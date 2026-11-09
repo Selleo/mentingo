@@ -401,8 +401,7 @@ export class LessonService {
       quizAttempt: openQuizAttempt ? mapQuizOpenAttemptToState(openQuizAttempt) : null,
     };
 
-    const isQuizFeedbackRedacted =
-      isPublicCoursePreview || !lesson.quizFeedbackEnabled || Boolean(lesson.isQuizAwaitingReview);
+    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -448,6 +447,21 @@ export class LessonService {
       };
 
       return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
+    }
+
+    // Partial result: counts only already graded questions, the rest waits for a reviewer.
+    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+      const quizDetails: QuestionDetails = {
+        questions: redactedQuestionList,
+        questionCount: redactedQuestionList.length,
+        score: null,
+        correctAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === true)
+          .length,
+        wrongAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === false)
+          .length,
+      };
+
+      return { ...lesson, quizDetails, isQuizFeedbackRedacted };
     }
 
     const quizDetails = {

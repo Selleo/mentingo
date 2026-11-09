@@ -227,10 +227,9 @@ export class QuizRuntimeService {
       (answer) => answer.questionId === question.id,
     );
     const hasFeedback = Boolean(questionAnswer);
-    // A pending attempt shows the learner's own answers but no correctness until it is graded.
+    // Answers waiting for a reviewer show the learner's own answer but no correctness yet.
     const showsCorrectness =
-      hasFeedback &&
-      attemptFeedback?.attempt.gradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
+      hasFeedback && questionAnswer?.gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED;
 
     const choiceSelections = new Set(
       attemptFeedback?.choiceSelections
@@ -260,7 +259,7 @@ export class QuizRuntimeService {
             undefined,
             true,
             true,
-            true,
+            showsCorrectness ? true : null,
             openTextAnswer.submittedText,
           )
         : null;

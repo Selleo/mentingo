@@ -4346,6 +4346,7 @@
       "multipleChoice": "Klausimas su keliais pasirinkimais.",
       "singleChoice": "Vieno pasirinkimo klausimas",
       "passingThreshold": "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
+      "partialScore": "Dalinis rezultatas: {{correct}} iš {{graded}} įvertintų klausimų teisingai",
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
