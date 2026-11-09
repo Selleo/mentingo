@@ -1,6 +1,6 @@
 import { setTimeout as delay } from "node:timers/promises";
 
-import { ne } from "drizzle-orm";
+import { ne, sql } from "drizzle-orm";
 
 import { OutboxDispatcherService } from "src/outbox/outbox-dispatcher.service";
 import { OUTBOX_STATUSES } from "src/outbox/outbox.types";
@@ -42,19 +42,35 @@ export async function waitForOutbox<T>(
   );
 }
 
-/** Names the outbox events that are still waiting or gave up, so a timeout says which handler failed. */
-async function describeUndeliveredEvents(app: INestApplication): Promise<string> {
-  const undelivered = await app
-    .get<DatabasePg>(DB_ADMIN, { strict: false })
+/**
+ * Names the outbox events that are still waiting or gave up, and the database sessions that are
+ * blocked or holding a transaction open, so a timeout says which handler failed or hung.
+ */
+export async function describeUndeliveredEvents(app: INestApplication): Promise<string> {
+  const dbAdmin = app.get<DatabasePg>(DB_ADMIN, { strict: false });
+  const undelivered = await dbAdmin
     .select({
       eventType: outboxEvents.eventType,
       status: outboxEvents.status,
+      attemptCount: outboxEvents.attemptCount,
+      succeededHandlers: outboxEvents.succeededHandlers,
       lastError: outboxEvents.lastError,
     })
     .from(outboxEvents)
     .where(ne(outboxEvents.status, OUTBOX_STATUSES.PUBLISHED));
+  const stuckSessions = await dbAdmin.execute(sql`
+    SELECT state, wait_event_type, wait_event,
+      pg_blocking_pids(pid) AS blocked_by,
+      left(regexp_replace(query, '\s+', ' ', 'g'), 300) AS query
+    FROM pg_stat_activity
+    WHERE datname = current_database()
+      AND pid <> pg_backend_pid()
+      AND (wait_event_type = 'Lock' OR state = 'idle in transaction')
+  `);
 
-  if (!undelivered.length) return "Every outbox event was delivered.";
+  const deliveryState = undelivered.length
+    ? `Undelivered outbox events: ${JSON.stringify(undelivered)}`
+    : "Every outbox event was delivered.";
 
-  return `Undelivered outbox events: ${JSON.stringify(undelivered)}`;
+  return `${deliveryState} Blocked or open database sessions: ${JSON.stringify(stuckSessions)}`;
 }

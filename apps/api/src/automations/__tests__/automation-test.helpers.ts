@@ -13,7 +13,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { automations, automationRuns, automationOccurrences } from "src/storage/schema";
 
-import { dispatchOutbox } from "../../../test/helpers/wait-for-outbox";
+import { describeUndeliveredEvents, dispatchOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { AutomationResponse, AutomationRunDetailResponse } from "../schema/automation.schema";
 import type { AutomationDefinition, AutomationSendEmailStep } from "@repo/shared";
@@ -126,12 +126,18 @@ export async function setupAutomationTestContext() {
     await t.runAsTenant(tenantId, () => t.app.get(OutboxPublisher).publish(notification));
     await dispatchOutbox(t.app);
 
-    return t.runAsTenant(tenantId, () =>
+    const runs = await t.runAsTenant(tenantId, () =>
       t.db
         .select()
         .from(automationRuns)
         .where(eq(automationRuns.occurrenceId, notification.notificationData.occurrenceId)),
     );
+
+    if (!runs.length) {
+      throw new Error(`No automation run was created. ${await describeUndeliveredEvents(t.app)}`);
+    }
+
+    return runs;
   };
 
   /** Sends one delivery, then dispatches the outbox so the recipient's next step is queued. */
