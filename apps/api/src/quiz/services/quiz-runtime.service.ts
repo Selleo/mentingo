@@ -377,7 +377,7 @@ export class QuizRuntimeService {
                   ({ questionAnswerId }) => questionAnswerId === questionAnswer.id,
                 )?.explanation ?? "",
             }
-          : null,
+          : undefined,
     };
   }
 

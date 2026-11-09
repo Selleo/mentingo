@@ -1,4 +1,4 @@
-import { ASSESSMENT_ANSWER_GRADING_STATUSES } from "@repo/shared";
+import { ASSESSMENT_ANSWER_GRADING_STATUSES, QUIZ_GRADING_COMMENT_MAX_LENGTH } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -13,7 +13,7 @@ const namedEntitySchema = Type.Object({ id: UUIDSchema, name: Type.String() });
 export const quizGradingAnswerListItemSchema = Type.Object({
   id: UUIDSchema,
   gradingStatus: quizGradingStatusSchema,
-  awardedPoints: Type.Union([Type.Number(), Type.Null()]),
+  awardedPoints: Type.Union([Type.Integer(), Type.Null()]),
   maximumPoints: Type.Number(),
   submittedAt: Type.String(),
   questionTitle: Type.String(),
@@ -32,9 +32,9 @@ export const quizGradingFiltersSchema = Type.Object({
 
 export const quizGradingReviewSchema = Type.Object({
   id: UUIDSchema,
-  revisionNumber: Type.Number(),
+  revisionNumber: Type.Integer(),
   reviewerName: Type.String(),
-  awardedPoints: Type.Number(),
+  awardedPoints: Type.Integer(),
   comment: Type.String(),
   reviewedAt: Type.String(),
 });
@@ -45,7 +45,7 @@ export const quizGradingAnswerDetailsSchema = Type.Intersect([
     questionDescription: Type.Union([Type.String(), Type.Null()]),
     reviewerInstructions: Type.Union([Type.String(), Type.Null()]),
     studentAnswer: Type.String(),
-    attemptNumber: Type.Number(),
+    attemptNumber: Type.Integer(),
     reviews: Type.Array(quizGradingReviewSchema),
     nextAnswerId: Type.Union([UUIDSchema, Type.Null()]),
   }),
@@ -53,7 +53,7 @@ export const quizGradingAnswerDetailsSchema = Type.Intersect([
 
 export const gradeQuizAnswerSchema = Type.Object({
   awardedPoints: Type.Integer({ minimum: 0 }),
-  comment: Type.Optional(Type.String({ maxLength: 5000 })),
+  comment: Type.Optional(Type.String({ maxLength: QUIZ_GRADING_COMMENT_MAX_LENGTH })),
 });
 
 export const gradeQuizAnswerResponseSchema = Type.Object({

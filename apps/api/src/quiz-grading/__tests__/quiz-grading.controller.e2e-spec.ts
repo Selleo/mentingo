@@ -6,6 +6,7 @@ import {
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_QUESTION_TYPES,
   COURSE_ENROLLMENT,
+  COURSE_LEARNING_STATE_KINDS,
   SYSTEM_ROLE_SLUGS,
   type SystemRoleSlug,
 } from "@repo/shared";
@@ -19,8 +20,10 @@ import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   assessmentAttemptQuestionAnswerReviews,
+  assessmentAttemptQuestionAnswers,
   assessmentAttempts,
   assessmentQuestionOpenTextSettings,
+  courseLearningStates,
   studentCourses,
   studentLessonProgress,
   tenants,
@@ -32,6 +35,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { addSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
@@ -83,8 +87,8 @@ describe("QuizGradingController (e2e)", () => {
     return user;
   };
 
-  // A quiz with two reviewer-graded open questions; passing needs at least half of the points.
-  const setup = () =>
+  // A quiz with two open questions, reviewer-graded by default; passing needs half of the points.
+  const setup = ({ briefRequiresReview = true } = {}) =>
     runAsTenant(defaultTenantId, async () => {
       await createSettingsFactory(db).create({ userId: null });
       const author = await createUser(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
@@ -97,7 +101,10 @@ describe("QuizGradingController (e2e)", () => {
         status: "published",
         settings: { lessonSequenceEnabled: false, quizFeedbackEnabled: true },
       });
-      const chapter = await createChapterFactory(db).create({ courseId: course.id });
+      const chapter = await createChapterFactory(db).create({
+        courseId: course.id,
+        lessonCount: 1,
+      });
       await db.insert(studentCourses).values({
         id: randomUUID(),
         studentId: student.id,
@@ -116,7 +123,11 @@ describe("QuizGradingController (e2e)", () => {
         attemptsLimit: null,
         quizCooldownInHours: null,
         questions: [
-          { type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE, title: "Brief", requiresReview: true },
+          {
+            type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE,
+            title: "Brief",
+            requiresReview: briefRequiresReview,
+          },
           {
             type: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE,
             title: "Detailed",
@@ -342,6 +353,113 @@ describe("QuizGradingController (e2e)", () => {
       isQuizPassed: true,
       quizScore: 0,
     });
+  });
+
+  it("completes the lesson when a re-grade turns a failed attempt into a pass", async () => {
+    const t = await setup();
+    await submitQuiz(t.studentCookie, t.lesson.id, t.briefId, t.detailedId);
+    const [first, second] = (await listAnswers(t.reviewerCookie).expect(200)).body.data;
+    await grade(t.reviewerCookie, first.id, 0).expect(201);
+    await grade(t.reviewerCookie, second.id, 0).expect(201);
+
+    expect(await findAttempt(t.student.id)).toMatchObject({
+      result: ASSESSMENT_ATTEMPT_RESULTS.FAILED,
+    });
+    expect(await findProgress(t.student.id, t.lesson.id)).toMatchObject({ isQuizPassed: false });
+
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
+    await grade(t.reviewerCookie, first.id, 1).expect(201);
+    const events = publishSpy.mock.calls.map(([event]) => event);
+    publishSpy.mockRestore();
+
+    expect(events.find((event) => event instanceof QuizAttemptGradedEvent)).toMatchObject({
+      passed: true,
+      isRegrade: true,
+    });
+    expect(await findAttempt(t.student.id)).toMatchObject({
+      result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+    });
+    expect(await findProgress(t.student.id, t.lesson.id)).toMatchObject({
+      isQuizPassed: true,
+      quizScore: 50,
+    });
+    const lessonView = await request(app.getHttpServer())
+      .get(`/api/lesson/${t.lesson.id}?language=en`)
+      .set("Cookie", t.studentCookie)
+      .expect(200);
+    expect(lessonView.body.data.lessonCompleted).toBe(true);
+  });
+
+  it("scores mixed quizzes on all points and refuses to grade automatically graded answers", async () => {
+    const t = await setup({ briefRequiresReview: false });
+    await submitQuiz(t.studentCookie, t.lesson.id, t.briefId, t.detailedId);
+
+    const list = await listAnswers(t.reviewerCookie).expect(200);
+    expect(list.body.data).toHaveLength(1);
+    expect(list.body.data[0].questionTitle).toBe("Detailed");
+
+    const [briefAnswer] = await dbAdmin
+      .select({ id: assessmentAttemptQuestionAnswers.id })
+      .from(assessmentAttemptQuestionAnswers)
+      .where(eq(assessmentAttemptQuestionAnswers.questionId, t.briefId));
+    const response = await grade(t.reviewerCookie, briefAnswer.id, 1).expect(404);
+    expect(response.body.message).toBe("quizGrading.errors.answerNotFound");
+
+    await grade(t.reviewerCookie, list.body.data[0].id, 0).expect(201);
+    expect(await findAttempt(t.student.id)).toMatchObject({
+      result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+      scorePercentage: "50.00",
+    });
+  });
+
+  it("keeps reviewers away from their own answers", async () => {
+    const t = await setup();
+    // A learner who is also a reviewer must not grade their own work.
+    await runAsTenant(defaultTenantId, () =>
+      addSystemRoleToUserInTests(db, t.student.id, defaultTenantId, SYSTEM_ROLE_SLUGS.REVIEWER),
+    );
+    const ownCookie = await cookieFor(t.student, app);
+    await submitQuiz(ownCookie, t.lesson.id, t.briefId, t.detailedId);
+
+    const ownList = await listAnswers(ownCookie).expect(200);
+    expect(ownList.body.pagination.totalItems).toBe(0);
+    const filters = await request(app.getHttpServer())
+      .get("/api/quiz-grading/filters")
+      .set("Cookie", ownCookie)
+      .expect(200);
+    expect(filters.body.data.students).toEqual([]);
+
+    const [ownAnswer] = (await listAnswers(t.reviewerCookie).expect(200)).body.data;
+    expect(ownAnswer.student.id).toBe(t.student.id);
+    await request(app.getHttpServer())
+      .get(`/api/quiz-grading/answers/${ownAnswer.id}`)
+      .set("Cookie", ownCookie)
+      .expect(404);
+    const response = await grade(ownCookie, ownAnswer.id, 1).expect(403);
+    expect(response.body.message).toBe("quizGrading.errors.ownAnswer");
+  });
+
+  it("refuses to grade an attempt from a course run the learner has since repeated", async () => {
+    const t = await setup();
+    await submitQuiz(t.studentCookie, t.lesson.id, t.briefId, t.detailedId);
+    const [first] = (await listAnswers(t.reviewerCookie).expect(200)).body.data;
+
+    await runAsTenant(defaultTenantId, () =>
+      db.insert(courseLearningStates).values({
+        courseId: t.course.id,
+        studentId: t.student.id,
+        kind: COURSE_LEARNING_STATE_KINDS.REPETITION,
+        previousStateId: randomUUID(),
+      }),
+    );
+
+    const response = await grade(t.reviewerCookie, first.id, 1).expect(409);
+    expect(response.body.message).toBe("quizGrading.errors.attemptSuperseded");
+    const reviews = await dbAdmin
+      .select()
+      .from(assessmentAttemptQuestionAnswerReviews)
+      .where(eq(assessmentAttemptQuestionAnswerReviews.questionAnswerId, first.id));
+    expect(reviews).toEqual([]);
   });
 
   it("rejects points above the question maximum", async () => {

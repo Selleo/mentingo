@@ -9616,7 +9616,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Points are outside the allowed range.",
-      "answerNotFound": "This answer does not exist or cannot be graded."
-    }
+      "answerNotFound": "This answer does not exist or cannot be graded.",
+      "ownAnswer": "You cannot grade your own answer.",
+      "attemptSuperseded": "The learner has started this course again, so this attempt can no longer be graded."
+    },
+    "loadError": "Could not load the grading queue. Refresh the page to try again."
   }
 }

@@ -6,6 +6,7 @@ type QuizAttemptGradedData = {
   lessonId: UUIDType;
   attemptId: UUIDType;
   reviewerId: UUIDType;
+  // Floored score percentage; `passed` is decided on the unrounded value.
   score: number;
   passed: boolean;
   isRegrade: boolean;

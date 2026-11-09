@@ -9574,7 +9574,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Die Punktzahl liegt außerhalb des zulässigen Bereichs.",
-      "answerNotFound": "Diese Antwort existiert nicht oder kann nicht bewertet werden."
-    }
+      "answerNotFound": "Diese Antwort existiert nicht oder kann nicht bewertet werden.",
+      "ownAnswer": "Du kannst deine eigene Antwort nicht bewerten.",
+      "attemptSuperseded": "Die lernende Person hat diesen Kurs neu begonnen, daher kann dieser Versuch nicht mehr bewertet werden."
+    },
+    "loadError": "Die Bewertungswarteschlange konnte nicht geladen werden. Lade die Seite neu, um es erneut zu versuchen."
   }
 }

@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
@@ -46,12 +53,14 @@ export class QuizGradingService {
 
   async getAnswers(
     filters: QuizGradingAnswerFilters,
+    reviewerId: UUIDType,
     pageInput?: number,
     perPageInput?: number,
   ): Promise<{ data: QuizGradingAnswerListResponse; pagination: Pagination }> {
     const { page, perPage } = parsePagination(pageInput, perPageInput);
     const { data, totalItems } = await this.quizGradingRepository.findAnswers(
       filters,
+      reviewerId,
       page,
       perPage,
     );
@@ -59,18 +68,21 @@ export class QuizGradingService {
     return { data, pagination: { totalItems, page, perPage } };
   }
 
-  getFilterOptions() {
-    return this.quizGradingRepository.findFilterOptions();
+  getFilterOptions(reviewerId: UUIDType) {
+    return this.quizGradingRepository.findFilterOptions(reviewerId);
   }
 
-  async getAnswerDetails(answerId: UUIDType): Promise<QuizGradingAnswerDetailsResponse> {
-    const answer = await this.quizGradingRepository.findAnswerDetails(answerId);
+  async getAnswerDetails(
+    answerId: UUIDType,
+    reviewerId: UUIDType,
+  ): Promise<QuizGradingAnswerDetailsResponse> {
+    const answer = await this.quizGradingRepository.findAnswerDetails(answerId, reviewerId);
 
     if (!answer) throw new NotFoundException("quizGrading.errors.answerNotFound");
 
     const [reviews, nextAnswerId] = await Promise.all([
       this.quizGradingRepository.findReviews(answerId),
-      this.quizGradingRepository.findNextPendingAnswerId(answerId),
+      this.quizGradingRepository.findNextPendingAnswerId(answerId, reviewerId),
     ]);
 
     return { ...answer, reviews, nextAnswerId };
@@ -81,7 +93,7 @@ export class QuizGradingService {
     { awardedPoints, comment }: GradeQuizAnswerBody,
     currentUser: CurrentUserType,
   ): Promise<GradeQuizAnswerResponse> {
-    const attemptGraded = await this.tenantDbRunnerService.transaction(async () => {
+    return this.tenantDbRunnerService.transaction(async () => {
       const lockTarget = await this.quizGradingRepository.findAnswerForGrading(answerId, this.db);
 
       if (!lockTarget) throw new NotFoundException("quizGrading.errors.answerNotFound");
@@ -94,25 +106,33 @@ export class QuizGradingService {
       if (!answer || answer.gradingMode !== ASSESSMENT_GRADING_MODES.MANUAL)
         throw new NotFoundException("quizGrading.errors.answerNotFound");
 
+      if (answer.studentId === currentUser.userId)
+        throw new ForbiddenException("quizGrading.errors.ownAnswer");
+
       if (awardedPoints > answer.maximumPoints)
         throw new BadRequestException("quizGrading.errors.pointsOutOfRange");
 
-      // Throws when the learner moved on to a newer learning state (e.g. repeated the course).
-      const learningStateId = await this.courseRepetitionService.resolveWritableState(
-        answer.courseId,
-        answer.studentId,
-        answer.learningStateId,
+      // The learner moved on to a newer learning state (e.g. repeated the course).
+      const learningStateId = await this.courseRepetitionService
+        .resolveWritableState(answer.courseId, answer.studentId, answer.learningStateId, this.db)
+        .catch((error: unknown) => {
+          if (error instanceof ConflictException)
+            throw new ConflictException("quizGrading.errors.attemptSuperseded");
+          throw error;
+        });
+
+      const attemptGraded = await courseLearningContext.run({ learningStateId }, () =>
+        this.recordGrade(answer, awardedPoints, comment ?? "", currentUser),
+      );
+      // Read inside the transaction so a failed lookup can't report a saved grade as failed.
+      const nextAnswerId = await this.quizGradingRepository.findNextPendingAnswerId(
+        answerId,
+        currentUser.userId,
         this.db,
       );
 
-      return courseLearningContext.run({ learningStateId }, () =>
-        this.recordGrade(answer, awardedPoints, comment ?? "", currentUser),
-      );
+      return { attemptGraded, nextAnswerId };
     });
-
-    const nextAnswerId = await this.quizGradingRepository.findNextPendingAnswerId(answerId);
-
-    return { attemptGraded, nextAnswerId };
   }
 
   private async recordGrade(
@@ -208,7 +228,7 @@ export class QuizGradingService {
     return true;
   }
 
-  // A re-grade refreshes the score of the learner's current result but never reopens a lesson.
+  // A re-grade refreshes the score of the learner's latest completed result but never reopens a lesson.
   private async updateRegradedProgress(
     answer: QuizAnswerForGrading,
     score: number,
@@ -226,7 +246,7 @@ export class QuizGradingService {
       this.db,
     );
 
-    // A newer attempt or a reset for a retake owns the progress now.
+    // A newer attempt, a reset for a retake or missing progress: nothing to refresh.
     if (latestAttempt?.id !== answer.attemptId || !progress?.completedAt) return;
 
     const wasPassed = Boolean(progress.isQuizPassed);

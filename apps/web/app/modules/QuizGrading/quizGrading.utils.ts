@@ -1,4 +1,4 @@
-import { ASSESSMENT_ANSWER_GRADING_STATUSES } from "@repo/shared";
+import { ASSESSMENT_ANSWER_GRADING_STATUSES, QUIZ_GRADING_COMMENT_MAX_LENGTH } from "@repo/shared";
 import { z } from "zod";
 
 import {
@@ -15,20 +15,22 @@ export type QuizGradingAnswersQuery = NonNullable<
 
 export type QuizGradingStatus = NonNullable<QuizGradingAnswersQuery["status"]>;
 
-export const QUIZ_GRADING_STATUSES = [
-  ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
-  ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
-] as const satisfies QuizGradingStatus[];
+export const QUIZ_GRADING_STATUSES = Object.values(
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
+) satisfies QuizGradingStatus[];
 
 export const QUIZ_GRADING_FILTER_KEYS = ["status", "courseId", "lessonId", "studentId"] as const;
 
 export type QuizGradingFilterKey = (typeof QUIZ_GRADING_FILTER_KEYS)[number];
 
 const DEFAULT_PER_PAGE: ItemsPerPageOption = 20;
-export const COMMENT_MAX_LENGTH = 5000;
+export const COMMENT_MAX_LENGTH = QUIZ_GRADING_COMMENT_MAX_LENGTH;
 
 const isStatus = (value: string | null): value is QuizGradingStatus =>
   QUIZ_GRADING_STATUSES.some((status) => status === value);
+
+const uuidOrUndefined = (value: string | null) =>
+  value && z.string().uuid().safeParse(value).success ? value : undefined;
 
 const isPerPage = (value: number): value is ItemsPerPageOption =>
   ITEMS_PER_PAGE_OPTIONS.some((option) => option === value);
@@ -41,9 +43,9 @@ export const parseQueueSearchParams = (params: URLSearchParams) => {
 
   return {
     status: isStatus(status) ? status : ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
-    courseId: params.get("courseId") ?? undefined,
-    lessonId: params.get("lessonId") ?? undefined,
-    studentId: params.get("studentId") ?? undefined,
+    courseId: uuidOrUndefined(params.get("courseId")),
+    lessonId: uuidOrUndefined(params.get("lessonId")),
+    studentId: uuidOrUndefined(params.get("studentId")),
     page: Number.isInteger(page) && page > 0 ? page : 1,
     perPage: isPerPage(perPage) ? perPage : DEFAULT_PER_PAGE,
   } satisfies QuizGradingAnswersQuery;

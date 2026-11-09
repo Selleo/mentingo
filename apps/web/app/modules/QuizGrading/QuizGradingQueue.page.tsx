@@ -72,13 +72,14 @@ export default function QuizGradingQueuePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = parseQueueSearchParams(searchParams);
-  const { data, isPending } = useQuizGradingAnswers(query);
-  const { data: pendingData } = useQuizGradingAnswers({
+  const { data, isPending, isError } = useQuizGradingAnswers(query);
+  const { data: pendingData, isError: isPendingCountError } = useQuizGradingAnswers({
     status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
     page: 1,
     perPage: 1,
   });
-  const { data: filterOptions } = useQuizGradingFilterOptions();
+  const { data: filterOptions, isError: isFilterOptionsError } = useQuizGradingFilterOptions();
+  const hasLoadError = isError || isPendingCountError || isFilterOptionsError;
 
   const answers = data?.data ?? [];
   const lessons = (filterOptions?.lessons ?? []).filter(
@@ -95,13 +96,20 @@ export default function QuizGradingQueuePage() {
       <div className="flex flex-col gap-4" data-testid={QUIZ_GRADING_HANDLES.QUEUE_PAGE}>
         <div className="flex flex-wrap items-center gap-3">
           <h4 className="h4">{t("quizGrading.title")}</h4>
-          <span
-            className="rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700"
-            data-testid={QUIZ_GRADING_HANDLES.PENDING_COUNT}
-          >
-            {t("quizGrading.pendingCount", { count: pendingData?.pagination.totalItems ?? 0 })}
-          </span>
+          {pendingData && (
+            <span
+              className="rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700"
+              data-testid={QUIZ_GRADING_HANDLES.PENDING_COUNT}
+            >
+              {t("quizGrading.pendingCount", { count: pendingData.pagination.totalItems })}
+            </span>
+          )}
         </div>
+        {hasLoadError && (
+          <p role="alert" className="text-sm text-error-700">
+            {t("quizGrading.loadError")}
+          </p>
+        )}
         <div className="flex flex-wrap gap-3">
           <FilterSelect
             label={t("quizGrading.filters.status")}
@@ -152,7 +160,7 @@ export default function QuizGradingQueuePage() {
               </TableRow>
             </TableHeader>
             <TableBody aria-busy={isPending}>
-              {!isPending && !answers.length && (
+              {!isPending && !isError && !answers.length && (
                 <TableRow>
                   <TableCell
                     colSpan={COLUMN_COUNT}

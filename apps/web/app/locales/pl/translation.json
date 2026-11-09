@@ -9723,7 +9723,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Liczba punktów jest poza dozwolonym zakresem.",
-      "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić."
-    }
+      "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić.",
+      "ownAnswer": "Nie możesz oceniać własnej odpowiedzi.",
+      "attemptSuperseded": "Kursant rozpoczął ten kurs od nowa, więc tej próby nie można już ocenić."
+    },
+    "loadError": "Nie udało się wczytać kolejki do oceny. Odśwież stronę, aby spróbować ponownie."
   }
 }

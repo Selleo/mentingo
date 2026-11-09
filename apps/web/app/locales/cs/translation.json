@@ -9639,7 +9639,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Počet bodů je mimo povolený rozsah.",
-      "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit."
-    }
+      "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit.",
+      "ownAnswer": "Nemůžete hodnotit svou vlastní odpověď.",
+      "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit."
+    },
+    "loadError": "Frontu k hodnocení se nepodařilo načíst. Obnovte stránku a zkuste to znovu."
   }
 }

@@ -80,14 +80,11 @@ export const questionSchema = Type.Object({
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
   // Reviewer-graded questions of a graded attempt: the points and comment the learner received.
   reviewerFeedback: Type.Optional(
-    Type.Union([
-      Type.Object({
-        awardedPoints: Type.Number(),
-        maximumPoints: Type.Number(),
-        comment: Type.String(),
-      }),
-      Type.Null(),
-    ]),
+    Type.Object({
+      awardedPoints: Type.Number(),
+      maximumPoints: Type.Number(),
+      comment: Type.String(),
+    }),
   ),
 });
 

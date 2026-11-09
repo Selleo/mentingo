@@ -49,16 +49,18 @@ export class QuizGradingController {
     response: paginatedResponse(quizGradingAnswerListSchema),
   })
   async getAnswers(
-    @Query("page") page?: number,
-    @Query("perPage") perPage?: number,
-    @Query("status") status?: QuizGradingStatus,
-    @Query("courseId") courseId?: UUIDType,
-    @Query("lessonId") lessonId?: UUIDType,
-    @Query("studentId") studentId?: UUIDType,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
+    @Query("status") status: QuizGradingStatus | undefined,
+    @Query("courseId") courseId: UUIDType | undefined,
+    @Query("lessonId") lessonId: UUIDType | undefined,
+    @Query("studentId") studentId: UUIDType | undefined,
+    @CurrentUser("userId") reviewerId: UUIDType,
   ): Promise<PaginatedResponse<QuizGradingAnswerListResponse>> {
     return new PaginatedResponse(
       await this.quizGradingService.getAnswers(
         { status, courseId, lessonId, studentId },
+        reviewerId,
         page,
         perPage,
       ),
@@ -68,8 +70,10 @@ export class QuizGradingController {
   @Get("filters")
   @RequirePermission(PERMISSIONS.QUIZ_GRADING_READ)
   @Validate({ response: baseResponse(quizGradingFiltersSchema) })
-  async getFilterOptions(): Promise<BaseResponse<QuizGradingFiltersResponse>> {
-    return new BaseResponse(await this.quizGradingService.getFilterOptions());
+  async getFilterOptions(
+    @CurrentUser("userId") reviewerId: UUIDType,
+  ): Promise<BaseResponse<QuizGradingFiltersResponse>> {
+    return new BaseResponse(await this.quizGradingService.getFilterOptions(reviewerId));
   }
 
   @Get("answers/:id")
@@ -80,8 +84,9 @@ export class QuizGradingController {
   })
   async getAnswerDetails(
     @Param("id") id: UUIDType,
+    @CurrentUser("userId") reviewerId: UUIDType,
   ): Promise<BaseResponse<QuizGradingAnswerDetailsResponse>> {
-    return new BaseResponse(await this.quizGradingService.getAnswerDetails(id));
+    return new BaseResponse(await this.quizGradingService.getAnswerDetails(id, reviewerId));
   }
 
   @Post("answers/:id/grade")

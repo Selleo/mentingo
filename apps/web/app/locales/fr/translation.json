@@ -9109,7 +9109,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Le nombre de points est hors de la plage autorisée.",
-      "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée."
-    }
+      "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée.",
+      "ownAnswer": "Vous ne pouvez pas noter votre propre réponse.",
+      "attemptSuperseded": "L'apprenant a recommencé ce cours, cette tentative ne peut donc plus être notée."
+    },
+    "loadError": "Impossible de charger la file de notation. Actualisez la page pour réessayer."
   }
 }

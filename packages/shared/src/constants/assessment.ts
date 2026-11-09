@@ -67,6 +67,8 @@ export const ASSESSMENT_ANSWER_GRADING_STATUSES = {
 export type AssessmentAnswerGradingStatus =
   (typeof ASSESSMENT_ANSWER_GRADING_STATUSES)[keyof typeof ASSESSMENT_ANSWER_GRADING_STATUSES];
 
+export const QUIZ_GRADING_COMMENT_MAX_LENGTH = 5000;
+
 export const ASSESSMENT_ATTEMPT_RESULTS = {
   PENDING: "pending",
   PASSED: "passed",

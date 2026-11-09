@@ -9524,7 +9524,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Los puntos están fuera del rango permitido.",
-      "answerNotFound": "Esta respuesta no existe o no se puede calificar."
-    }
+      "answerNotFound": "Esta respuesta no existe o no se puede calificar.",
+      "ownAnswer": "No puedes calificar tu propia respuesta.",
+      "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar."
+    },
+    "loadError": "No se pudo cargar la cola de calificación. Actualiza la página para volver a intentarlo."
   }
 }

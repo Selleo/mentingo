@@ -9637,7 +9637,10 @@
     },
     "errors": {
       "pointsOutOfRange": "Taškų skaičius nepatenka į leistiną intervalą.",
-      "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti."
-    }
+      "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti.",
+      "ownAnswer": "Negalite vertinti savo atsakymo.",
+      "attemptSuperseded": "Besimokantysis pradėjo šį kursą iš naujo, todėl šio bandymo nebegalima įvertinti."
+    },
+    "loadError": "Nepavyko įkelti vertinimo eilės. Atnaujinkite puslapį ir bandykite dar kartą."
   }
 }

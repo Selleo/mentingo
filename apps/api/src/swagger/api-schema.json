@@ -16968,6 +16968,23 @@
             }
           },
           {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "pending",
+                  "type": "string"
+                },
+                {
+                  "const": "graded",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "courseId",
             "required": false,
             "in": "query",
@@ -16992,23 +17009,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "pending",
-                  "type": "string"
-                },
-                {
-                  "const": "graded",
-                  "type": "string"
-                }
-              ]
             }
           }
         ],
@@ -44334,29 +44334,22 @@
                           ]
                         },
                         "reviewerFeedback": {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "awardedPoints": {
-                                  "type": "number"
-                                },
-                                "maximumPoints": {
-                                  "type": "number"
-                                },
-                                "comment": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "awardedPoints",
-                                "maximumPoints",
-                                "comment"
-                              ]
+                          "type": "object",
+                          "properties": {
+                            "awardedPoints": {
+                              "type": "number"
                             },
-                            {
-                              "type": "null"
+                            "maximumPoints": {
+                              "type": "number"
+                            },
+                            "comment": {
+                              "type": "string"
                             }
+                          },
+                          "required": [
+                            "awardedPoints",
+                            "maximumPoints",
+                            "comment"
                           ]
                         }
                       },
@@ -162903,7 +162896,7 @@
                 "awardedPoints": {
                   "anyOf": [
                     {
-                      "type": "number"
+                      "type": "integer"
                     },
                     {
                       "type": "null"
@@ -163120,7 +163113,7 @@
                   "awardedPoints": {
                     "anyOf": [
                       {
-                        "type": "number"
+                        "type": "integer"
                       },
                       {
                         "type": "null"
@@ -163224,7 +163217,7 @@
                     "type": "string"
                   },
                   "attemptNumber": {
-                    "type": "number"
+                    "type": "integer"
                   },
                   "reviews": {
                     "type": "array",
@@ -163236,13 +163229,13 @@
                           "type": "string"
                         },
                         "revisionNumber": {
-                          "type": "number"
+                          "type": "integer"
                         },
                         "reviewerName": {
                           "type": "string"
                         },
                         "awardedPoints": {
-                          "type": "number"
+                          "type": "integer"
                         },
                         "comment": {
                           "type": "string"

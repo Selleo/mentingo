@@ -45,8 +45,13 @@ export class QuizGradingRepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async findAnswers(filters: QuizGradingAnswerFilters, page: number, perPage: number) {
-    const queue = this.queueSubquery(filters);
+  async findAnswers(
+    filters: QuizGradingAnswerFilters,
+    reviewerId: UUIDType,
+    page: number,
+    perPage: number,
+  ) {
+    const queue = this.queueSubquery(filters, reviewerId);
 
     const [data, [{ totalItems }]] = await Promise.all([
       this.db
@@ -61,8 +66,8 @@ export class QuizGradingRepository {
     return { data, totalItems };
   }
 
-  async findFilterOptions() {
-    const queue = this.queueSubquery({});
+  async findFilterOptions(reviewerId: UUIDType) {
+    const queue = this.queueSubquery({}, reviewerId);
 
     const [courseRows, lessonRows, studentRows] = await Promise.all([
       this.db
@@ -82,8 +87,8 @@ export class QuizGradingRepository {
     return { courses: courseRows, lessons: lessonRows, students: studentRows };
   }
 
-  async findAnswerDetails(answerId: UUIDType) {
-    const queue = this.queueSubquery({});
+  async findAnswerDetails(answerId: UUIDType, reviewerId: UUIDType) {
+    const queue = this.queueSubquery({}, reviewerId);
 
     const [answer] = await this.db
       .select({
@@ -123,10 +128,18 @@ export class QuizGradingRepository {
       .orderBy(desc(assessmentAttemptQuestionAnswerReviews.revisionNumber));
   }
 
-  async findNextPendingAnswerId(excludedAnswerId: UUIDType) {
-    const queue = this.queueSubquery({ status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING });
+  async findNextPendingAnswerId(
+    excludedAnswerId: UUIDType,
+    reviewerId: UUIDType,
+    db: DatabasePg = this.db,
+  ) {
+    const queue = this.queueSubquery(
+      { status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING },
+      reviewerId,
+      db,
+    );
 
-    const [next] = await this.db
+    const [next] = await db
       .select({ id: queue.id })
       .from(queue)
       .where(ne(queue.id, excludedAnswerId))
@@ -253,9 +266,13 @@ export class QuizGradingRepository {
     };
   }
 
-  // Only reviewer-graded answers from the learner's current learning state belong to the queue.
-  private queueSubquery(filters: QuizGradingAnswerFilters) {
-    return this.db
+  // Reviewer-graded answers from the learner's current learning state, never the reviewer's own.
+  private queueSubquery(
+    filters: QuizGradingAnswerFilters,
+    reviewerId: UUIDType,
+    db: DatabasePg = this.db,
+  ) {
+    return db
       .select({
         id: assessmentAttemptQuestionAnswers.id,
         questionId: sql<UUIDType>`${assessmentQuestions.id}`.as("queue_question_id"),
@@ -302,6 +319,7 @@ export class QuizGradingRepository {
           eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL),
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           activeLearningState(assessmentAttempts.learningStateId),
+          ne(users.id, reviewerId),
           filters.status
             ? eq(assessmentAttemptQuestionAnswers.gradingStatus, filters.status)
             : undefined,
