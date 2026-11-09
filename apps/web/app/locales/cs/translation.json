@@ -4229,7 +4229,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "Kurz není dostupný",
+      "accessTitle": "Přihlaste se a pokračujte ke kurzu",
       "accessDescription": "Přihlaste se nebo si vytvořte účet a pokračujte ke kurzu.",
       "goToLogin": "Přejít k přihlášení",
       "goToCourseList": "Přejít na seznam kurzů",
@@ -4318,6 +4318,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Přihlaste se a pokračujte k lekci",
+      "loginDescription": "Přihlaste se nebo si vytvořte účet a pokračujte k lekci.",
       "lessonIdNotFound": "ID lekce nebylo nalezeno",
       "notAuthorizedTitle": "Neoprávněný",
       "notAuthorizedDescription": "Nemáte oprávnění k přístupu k této lekci.",

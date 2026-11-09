@@ -4222,7 +4222,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "Kurs ist nicht verfügbar",
+      "accessTitle": "Melden Sie sich an, um zum Kurs zu gelangen",
       "accessDescription": "Melden Sie sich an oder erstellen Sie ein Konto, um zum Kurs zu gelangen.",
       "goToLogin": "Zum Login",
       "goToCourseList": "Zur Kursliste",
@@ -4311,6 +4311,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Melden Sie sich an, um zur Lektion zu gelangen",
+      "loginDescription": "Melden Sie sich an oder erstellen Sie ein Konto, um zur Lektion zu gelangen.",
       "lessonIdNotFound": "Lektions-ID nicht gefunden",
       "notAuthorizedTitle": "Nicht autorisiert",
       "notAuthorizedDescription": "Sie sind nicht berechtigt, auf diese Lektion zuzugreifen.",

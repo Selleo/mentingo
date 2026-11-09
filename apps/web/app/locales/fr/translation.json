@@ -3983,6 +3983,11 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Connectez-vous pour accéder au cours",
+      "accessDescription": "Connectez-vous ou créez un compte pour accéder au cours.",
+      "goToLogin": "Se connecter"
+    },
     "other": {
       "cannotFindCourses": "Nous n'avons trouvé aucun cours",
       "changeSearchCriteria": "Veuillez modifier les critères de recherche ou réessayer plus tard",
@@ -4064,6 +4069,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Connectez-vous pour accéder à la leçon",
+      "loginDescription": "Connectez-vous ou créez un compte pour accéder à la leçon.",
       "lessonIdNotFound": "ID de leçon introuvable",
       "notAuthorizedTitle": "Non autorisé",
       "notAuthorizedDescription": "Vous n'êtes pas autorisé à accéder à cette leçon.",

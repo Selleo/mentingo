@@ -1,5 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
@@ -23,18 +23,27 @@ vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUser: () => ({ data: currentUser, isLoading: false }),
 }));
 
+function LessonDestination() {
+  const location = useLocation();
+  return <div>{`${location.pathname}${location.search}${location.hash}`}</div>;
+}
+
 const renderAuth = (entry: string) =>
   renderWith().render(
-    <MemoryRouter initialEntries={[entry]}>
+    <MemoryRouter
+      initialEntries={[entry]}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <Routes>
         <Route
-          path="/auth/register"
+          path="/auth/:page"
           element={
             <MFAGuard mode="auth">
               <div>Registration</div>
             </MFAGuard>
           }
         />
+        <Route path="/course/:courseId/lesson/:lessonId" element={<LessonDestination />} />
         <Route path="/course/:slug" element={<div>Course page</div>} />
         <Route path="/dashboard" element={<div>Dashboard</div>} />
       </Routes>
@@ -62,6 +71,21 @@ describe("course registration return", () => {
     renderAuth("/auth/register?returnTo=%2Fcourse%2Fintro");
 
     expect(await screen.findByText("Course page")).toBeInTheDocument();
+  });
+
+  it("retains the exact lesson destination through anonymous authentication", async () => {
+    const path = "/course/course-1/lesson/lesson-1?language=pl&preview=true#section-2";
+    renderAuth(`/auth/login?returnTo=${encodeURIComponent(path)}`);
+    await waitFor(() => {
+      expect(useNavigationHistoryStore.getState().navigationHistory[0]?.pathname).toBe(path);
+    });
+  });
+
+  it("returns to the exact lesson destination after authentication", async () => {
+    const path = "/course/course-1/lesson/lesson-1?language=pl&preview=true#section-2";
+    currentUser = { shouldVerifyMFA: false, requiresPasswordChange: false };
+    renderAuth(`/auth/login?returnTo=${encodeURIComponent(path)}`);
+    expect(await screen.findByText(path)).toBeInTheDocument();
   });
 
   it("ignores an unsafe return destination", async () => {
