@@ -4359,6 +4359,7 @@
       "placeMatch": "Padėti „{{match}}“ čia",
       "removeMatch": "Pašalinti atitikmenį {{match}}",
       "allMatchesPlaced": "Visi atitikmenys padėti",
+      "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
       "correctMatch": "Teisingas atitikmuo:"
     },
     "aiMentor": {

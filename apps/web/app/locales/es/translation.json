@@ -4302,6 +4302,7 @@
       "placeMatch": "Colocar «{{match}}» aquí",
       "removeMatch": "Quitar pareja {{match}}",
       "allMatchesPlaced": "Todas las parejas colocadas",
+      "noMatchesAvailable": "Esta pregunta aún no tiene parejas disponibles.",
       "correctMatch": "Pareja correcta:"
     },
     "aiMentor": {

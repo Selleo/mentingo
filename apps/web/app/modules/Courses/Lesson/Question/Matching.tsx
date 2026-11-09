@@ -141,7 +141,9 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
           >
             {poolTargets.length === 0 && (
               <span className="body-sm text-neutral-600">
-                {t("studentLessonView.other.allMatchesPlaced")}
+                {targets.length === 0
+                  ? t("studentLessonView.other.noMatchesAvailable")
+                  : t("studentLessonView.other.allMatchesPlaced")}
               </span>
             )}
             {poolTargets.map((target) => (

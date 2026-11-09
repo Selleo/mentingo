@@ -4357,6 +4357,7 @@
       "placeMatch": "„{{match}}“ hier ablegen",
       "removeMatch": "Zuordnung {{match}} entfernen",
       "allMatchesPlaced": "Alle Zuordnungen platziert",
+      "noMatchesAvailable": "Für diese Frage sind noch keine Zuordnungen verfügbar.",
       "correctMatch": "Richtige Zuordnung:"
     },
     "aiMentor": {

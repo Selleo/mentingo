@@ -4364,6 +4364,7 @@
       "placeMatch": "Umístit sem „{{match}}“",
       "removeMatch": "Odebrat přiřazení {{match}}",
       "allMatchesPlaced": "Všechna přiřazení jsou umístěna",
+      "noMatchesAvailable": "Pro tuto otázku zatím nejsou k dispozici žádná přiřazení.",
       "correctMatch": "Správné přiřazení:"
     },
     "aiMentor": {

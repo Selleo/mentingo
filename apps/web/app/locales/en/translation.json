@@ -4358,6 +4358,7 @@
       "placeMatch": "Place “{{match}}” here",
       "removeMatch": "Remove match {{match}}",
       "allMatchesPlaced": "All matches placed",
+      "noMatchesAvailable": "No matches are available for this question yet.",
       "correctMatch": "Correct match:"
     },
     "aiMentor": {

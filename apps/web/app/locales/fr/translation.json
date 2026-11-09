@@ -4115,6 +4115,7 @@
       "placeMatch": "Placer « {{match}} » ici",
       "removeMatch": "Retirer la correspondance {{match}}",
       "allMatchesPlaced": "Toutes les correspondances sont placées",
+      "noMatchesAvailable": "Aucune correspondance n’est encore disponible pour cette question.",
       "correctMatch": "Bonne correspondance :"
     },
     "aiMentor": {

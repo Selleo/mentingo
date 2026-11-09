@@ -78,8 +78,20 @@ const groupQuestionsByType = (questions: Questions) => {
   };
 };
 
+// Untranslated matching questions have no matches to place, so they cannot require answers.
+const getAnswerableMatchingPairs = (question: Questions[number]) =>
+  question.matchingTargets?.some(Boolean) ? (question.options ?? []) : [];
+
 function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
   return questions.reduce((result, question) => {
+    if (question.type === QuestionType.MATCHING) {
+      result[question.id] = Object.fromEntries(
+        getAnswerableMatchingPairs(question).map((option) => [option.id, null]),
+      );
+
+      return result;
+    }
+
     if (question.type === QuestionType.TRUE_OR_FALSE) {
       result[question.id] =
         question?.options?.reduce(
@@ -209,7 +221,10 @@ function prepareMatchingAnswers(questions: Questions): AnswersMap {
     questions.map((question) => [
       question.id,
       Object.fromEntries(
-        (question.options ?? []).map((option) => [option.id, option.studentAnswer ?? null]),
+        getAnswerableMatchingPairs(question).map((option) => [
+          option.id,
+          option.studentAnswer ?? null,
+        ]),
       ),
     ]),
   );

@@ -626,6 +626,7 @@ describe("matching mapping", () => {
     {
       id: "question-matching",
       type: "matching",
+      matchingTargets: ["Woof", "Meow"],
       options: [
         { id: "pair-1", studentAnswer: "Meow" },
         { id: "pair-2", studentAnswer: null },
@@ -634,6 +635,13 @@ describe("matching mapping", () => {
   ] as unknown as NonNullable<
     import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
   >["questions"];
+
+  it("asks for no answers when the question has no matches in this language", () => {
+    const untranslated = [{ ...questions[0], matchingTargets: ["", ""] }];
+
+    expect(getEmptyQuizAnswers(untranslated).matchingQuestions["question-matching"]).toEqual({});
+    expect(getUserAnswers(untranslated).matchingQuestions["question-matching"]).toEqual({});
+  });
 
   it("prepares one answer per pair", () => {
     expect(getEmptyQuizAnswers(questions).matchingQuestions["question-matching"]).toEqual({

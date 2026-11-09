@@ -4627,6 +4627,7 @@
       "placeMatch": "Umieść tutaj „{{match}}”",
       "removeMatch": "Usuń dopasowanie {{match}}",
       "allMatchesPlaced": "Wszystkie dopasowania są umieszczone",
+      "noMatchesAvailable": "To pytanie nie ma jeszcze dopasowań do ułożenia.",
       "correctMatch": "Poprawne dopasowanie:"
     },
     "aiMentor": {
