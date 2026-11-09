@@ -13,12 +13,13 @@ import { CategoryChip } from "~/components/ui/CategoryChip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
-import { formatDuration } from "./utils";
+import { doesExpandedCardCoverRowEdge, formatDuration, getExpandedCardOffset } from "./utils";
 
-import type { CourseCardMediaState } from "./ModernCourseCard.types";
+import type { CourseCardMediaState, ExpandedCardLayout } from "./ModernCourseCard.types";
 import type { CSSProperties } from "react";
 
 const VIDEO_PRELOAD_DELAY_MS = 1000;
+const CARD_EXPAND_DELAY_MS = 500;
 const CARD_TRANSITION_DURATION = "900ms";
 const PANEL_TRANSITION_DURATION = "850ms";
 const MEDIA_TRANSITION_DURATION = "650ms";
@@ -26,6 +27,15 @@ const CONTENT_TRANSITION_DURATION = "600ms";
 const SMOOTH_EASE = "cubic-bezier(0.22,1,0.36,1)";
 const ROW_HOVER_COUNT_KEY = "courseRowHoverCount";
 const ROW_ELEVATED_Z_INDEX = "1000";
+const EXPANDED_CARD_SCALE = 1.25;
+const EXPANDED_CARD_VIEWPORT_MARGIN_PX = 12;
+const EXPANDED_CARD_MIN_LIFT_PX = 8;
+const PANEL_MAX_HEIGHT_PX = 220;
+const ROW_ARROW_ZONE_WIDTH_PX = 112;
+const COLLAPSED_CARD_LAYOUT: ExpandedCardLayout = {
+  offset: { x: 0, y: 0 },
+  coversRowEdge: false,
+};
 
 const getEmbedUrlWithParams = (url: string): string => {
   const separator = url.includes("?") ? "&" : "?";
@@ -82,9 +92,11 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+  const [expandedLayout, setExpandedLayout] = useState<ExpandedCardLayout>(COLLAPSED_CARD_LAYOUT);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const elevatedRowRef = useRef<HTMLElement | null>(null);
 
   const setRowElevated = (elevate: boolean) => {
@@ -116,6 +128,56 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
   };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const measureExpandedLayout = (): ExpandedCardLayout => {
+    const card = cardRef.current;
+    if (!card) return COLLAPSED_CARD_LAYOUT;
+
+    const cardRect = card.getBoundingClientRect();
+    const containerRect = card.closest("main")?.getBoundingClientRect();
+    const rowRect = card.closest("[data-course-row]")?.getBoundingClientRect();
+
+    const offset = getExpandedCardOffset({
+      cardRect,
+      panelHeight: Math.min(panelRef.current?.scrollHeight ?? 0, PANEL_MAX_HEIGHT_PX),
+      bounds: {
+        top: Math.max(containerRect?.top ?? 0, 0),
+        right: Math.min(containerRect?.right ?? window.innerWidth, window.innerWidth),
+        bottom: Math.min(containerRect?.bottom ?? window.innerHeight, window.innerHeight),
+        left: Math.max(containerRect?.left ?? 0, 0),
+      },
+      scale: EXPANDED_CARD_SCALE,
+      margin: EXPANDED_CARD_VIEWPORT_MARGIN_PX,
+      minLift: EXPANDED_CARD_MIN_LIFT_PX,
+    });
+
+    const coversRowEdge = rowRect
+      ? doesExpandedCardCoverRowEdge({
+          cardRect,
+          rowRect,
+          offsetX: offset.x,
+          scale: EXPANDED_CARD_SCALE,
+          edgeWidth: ROW_ARROW_ZONE_WIDTH_PX,
+        })
+      : false;
+
+    return { offset, coversRowEdge };
+  };
+
+  const { offset: expandedOffset, coversRowEdge } = expandedLayout;
+  const isExpanded = isHovered && popoutEnabled;
+
+  useEffect(() => {
+    if (!isExpanded || !coversRowEdge) return;
+
+    const row = cardRef.current?.closest<HTMLElement>("[data-course-row]");
+    if (!row) return;
+
+    row.dataset.cardOverArrows = "true";
+    return () => {
+      delete row.dataset.cardOverArrows;
+    };
+  }, [isExpanded, coversRowEdge]);
 
   useEffect(() => {
     setRowElevated(isHovered);
@@ -212,9 +274,10 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
   const isOverlayTextHidden = isPicker ? isVideoVisible : isHovered;
 
   const surfaceStyle: CSSProperties = {
-    transform:
-      isHovered && popoutEnabled ? "scale(1.05) translateY(-32%)" : "scale(1) translateY(0px)",
-    transformOrigin: "center center",
+    transform: isExpanded
+      ? `translate(${expandedOffset.x}px, ${expandedOffset.y}px) scale(${EXPANDED_CARD_SCALE})`
+      : "translate(0px, 0px) scale(1)",
+    transformOrigin: "center top",
     zIndex: isHovered ? 120 : 10,
     transitionDuration: CARD_TRANSITION_DURATION,
     transitionTimingFunction: SMOOTH_EASE,
@@ -340,9 +403,10 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
 
       {!isPicker && (
         <div
+          ref={panelRef}
           className="overflow-hidden rounded-b-lg bg-white shadow-xl transition-all"
           style={{
-            maxHeight: isHovered ? "220px" : "0px",
+            maxHeight: isHovered ? `${PANEL_MAX_HEIGHT_PX}px` : "0px",
             opacity: isHovered ? 1 : 0,
             transitionDuration: PANEL_TRANSITION_DURATION,
             transitionTimingFunction: SMOOTH_EASE,
@@ -401,8 +465,9 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
         if (isPicker) return;
 
         timeoutRef.current = setTimeout(() => {
+          if (popoutEnabled) setExpandedLayout(measureExpandedLayout());
           setIsHovered(true);
-        }, 200);
+        }, CARD_EXPAND_DELAY_MS);
       }}
       onMouseLeave={() => {
         // Picker media follows the viewport; hiding it here would never be undone.

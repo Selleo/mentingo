@@ -39,7 +39,7 @@ const GroupManagerModernCoursesView = () => {
           courseSlug={heroCourse.id}
         />
 
-        <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
+        <div className="relative z-30 space-y-3 py-6 pb-12 md:py-8 md:pb-8">
           <ModernCourseCarousel title={t("navigationSideBar.courses")} courses={courses} />
         </div>
       </div>
