@@ -1,4 +1,5 @@
 import * as Switch from "@radix-ui/react-switch";
+import { ASSESSMENT_TIME_LIMIT_MINUTES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -10,8 +11,11 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
+import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 
 import { InfoTooltip } from "./InfoTooltip";
@@ -19,6 +23,8 @@ import { InfoTooltip } from "./InfoTooltip";
 import type { Lesson } from "../../../../EditCourse.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
+
+const TIME_LIMIT_SLIDER_STEP_MINUTES = 5;
 
 type Props = {
   form: UseFormReturn<QuizLessonFormValues>;
@@ -107,6 +113,57 @@ const QuizSettingsSection = ({
               </FormItem>
             );
           }}
+        />
+
+        <FormField
+          control={form.control}
+          name="timeLimitMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-x-2">
+                <Label htmlFor="timeLimitMinutes" className="body-base-md text-sm">
+                  {t("adminCourseView.curriculum.lesson.settings.timeLimitMinutes")}
+                </Label>
+                <InfoTooltip
+                  message={t("adminCourseView.curriculum.lesson.tooltip.timeLimitMinutes")}
+                  iconClassName="text-sm"
+                />
+              </div>
+              <div className="flex items-center gap-x-4">
+                {/* 0 on the slider means no limit, so it maps to null like an empty input */}
+                <Slider
+                  min={0}
+                  max={ASSESSMENT_TIME_LIMIT_MINUTES.MAX}
+                  step={TIME_LIMIT_SLIDER_STEP_MINUTES}
+                  value={field.value ?? 0}
+                  onValueChange={(value) => field.onChange(value || null)}
+                  aria-label={t("adminCourseView.curriculum.lesson.settings.timeLimitMinutes")}
+                  aria-valuetext={field.value ? formatDuration(field.value * 60, t) : undefined}
+                  className="flex-1"
+                />
+                <FormControl>
+                  <Input
+                    id="timeLimitMinutes"
+                    data-testid={QUIZ_LESSON_FORM_HANDLES.TIME_LIMIT_INPUT}
+                    {...field}
+                    inputMode="numeric"
+                    type="number"
+                    placeholder="0"
+                    value={field.value ?? ""}
+                    onChange={(e) =>
+                      field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                    }
+                    className="w-24"
+                  />
+                </FormControl>
+                {/* fixed width keeps the slider from resizing as the label changes */}
+                <span className="w-24 shrink-0 text-sm text-muted-foreground">
+                  {!!field.value && formatDuration(field.value * 60, t)}
+                </span>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <div className="space-y-2">

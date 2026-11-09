@@ -1,10 +1,17 @@
-import { ASSESSMENT_SCORING_MODES } from "@repo/shared";
+import { ASSESSMENT_SCORING_MODES, ASSESSMENT_TIME_LIMIT_MINUTES } from "@repo/shared";
 import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
 
-export const quizLessonFormSchema = (t: (key: string) => string) =>
-  z.object({
+export const quizLessonFormSchema = (
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
+  const timeLimitMessage = t("adminCourseView.curriculum.lesson.validation.timeLimitMinutes", {
+    min: ASSESSMENT_TIME_LIMIT_MINUTES.MIN,
+    max: ASSESSMENT_TIME_LIMIT_MINUTES.MAX,
+  });
+
+  return z.object({
     title: z
       .string()
       .min(2, t("adminCourseView.curriculum.lesson.validation.titleMinLength"))
@@ -12,6 +19,16 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
     thresholdScore: z.union([z.number().min(0).max(100), z.null()]).optional(),
     attemptsLimit: z.union([z.number().min(1).max(100), z.null()]).optional(),
     quizCooldownInHours: z.union([z.number().min(1).max(720), z.null()]).optional(),
+    timeLimitMinutes: z
+      .union([
+        z
+          .number()
+          .int(timeLimitMessage)
+          .min(ASSESSMENT_TIME_LIMIT_MINUTES.MIN, timeLimitMessage)
+          .max(ASSESSMENT_TIME_LIMIT_MINUTES.MAX, timeLimitMessage),
+        z.null(),
+      ])
+      .optional(),
     questions: z
       .array(
         z.object({
@@ -143,5 +160,6 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
         });
       }),
   });
+};
 
 export type QuizLessonFormValues = z.infer<ReturnType<typeof quizLessonFormSchema>>;

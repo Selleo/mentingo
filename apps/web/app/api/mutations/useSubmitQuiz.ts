@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
+import { refetchLessonOnClosedQuizAttempt } from "~/api/utils/refetchLessonOnClosedQuizAttempt";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -32,11 +33,12 @@ export function useSubmitQuiz({ handleOnSuccess }: SubmitQuizProps) {
     onSuccess: async () => {
       await handleOnSuccess();
     },
-    onError: (error) => {
+    onError: async (error, { lessonId }) => {
       toast({
         variant: "destructive",
         description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
+      await refetchLessonOnClosedQuizAttempt(error, lessonId);
     },
   });
 }

@@ -12,6 +12,7 @@ import {
   findFirstLessonIdForCompletedCourse,
   findFirstNonCompletedLessonId,
   findFirstNotStartedLessonId,
+  getDraftQuizAnswers,
   getEmptyQuizAnswers,
   getRequiredMatchingAnswerCounts,
   getUserAnswers,
@@ -520,6 +521,122 @@ describe("parseQuizFormData", () => {
         questionId: "question-dnd",
         answers: [{ value: "dragged" }],
       },
+    ]);
+  });
+});
+
+describe("getDraftQuizAnswers", () => {
+  const questions = [
+    { id: "single", type: "single_choice", options: [{ id: "s1" }, { id: "s2" }] },
+    { id: "multi", type: "multiple_choice", options: [{ id: "m1" }, { id: "m2" }, { id: "m3" }] },
+    { id: "tf", type: "true_or_false", options: [{ id: "t1" }, { id: "t2" }] },
+    { id: "brief", type: "brief_response", options: [] },
+    { id: "detailed", type: "detailed_response", options: [] },
+  ] as unknown as NonNullable<
+    import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+  >["questions"];
+
+  it("restores autosaved answers so that re-parsing yields the same draft", () => {
+    const draftAnswers = [
+      { questionId: "single", answers: [{ answerId: "s2" }] },
+      { questionId: "multi", answers: [{ answerId: "m1" }, { answerId: "m3" }] },
+      { questionId: "tf", answers: [{ answerId: "t1", value: "false" }] },
+      { questionId: "brief", answers: [{ answerId: "brief", value: "short answer" }] },
+    ];
+
+    const form = getDraftQuizAnswers(questions, draftAnswers);
+
+    expect(form.singleAnswerQuestions.single).toEqual({ s1: null, s2: "s2" });
+    expect(form.trueOrFalseQuestions.tf).toEqual({ t1: "false", t2: null });
+    expect(form.detailedResponses.detailed).toBe("");
+    expect(parseQuizFormData(form)).toEqual(
+      expect.arrayContaining(draftAnswers.map((answer) => expect.objectContaining(answer))),
+    );
+    expect(parseQuizFormData(form)).toHaveLength(draftAnswers.length);
+  });
+
+  it("ignores answers to questions that are no longer in the quiz", () => {
+    const form = getDraftQuizAnswers(questions, [
+      { questionId: "removed", answers: [{ answerId: "x" }] },
+    ]);
+
+    expect(form).toEqual(getEmptyQuizAnswers(questions));
+  });
+});
+
+describe("timed quiz fill in the blanks drafts", () => {
+  const questions = [
+    {
+      id: "text-legacy",
+      type: "fill_in_the_blanks_text",
+      description: "A [word] B [word] C [word]",
+      options: [],
+    },
+    {
+      id: "text-markers",
+      type: "fill_in_the_blanks_text",
+      description: "A <blank-answer-b1> B <blank-answer-b2>",
+      options: [{ id: "b1" }, { id: "b2" }],
+    },
+    {
+      id: "dnd-markers",
+      type: "fill_in_the_blanks_dnd",
+      description: "A <blank-answer-d1> B <blank-answer-d2>",
+      options: [{ id: "d1" }, { id: "d2" }],
+    },
+    {
+      id: "dnd-legacy",
+      type: "fill_in_the_blanks_dnd",
+      description: "A [word] B [word]",
+      options: [],
+    },
+  ] as unknown as NonNullable<
+    import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+  >["questions"];
+
+  const roundTrip = (form: QuizForm) => getDraftQuizAnswers(questions, parseQuizFormData(form));
+
+  it("keeps partially filled legacy text blanks in their positions", () => {
+    const form = getEmptyQuizAnswers(questions);
+    form.fillInTheBlanksText["text-legacy"] = { "1": null, "2": "second", "3": null };
+
+    expect(parseQuizFormData(form)).toEqual([
+      { questionId: "text-legacy", answers: [{ value: "" }, { value: "second" }] },
+    ]);
+    expect(roundTrip(form).fillInTheBlanksText["text-legacy"]).toEqual({
+      "1": "",
+      "2": "second",
+      "3": null,
+    });
+  });
+
+  it("restores marker-based text and drag-and-drop blanks by blank id", () => {
+    const form = getEmptyQuizAnswers(questions);
+    form.fillInTheBlanksText["text-markers"] = { b1: null, b2: "two" };
+    form.fillInTheBlanksDnd["dnd-markers"] = { d1: null, d2: "word-option" };
+
+    const restored = roundTrip(form);
+
+    expect(restored.fillInTheBlanksText["text-markers"]).toEqual({ b1: null, b2: "two" });
+    expect(restored.fillInTheBlanksDnd["dnd-markers"]).toEqual({ d1: null, d2: "word-option" });
+  });
+
+  it("does not send empty drag-and-drop values for legacy blanks", () => {
+    const form = getEmptyQuizAnswers(questions);
+    form.fillInTheBlanksDnd["dnd-legacy"] = { "1": "first", "2": null };
+
+    expect(roundTrip(form).fillInTheBlanksDnd["dnd-legacy"]).toEqual({ "1": "first", "2": null });
+  });
+});
+
+describe("parseQuizFormData open responses", () => {
+  it("leaves out empty brief and detailed responses", () => {
+    const form = getEmptyQuizAnswers([]);
+    form.briefResponses = { brief: "", answered: "yes" };
+    form.detailedResponses = { detailed: "" };
+
+    expect(parseQuizFormData(form)).toEqual([
+      { questionId: "answered", answers: [{ answerId: "answered", value: "yes" }] },
     ]);
   });
 });

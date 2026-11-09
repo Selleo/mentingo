@@ -3185,13 +3185,15 @@
           "attemptsLimit": "Límite de intentos",
           "quizCooldownInHours": "Bloqueo de tiempo después de intentos fallidos (en horas)",
           "numberOfQuestions": "{{count1}} de preguntas {{count2}}",
-          "noQuestions": "Sin preguntas"
+          "noQuestions": "Sin preguntas",
+          "timeLimitMinutes": "Límite de tiempo (en minutos)"
         },
         "tooltip": {
           "switch": "Si está habilitado, el estudiante tiene un número limitado de intentos de prueba.",
           "passingThreshold": "El umbral porcentual para aprobar el cuestionario. Si un estudiante alcanza esta puntuación, la prueba se considerará aprobada.",
           "attemptsLimit": "Número de intentos de prueba permitidos antes de que se active el bloqueo de tiempo.",
-          "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos."
+          "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos.",
+          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo."
         },
         "validation": {
           "optionTextRequired": "El texto de la opción es obligatorio",
@@ -3220,7 +3222,8 @@
           "sourceUrlInvalid": "Introduce una URL HTTPS válida",
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
           "matchingMatchRequired": "Completa la pareja de este elemento",
-          "matchingPairsUnique": "Cada par necesita una pareja única"
+          "matchingPairsUnique": "Cada par necesita una pareja única",
+          "timeLimitMinutes": "Introduce un número entero de minutos entre {{min}} y {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -4450,12 +4453,23 @@
       "courseEnrollmentRequired": "No estás inscrito en este curso.",
       "quizRetakeUnavailable": "Las respuestas del cuestionario no se pueden restablecer debido al límite de intentos o al tiempo de reutilización.",
       "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo.",
-      "quizAwaitingReview": "Este cuestionario está pendiente de revisión."
+      "quizAwaitingReview": "Este cuestionario está pendiente de revisión.",
+      "quizNotTimed": "Este cuestionario no tiene límite de tiempo.",
+      "quizAttemptNotStarted": "Inicia el cuestionario antes de enviar respuestas.",
+      "quizAttemptExpired": "El tiempo de este intento del cuestionario se ha agotado.",
+      "quizDraftInvalid": "No se pudieron guardar tus respuestas automáticamente. Revísalas e inténtalo de nuevo."
     },
     "preview": {
       "title": "Estás viendo una vista previa del curso",
       "enrollmentDescription": "Inscríbete para responder cuestionarios y guardar tu progreso.",
       "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios y registrar tu progreso."
+    },
+    "timedQuiz": {
+      "info": "Límite de tiempo: {{minutes}} min. El temporizador empieza al seleccionar «Iniciar cuestionario» y sigue corriendo aunque salgas de la página. Tus respuestas se guardan automáticamente y se envían cuando se acaba el tiempo. Las preguntas sin responder obtienen 0 puntos.",
+      "start": "Iniciar cuestionario",
+      "timeLeft": "Tiempo restante: {{time}}",
+      "warning": "Queda menos de un minuto. Tus respuestas se enviarán automáticamente cuando se acabe el tiempo.",
+      "timeUp": "Se acabó el tiempo. Estamos enviando tus respuestas."
     }
   },
   "studentCourseView": {

@@ -71,6 +71,7 @@ export const useQuizLessonForm = ({
       thresholdScore: null,
       attemptsLimit: null,
       quizCooldownInHours: null,
+      timeLimitMinutes: null,
       questions: [],
     },
   });
@@ -84,6 +85,7 @@ export const useQuizLessonForm = ({
         thresholdScore: null,
         attemptsLimit: null,
         quizCooldownInHours: null,
+        timeLimitMinutes: lessonToEdit.timeLimitMinutes ?? null,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
