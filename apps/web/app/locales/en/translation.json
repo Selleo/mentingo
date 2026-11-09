@@ -3194,7 +3194,7 @@
           "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
           "noQuestions": "No questions",
-          "timeLimitMinutes": "Time limit (in minutes)"
+          "timeLimitMinutes": "Time limit (hh:mm)"
         },
         "tooltip": {
           "switch": "If enabled, the student has a limited number of quiz attempts.",
@@ -3231,7 +3231,7 @@
           "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
           "matchingMatchRequired": "Fill in the match for this pair",
           "matchingPairsUnique": "Each pair needs a unique match",
-          "timeLimitMinutes": "Enter a whole number of minutes between {{min}} and {{max}}."
+          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",

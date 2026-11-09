@@ -2,13 +2,14 @@ import { ASSESSMENT_SCORING_MODES, ASSESSMENT_TIME_LIMIT_MINUTES } from "@repo/s
 import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
+import { minutesToTimeValue } from "../utils/timeLimitTime";
 
 export const quizLessonFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
 ) => {
   const timeLimitMessage = t("adminCourseView.curriculum.lesson.validation.timeLimitMinutes", {
-    min: ASSESSMENT_TIME_LIMIT_MINUTES.MIN,
-    max: ASSESSMENT_TIME_LIMIT_MINUTES.MAX,
+    min: minutesToTimeValue(ASSESSMENT_TIME_LIMIT_MINUTES.MIN),
+    max: minutesToTimeValue(ASSESSMENT_TIME_LIMIT_MINUTES.MAX),
   });
 
   return z.object({

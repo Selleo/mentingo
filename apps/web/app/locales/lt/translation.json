@@ -3193,7 +3193,7 @@
           "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
           "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
           "noQuestions": "Jokių klausimų",
-          "timeLimitMinutes": "Laiko limitas (minutėmis)"
+          "timeLimitMinutes": "Laiko limitas (hh:mm)"
         },
         "tooltip": {
           "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
@@ -3230,7 +3230,7 @@
           "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
           "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
           "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį",
-          "timeLimitMinutes": "Įveskite sveiką minučių skaičių nuo {{min}} iki {{max}}."
+          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",

@@ -3199,7 +3199,7 @@
           "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
           "numberOfQuestions": "{{count1}} z {{count2}} otázek",
           "noQuestions": "Žádné otázky",
-          "timeLimitMinutes": "Časový limit (v minutách)"
+          "timeLimitMinutes": "Časový limit (hh:mm)"
         },
         "tooltip": {
           "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
@@ -3236,7 +3236,7 @@
           "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
           "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
           "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení",
-          "timeLimitMinutes": "Zadejte celý počet minut od {{min}} do {{max}}."
+          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",

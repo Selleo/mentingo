@@ -6,6 +6,7 @@ import { cn } from "~/lib/utils";
 import { DEFAULT_TIME_STEP_MINUTES } from "./calendarTimeSelect.utils";
 
 type CalendarTimeInputProps = {
+  id?: string;
   value: string;
   stepMinutes?: number;
   testId?: string;
@@ -23,6 +24,7 @@ const normalizeTimeValue = (value: string) => {
 };
 
 export function CalendarTimeInput({
+  id,
   value,
   stepMinutes = DEFAULT_TIME_STEP_MINUTES,
   testId,
@@ -36,6 +38,7 @@ export function CalendarTimeInput({
         aria-hidden="true"
       />
       <Input
+        id={id}
         type="time"
         data-testid={testId}
         value={normalizeTimeValue(value)}

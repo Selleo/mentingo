@@ -3186,7 +3186,7 @@
           "quizCooldownInHours": "Bloqueo de tiempo después de intentos fallidos (en horas)",
           "numberOfQuestions": "{{count1}} de preguntas {{count2}}",
           "noQuestions": "Sin preguntas",
-          "timeLimitMinutes": "Límite de tiempo (en minutos)"
+          "timeLimitMinutes": "Límite de tiempo (hh:mm)"
         },
         "tooltip": {
           "switch": "Si está habilitado, el estudiante tiene un número limitado de intentos de prueba.",
@@ -3223,7 +3223,7 @@
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
           "matchingMatchRequired": "Completa la pareja de este elemento",
           "matchingPairsUnique": "Cada par necesita una pareja única",
-          "timeLimitMinutes": "Introduce un número entero de minutos entre {{min}} y {{max}}."
+          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",

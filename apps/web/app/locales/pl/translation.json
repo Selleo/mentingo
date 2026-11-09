@@ -3446,7 +3446,7 @@
           "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
           "noQuestions": "Brak pytań",
-          "timeLimitMinutes": "Limit czasu (w minutach)"
+          "timeLimitMinutes": "Limit czasu (gg:mm)"
         },
         "tooltip": {
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
@@ -3485,7 +3485,7 @@
           "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
           "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
           "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie",
-          "timeLimitMinutes": "Podaj pełną liczbę minut od {{min}} do {{max}}."
+          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",

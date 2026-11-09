@@ -3193,7 +3193,7 @@
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
           "noQuestions": "Keine Fragen",
-          "timeLimitMinutes": "Zeitlimit (in Minuten)"
+          "timeLimitMinutes": "Zeitlimit (hh:mm)"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
@@ -3230,7 +3230,7 @@
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
           "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
           "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
-          "timeLimitMinutes": "Gib eine ganze Zahl an Minuten zwischen {{min}} und {{max}} ein."
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",

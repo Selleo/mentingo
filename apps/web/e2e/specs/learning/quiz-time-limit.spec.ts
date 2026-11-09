@@ -1,4 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
+import { minutesToTimeValue } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/utils/timeLimitTime";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../data/curriculum/handles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
@@ -57,7 +58,7 @@ test("author sets and clears a quiz time limit; the student resumes the timed at
         await openExistingLessonFlow(page, quizChapter.id, quizLesson.id);
         await page
           .getByTestId(QUIZ_LESSON_FORM_HANDLES.TIME_LIMIT_INPUT)
-          .fill(timeLimit === null ? "" : String(timeLimit));
+          .fill(minutesToTimeValue(timeLimit));
         await saveQuizLessonFormFlow(page);
 
         await expect
