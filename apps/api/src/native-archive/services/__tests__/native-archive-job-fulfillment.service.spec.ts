@@ -62,7 +62,7 @@ function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }
     nativeArchiveSnapshotService as never,
     {} as never,
     nativeArchiveExportReuseService as never,
-    {} as never,
+    { publishDurable: jest.fn().mockResolvedValue(undefined) } as never,
   );
 
   const progress = { enterStage: jest.fn(), reportStageWork: jest.fn() };
@@ -218,7 +218,7 @@ describe("NativeArchiveJobFulfillmentService", () => {
       } as never,
       {} as never,
       { copyRememberedExport: async () => false, rememberExport: async () => undefined } as never,
-      {} as never,
+      { publishDurable: async () => undefined } as never,
     );
 
     await expect(

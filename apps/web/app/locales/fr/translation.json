@@ -6087,7 +6087,9 @@
       "start_learning_path": "Parcours d'apprentissage commencé",
       "complete_learning_path": "Parcours d'apprentissage terminé",
       "play_scorm": "SCORM joué",
-      "complete_scorm": "SCORM terminé"
+      "complete_scorm": "SCORM terminé",
+      "export": "Exporté",
+      "import": "Importé"
     },
     "entity": {
       "automation": "Automatisation",

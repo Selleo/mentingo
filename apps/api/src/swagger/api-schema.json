@@ -23125,6 +23125,14 @@
                     {
                       "const": "complete_scorm",
                       "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
+                      "type": "string"
                     }
                   ]
                 },
@@ -23282,6 +23290,14 @@
                       },
                       {
                         "const": "complete_scorm",
+                        "type": "string"
+                      },
+                      {
+                        "const": "export",
+                        "type": "string"
+                      },
+                      {
+                        "const": "import",
                         "type": "string"
                       }
                     ]
@@ -174697,6 +174713,14 @@
                               {
                                 "const": "complete_scorm",
                                 "type": "string"
+                              },
+                              {
+                                "const": "export",
+                                "type": "string"
+                              },
+                              {
+                                "const": "import",
+                                "type": "string"
                               }
                             ]
                           }
@@ -178560,6 +178584,14 @@
                     },
                     {
                       "const": "complete_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
                       "type": "string"
                     }
                   ]

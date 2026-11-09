@@ -111,3 +111,5 @@ export * from "./email-template/add-email-template-language.event";
 export * from "./email-template/remove-email-template-language.event";
 export * from "./email-template/delete-email-template.event";
 export * from "./automation/automation-activity.event";
+export * from "./native-archive/native-archive-exported.event";
+export * from "./native-archive/native-archive-imported.event";
