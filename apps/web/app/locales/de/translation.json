@@ -4719,8 +4719,8 @@
       "finishedCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn ein Benutzer einen Kurs beendet",
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
-      "publicCoursePreview": "Öffentliche Kurse vor der Anmeldung ansehen",
-      "publicCoursePreviewDescription": "Angemeldete Nutzer können kostenlose öffentliche Kurse ohne Einschreibung ansehen. Quizze, Aktivitäten und Lernfortschritt erfordern eine Einschreibung. Für kostenpflichtige Kurse gelten die bisherigen Zugangsregeln."
+      "publicCoursePreview": "Lektionen vor der Kurseinschreibung ansehen",
+      "publicCoursePreviewDescription": "Nutzer können Lektionen in kostenlosen öffentlichen Kursen ohne Einschreibung ansehen."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",

@@ -4728,8 +4728,8 @@
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
       "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
-      "publicCoursePreview": "Náhled veřejných kurzů před zápisem",
-      "publicCoursePreviewDescription": "Přihlášení uživatelé si mohou prohlížet bezplatné veřejné kurzy bez zápisu. Kvízy, aktivity a ukládání postupu vyžadují zápis. Placené kurzy si zachovávají stávající pravidla přístupu."
+      "publicCoursePreview": "Náhled lekcí před zápisem do kurzu",
+      "publicCoursePreviewDescription": "Umožněte uživatelům prohlížet lekce v bezplatných veřejných kurzech bez zápisu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",

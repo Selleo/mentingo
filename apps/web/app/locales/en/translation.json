@@ -4720,8 +4720,8 @@
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
-      "publicCoursePreview": "Preview public courses before enrollment",
-      "publicCoursePreviewDescription": "Let signed-in users browse free public courses without enrolling. Quizzes, activities and progress require enrollment. Paid courses keep their existing access rules."
+      "publicCoursePreview": "View lessons before enrolling in a course",
+      "publicCoursePreviewDescription": "Let unenrolled users view lessons in free public courses."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",

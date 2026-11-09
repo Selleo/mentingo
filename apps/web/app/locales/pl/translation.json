@@ -5033,8 +5033,8 @@
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
-      "publicCoursePreview": "Podgląd publicznych kursów przed zapisem",
-      "publicCoursePreviewDescription": "Pozwól zalogowanym użytkownikom przeglądać bezpłatne publiczne kursy bez zapisu. Quizy, aktywności i zapisywanie postępów wymagają zapisu. Zasady dostępu do płatnych kursów pozostają bez zmian."
+      "publicCoursePreview": "Podgląd lekcji przed zapisem do kursu",
+      "publicCoursePreviewDescription": "Pozwól niezapisanym użytkownikom przeglądać lekcje w bezpłatnych kursach publicznych."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",

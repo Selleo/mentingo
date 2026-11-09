@@ -4658,8 +4658,8 @@
       "finishedCourseNotificationDescription": "Recibir notificaciones cuando un usuario finalice un curso.",
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
       "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
-      "publicCoursePreview": "Vista previa de cursos públicos antes de inscribirse",
-      "publicCoursePreviewDescription": "Permite a los usuarios conectados explorar cursos públicos gratuitos sin inscribirse. Los cuestionarios, las actividades y el progreso requieren inscripción. Los cursos de pago mantienen sus reglas de acceso."
+      "publicCoursePreview": "Ver lecciones antes de inscribirse en un curso",
+      "publicCoursePreviewDescription": "Permite ver lecciones de cursos públicos gratuitos sin inscribirse."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",
