@@ -2,7 +2,11 @@ import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
-import { NATIVE_ARCHIVE_JOB_STAGES, NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
+import {
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
+  NATIVE_ARCHIVE_JOB_STAGES,
+  NATIVE_ARCHIVE_LIMITS,
+} from "../native-archive.constants";
 
 export const nativeArchiveJobResponseSchema = Type.Object({ jobId: Type.String() });
 export const nativeArchiveDownloadUrlResponseSchema = Type.Object({
@@ -38,4 +42,19 @@ export const nativeArchiveStatusResponseSchema = Type.Object({
   ]),
   failedReason: Type.Union([Type.String(), Type.Null()]),
   progress: Type.Union([nativeArchiveJobProgressSchema, Type.Null()]),
+});
+
+export const nativeArchiveImportFinishedDataSchema = Type.Object({
+  tenantId: UUIDSchema,
+  jobId: Type.String(),
+  actorId: UUIDSchema,
+  outcome: Type.Enum(NATIVE_ARCHIVE_IMPORT_OUTCOMES),
+  courseId: Type.Union([UUIDSchema, Type.Null()]),
+  failureCode: Type.Union([Type.String(), Type.Null()]),
+  importSource: Type.Record(Type.String(), Type.String()),
+  finishedAt: Type.String(),
+});
+
+export const nativeArchiveImportFinishedEventSchema = Type.Object({
+  importFinishedData: nativeArchiveImportFinishedDataSchema,
 });

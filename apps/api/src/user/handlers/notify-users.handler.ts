@@ -16,15 +16,15 @@ import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.e
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
 import { getNotificationUserFields } from "src/notifications/services/notification-fields";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { courses, users } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
-import type { IEventHandler } from "@nestjs/cqrs";
 import type { InactiveUsers } from "src/events/user/user-short-inactivity.event";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType =
   | UserFirstLoginEvent
@@ -35,7 +35,15 @@ type EventType =
   | UserCourseFinishedEvent;
 
 @Injectable()
-export class NotifyUsersHandler implements IEventHandler {
+@OutboxEventsHandler(
+  UserFirstLoginEvent,
+  UsersAssignedToCourseEvent,
+  UsersShortInactivityEvent,
+  UsersLongInactivityEvent,
+  UserChapterFinishedEvent,
+  UserCourseFinishedEvent,
+)
+export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly emailService: EmailService,
@@ -44,29 +52,15 @@ export class NotifyUsersHandler implements IEventHandler {
     private readonly statisticsService: StatisticsService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (
-        !(
-          event instanceof UserFirstLoginEvent ||
-          event instanceof UsersAssignedToCourseEvent ||
-          event instanceof UsersShortInactivityEvent ||
-          event instanceof UsersLongInactivityEvent ||
-          event instanceof UserChapterFinishedEvent ||
-          event instanceof UserCourseFinishedEvent
-        )
-      ) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(event: EventType, { eventId }: OutboxDeliveryContext) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: EventType) {
+  private async prepareNotifications(event: EventType) {
     if (event instanceof UsersShortInactivityEvent) {
       await this.prepareForTenant(event.usersShortInactivity.tenantId, () =>
         this.notifyUserAboutShortInactivity(event),

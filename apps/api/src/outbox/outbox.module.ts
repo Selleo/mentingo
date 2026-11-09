@@ -1,26 +1,24 @@
 import { Global, Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
+import { DiscoveryModule } from "@nestjs/core";
 
-import { OutboxDirectHandlerService } from "./outbox-direct-handler.service";
 import { OutboxDispatcherCron } from "./outbox-dispatcher.cron";
 import { OutboxDispatcherService } from "./outbox-dispatcher.service";
+import { OutboxEventHandlerRegistry } from "./outbox-event-handler-registry";
 import { OutboxListenerService } from "./outbox-listener.service";
-import { OutboxNotificationPreparationService } from "./outbox-notification-preparation.service";
 import { isOutboxProcessingEnabled } from "./outbox.constants";
 import { OutboxPublisher } from "./outbox.publisher";
 import { OutboxRepository } from "./outbox.repository";
 
 @Global()
 @Module({
-  imports: [CqrsModule],
+  imports: [DiscoveryModule],
   providers: [
     OutboxRepository,
     OutboxPublisher,
-    OutboxDirectHandlerService,
-    OutboxNotificationPreparationService,
     OutboxDispatcherService,
+    OutboxEventHandlerRegistry,
     ...(isOutboxProcessingEnabled() ? [OutboxDispatcherCron, OutboxListenerService] : []),
   ],
-  exports: [OutboxPublisher, OutboxDirectHandlerService, OutboxNotificationPreparationService],
+  exports: [OutboxPublisher],
 })
 export class OutboxModule {}

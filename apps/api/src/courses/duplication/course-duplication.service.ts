@@ -97,17 +97,17 @@ export class CourseDuplicationService {
    * A delivery failure is logged instead of failing a duplication that already exists.
    */
   private async recordCourseDuplicated(data: CourseDuplicationJobData): Promise<void> {
-    const courseDuplicatedEvent = new CourseDuplicatedEvent(
-      data.tenantId,
-      data.sourceCourseId,
-      data.targetCourseId,
-      data.actor.userId,
-      new Date().toISOString(),
-    );
+    const courseDuplicatedEvent = new CourseDuplicatedEvent({
+      tenantId: data.tenantId,
+      sourceCourseId: data.sourceCourseId,
+      courseId: data.targetCourseId,
+      actorId: data.actor.userId,
+      duplicatedAt: new Date().toISOString(),
+    });
 
     try {
       await this.tenantDbRunnerService.transactionWithHandle((transaction) =>
-        this.outboxPublisher.publishDurable(courseDuplicatedEvent, transaction),
+        this.outboxPublisher.publish(courseDuplicatedEvent, transaction),
       );
     } catch (error) {
       this.logger.error(

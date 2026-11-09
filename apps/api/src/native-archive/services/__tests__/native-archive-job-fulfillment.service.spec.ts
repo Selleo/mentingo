@@ -1,6 +1,8 @@
 import { Readable } from "node:stream";
 
 import {
+  NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_STAGES,
 } from "../../native-archive.constants";
@@ -62,7 +64,7 @@ function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }
     nativeArchiveSnapshotService as never,
     {} as never,
     nativeArchiveExportReuseService as never,
-    { publishDurable: jest.fn().mockResolvedValue(undefined) } as never,
+    { publish: jest.fn().mockResolvedValue(undefined) } as never,
   );
 
   const progress = { enterStage: jest.fn(), reportStageWork: jest.fn() };
@@ -218,7 +220,7 @@ describe("NativeArchiveJobFulfillmentService", () => {
       } as never,
       {} as never,
       { copyRememberedExport: async () => false, rememberExport: async () => undefined } as never,
-      { publishDurable: async () => undefined } as never,
+      { publish: async () => undefined } as never,
     );
 
     await expect(
@@ -228,5 +230,37 @@ describe("NativeArchiveJobFulfillmentService", () => {
         actor: ACTOR,
       }),
     ).resolves.toMatchObject({ filename });
+  });
+
+  it("stores the failed outcome of a sourced import in the outbox", async () => {
+    const outboxPublisher = { publish: jest.fn() };
+    const service = new NativeArchiveJobFulfillmentService(
+      {} as never,
+      {
+        runWithTenant: async (_tenantId: string, callback: () => Promise<unknown>) => callback(),
+      } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      outboxPublisher as never,
+    );
+
+    await service
+      .fulfillArchiveJob("import-job", {
+        action: NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
+        archiveOrigin: NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.IMPORT_SOURCE,
+        importSource: { kind: "unregistered-source" },
+        actor: ACTOR,
+      })
+      .catch(() => undefined);
+
+    expect(outboxPublisher.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        importFinishedData: expect.objectContaining({
+          jobId: "import-job",
+          outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.FAILED,
+        }),
+      }),
+    );
   });
 });

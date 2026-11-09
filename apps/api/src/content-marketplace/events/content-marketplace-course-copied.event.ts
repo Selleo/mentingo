@@ -1,14 +1,21 @@
-import { UUIDType } from "src/common";
+import { OutboxEvent } from "src/outbox/outbox.decorators";
 
-import type { CONTENT_MARKETPLACE_COPY_STATUSES } from "../content-marketplace.constants";
+import {
+  contentMarketplaceCourseCopiedEventSchema,
+  type contentMarketplaceCourseCopiedDataSchema,
+} from "../schemas/content-marketplace.schema";
+
+import type { Static } from "@sinclair/typebox";
+
+export type ContentMarketplaceCourseCopiedData = Static<
+  typeof contentMarketplaceCourseCopiedDataSchema
+>;
 
 /** A marketplace copy that ended before its import could report it, such as a failed archive download. */
+@OutboxEvent({
+  clearPayloadAfterDelivery: true,
+  payloadSchema: contentMarketplaceCourseCopiedEventSchema,
+})
 export class ContentMarketplaceCourseCopiedEvent {
-  constructor(
-    public readonly tenantId: UUIDType,
-    public readonly acquisitionId: UUIDType,
-    public readonly status: (typeof CONTENT_MARKETPLACE_COPY_STATUSES)[keyof typeof CONTENT_MARKETPLACE_COPY_STATUSES],
-    public readonly courseId: UUIDType | null,
-    public readonly occurredAt: string,
-  ) {}
+  constructor(public readonly courseCopiedData: ContentMarketplaceCourseCopiedData) {}
 }

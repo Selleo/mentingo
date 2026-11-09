@@ -1,26 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler } from "@nestjs/cqrs";
 
 import { UserActivityEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { StatisticsService } from "../statistics.service";
 
-import type { IEventHandler } from "@nestjs/cqrs";
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 @Injectable()
-@EventsHandler(UserActivityEvent)
-export class StatisticsHandler implements IEventHandler<UserActivityEvent> {
+@OutboxEventsHandler(UserActivityEvent)
+export class StatisticsHandler implements OutboxEventsHandlerOf<UserActivityEvent> {
   constructor(private readonly statisticsService: StatisticsService) {}
 
-  async handle(event: UserActivityEvent) {
-    try {
-      await this.handleUserActivity(event);
-    } catch (error) {
-      console.error("Error handling event:", error);
-    }
-  }
-
-  private async handleUserActivity(event: UserActivityEvent) {
-    await this.statisticsService.updateUserActivity(event.userId);
+  async handleOutboxEvent({ userActivityData }: UserActivityEvent) {
+    await this.statisticsService.updateUserActivity(userActivityData.userId);
   }
 }

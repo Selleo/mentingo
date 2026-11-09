@@ -1,11 +1,9 @@
-import { randomUUID } from "node:crypto";
-
 import { Injectable } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
+import { mapValues } from "lodash";
+import { match, P } from "ts-pattern";
 
-import { OutboxDirectHandlerService } from "./outbox-direct-handler.service";
-import { OutboxNotificationPreparationService } from "./outbox-notification-preparation.service";
-import { isOutboxProcessingEnabled } from "./outbox.constants";
+import { isRecord } from "src/common/utils/object.utils";
+
 import { OutboxRepository } from "./outbox.repository";
 
 import type { OutboxPublication } from "./outbox.types";
@@ -13,71 +11,15 @@ import type { DatabasePg } from "src/common";
 
 @Injectable()
 export class OutboxPublisher {
-  constructor(
-    private readonly outboxRepository: OutboxRepository,
-    private readonly eventBus: EventBus,
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
-  ) {}
+  constructor(private readonly outboxRepository: OutboxRepository) {}
 
-  async publish(event: object, dbInstance?: DatabasePg): Promise<void> {
-    const notifications = await this.outboxNotificationPreparationService.prepare(event);
-    for (const notification of notifications) {
-      await this.publish(notification, dbInstance);
-    }
-
-    const publication: OutboxPublication = {
-      eventType: this.getEventType(event),
-      payload: this.sanitizeValue(event) as Record<string, unknown>,
-    };
-
-    if (!isOutboxProcessingEnabled()) {
-      await this.publishWithoutDispatcher(event, publication, dbInstance);
-      return;
-    }
-
-    await this.outboxRepository.createPending(publication, dbInstance);
-    await this.outboxRepository.notifyPending(dbInstance);
-  }
-
-  private async publishWithoutDispatcher(
-    event: object,
-    publication: OutboxPublication,
-    transaction?: DatabasePg,
-  ): Promise<void> {
-    await this.outboxDirectHandlerService.dispatchReactions(
-      publication.eventType,
-      publication.payload,
-      randomUUID(),
-      transaction,
-    );
-    if (!this.outboxDirectHandlerService.has(publication.eventType)) {
-      await this.eventBus.publish(event);
-      return;
-    }
-
-    // Keep the handoff durable even when direct intake replaces the dispatcher.
-    const eventId = randomUUID();
-    await this.outboxRepository.createPending(publication, transaction, eventId);
-    await this.outboxDirectHandlerService.dispatch(
-      publication.eventType,
-      publication.payload,
-      eventId,
-      transaction,
-    );
-    await this.outboxRepository.markPublished(eventId, true, transaction);
-  }
-
-  /** Persist with the caller's transaction. Never emit a side effect before its commit. */
-  async publishDurable(event: object, db?: DatabasePg): Promise<void> {
-    await this.outboxRepository.createPending(
-      {
-        eventType: this.getEventType(event),
-        payload: this.sanitizeValue(event) as Record<string, unknown>,
-      },
-      db,
-    );
-    await this.outboxRepository.notifyPending(db);
+  /**
+   * Stores the event with the caller's transaction, so nothing is handled unless the change
+   * commits. The dispatcher delivers it after the commit.
+   */
+  async publish(event: object, transaction?: DatabasePg): Promise<void> {
+    await this.outboxRepository.createPending(this.buildPublication(event), transaction);
+    await this.outboxRepository.notifyPending(transaction);
   }
 
   private getEventType(event: object): string {
@@ -86,17 +28,22 @@ export class OutboxPublisher {
     return "UnknownEvent";
   }
 
-  private sanitizeValue(value: unknown): unknown {
-    if (value === undefined) return null;
-    if (value === null) return null;
-    if (Array.isArray(value)) return value.map((item) => this.sanitizeValue(item));
-    if (typeof value === "object") {
-      const entries = Object.entries(value as Record<string, unknown>).map(([key, item]) => [
-        key,
-        this.sanitizeValue(item),
-      ]);
-      return Object.fromEntries(entries);
-    }
-    return value;
+  private buildPublication(event: object): OutboxPublication {
+    return {
+      eventType: this.getEventType(event),
+      payload: mapValues(event as Record<string, unknown>, (value) =>
+        this.replaceUndefinedWithNull(value),
+      ),
+    };
+  }
+
+  private replaceUndefinedWithNull(value: unknown): unknown {
+    return match(value)
+      .with(P.nullish, () => null)
+      .with(P.array(), (items) => items.map((item) => this.replaceUndefinedWithNull(item)))
+      .when(isRecord, (record) =>
+        mapValues(record, (property) => this.replaceUndefinedWithNull(property)),
+      )
+      .otherwise((primitive) => primitive);
   }
 }

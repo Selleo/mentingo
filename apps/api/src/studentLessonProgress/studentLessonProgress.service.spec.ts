@@ -44,7 +44,7 @@ describe("StudentLessonProgressService.markLessonAsIncomplete", () => {
         callback(transaction),
       ),
     };
-    const outboxPublisher = { publishDurable: jest.fn() };
+    const outboxPublisher = { publish: jest.fn() };
     const service = new StudentLessonProgressService(
       db as unknown as DatabasePg,
       {} as never,
@@ -108,14 +108,14 @@ describe("StudentLessonProgressService.markLessonAsIncomplete", () => {
       await expect(request).rejects.toBeInstanceOf(ForbiddenException);
       expect(db.update).not.toHaveBeenCalled();
       expect(transaction.update).not.toHaveBeenCalled();
-      expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+      expect(outboxPublisher.publish).not.toHaveBeenCalled();
     },
   );
 
   it("rolls progress changes and durable invalidation into one transaction", async () => {
     const { db, transaction, outboxPublisher, methods, service } = setup();
     const failure = new Error("Outbox unavailable");
-    outboxPublisher.publishDurable.mockRejectedValue(failure);
+    outboxPublisher.publish.mockRejectedValue(failure);
 
     await expect(service.markLessonAsIncomplete(params)).rejects.toBe(failure);
 
@@ -140,7 +140,7 @@ describe("StudentLessonProgressService.markLessonAsIncomplete", () => {
       actor,
       transaction,
     );
-    expect(outboxPublisher.publishDurable).toHaveBeenCalledWith(
+    expect(outboxPublisher.publish).toHaveBeenCalledWith(
       expect.objectContaining({
         data: { userId: "student", lessonId: "lesson", courseId: "course", actor },
       }),
@@ -150,11 +150,11 @@ describe("StudentLessonProgressService.markLessonAsIncomplete", () => {
 
   it("uses an existing transaction without opening a nested one", async () => {
     const { db, transaction, outboxPublisher, service } = setup();
-    outboxPublisher.publishDurable.mockResolvedValue(undefined);
+    outboxPublisher.publish.mockResolvedValue(undefined);
 
     await service.markLessonAsIncomplete({ ...params, dbInstance: transaction as never });
 
     expect(db.transaction).not.toHaveBeenCalled();
-    expect(outboxPublisher.publishDurable).toHaveBeenCalledWith(expect.anything(), transaction);
+    expect(outboxPublisher.publish).toHaveBeenCalledWith(expect.anything(), transaction);
   });
 });

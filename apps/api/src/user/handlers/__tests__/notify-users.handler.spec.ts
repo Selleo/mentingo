@@ -69,8 +69,9 @@ describe("NotifyUsersHandler", () => {
     {} as never,
     {} as never,
     tenantRunner as never,
-    {} as never,
-    {} as never,
+    {
+      publishCollectedNotifications: (_eventId: string, prepare: () => Promise<void>) => prepare(),
+    } as never,
   );
 
   const actor = {
@@ -170,7 +171,7 @@ describe("NotifyUsersHandler", () => {
         .spyOn(handler, testCase.notificationMethod)
         .mockResolvedValue(undefined);
 
-      await handler.handle(testCase.event());
+      await handler.handleOutboxEvent(testCase.event(), { eventId: "event-1" });
 
       expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(
         testCase.resolvedTenantId ?? tenantId,
@@ -189,7 +190,7 @@ describe("NotifyUsersHandler", () => {
         .spyOn(handler, testCase.notificationMethod)
         .mockResolvedValue(undefined);
 
-      await handler.handle(event);
+      await handler.handleOutboxEvent(event, { eventId: "event-1" });
 
       expect(tenantRunner.runWithTenant).toHaveBeenCalledWith(
         testCase.resolvedTenantId ?? tenantId,

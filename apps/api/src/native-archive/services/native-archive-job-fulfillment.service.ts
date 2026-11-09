@@ -44,6 +44,7 @@ import {
   fingerprintArchiveInput,
 } from "./native-archive-zip.utils";
 
+import type { NativeArchiveImportFinishedData } from "../events/native-archive-import-finished.event";
 import type {
   NativeArchiveBuildInput,
   NativeArchiveExportAccess,
@@ -150,20 +151,20 @@ export class NativeArchiveJobFulfillmentService {
     jobId: string,
     actor: CurrentUserType,
     importSource: NativeArchiveImportSource,
-    finish: Pick<NativeArchiveImportFinishedEvent, "outcome" | "courseId" | "failureCode">,
+    finish: Pick<NativeArchiveImportFinishedData, "outcome" | "courseId" | "failureCode">,
   ) {
     await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
       this.outboxPublisher.publish(
-        new NativeArchiveImportFinishedEvent(
-          actor.tenantId,
+        new NativeArchiveImportFinishedEvent({
+          tenantId: actor.tenantId,
           jobId,
-          actor.userId,
-          finish.outcome,
-          finish.courseId,
-          finish.failureCode,
+          actorId: actor.userId,
+          outcome: finish.outcome,
+          courseId: finish.courseId,
+          failureCode: finish.failureCode,
           importSource,
-          new Date().toISOString(),
-        ),
+          finishedAt: new Date().toISOString(),
+        }),
       ),
     );
   }
@@ -174,7 +175,7 @@ export class NativeArchiveJobFulfillmentService {
     { kind, rootId, alreadyExists, createdCourseIds, reusedCourseIds }: NativeArchiveImportResult,
   ) {
     await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-      this.outboxPublisher.publishDurable(
+      this.outboxPublisher.publish(
         new NativeArchiveImportedEvent({
           actor,
           kind,
@@ -346,7 +347,7 @@ export class NativeArchiveJobFulfillmentService {
     });
 
     await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-      this.outboxPublisher.publishDurable(
+      this.outboxPublisher.publish(
         new NativeArchiveExportedEvent({ actor, kind, rootId, exportAccess }),
       ),
     );

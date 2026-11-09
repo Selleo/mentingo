@@ -270,17 +270,17 @@ export class NativeArchiveImportService {
   ): Promise<void> {
     if (!importFinishedReport) return;
 
-    await this.outboxPublisher.publishDurable(
-      new NativeArchiveImportFinishedEvent(
-        actor.tenantId,
-        importFinishedReport.jobId,
-        actor.userId,
-        NATIVE_ARCHIVE_IMPORT_OUTCOMES.IMPORTED,
+    await this.outboxPublisher.publish(
+      new NativeArchiveImportFinishedEvent({
+        tenantId: actor.tenantId,
+        jobId: importFinishedReport.jobId,
+        actorId: actor.userId,
+        outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.IMPORTED,
         courseId,
-        null,
-        importFinishedReport.importSource,
-        new Date().toISOString(),
-      ),
+        failureCode: null,
+        importSource: importFinishedReport.importSource,
+        finishedAt: new Date().toISOString(),
+      }),
       transaction,
     );
   }

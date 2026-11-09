@@ -1,5 +1,4 @@
 import { Global, Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { ArticlesActivityHandler } from "src/activity-logs/handlers/articles-activity.handler";
 import { QAActivityHandler } from "src/activity-logs/handlers/qa-activity.handler";
@@ -33,7 +32,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
 @Global()
 @Module({
-  imports: [CqrsModule, LiveTrainingModule, LocalizationModule],
+  imports: [LiveTrainingModule, LocalizationModule],
   controllers: [ActivityLogsController],
   providers: [
     ActivityLogsService,
@@ -62,6 +61,6 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     ScormActivityHandler,
     NativeArchiveActivityHandler,
   ],
-  exports: [ActivityLogsService, CqrsModule],
+  exports: [ActivityLogsService],
 })
 export class ActivityLogsModule {}

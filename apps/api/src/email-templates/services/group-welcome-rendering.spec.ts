@@ -72,7 +72,12 @@ it("renders a group-specific welcome using the new member's public email variabl
     "tenant",
     publication,
     "en",
-    resolveAutomationMappings(mappings, notification.recipients[0]!.eventFields, "en", "en"),
+    resolveAutomationMappings(
+      mappings,
+      notification.notificationData.recipients[0]!.eventFields,
+      "en",
+      "en",
+    ),
     { companyName: "Tenant", primaryColor: "#123456" },
   );
   expect(rendered.subject).toBe("Welcome Alex to Sales <Europe>");

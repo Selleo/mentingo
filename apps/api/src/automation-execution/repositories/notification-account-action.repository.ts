@@ -133,7 +133,7 @@ export class NotificationAccountActionRepository {
         AND ${outboxEvents.status} IN (${OUTBOX_STATUSES.PENDING}, ${OUTBOX_STATUSES.PROCESSING}, ${OUTBOX_STATUSES.FAILED})
         AND jsonb_path_exists(
           ${outboxEvents.payload},
-          '$.recipients[*] ? (@.accountActionIntentId == $reference)',
+          '$.notificationData.recipients[*] ? (@.accountActionIntentId == $reference)',
           jsonb_build_object('reference', ${notificationAccountActionIntents.id}::text)
         )
     )`;

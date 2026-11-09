@@ -1,18 +1,25 @@
-import { AutomationEventKind } from "@repo/shared";
-
-import { UUIDType } from "src/common";
+import { OutboxEvent } from "src/outbox/outbox.decorators";
 
 import type { NotificationEventItem, NotificationRecipient } from "../automation-execution.types";
+import type { AutomationEventKind } from "@repo/shared";
+import type { UUIDType } from "src/common";
 
+export type NotificationEventData = {
+  occurrenceId: string;
+  kind: AutomationEventKind;
+  recipients: NotificationRecipient[];
+  items?: NotificationEventItem[];
+};
+
+/** Recipients carry names and emails, so the stored payload is cleared once runs are created. */
+@OutboxEvent({ clearPayloadAfterDelivery: true })
 export class NotificationEvent {
-  constructor(
-    public readonly occurrenceId: string,
-    public readonly kind: AutomationEventKind,
-    public readonly recipients: NotificationRecipient[],
-    public readonly items?: NotificationEventItem[],
-  ) {}
+  constructor(public readonly notificationData: NotificationEventData) {}
 }
 
+export type AutomationEmailDeliveryRequestedData = { emailDeliveryId: UUIDType };
+
+@OutboxEvent({ clearPayloadAfterDelivery: true })
 export class AutomationEmailDeliveryRequestedEvent {
-  constructor(public readonly emailDeliveryId: UUIDType) {}
+  constructor(public readonly emailDeliveryRequestData: AutomationEmailDeliveryRequestedData) {}
 }

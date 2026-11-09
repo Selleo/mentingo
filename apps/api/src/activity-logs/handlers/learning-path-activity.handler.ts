@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateLearningPathEvent,
@@ -9,10 +8,13 @@ import {
   StartLearningPathEvent,
   CompleteLearningPathEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type LearningPathEventType =
   | CreateLearningPathEvent
@@ -32,23 +34,19 @@ const LearningPathActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...LearningPathActivityEvents)
-export class LearningPathActivityHandler implements IEventHandler<LearningPathEventType> {
+@OutboxEventsHandler(...LearningPathActivityEvents)
+export class LearningPathActivityHandler implements OutboxEventsHandlerOf<LearningPathEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: LearningPathEventType) {
+  async handleOutboxEvent(event: LearningPathEventType) {
     if (event instanceof CreateLearningPathEvent) return await this.handleCreateLearningPath(event);
-
     if (event instanceof UpdateLearningPathEvent) return await this.handleUpdateLearningPath(event);
-
     if (event instanceof DeleteLearningPathEvent) return await this.handleDeleteLearningPath(event);
-
     if (event instanceof EnrollLearningPathEvent) return await this.handleEnrollLearningPath(event);
-
     if (event instanceof StartLearningPathEvent) return await this.handleStartLearningPath(event);
-
-    if (event instanceof CompleteLearningPathEvent)
+    if (event instanceof CompleteLearningPathEvent) {
       return await this.handleCompleteLearningPath(event);
+    }
   }
 
   private async handleCreateLearningPath(event: CreateLearningPathEvent) {

@@ -63,7 +63,7 @@ describe("CourseActivityHandler", () => {
       },
     ];
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new BulkUpdateCourseCategoryEvent({
         actor,
         tenantId: actor.tenantId,
@@ -128,7 +128,7 @@ describe("CourseActivityHandler", () => {
     }).compile();
     const handler = module.get(CourseActivityHandler);
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new BulkUpdateCourseCategoryEvent({
         actor: {
           userId: "00000000-0000-0000-0000-000000000001",
@@ -200,7 +200,7 @@ describe("CourseActivityHandler", () => {
       },
     ];
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new BulkUpdateCourseStatusEvent({
         actor,
         tenantId: actor.tenantId,
@@ -265,7 +265,7 @@ describe("CourseActivityHandler", () => {
     }).compile();
     const handler = module.get(CourseActivityHandler);
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new BulkUpdateCourseStatusEvent({
         actor: {
           userId: "00000000-0000-0000-0000-000000000001",
@@ -312,7 +312,7 @@ describe("CourseActivityHandler", () => {
     };
     const courseId = "00000000-0000-0000-0000-000000000101";
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new DeleteCourseEvent({
         actor,
         courses: [{ courseId, courseTitle: "Deleted Course" }],
@@ -363,7 +363,7 @@ describe("CourseActivityHandler", () => {
       },
     ];
 
-    await handler.handle(new DeleteCourseEvent({ actor, courses }));
+    await handler.handleOutboxEvent(new DeleteCourseEvent({ actor, courses }));
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,

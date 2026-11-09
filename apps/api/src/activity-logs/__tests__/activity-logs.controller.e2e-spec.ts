@@ -10,6 +10,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
+import { dispatchOutbox } from "../../../test/helpers/wait-for-outbox";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
 import type { INestApplication } from "@nestjs/common";
@@ -26,6 +27,7 @@ describe("ActivityLogsController (e2e)", () => {
 
   const waitForActivityLogCount = async (expectedCount: number) => {
     for (let attempt = 0; attempt < 20; attempt += 1) {
+      await dispatchOutbox(app);
       const [{ totalItems }] = await db.select({ totalItems: count() }).from(activityLogs);
       if (Number(totalItems) >= expectedCount) return;
 

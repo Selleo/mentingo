@@ -231,7 +231,11 @@ describe("Automation event-to-delivery execution (e2e)", () => {
   it("exhausts retries for one recipient while allowing another to succeed", async () => {
     await t.createEnabledAutomation();
     const event = t.createWelcomeNotificationEvent();
-    event.recipients.push({ ...event.recipients[0], itemId: t.admin.id, email: t.admin.email });
+    event.notificationData.recipients.push({
+      ...event.notificationData.recipients[0],
+      itemId: t.admin.id,
+      email: t.admin.email,
+    });
     const [run] = await t.publishNotificationAndGetRuns(event);
     const deliveries = (await t.getAutomationRun(run.id)).deliveries;
     const failing = deliveries.find(({ recipientEmail }) => recipientEmail === t.student.email)!;
@@ -316,7 +320,7 @@ describe("Automation event-to-delivery execution (e2e)", () => {
   it("records an empty audience as completed without sending", async () => {
     await t.createEnabledAutomation();
     const event = t.createWelcomeNotificationEvent();
-    event.recipients.length = 0;
+    event.notificationData.recipients.length = 0;
     const [run] = await t.publishNotificationAndGetRuns(event);
     expect(await t.getAutomationRun(run.id)).toMatchObject({
       run: { status: "succeeded", succeededCount: 0, completedAt: expect.any(String) },
@@ -447,9 +451,13 @@ describe("Automation event-to-delivery execution (e2e)", () => {
       );
       await t.createEnabledAutomation(body);
       const base = t.createWelcomeNotificationEvent();
-      const event = new NotificationEvent(base.occurrenceId, "user_assigned_to_course", [
-        { ...base.recipients[0], eventFields: { has_deadline: value } },
-      ]);
+      const event = new NotificationEvent({
+        occurrenceId: base.notificationData.occurrenceId,
+        kind: "user_assigned_to_course",
+        recipients: [
+          { ...base.notificationData.recipients[0], eventFields: { has_deadline: value } },
+        ],
+      });
       const [run] = await t.publishNotificationAndGetRuns(event);
       const detail = await t.getAutomationRun(run.id);
       if (value === "invalid") {

@@ -11,7 +11,6 @@ import { CourseAuthoringContextBridgeService } from "src/luma/course-authoring-c
 import { LumaService } from "src/luma/luma.service";
 import { authoringSessionSchema } from "src/luma/schema/course-authoring-session.schema";
 import * as outboxConstants from "src/outbox/outbox.constants";
-import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { DB, DB_APP } from "src/storage/db/db.providers";
 import { createTenantAwareDb } from "src/storage/db/tenant-aware-session";
@@ -84,12 +83,6 @@ integration("course authoring Core to AI HTTP roundtrip", () => {
     db = app.get(DB);
     runner = app.get(TenantDbRunnerService);
     applicationService = app.get(CourseAuthoringApplicationService);
-    const publisher = app.get(OutboxPublisher);
-    jest
-      .spyOn(publisher, "publish")
-      .mockImplementation((event, transaction) =>
-        publisher.publishDurable(event, transaction ?? db),
-      );
     jest.spyOn(outboxConstants, "isOutboxProcessingEnabled").mockReturnValue(true);
 
     await runner.runWithTenant(test.defaultTenantId, async () => {

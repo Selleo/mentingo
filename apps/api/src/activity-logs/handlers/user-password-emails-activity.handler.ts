@@ -1,25 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { match } from "ts-pattern";
 
 import {
   USER_PASSWORD_EMAIL_TYPES,
   UserPasswordEmailsEvent,
 } from "src/events/user/user-password-emails.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
 @Injectable()
-@EventsHandler(UserPasswordEmailsEvent)
-export class UserPasswordEmailsActivityHandler implements IEventHandler<UserPasswordEmailsEvent> {
+@OutboxEventsHandler(UserPasswordEmailsEvent)
+export class UserPasswordEmailsActivityHandler
+  implements OutboxEventsHandlerOf<UserPasswordEmailsEvent>
+{
   constructor(
     private readonly activityLogsService: ActivityLogsService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
-  async handle(event: UserPasswordEmailsEvent) {
+  async handleOutboxEvent(event: UserPasswordEmailsEvent) {
     const { actor, tenantId, type, recipients, sentCount, skippedCount } = event.userPasswordEmails;
 
     if (sentCount === 0) return;

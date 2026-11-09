@@ -16,7 +16,7 @@ import { getAccountActionPlaceholderNames } from "src/automations/mappers/automa
 import { AutomationRecipientRepository } from "../repositories/automation-recipient.repository";
 
 import type { NotificationEventItem, NotificationRecipient } from "../automation-execution.types";
-import type { NotificationEvent } from "../events/notification-event";
+import type { NotificationEventData } from "../events/notification-event";
 import type { DatabasePg } from "src/common";
 
 @Injectable()
@@ -25,7 +25,7 @@ export class AutomationRecipientResolverService {
 
   async resolveAutomationRecipients(
     step: AutomationSendEmailStep,
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction: DatabasePg,
   ): Promise<NotificationRecipient[]> {
     const selection = step.config.recipients ?? { type: AUTOMATION_RECIPIENT_TYPES.EVENT };
@@ -97,7 +97,7 @@ export class AutomationRecipientResolverService {
     });
   }
 
-  private indexOriginalRecipientOccurrences(event: NotificationEvent): Map<string, string> {
+  private indexOriginalRecipientOccurrences(event: NotificationEventData): Map<string, string> {
     const snapshotIds = new Map<string, string>();
     const snapshotRepetitions = new Map<string, number>();
 
@@ -116,7 +116,7 @@ export class AutomationRecipientResolverService {
   }
 
   private deduplicateNotificationItemsFromRecipients(
-    event: NotificationEvent,
+    event: NotificationEventData,
   ): NotificationEventItem[] {
     const items = new Map<string, NotificationEventItem>();
     const repetitions = new Map<string, number>();
@@ -134,7 +134,7 @@ export class AutomationRecipientResolverService {
     return [...items.values()];
   }
 
-  private usesRecipientIdentityFields(event: NotificationEvent): boolean {
+  private usesRecipientIdentityFields(event: NotificationEventData): boolean {
     return (
       [
         AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES,
@@ -148,7 +148,7 @@ export class AutomationRecipientResolverService {
 
   private hashNotificationItemFields(
     fields: NotificationEventItem["eventFields"],
-    event: NotificationEvent,
+    event: NotificationEventData,
   ): string {
     const audienceFields = this.usesRecipientIdentityFields(event)
       ? new Set(["userEmail", "userFirstName", "userLastName"])

@@ -21,6 +21,7 @@ import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateAllTables } from "../../../test/helpers/test-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 import {
   ACTIVITY_LOG_ACTION_TYPES,
   ACTIVITY_LOG_RESOURCE_TYPES,
@@ -155,13 +156,13 @@ describe("Activity Logs E2E", () => {
     expectedCount = 1,
     timeoutMs = 5000,
   ) => {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
-      const logs = await getLogs(filters);
-      if (logs.length >= expectedCount) return logs;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    throw new Error(`Timed out waiting for activity logs`);
+    return waitForOutbox(
+      app,
+      () => getLogs(filters),
+      (logs) => logs.length >= expectedCount,
+      timeoutMs,
+      50,
+    );
   };
 
   const parseMetadata = (metadata: any) =>

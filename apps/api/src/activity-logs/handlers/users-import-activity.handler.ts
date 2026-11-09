@@ -1,17 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { UsersImportEvent } from "src/events/user/users-import.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
 @Injectable()
-@EventsHandler(UsersImportEvent)
-export class UsersImportActivityHandler implements IEventHandler<UsersImportEvent> {
+@OutboxEventsHandler(UsersImportEvent)
+export class UsersImportActivityHandler implements OutboxEventsHandlerOf<UsersImportEvent> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: UsersImportEvent) {
+  async handleOutboxEvent(event: UsersImportEvent) {
     const { actor, tenantId, importedUsers, skippedRows, importedUsersCount, skippedRowsCount } =
       event.usersImport;
 

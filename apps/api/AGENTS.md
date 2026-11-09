@@ -11,7 +11,7 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Migrations: `drizzle-kit` with configs in `drizzle.config.ts` and `drizzle.migrator.config.ts`.
 - Validation/OpenAPI: TypeBox + `nestjs-typebox` + Swagger.
 - Auth: JWT cookies, Passport strategies, Redis-backed session revocation.
-- Jobs/events: BullMQ in `src/queue`, Nest CQRS events, outbox in `src/outbox`.
+- Jobs/events: BullMQ in `src/queue`, domain events through the outbox in `src/outbox`.
 - Realtime: Socket.IO gateways in `src/websocket` and file upload notifications.
 - Tests: Jest unit and e2e.
 
@@ -96,10 +96,20 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 ### Outbox And Worker Flow
 
 - Publisher: `src/outbox/outbox.publisher.ts`.
-- Dispatcher: `src/outbox/outbox-dispatcher.service.ts`, `src/outbox/outbox-dispatcher.cron.ts`.
+- Dispatcher: `src/outbox/outbox-dispatcher.service.ts`, `src/outbox/outbox-dispatcher.cron.ts`, `src/outbox/outbox-listener.service.ts`.
+- Handler discovery and rehydration: `src/outbox/outbox-event-handler-registry.ts`, `src/outbox/utils/outbox-event-rehydration.utils.ts`.
 - Claiming: `src/outbox/outbox.repository.ts`.
 - Queues: `src/queue/queue.service.ts`, `src/queue/queue.types.ts`.
-- Agent rule: keep `FOR UPDATE SKIP LOCKED` claiming and event materialization intact when changing durable events.
+- Every domain event goes through `OutboxPublisher.publish(event, transaction)`; pass the transaction that commits the change. Publishing only stores the event; the dispatcher delivers it after the commit, in the event's tenant. There is no in-process event bus.
+- `LEGACY_FLAT_OUTBOX_PAYLOAD_FIELDS` upgrades flat payloads still written by API instances older than the single-data-object format during a deploy. Remove it once no such instance can run.
+- Events take one data object: `constructor(public readonly <name>Data: <Name>Data) {}`. The stored payload is the event's own fields, so its shape is a contract: renaming the class or a field breaks rows still in the outbox and SQL that reads payloads (gamification history, account-action cleanup). Change it only with a data migration.
+- Declare per-event storage with `@OutboxEvent({ payloadSchema, clearPayloadAfterDelivery })`. A payload failing `payloadSchema` is marked dead without reaching any handler, so handlers do not re-validate it. Clear payloads that carry personal data; never clear events that other features read as history.
+- Consume events with an `@Injectable()` provider decorated `@OutboxEventsHandler(EventA, EventB)` that implements `OutboxEventsHandlerOf<EventA | EventB>`. `handleOutboxEvent(event, { eventId })` receives the rehydrated event instance and the outbox event ID; use the ID to deduplicate side effects.
+- Handlers are awaited one by one, each in its own transaction that first locks the event under the dispatcher's claim (`claim_id`) and then records the handler's success: database writes of a handler that throws are rolled back, a handler that succeeded never runs again, and a dispatcher whose stale claim was taken over stops without running anything. A failed handler is retried after a delay; after `OUTBOX_MAX_ATTEMPTS` the event is marked dead. Side effects outside the database (queue jobs, emails, sockets) can still repeat, so key them by `eventId`. Keep handlers short; hand long work to a BullMQ queue.
+- Security-relevant effects that must not wait for the dispatcher (such as closing a revoked session's sockets) are done directly by the caller; the outbox event then only repeats them for recovery.
+- Automation emails: an outbox handler captures recipients through `NotificationCollectorService.publishCollectedNotifications(eventId, prepare)`, which publishes `NotificationEvent`s identified by the source event, so retries do not create duplicate automation runs. Do not publish `NotificationEvent` with a random occurrence from a handler.
+- Tests do not start the dispatcher: call `OutboxDispatcherService.dispatchPendingEvents()` (or `waitForOutbox`) before asserting a handler's side effects.
+- Agent rule: keep `FOR UPDATE SKIP LOCKED` claiming, per-handler success tracking, and payload compatibility intact when changing durable events.
 
 ### File And Video Upload Flow
 

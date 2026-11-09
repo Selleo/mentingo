@@ -1674,6 +1674,20 @@
       "when": 1794324839166,
       "tag": "0238_keep_open_questions_participation_graded",
       "breakpoints": true
+    },
+    {
+      "idx": 239,
+      "version": "7",
+      "when": 1794472734000,
+      "tag": "0239_track_outbox_handler_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1794472740580,
+      "tag": "0240_migrate_outbox_payloads_to_unified_delivery",
+      "breakpoints": true
     }
   ]
 }

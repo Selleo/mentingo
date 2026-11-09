@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { match, P } from "ts-pattern";
 
 import { NativeArchiveExportedEvent, NativeArchiveImportedEvent } from "src/events";
@@ -7,21 +6,23 @@ import {
   NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_KIND,
 } from "src/native-archive/native-archive.constants";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
 import type { NativeArchiveExport, NativeArchiveImport } from "src/events";
 import type { NativeArchiveKind } from "src/native-archive/native-archive.types";
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type NativeArchiveEventType = NativeArchiveExportedEvent | NativeArchiveImportedEvent;
 
 @Injectable()
-@EventsHandler(NativeArchiveExportedEvent, NativeArchiveImportedEvent)
-export class NativeArchiveActivityHandler implements IEventHandler<NativeArchiveEventType> {
+@OutboxEventsHandler(NativeArchiveExportedEvent, NativeArchiveImportedEvent)
+export class NativeArchiveActivityHandler implements OutboxEventsHandlerOf<NativeArchiveEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: NativeArchiveEventType) {
+  async handleOutboxEvent(event: NativeArchiveEventType) {
     await match(event)
       .with(P.instanceOf(NativeArchiveExportedEvent), ({ archiveExport }) =>
         this.recordArchiveExport(archiveExport),

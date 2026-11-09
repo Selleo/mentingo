@@ -2,54 +2,68 @@ import { Logger } from "@nestjs/common";
 
 import { OutboxDispatcherService } from "./outbox-dispatcher.service";
 
+class LessonProgressChangedEvent {}
+
 describe("OutboxDispatcherService", () => {
-  it("continues dispatching after competency queue intake fails and releases its running guard", async () => {
+  it("continues dispatching after a handler fails and releases its running guard", async () => {
     jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
     const event = {
       id: "failed",
       tenantId: "tenant",
-      eventType: "LessonProgressChangedEvent",
+      eventType: LessonProgressChangedEvent.name,
       payload: { data: { userId: "learner", courseId: "course" } },
       attemptCount: 0,
+      succeededHandlers: [],
+      claimId: "claim",
     };
     const outboxRepository = {
-      recoverStalledIntake: jest.fn(),
-      claimNext: jest
+      releaseStalledClaims: jest.fn(),
+      claimNextDueEvent: jest
         .fn()
         .mockResolvedValueOnce(event)
         .mockResolvedValueOnce({ ...event, id: "ready" })
         .mockResolvedValue(null),
-      markFailed: jest.fn(),
+      recordFailedAttempt: jest.fn(),
       markPublished: jest.fn(),
+      recordSucceededHandler: jest.fn(),
+      replaceStoredPayload: jest.fn(),
+      lockClaimedEvent: jest.fn().mockResolvedValue({ succeededHandlers: [] }),
     };
-    const eventBus = { publish: jest.fn() };
-    const outboxDirectHandlerService = {
-      dispatchReactions: jest
-        .fn()
-        .mockRejectedValueOnce(new Error("Redis unavailable"))
-        .mockResolvedValue(undefined),
-      dispatch: jest.fn().mockResolvedValue(false),
+    const handleOutboxEvent = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Redis unavailable"))
+      .mockResolvedValue(undefined);
+    const outboxEventHandlerRegistry = {
+      findEventSubscription: jest.fn().mockReturnValue({
+        eventClass: LessonProgressChangedEvent,
+        handlers: [{ name: "CompetenciesLearningHandler", handleOutboxEvent }],
+      }),
+      getEventOptions: jest.fn().mockReturnValue({}),
     };
     const tenantDbRunnerService = {
       runForEachTenant: jest.fn(async (callback) => callback("tenant")),
+      transactionWithHandle: jest.fn(async (callback) => callback()),
     };
     const dispatcher = new OutboxDispatcherService(
       tenantDbRunnerService as never,
       outboxRepository as never,
-      eventBus as never,
-      outboxDirectHandlerService as never,
+      outboxEventHandlerRegistry as never,
     );
 
     await dispatcher.dispatchPendingEvents();
     await dispatcher.dispatchPendingEvents();
 
-    expect(outboxRepository.markFailed).toHaveBeenCalledWith(
-      "failed",
-      expect.objectContaining({ message: "Redis unavailable" }),
-      1,
+    expect(outboxRepository.recordFailedAttempt).toHaveBeenCalledWith(event, {
+      status: "failed",
+      attemptCount: 1,
+      lastError: "CompetenciesLearningHandler: Redis unavailable",
+    });
+    expect(outboxRepository.markPublished).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "ready", claimId: "claim" }),
     );
-    expect(outboxRepository.markPublished).toHaveBeenCalledWith("ready");
-    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(handleOutboxEvent).toHaveBeenCalledWith(expect.any(LessonProgressChangedEvent), {
+      eventId: "ready",
+    });
     expect(tenantDbRunnerService.runForEachTenant).toHaveBeenCalledTimes(2);
   });
 });

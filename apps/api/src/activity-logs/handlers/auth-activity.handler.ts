@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   SupportModeEnterEvent,
@@ -7,9 +6,12 @@ import {
   UserLogoutEvent,
   UserLoginFailedEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type AuthEventType =
   | UserLoginEvent
@@ -18,11 +20,11 @@ type AuthEventType =
   | UserLoginFailedEvent;
 
 @Injectable()
-@EventsHandler(UserLoginEvent, UserLogoutEvent, SupportModeEnterEvent, UserLoginFailedEvent)
-export class AuthActivityHandler implements IEventHandler<AuthEventType> {
+@OutboxEventsHandler(UserLoginEvent, UserLogoutEvent, SupportModeEnterEvent, UserLoginFailedEvent)
+export class AuthActivityHandler implements OutboxEventsHandlerOf<AuthEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: AuthEventType) {
+  async handleOutboxEvent(event: AuthEventType) {
     if (event instanceof UserLoginEvent) return await this.handleLogin(event);
     if (event instanceof UserLogoutEvent) return await this.handleLogout(event);
     if (event instanceof SupportModeEnterEvent) return await this.handleSupportModeEnter(event);

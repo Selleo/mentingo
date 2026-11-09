@@ -8,7 +8,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import { AUTH_ERROR_KEYS, AUTH_TOKEN_PURPOSE, SUPPORT_SESSION_ERROR_KEYS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
@@ -16,9 +15,11 @@ import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
 import { UserSessionRevokedEvent } from "src/events/user/user-session-revoked.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SessionRevocationService } from "src/redis";
 import { REDIS_CLIENT } from "src/redis/redis.tokens";
 import { RedisClient } from "src/redis/redis.types";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { jwtPayloadSchema, pendingMfaPayloadSchema } from "../schemas/jwt-strategy.schema";
 
@@ -52,7 +53,8 @@ export class SessionService {
     private readonly mfaRepository: MfaRepository,
     private readonly sessionRevocationService: SessionRevocationService,
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClient,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
   getUserMfaPolicy(tenantId: string, userId: string) {
@@ -280,8 +282,10 @@ export class SessionService {
   async revokeSession(user: CurrentUserType) {
     await this.sessionRevocationService.revokeSession(user);
     if (user.sessionId) {
-      this.eventBus.publish(
-        new UserSessionRevokedEvent({ userId: user.userId, sessionId: user.sessionId }),
+      const revokedSession = { userId: user.userId, sessionId: user.sessionId };
+
+      await this.tenantDbRunnerService.runWithTenant(user.tenantId, () =>
+        this.outboxPublisher.publish(new UserSessionRevokedEvent(revokedSession)),
       );
     }
     if (user.supportSessionId) await this.revokeSupportSessionMfaAssurance(user.supportSessionId);

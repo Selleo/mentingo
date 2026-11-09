@@ -30,7 +30,7 @@ function transactionHarness() {
 
 function publisher(reject = false) {
   return {
-    publishDurable: jest.fn(async (_event: object, _transaction?: object) => {
+    publish: jest.fn(async (_event: object, _transaction?: object) => {
       if (reject) throw new Error("outbox unavailable");
     }),
   };
@@ -106,10 +106,7 @@ describe("durable learning-source withdrawals", () => {
     const outbox = publisher();
     const { service, tx } = lessonService(outbox);
     await service.deleteStudentQuizAnswers(lessonId, actor);
-    expect(outbox.publishDurable).toHaveBeenCalledWith(
-      expect.any(LessonProgressChangedEvent),
-      tx.trx,
-    );
+    expect(outbox.publish).toHaveBeenCalledWith(expect.any(LessonProgressChangedEvent), tx.trx);
     expect(tx.didCommit()).toBe(true);
 
     const failedPublisher = publisher(true);
@@ -124,10 +121,7 @@ describe("durable learning-source withdrawals", () => {
     const outbox = publisher();
     const { service, tx } = aiService(outbox);
     await service.retakeLesson(lessonId, actor);
-    expect(outbox.publishDurable).toHaveBeenCalledWith(
-      expect.any(LessonProgressChangedEvent),
-      tx.trx,
-    );
+    expect(outbox.publish).toHaveBeenCalledWith(expect.any(LessonProgressChangedEvent), tx.trx);
     expect(tx.didCommit()).toBe(true);
 
     const failedPublisher = publisher(true);
@@ -142,7 +136,7 @@ describe("durable learning-source withdrawals", () => {
     const outbox = publisher();
     const { service, tx } = certificatesService(outbox);
     await service.resetCourseCertificates("course", { sendEmail: false } as never, actor);
-    const [event, usedTransaction] = outbox.publishDurable.mock.calls[0];
+    const [event, usedTransaction] = outbox.publish.mock.calls[0];
     expect(event).toBeInstanceOf(LearningSourceWithdrawnEvent);
     expect(event).toMatchObject({ data: { userId: actor.userId, courseId, actor } });
     expect(usedTransaction).toBe(tx.trx);
@@ -158,7 +152,7 @@ describe("durable learning-source withdrawals", () => {
     resolver.mockResolvedValueOnce([{ id: "certificate", userId: actor.userId, courseId }]);
     resolver.mockResolvedValueOnce([]);
     await stale.service.resetCourseCertificates("course", { sendEmail: false } as never, actor);
-    expect(stalePublisher.publishDurable).not.toHaveBeenCalled();
+    expect(stalePublisher.publish).not.toHaveBeenCalled();
     expect(stale.tx.didCommit()).toBe(true);
 
     const failedPublisher = publisher(true);

@@ -123,7 +123,13 @@ describe("UsersController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(baseDb, ["automation_runs", "users", "groups", "settings"]);
+    await truncateTables(baseDb, [
+      "automation_runs",
+      "outbox_events",
+      "users",
+      "groups",
+      "settings",
+    ]);
   });
 
   describe("GET /user?id=:id", () => {

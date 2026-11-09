@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateScormEvent,
@@ -8,10 +7,13 @@ import {
   PlayScormEvent,
   CompleteScormEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type ScormEventType =
   | CreateScormEvent
@@ -29,19 +31,15 @@ const ScormActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...ScormActivityEvents)
-export class ScormActivityHandler implements IEventHandler<ScormEventType> {
+@OutboxEventsHandler(...ScormActivityEvents)
+export class ScormActivityHandler implements OutboxEventsHandlerOf<ScormEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: ScormEventType) {
+  async handleOutboxEvent(event: ScormEventType) {
     if (event instanceof CreateScormEvent) return await this.handleCreateScorm(event);
-
     if (event instanceof UpdateScormEvent) return await this.handleUpdateScorm(event);
-
     if (event instanceof DeleteScormEvent) return await this.handleDeleteScorm(event);
-
     if (event instanceof PlayScormEvent) return await this.handlePlayScorm(event);
-
     if (event instanceof CompleteScormEvent) return await this.handleCompleteScorm(event);
   }
 

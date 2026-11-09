@@ -1,12 +1,32 @@
-import type { DatabasePg } from "src/common";
+import type { OUTBOX_HANDLER_DELIVERY_OUTCOMES } from "./outbox.constants";
+import type { TSchema } from "@sinclair/typebox";
+import type { outboxEvents } from "src/storage/schema";
 
-export type OutboxCommandHandler = (
-  payload: Record<string, unknown>,
-  id: string,
-  transaction?: DatabasePg,
-) => Promise<void>;
+export type OutboxEventClass = abstract new (data: never) => object;
 
-export type OutboxNotificationPreparer = (event: object) => Promise<object[]>;
+export type OutboxDeliveryContext = { eventId: string };
+
+/** What every `@OutboxEventsHandler` provider implements; the dispatcher awaits it per event. */
+export interface OutboxEventsHandlerOf<TEvent extends object> {
+  handleOutboxEvent(event: TEvent, context: OutboxDeliveryContext): Promise<void>;
+}
+
+export type OutboxEventOptions = {
+  /** Clears the stored payload once every handler succeeded, for events carrying personal data. */
+  clearPayloadAfterDelivery?: boolean;
+  /** Checked before any handler runs; a payload that fails it is marked dead instead of retried. */
+  payloadSchema?: TSchema;
+};
+
+export type OutboxRegisteredHandler = {
+  name: string;
+  handleOutboxEvent: (event: object, context: OutboxDeliveryContext) => Promise<void>;
+};
+
+export type OutboxEventSubscription = {
+  eventClass: OutboxEventClass;
+  handlers: OutboxRegisteredHandler[];
+};
 
 export type OutboxPublication = {
   eventType: string;
@@ -18,18 +38,24 @@ export const OUTBOX_STATUSES = {
   PROCESSING: "processing",
   PUBLISHED: "published",
   FAILED: "failed",
+  DEAD: "dead",
 } as const;
 
 export type OutboxStatus = (typeof OUTBOX_STATUSES)[keyof typeof OUTBOX_STATUSES];
 
-export interface OutboxEnvelope<TPayload = Record<string, unknown>> {
-  id: string;
-  eventType: string;
-  payload: TPayload;
-  status: OutboxStatus;
+export type OutboxEnvelope = Pick<
+  typeof outboxEvents.$inferSelect,
+  "id" | "eventType" | "payload" | "attemptCount" | "succeededHandlers" | "tenantId" | "claimId"
+>;
+
+export type OutboxHandlerDeliveryOutcome =
+  (typeof OUTBOX_HANDLER_DELIVERY_OUTCOMES)[keyof typeof OUTBOX_HANDLER_DELIVERY_OUTCOMES];
+
+/** Identifies one dispatcher's claim on an event; writes made under a lost claim change nothing. */
+export type OutboxClaim = Pick<OutboxEnvelope, "id" | "claimId">;
+
+export type OutboxFailedAttempt = {
+  status: typeof OUTBOX_STATUSES.FAILED | typeof OUTBOX_STATUSES.DEAD;
   attemptCount: number;
-  publishedAt: string | null;
-  lastError: string | null;
-  createdAt: string;
-  tenantId: string;
-}
+  lastError: string;
+};
