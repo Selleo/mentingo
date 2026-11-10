@@ -4227,7 +4227,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "Kursas nepasiekiamas",
+      "accessTitle": "Prisijunkite, kad galėtumėte pereiti į kursą",
       "accessDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti kursą.",
       "goToLogin": "Eiti į prisijungimą",
       "goToCourseList": "Eiti į kursų sąrašą",
@@ -4316,6 +4316,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Prisijunkite, kad galėtumėte pereiti į pamoką",
+      "loginDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti pamoką.",
       "lessonIdNotFound": "Pamokos ID nerastas",
       "notAuthorizedTitle": "Neįgaliotas",
       "notAuthorizedDescription": "Jūs neturite teisės pasiekti šios pamokos.",

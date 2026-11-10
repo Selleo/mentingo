@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@remix-run/react";
+import { useLocation, useNavigate, useParams } from "@remix-run/react";
 import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,6 +44,7 @@ const checkOverallLessonPosition = (chapters: Chapters, currentLessonId: string)
 
 export default function LessonPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { courseId = "", lessonId = "" } = useParams();
 
@@ -99,6 +100,19 @@ export default function LessonPage() {
   }, [lessonError]);
 
   if (error) {
+    if (!user) {
+      return (
+        <ErrorPage
+          iconName="LogIn"
+          title={t("studentLessonView.error.loginTitle")}
+          description={t("studentLessonView.error.loginDescription")}
+          actionLabel={t("studentCoursesView.courseUnavailable.goToLogin")}
+          actionIcon="ArrowRight"
+          to={`/auth/login?returnTo=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`}
+        />
+      );
+    }
+
     return (
       <ErrorPage
         title={t("studentLessonView.error.notAuthorizedTitle")}

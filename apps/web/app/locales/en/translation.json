@@ -4226,7 +4226,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "The course is unavailable",
+      "accessTitle": "Sign in to access the course",
       "accessDescription": "Please sign in or create an account to continue to the course.",
       "goToLogin": "Go to login",
       "goToCourseList": "Go to course list",
@@ -4315,6 +4315,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Sign in to access the lesson",
+      "loginDescription": "Please sign in or create an account to continue to the lesson.",
       "lessonIdNotFound": "Lesson ID not found",
       "notAuthorizedTitle": "Not authorized",
       "notAuthorizedDescription": "You're not authorized to access this lesson.",

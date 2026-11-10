@@ -28,6 +28,7 @@ export { default as TrashIcon } from "./trash-icon.svg?react";
 export { default as UploadIllustration } from "./upload-illustration.svg?react";
 export { default as UploadImageIcon } from "./upload-image.svg?react";
 export {
+  LogIn,
   Bot,
   Building,
   MailWarning,

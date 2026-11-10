@@ -4170,7 +4170,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "El curso no está disponible",
+      "accessTitle": "Inicia sesión para acceder al curso",
       "accessDescription": "Inicia sesión o crea una cuenta para continuar al curso.",
       "goToLogin": "Ir al inicio de sesión",
       "goToCourseList": "Ir a la lista de cursos",
@@ -4259,6 +4259,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Inicia sesión para acceder a la lección",
+      "loginDescription": "Inicia sesión o crea una cuenta para continuar a la lección.",
       "lessonIdNotFound": "ID de lección no encontrada",
       "notAuthorizedTitle": "No autorizado",
       "notAuthorizedDescription": "No estás autorizado a acceder a esta lección.",
