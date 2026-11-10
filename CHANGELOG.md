@@ -1,3 +1,27 @@
+<a name="v4.31.0"></a>
+
+## [v4.31.0] - 10.11.2026
+
+### Features:
+
+- sort report columns and show latest activity first ([#2118](https://github.com/Selleo/mentingo/issues/2118))
+
+- enforce quiz time limits on the server ([#2177](https://github.com/Selleo/mentingo/issues/2177))
+
+- rank learners on gamification leaderboards ([#2167](https://github.com/Selleo/mentingo/issues/2167))
+
+### Bug Fixes:
+
+- prevent login issues when MFA role settings are missing ([#2186](https://github.com/Selleo/mentingo/issues/2186))
+
+- guide learners to sign in when accessing content without being logged in ([#2184](https://github.com/Selleo/mentingo/issues/2184))
+
+- show lesson preview prompts only on quizzes ([#2170](https://github.com/Selleo/mentingo/issues/2170))
+
+### Chores:
+
+- improve the course list banner for a better browsing experience ([#2183](https://github.com/Selleo/mentingo/issues/2183))
+
 <a name="v4.30.0"></a>
 
 ## [v4.30.0] - 09.11.2026
@@ -37,6 +61,10 @@
 - isolate SCORM content on a dedicated origin with short-lived grants ([#2148](https://github.com/Selleo/mentingo/issues/2148))
 
 - enhance platform security for a safer user experience ([#2146](https://github.com/Selleo/mentingo/issues/2146))
+
+### Documentation:
+
+- update changelog for version v4.30.0
 
 <a name="v4.29.0"></a>
 
@@ -3720,7 +3748,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.30.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.31.0...HEAD
+[v4.31.0]: https://github.com/Selleo/mentingo/compare/v4.30.0...v4.31.0
 [v4.30.0]: https://github.com/Selleo/mentingo/compare/v4.29.0...v4.30.0
 [v4.29.0]: https://github.com/Selleo/mentingo/compare/v4.28.0...v4.29.0
 [v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
