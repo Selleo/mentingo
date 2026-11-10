@@ -48,8 +48,9 @@ export function CalendarTimeInput({
         className={cn(
           "block w-full min-w-[10.5rem] appearance-none pl-9 pr-3 tabular-nums",
           "[&::-webkit-calendar-picker-indicator]:hidden",
-          "[&::-webkit-datetime-edit]:m-0 [&::-webkit-datetime-edit]:p-0",
-          "[&::-webkit-datetime-edit-fields-wrapper]:p-0",
+          // index.css shifts date input text right by 16px twice to clear the left picker icon
+          "[&::-webkit-datetime-edit]:left-0 [&::-webkit-datetime-edit]:m-0 [&::-webkit-datetime-edit]:p-0",
+          "[&::-webkit-datetime-edit-fields-wrapper]:left-0 [&::-webkit-datetime-edit-fields-wrapper]:p-0",
         )}
       />
     </div>
