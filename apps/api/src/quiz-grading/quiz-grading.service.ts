@@ -10,8 +10,10 @@ import {
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_GRADING_MODES,
+  COURSE_STATUSES,
   PERMISSIONS,
   QUIZ_REVIEW_GRADING_METHODS,
+  type QuizReviewGradingMethod,
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
@@ -110,6 +112,13 @@ export class QuizGradingService {
       if (answer.studentId === currentUser.userId)
         throw new ForbiddenException("quizGrading.errors.ownAnswer");
 
+      // Grading may complete the lesson, which needs a published course and an enrolled learner.
+      if (answer.courseStatus === COURSE_STATUSES.DRAFT)
+        throw new ConflictException("quizGrading.errors.courseNotPublished");
+
+      if (!answer.isLearnerEnrolled)
+        throw new ConflictException("quizGrading.errors.learnerNotEnrolled");
+
       const awardedPoints = match(grade)
         .with({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL }, ({ passed }) =>
           passed ? answer.maximumPoints : 0,
@@ -126,7 +135,7 @@ export class QuizGradingService {
         });
 
       const attemptGraded = await courseLearningContext.run({ learningStateId }, () =>
-        this.recordGrade(answer, awardedPoints, comment ?? "", currentUser),
+        this.recordGrade(answer, grade.method, awardedPoints, comment ?? "", currentUser),
       );
       // Read inside the transaction so a failed lookup can't report a saved grade as failed.
       const nextAnswerId = await this.quizGradingRepository.findNextPendingAnswerId(
@@ -141,6 +150,7 @@ export class QuizGradingService {
 
   private async recordGrade(
     answer: QuizAnswerForGrading,
+    gradingMethod: QuizReviewGradingMethod,
     awardedPoints: number,
     comment: string,
     currentUser: CurrentUserType,
@@ -149,6 +159,7 @@ export class QuizGradingService {
       {
         questionAnswerId: answer.id,
         reviewerId: currentUser.userId,
+        gradingMethod,
         awardedPoints: String(awardedPoints),
         explanation: comment,
         explanationLanguage: answer.language,

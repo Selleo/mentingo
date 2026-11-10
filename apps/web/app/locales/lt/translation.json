@@ -9642,7 +9642,9 @@
     "errors": {
       "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti.",
       "ownAnswer": "Negalite vertinti savo atsakymo.",
-      "attemptSuperseded": "Besimokantysis pradėjo šį kursą iš naujo, todėl šio bandymo nebegalima įvertinti."
+      "attemptSuperseded": "Besimokantysis pradėjo šį kursą iš naujo, todėl šio bandymo nebegalima įvertinti.",
+      "courseNotPublished": "Šis kursas vėl yra juodraštis. Prieš vertindami atsakymus, jį paskelbkite.",
+      "learnerNotEnrolled": "Besimokantysis nebėra užsiregistravęs į šį kursą, todėl šio atsakymo įvertinti negalima."
     },
     "loadError": "Nepavyko įkelti vertinimo eilės. Atnaujinkite puslapį ir bandykite dar kartą."
   }

@@ -9529,7 +9529,9 @@
     "errors": {
       "answerNotFound": "Esta respuesta no existe o no se puede calificar.",
       "ownAnswer": "No puedes calificar tu propia respuesta.",
-      "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar."
+      "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar.",
+      "courseNotPublished": "Este curso ha vuelto a borrador. Publícalo antes de calificar sus respuestas.",
+      "learnerNotEnrolled": "El estudiante ya no está inscrito en este curso, por lo que esta respuesta no se puede calificar."
     },
     "loadError": "No se pudo cargar la cola de calificación. Actualiza la página para volver a intentarlo."
   }

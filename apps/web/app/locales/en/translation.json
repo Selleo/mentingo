@@ -9621,7 +9621,9 @@
     "errors": {
       "answerNotFound": "This answer does not exist or cannot be graded.",
       "ownAnswer": "You cannot grade your own answer.",
-      "attemptSuperseded": "The learner has started this course again, so this attempt can no longer be graded."
+      "attemptSuperseded": "The learner has started this course again, so this attempt can no longer be graded.",
+      "courseNotPublished": "This course is back in draft. Publish it before grading its answers.",
+      "learnerNotEnrolled": "The learner is no longer enrolled in this course, so this answer can't be graded."
     },
     "loadError": "Could not load the grading queue. Refresh the page to try again."
   }

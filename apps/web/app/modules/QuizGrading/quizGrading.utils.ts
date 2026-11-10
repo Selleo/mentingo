@@ -1,4 +1,9 @@
-import { ASSESSMENT_ANSWER_GRADING_STATUSES, QUIZ_GRADING_COMMENT_MAX_LENGTH } from "@repo/shared";
+import {
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
+  QUIZ_GRADING_COMMENT_MAX_LENGTH,
+  QUIZ_REVIEW_GRADING_METHODS,
+} from "@repo/shared";
+import { match } from "ts-pattern";
 import { z } from "zod";
 
 import {
@@ -8,6 +13,7 @@ import {
 
 import type { TFunction } from "i18next";
 import type { ApiClient } from "~/api/api-client";
+import type { GetAnswerDetailsResponse } from "~/api/generated-api";
 
 export type QuizGradingAnswersQuery = NonNullable<
   Parameters<typeof ApiClient.api.quizGradingControllerGetAnswers>[0]
@@ -73,9 +79,16 @@ export const updateQueueSearchParams = (
 export const GRADE_VERDICTS = ["passed", "failed"] as const;
 export type GradeVerdict = (typeof GRADE_VERDICTS)[number];
 
-// shortcut: pass/fail is the only grading method, so full points mean "passed"; read the stored method once another one exists.
-export const verdictFromPoints = (awardedPoints: number, maximumPoints: number): GradeVerdict =>
-  awardedPoints >= maximumPoints ? "passed" : "failed";
+type QuizGradingReview = GetAnswerDetailsResponse["data"]["reviews"][number];
+
+// Pass/fail stores full points or 0, so any points mean "passed" even if the question's maximum changes later.
+export const reviewVerdict = (review: Pick<QuizGradingReview, "method" | "awardedPoints">) =>
+  match(review)
+    .returnType<GradeVerdict>()
+    .with({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL }, ({ awardedPoints }) =>
+      awardedPoints > 0 ? "passed" : "failed",
+    )
+    .exhaustive();
 
 export const gradeAnswerFormSchema = (t: TFunction) =>
   z.object({

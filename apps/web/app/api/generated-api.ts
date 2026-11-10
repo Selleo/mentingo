@@ -31349,6 +31349,7 @@ export interface GetAnswerDetailsResponse {
       id: string;
       revisionNumber: number;
       reviewerName: string;
+      method: "pass_fail";
       awardedPoints: number;
       comment: string;
       reviewedAt: string;

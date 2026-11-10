@@ -162905,7 +162905,7 @@
                 "awardedPoints": {
                   "anyOf": [
                     {
-                      "type": "integer"
+                      "type": "number"
                     },
                     {
                       "type": "null"
@@ -163122,7 +163122,7 @@
                   "awardedPoints": {
                     "anyOf": [
                       {
-                        "type": "integer"
+                        "type": "number"
                       },
                       {
                         "type": "null"
@@ -163243,8 +163243,12 @@
                         "reviewerName": {
                           "type": "string"
                         },
+                        "method": {
+                          "const": "pass_fail",
+                          "type": "string"
+                        },
                         "awardedPoints": {
-                          "type": "integer"
+                          "type": "number"
                         },
                         "comment": {
                           "type": "string"
@@ -163257,6 +163261,7 @@
                         "id",
                         "revisionNumber",
                         "reviewerName",
+                        "method",
                         "awardedPoints",
                         "comment",
                         "reviewedAt"

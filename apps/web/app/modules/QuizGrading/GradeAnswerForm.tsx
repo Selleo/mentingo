@@ -23,7 +23,7 @@ import {
   COMMENT_MAX_LENGTH,
   GRADE_VERDICTS,
   gradeAnswerFormSchema,
-  verdictFromPoints,
+  reviewVerdict,
 } from "./quizGrading.utils";
 
 import type { GradeAnswerFormValues } from "./quizGrading.utils";
@@ -37,36 +37,32 @@ type GradeAnswerFormProps = {
 export function GradeAnswerForm({ answer, onGraded }: GradeAnswerFormProps) {
   const { t } = useTranslation();
   const { mutateAsync: gradeAnswer, isPending } = useGradeQuizAnswer();
+  const [latestReview] = answer.reviews;
   const form = useForm<GradeAnswerFormValues>({
     resolver: zodResolver(gradeAnswerFormSchema(t)),
     defaultValues: {
-      verdict:
-        answer.awardedPoints === null
-          ? undefined
-          : verdictFromPoints(answer.awardedPoints, answer.maximumPoints),
-      comment: answer.reviews[0]?.comment ?? "",
+      verdict: latestReview && reviewVerdict(latestReview),
+      comment: latestReview?.comment ?? "",
     },
   });
 
-  const onSubmit = async ({ verdict, comment }: GradeAnswerFormValues) => {
-    const { nextAnswerId } = await gradeAnswer({
+  const onSubmit = ({ verdict, comment }: GradeAnswerFormValues) =>
+    gradeAnswer({
       answerId: answer.id,
       body: {
         method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL,
         passed: verdict === "passed",
         comment: comment.trim() || undefined,
       },
-    });
-
-    onGraded(nextAnswerId);
-  };
+    }).then(
+      ({ nextAnswerId }) => onGraded(nextAnswerId),
+      // The mutation already shows the API error.
+      () => undefined,
+    );
 
   return (
     <Form {...form}>
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={form.handleSubmit((values) => onSubmit(values).catch(() => undefined))}
-      >
+      <form className="flex flex-col gap-4" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="verdict"

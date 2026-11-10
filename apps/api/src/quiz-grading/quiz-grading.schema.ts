@@ -17,7 +17,7 @@ const namedEntitySchema = Type.Object({ id: UUIDSchema, name: Type.String() });
 export const quizGradingAnswerListItemSchema = Type.Object({
   id: UUIDSchema,
   gradingStatus: quizGradingStatusSchema,
-  awardedPoints: Type.Union([Type.Integer(), Type.Null()]),
+  awardedPoints: Type.Union([Type.Number(), Type.Null()]),
   maximumPoints: Type.Number(),
   submittedAt: Type.String(),
   questionTitle: Type.String(),
@@ -38,7 +38,8 @@ export const quizGradingReviewSchema = Type.Object({
   id: UUIDSchema,
   revisionNumber: Type.Integer(),
   reviewerName: Type.String(),
-  awardedPoints: Type.Integer(),
+  method: Type.Literal(QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL),
+  awardedPoints: Type.Number(),
   comment: Type.String(),
   reviewedAt: Type.String(),
 });

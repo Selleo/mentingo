@@ -9644,7 +9644,9 @@
     "errors": {
       "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit.",
       "ownAnswer": "Nemůžete hodnotit svou vlastní odpověď.",
-      "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit."
+      "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit.",
+      "courseNotPublished": "Tento kurz je opět koncept. Před hodnocením odpovědí jej zveřejněte.",
+      "learnerNotEnrolled": "Studující už není do tohoto kurzu zapsán, proto tuto odpověď nelze hodnotit."
     },
     "loadError": "Frontu k hodnocení se nepodařilo načíst. Obnovte stránku a zkuste to znovu."
   }

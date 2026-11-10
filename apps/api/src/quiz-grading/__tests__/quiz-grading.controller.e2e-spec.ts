@@ -24,7 +24,9 @@ import {
   assessmentAttemptQuestionAnswers,
   assessmentAttempts,
   assessmentQuestionOpenTextSettings,
+  assessmentQuestions,
   courseLearningStates,
+  courses,
   studentCourses,
   studentLessonProgress,
   tenants,
@@ -574,6 +576,107 @@ describe("QuizGradingController (e2e)", () => {
     ).expect(404);
 
     expect(await findAttempt(t.student.id)).toMatchObject({
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
+    });
+  });
+
+  it("finalizes the attempt exactly once when its last answers are graded at the same time", async () => {
+    const context = await setup();
+
+    await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
+    const [first, second] = (await listAnswers(context.reviewerCookie).expect(200)).body.data;
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
+
+    const responses = await Promise.all([
+      grade(context.reviewerCookie, first.id, true).expect(201),
+      grade(context.reviewerCookie, second.id, true).expect(201),
+    ]);
+
+    const events = publishSpy.mock.calls.map(([event]) => event);
+
+    publishSpy.mockRestore();
+    expect(
+      responses.map(({ body }) => body.data.attemptGraded).sort((left, right) => +left - +right),
+    ).toEqual([false, true]);
+    expect(events.filter((event) => event instanceof QuizCompletedEvent)).toHaveLength(1);
+    expect(await findAttempt(context.student.id)).toMatchObject({
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      awardedPoints: "2.00",
+    });
+    expect(await findProgress(context.student.id, context.lesson.id)).toMatchObject({
+      completedAt: expect.any(String),
+      isQuizPassed: true,
+    });
+  });
+
+  it("stores the grading method and awards fractional maximum points", async () => {
+    const context = await setup();
+
+    await runAsTenant(defaultTenantId, () =>
+      db
+        .update(assessmentQuestions)
+        .set({ maximumPoints: "1.5" })
+        .where(eq(assessmentQuestions.id, context.briefId)),
+    );
+    await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
+    const answers = (await listAnswers(context.reviewerCookie).expect(200)).body.data;
+    const brief = answers.find(
+      ({ questionTitle }: { questionTitle: string }) => questionTitle === "Brief",
+    );
+
+    await grade(context.reviewerCookie, brief.id, true).expect(201);
+
+    const graded = await listAnswers(context.reviewerCookie, "?status=graded").expect(200);
+
+    expect(graded.body.data).toEqual([
+      expect.objectContaining({ id: brief.id, awardedPoints: 1.5, maximumPoints: 1.5 }),
+    ]);
+
+    const details = await request(app.getHttpServer())
+      .get(`/api/quiz-grading/answers/${brief.id}`)
+      .set("Cookie", context.reviewerCookie)
+      .expect(200);
+
+    expect(details.body.data.reviews).toEqual([
+      expect.objectContaining({
+        method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL,
+        awardedPoints: 1.5,
+      }),
+    ]);
+  });
+
+  it("refuses to grade answers from a draft course or an unenrolled learner", async () => {
+    const context = await setup();
+
+    await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
+    const [first] = (await listAnswers(context.reviewerCookie).expect(200)).body.data;
+
+    await runAsTenant(defaultTenantId, () =>
+      db.update(courses).set({ status: "draft" }).where(eq(courses.id, context.course.id)),
+    );
+
+    expect((await listAnswers(context.reviewerCookie).expect(200)).body.pagination.totalItems).toBe(
+      0,
+    );
+    expect((await grade(context.reviewerCookie, first.id, true).expect(409)).body.message).toBe(
+      "quizGrading.errors.courseNotPublished",
+    );
+
+    await runAsTenant(defaultTenantId, async () => {
+      await db
+        .update(courses)
+        .set({ status: "published" })
+        .where(eq(courses.id, context.course.id));
+      await db.delete(studentCourses).where(eq(studentCourses.studentId, context.student.id));
+    });
+
+    expect((await listAnswers(context.reviewerCookie).expect(200)).body.pagination.totalItems).toBe(
+      0,
+    );
+    expect((await grade(context.reviewerCookie, first.id, true).expect(409)).body.message).toBe(
+      "quizGrading.errors.learnerNotEnrolled",
+    );
+    expect(await findAttempt(context.student.id)).toMatchObject({
       gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
     });
   });

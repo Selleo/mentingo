@@ -1,8 +1,10 @@
+import { QUIZ_REVIEW_GRADING_METHODS } from "@repo/shared";
+
 import {
   gradeAnswerFormSchema,
   parseQueueSearchParams,
+  reviewVerdict,
   updateQueueSearchParams,
-  verdictFromPoints,
 } from "./quizGrading.utils";
 
 import type { TFunction } from "i18next";
@@ -94,9 +96,11 @@ describe("gradeAnswerFormSchema", () => {
   });
 });
 
-describe("verdictFromPoints", () => {
-  it("treats full points as passed and anything less as failed", () => {
-    expect(verdictFromPoints(1, 1)).toBe("passed");
-    expect(verdictFromPoints(0, 1)).toBe("failed");
+describe("reviewVerdict", () => {
+  it("reads pass/fail from the stored points, whatever the question is worth now", () => {
+    const method = QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL;
+
+    expect(reviewVerdict({ method, awardedPoints: 1.5 })).toBe("passed");
+    expect(reviewVerdict({ method, awardedPoints: 0 })).toBe("failed");
   });
 });

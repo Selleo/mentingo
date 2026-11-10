@@ -3,6 +3,7 @@ import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_GRADING_MODES,
+  COURSE_STATUSES,
 } from "@repo/shared";
 import { and, asc, count, desc, eq, max, ne, sql } from "drizzle-orm";
 
@@ -21,6 +22,7 @@ import {
   chapters,
   courses,
   lessons,
+  studentCourses,
   studentLessonProgress,
   users,
 } from "src/storage/schema";
@@ -33,6 +35,9 @@ import type {
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 const fullName = sql<string>`concat_ws(' ', ${users.firstName}, ${users.lastName})`;
+
+// Completing a lesson on the learner's behalf needs them to still be enrolled.
+const isLearnerEnrolled = sql<boolean>`EXISTS (SELECT 1 FROM ${studentCourses} WHERE ${studentCourses.courseId} = ${courses.id} AND ${studentCourses.studentId} = ${assessmentAttempts.learnerId})`;
 
 // Questions are localized by their assessment; reviewers read them in the student's language.
 const localizedQuestionField = (column: AnyPgColumn) =>
@@ -118,6 +123,7 @@ export class QuizGradingRepository {
         id: assessmentAttemptQuestionAnswerReviews.id,
         revisionNumber: assessmentAttemptQuestionAnswerReviews.revisionNumber,
         reviewerName: fullName,
+        method: assessmentAttemptQuestionAnswerReviews.gradingMethod,
         awardedPoints: sql<number>`${assessmentAttemptQuestionAnswerReviews.awardedPoints}::float`,
         comment: assessmentAttemptQuestionAnswerReviews.explanation,
         reviewedAt: assessmentAttemptQuestionAnswerReviews.reviewedAt,
@@ -167,6 +173,8 @@ export class QuizGradingRepository {
         lessonId: lessons.id,
         chapterId: chapters.id,
         courseId: courses.id,
+        courseStatus: courses.status,
+        isLearnerEnrolled,
       })
       .from(assessmentAttemptQuestionAnswers)
       .innerJoin(
@@ -266,7 +274,8 @@ export class QuizGradingRepository {
     };
   }
 
-  // Reviewer-graded answers from the learner's current learning state, never the reviewer's own.
+  // Reviewer-graded answers from the learner's current learning state that can still complete
+  // the lesson, never the reviewer's own.
   private queueSubquery(
     filters: QuizGradingAnswerFilters,
     reviewerId: UUIDType,
@@ -287,11 +296,9 @@ export class QuizGradingRepository {
         ),
         submittedAt: assessmentAttemptQuestionAnswers.submittedAt,
         questionTitle: localizedQuestionField(assessmentQuestions.title).as("question_title"),
-        questionDescription: sql<
-          string | null
-        >`NULLIF(${localizedQuestionField(assessmentQuestions.description)}, '')`.as(
-          "question_description",
-        ),
+        questionDescription: sql<string | null>`NULLIF(${localizedQuestionField(
+          assessmentQuestions.description,
+        )}, '')`.as("question_description"),
         attemptNumber: assessmentAttempts.attemptNumber,
         courseId: sql<UUIDType>`${courses.id}`.as("course_id"),
         courseName: this.courseTitle().as("course_name"),
@@ -320,6 +327,8 @@ export class QuizGradingRepository {
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           activeLearningState(assessmentAttempts.learningStateId),
           ne(users.id, reviewerId),
+          ne(courses.status, COURSE_STATUSES.DRAFT),
+          isLearnerEnrolled,
           filters.status
             ? eq(assessmentAttemptQuestionAnswers.gradingStatus, filters.status)
             : undefined,
