@@ -12,7 +12,6 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { CalendarTimeInput } from "~/modules/Calendar/components/CalendarTimeInput";
-import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
@@ -127,18 +126,13 @@ const QuizSettingsSection = ({
                   iconClassName="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-x-4">
-                <CalendarTimeInput
-                  id="timeLimitMinutes"
-                  testId={QUIZ_LESSON_FORM_HANDLES.TIME_LIMIT_INPUT}
-                  value={minutesToTimeValue(field.value)}
-                  stepMinutes={1}
-                  onChange={(value) => field.onChange(timeValueToMinutes(value))}
-                />
-                <span className="text-sm text-muted-foreground">
-                  {!!field.value && formatDuration(field.value * 60, t)}
-                </span>
-              </div>
+              <CalendarTimeInput
+                id="timeLimitMinutes"
+                testId={QUIZ_LESSON_FORM_HANDLES.TIME_LIMIT_INPUT}
+                value={minutesToTimeValue(field.value)}
+                stepMinutes={1}
+                onChange={(value) => field.onChange(timeValueToMinutes(value))}
+              />
               <FormMessage />
             </FormItem>
           )}
