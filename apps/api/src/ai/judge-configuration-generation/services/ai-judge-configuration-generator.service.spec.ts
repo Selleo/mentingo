@@ -195,4 +195,129 @@ describe("AiJudgeConfigurationGeneratorService", () => {
       blockingIssues,
     });
   });
+  it("removes a targeted blocker without rewriting the unaffected criterion or learner task", async () => {
+    const { service } = createService({
+      ...configuration,
+      taskGoal: "A different participant now performs the task.",
+      passingThresholdPercent: 80,
+      criteria: [{ ...configuration.criteria[0], title: "Unrequested rewrite" }],
+      blockingErrors: [],
+    });
+    const result = await service.generate({
+      mode: "repair",
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: configuration,
+      blockingIssues: [
+        {
+          code: "ordinary_omission",
+          severity: "error",
+          target: { type: "blockingError", ref: "B1" },
+          message: "This is ordinary weak performance.",
+          correction: "Remove this blocker.",
+        },
+      ],
+    });
+    expect(result).toEqual({ ...configuration, blockingErrors: [] });
+  });
+
+  it("applies a targeted example repair while retaining other guidance and authored fields", async () => {
+    const criterion = configuration.criteria[0];
+    const { service } = createService({
+      ...configuration,
+      criteria: [
+        {
+          ...criterion,
+          title: "Unrequested rewrite",
+          scoreGuidance: criterion.scoreGuidance.map((guidance) => ({
+            ...guidance,
+            description: "Unrequested restyling",
+            example: "What matters most to you?",
+          })),
+        },
+      ],
+      blockingErrors: [],
+    });
+    const result = await service.generate({
+      mode: "repair",
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: configuration,
+      blockingIssues: [
+        {
+          code: "wrong_speaker",
+          severity: "error",
+          target: { type: "scoreGuidance", ref: "C1", score: 1, field: "example" },
+          message: "The example includes the counterpart.",
+          correction: "Use only learner speech.",
+        },
+      ],
+    });
+    expect(result).toEqual({
+      ...configuration,
+      criteria: [
+        {
+          ...criterion,
+          scoreGuidance: [
+            criterion.scoreGuidance[0],
+            { ...criterion.scoreGuidance[1], example: "What matters most to you?" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("does not invent criteria or rebuild a rubric when repair findings are empty", async () => {
+    const { service } = createService({ ...configuration, criteria: [], blockingErrors: [] });
+    const result = await service.generate({
+      mode: "repair",
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: configuration,
+      blockingIssues: [],
+    });
+    expect(result).toEqual(configuration);
+  });
+  it.each(["unknownField", "ref", "title"])(
+    "ignores an unsupported blocker field target %s without deleting or rewriting the item",
+    async (field) => {
+      const { service } = createService({ ...configuration, blockingErrors: [] });
+      const result = await service.generate({
+        mode: "repair",
+        language: SUPPORTED_LANGUAGES.EN,
+        lessonContext,
+        currentConfiguration: configuration,
+        blockingIssues: [
+          {
+            code: "invalid_target",
+            severity: "error",
+            target: { type: "blockingError", ref: "B1", field },
+            message: "A field needs repair.",
+            correction: "Correct the targeted field.",
+          },
+        ],
+      });
+      expect(result).toEqual(configuration);
+    },
+  );
+
+  it("does not delete a blocker for a narrow description-only repair", async () => {
+    const { service } = createService({ ...configuration, blockingErrors: [] });
+    const result = await service.generate({
+      mode: "repair",
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: configuration,
+      blockingIssues: [
+        {
+          code: "description_ambiguity",
+          severity: "error",
+          target: { type: "blockingError", ref: "B1", field: "description" },
+          message: "The description needs clarification.",
+          correction: "Clarify the boundary.",
+        },
+      ],
+    });
+    expect(result).toEqual(configuration);
+  });
 });

@@ -1,6 +1,6 @@
 id: aiMentorConfigurationValidator
 description: Semantic quality validator for structured AI Mentor configurations
-version: 2
+version: 3
 
 template: |
   <role>
@@ -22,7 +22,7 @@ template: |
   <quality_checks>
   For Teacher, verify that task goal, expertise, scope, and teaching style are coherent; the configuration teaches rather than only tests; feedback guidance does not contradict Teacher behavior; and it does not require invented knowledge.
   For Roleplay, verify that aiRole and learnerRole are distinct, clear, and concise participant identities rather than descriptions of actions, services, relationships, goals, or scenario facts; scenario and character goal create a plausible interaction; character goal belongs to the AI character rather than the learner; opening instruction is a natural first spoken move by the AI character; additional instructions describe only the AI character's responses rather than learner actions; difficulty is achievable; facts do not contradict the scenario; and the character participates rather than coaches or evaluates the learner.
-  For both, verify alignment with the learner-facing task, internal coherence, and that optional instructions do not override the selected behavior.
+  For both, verify alignment with the learner-facing task, internal coherence, and that optional instructions do not override the selected behavior. Check that every applicable source boundary survives, including distinct limits on real actions and lesson completion; preserving only one half of a multi-outcome prohibition is an omission. Never treat rehearsal as proof of completion.
   </quality_checks>
 
   <finding_rules>

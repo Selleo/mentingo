@@ -45,6 +45,10 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - API lint/typecheck: `pnpm lint-tsc-api`.
 - Web lint/typecheck: `pnpm lint-tsc-web`.
 - API tests: `pnpm test:api`.
+- Deterministic AI regressions: `pnpm test:ai:regression` (no running app or provider credentials).
+- Manual AI model/application experiments: `pnpm eval:ai --mode list`; see `docs/langfuse/core-evaluation-runbook.md`.
+- Run and record a real dataset experiment: `pnpm eval:ai:experiment --config PATH`; add `--check` for local prerequisite validation only. See `docs/langfuse/README.md`.
+- Normalize/record an actual experiment report: `pnpm eval:ai:record` with explicit report/run/receipt arguments; remote upload additionally requires `--apply`.
 - Web unit tests: `pnpm test:web`.
 - Web E2E tests: `pnpm test:web:e2e`.
 - Generate web API client: `pnpm generate:client`.
@@ -81,6 +85,15 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - Use the outbox for durable domain events emitted from committed database changes, especially when downstream handlers should react reliably after the source transaction succeeds.
 - Do not force events for simple synchronous reads/writes; use them when they reduce coupling, improve reliability, or make side effects auditable/retryable.
 - Do not define reusable workflow/API/domain types inside service files. Put shared service contracts in `*.types.ts`, API contracts in schema files, and persistence shapes in repository/schema files.
+
+## AI Regression Checks
+
+- After meaningful AI changes, run `pnpm test:ai:regression` from the repository root before declaring the change complete. This runs the deterministic evaluation harness and Langfuse configuration/recording tests without calling models, application endpoints or Langfuse.
+- Meaningful AI changes include prompt/template behavior, model/provider selection, runtime routing, Judge/scoring/blocker logic, structured-output contracts, retrieval/embeddings, assistant tool use, course-authoring integration, translation, and voice/transcription behavior. Also run the narrowest existing product tests for the affected path; the evaluation harness does not replace ordinary voice/protocol, permission, persistence or integration tests.
+- When fixing a historical failure or changing intended AI behavior, add/update the corresponding versioned scenario, expected outcomes and deterministic assertions where applicable. Keep the case matrix and documented execution limits accurate; a catalogue entry is not a passing test.
+- For affected model-quality or native application scenarios, use `pnpm eval:ai` with explicit case selection and the existing opt-in flags when the local test environment and suitable fixtures/credentials are available, respecting any task restrictions on provider execution. Native scenarios require a running local Core environment, supporting services/workers and isolated disposable fixtures; prompt-only scenarios do not. The application controls whether its Luma endpoint is local or hosted. Do not switch endpoints, copy production credentials or create customer fixtures merely to make a regression runnable.
+- Keep live model/application experiments separate from ordinary unit tests and default CI. Remote Langfuse recording is optional and explicit (`pnpm eval:ai:record ... --apply`), separate from running tests locally. Honor the task’s existing restrictions on remote calls/uploads; do not add automatic remote runs or publishing to the default command.
+- Report the exact commands and selected cases, deterministic results and semantic review status separately. If a model/application case lacks a fixture, service, credential or permitted execution path, report it as not run with the missing prerequisite; do not count preparation, mocks or a nonempty response as quality acceptance. Use `docs/langfuse/core-evaluation-runbook.md` and `docs/langfuse/core-test-case-matrix.md` for commands, ownership and known gaps.
 
 ## Definition Of Done
 
