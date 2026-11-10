@@ -9087,10 +9087,14 @@
     "studentAnswer": "Réponse de l'apprenant",
     "nextAnswer": "Réponse suivante",
     "points": "Points : {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Réussi",
+      "failed": "Échoué"
+    },
     "form": {
       "title": "Note",
-      "points": "Points (0–{{max}})",
-      "pointsRange": "Saisissez un nombre entier de 0 à {{max}}.",
+      "verdict": "Résultat ({{max}} pt en cas de réussite)",
+      "verdictRequired": "Choisissez réussi ou échoué.",
       "comment": "Commentaire (facultatif)",
       "commentPlaceholder": "Retour pour l'apprenant",
       "commentTooLong": "Le commentaire peut contenir au maximum {{max}} caractères.",
@@ -9108,7 +9112,6 @@
       "gradeError": "Impossible d'enregistrer la note."
     },
     "errors": {
-      "pointsOutOfRange": "Le nombre de points est hors de la plage autorisée.",
       "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée.",
       "ownAnswer": "Vous ne pouvez pas noter votre propre réponse.",
       "attemptSuperseded": "L'apprenant a recommencé ce cours, cette tentative ne peut donc plus être notée."

@@ -69,19 +69,21 @@ export const updateQueueSearchParams = (
   return next;
 };
 
-export const gradeAnswerFormSchema = (t: TFunction, maximumPoints: number) => {
-  const pointsMessage = t("quizGrading.form.pointsRange", { max: maximumPoints });
+export const GRADE_VERDICTS = ["passed", "failed"] as const;
+export type GradeVerdict = (typeof GRADE_VERDICTS)[number];
 
-  return z.object({
-    awardedPoints: z
-      .string()
-      .trim()
-      .regex(/^\d+$/, pointsMessage)
-      .refine((value) => Number(value) <= maximumPoints, pointsMessage),
+// shortcut: pass/fail is the only grading method, so full points mean "passed"; read the stored method once another one exists.
+export const verdictFromPoints = (awardedPoints: number, maximumPoints: number): GradeVerdict =>
+  awardedPoints >= maximumPoints ? "passed" : "failed";
+
+export const gradeAnswerFormSchema = (t: TFunction) =>
+  z.object({
+    verdict: z.enum(GRADE_VERDICTS, {
+      errorMap: () => ({ message: t("quizGrading.form.verdictRequired") }),
+    }),
     comment: z
       .string()
       .max(COMMENT_MAX_LENGTH, t("quizGrading.form.commentTooLong", { max: COMMENT_MAX_LENGTH })),
   });
-};
 
 export type GradeAnswerFormValues = z.infer<ReturnType<typeof gradeAnswerFormSchema>>;

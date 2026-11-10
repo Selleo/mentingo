@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ASSESSMENT_ANSWER_GRADING_STATUSES } from "@repo/shared";
+import { ASSESSMENT_ANSWER_GRADING_STATUSES, QUIZ_REVIEW_GRADING_METHODS } from "@repo/shared";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -13,12 +13,18 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Textarea } from "~/components/ui/textarea";
 
 import { QUIZ_GRADING_HANDLES } from "../../../e2e/data/quiz-grading/handles";
 
-import { COMMENT_MAX_LENGTH, gradeAnswerFormSchema } from "./quizGrading.utils";
+import {
+  COMMENT_MAX_LENGTH,
+  GRADE_VERDICTS,
+  gradeAnswerFormSchema,
+  verdictFromPoints,
+} from "./quizGrading.utils";
 
 import type { GradeAnswerFormValues } from "./quizGrading.utils";
 import type { GetAnswerDetailsResponse } from "~/api/generated-api";
@@ -32,18 +38,26 @@ export function GradeAnswerForm({ answer, onGraded }: GradeAnswerFormProps) {
   const { t } = useTranslation();
   const { mutateAsync: gradeAnswer, isPending } = useGradeQuizAnswer();
   const form = useForm<GradeAnswerFormValues>({
-    resolver: zodResolver(gradeAnswerFormSchema(t, answer.maximumPoints)),
+    resolver: zodResolver(gradeAnswerFormSchema(t)),
     defaultValues: {
-      awardedPoints: answer.awardedPoints?.toString() ?? "",
+      verdict:
+        answer.awardedPoints === null
+          ? undefined
+          : verdictFromPoints(answer.awardedPoints, answer.maximumPoints),
       comment: answer.reviews[0]?.comment ?? "",
     },
   });
 
-  const onSubmit = async ({ awardedPoints, comment }: GradeAnswerFormValues) => {
+  const onSubmit = async ({ verdict, comment }: GradeAnswerFormValues) => {
     const { nextAnswerId } = await gradeAnswer({
       answerId: answer.id,
-      body: { awardedPoints: Number(awardedPoints), comment: comment.trim() || undefined },
+      body: {
+        method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL,
+        passed: verdict === "passed",
+        comment: comment.trim() || undefined,
+      },
     });
+
     onGraded(nextAnswerId);
   };
 
@@ -55,21 +69,29 @@ export function GradeAnswerForm({ answer, onGraded }: GradeAnswerFormProps) {
       >
         <FormField
           control={form.control}
-          name="awardedPoints"
+          name="verdict"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("quizGrading.form.points", { max: answer.maximumPoints })}</FormLabel>
+              <FormLabel>{t("quizGrading.form.verdict", { max: answer.maximumPoints })}</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={answer.maximumPoints}
-                  step={1}
-                  className="w-32"
-                  data-testid={QUIZ_GRADING_HANDLES.POINTS_INPUT}
-                />
+                <RadioGroup
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                  className="flex gap-6"
+                >
+                  {GRADE_VERDICTS.map((verdict) => (
+                    <div key={verdict} className="flex items-center gap-2">
+                      <RadioGroupItem
+                        value={verdict}
+                        id={`grade-verdict-${verdict}`}
+                        data-testid={QUIZ_GRADING_HANDLES.VERDICT_OPTION(verdict)}
+                      />
+                      <Label htmlFor={`grade-verdict-${verdict}`} className="cursor-pointer">
+                        {t(`quizGrading.verdict.${verdict}`)}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>

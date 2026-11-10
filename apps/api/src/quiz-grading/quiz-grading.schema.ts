@@ -1,4 +1,8 @@
-import { ASSESSMENT_ANSWER_GRADING_STATUSES, QUIZ_GRADING_COMMENT_MAX_LENGTH } from "@repo/shared";
+import {
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
+  QUIZ_GRADING_COMMENT_MAX_LENGTH,
+  QUIZ_REVIEW_GRADING_METHODS,
+} from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -51,8 +55,10 @@ export const quizGradingAnswerDetailsSchema = Type.Intersect([
   }),
 ]);
 
+// A new grading method becomes another variant of a union discriminated by `method`.
 export const gradeQuizAnswerSchema = Type.Object({
-  awardedPoints: Type.Integer({ minimum: 0 }),
+  method: Type.Literal(QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL),
+  passed: Type.Boolean(),
   comment: Type.Optional(Type.String({ maxLength: QUIZ_GRADING_COMMENT_MAX_LENGTH })),
 });
 

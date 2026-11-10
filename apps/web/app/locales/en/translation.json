@@ -9594,10 +9594,14 @@
     "studentAnswer": "Student's answer",
     "nextAnswer": "Next answer",
     "points": "Points: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Pass",
+      "failed": "Fail"
+    },
     "form": {
       "title": "Grade",
-      "points": "Points (0–{{max}})",
-      "pointsRange": "Enter a whole number from 0 to {{max}}.",
+      "verdict": "Result ({{max}} pt for a pass)",
+      "verdictRequired": "Choose pass or fail.",
       "comment": "Comment (optional)",
       "commentPlaceholder": "Feedback for the student",
       "commentTooLong": "The comment can have at most {{max}} characters.",
@@ -9615,7 +9619,6 @@
       "gradeError": "Could not save the grade."
     },
     "errors": {
-      "pointsOutOfRange": "Points are outside the allowed range.",
       "answerNotFound": "This answer does not exist or cannot be graded.",
       "ownAnswer": "You cannot grade your own answer.",
       "attemptSuperseded": "The learner has started this course again, so this attempt can no longer be graded."

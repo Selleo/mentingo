@@ -69,6 +69,13 @@ export type AssessmentAnswerGradingStatus =
 
 export const QUIZ_GRADING_COMMENT_MAX_LENGTH = 5000;
 
+/** How a reviewer grades an open answer. Pass awards the question's full points, fail awards 0. */
+export const QUIZ_REVIEW_GRADING_METHODS = {
+  PASS_FAIL: "pass_fail",
+} as const;
+export type QuizReviewGradingMethod =
+  (typeof QUIZ_REVIEW_GRADING_METHODS)[keyof typeof QUIZ_REVIEW_GRADING_METHODS];
+
 export const ASSESSMENT_ATTEMPT_RESULTS = {
   PENDING: "pending",
   PASSED: "passed",

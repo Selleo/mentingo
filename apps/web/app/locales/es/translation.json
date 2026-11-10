@@ -9502,10 +9502,14 @@
     "studentAnswer": "Respuesta del estudiante",
     "nextAnswer": "Siguiente respuesta",
     "points": "Puntos: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Aprobado",
+      "failed": "Suspenso"
+    },
     "form": {
       "title": "Calificación",
-      "points": "Puntos (0–{{max}})",
-      "pointsRange": "Introduce un número entero de 0 a {{max}}.",
+      "verdict": "Resultado ({{max}} pt si aprueba)",
+      "verdictRequired": "Elige aprobado o suspenso.",
       "comment": "Comentario (opcional)",
       "commentPlaceholder": "Comentarios para el estudiante",
       "commentTooLong": "El comentario puede tener como máximo {{max}} caracteres.",
@@ -9523,7 +9527,6 @@
       "gradeError": "No se pudo guardar la calificación."
     },
     "errors": {
-      "pointsOutOfRange": "Los puntos están fuera del rango permitido.",
       "answerNotFound": "Esta respuesta no existe o no se puede calificar.",
       "ownAnswer": "No puedes calificar tu propia respuesta.",
       "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar."

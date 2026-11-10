@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
@@ -12,7 +11,9 @@ import {
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_GRADING_MODES,
   PERMISSIONS,
+  QUIZ_REVIEW_GRADING_METHODS,
 } from "@repo/shared";
+import { match } from "ts-pattern";
 
 import { DatabasePg, type Pagination, type UUIDType } from "src/common";
 import { parsePagination } from "src/common/pagination";
@@ -90,7 +91,7 @@ export class QuizGradingService {
 
   async gradeAnswer(
     answerId: UUIDType,
-    { awardedPoints, comment }: GradeQuizAnswerBody,
+    { comment, ...grade }: GradeQuizAnswerBody,
     currentUser: CurrentUserType,
   ): Promise<GradeQuizAnswerResponse> {
     return this.tenantDbRunnerService.transaction(async () => {
@@ -109,8 +110,11 @@ export class QuizGradingService {
       if (answer.studentId === currentUser.userId)
         throw new ForbiddenException("quizGrading.errors.ownAnswer");
 
-      if (awardedPoints > answer.maximumPoints)
-        throw new BadRequestException("quizGrading.errors.pointsOutOfRange");
+      const awardedPoints = match(grade)
+        .with({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL }, ({ passed }) =>
+          passed ? answer.maximumPoints : 0,
+        )
+        .exhaustive();
 
       // The learner moved on to a newer learning state (e.g. repeated the course).
       const learningStateId = await this.courseRepetitionService

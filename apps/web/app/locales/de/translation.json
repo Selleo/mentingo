@@ -9552,10 +9552,14 @@
     "studentAnswer": "Antwort der lernenden Person",
     "nextAnswer": "Nächste Antwort",
     "points": "Punkte: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Bestanden",
+      "failed": "Nicht bestanden"
+    },
     "form": {
       "title": "Bewertung",
-      "points": "Punkte (0–{{max}})",
-      "pointsRange": "Gib eine ganze Zahl von 0 bis {{max}} ein.",
+      "verdict": "Ergebnis ({{max}} Pkt. bei Bestehen)",
+      "verdictRequired": "Wählen Sie bestanden oder nicht bestanden.",
       "comment": "Kommentar (optional)",
       "commentPlaceholder": "Feedback für die lernende Person",
       "commentTooLong": "Der Kommentar darf höchstens {{max}} Zeichen lang sein.",
@@ -9573,7 +9577,6 @@
       "gradeError": "Die Bewertung konnte nicht gespeichert werden."
     },
     "errors": {
-      "pointsOutOfRange": "Die Punktzahl liegt außerhalb des zulässigen Bereichs.",
       "answerNotFound": "Diese Antwort existiert nicht oder kann nicht bewertet werden.",
       "ownAnswer": "Du kannst deine eigene Antwort nicht bewerten.",
       "attemptSuperseded": "Die lernende Person hat diesen Kurs neu begonnen, daher kann dieser Versuch nicht mehr bewertet werden."

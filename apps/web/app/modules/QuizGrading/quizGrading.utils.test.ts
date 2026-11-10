@@ -2,6 +2,7 @@ import {
   gradeAnswerFormSchema,
   parseQueueSearchParams,
   updateQueueSearchParams,
+  verdictFromPoints,
 } from "./quizGrading.utils";
 
 import type { TFunction } from "i18next";
@@ -78,17 +79,24 @@ describe("updateQueueSearchParams", () => {
 });
 
 describe("gradeAnswerFormSchema", () => {
-  const schema = gradeAnswerFormSchema(t, 3);
+  const schema = gradeAnswerFormSchema(t);
 
-  it.each(["0", "3", " 2 "])("accepts whole points within range: %s", (awardedPoints) => {
-    expect(schema.safeParse({ awardedPoints, comment: "" }).success).toBe(true);
+  it.each(["passed", "failed"])("accepts the %s verdict", (verdict) => {
+    expect(schema.safeParse({ verdict, comment: "" }).success).toBe(true);
   });
 
-  it.each(["", "4", "-1", "1.5", "abc"])("rejects invalid points: %s", (awardedPoints) => {
-    expect(schema.safeParse({ awardedPoints, comment: "" }).success).toBe(false);
+  it.each([undefined, "", "1"])("rejects a missing or unknown verdict: %s", (verdict) => {
+    expect(schema.safeParse({ verdict, comment: "" }).success).toBe(false);
   });
 
   it("rejects comments over the limit", () => {
-    expect(schema.safeParse({ awardedPoints: "1", comment: "a".repeat(5001) }).success).toBe(false);
+    expect(schema.safeParse({ verdict: "passed", comment: "a".repeat(5001) }).success).toBe(false);
+  });
+});
+
+describe("verdictFromPoints", () => {
+  it("treats full points as passed and anything less as failed", () => {
+    expect(verdictFromPoints(1, 1)).toBe("passed");
+    expect(verdictFromPoints(0, 1)).toBe("failed");
   });
 });

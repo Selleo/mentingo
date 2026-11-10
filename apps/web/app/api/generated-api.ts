@@ -31358,8 +31358,8 @@ export interface GetAnswerDetailsResponse {
 }
 
 export interface GradeAnswerBody {
-  /** @min 0 */
-  awardedPoints: number;
+  method: "pass_fail";
+  passed: boolean;
   /** @maxLength 5000 */
   comment?: string;
 }

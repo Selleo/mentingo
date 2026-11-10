@@ -114,12 +114,8 @@ test("grading the last answer completes the lesson", async ({
         );
 
         const answerUrl = page.url();
-        const answerId = new URL(answerUrl).pathname.split("/").pop() ?? "";
-        const { maximumPoints } = (
-          await reviewerClient.api.quizGradingControllerGetAnswerDetails(answerId)
-        ).data.data;
 
-        await page.getByTestId(QUIZ_GRADING_HANDLES.POINTS_INPUT).fill(String(maximumPoints));
+        await page.getByTestId(QUIZ_GRADING_HANDLES.VERDICT_OPTION("passed")).click();
         await page.getByTestId(QUIZ_GRADING_HANDLES.COMMENT_INPUT).fill(REVIEWER_COMMENT);
         await page.getByTestId(QUIZ_GRADING_HANDLES.SUBMIT_BUTTON).click();
 

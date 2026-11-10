@@ -163294,9 +163294,12 @@
       "GradeAnswerBody": {
         "type": "object",
         "properties": {
-          "awardedPoints": {
-            "minimum": 0,
-            "type": "integer"
+          "method": {
+            "const": "pass_fail",
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
           },
           "comment": {
             "maxLength": 5000,
@@ -163304,7 +163307,8 @@
           }
         },
         "required": [
-          "awardedPoints"
+          "method",
+          "passed"
         ]
       },
       "GradeAnswerResponse": {

@@ -9,7 +9,7 @@ export const QUIZ_GRADING_HANDLES = {
   ANSWER_PAGE: "quiz-grading-answer-page",
   QUESTION_TITLE: "quiz-grading-question-title",
   STUDENT_ANSWER: "quiz-grading-student-answer",
-  POINTS_INPUT: "quiz-grading-points-input",
+  VERDICT_OPTION: (verdict: "passed" | "failed") => `quiz-grading-verdict-${verdict}`,
   COMMENT_INPUT: "quiz-grading-comment-input",
   SUBMIT_BUTTON: "quiz-grading-submit-button",
   NEXT_ANSWER_BUTTON: "quiz-grading-next-answer-button",

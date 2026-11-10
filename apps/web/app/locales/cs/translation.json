@@ -9617,10 +9617,14 @@
     "studentAnswer": "Odpověď studenta",
     "nextAnswer": "Další odpověď",
     "points": "Body: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Splněno",
+      "failed": "Nesplněno"
+    },
     "form": {
       "title": "Hodnocení",
-      "points": "Body (0–{{max}})",
-      "pointsRange": "Zadejte celé číslo od 0 do {{max}}.",
+      "verdict": "Výsledek ({{max}} b. za splnění)",
+      "verdictRequired": "Vyberte splněno nebo nesplněno.",
       "comment": "Komentář (nepovinné)",
       "commentPlaceholder": "Zpětná vazba pro studenta",
       "commentTooLong": "Komentář může mít nejvýše {{max}} znaků.",
@@ -9638,7 +9642,6 @@
       "gradeError": "Hodnocení se nepodařilo uložit."
     },
     "errors": {
-      "pointsOutOfRange": "Počet bodů je mimo povolený rozsah.",
       "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit.",
       "ownAnswer": "Nemůžete hodnotit svou vlastní odpověď.",
       "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit."

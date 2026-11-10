@@ -9615,10 +9615,14 @@
     "studentAnswer": "Besimokančiojo atsakymas",
     "nextAnswer": "Kitas atsakymas",
     "points": "Taškai: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Įskaityta",
+      "failed": "Neįskaityta"
+    },
     "form": {
       "title": "Įvertinimas",
-      "points": "Taškai (0–{{max}})",
-      "pointsRange": "Įveskite sveikąjį skaičių nuo 0 iki {{max}}.",
+      "verdict": "Rezultatas ({{max}} tšk. už įskaitymą)",
+      "verdictRequired": "Pasirinkite įskaityta arba neįskaityta.",
       "comment": "Komentaras (neprivalomas)",
       "commentPlaceholder": "Grįžtamasis ryšys besimokančiajam",
       "commentTooLong": "Komentarą gali sudaryti ne daugiau kaip {{max}} simbolių.",
@@ -9636,7 +9640,6 @@
       "gradeError": "Nepavyko išsaugoti įvertinimo."
     },
     "errors": {
-      "pointsOutOfRange": "Taškų skaičius nepatenka į leistiną intervalą.",
       "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti.",
       "ownAnswer": "Negalite vertinti savo atsakymo.",
       "attemptSuperseded": "Besimokantysis pradėjo šį kursą iš naujo, todėl šio bandymo nebegalima įvertinti."

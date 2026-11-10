@@ -15,6 +15,7 @@ import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 import { QUIZ_GRADING_HANDLES } from "../../../e2e/data/quiz-grading/handles";
 
 import { GradeAnswerForm } from "./GradeAnswerForm";
+import { verdictFromPoints } from "./quizGrading.utils";
 import { QuizGradingStatusBadge } from "./QuizGradingStatusBadge";
 
 import type { ReactNode } from "react";
@@ -150,6 +151,10 @@ export default function QuizGradingAnswerPage() {
                   <span>{formatLocalizedDate(i18n.language, review.reviewedAt)}</span>
                 </div>
                 <span className="body-sm-md text-neutral-950">
+                  {t(
+                    `quizGrading.verdict.${verdictFromPoints(review.awardedPoints, answer.maximumPoints)}`,
+                  )}
+                  {" · "}
                   {t("quizGrading.points", {
                     points: review.awardedPoints,
                     max: answer.maximumPoints,

@@ -9701,10 +9701,14 @@
     "studentAnswer": "Odpowiedź kursanta",
     "nextAnswer": "Następna odpowiedź",
     "points": "Punkty: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Zaliczone",
+      "failed": "Niezaliczone"
+    },
     "form": {
       "title": "Ocena",
-      "points": "Punkty (0–{{max}})",
-      "pointsRange": "Wpisz liczbę całkowitą od 0 do {{max}}.",
+      "verdict": "Wynik ({{max}} pkt za zaliczenie)",
+      "verdictRequired": "Wybierz zaliczone lub niezaliczone.",
       "comment": "Komentarz (opcjonalnie)",
       "commentPlaceholder": "Informacja zwrotna dla kursanta",
       "commentTooLong": "Komentarz może mieć maksymalnie {{max}} znaków.",
@@ -9722,7 +9726,6 @@
       "gradeError": "Nie udało się zapisać oceny."
     },
     "errors": {
-      "pointsOutOfRange": "Liczba punktów jest poza dozwolonym zakresem.",
       "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić.",
       "ownAnswer": "Nie możesz oceniać własnej odpowiedzi.",
       "attemptSuperseded": "Kursant rozpoczął ten kurs od nowa, więc tej próby nie można już ocenić."
