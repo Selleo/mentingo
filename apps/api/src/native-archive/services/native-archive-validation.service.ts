@@ -128,6 +128,7 @@ export class NativeArchiveValidationService {
         snapshot.assessmentQuestionMatchingPairs.filter((pair) => pair.questionId === question.id)
           .length < MINIMUM_MATCHING_PAIRS,
     );
+
     if (hasIncompleteMatchingQuestion) {
       throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
     }

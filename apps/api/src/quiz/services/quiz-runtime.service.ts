@@ -598,6 +598,7 @@ export class QuizRuntimeService {
 
       const questionAnswerId = randomUUID();
       const awardedPoints = this.scoreQuestionAnswer(quizQuestion, submittedQuestion.answers);
+
       if (awardedPoints >= Number(quizQuestion.maximumPoints)) attemptData.correctAnswerCount += 1;
 
       attemptData.questionAnswers.push({

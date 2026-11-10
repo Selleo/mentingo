@@ -284,6 +284,7 @@ describe("Course language deletion (e2e)", () => {
       const { admin, cookie } = await arrangeSignedInAdmin();
       const course = await arrangeBilingualCourse(admin.id);
       const { question } = await arrangeBilingualCourseContent(course.id, admin.id);
+
       await inTenant(() =>
         db.insert(assessmentQuestionMatchingPairs).values(
           [COURSE_LANGUAGES.BASE, COURSE_LANGUAGES.TRANSLATION].map((language) => ({
@@ -325,6 +326,7 @@ describe("Course language deletion (e2e)", () => {
           .from(assessmentQuestionMatchingPairs)
           .where(eq(assessmentQuestionMatchingPairs.questionId, question.id)),
       );
+
       expect(remainingPairs).toEqual([{ language: COURSE_LANGUAGES.BASE }]);
     });
 

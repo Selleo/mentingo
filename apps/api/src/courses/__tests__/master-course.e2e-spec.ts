@@ -107,6 +107,12 @@ describe("Master course export and sync (e2e)", () => {
   let sourceTenantId: string;
   let targetTenantId: string;
   let masterCourseService: MasterCourseService;
+
+  const createUpdateSync =
+    (job: Omit<Parameters<MasterCourseService["transferFromSyncJob"]>[0], "triggerEventType">) =>
+    () =>
+      masterCourseService.transferFromSyncJob({ ...job, triggerEventType: "UpdateCourseEvent" });
+
   let aiRepository: AiRepository;
   let mockS3Service: {
     copyFile: jest.Mock;
@@ -1867,14 +1873,12 @@ describe("Master course export and sync (e2e)", () => {
       .select()
       .from(masterCourseExports)
       .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
-    const sync = () =>
-      masterCourseService.transferFromSyncJob({
-        exportId: exportLink.id,
-        sourceCourseId,
-        sourceTenantId,
-        targetTenantId,
-        triggerEventType: "UpdateCourseEvent",
-      });
+    const sync = createUpdateSync({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+    });
     await runAsTenant(sourceTenantId, async () => {
       await db
         .update(assessmentQuestionChoiceOptions)
@@ -1934,6 +1938,7 @@ describe("Master course export and sync (e2e)", () => {
             .insert(assessments)
             .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
             .returning();
+
           await db.insert(assessmentQuestions).values({
             id: questionId,
             assessmentId: assessment.id,
@@ -2005,14 +2010,12 @@ describe("Master course export and sync (e2e)", () => {
       .select()
       .from(masterCourseExports)
       .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
-    const sync = () =>
-      masterCourseService.transferFromSyncJob({
-        exportId: exportLink.id,
-        sourceCourseId,
-        sourceTenantId,
-        targetTenantId,
-        triggerEventType: "UpdateCourseEvent",
-      });
+    const sync = createUpdateSync({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+    });
 
     await runAsTenant(sourceTenantId, async () => {
       await db

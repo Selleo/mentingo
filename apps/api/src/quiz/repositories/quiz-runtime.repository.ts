@@ -336,6 +336,7 @@ export class QuizRuntimeRepository {
 
   async findMatchingAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
     if (!questionAnswerIds.length) return [];
+
     return db
       .select()
       .from(assessmentAttemptMatchingAnswers)

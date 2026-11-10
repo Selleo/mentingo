@@ -1894,6 +1894,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const quiz = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
       const question = quiz?.questions?.[0];
       const [cat, dog] = question?.options ?? [];
+
       if (!question?.id || !cat?.id || !dog?.id) throw new Error("Matching quiz was not created");
 
       return { lesson, question, questionId: question.id, cat, catId: cat.id, dog, dogId: dog.id };
@@ -1937,7 +1938,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         SUPPORTED_LANGUAGES.EN,
         learner.id,
       );
-      expect([...(delivery.questions[0].matchingTargets ?? [])].sort()).toEqual(["Meow", "Woof"]);
+
+      expect(new Set(delivery.questions[0].matchingTargets)).toEqual(new Set(["Meow", "Woof"]));
       expect(delivery.questions[0].options?.map(({ matchedWord }) => matchedWord)).toEqual([
         null,
         null,
@@ -1947,6 +1949,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         { answerId: catId, value: "Meow" },
         { answerId: dogId, value: "Meow" },
       ]);
+
       expect(attempt).toMatchObject({ score: 50, passed: true, correctAnswerCount: 0 });
 
       const feedback = await runtime.getQuizForDelivery(
@@ -1955,6 +1958,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         learner.id,
         true,
       );
+
       expect(feedback.questions[0].passQuestion).toBe(false);
       expect(feedback.questions[0].options).toMatchObject([
         { optionText: "Cat", studentAnswer: "Meow", isCorrect: true, matchedWord: "Meow" },
@@ -2009,6 +2013,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const { lesson, questionId } = await createMatchingQuiz(
         ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
       );
+
       await db
         .delete(assessmentQuestionMatchingPairs)
         .where(eq(assessmentQuestionMatchingPairs.questionId, questionId));
@@ -2031,6 +2036,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       });
 
       const updated = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+
       expect(
         updated?.questions?.[0].options?.map(({ id, optionText }) => [id, optionText]),
       ).toEqual([
@@ -2050,6 +2056,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
         },
       );
+
       await db
         .update(assessments)
         .set({ availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL] })
@@ -2079,6 +2086,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         lesson.id,
         SUPPORTED_LANGUAGES.EN,
       );
+
       expect(english?.questions?.[0].options?.map(({ matchedWord }) => matchedWord)).toEqual([
         "Meow",
         "Woof",
@@ -2088,7 +2096,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         SUPPORTED_LANGUAGES.PL,
         learner.id,
       );
-      expect([...(polish.questions[0].matchingTargets ?? [])].sort()).toEqual(["Hau", "Miau"]);
+
+      expect(new Set(polish.questions[0].matchingTargets)).toEqual(new Set(["Hau", "Miau"]));
       expect(polish.questions[0].options?.map(({ optionText }) => optionText)).toEqual([
         "Kot",
         "Pies",
@@ -2135,6 +2144,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const authoring = app.get(QuizAuthoringService);
       const { lesson } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL);
       const definition = await authoring.getQuizLessonForAuthoring(lesson.id);
+
       if (!definition) throw new Error("Quiz definition missing");
 
       await expect(

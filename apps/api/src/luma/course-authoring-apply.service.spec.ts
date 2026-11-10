@@ -964,7 +964,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
         // Luma does not author matching questions yet.
         Object.values(ASSESSMENT_QUESTION_TYPES)
           .filter((type) => type !== ASSESSMENT_QUESTION_TYPES.MATCHING)
-          .sort(),
+          .sort((left, right) => left.localeCompare(right)),
       );
       expect(test.saveQuizFromAuthoring).toHaveBeenCalledWith(
         expect.objectContaining({

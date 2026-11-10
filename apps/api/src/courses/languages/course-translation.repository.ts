@@ -391,6 +391,7 @@ export class CourseTranslationRepository {
     db: DatabasePg,
   ) {
     const { questionId, displayOrder, side } = target;
+
     return db
       .insert(assessmentQuestionMatchingPairs)
       .values({

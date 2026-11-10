@@ -74,6 +74,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
           }
 
           const matches = question.options?.map((option) => option.matchedWord?.trim()) ?? [];
+
           if (question.type === QuestionType.MATCHING && new Set(matches).size !== matches.length) {
             ctx.addIssue({
               path: [index, "options"],

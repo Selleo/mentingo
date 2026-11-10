@@ -65,6 +65,7 @@ describe("NativeArchiveValidationService", () => {
 
   it("treats archives exported before matching questions as having no pairs", () => {
     const value = snapshot();
+
     delete value.assessmentQuestionMatchingPairs;
 
     expect(service.validateCourseSnapshot(value).assessmentQuestionMatchingPairs).toEqual([]);
@@ -73,6 +74,7 @@ describe("NativeArchiveValidationService", () => {
   it("rejects matching questions with fewer than two pairs", () => {
     const questionId = "0b9b1b0e-4a07-4c3c-9e57-2c1d3f6c1a01";
     const value = snapshot();
+
     value.questions = [{ id: questionId, lessonId: LESSON_ID, type: "matching" }];
     value.assessmentQuestionMatchingPairs = [
       { id: "0b9b1b0e-4a07-4c3c-9e57-2c1d3f6c1a02", questionId, prompt: "Cat", match: "Meow" },
