@@ -1,0 +1,970 @@
+{
+  "version": 1,
+  "name": "mentingo-assessment-issue-2019-v1",
+  "cases": [
+    {
+      "id": "assessment-2019-own-account-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I disabled MFA on my own training account. I have not changed the client system."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-client-admission-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I disabled MFA on the client production system so I could log in faster."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-client-denial-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I did not disable MFA on the client production system. I left it enabled."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-third-party-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "The previous consultant disabled MFA on the client production system. I reported it and did not change MFA myself."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-mentor-statement-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "assistant",
+            "content": "I disabled MFA on the client production system."
+          },
+          {
+            "role": "user",
+            "content": "That was unsafe. I did not do that and will keep MFA enabled."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-quotation-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "The client wrote: “I disabled MFA.” I am quoting their message; I did not change the setting."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-hypothetical-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "If someone disabled MFA on a client production system, I would ask security to restore it. I will keep MFA enabled."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-ambiguous-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "MFA was disabled before the meeting. I do not know who changed it."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-explicit-intent-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I will disable MFA on the client production system after this call."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-mixed-denial-admission-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I did not share the client password, but I did disable MFA on the client production system."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-multiple-blockers-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I disabled MFA on the client production system and sent the client password to an unauthorized contractor."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1", "B2"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-denial-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Nie wyłączyłem MFA w systemie produkcyjnym klienta. Pozostawiłem je włączone."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-admission-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Wyłączyłem MFA w systemie produkcyjnym klienta, żeby szybciej się zalogować."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-own-account-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Wyłączyłem MFA na moim własnym koncie szkoleniowym. Nie zmieniałem ustawień klienta."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-third-party-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Poprzedni konsultant wyłączył MFA w systemie klienta. Ja zgłosiłem ten incydent i niczego nie wyłączałem."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-quotation-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Klient napisał: „Wyłączyłem MFA”. Cytuję jego wiadomość, sam nie zmieniałem ustawień."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-hypothetical-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Gdyby ktoś wyłączył MFA u klienta, poprosiłbym dział bezpieczeństwa o przywrócenie. Ja tego nie zrobię."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-ambiguous-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "MFA było wyłączone przed spotkaniem. Nie wiem, kto zmienił ustawienia."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-multiple-blockers-pl",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "pl",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "Wyłączyłem MFA w systemie produkcyjnym klienta i przekazałem hasło klienta nieupoważnionemu podwykonawcy."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": false,
+        "blockerRefs": ["B1", "B2"],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    },
+    {
+      "id": "assessment-2019-mixed-retraction-en",
+      "flow": "grading-semantic",
+      "execution": "assessment",
+      "provenance": "synthetic",
+      "reviewStatus": "pending_domain_review",
+      "input": {
+        "language": "en",
+        "transcript": [
+          {
+            "role": "user",
+            "content": "I was thinking about disabling client MFA, but I decided not to. I will keep it enabled."
+          }
+        ],
+        "rubric": {
+          "taskGoal": "Evaluate only the learner’s own client-security actions or explicit intent. No scored criteria; only verified blocking errors determine failure.",
+          "passingThresholdPercent": 100,
+          "criteria": [],
+          "blockingErrors": [
+            {
+              "ref": "B1",
+              "description": "The learner disables, requests disabling, or explicitly intends to disable multi-factor authentication on a client production system. Changing MFA on the learner’s own training account is outside this rule. Negation, quotations, reporting other people, questions, hypothetical discussion, or an ambiguous passive statement do not establish the learner’s prohibited action or intent."
+            },
+            {
+              "ref": "B2",
+              "description": "The learner shares, offers to share, or explicitly intends to share client credentials with an unauthorized person. Negations, third-party reports, quotations, hypotheticals and ambiguity do not establish this action."
+            }
+          ]
+        },
+        "fixtureRequirements": "Create a NEW owned lesson/thread in a disposable tenant with the exact transcript and the empty scored rubric above. Persist both blocker descriptions in listed order, map B1/B2 to their real blocker UUIDs in blockingErrorIds. Never add a judge message before evaluation."
+      },
+      "expected": {
+        "passed": true,
+        "blockerRefs": [],
+        "rationale": "Only the learner’s explicit own prohibited client action/intent counts. Scope, negation, speaker attribution, quotations, hypotheticals and uncertainty must be resolved semantically."
+      },
+      "rubric": [],
+      "sourcePaths": [
+        "apps/api/src/ai/services/judge.service.ts",
+        "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+      ],
+      "history": {
+        "issue": "https://github.com/Selleo/mentingo/issues/2019",
+        "pullRequest": "https://github.com/Selleo/mentingo/pull/2018",
+        "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
+        "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
+      }
+    }
+  ]
+}

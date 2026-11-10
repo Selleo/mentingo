@@ -1,0 +1,23 @@
+{
+  "project": "mentingo",
+  "repo": "../..",
+  "python": "python3",
+  "features": [
+    "mentor-teacher-chat"
+  ],
+  "cases": [
+    "mentor-teacher-chat-grounded-v1"
+  ],
+  "runName": "prompt-regression",
+  "outputDir": "./experiment-runs",
+  "model": {
+    "model": "gpt-6-luna",
+    "apiKeyEnv": "EVAL_MODEL_API_KEY",
+    "baseURL": "https://api.openai.com/v1"
+  },
+  "envFiles": [
+    "../../apps/api/.env"
+  ],
+  "timeoutSeconds": 300,
+  "allowBundledPrompts": true
+}

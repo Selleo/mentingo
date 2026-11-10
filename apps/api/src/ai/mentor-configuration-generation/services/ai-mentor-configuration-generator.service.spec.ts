@@ -66,8 +66,8 @@ describe("AiMentorConfigurationGeneratorService", () => {
         id === "aiMentorConfigurationGeneratorBase"
           ? "BASE"
           : id === "aiMentorConfigurationGeneratorPractice"
-            ? "The learner's brief describes what the learner wants to practise"
-            : `MODE:${id}`,
+          ? "The learner's brief describes what the learner wants to practise"
+          : `MODE:${id}`,
       ),
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
@@ -177,5 +177,48 @@ describe("AiMentorConfigurationGeneratorService", () => {
         brief: "Create a Teacher.",
       }),
     ).rejects.toThrow("invalid configuration structure");
+  });
+  it("repairs only the targeted field and preserves the roleplay goal and participants", async () => {
+    const current = { type: AI_MENTOR_TYPE.ROLEPLAY, ...roleplayFields };
+    const { service } = createService({
+      ...roleplayFields,
+      characterGoal: "A rewritten goal that was never requested.",
+      aiRole: "Another buyer",
+      factsAndConstraints: "Badge issue is free; completion requires confirmed real action.",
+    });
+    const result = await service.generate({
+      mode: "repair",
+      configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: current,
+      blockingIssues: [
+        {
+          code: "missing_constraint",
+          severity: "error",
+          target: { field: "factsAndConstraints" },
+          message: "A completion boundary is missing.",
+          correction: "Retain the source completion boundary.",
+        },
+      ],
+    });
+    expect(result).toEqual({
+      ...current,
+      factsAndConstraints: "Badge issue is free; completion requires confirmed real action.",
+    });
+  });
+
+  it("preserves every field when a repair has no findings", async () => {
+    const current = { type: AI_MENTOR_TYPE.ROLEPLAY, ...roleplayFields };
+    const { service } = createService({ ...roleplayFields, characterGoal: "Unrequested goal." });
+    const result = await service.generate({
+      mode: "repair",
+      configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      currentConfiguration: current,
+      blockingIssues: [],
+    });
+    expect(result).toEqual(current);
   });
 });

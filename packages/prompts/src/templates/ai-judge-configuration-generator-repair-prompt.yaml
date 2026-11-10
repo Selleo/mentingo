@@ -1,6 +1,6 @@
 id: aiJudgeConfigurationGeneratorRepair
 description: Internal repair-mode add-on for the AI Judge configuration Generator
-version: 1
+version: 2
 
 template: |
   <generation_mode>
@@ -9,6 +9,9 @@ template: |
 
   <mode_rules>
   - This is a focused internal correction step, not a new interpretation of the creator brief.
+  - Preservation in repair takes priority over general create-mode preferences about wording, HTML, learner subjects, criterion completeness, and calibration examples for fields outside the supplied repair scope.
+  - When findings are absent or empty, do not infer missing criteria from the original brief. If the requested defect is already absent, return the existing configuration unchanged. Never invent a blocker to remove or a criterion to add.
+  - If one blocking error is affected, preserve all unrelated criteria, their guidance, taskGoal, and threshold exactly. A request to repair blocking errors is not permission to rebuild the rubric.
   - Preserve the creatorInstruction as an acceptance condition across every repair. Do not undo or weaken the change the creator originally requested.
   - Return the complete replacement configuration and change only what is necessary to resolve the blocking findings while keeping the rubric coherent.
   - Copy every field that is not directly affected by a supplied finding exactly as provided, character for character.
