@@ -31325,6 +31325,16 @@ export interface RunReportBody {
         }
     )[];
   };
+  sortBy?:
+    | "learner"
+    | "course"
+    | "path"
+    | "status"
+    | "progress"
+    | "score"
+    | "attempts"
+    | "lastActivity";
+  sortDirection?: "asc" | "desc";
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /**
    * @min 1
@@ -32047,6 +32057,16 @@ export interface CreateReportExportBody {
           }
       )[];
     };
+    sortBy?:
+      | "learner"
+      | "course"
+      | "path"
+      | "status"
+      | "progress"
+      | "score"
+      | "attempts"
+      | "lastActivity";
+    sortDirection?: "asc" | "desc";
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /**
      * @min 1

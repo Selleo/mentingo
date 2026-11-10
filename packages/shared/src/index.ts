@@ -51,6 +51,7 @@ export * from "./constants/newsSettings";
 export * from "./constants/permissions";
 export * from "./constants/qaSettings";
 export * from "./constants/registrationForm";
+export * from "./constants/reports";
 export * from "./constants/resourceLibrary";
 export * from "./constants/richTextResource";
 export * from "./constants/scorm-bridge";

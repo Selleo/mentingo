@@ -1,9 +1,15 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  DEFAULT_REPORT_SORT,
+  REPORT_SORT_DIRECTIONS,
+  REPORT_SORT_FIELDS,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import { sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 
-import { REPORT_VIEWS } from "../constants/reports.constants";
+import { REPORT_STATUS, REPORT_VIEWS } from "../constants/reports.constants";
 
 import type { ReportStatementContext } from "./reports-query.types";
 import type { SQL } from "drizzle-orm";
@@ -31,7 +37,7 @@ export function buildReportStatement(
     buildBreakdownCtes(context),
     buildPageRowsCte(context),
   ];
-  return sql`WITH ${sql.join(ctes, sql`, `)} ${buildResultProjection()}`;
+  return sql`WITH ${sql.join(ctes, sql`, `)} ${buildResultProjection(context)}`;
 }
 
 function buildLearnerPopulationCte(context: ReportStatementContext): SQL {
@@ -367,16 +373,44 @@ function buildBreakdownCtes(context: ReportStatementContext): SQL {
   `;
 }
 
+/**
+ * Orders report rows by the requested column, with stable record ties so pagination never
+ * skips or repeats rows. Shared by pagination and JSON aggregation (and therefore exports).
+ */
+function buildRowOrder({ query }: ReportStatementContext): SQL {
+  const sortColumn = match(query.sortBy ?? DEFAULT_REPORT_SORT.sortBy)
+    .with(REPORT_SORT_FIELDS.LEARNER, () => sql`learner_name`)
+    .with(REPORT_SORT_FIELDS.COURSE, () => sql`course_title`)
+    .with(REPORT_SORT_FIELDS.PATH, () => sql`path_title`)
+    .with(
+      REPORT_SORT_FIELDS.STATUS,
+      () =>
+        sql`CASE status WHEN ${REPORT_STATUS.NOT_STARTED} THEN 0 WHEN ${REPORT_STATUS.IN_PROGRESS} THEN 1 WHEN ${REPORT_STATUS.COMPLETED} THEN 2 END`,
+    )
+    .with(REPORT_SORT_FIELDS.PROGRESS, () => sql`progress`)
+    .with(REPORT_SORT_FIELDS.SCORE, () => sql`score`)
+    .with(REPORT_SORT_FIELDS.ATTEMPTS, () => sql`attempts`)
+    .with(REPORT_SORT_FIELDS.LAST_ACTIVITY, () => sql`last_activity_at`)
+    .exhaustive();
+
+  const sortDirection = match(query.sortDirection ?? DEFAULT_REPORT_SORT.sortDirection)
+    .with(REPORT_SORT_DIRECTIONS.ASC, () => sql`ASC`)
+    .with(REPORT_SORT_DIRECTIONS.DESC, () => sql`DESC`)
+    .exhaustive();
+
+  return sql`${sortColumn} ${sortDirection} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
+}
+
 function buildPageRowsCte(context: ReportStatementContext): SQL {
   return sql`
           page_rows AS (
-            SELECT * FROM filtered ORDER BY learner_name, COALESCE(course_title, path_title)
+            SELECT * FROM filtered ORDER BY ${buildRowOrder(context)}
             LIMIT ${context.pageLimit} OFFSET ${context.pageOffset}
           )
   `;
 }
 
-function buildResultProjection(): SQL {
+function buildResultProjection(context: ReportStatementContext): SQL {
   return sql`
           SELECT summary.*,
             COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
@@ -409,7 +443,7 @@ function buildResultProjection(): SQL {
               'lastActivityAt', CASE WHEN last_activity_at IS NULL THEN NULL ELSE
                 TO_CHAR(last_activity_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,
               'groupIds', group_ids, 'pathCourses', path_courses
-            ) ORDER BY learner_name, COALESCE(course_title, path_title)) FROM page_rows), '[]'::jsonb) AS rows
+            ) ORDER BY ${buildRowOrder(context)}) FROM page_rows), '[]'::jsonb) AS rows
           FROM summary
   `;
 }

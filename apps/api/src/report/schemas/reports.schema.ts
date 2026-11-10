@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { REPORT_SORT_DIRECTIONS, REPORT_SORT_FIELDS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -78,6 +78,8 @@ export const reportDefinitionSchema = Type.Object(reportDefinitionProperties, {
 export const reportsQuerySchema = Type.Object(
   {
     ...reportDefinitionProperties,
+    sortBy: Type.Optional(Type.Enum(REPORT_SORT_FIELDS)),
+    sortDirection: Type.Optional(Type.Enum(REPORT_SORT_DIRECTIONS)),
     language: Type.Enum(SUPPORTED_LANGUAGES),
     page: Type.Integer({ minimum: 1, default: 1 }),
     pageSize: Type.Integer({ minimum: 1, maximum: 100, default: 25 }),

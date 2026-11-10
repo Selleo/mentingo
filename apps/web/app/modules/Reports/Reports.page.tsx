@@ -1,5 +1,5 @@
 import { useSearchParams } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { DEFAULT_REPORT_SORT, PERMISSIONS } from "@repo/shared";
 import {
   AlertTriangle,
   BookOpen,
@@ -59,6 +59,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 
 import { REPORTS_HANDLES } from "../../../e2e/data/reports/handles";
 
+import type { ReportSort } from "./reports-api.types";
 import type { MetaFunction } from "@remix-run/react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -281,6 +282,7 @@ export default function ReportsPage() {
     initialConfiguration === null,
   );
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<ReportSort>(DEFAULT_REPORT_SORT);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [optionSearch, setOptionSearch] = useState("");
   const [saveName, setSaveName] = useState("");
@@ -303,8 +305,8 @@ export default function ReportsPage() {
   const configurationsQuery = useReportConfigurations();
   const currentTimezone = applied.timezone;
   const reportQuery = useMemo(
-    () => toReportsQuery(applied, language, currentTimezone, page, pageSize),
-    [applied, currentTimezone, language, page, pageSize],
+    () => toReportsQuery(applied, language, currentTimezone, page, pageSize, sort),
+    [applied, currentTimezone, language, page, pageSize, sort],
   );
   const isResultEnabled =
     canUseReports &&
@@ -352,11 +354,11 @@ export default function ReportsPage() {
     setDraft((current) => ({ ...current, timezone }));
   }, [searchParams]);
 
-  const applyConfiguration = () => {
+  const applyReportConfiguration = (configuration: ReportConfiguration) => {
     const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("reportConfig", JSON.stringify(draft));
+    nextParams.set("reportConfig", JSON.stringify(configuration));
     setSearchParams(nextParams, { replace: false });
-    setApplied(draft);
+    setApplied(configuration);
     setIsInvalidURLConfiguration(false);
     setInaccessibleReference(null);
     setPage(1);
@@ -372,19 +374,7 @@ export default function ReportsPage() {
     const reset = resetReportConfiguration(draft);
     setDraft(reset);
     setIncompatibleCount(0);
-    if (isInvalidURLConfiguration) {
-      setApplied(reset);
-      setIsInvalidURLConfiguration(false);
-      setInaccessibleReference(null);
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current);
-          next.delete("reportConfig");
-          return next;
-        },
-        { replace: false },
-      );
-    }
+    applyReportConfiguration(reset);
   };
 
   const selectSubject = (id: string, label: string, type: Exclude<ReportSubject, null>["type"]) => {
@@ -485,7 +475,7 @@ export default function ReportsPage() {
     const exported = await createExport({
       format,
       language,
-      query: toReportsQuery(applied, language, currentTimezone, 1, 100),
+      query: toReportsQuery(applied, language, currentTimezone, 1, 100, sort),
     });
     setExportId(exported.id);
   };
@@ -592,6 +582,11 @@ export default function ReportsPage() {
           language={language}
           timezone={currentTimezone}
           isFetching={resultQuery.isFetching}
+          sort={sort}
+          onSortChange={(nextSort) => {
+            setSort(nextSort);
+            setPage(1);
+          }}
           onPageChange={setPage}
           onPageSizeChange={(nextPageSize) => {
             setPageSize(nextPageSize);
@@ -718,7 +713,7 @@ export default function ReportsPage() {
                     type="button"
                     className="gap-2"
                     disabled={!canApply}
-                    onClick={applyConfiguration}
+                    onClick={() => applyReportConfiguration(draft)}
                   >
                     {isDirty && (
                       <span aria-hidden className="size-1.5 rounded-full bg-warning-400" />

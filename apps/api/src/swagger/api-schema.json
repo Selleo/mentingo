@@ -163011,6 +163011,54 @@
               "rules"
             ]
           },
+          "sortBy": {
+            "anyOf": [
+              {
+                "const": "learner",
+                "type": "string"
+              },
+              {
+                "const": "course",
+                "type": "string"
+              },
+              {
+                "const": "path",
+                "type": "string"
+              },
+              {
+                "const": "status",
+                "type": "string"
+              },
+              {
+                "const": "progress",
+                "type": "string"
+              },
+              {
+                "const": "score",
+                "type": "string"
+              },
+              {
+                "const": "attempts",
+                "type": "string"
+              },
+              {
+                "const": "lastActivity",
+                "type": "string"
+              }
+            ]
+          },
+          "sortDirection": {
+            "anyOf": [
+              {
+                "const": "asc",
+                "type": "string"
+              },
+              {
+                "const": "desc",
+                "type": "string"
+              }
+            ]
+          },
           "language": {
             "anyOf": [
               {
@@ -166265,6 +166313,54 @@
                 "required": [
                   "match",
                   "rules"
+                ]
+              },
+              "sortBy": {
+                "anyOf": [
+                  {
+                    "const": "learner",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  },
+                  {
+                    "const": "path",
+                    "type": "string"
+                  },
+                  {
+                    "const": "status",
+                    "type": "string"
+                  },
+                  {
+                    "const": "progress",
+                    "type": "string"
+                  },
+                  {
+                    "const": "score",
+                    "type": "string"
+                  },
+                  {
+                    "const": "attempts",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lastActivity",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sortDirection": {
+                "anyOf": [
+                  {
+                    "const": "asc",
+                    "type": "string"
+                  },
+                  {
+                    "const": "desc",
+                    "type": "string"
+                  }
                 ]
               },
               "language": {

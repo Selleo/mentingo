@@ -1,10 +1,12 @@
+import { DEFAULT_REPORT_SORT } from "@repo/shared";
+
 import type {
   ReportFilterField,
   ReportFilterOperator,
   ReportFilterTree,
   ReportView,
 } from "./reports.types";
-import type { SupportedLanguages } from "@repo/shared";
+import type { ReportSortDirection, ReportSortField, SupportedLanguages } from "@repo/shared";
 
 /** What a report shows: its view, scope and conditions. Saved configurations store only this. */
 export type ReportDefinition = {
@@ -32,11 +34,17 @@ export type ReportDefinition = {
   };
 };
 
-export type ReportsQuery = ReportDefinition & {
-  language: SupportedLanguages;
-  page: number;
-  pageSize: number;
+export type ReportSort = {
+  sortBy: ReportSortField;
+  sortDirection: ReportSortDirection;
 };
+
+export type ReportsQuery = ReportDefinition &
+  Partial<ReportSort> & {
+    language: SupportedLanguages;
+    page: number;
+    pageSize: number;
+  };
 
 type ReportBuilderState = {
   view: ReportView;
@@ -87,8 +95,10 @@ export const toReportsQuery = (
   timezone: string,
   page = 1,
   pageSize = 25,
+  sort: ReportSort = DEFAULT_REPORT_SORT,
 ): ReportsQuery => ({
   ...toReportDefinition(config, timezone),
+  ...sort,
   language,
   page,
   pageSize,

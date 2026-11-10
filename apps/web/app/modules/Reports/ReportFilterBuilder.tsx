@@ -219,10 +219,15 @@ function RuleEditor({
 
   return (
     <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(150px,1fr)_minmax(130px,0.8fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_auto]">
-      <Select
-        value={rule.field}
-        onValueChange={(next) => {
-          const field = next as ReportFilterField;
+      <ReportOptionPicker
+        label={t("reports.filters.field")}
+        placeholder={t("reports.filters.field")}
+        options={fieldKeys.map((field) => ({ id: field, label: t(`reports.fields.${field}`) }))}
+        selectedIds={[rule.field]}
+        className={controlClassName}
+        onToggle={({ id }) => {
+          const field = fieldKeys.find((fieldKey) => fieldKey === id);
+          if (!field) return;
           update({
             field,
             operator: REPORT_FILTER_FIELDS[field][0],
@@ -230,18 +235,7 @@ function RuleEditor({
             secondValue: undefined,
           });
         }}
-      >
-        <SelectTrigger aria-label={t("reports.filters.field")} className={controlClassName}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {fieldKeys.map((field) => (
-            <SelectItem key={field} value={field}>
-              {t(`reports.fields.${field}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      />
       <Select
         value={rule.operator}
         onValueChange={(next) => {

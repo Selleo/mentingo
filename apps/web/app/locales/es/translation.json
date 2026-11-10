@@ -7703,7 +7703,9 @@
       "averageQuizScore": "Puntuación media de cuestionarios",
       "attempts": "Intentos totales",
       "lastActivity": "Última actividad",
-      "pathCourseStatus": "Estado del curso en el itinerario"
+      "pathCourseStatus": "Estado del curso en el itinerario",
+      "sortAscending": "Ordenar de forma ascendente",
+      "sortDescending": "Ordenar de forma descendente"
     },
     "help": {
       "title": "Acerca de este informe",

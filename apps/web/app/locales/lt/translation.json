@@ -8426,7 +8426,9 @@
       "averageQuizScore": "Vidutinis testų rezultatas",
       "attempts": "Visi bandymai",
       "lastActivity": "Paskutinė veikla",
-      "pathCourseStatus": "Kurso būsena mokymosi kelyje"
+      "pathCourseStatus": "Kurso būsena mokymosi kelyje",
+      "sortAscending": "Rikiuoti didėjimo tvarka",
+      "sortDescending": "Rikiuoti mažėjimo tvarka"
     },
     "help": {
       "title": "Apie ataskaitą",
