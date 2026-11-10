@@ -1,4 +1,6 @@
 import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
@@ -453,6 +455,66 @@ describe("Timed quiz attempts (e2e)", () => {
 
     const resubmit = await submit(cookies, lesson.id, allCorrect).expect(409);
     expect(resubmit.body.message).toBe("studentLessonView.validation.quizAttemptExpired");
+  });
+
+  const addReviewedOpenQuestion = async (assessmentId: UUIDType) => {
+    const [question] = await db
+      .insert(assessmentQuestions)
+      .values({
+        assessmentId,
+        questionType: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE,
+        gradingMode: ASSESSMENT_GRADING_MODES.MANUAL,
+        maximumPoints: "1",
+        prompt: buildJsonbField("en", "Explain"),
+        title: buildJsonbField("en", "Explain"),
+        displayOrder: 3,
+      })
+      .returning();
+    return question.id;
+  };
+
+  it("leaves an in-time submit with a reviewed open answer awaiting review", async () => {
+    const { student, cookies, lesson, assessment, allCorrect } = await setupQuiz(10);
+    const openQuestionId = await addReviewedOpenQuestion(assessment.id);
+    const { attemptId } = await startAttemptState(cookies, lesson.id);
+
+    const response = await submit(cookies, lesson.id, [
+      ...allCorrect,
+      { questionId: openQuestionId, answers: [{ value: "My open answer" }] },
+    ]).expect(201);
+    expect(response.body.data.data).toMatchObject({ awaitingReview: true });
+
+    const [attempt] = await getAttempts(assessment.id);
+    expect(attempt).toMatchObject({
+      id: attemptId,
+      submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
+      result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
+      scorePercentage: null,
+      gradedAt: null,
+    });
+    expect((await getProgress(student.id, lesson.id)).completedAt).toBeNull();
+
+    const restart = await startAttempt(cookies, lesson.id).expect(409);
+    expect(restart.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
+  });
+
+  it("grades an abandoned attempt whose draft skipped the reviewed open question", async () => {
+    const { cookies, lesson, assessment, questions } = await setupQuiz(10);
+    await addReviewedOpenQuestion(assessment.id);
+    const { attemptId } = await startAttemptState(cookies, lesson.id);
+    await saveDraft(cookies, lesson.id, attemptId, draftWithFirstCorrect(questions)).expect(200);
+    await expireAttempt(attemptId, pastGrace);
+
+    await startAttempt(cookies, lesson.id).expect(201);
+
+    const [attempt] = await getAttempts(assessment.id);
+    expect(attempt).toMatchObject({
+      id: attemptId,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      result: ASSESSMENT_ATTEMPT_RESULTS.FAILED,
+      scorePercentage: "33.33",
+    });
   });
 
   it("finalizes an expired attempt on a late start and reports it as finalized", async () => {
