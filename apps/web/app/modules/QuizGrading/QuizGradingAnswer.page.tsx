@@ -99,30 +99,37 @@ export default function QuizGradingAnswerPage() {
             value={`${answer.awardedPoints ?? "—"} / ${answer.maximumPoints}`}
           />
         </dl>
-        <Section title={t("quizGrading.question")}>
-          <div
-            className="body-base-md text-neutral-950"
-            data-testid={QUIZ_GRADING_HANDLES.QUESTION_TITLE}
-            dangerouslySetInnerHTML={{ __html: sanitizeQuizQuestionTitle(answer.questionTitle) }}
-          />
-          {answer.questionDescription && (
-            <Viewer content={answer.questionDescription} style="prose" />
+        <section className="flex flex-col gap-5 rounded-lg border border-neutral-200 bg-white p-6">
+          <div className="flex flex-col gap-2">
+            <h2 className="details-md text-neutral-600">{t("quizGrading.question")}</h2>
+            <div
+              className="body-base-md text-neutral-950"
+              data-testid={QUIZ_GRADING_HANDLES.QUESTION_TITLE}
+              dangerouslySetInnerHTML={{ __html: sanitizeQuizQuestionTitle(answer.questionTitle) }}
+            />
+            {answer.questionDescription && (
+              <Viewer content={answer.questionDescription} style="prose" />
+            )}
+          </div>
+          {answer.reviewerInstructions && (
+            <div className="flex flex-col gap-2 rounded-md bg-warning-50 p-4">
+              <h3 className="details-md text-neutral-600">
+                {t("quizGrading.reviewerInstructions")}
+              </h3>
+              <Viewer content={answer.reviewerInstructions} style="prose" />
+            </div>
           )}
-        </Section>
-        {answer.reviewerInstructions && (
-          <Section title={t("quizGrading.reviewerInstructions")}>
-            <Viewer content={answer.reviewerInstructions} style="prose" />
-          </Section>
-        )}
-        <Section title={t("quizGrading.studentAnswer")}>
-          {/* Learners type open answers into a plain textarea, so render them as text. */}
-          <p
-            className="body-base whitespace-pre-wrap break-words text-neutral-950"
-            data-testid={QUIZ_GRADING_HANDLES.STUDENT_ANSWER}
-          >
-            {answer.studentAnswer}
-          </p>
-        </Section>
+          <div className="flex flex-col gap-2">
+            <h3 className="details-md text-neutral-600">{t("quizGrading.studentAnswer")}</h3>
+            {/* Learners type open answers into a plain textarea, so render them as text. */}
+            <p
+              className="body-base whitespace-pre-wrap break-words rounded-md border-l-4 border-primary-500 bg-primary-50 p-4 text-neutral-950"
+              data-testid={QUIZ_GRADING_HANDLES.STUDENT_ANSWER}
+            >
+              {answer.studentAnswer}
+            </p>
+          </div>
+        </section>
         {canGrade && (
           <Section title={t("quizGrading.form.title")}>
             <GradeAnswerForm
