@@ -1,3 +1,5 @@
+import { toJsonbBuildObject } from "src/utils/jsonb";
+
 import { CourseTransferMaterializerService } from "../services/course-transfer-materializer.service";
 
 describe("archive course learning outcomes updates", () => {
@@ -36,7 +38,7 @@ describe("archive course learning outcomes updates", () => {
 
     expect(updateTargetCourse).toHaveBeenCalledWith(
       "existing-target-id",
-      expect.objectContaining({ learningOutcomes }),
+      expect.objectContaining({ learningOutcomes: toJsonbBuildObject(learningOutcomes) }),
     );
   });
 });

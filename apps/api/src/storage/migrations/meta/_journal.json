@@ -1660,6 +1660,13 @@
       "when": 1794215273004,
       "tag": "0236_add_quiz_attempt_check_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1794304666305,
+      "tag": "0237_normalize_shared_course_learning_outcomes",
+      "breakpoints": true
     }
   ]
 }

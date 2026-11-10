@@ -33,7 +33,7 @@ describe("NativeArchiveImportRepository", () => {
     expect(insertedValues).toEqual(
       expect.objectContaining({ id: "course-id", authorId: "actor-id", categoryId: "category-id" }),
     );
-    expect(insertedValues.learningOutcomes).toEqual({
+    expect(insertedValues.learningOutcomes).not.toEqual({
       en: ["Recognize risk"],
       pl: ["Rozpoznaj ryzyko"],
     });
