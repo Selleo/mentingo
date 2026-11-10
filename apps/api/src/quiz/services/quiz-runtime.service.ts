@@ -259,7 +259,7 @@ export class QuizRuntimeService {
             undefined,
             true,
             true,
-            showsCorrectness ? true : null,
+            showsCorrectness || null,
             openTextAnswer.submittedText,
           )
         : null;

@@ -1654,6 +1654,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       authoring.updateQuizLesson(lesson.id, { language: SUPPORTED_LANGUAGES.EN, questions });
 
     const created = await readBack();
+
     expect(created.questions.map(({ requiresReview }) => requiresReview)).toEqual([true, false]);
     expect(created.gradingModes).toEqual([
       ASSESSMENT_GRADING_MODES.MANUAL,
@@ -2806,6 +2807,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
       });
       const chapter = await chapterFactory.create({ courseId: course.id });
+
       await enrollStudentToCourse(student.id, course.id);
       const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
       const choiceAnswers = await buildQuizAnswers(lesson.id);
@@ -2856,6 +2858,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .select()
         .from(assessmentAttempts)
         .where(eq(assessmentAttempts.learnerId, student.id));
+
       expect(attempt).toMatchObject({
         gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
         result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
@@ -2880,6 +2883,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           ),
         )
         .where(eq(assessmentAttemptQuestionAnswers.attemptId, attempt.id));
+
       expect(answers.find(({ questionId }) => questionId === openQuestion.id)).toMatchObject({
         gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
         awardedPoints: "0.00",
@@ -2902,6 +2906,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
             eq(studentLessonProgress.lessonId, lesson.id),
           ),
         );
+
       expect(progress).toMatchObject({ completedAt: null, isQuizPassed: false, attempts: 1 });
       expect(await app.get(StatisticsRepository).getQuizStats(student.id)).toMatchObject({
         totalAttempts: 0,
@@ -2912,6 +2917,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     it("shows a partial result: graded questions with correctness, open answers waiting for review", async () => {
       const { cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers } =
         await setupQuizWithOpenQuestion();
+
       await submit(cookies, lesson.id, questionsAnswers).expect(201);
 
       const lessonResponse = await request(app.getHttpServer())
@@ -2919,6 +2925,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .set("Cookie", cookies)
         .expect(200);
       const lessonData = lessonResponse.body.data;
+
       expect(lessonData).toMatchObject({
         lessonCompleted: false,
         isQuizAwaitingReview: true,
@@ -2929,6 +2936,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         correctAnswerCount: choiceAnswers.length,
         wrongAnswerCount: 0,
       });
+
       for (const question of lessonData.quizDetails.questions) {
         if (question.id === openQuestion.id) {
           expect(question.passQuestion).toBeNull();
@@ -2949,6 +2957,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const courseLesson = courseResponse.body.data.chapters
         .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
         .find(({ id }: { id: string }) => id === lesson.id);
+
       expect(courseLesson.status).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
     });
 
@@ -2956,6 +2965,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion({
         quizFeedbackEnabled: false,
       });
+
       await submit(cookies, lesson.id, questionsAnswers).expect(201);
 
       const lessonResponse = await request(app.getHttpServer())
@@ -2963,6 +2973,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .set("Cookie", cookies)
         .expect(200);
       const lessonData = lessonResponse.body.data;
+
       expect(lessonData).toMatchObject({
         lessonCompleted: false,
         isQuizAwaitingReview: true,
@@ -2973,10 +2984,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         correctAnswerCount: null,
         wrongAnswerCount: null,
       });
+
       for (const question of lessonData.quizDetails.questions) {
         expect(question.passQuestion).not.toBe(true);
         for (const option of question.options) expect(option.isCorrect).not.toBe(true);
       }
+
       expect(
         lessonData.quizDetails.questions.some(
           (question: { options: { isStudentAnswer: boolean }[] }) =>
@@ -2987,20 +3000,24 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     it("blocks resubmitting and retaking while the quiz awaits review", async () => {
       const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion();
+
       await submit(cookies, lesson.id, questionsAnswers).expect(201);
 
       const resubmit = await submit(cookies, lesson.id, questionsAnswers).expect(409);
+
       expect(resubmit.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
 
       const retake = await request(app.getHttpServer())
         .delete(`/api/lesson/delete-student-quiz-answers?lessonId=${lesson.id}`)
         .set("Cookie", cookies)
         .expect(409);
+
       expect(retake.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
     });
 
     it("grades quizzes without manual questions immediately", async () => {
       const { student, cookies, lesson } = await setupQuizWithOpenQuestion();
+
       await db
         .delete(assessmentQuestions)
         .where(eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL));
@@ -3013,6 +3030,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .select()
         .from(assessmentAttempts)
         .where(eq(assessmentAttempts.learnerId, student.id));
+
       expect(attempt.gradingStatus).toBe(ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED);
       expect(attempt.gradedAt).not.toBeNull();
     });

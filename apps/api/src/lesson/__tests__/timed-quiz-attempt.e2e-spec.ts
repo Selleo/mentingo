@@ -470,6 +470,7 @@ describe("Timed quiz attempts (e2e)", () => {
         displayOrder: 3,
       })
       .returning();
+
     return question.id;
   };
 
@@ -482,9 +483,11 @@ describe("Timed quiz attempts (e2e)", () => {
       ...allCorrect,
       { questionId: openQuestionId, answers: [{ value: "My open answer" }] },
     ]).expect(201);
+
     expect(response.body.data.data).toMatchObject({ awaitingReview: true });
 
     const [attempt] = await getAttempts(assessment.id);
+
     expect(attempt).toMatchObject({
       id: attemptId,
       submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
@@ -496,19 +499,23 @@ describe("Timed quiz attempts (e2e)", () => {
     expect((await getProgress(student.id, lesson.id)).completedAt).toBeNull();
 
     const restart = await startAttempt(cookies, lesson.id).expect(409);
+
     expect(restart.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
   });
 
   it("grades an abandoned attempt whose draft skipped the reviewed open question", async () => {
     const { cookies, lesson, assessment, questions } = await setupQuiz(10);
+
     await addReviewedOpenQuestion(assessment.id);
     const { attemptId } = await startAttemptState(cookies, lesson.id);
+
     await saveDraft(cookies, lesson.id, attemptId, draftWithFirstCorrect(questions)).expect(200);
     await expireAttempt(attemptId, pastGrace);
 
     await startAttempt(cookies, lesson.id).expect(201);
 
     const [attempt] = await getAttempts(assessment.id);
+
     expect(attempt).toMatchObject({
       id: attemptId,
       gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
