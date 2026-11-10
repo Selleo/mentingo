@@ -9,7 +9,6 @@ export const LEADERBOARD_HANDLES = {
   ENTRY: "leaderboard-entry",
   NEARBY: "leaderboard-nearby",
   EMPTY: "leaderboard-empty",
-  UNAVAILABLE: "leaderboard-unavailable",
   ERROR: "leaderboard-error",
   RANGE_HINT: "leaderboard-range-hint",
   SETTINGS_CARD: "leaderboard-settings-card",

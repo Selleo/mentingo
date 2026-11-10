@@ -9419,7 +9419,6 @@
       "yourPosition": "Twoja pozycja",
       "empty": "Brak uczestników w rankingu.",
       "noGroups": "Nie należysz jeszcze do żadnej grupy, więc nie ma rankingu do wyświetlenia.",
-      "unavailable": "Rankingi nie są włączone w Twojej organizacji.",
       "loadError": "Nie udało się wczytać rankingu.",
       "invalidRange": "Wybierz datę początkową, która nie jest późniejsza niż końcowa.",
       "chooseRange": "Wybierz datę początkową i końcową.",
@@ -9436,11 +9435,11 @@
           "description": "Administratorzy zawsze widzą wszystkie rankingi.",
           "closed": {
             "label": "Zamknięte",
-            "description": "Uczestnicy widzą tylko rankingi grup, do których należą."
+            "description": "Tylko własne grupy"
           },
           "public": {
             "label": "Publiczne",
-            "description": "Uczestnicy widzą też ranking całej organizacji."
+            "description": "Grupy i cała organizacja"
           }
         }
       }

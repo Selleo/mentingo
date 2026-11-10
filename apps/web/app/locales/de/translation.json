@@ -9270,7 +9270,6 @@
       "yourPosition": "Deine Position",
       "empty": "Noch keine Lernenden in der Rangliste.",
       "noGroups": "Du bist noch in keiner Gruppe, daher gibt es keine Bestenliste.",
-      "unavailable": "Bestenlisten sind in deiner Organisation nicht aktiviert.",
       "loadError": "Die Bestenliste konnte nicht geladen werden.",
       "invalidRange": "Wähle ein Startdatum, das nicht nach dem Enddatum liegt.",
       "chooseRange": "Wähle ein Start- und ein Enddatum.",
@@ -9287,11 +9286,11 @@
           "description": "Admins sehen immer alle Bestenlisten.",
           "closed": {
             "label": "Geschlossen",
-            "description": "Lernende sehen nur die Bestenlisten ihrer Gruppen."
+            "description": "Nur eigene Gruppen"
           },
           "public": {
             "label": "Öffentlich",
-            "description": "Lernende sehen auch die Bestenliste der gesamten Organisation."
+            "description": "Gruppen und gesamte Organisation"
           }
         }
       }

@@ -23,6 +23,7 @@ const VISIBILITY_OPTIONS = [
 export function LeaderboardSettingsCard({ globalSettings }: LeaderboardSettingsCardProps) {
   const { t } = useTranslation();
   const { mutate: updateLeaderboardSettings, isPending } = useUpdateLeaderboardSettings();
+  const isVisibilityDisabled = isPending || !globalSettings.leaderboardsEnabled;
 
   if (!globalSettings.gamificationEnabled) return null;
 
@@ -45,7 +46,7 @@ export function LeaderboardSettingsCard({ globalSettings }: LeaderboardSettingsC
           }
           testId={LEADERBOARD_HANDLES.SETTINGS_ENABLED_SWITCH}
         />
-        <div className="space-y-4 rounded-lg border p-3 shadow-sm">
+        <div className="space-y-3 rounded-lg border p-3 shadow-sm">
           <div className="space-y-0.5">
             <p className="body-base-md">
               {t("gamification.leaderboard.settings.visibility.label")}
@@ -56,20 +57,22 @@ export function LeaderboardSettingsCard({ globalSettings }: LeaderboardSettingsC
           </div>
           <RadioGroup
             value={globalSettings.leaderboardVisibility}
-            disabled={isPending || !globalSettings.leaderboardsEnabled}
+            disabled={isVisibilityDisabled}
             onValueChange={(value) =>
               updateLeaderboardSettings({ leaderboardVisibility: value as LeaderboardVisibility })
             }
+            className="gap-3"
             data-testid={LEADERBOARD_HANDLES.SETTINGS_VISIBILITY}
           >
             {VISIBILITY_OPTIONS.map(({ value, key }) => (
-              <div key={value} className="flex items-start gap-3">
+              <div key={value} className="flex items-center gap-2">
                 <RadioGroupItem id={`leaderboard-visibility-${value}`} value={value} />
-                <Label htmlFor={`leaderboard-visibility-${value}`} className="space-y-0.5">
-                  <span className="body-base-md block">
+                <Label htmlFor={`leaderboard-visibility-${value}`} className="cursor-pointer">
+                  <span className="body-sm-md text-neutral-950">
                     {t(`gamification.leaderboard.settings.visibility.${key}.label`)}
                   </span>
-                  <span className="body-sm-md block text-muted-foreground">
+                  <span className="body-sm text-muted-foreground">
+                    {" · "}
                     {t(`gamification.leaderboard.settings.visibility.${key}.description`)}
                   </span>
                 </Label>

@@ -8800,7 +8800,6 @@
       "yourPosition": "Votre position",
       "empty": "Aucun apprenant à classer pour le moment.",
       "noGroups": "Vous n'appartenez encore à aucun groupe, il n'y a donc aucun classement à afficher.",
-      "unavailable": "Les classements ne sont pas activés dans votre organisation.",
       "loadError": "Le classement n'a pas pu être chargé.",
       "invalidRange": "Choisissez une date de début qui n'est pas après la date de fin.",
       "chooseRange": "Choisissez une date de début et une date de fin.",
@@ -8817,11 +8816,11 @@
           "description": "Les administrateurs voient toujours tous les classements.",
           "closed": {
             "label": "Fermé",
-            "description": "Les apprenants ne voient que les classements de leurs groupes."
+            "description": "Leurs groupes uniquement"
           },
           "public": {
             "label": "Public",
-            "description": "Les apprenants voient aussi le classement de toute l'organisation."
+            "description": "Groupes et toute l'organisation"
           }
         }
       }

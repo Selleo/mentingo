@@ -9335,7 +9335,6 @@
       "yourPosition": "Vaše pozice",
       "empty": "Zatím nejsou žádní studenti k seřazení.",
       "noGroups": "Zatím nejste v žádné skupině, takže není co zobrazit.",
-      "unavailable": "Žebříčky nejsou ve vaší organizaci zapnuté.",
       "loadError": "Žebříček se nepodařilo načíst.",
       "invalidRange": "Zvolte počáteční datum, které není po koncovém datu.",
       "chooseRange": "Zvolte počáteční a koncové datum.",
@@ -9352,11 +9351,11 @@
           "description": "Administrátoři vždy vidí všechny žebříčky.",
           "closed": {
             "label": "Uzavřené",
-            "description": "Studenti vidí jen žebříčky skupin, do kterých patří."
+            "description": "Jen vlastní skupiny"
           },
           "public": {
             "label": "Veřejné",
-            "description": "Studenti vidí i žebříček celé organizace."
+            "description": "Skupiny i celá organizace"
           }
         }
       }

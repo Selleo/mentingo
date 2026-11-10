@@ -9220,7 +9220,6 @@
       "yourPosition": "Tu posición",
       "empty": "Todavía no hay estudiantes en la clasificación.",
       "noGroups": "Todavía no perteneces a ningún grupo, así que no hay clasificación que mostrar.",
-      "unavailable": "Las clasificaciones no están activadas en tu organización.",
       "loadError": "No se pudo cargar la clasificación.",
       "invalidRange": "Elige una fecha de inicio que no sea posterior a la de fin.",
       "chooseRange": "Elige una fecha de inicio y una de fin.",
@@ -9237,11 +9236,11 @@
           "description": "Los administradores siempre ven todas las clasificaciones.",
           "closed": {
             "label": "Cerrada",
-            "description": "Los estudiantes solo ven las clasificaciones de sus grupos."
+            "description": "Solo sus grupos"
           },
           "public": {
             "label": "Pública",
-            "description": "Los estudiantes también ven la clasificación de toda la organización."
+            "description": "Grupos y toda la organización"
           }
         }
       }

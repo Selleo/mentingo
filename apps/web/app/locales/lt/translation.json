@@ -9333,7 +9333,6 @@
       "yourPosition": "Jūsų vieta",
       "empty": "Kol kas nėra ką reitinguoti.",
       "noGroups": "Dar nepriklausote jokiai grupei, todėl lyderių lentelės nėra.",
-      "unavailable": "Lyderių lentelės jūsų organizacijoje neįjungtos.",
       "loadError": "Nepavyko įkelti lyderių lentelės.",
       "invalidRange": "Pasirinkite pradžios datą, kuri nėra vėlesnė už pabaigos datą.",
       "chooseRange": "Pasirinkite pradžios ir pabaigos datas.",
@@ -9350,11 +9349,11 @@
           "description": "Administratoriai visada mato visas lyderių lenteles.",
           "closed": {
             "label": "Uždaros",
-            "description": "Besimokantieji mato tik savo grupių lyderių lenteles."
+            "description": "Tik savo grupės"
           },
           "public": {
             "label": "Viešos",
-            "description": "Besimokantieji mato ir visos organizacijos lyderių lentelę."
+            "description": "Grupės ir visa organizacija"
           }
         }
       }

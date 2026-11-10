@@ -7,7 +7,6 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useLeaderboard } from "~/api/queries/useLeaderboard";
 import { useLeaderboardScopes } from "~/api/queries/useLeaderboardScopes";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
@@ -21,11 +20,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
+import { GamificationFeatureGuard } from "~/Guards/GamificationFeatureGuard";
+import { GAMIFICATION_FEATURES } from "~/Guards/GamificationFeatureGuard.constants";
 
 import { LEADERBOARD_HANDLES } from "../../../../e2e/data/gamification/handles";
 
 import {
-  areLeaderboardsEnabled,
   buildLeaderboardQuery,
   isRangeReversed,
   resolveScope,
@@ -46,9 +46,15 @@ const METRIC_LABEL_KEYS = {
 } as const satisfies Record<LeaderboardMetric, string>;
 
 export default function LeaderboardPage() {
+  return (
+    <GamificationFeatureGuard feature={GAMIFICATION_FEATURES.LEADERBOARDS}>
+      <Leaderboard />
+    </GamificationFeatureGuard>
+  );
+}
+
+function Leaderboard() {
   const { t } = useTranslation();
-  const { data: globalSettings, error: settingsError } = useGlobalSettings();
-  const isEnabled = areLeaderboardsEnabled(globalSettings);
 
   const [selectedScope, setSelectedScope] = useState<string | null>(null);
   const [metric, setMetric] = useState<LeaderboardMetric>(LEADERBOARD_METRICS.XP);
@@ -56,16 +62,16 @@ export default function LeaderboardPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  const { data: scopes, error: scopesError } = useLeaderboardScopes({ enabled: isEnabled });
+  const { data: scopes, error: scopesError } = useLeaderboardScopes();
   const scope = scopes ? resolveScope(selectedScope, scopes) : null;
   const filters = scope ? { scope, metric, period, from, to } : null;
   const query = filters ? buildLeaderboardQuery(filters) : null;
 
   const { data: leaderboard, error: leaderboardError } = useLeaderboard(query ?? {}, {
-    enabled: isEnabled && Boolean(query),
+    enabled: Boolean(query),
   });
 
-  const loadError = settingsError ?? scopesError ?? leaderboardError;
+  const loadError = scopesError ?? leaderboardError;
 
   const breadcrumbs = [
     { title: "Mentingo", href: "/dashboard" },
@@ -81,15 +87,7 @@ export default function LeaderboardPage() {
       );
     }
 
-    if (!globalSettings || (isEnabled && !scopes)) return <Skeleton className="h-64 w-full" />;
-
-    if (!isEnabled) {
-      return (
-        <p data-testid={LEADERBOARD_HANDLES.UNAVAILABLE} className="body-sm text-neutral-600">
-          {t("gamification.leaderboard.unavailable")}
-        </p>
-      );
-    }
+    if (!scopes) return <Skeleton className="h-64 w-full" />;
 
     if (!filters) {
       return (
@@ -125,7 +123,7 @@ export default function LeaderboardPage() {
           <p className="body-sm text-neutral-600">{t("gamification.leaderboard.description")}</p>
         </div>
 
-        {isEnabled && scope && scopes && (
+        {scope && scopes && (
           <div className="grid gap-3 md:grid-cols-3">
             <Select value={scope} onValueChange={setSelectedScope}>
               <SelectTrigger

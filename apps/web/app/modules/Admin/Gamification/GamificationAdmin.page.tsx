@@ -19,6 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { GamificationFeatureGuard } from "~/Guards/GamificationFeatureGuard";
+import { GAMIFICATION_FEATURES } from "~/Guards/GamificationFeatureGuard.constants";
 import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { AchievementBadge } from "~/modules/Gamification/AchievementBadge";
@@ -31,6 +33,14 @@ import type { MetaFunction } from "@remix-run/react";
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.gamification");
 
 export default function GamificationAdminPage() {
+  return (
+    <GamificationFeatureGuard feature={GAMIFICATION_FEATURES.GAMIFICATION}>
+      <GamificationAdmin />
+    </GamificationFeatureGuard>
+  );
+}
+
+function GamificationAdmin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const language = useLanguageStore((state) => state.language);
