@@ -202,7 +202,7 @@ export class QuizGradingRepository {
       .update(assessmentAttemptQuestionAnswers)
       .set({
         gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
-        awardedPoints: awardedPoints.toString(),
+        awardedPoints: String(awardedPoints),
       })
       .where(eq(assessmentAttemptQuestionAnswers.id, answerId));
   }

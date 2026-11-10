@@ -332,6 +332,7 @@ export class QuizRuntimeRepository {
 
   async findLatestReviews(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
     if (!questionAnswerIds.length) return [];
+
     return db
       .selectDistinctOn([assessmentAttemptQuestionAnswerReviews.questionAnswerId], {
         questionAnswerId: assessmentAttemptQuestionAnswerReviews.questionAnswerId,

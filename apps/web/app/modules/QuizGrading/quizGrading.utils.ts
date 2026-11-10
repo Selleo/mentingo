@@ -24,6 +24,7 @@ export const QUIZ_GRADING_FILTER_KEYS = ["status", "courseId", "lessonId", "stud
 export type QuizGradingFilterKey = (typeof QUIZ_GRADING_FILTER_KEYS)[number];
 
 const DEFAULT_PER_PAGE: ItemsPerPageOption = 20;
+
 export const COMMENT_MAX_LENGTH = QUIZ_GRADING_COMMENT_MAX_LENGTH;
 
 const isStatus = (value: string | null): value is QuizGradingStatus =>

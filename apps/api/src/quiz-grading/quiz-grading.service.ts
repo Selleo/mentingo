@@ -149,7 +149,7 @@ export class QuizGradingService {
       {
         questionAnswerId: answer.id,
         reviewerId: currentUser.userId,
-        awardedPoints: awardedPoints.toString(),
+        awardedPoints: String(awardedPoints),
         explanation: comment,
         explanationLanguage: answer.language,
       },
