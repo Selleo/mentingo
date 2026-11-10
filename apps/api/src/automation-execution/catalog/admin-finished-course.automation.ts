@@ -1,6 +1,8 @@
 import {
   AUTOMATION_EVENT_KINDS,
   AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
   BUILT_IN_EMAIL_TEMPLATE_KEYS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -9,6 +11,11 @@ import type { BuiltInAutomationDefinition } from "../automation-execution.types"
 
 export const adminFinishedCourseAutomation: BuiltInAutomationDefinition = {
   eventKind: AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE,
+  triggerEventKind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
+  recipients: {
+    type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+    audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+  },
   name: {
     [SUPPORTED_LANGUAGES.EN]: "Admin course completion notification",
     [SUPPORTED_LANGUAGES.PL]: "Powiadomienie administratora o ukończeniu kursu",

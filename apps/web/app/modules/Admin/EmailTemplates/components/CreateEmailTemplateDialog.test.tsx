@@ -19,10 +19,7 @@ vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
 }));
 vi.mock("~/api/queries/useEmailTemplateEvents", () => ({
   useEmailTemplateEvents: () => ({
-    data: [
-      { kind: "user_finished_course", label: "Learner completion" },
-      { kind: "admin_finished_course", label: "Admin completion" },
-    ],
+    data: [{ kind: "user_finished_course", label: "Learner completion" }],
     isPending: false,
     isError: false,
   }),
@@ -34,10 +31,7 @@ vi.mock("~/api/mutations/emailTemplates/useCreateEmailTemplate", () => ({
 describe("CreateEmailTemplateDialog completion events", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it.each([
-    ["uczestnika", "user_finished_course"],
-    ["administratora", "admin_finished_course"],
-  ])("selects the event for %s without changing its identity", async (recipient, kind) => {
+  it("selects the shared course completion condition", async () => {
     const i18n = createInstance();
     await i18n.init({ lng: "pl", resources: { pl: { translation } } });
     const user = userEvent.setup();
@@ -48,18 +42,19 @@ describe("CreateEmailTemplateDialog completion events", () => {
     );
     await user.type(screen.getByRole("textbox", { name: "Nazwa szablonu" }), "Test");
     await user.click(screen.getByRole("combobox", { name: "Zdarzenie" }));
-    const search = screen.getAllByRole("combobox").find((element) => element.tagName === "INPUT")!;
+    const search = screen.getAllByRole("combobox").find((element) => element.tagName === "INPUT");
+    if (!search) throw new Error("Missing condition search input");
     await user.type(search, "kurs");
-    expect(screen.getAllByRole("option")).toHaveLength(2);
+    expect(screen.getAllByRole("option")).toHaveLength(1);
     await user.click(
       screen.getByRole("option", {
-        name: `Uczestnik ukończył kurs — e-mail do ${recipient}`,
+        name: "Uczestnik ukończył kurs",
       }),
     );
     await user.click(screen.getByRole("button", { name: translation.emailTemplates.ui.create }));
     await waitFor(() =>
       expect(mocks.createTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ triggerEventKind: kind }),
+        expect.objectContaining({ triggerEventKind: "user_finished_course" }),
       ),
     );
   });

@@ -5,6 +5,9 @@ import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_MAX_EMAIL_DELIVERY_ATTEMPTS,
   AUTOMATION_STEP_TYPES,
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
   flattenAutomationWorkflow,
   evaluateAutomationWorkflow,
@@ -80,8 +83,9 @@ export class AutomationRunCreationService {
       throw new Error("Automation delivery requires tenant context");
     }
 
-    const delivery =
-      await this.automationEmailDeliveryRepository.findAutomationEmailDeliveryById(emailDeliveryId);
+    const delivery = await this.automationEmailDeliveryRepository.findAutomationEmailDeliveryById(
+      emailDeliveryId,
+    );
 
     if (!delivery || !CLAIMABLE_AUTOMATION_EMAIL_DELIVERY_STATUSES.includes(delivery.status)) {
       return;
@@ -129,8 +133,9 @@ export class AutomationRunCreationService {
       return;
     }
 
-    const enabledAutomations =
-      await this.automationDefinitionStorageService.listEnabledAutomations(transaction);
+    const enabledAutomations = await this.automationDefinitionStorageService.listEnabledAutomations(
+      transaction,
+    );
 
     for (const automation of enabledAutomations) {
       await this.startMatchingAutomationRun(automation, event, transaction);
@@ -149,9 +154,12 @@ export class AutomationRunCreationService {
     const path = flattenAutomationWorkflow(automation.appliedDefinition.workflow);
     const trigger = path[0];
 
+    const matchingEvent = this.alignCourseCompletionEventWithAutomation(automation, path, event);
+
     if (
+      !matchingEvent ||
       trigger?.type !== AUTOMATION_STEP_TYPES.TRIGGER ||
-      trigger.config.eventKind !== event.kind
+      trigger.config.eventKind !== matchingEvent.kind
     ) {
       return;
     }
@@ -159,13 +167,69 @@ export class AutomationRunCreationService {
     const plan = await this.planAutomationRun(
       automation.appliedDefinition.workflow,
       path,
-      event,
+      matchingEvent,
       transaction,
     );
 
-    const run = await this.recordPlannedAutomationRun(automation, event, plan, transaction);
+    const run = await this.recordPlannedAutomationRun(automation, matchingEvent, plan, transaction);
 
     await this.createAndQueueRecipientDeliveries(run.id, plan.recipients, transaction);
+  }
+
+  /**
+   * Drains occurrences queued before course completion was unified: legacy administrator
+   * snapshots only reach administrator workflows, and legacy learner-only snapshots skip them
+   * so explicitly selected recipients are not emailed twice. Returns null when the automation
+   * must not run for the event.
+   */
+  private alignCourseCompletionEventWithAutomation(
+    automation: AutomationRecord,
+    path: AutomationStep[],
+    event: NotificationEventData,
+  ): NotificationEventData | null {
+    const isAdministratorWorkflow = this.isAdministratorCourseCompletionWorkflow(automation, path);
+
+    if (event.kind === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE) {
+      if (!isAdministratorWorkflow) {
+        return null;
+      }
+
+      return {
+        ...event,
+        kind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
+        recipients: event.recipients.map((recipient) => ({
+          ...recipient,
+          audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+        })),
+      };
+    }
+
+    const isLegacyLearnerOnlyCompletion =
+      event.kind === AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE &&
+      !event.items &&
+      !event.recipients.some((recipient) => recipient.audience);
+
+    if (isLegacyLearnerOnlyCompletion && isAdministratorWorkflow) {
+      return null;
+    }
+
+    return event;
+  }
+
+  private isAdministratorCourseCompletionWorkflow(
+    automation: AutomationRecord,
+    path: AutomationStep[],
+  ): boolean {
+    return (
+      automation.legacyAppliedEventKind === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE ||
+      automation.builtInKey === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE ||
+      path.some(
+        (step) =>
+          step.type === AUTOMATION_STEP_TYPES.SEND_EMAIL &&
+          step.config.recipients?.type === AUTOMATION_RECIPIENT_TYPES.EVENT &&
+          step.config.recipients.audience === AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+      )
+    );
   }
 
   private async planAutomationRun(

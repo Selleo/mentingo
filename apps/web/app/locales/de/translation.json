@@ -333,11 +333,11 @@
       "user_short_inactivity": "Lernender seit 14 Tagen inaktiv",
       "user_long_inactivity": "Lernender seit 30 Tagen inaktiv",
       "user_finished_chapter": "Lernender hat ein Kapitel abgeschlossen",
-      "user_finished_course": "Lernender hat einen Kurs abgeschlossen — E-Mail an Lernenden",
+      "user_finished_course": "Lernender hat einen Kurs abgeschlossen",
       "certificate_expiration_warning": "Zertifikat läuft innerhalb von 7 Tagen ab",
       "certificate_expired": "Zertifikat abgelaufen",
       "admin_new_user": "Neuer Benutzer registriert",
-      "admin_finished_course": "Lernender hat einen Kurs abgeschlossen — E-Mail an Administrator",
+      "admin_finished_course": "Lernender hat einen Kurs abgeschlossen",
       "admin_overdue_courses": "Kursfrist verpasst",
       "course_due_date_reminder": "Kurs in 7 Tagen oder 1 Tag fällig",
       "magic_link": "Anmeldelink angefordert",
@@ -7755,6 +7755,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Empfänger",
+      "courseCompletionAudience": "Empfänger des Kursabschlusses",
+      "courseCompletionAudiences": {
+        "learner": "Lernender, der den Kurs abgeschlossen hat",
+        "administrators": "Administratoren (gemäß Benachrichtigungseinstellungen)"
+      },
       "event": "Mit dem Ereignis verknüpfte Benutzer",
       "user": "Ausgewählter Benutzer",
       "group": "Mitglieder einer ausgewählten Gruppe",

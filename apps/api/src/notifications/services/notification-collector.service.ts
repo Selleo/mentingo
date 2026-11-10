@@ -103,6 +103,10 @@ export class NotificationCollectorService {
     const recipients = recipientsByEvent.get(template.event) ?? [];
     const recipient = this.createNotificationRecipient(message.to, template, recipients.length);
 
+    if (options.audience) {
+      recipient.audience = options.audience;
+    }
+
     recipients.push(recipient);
     recipientsByEvent.set(template.event, recipients);
   }

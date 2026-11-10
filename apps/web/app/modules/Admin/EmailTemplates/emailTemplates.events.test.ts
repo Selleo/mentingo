@@ -1,3 +1,4 @@
+import { AUTOMATION_TRIGGER_DEFINITIONS } from "@repo/shared";
 import { createInstance } from "i18next";
 import { describe, expect, it } from "vitest";
 
@@ -5,7 +6,7 @@ const locales = import.meta.glob("../../../locales/*/translation.json", { eager:
 
 describe("email template event labels", () => {
   it.each(Object.entries(locales))(
-    "distinguishes completion recipients in %s",
+    "describes the business condition rather than an email audience in %s",
     async (_, resource) => {
       const translation = (resource as { default: Record<string, unknown> }).default;
       const i18n = createInstance();
@@ -16,7 +17,17 @@ describe("email template event labels", () => {
 
       expect(learnerLabel).not.toBe("emailTemplates.events.user_finished_course");
       expect(adminLabel).not.toBe("emailTemplates.events.admin_finished_course");
-      expect(adminLabel).not.toBe(learnerLabel);
+      expect(adminLabel).toBe(learnerLabel);
+      const completion = AUTOMATION_TRIGGER_DEFINITIONS.find(
+        ({ type }) => type === "user_finished_course",
+      );
+      expect(completion).toBeDefined();
+      expect(i18n.t(completion?.labelKey ?? "")).toBe(learnerLabel);
+      expect(
+        AUTOMATION_TRIGGER_DEFINITIONS.filter(
+          ({ type }) => type === "user_finished_course" || type === "admin_finished_course",
+        ).map(({ type }) => type),
+      ).toEqual(["user_finished_course"]);
     },
   );
 });

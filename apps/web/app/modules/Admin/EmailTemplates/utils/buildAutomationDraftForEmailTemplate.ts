@@ -1,5 +1,6 @@
 import {
   AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_EVENT_KINDS,
   AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
@@ -14,6 +15,10 @@ export function buildAutomationDraftForEmailTemplate(
   name: string,
 ): CreateAutomationInput {
   const triggerId = crypto.randomUUID();
+  const completionAudience =
+    template.event === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE
+      ? ("administrators" as const)
+      : ("learner" as const);
 
   const mappings = Object.fromEntries(
     (template.placeholders ?? []).flatMap((tag) => {
@@ -45,7 +50,12 @@ export function buildAutomationDraftForEmailTemplate(
           type: AUTOMATION_STEP_TYPES.SEND_EMAIL,
           config: {
             template: { type: AUTOMATION_TEMPLATE_TYPES.CUSTOM, id: template.id },
-            recipients: { type: AUTOMATION_RECIPIENT_TYPES.EVENT },
+            recipients: {
+              type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+              ...(event.kind === AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE
+                ? { audience: completionAudience }
+                : {}),
+            },
             mappings,
           },
         },

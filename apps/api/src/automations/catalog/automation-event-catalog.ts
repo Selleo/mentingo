@@ -5,6 +5,7 @@ import {
   AUTOMATION_EVENT_KINDS,
   AUTOMATION_TRIGGER_DEFINITIONS,
   AUTOMATION_EVENT_VARIABLES,
+  resolveCurrentAutomationEventKind,
   type AutomationEventDefinition,
   type AutomationEventFieldDefinition,
   type AutomationEventKind,
@@ -105,7 +106,7 @@ export const AUTOMATION_EVENT_CATALOG: AutomationEventDefinition[] =
   });
 
 export const findAutomationEventDefinition = (kind: string | null | undefined) =>
-  AUTOMATION_EVENT_CATALOG.find((event) => event.kind === kind);
+  AUTOMATION_EVENT_CATALOG.find((event) => event.kind === resolveCurrentAutomationEventKind(kind));
 
 function getBranchCatalogFields(kind: AutomationEventKind): AutomationEventFieldDefinition[] {
   const boolean = (key: string, label: string) => ({

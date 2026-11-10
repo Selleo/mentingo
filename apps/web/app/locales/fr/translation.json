@@ -333,11 +333,11 @@
       "user_short_inactivity": "Apprenant inactif depuis 14 jours",
       "user_long_inactivity": "Apprenant inactif depuis 30 jours",
       "user_finished_chapter": "L’apprenant a terminé un chapitre",
-      "user_finished_course": "L’apprenant a terminé un cours — e-mail à l’apprenant",
+      "user_finished_course": "L’apprenant a terminé un cours",
       "certificate_expiration_warning": "Le certificat expire dans les 7 prochains jours",
       "certificate_expired": "Certificat expiré",
       "admin_new_user": "Nouvel utilisateur inscrit",
-      "admin_finished_course": "L’apprenant a terminé un cours — e-mail à l’administrateur",
+      "admin_finished_course": "L’apprenant a terminé un cours",
       "admin_overdue_courses": "Échéance du cours dépassée",
       "course_due_date_reminder": "Cours à terminer dans 7 jours ou 1 jour",
       "magic_link": "Lien de connexion demandé",
@@ -7699,6 +7699,11 @@
     },
     "recipients": {
       "title": "Destinataires",
+      "courseCompletionAudience": "Destinataires de fin de cours",
+      "courseCompletionAudiences": {
+        "learner": "Apprenant ayant terminé le cours",
+        "administrators": "Administrateurs (selon les préférences de notification)"
+      },
       "event": "Utilisateurs liés à l’événement",
       "user": "Utilisateur sélectionné",
       "group": "Membres d’un groupe sélectionné",

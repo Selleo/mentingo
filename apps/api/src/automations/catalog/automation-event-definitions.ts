@@ -239,10 +239,22 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
     {
       kind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
       label: "Course completion",
-      description: "Sent when a learner completes a course.",
+      description: "A learner completes a course. Email actions select their audience.",
       recipientPolicy:
-        "Eligible recipients selected by the event producer. Account operations and in-app notifications remain independent.",
+        "The completing learner, or eligible administrators respecting personal notification preferences, selected by each email action.",
       fields: [
+        {
+          key: "user_name",
+          label: "Learner name",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Alex",
+        },
+        {
+          key: "progress_link",
+          label: "Progress link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/course/leadership",
+        },
         {
           key: "course_name",
           label: "Course name",
@@ -345,36 +357,6 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
           label: "Profile link",
           type: AUTOMATION_PLACEHOLDER_TYPES.URL,
           sampleValue: "https://example.com/users/alex",
-          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
-        },
-      ],
-    },
-    {
-      kind: AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE,
-      label: "Admin course completion notification",
-      description: "Sent to administrators when a learner completes a course.",
-      recipientPolicy:
-        "Eligible administrators selected by the event producer, respecting personal notification preferences.",
-      fields: [
-        {
-          key: "user_name",
-          label: "User name",
-          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
-          sampleValue: "Alex",
-          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
-        },
-        {
-          key: "course_name",
-          label: "Course name",
-          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
-          sampleValue: "Leadership essentials",
-          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
-        },
-        {
-          key: "progress_link",
-          label: "Progress link",
-          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
-          sampleValue: "https://example.com/progress",
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
       ],

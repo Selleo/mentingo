@@ -333,11 +333,11 @@
       "user_short_inactivity": "Uczestnik nieaktywny od 14 dni",
       "user_long_inactivity": "Uczestnik nieaktywny od 30 dni",
       "user_finished_chapter": "Uczestnik ukończył rozdział",
-      "user_finished_course": "Uczestnik ukończył kurs — e-mail do uczestnika",
+      "user_finished_course": "Uczestnik ukończył kurs",
       "certificate_expiration_warning": "Certyfikat wygaśnie w ciągu 7 dni",
       "certificate_expired": "Certyfikat wygasł",
       "admin_new_user": "Zarejestrowano nowego użytkownika",
-      "admin_finished_course": "Uczestnik ukończył kurs — e-mail do administratora",
+      "admin_finished_course": "Uczestnik ukończył kurs",
       "admin_overdue_courses": "Minął termin ukończenia kursu",
       "course_due_date_reminder": "Termin kursu za 7 dni lub 1 dzień",
       "magic_link": "Poproszono o link do logowania",
@@ -7838,6 +7838,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Odbiorcy",
+      "courseCompletionAudience": "Odbiorcy ukończenia kursu",
+      "courseCompletionAudiences": {
+        "learner": "Uczestnik, który ukończył kurs",
+        "administrators": "Administratorzy (zgodnie z preferencjami powiadomień)"
+      },
       "event": "Użytkownicy powiązani ze zdarzeniem",
       "user": "Wybrany użytkownik",
       "group": "Członkowie wybranej grupy",

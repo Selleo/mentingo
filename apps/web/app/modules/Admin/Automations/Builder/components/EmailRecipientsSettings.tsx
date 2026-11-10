@@ -1,4 +1,4 @@
-import { AUTOMATION_RECIPIENT_TYPES } from "@repo/shared";
+import { AUTOMATION_EVENT_KINDS, AUTOMATION_RECIPIENT_TYPES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -57,6 +57,17 @@ export function EmailRecipientsSettings({
     onChange(selection);
   }
 
+  let eventDescription = t("automationBuilder.recipients.selectTrigger");
+  if (event) eventDescription = t(`automationBuilder.recipients.eventDescriptions.${event.kind}`);
+  if (
+    event?.kind === AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE &&
+    recipients.type === AUTOMATION_RECIPIENT_TYPES.EVENT
+  ) {
+    eventDescription = t(
+      `automationBuilder.recipients.courseCompletionAudiences.${recipients.audience ?? "learner"}`,
+    );
+  }
+
   return (
     <div className="space-y-2">
       <Label>{t("automationBuilder.recipients.title")}</Label>
@@ -77,12 +88,31 @@ export function EmailRecipientsSettings({
           },
         ]}
       />
+      {recipients.type === AUTOMATION_RECIPIENT_TYPES.EVENT &&
+        event?.kind === AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE && (
+          <AutomationSearchSelect
+            label={t("automationBuilder.recipients.courseCompletionAudience")}
+            placeholder={t("automationBuilder.recipients.courseCompletionAudience")}
+            value={recipients.audience ?? "learner"}
+            disabled={disabled}
+            onValueChange={(audience) =>
+              onChange({
+                type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+                audience: audience === "administrators" ? "administrators" : "learner",
+              })
+            }
+            groups={[
+              {
+                options: ["learner", "administrators"].map((audience) => ({
+                  value: audience,
+                  label: t(`automationBuilder.recipients.courseCompletionAudiences.${audience}`),
+                })),
+              },
+            ]}
+          />
+        )}
       {recipients.type === AUTOMATION_RECIPIENT_TYPES.EVENT && (
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          {event
-            ? t(`automationBuilder.recipients.eventDescriptions.${event.kind}`)
-            : t("automationBuilder.recipients.selectTrigger")}
-        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">{eventDescription}</p>
       )}
       {recipients.type === AUTOMATION_RECIPIENT_TYPES.EVERYONE && (
         <p className="text-xs leading-relaxed text-muted-foreground">

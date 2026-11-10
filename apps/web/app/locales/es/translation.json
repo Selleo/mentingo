@@ -333,11 +333,11 @@
       "user_short_inactivity": "Alumno inactivo durante 14 días",
       "user_long_inactivity": "Alumno inactivo durante 30 días",
       "user_finished_chapter": "El alumno completó un capítulo",
-      "user_finished_course": "El alumno completó un curso — correo al alumno",
+      "user_finished_course": "El alumno completó un curso",
       "certificate_expiration_warning": "El certificado caduca en los próximos 7 días",
       "certificate_expired": "Certificado caducado",
       "admin_new_user": "Nuevo usuario registrado",
-      "admin_finished_course": "El alumno completó un curso — correo al administrador",
+      "admin_finished_course": "El alumno completó un curso",
       "admin_overdue_courses": "Plazo del curso vencido",
       "course_due_date_reminder": "Curso con vencimiento en 7 días o 1 día",
       "magic_link": "Enlace de inicio de sesión solicitado",
@@ -7942,6 +7942,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Destinatarios",
+      "courseCompletionAudience": "Destinatarios de finalización del curso",
+      "courseCompletionAudiences": {
+        "learner": "Alumno que completó el curso",
+        "administrators": "Administradores (según las preferencias de notificación)"
+      },
       "event": "Usuarios vinculados al evento",
       "user": "Usuario seleccionado",
       "group": "Miembros de un grupo seleccionado",

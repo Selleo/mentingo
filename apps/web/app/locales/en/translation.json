@@ -333,11 +333,11 @@
       "user_short_inactivity": "Learner inactive for 14 days",
       "user_long_inactivity": "Learner inactive for 30 days",
       "user_finished_chapter": "Learner completed a chapter",
-      "user_finished_course": "Learner completed a course — email to learner",
+      "user_finished_course": "Learner completed a course",
       "certificate_expiration_warning": "Certificate expires within 7 days",
       "certificate_expired": "Certificate expired",
       "admin_new_user": "New user registered",
-      "admin_finished_course": "Learner completed a course — email to administrator",
+      "admin_finished_course": "Learner completed a course",
       "admin_overdue_courses": "Course deadline missed",
       "course_due_date_reminder": "Course due in 7 days or 1 day",
       "magic_link": "Sign-in link requested",
@@ -8014,6 +8014,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Recipients",
+      "courseCompletionAudience": "Course completion recipients",
+      "courseCompletionAudiences": {
+        "learner": "Learner who completed the course",
+        "administrators": "Administrators (respecting notification preferences)"
+      },
       "event": "Users linked to the event",
       "user": "Selected user",
       "group": "Members of a selected group",

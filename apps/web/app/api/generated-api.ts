@@ -26143,6 +26143,7 @@ export interface ListAutomationsResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -26300,6 +26301,7 @@ export interface ListAutomationsResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -26624,6 +26626,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -26775,6 +26778,7 @@ export interface SimulateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -27048,6 +27052,7 @@ export interface CreateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -27203,6 +27208,7 @@ export interface CreateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27360,6 +27366,7 @@ export interface CreateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -27519,6 +27526,7 @@ export interface CreateAutomationFromTemplateResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27676,6 +27684,7 @@ export interface CreateAutomationFromTemplateResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -27835,6 +27844,7 @@ export interface GetAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27992,6 +28002,7 @@ export interface GetAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28150,6 +28161,7 @@ export interface UpdateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -28305,6 +28317,7 @@ export interface UpdateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -28462,6 +28475,7 @@ export interface UpdateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28628,6 +28642,7 @@ export interface DuplicateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -28785,6 +28800,7 @@ export interface DuplicateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28944,6 +28960,7 @@ export interface ApplyAutomationBody {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29100,6 +29117,7 @@ export interface ApplyAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29257,6 +29275,7 @@ export interface ApplyAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -29416,6 +29435,7 @@ export interface EnableAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29573,6 +29593,7 @@ export interface EnableAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -29732,6 +29753,7 @@ export interface DisableAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29889,6 +29911,7 @@ export interface DisableAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -30048,6 +30071,7 @@ export interface ArchiveAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -30205,6 +30229,7 @@ export interface ArchiveAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
