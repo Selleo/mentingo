@@ -35,6 +35,7 @@ export const courseChatMessagePreviewSchema = courseChatMessageBaseSchema;
 export const courseChatMessageSchema = Type.Composite([
   courseChatMessageBaseSchema,
   Type.Object({
+    title: Type.Union([Type.String(), Type.Null()]),
     replyCount: Type.Number(),
     latestReply: Type.Union([courseChatMessagePreviewSchema, Type.Null()]),
     replyParticipants: Type.Array(userSchema),

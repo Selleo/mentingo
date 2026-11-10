@@ -11,6 +11,7 @@ export type CourseChatMessageRow = {
   id: UUIDType;
   threadId: UUIDType;
   courseId: UUIDType;
+  title: string | null;
   userId: UUIDType;
   content: string;
   parentMessageId: UUIDType | null;
@@ -55,7 +56,8 @@ export type CourseChatEmailContext = {
 export type CourseChatMessageContext = {
   id: UUIDType;
   threadId: UUIDType;
-  courseId: UUIDType;
+  /** Null for general forum posts, which course discussion endpoints must not touch. */
+  courseId: UUIDType | null;
   userId?: UUIDType;
   parentMessageId: UUIDType | null;
   deletedAt?: string | null;

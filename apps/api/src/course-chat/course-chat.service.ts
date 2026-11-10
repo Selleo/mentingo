@@ -14,13 +14,12 @@ import {
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
 import { BaseResponse, PaginatedResponse, DatabasePg } from "src/common";
+import { CourseChatMessageMapper } from "src/course-chat/course-chat-message.mapper";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatMessageCreatedEvent } from "src/events/course-chat/course-chat-message-created.event";
 import { CourseChatReplyCreatedEvent } from "src/events/course-chat/course-chat-reply-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
-import { FileService } from "src/file/file.service";
-import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
@@ -28,14 +27,6 @@ import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
-  CourseChatMessageReactionSummaryRow,
-  CourseChatMessageRow,
-  CourseChatReplyParticipantRow,
-  CourseChatReplySummaryRow,
-} from "src/course-chat/course-chat.repository.types";
-import type {
-  CourseChatMessagePreviewResponse,
-  CourseChatMessageReactionResponse,
   CourseChatMessageResponse,
   CourseChatUserResponse,
   CreateCourseChatMessageBody,
@@ -56,7 +47,7 @@ export class CourseChatService {
     private readonly announcementService: AnnouncementsService,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: CourseChatRealtimePublisher,
-    private readonly fileService: FileService,
+    private readonly courseChatMessageMapper: CourseChatMessageMapper,
   ) {}
 
   async assertUserEnrolledInCourse(courseId: UUIDType, userId: UUIDType) {
@@ -83,7 +74,9 @@ export class CourseChatService {
 
     return new PaginatedResponse({
       ...messages,
-      data: await this.mapMessages(messages.data, params.userId, { includeReplySummary: true }),
+      data: await this.courseChatMessageMapper.mapMessages(messages.data, params.userId, {
+        includeReplySummary: true,
+      }),
     });
   }
 
@@ -102,7 +95,9 @@ export class CourseChatService {
 
     return new PaginatedResponse({
       ...replies,
-      data: await this.mapMessages(replies.data, params.userId, { includeReplySummary: false }),
+      data: await this.courseChatMessageMapper.mapMessages(replies.data, params.userId, {
+        includeReplySummary: false,
+      }),
     });
   }
 
@@ -113,7 +108,7 @@ export class CourseChatService {
     await this.assertUserEnrolledInCourse(courseId, userId);
 
     const users = await this.courseChatRepository.getEnrolledUsers(courseId);
-    const avatarUrlByReference = await this.getAvatarUrlByReference(
+    const avatarUrlByReference = await this.courseChatMessageMapper.getAvatarUrlByReference(
       users.map((user) => user.avatarReference),
     );
     const onlineUserIds = await this.courseChatPresenceService.getOnlineUserIds(
@@ -124,7 +119,10 @@ export class CourseChatService {
     return new BaseResponse(
       users.map((user) => ({
         ...user,
-        avatarReference: this.getMappedAvatarReference(user.avatarReference, avatarUrlByReference),
+        avatarReference: this.courseChatMessageMapper.getMappedAvatarReference(
+          user.avatarReference,
+          avatarUrlByReference,
+        ),
         isOnline: onlineUserIds.has(user.id),
       })),
     );
@@ -135,6 +133,7 @@ export class CourseChatService {
     currentUser: CurrentUserType,
     tenantId: UUIDType,
     body: CreateCourseChatMessageBody,
+    options: { title?: string } = {},
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
     await this.assertUserEnrolledInCourse(courseId, currentUser.userId);
 
@@ -163,6 +162,7 @@ export class CourseChatService {
         courseId,
         userId: currentUser.userId,
         content: this.normalizeContent(body.content),
+        title: options.title,
         parentMessageId: body.parentMessageId,
         parentMessage: parentMessage ?? undefined,
         dbInstance: trx,
@@ -218,7 +218,7 @@ export class CourseChatService {
     }
 
     const message = await this.courseChatRepository.getMessageContext(messageId);
-    if (!message || message.deletedAt || !message.userId) {
+    if (!message || message.deletedAt || !message.userId || !message.courseId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
@@ -231,7 +231,7 @@ export class CourseChatService {
       reaction: body.reaction,
     });
 
-    const reactions = this.mapReactions(
+    const reactions = this.courseChatMessageMapper.mapReactions(
       await this.courseChatRepository.getMessageReactions(messageId, userId),
     );
     const payload = {
@@ -255,7 +255,7 @@ export class CourseChatService {
     permissions: PermissionKey[],
   ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
     const message = await this.courseChatRepository.getMessageContext(messageId);
-    if (!message || message.deletedAt || !message.userId) {
+    if (!message || message.deletedAt || !message.userId || !message.courseId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
@@ -294,7 +294,7 @@ export class CourseChatService {
   private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {
     const message = await this.courseChatRepository.getMessageContext(messageId);
 
-    if (!message) {
+    if (!message || !message.courseId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
@@ -307,170 +307,15 @@ export class CourseChatService {
     const message = await this.courseChatRepository.getMessageById(messageId);
     if (!message) throw new NotFoundException("courseChat.errors.notFound");
 
-    const [mappedMessage] = await this.mapMessages([message], viewerUserId, {
-      includeReplySummary: true,
-    });
+    const [mappedMessage] = await this.courseChatMessageMapper.mapMessages(
+      [message],
+      viewerUserId,
+      {
+        includeReplySummary: true,
+      },
+    );
 
     return mappedMessage;
-  }
-
-  private async mapMessages(
-    messages: CourseChatMessageRow[],
-    viewerUserId: UUIDType,
-    options: { includeReplySummary: boolean },
-  ): Promise<CourseChatMessageResponse[]> {
-    const messageIds = messages.map((message) => message.id);
-    const [reactionRows, replySummaries, replyParticipants] = await Promise.all([
-      this.courseChatRepository.getMessageReactionsForMessages(messageIds, viewerUserId),
-      options.includeReplySummary
-        ? this.courseChatRepository.getReplySummaries(messageIds)
-        : Promise.resolve([]),
-      options.includeReplySummary
-        ? this.courseChatRepository.getReplyParticipants(messageIds)
-        : Promise.resolve([]),
-    ]);
-    const latestReplies = replySummaries
-      .map((summary) => summary.latestReply)
-      .filter((message): message is CourseChatMessageRow => Boolean(message));
-    const avatarUrlByReference = await this.getAvatarUrlByReference([
-      ...messages.map((message) => message.userAvatarReference),
-      ...latestReplies.map((message) => message.userAvatarReference),
-      ...replyParticipants.map((participant) => participant.avatarReference),
-    ]);
-    const latestReplyReactionRows = await this.courseChatRepository.getMessageReactionsForMessages(
-      latestReplies.map((reply) => reply.id),
-      viewerUserId,
-    );
-
-    const reactionsByMessageId = this.groupReactions([...reactionRows, ...latestReplyReactionRows]);
-    const replySummaryByMessageId = new Map(
-      replySummaries.map((summary) => [summary.parentMessageId, summary]),
-    );
-    const replyParticipantsByMessageId = this.groupReplyParticipants(replyParticipants);
-
-    return messages.map((message) =>
-      this.mapMessage(
-        message,
-        reactionsByMessageId,
-        replySummaryByMessageId,
-        replyParticipantsByMessageId,
-        avatarUrlByReference,
-      ),
-    );
-  }
-
-  private mapMessage(
-    message: CourseChatMessageRow,
-    reactionsByMessageId: Map<UUIDType, CourseChatMessageReactionResponse[]>,
-    replySummaryByMessageId: Map<UUIDType, CourseChatReplySummaryRow>,
-    replyParticipantsByMessageId: Map<UUIDType, CourseChatReplyParticipantRow[]>,
-    avatarUrlByReference: Map<string, string>,
-  ): CourseChatMessageResponse {
-    const replySummary = replySummaryByMessageId.get(message.id);
-
-    return {
-      ...this.mapMessagePreview(message, reactionsByMessageId, avatarUrlByReference),
-      replyCount: replySummary?.replyCount ?? 0,
-      replyParticipants: (replyParticipantsByMessageId.get(message.id) ?? []).map((user) => ({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatarReference: this.getMappedAvatarReference(user.avatarReference, avatarUrlByReference),
-      })),
-      latestReply: replySummary?.latestReply
-        ? this.mapMessagePreview(
-            replySummary.latestReply,
-            reactionsByMessageId,
-            avatarUrlByReference,
-          )
-        : null,
-    };
-  }
-
-  private mapMessagePreview(
-    message: CourseChatMessageRow,
-    reactionsByMessageId: Map<UUIDType, CourseChatMessageReactionResponse[]>,
-    avatarUrlByReference: Map<string, string>,
-  ): CourseChatMessagePreviewResponse {
-    return {
-      id: message.id,
-      courseId: message.courseId,
-      userId: message.userId,
-      content: message.deletedAt ? "" : message.content,
-      parentMessageId: message.parentMessageId,
-      deletedAt: message.deletedAt,
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      user: {
-        id: message.userIdForProfile,
-        firstName: message.userFirstName,
-        lastName: message.userLastName,
-        avatarReference: this.getMappedAvatarReference(
-          message.userAvatarReference,
-          avatarUrlByReference,
-        ),
-      },
-      reactions: message.deletedAt ? [] : (reactionsByMessageId.get(message.id) ?? []),
-    };
-  }
-
-  private groupReplyParticipants(participants: CourseChatReplyParticipantRow[]) {
-    const participantsByMessageId = new Map<UUIDType, CourseChatReplyParticipantRow[]>();
-
-    for (const participant of participants) {
-      const current = participantsByMessageId.get(participant.parentMessageId) ?? [];
-      current.push(participant);
-      participantsByMessageId.set(participant.parentMessageId, current);
-    }
-
-    return participantsByMessageId;
-  }
-
-  private async getAvatarUrlByReference(avatarReferences: (string | null)[]) {
-    const uniqueAvatarReferences = Array.from(
-      new Set(avatarReferences.filter((reference): reference is string => Boolean(reference))),
-    );
-
-    const avatarEntries = await Promise.all(
-      uniqueAvatarReferences.map(
-        async (avatarReference): Promise<[string, string]> => [
-          avatarReference,
-          await this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS }),
-        ],
-      ),
-    );
-
-    return new Map(avatarEntries);
-  }
-
-  private getMappedAvatarReference(
-    avatarReference: string | null,
-    avatarUrlByReference: Map<string, string>,
-  ) {
-    if (!avatarReference) return null;
-    return avatarUrlByReference.get(avatarReference) ?? avatarReference;
-  }
-
-  private groupReactions(reactions: CourseChatMessageReactionSummaryRow[]) {
-    const reactionsByMessageId = new Map<UUIDType, CourseChatMessageReactionResponse[]>();
-
-    for (const reaction of reactions) {
-      const current = reactionsByMessageId.get(reaction.messageId) ?? [];
-      current.push(...this.mapReactions([reaction]));
-      reactionsByMessageId.set(reaction.messageId, current);
-    }
-
-    return reactionsByMessageId;
-  }
-
-  private mapReactions(
-    reactions: CourseChatMessageReactionSummaryRow[],
-  ): CourseChatMessageReactionResponse[] {
-    return reactions.map(({ reaction, count, reactedByCurrentUser }) => ({
-      reaction,
-      count,
-      reactedByCurrentUser,
-    }));
   }
 
   private normalizeContent(content: string) {

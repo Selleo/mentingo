@@ -34,6 +34,7 @@ export * from "./constants/entityTypes";
 export * from "./constants/features";
 export * from "./constants/fileTypes";
 export * from "./constants/fileUpload";
+export * from "./constants/forum";
 export * from "./constants/gamification";
 export * from "./constants/globalSearch";
 export * from "./constants/languages";

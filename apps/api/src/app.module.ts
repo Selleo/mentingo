@@ -54,6 +54,7 @@ import { DevToolsModule, isDevToolsEnabled } from "./dev-tools/dev-tools.module"
 import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { ForumModule } from "./forum/forum.module";
 import { GamificationModule } from "./gamification/gamification.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
 import { GroupModule } from "./group/group.module";
@@ -137,6 +138,7 @@ import type { RedisClient } from "src/redis";
     CourseRepetitionModule,
     NativeArchiveModule,
     CourseChatModule,
+    ForumModule,
     LearningPathModule,
     GroupModule,
     GlobalSearchModule,

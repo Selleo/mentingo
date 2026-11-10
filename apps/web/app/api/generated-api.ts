@@ -473,6 +473,7 @@ export interface GetPublicGlobalSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -759,6 +760,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -807,6 +809,7 @@ export interface UpdateEnforceSSOResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -855,6 +858,7 @@ export interface UpdateModernCourseListEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -903,6 +907,7 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -955,6 +960,7 @@ export interface UpdateFeaturedCourseResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1003,6 +1009,56 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
+    gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateForumEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1056,6 +1112,7 @@ export interface UpdateLeaderboardSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1104,6 +1161,7 @@ export interface UpdateCalendarEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1152,6 +1210,7 @@ export interface UpdateLiveTrainingEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1205,6 +1264,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1253,6 +1313,7 @@ export interface UpdateLearningPathsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1301,6 +1362,7 @@ export interface UpdateGamificationEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1380,6 +1442,7 @@ export interface UpdateColorSchemaResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -30579,6 +30642,7 @@ export interface GetMessagesResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
+    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30668,6 +30732,7 @@ export interface CreateMessageResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
+    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30729,6 +30794,7 @@ export interface GetRepliesResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
+    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30800,6 +30866,233 @@ export interface DeleteMessageResponse {
     /** @format uuid */
     messageId: string;
     parentMessageId: string | null;
+    removed: boolean;
+    deletedAt: string | null;
+  };
+}
+
+export interface GetTopicsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    excerpt: string;
+    isDeleted: boolean;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateTopicBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+  /** @format uuid */
+  courseId?: string;
+}
+
+export interface CreateTopicResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    firstPost: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      topicId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      isFirstPost: boolean;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    };
+  };
+}
+
+export interface GetTopicResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    firstPost: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      topicId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      isFirstPost: boolean;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    };
+  };
+}
+
+export interface GetTopicPostsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    isFirstPost: boolean;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreatePostBody {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+}
+
+export interface CreatePostResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    isFirstPost: boolean;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface DeletePostResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    postId: string;
+    isFirstPost: boolean;
     removed: boolean;
     deletedAt: string | null;
   };
@@ -39053,6 +39346,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateForumEnabled
+     * @request PATCH:/api/settings/admin/forum
+     */
+    settingsControllerUpdateForumEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateForumEnabledResponse, any>({
+        path: `/api/settings/admin/forum`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateLeaderboardSettings
      * @request PATCH:/api/settings/admin/leaderboards
      */
@@ -45653,6 +45960,147 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseChatControllerDeleteMessage: (messageId: string, params: RequestParams = {}) =>
       this.request<DeleteMessageResponse, any>({
         path: `/api/course-chat/messages/${messageId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopics
+     * @request GET:/api/forum/topics
+     */
+    forumControllerGetTopics: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        sort?: "lastActivity" | "newest" | "mostReplies";
+        /** @maxLength 200 */
+        search?: string;
+        scope?: "general" | "course";
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicsResponse, any>({
+        path: `/api/forum/topics`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerCreateTopic
+     * @request POST:/api/forum/topics
+     */
+    forumControllerCreateTopic: (
+      data: CreateTopicBody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateTopicResponse, any>({
+        path: `/api/forum/topics`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopic
+     * @request GET:/api/forum/topics/{topicId}
+     */
+    forumControllerGetTopic: (
+      topicId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopicPosts
+     * @request GET:/api/forum/topics/{topicId}/posts
+     */
+    forumControllerGetTopicPosts: (
+      topicId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicPostsResponse, any>({
+        path: `/api/forum/topics/${topicId}/posts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerCreatePost
+     * @request POST:/api/forum/topics/{topicId}/posts
+     */
+    forumControllerCreatePost: (
+      topicId: string,
+      data: CreatePostBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePostResponse, any>({
+        path: `/api/forum/topics/${topicId}/posts`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerDeletePost
+     * @request DELETE:/api/forum/posts/{postId}
+     */
+    forumControllerDeletePost: (postId: string, params: RequestParams = {}) =>
+      this.request<DeletePostResponse, any>({
+        path: `/api/forum/posts/${postId}`,
         method: "DELETE",
         format: "json",
         ...params,

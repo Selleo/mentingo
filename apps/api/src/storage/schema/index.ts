@@ -8,6 +8,7 @@ import {
 } from "@repo/email-templates";
 import {
   COURSE_TYPE,
+  DISCUSSION_SCOPES,
   AUTOMATION_NODE_KINDS,
   AUTOMATION_STATUSES,
   AUTOMATION_RUN_STATUSES,
@@ -80,6 +81,7 @@ import {
   type AnnouncementSourceType,
   type AnnouncementStatus,
   type CourseGenerationSyncStatus,
+  type DiscussionScope,
   type LiveTrainingDeliveryType,
   type LiveTrainingLinkEntityType,
   type LiveTrainingMemberRole,
@@ -1324,9 +1326,9 @@ export const courseChatThreads = pgTable(
   {
     ...id,
     ...timestamps,
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    scope: text("scope").$type<DiscussionScope>().notNull().default(DISCUSSION_SCOPES.COURSE),
+    title: text("title"),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     createdByUserId: uuid("created_by_user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
@@ -1342,6 +1344,23 @@ export const courseChatThreads = pgTable(
       table.courseId,
       table.updatedAt,
     ),
+    scopeUpdatedAtIdx: index("course_chat_threads_tenant_id_scope_updated_at_idx").on(
+      table.tenantId,
+      table.scope,
+      table.updatedAt,
+    ),
+    scopeCheck: check(
+      "course_chat_threads_scope_check",
+      sql`${table.scope} IN ('general', 'course')`,
+    ),
+    scopeCourseCheck: check(
+      "course_chat_threads_scope_course_check",
+      sql`(${table.scope} = 'course') = (${table.courseId} IS NOT NULL)`,
+    ),
+    generalTitleCheck: check(
+      "course_chat_threads_general_title_check",
+      sql`${table.scope} <> 'general' OR ${table.title} IS NOT NULL`,
+    ),
   })),
 );
 
@@ -1353,9 +1372,7 @@ export const courseChatMessages = pgTable(
     threadId: uuid("thread_id")
       .references(() => courseChatThreads.id, { onDelete: "cascade" })
       .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
@@ -1395,9 +1412,7 @@ export const courseChatMessageReactions = pgTable(
     messageId: uuid("message_id")
       .references(() => courseChatMessages.id, { onDelete: "cascade" })
       .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
