@@ -3896,7 +3896,8 @@
           },
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
           "dragWord": "Ziehen Sie ein Wort in einen Satz",
-          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll."
+          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll.",
+          "requiresReview": "Vom Prüfer bewertet"
         }
       }
     },
@@ -4343,6 +4344,7 @@
       "multipleChoice": "Multiple-Choice-Frage.",
       "singleChoice": "Single-Choice-Frage",
       "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
+      "partialScore": "Teilergebnis: {{correct}} von {{graded}} bewerteten Fragen richtig",
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
       "openInNewTab": "In neuem Tab öffnen",
@@ -4420,7 +4422,8 @@
       "retakeAvailableIn": "Nach der letzten Wiederholung {{time}} Stunden lang gesperrt.",
       "cooldown": "Das Quiz wird nach dem letzten Versuch {{time}} Stunden lang gesperrt.",
       "noCooldown": "Keine Abklingzeit.",
-      "beta": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko."
+      "beta": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
+      "awaitingReview": "Du kannst das Quiz nach der Bewertung wiederholen."
     },
     "breadcrumbs": {
       "availableCourses": "Verfügbare Kurse",
@@ -4458,7 +4461,8 @@
       "quizNotAnsweredYet": "Sie haben dieses Quiz noch nicht beantwortet.",
       "courseEnrollmentRequired": "Sie sind nicht in diesen Kurs eingeschrieben.",
       "quizRetakeUnavailable": "Die Quizantworten können wegen des Versuchslimits oder der Wartezeit nicht zurückgesetzt werden.",
-      "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+      "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
+      "quizAwaitingReview": "Dieses Quiz wartet auf eine Bewertung."
     },
     "preview": {
       "title": "Sie sehen eine Kursvorschau",
@@ -4864,7 +4868,8 @@
     "completed": "Vollendet",
     "inProgress": "Im Gange",
     "notStarted": "Nicht gestartet",
-    "blocked": "Blockiert"
+    "blocked": "Blockiert",
+    "awaitingReview": "Wartet auf Bewertung"
   },
   "studentCertificateView": {
     "header": "Zertifikate",
@@ -6543,7 +6548,8 @@
         "started": "Begonnen",
         "completed": "Abgeschlossen",
         "inProgress": "In Bearbeitung",
-        "notStarted": "Nicht begonnen"
+        "notStarted": "Nicht begonnen",
+        "awaitingReview": "Wartet auf Bewertung"
       },
       "lessonTypes": {
         "content": "Inhalt",

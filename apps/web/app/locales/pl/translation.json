@@ -4155,7 +4155,8 @@
             }
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
-          "dragWord": "Przeciągnij słowo do zdania"
+          "dragWord": "Przeciągnij słowo do zdania",
+          "requiresReview": "Oceniane przez recenzenta"
         }
       },
       "validation": {
@@ -4613,6 +4614,7 @@
       "multipleChoice": "Pytanie wielokrotnego wyboru.",
       "singleChoice": "Pytanie jednokrotnego wyboru.",
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "partialScore": "Wynik częściowy: {{correct}} z {{graded}} ocenionych pytań poprawnie",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",
@@ -4690,7 +4692,8 @@
       "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
       "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
       "noCooldown": "Brak okresu oczekiwania.",
-      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
+      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
+      "awaitingReview": "Quiz można powtórzyć po jego ocenie."
     },
     "breadcrumbs": {
       "availableCourses": "Dostępne kursy",
@@ -4728,7 +4731,8 @@
       "quizNotAnsweredYet": "Ten quiz nie został jeszcze rozwiązany.",
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
-      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
+      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie.",
+      "quizAwaitingReview": "Ten quiz oczekuje na ocenę."
     },
     "preview": {
       "title": "Przeglądasz podgląd kursu",
@@ -5179,7 +5183,8 @@
     "completed": "Ukończone",
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
-    "blocked": "Zablokowane"
+    "blocked": "Zablokowane",
+    "awaitingReview": "Oczekuje na ocenę"
   },
   "studentCertificateView": {
     "header": "Certyfikaty",
@@ -6619,7 +6624,8 @@
         "started": "Rozpoczęto",
         "completed": "Ukończono",
         "inProgress": "W toku",
-        "notStarted": "Nie rozpoczęto"
+        "notStarted": "Nie rozpoczęto",
+        "awaitingReview": "Oczekuje na ocenę"
       },
       "lessonTypes": {
         "content": "Treść",

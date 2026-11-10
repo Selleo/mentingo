@@ -1,4 +1,4 @@
-import { ASSESSMENT_QUESTION_TYPES, LESSON_TYPES } from "@repo/shared";
+import { ASSESSMENT_GRADING_MODES, ASSESSMENT_QUESTION_TYPES, LESSON_TYPES } from "@repo/shared";
 import { match } from "ts-pattern";
 
 import { normalizeBlankPromptMarkers } from "./quiz-authoring-mapper.utils";
@@ -118,6 +118,7 @@ const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): Ad
     displayOrder: question.displayOrder,
     ...(solutionExplanation ? { solutionExplanation } : {}),
     photoS3Key: question.photoS3Key,
+    requiresReview: question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL,
     options,
   };
 };

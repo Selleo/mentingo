@@ -39269,19 +39269,27 @@
                           "status": {
                             "anyOf": [
                               {
-                                "const": "not_started",
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "const": "not_started",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "in_progress",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "completed",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "blocked",
+                                    "type": "string"
+                                  }
+                                ]
                               },
                               {
-                                "const": "in_progress",
-                                "type": "string"
-                              },
-                              {
-                                "const": "completed",
-                                "type": "string"
-                              },
-                              {
-                                "const": "blocked",
+                                "const": "awaiting_review",
                                 "type": "string"
                               }
                             ]
@@ -39872,6 +39880,9 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "requiresReview": {
+                                  "type": "boolean"
                                 },
                                 "options": {
                                   "type": "array",
@@ -42505,19 +42516,27 @@
                     "status": {
                       "anyOf": [
                         {
-                          "const": "not_started",
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "const": "not_started",
+                              "type": "string"
+                            },
+                            {
+                              "const": "in_progress",
+                              "type": "string"
+                            },
+                            {
+                              "const": "completed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "blocked",
+                              "type": "string"
+                            }
+                          ]
                         },
                         {
-                          "const": "in_progress",
-                          "type": "string"
-                        },
-                        {
-                          "const": "completed",
-                          "type": "string"
-                        },
-                        {
-                          "const": "blocked",
+                          "const": "awaiting_review",
                           "type": "string"
                         }
                       ]
@@ -42817,6 +42836,9 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "requiresReview": {
+                            "type": "boolean"
                           },
                           "options": {
                             "type": "array",
@@ -43311,6 +43333,9 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "requiresReview": {
+                                "type": "boolean"
                               },
                               "options": {
                                 "type": "array",
@@ -44036,6 +44061,9 @@
                             }
                           ]
                         },
+                        "requiresReview": {
+                          "type": "boolean"
+                        },
                         "options": {
                           "type": "array",
                           "items": {
@@ -44366,6 +44394,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "isQuizAwaitingReview": {
+                "type": "boolean"
               },
               "attempts": {
                 "anyOf": [
@@ -45484,6 +45515,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -46310,6 +46344,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -46955,6 +46992,9 @@
                             }
                           ]
                         },
+                        "requiresReview": {
+                          "type": "boolean"
+                        },
                         "options": {
                           "type": "array",
                           "items": {
@@ -47366,6 +47406,9 @@
                         }
                       ]
                     },
+                    "requiresReview": {
+                      "type": "boolean"
+                    },
                     "options": {
                       "type": "array",
                       "items": {
@@ -47703,6 +47746,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -48080,6 +48126,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -48543,13 +48592,17 @@
                   },
                   "score": {
                     "type": "number"
+                  },
+                  "awaitingReview": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "correctAnswerCount",
                   "wrongAnswerCount",
                   "questionCount",
-                  "score"
+                  "score",
+                  "awaitingReview"
                 ]
               }
             },

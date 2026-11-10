@@ -35,11 +35,13 @@ export type QuizAttemptFeedback = {
   attempt: {
     id: UUIDType;
     scorePercentage: string | null;
+    gradingStatus: AssessmentAttemptGradingStatus;
   };
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
     awardedPoints: string | null;
+    gradingStatus: AssessmentAnswerGradingStatus;
   }>;
   choiceSelections: Array<{ questionAnswerId: UUIDType; selectedOptionId: UUIDType }>;
   statementAnswers: Array<{
@@ -62,12 +64,12 @@ export type PreparedQuizAttempt = {
   learnerId: UUIDType;
   language: SupportedLanguages;
   availablePoints: string;
-  awardedPoints: string;
-  scorePercentage: string;
+  awardedPoints: string | null;
+  scorePercentage: string | null;
   gradingStatus: AssessmentAttemptGradingStatus;
   result: AssessmentAttemptResult;
   submittedAt: string;
-  gradedAt: string;
+  gradedAt: string | null;
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
@@ -99,6 +101,7 @@ export type QuizRuntimeSubmissionResult = {
   questionCount: number;
   score: number;
   passed: boolean;
+  awaitingReview: boolean;
   attemptId: UUIDType;
   attemptNumber: number;
 };

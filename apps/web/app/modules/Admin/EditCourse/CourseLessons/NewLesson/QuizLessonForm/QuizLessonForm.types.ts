@@ -28,6 +28,7 @@ export type Question = {
   description?: string;
   photoS3Key?: string;
   photoS3SingedUrl?: string;
+  requiresReview?: boolean;
   displayOrder: number;
   title: string;
   options?: QuestionOption[];

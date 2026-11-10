@@ -58,6 +58,8 @@ export const QUIZ_LESSON_FORM_HANDLES = {
   questionToggle: (questionIndex: number) => `curriculum-quiz-question-toggle-${questionIndex}`,
   questionDeleteButton: (questionIndex: number) =>
     `curriculum-quiz-question-delete-button-${questionIndex}`,
+  questionRequiresReviewSwitch: (questionIndex: number) =>
+    `curriculum-quiz-question-requires-review-switch-${questionIndex}`,
   addOptionButton: (questionIndex: number) =>
     `curriculum-quiz-question-add-option-button-${questionIndex}`,
   optionInput: (questionIndex: number, optionIndex: number) =>
