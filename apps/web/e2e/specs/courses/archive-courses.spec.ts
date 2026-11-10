@@ -47,16 +47,7 @@ test("admin can archive and restore courses from bulk actions", async ({
     });
 
     await openCoursesPageFlow(page);
-    const filteredCoursesResponse = page.waitForResponse((response) => {
-      const url = new URL(response.url());
-      return (
-        url.pathname.endsWith("/api/course/all") &&
-        url.searchParams.get("title") === prefix &&
-        response.ok()
-      );
-    });
     await filterCoursesFlow(page, { title: prefix });
-    await filteredCoursesResponse;
     await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeVisible();
     await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[1].id))).toBeVisible();
     await selectCoursesFlow(
@@ -119,8 +110,13 @@ test("admin can archive and restore courses from bulk actions", async ({
     await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeHidden();
 
     await filterCoursesFlow(page, { archivedStatus: "archived" });
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[1].id))).toBeHidden();
+    await expect(
+      page.getByTestId(COURSES_PAGE_HANDLES.TABLE_BODY).locator("tr[data-course-id]"),
+    ).toHaveCount(1);
     await page.getByTestId(COURSES_PAGE_HANDLES.rowActionsTrigger(courses[0].id)).click();
     await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_RESTORE_ACTION).click();
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeVisible();
     await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON).click();
     await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeHidden();
   });
