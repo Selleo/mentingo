@@ -5,6 +5,7 @@ export const DURATION_DISPLAY_BUCKET_SECONDS = 15 * 60;
 export const DURATION_DEFAULTS: DurationHeuristics = {
   wordsPerMinute: 200,
   videoMinutes: 3,
+  audioMinutes: 3,
   imageSeconds: 15,
   downloadSeconds: 30,
   quizSeconds: 60,

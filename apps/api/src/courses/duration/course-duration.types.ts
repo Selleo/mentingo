@@ -67,6 +67,7 @@ export type DurationDb = DatabasePg;
 export type DurationHeuristics = {
   wordsPerMinute: number;
   videoMinutes: number;
+  audioMinutes: number;
   imageSeconds: number;
   downloadSeconds: number;
   quizSeconds: number;

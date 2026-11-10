@@ -7,6 +7,7 @@ This is the canonical technical reference for Mentingo's course duration estimat
 | Constant                |         Value | Meaning                                                                                                 |
 | ----------------------- | ------------: | ------------------------------------------------------------------------------------------------------- |
 | Words per minute        |         `200` | Reading-speed assumption for visible lesson text                                                        |
+| Audio fallback          | `180` seconds | Estimate for embedded audio with missing/invalid metadata or an unresolved resource                     |
 | Video fallback          | `180` seconds | Estimate for an internal video with missing/invalid metadata, an unresolved video, or an external video |
 | Image occurrence        |  `15` seconds | Fixed contribution per embedded image                                                                   |
 | Download occurrence     |  `30` seconds | Fixed contribution per embedded downloadable file                                                       |
@@ -26,13 +27,14 @@ For localized lesson HTML, count the visible words after removing markup and cal
 readingSeconds = ceil(wordCount / 200 * 60)
 ```
 
-For each embedded occurrence, add the contribution for its resource kind. An internal video contributes `ceil(resource.metadata.durationSeconds)` when the server-owned value is finite and positive; otherwise it contributes the 180-second fallback. A resource relationship without an actual embedded content reference contributes nothing. Every repeated embedded occurrence is counted.
+For each embedded occurrence, add the contribution for its resource kind. An internal video or audio recording contributes `ceil(resource.metadata.durationSeconds)` when the server-owned value is finite and positive; otherwise it contributes the 180-second fallback. A resource relationship without an actual embedded content reference contributes nothing. Every repeated embedded occurrence is counted.
 
 Lesson-type additions are applied as follows:
 
 ```text
 CONTENT = readingSeconds
          + video occurrences
+         + audio occurrences
          + image occurrences
          + download occurrences
          + presentation occurrences
@@ -88,7 +90,9 @@ displayedRemainingSeconds = sum(
 
 Partial quiz answers, watched video ranges, reading progress, and other partial lesson progress do not reduce the estimate in this issue. The progress card uses `sumRemainingChapterDisplayDurations` in `apps/web/app/modules/Courses/CourseView/CourseStatBar/CourseStatBar.tsx`.
 
-## Recalculation and video metadata
+## Recalculation and media metadata
+
+Audio uploads persist the positive duration from the same server-side ffprobe validation used to check the file. Legacy live audio resources without duration metadata are discovered every ten minutes in tenant-scoped keyset batches of at most 100 per tenant. The existing metadata queue probes those S3 files, persists the duration, and emits the duration-updated outbox event to refresh affected courses. Stable resource job IDs deduplicate replicas/restarts; jobs exhausted after the existing retry budget require operational retry/removal. Until metadata is available and projections refresh, the three-minute audio fallback applies when a course is recalculated. The calculator uses that canonical value, not HTML/player-supplied duration attributes. Audio only affects estimated learning time; video playback/completion gates and actual learner activity tracking are unchanged.
 
 The backend refreshes the affected course hierarchy from current database state after course, chapter, lesson, question, or relevant resource metadata changes. The refresh updates lesson, chapter, and course projections together; it does not apply learner progress deltas. A video metadata worker may persist a positive integer `durationSeconds` after probing an S3 object or reading Bunny metadata, then refreshes every course whose lesson content embeds that resource. Bunny processing statuses 3 and 4 are treated as ready only when the provider also returns a positive length. Attached-but-unused resources do not trigger a duration contribution.
 

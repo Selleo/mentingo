@@ -4,6 +4,7 @@ import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { isQueueSandboxProcess } from "src/queue/queue.constants";
 import { S3Module } from "src/s3/s3.module";
 
+import { AudioDurationBackfillCron } from "./audio-duration-backfill.cron";
 import { FileController } from "./file.controller";
 import { FileService } from "./file.service";
 import { HostedVideoCopyService } from "./hosted-video-copy.service";
@@ -45,6 +46,7 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
     VideoMetadataQueueService,
     VideoMetadataRepository,
     VideoMetadataService,
+    AudioDurationBackfillCron,
     ...(isQueueSandboxProcess() ? [] : [VideoMetadataWorker]),
   ],
   exports: [

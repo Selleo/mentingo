@@ -20,13 +20,19 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
   const readingSeconds = Math.ceil(
     ($.text().trim().split(/\s+/).filter(Boolean).length / DURATION_DEFAULTS.wordsPerMinute) * 60,
   );
-  const counts = { video: 0, image: 0, download: 0, presentation: 0 };
+  const counts = { video: 0, audio: 0, image: 0, download: 0, presentation: 0 };
   $("[data-node-type]").each((_, element) => {
     const nodeType = $(element).attr("data-node-type");
     if (nodeType === "video")
       counts.video += getVideoDurationSeconds(
         $(element).attr("data-src"),
         params.resourcesByReference,
+      );
+    if (nodeType === "audio")
+      counts.audio += getMediaDurationSeconds(
+        $(element).attr("data-src"),
+        params.resourcesByReference,
+        "audio/",
       );
     if (nodeType === "image") counts.image += 1;
     if (nodeType === "downloadable-file") counts.download += 1;
@@ -45,6 +51,7 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
       () =>
         readingSeconds +
         counts.video +
+        counts.audio +
         counts.image * DURATION_DEFAULTS.imageSeconds +
         counts.download * DURATION_DEFAULTS.downloadSeconds +
         counts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
@@ -62,18 +69,28 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
 export const getVideoDurationSeconds = (
   source: string | undefined,
   resourcesByReference: Map<string, DurationResource> | undefined,
+): number => getMediaDurationSeconds(source, resourcesByReference, "video/");
+
+const getMediaDurationSeconds = (
+  source: string | undefined,
+  resourcesByReference: Map<string, DurationResource> | undefined,
+  contentTypePrefix: "audio/" | "video/",
 ): number => {
   const reference = source ? extractLessonResourceIds(source)[0] : undefined;
   const resource = reference ? resourcesByReference?.get(reference) : undefined;
   const duration = resource?.metadata?.durationSeconds;
   if (
-    resource?.contentType.startsWith("video/") &&
+    resource?.contentType.startsWith(contentTypePrefix) &&
     typeof duration === "number" &&
     Number.isFinite(duration) &&
     duration > 0
   )
     return Math.ceil(duration);
-  return DURATION_DEFAULTS.videoMinutes * 60;
+  return (
+    (contentTypePrefix === "audio/"
+      ? DURATION_DEFAULTS.audioMinutes
+      : DURATION_DEFAULTS.videoMinutes) * 60
+  );
 };
 
 export const extractEmbeddedResourceIds = (content: string | null | undefined): string[] =>

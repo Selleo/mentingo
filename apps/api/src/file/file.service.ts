@@ -79,7 +79,7 @@ import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { isStorageRangeNotSatisfiableError } from "./utils/storageErrors";
 import { findStorageKeyTenantId, prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { UPLOAD_ERROR_KEYS } from "./utils/uploadErrors";
-import { validateAudioUpload } from "./utils/validate-audio";
+import { validateAudioUploadWithMetadata } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
@@ -592,7 +592,8 @@ export class FileService {
     resource: string,
     tenantId: UUIDType,
   ): Promise<UploadFileResult> {
-    const audioMimeType = await validateAudioUpload(file);
+    const { contentType: audioMimeType, durationSeconds } =
+      await validateAudioUploadWithMetadata(file);
 
     const fileKey = prefixTenantStorageKey(
       `${resource}/${randomUUID()}${VALIDATED_AUDIO_FILE_EXTENSIONS[audioMimeType]}`,
@@ -610,6 +611,7 @@ export class FileService {
       fileKey,
       fileUrl: await this.s3Service.getSignedUrl(fileKey),
       contentType: audioMimeType,
+      durationSeconds,
     };
   }
 
@@ -891,6 +893,9 @@ export class FileService {
               size: file.size,
               checksum,
               ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
+              ...(uploadResult.durationSeconds !== undefined
+                ? { durationSeconds: uploadResult.durationSeconds }
+                : {}),
             }),
             uploadedBy: currentUser?.userId || null,
             visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,

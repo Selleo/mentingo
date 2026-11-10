@@ -27,6 +27,8 @@ import {
 } from "src/file/file.constants";
 import { audioProbeResultSchema, type AudioProbeResult } from "src/file/types/audio-probe.type";
 
+import type { ValidatedAudioMetadata } from "src/file/types/validated-audio-metadata.type";
+
 const execFileAsync = promisify(execFile);
 
 const EBML_ROOT_ID = 0x1a45dfa3;
@@ -186,12 +188,12 @@ const assertAudioSize = (size: number) => {
 
 /**
  * Validates audio stored at `filePath` by probing and decoding its actual content, and returns
- * the canonical MIME type. Never trusts the extension or declared MIME.
+ * canonical MIME and duration metadata. Never trusts the extension or declared MIME.
  */
-export async function validateAudioFileAtPath(
+export async function validateAudioFileAtPathWithMetadata(
   filePath: string,
   declared: { mimetype: string; originalname: string; size: number },
-): Promise<ValidatedAudioMimeType> {
+): Promise<ValidatedAudioMetadata> {
   if (!isAudioFile({ type: declared.mimetype, name: declared.originalname })) {
     throw new BadRequestException("files.toast.invalidData");
   }
@@ -203,11 +205,13 @@ export async function validateAudioFileAtPath(
 
   try {
     const probeResult = await probeAudioFile(filePath);
+    const duration = Number(probeResult.format.duration);
+    if (!Number.isFinite(duration) || duration <= 0) throw new Error("Invalid audio duration");
     const audioMimeType = await detectAudioMimeType(filePath, probeResult);
     if (!audioMimeType) throw new Error("Unsupported audio");
 
     await decodeAudioToNullSink(filePath);
-    return audioMimeType;
+    return { contentType: audioMimeType, durationSeconds: Math.ceil(duration) };
   } catch {
     throw new BadRequestException("files.toast.invalidFileType");
   }
@@ -217,9 +221,9 @@ export async function validateAudioFileAtPath(
  * Validates an in-memory audio upload. ffprobe and ffmpeg need a file, so the bytes are written
  * to a private temporary directory for the duration of the check.
  */
-export async function validateAudioUpload(
+export async function validateAudioUploadWithMetadata(
   file: Express.Multer.File,
-): Promise<ValidatedAudioMimeType> {
+): Promise<ValidatedAudioMetadata> {
   if (!file.buffer) throw new BadRequestException("files.toast.invalidData");
 
   assertAudioSize(file.buffer.length);
@@ -229,7 +233,7 @@ export async function validateAudioUpload(
   try {
     const filePath = path.join(directory, "upload");
     await writeFile(filePath, file.buffer, { mode: 0o600 });
-    return await validateAudioFileAtPath(filePath, {
+    return await validateAudioFileAtPathWithMetadata(filePath, {
       mimetype: file.mimetype,
       originalname: file.originalname,
       size: file.buffer.length,
@@ -237,4 +241,19 @@ export async function validateAudioUpload(
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+}
+
+/** Backwards-compatible MIME-only validation. */
+export async function validateAudioFileAtPath(
+  filePath: string,
+  declared: { mimetype: string; originalname: string; size: number },
+): Promise<ValidatedAudioMimeType> {
+  return (await validateAudioFileAtPathWithMetadata(filePath, declared)).contentType;
+}
+
+/** Backwards-compatible MIME-only validation. */
+export async function validateAudioUpload(
+  file: Express.Multer.File,
+): Promise<ValidatedAudioMimeType> {
+  return (await validateAudioUploadWithMetadata(file)).contentType;
 }

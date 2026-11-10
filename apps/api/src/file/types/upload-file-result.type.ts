@@ -5,4 +5,5 @@ export type UploadFileResult = {
   fileUrl: string;
   contentType: string;
   imageVariants?: ImageVariantMetadata;
+  durationSeconds?: number;
 };

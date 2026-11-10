@@ -49,6 +49,63 @@ describe("CourseDurationService", () => {
     });
   });
 
+  it("includes localized audio duration in lesson, chapter and course projections", async () => {
+    const audioNode = `<div data-node-type="audio" data-src="/api/lesson/lesson-resource/${resourceId}"></div>`;
+    const repository = {
+      withCourseDurationTransaction: jest.fn(async (_courseId, _db, callback) =>
+        callback({} as never),
+      ),
+      getCourseLocalization: jest
+        .fn()
+        .mockResolvedValue([{ baseLanguage: "pl", availableLocales: ["pl", "en"] }]),
+      getChapterDurationRows: jest
+        .fn()
+        .mockResolvedValue([{ id: "chapter-id", durationEstimates: {} }]),
+      getLessonProjectionRows: jest.fn().mockResolvedValue([
+        {
+          id: "lesson-id",
+          chapterId: "chapter-id",
+          type: LESSON_TYPES.CONTENT,
+          description: { pl: audioNode, en: audioNode + audioNode },
+          questionCount: 0,
+        },
+      ]),
+      getResourceRowsByReferences: jest.fn().mockResolvedValue([
+        {
+          id: resourceId,
+          resourceEntityId: null,
+          contentType: "audio/mpeg",
+          metadata: { durationSeconds: 65.2 },
+        },
+      ]),
+      updateLessonDurations: jest.fn().mockResolvedValue(undefined),
+      updateChapterDurations: jest.fn().mockResolvedValue(undefined),
+      updateCourseDuration: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new CourseDurationService(repository as never);
+
+    await service.refreshCourseDurationEstimates("course-id" as never);
+
+    const durationEstimates = { pl: { totalSeconds: 66 }, en: { totalSeconds: 132 } };
+    expect(repository.getResourceRowsByReferences).toHaveBeenCalledWith(
+      [resourceId],
+      expect.anything(),
+    );
+    expect(repository.updateLessonDurations).toHaveBeenCalledWith(
+      [{ id: "lesson-id", durationEstimates }],
+      expect.anything(),
+    );
+    expect(repository.updateChapterDurations).toHaveBeenCalledWith(
+      [{ id: "chapter-id", durationEstimates }],
+      expect.anything(),
+    );
+    expect(repository.updateCourseDuration).toHaveBeenCalledWith(
+      "course-id",
+      durationEstimates,
+      expect.anything(),
+    );
+  });
+
   it("creates projections only for the course's active languages", () => {
     const activeLanguages = ["en", "pl", "en"] as const;
 

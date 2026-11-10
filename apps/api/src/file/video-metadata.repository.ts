@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, asc, eq, gt, like, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -11,6 +11,24 @@ import type { VideoMetadataResource } from "./video-metadata.types";
 @Injectable()
 export class VideoMetadataRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
+
+  /** One tenant-scoped keyset page; never loads the audio bytes in the cron process. */
+  async findAudioMissingDuration(tenantId: string, afterId?: string, limit = 100) {
+    return this.db
+      .select({ id: resources.id, reference: resources.reference })
+      .from(resources)
+      .where(
+        and(
+          eq(resources.tenantId, tenantId),
+          eq(resources.archived, false),
+          like(resources.contentType, "audio/%"),
+          sql`${resources.metadata}->>'durationSeconds' is null`,
+          afterId ? gt(resources.id, afterId) : undefined,
+        ),
+      )
+      .orderBy(asc(resources.id))
+      .limit(limit);
+  }
 
   async findResource(
     resourceId: string,
