@@ -32,6 +32,9 @@ export class MfaRepository {
         .select({
           personal: sql<SettingsJSONContentSchema | null>`${personalSettings.settings}`,
           global: sql<GlobalSettingsJSONContentSchema | null>`${globalSettings.settings}`,
+          enforcedRoles: sql<
+            string[]
+          >`coalesce(${globalSettings.settings} -> 'MFAEnforcedRoles', '[]'::jsonb)`,
           roleSlugs: sql<
             string[]
           >`coalesce(array_agg(${permissionRoles.slug}) filter (where ${permissionRoles.slug} is not null), '{}')`,
@@ -57,12 +60,10 @@ export class MfaRepository {
       if (!source?.personal || !source.global || typeof source.personal.isMFAEnabled !== "boolean")
         throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
 
-      const enforcedRoles = source.global.MFAEnforcedRoles;
-
       return {
         required:
           source.personal.isMFAEnabled ||
-          source.roleSlugs.some((slug) => enforcedRoles.includes(slug)),
+          source.roleSlugs.some((slug) => source.enforcedRoles.includes(slug)),
         enabled: source.personal.isMFAEnabled,
         secret: source.personal.MFASecret,
       };
