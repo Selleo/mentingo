@@ -4453,7 +4453,8 @@
       "account": "Compte",
       "integrations": "Intégrations",
       "organization": "Organisation",
-      "platformCustomization": "Personnalisation de la plateforme"
+      "platformCustomization": "Personnalisation de la plateforme",
+      "features": "Fonctionnalités"
     },
     "breadcrumbs": {
       "settings": "Paramètres"
@@ -4498,16 +4499,16 @@
       "newUserNotifications": "Notifications des nouveaux utilisateurs",
       "newUserNotificationsDescription": "Recevoir des notifications lorsqu'un nouvel utilisateur est créé",
       "coursesVisibility": "Afficher les cours aux visiteurs",
-      "coursesVisibilityDescription": "Autoriser les visiteurs à consulter la liste des cours et à accéder aux leçons gratuites sans se connecter",
+      "coursesVisibilityDescription": "Permet aux personnes non connectées de parcourir la liste des cours et d'ouvrir les leçons gratuites.",
       "modernCourseList": "Utiliser la vue moderne de la liste des cours",
       "modernCourseListDescription": "Activez la nouvelle conception de la liste de cours avec les sections héros et meilleurs cours",
       "courseListLayoutRecommended": "Recommandé",
       "courseDiscussions": "Activer les discussions sur les cours",
-      "courseDiscussionsDescription": "Autoriser les utilisateurs inscrits à consulter et à participer aux fils de discussion du cours",
+      "courseDiscussionsDescription": "Ajoute à chaque cours un onglet de discussion où les utilisateurs inscrits peuvent poser des questions, répondre et réagir.",
       "calendar": "Activer le calendrier",
       "calendarDescription": "Autoriser les utilisateurs à afficher les événements programmés dans le calendrier",
       "liveTraining": "Activer la formation en direct",
-      "liveTrainingDescription": "Permettez aux formateurs de créer et d’exécuter des sessions de formation en direct",
+      "liveTrainingDescription": "Permet aux formateurs de planifier et d'animer des sessions en direct en ligne. Les apprenants voient les prochaines sessions dans leur calendrier et les rejoignent dans le navigateur.",
       "liveTrainingMaxParallelSessions": "Nombre maximum de sessions de formation en direct parallèles",
       "liveTrainingMaxParallelSessionsDescription": "Limitez le nombre de sessions de formation en direct pouvant être actives en même temps.",
       "liveTrainingTooltip": "Activez cette option si l'organisation doit utiliser des sessions en direct animées par un formateur.",
@@ -4518,7 +4519,7 @@
       "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
       "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard",
       "publicCoursePreview": "Consulter les leçons avant de s’inscrire à un cours",
-      "publicCoursePreviewDescription": "Permet aux utilisateurs non inscrits de consulter les leçons des cours publics gratuits."
+      "publicCoursePreviewDescription": "Permet aux utilisateurs connectés d'ouvrir les leçons des cours gratuits avant de s'inscrire. Les quiz et le suivi de la progression nécessitent toujours une inscription."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",
@@ -5545,11 +5546,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Activer la section Questions et réponses",
-        "description": "Activez la section Questions et réponses. Lorsqu'elle est désactivée, la section Q&A est masquée pour tous les utilisateurs."
+        "description": "Ajoute une section Q&A avec les questions fréquentes et leurs réponses. Désactivée, elle est masquée pour tous."
       },
       "qaPublic": {
-        "label": "Afficher la section Q&A aux utilisateurs non enregistrés",
-        "description": "Autoriser les utilisateurs non enregistrés à afficher la section Q&R (ne peut être activé que lorsque la section Q&A est activée)"
+        "label": "Visibilité pour les visiteurs",
+        "description": "Les personnes non connectées peuvent aussi lire la section Q&A. Disponible une fois Q&A activé."
       }
     },
     "toast": {
@@ -5565,11 +5566,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Activer la section actualités",
-        "description": "Activez la section actualités. Lorsqu'elle est désactivée, la section d'actualités est masquée pour tous les utilisateurs."
+        "description": "Ajoute une section Actualités où vous publiez des annonces et des nouveautés pour les utilisateurs. Désactivée, la section est masquée pour tous."
       },
       "newsPublic": {
-        "label": "Afficher la section d'actualités aux utilisateurs non enregistrés",
-        "description": "Autoriser les utilisateurs non enregistrés à afficher la section d'actualités (ne peut être activé que lorsque la section d'actualités est activée)"
+        "label": "Visibilité pour les visiteurs",
+        "description": "Les personnes non connectées peuvent aussi lire les actualités. Disponible une fois les actualités activées."
       }
     },
     "toast": {
@@ -5585,11 +5586,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Activer la section Base de connaissances",
-        "description": "Activez la section base de connaissances. Lorsqu'elle est désactivée, la section de la base de connaissances est masquée pour tous les utilisateurs."
+        "description": "Ajoute une base de connaissances où vous publiez des articles comme des guides, des procédures et des FAQ. Désactivée, elle est masquée pour tous."
       },
       "articlesPublic": {
-        "label": "Afficher la section de la base de connaissances aux utilisateurs non enregistrés",
-        "description": "Autoriser les utilisateurs non enregistrés à afficher la section de la base de connaissances (ne peut être activé que lorsque la section de la base de connaissances est activée)"
+        "label": "Visibilité pour les visiteurs",
+        "description": "Les personnes non connectées peuvent aussi lire la base de connaissances. Disponible une fois la base de connaissances activée."
       }
     },
     "toast": {
@@ -5605,7 +5606,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Activer les parcours de développement",
-        "description": "Activez les parcours de développement. Lorsqu'ils sont désactivés, les parcours de développement sont masqués et bloqués pour tous les utilisateurs."
+        "description": "Regroupez des cours en parcours de développement que les apprenants suivent étape par étape. Désactivés, les parcours sont masqués et leurs pages bloquées pour tous."
       }
     }
   },
@@ -8842,7 +8843,7 @@
         "updated": "Paramètres des classements mis à jour.",
         "enabled": {
           "label": "Activer les classements",
-          "description": "Affiche la page des classements. Désactivé, personne ne peut ouvrir les classements."
+          "description": "Ajoute une page de classements qui ordonne les apprenants selon leur XP ou leurs succès, par groupe ou pour toute l'organisation. Désactivée, personne ne peut l'ouvrir."
         },
         "visibility": {
           "label": "Visibilité pour les apprenants",
@@ -8863,7 +8864,7 @@
       "description": "Activez la gamification pour votre organisation et configurez les succès que les apprenants peuvent obtenir.",
       "enabled": {
         "label": "Activer la gamification",
-        "description": "Affiche aux utilisateurs les niveaux, l’XP, les succès et les notifications de récompense. Les récompenses sont calculées même lorsque cette option est désactivée."
+        "description": "Affiche aux utilisateurs leurs niveaux, leur XP et leurs succès sur leur profil et leur tableau de bord, avec une notification pour chaque récompense. La progression est comptée même lorsque l'option est désactivée."
       },
       "achievements": {
         "title": "Succès",
@@ -9075,5 +9076,49 @@
     "label": "Vue des cours",
     "catalogue": "Catalogue",
     "table": "Tableau"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Cette fonctionnalité nécessite une intégration qui n'est pas encore configurée.",
+      "configure": "Configurer l'intégration"
+    },
+    "disable": {
+      "title": "Désactiver « {{feature}} » ?",
+      "description": "Les utilisateurs ne la verront plus. Les données sont conservées et reviennent quand vous la réactivez.",
+      "confirm": "Désactiver"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Parcours de développement"
+      },
+      "gamification": {
+        "title": "Gamification"
+      },
+      "liveTraining": {
+        "title": "Formations en direct"
+      },
+      "courseDiscussions": {
+        "title": "Discussions de cours"
+      },
+      "leaderboards": {
+        "title": "Classements"
+      },
+      "news": {
+        "title": "Actualités"
+      },
+      "articles": {
+        "title": "Base de connaissances"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Cours pour les visiteurs"
+      },
+      "publicCoursePreview": {
+        "title": "Aperçu public des cours"
+      }
+    },
+    "requiresGamification": "Activez d'abord la gamification."
   }
 }

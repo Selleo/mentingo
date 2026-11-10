@@ -4711,7 +4711,8 @@
       "account": "Account",
       "integrations": "Integrations",
       "organization": "Organization",
-      "platformCustomization": "Platform Customization"
+      "platformCustomization": "Platform Customization",
+      "features": "Features"
     },
     "breadcrumbs": {
       "settings": "Settings"
@@ -4756,7 +4757,7 @@
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
-      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "coursesVisibilityDescription": "Lets people who are not signed in browse the course list and open free lessons.",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
       "courseListLayout": "Course list layout",
@@ -4772,11 +4773,11 @@
         "availableCourses": "Available courses"
       },
       "courseDiscussions": "Enable course discussions",
-      "courseDiscussionsDescription": "Allow enrolled users to view and participate in course discussion threads",
+      "courseDiscussionsDescription": "Adds a discussion tab to every course where enrolled users can ask questions, reply and react.",
       "calendar": "Enable calendar",
       "calendarDescription": "Allow users to view scheduled events in the calendar",
       "liveTraining": "Enable Live Training",
-      "liveTrainingDescription": "Allow trainers to create and run live training sessions",
+      "liveTrainingDescription": "Lets trainers schedule and run live online sessions. Learners see upcoming sessions in their calendar and join them in the browser.",
       "liveTrainingMaxParallelSessions": "Max parallel Live Training sessions",
       "liveTrainingMaxParallelSessionsDescription": "Limit how many Live Training sessions can be active at the same time.",
       "liveTrainingTooltip": "Enable this only when the tenant should use trainer-led live sessions.",
@@ -4787,7 +4788,7 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "View lessons before enrolling in a course",
-      "publicCoursePreviewDescription": "Let unenrolled users view lessons in free public courses."
+      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -5814,11 +5815,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Enable Q&A section",
-        "description": "Enable the Q&A section. When disabled, the Q&A section is hidden for all users."
+        "description": "Adds a Q&A section with common questions and their answers. When off, it is hidden for everyone."
       },
       "qaPublic": {
-        "label": "Show Q&A section to unregistered users",
-        "description": "Allow unregistered users to view the Q&A section (can only be toggled, when Q&A section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read the Q&A section too. Available once Q&A is on."
       }
     },
     "toast": {
@@ -5834,11 +5835,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Enable news section",
-        "description": "Enable the news section. When disabled, the news section is hidden for all users."
+        "description": "Adds a News section where you publish announcements and updates for users. When off, the section is hidden for everyone."
       },
       "newsPublic": {
-        "label": "Show news section to unregistered users",
-        "description": "Allow unregistered users to view the news section (can only be toggled, when news section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read news too. Available once news is on."
       }
     },
     "toast": {
@@ -5854,11 +5855,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Enable knowledge base section",
-        "description": "Enable the knowledge base section. When disabled, the knowledge base section is hidden for all users."
+        "description": "Adds a knowledge base where you publish articles such as guides, procedures and FAQs. When off, it is hidden for everyone."
       },
       "articlesPublic": {
-        "label": "Show knowledge base section to unregistered users",
-        "description": "Allow unregistered users to view the knowledge base section (can only be toggled, when the knowledge base section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read the knowledge base too. Available once the knowledge base is on."
       }
     },
     "toast": {
@@ -5874,7 +5875,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Enable Development Paths",
-        "description": "Enable Development Paths. When disabled, Development Paths are hidden and blocked for all users."
+        "description": "Group courses into development paths that learners complete step by step. When off, development paths are hidden and their pages are blocked for everyone."
       }
     }
   },
@@ -9349,7 +9350,7 @@
         "updated": "Leaderboard settings updated.",
         "enabled": {
           "label": "Enable leaderboards",
-          "description": "Shows the leaderboards page. When off, nobody can open leaderboards."
+          "description": "Adds a leaderboards page that ranks learners by XP or achievements, per group or across the organization. When off, nobody can open it."
         },
         "visibility": {
           "label": "Learner visibility",
@@ -9370,7 +9371,7 @@
       "description": "Turn gamification on for your organization and configure the achievements learners can earn.",
       "enabled": {
         "label": "Enable gamification",
-        "description": "Show levels, XP, achievements and reward notifications to users. Rewards are calculated even while this is off."
+        "description": "Shows users their levels, XP and achievements on their profile and dashboard, with a notification for each reward. Progress is counted even while this is off."
       },
       "achievements": {
         "title": "Achievements",
@@ -9582,5 +9583,49 @@
     "label": "Courses view",
     "catalogue": "Catalogue",
     "table": "Table"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "This feature needs an integration that is not configured yet.",
+      "configure": "Configure integration"
+    },
+    "disable": {
+      "title": "Turn off \"{{feature}}\"?",
+      "description": "Users will no longer see it. Your data stays saved and comes back when you turn it on again.",
+      "confirm": "Turn off"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Development paths"
+      },
+      "gamification": {
+        "title": "Gamification"
+      },
+      "liveTraining": {
+        "title": "Live training"
+      },
+      "courseDiscussions": {
+        "title": "Course discussions"
+      },
+      "leaderboards": {
+        "title": "Leaderboards"
+      },
+      "news": {
+        "title": "News"
+      },
+      "articles": {
+        "title": "Knowledge base"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Courses for visitors"
+      },
+      "publicCoursePreview": {
+        "title": "Public course preview"
+      }
+    },
+    "requiresGamification": "Turn on Gamification first."
   }
 }

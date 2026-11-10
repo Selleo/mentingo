@@ -120,6 +120,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         user?.roleSlugs ?? [],
         competenciesConfiguration?.enabled === true && !isCompetenciesConfigurationError,
         areLeaderboardsEnabled(globalSettings),
+        globalSettings?.gamificationEnabled === true,
       ),
     );
   }

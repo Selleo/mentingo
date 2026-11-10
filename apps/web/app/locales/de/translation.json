@@ -4710,7 +4710,8 @@
       "account": "Konto",
       "integrations": "Integrationen",
       "organization": "Organisation",
-      "platformCustomization": "Plattformanpassung"
+      "platformCustomization": "Plattformanpassung",
+      "features": "Funktionen"
     },
     "breadcrumbs": {
       "settings": "Einstellungen"
@@ -4755,7 +4756,7 @@
       "newUserNotifications": "Benachrichtigungen für neue Benutzer",
       "newUserNotificationsDescription": "Erhalten Sie Benachrichtigungen, wenn ein neuer Benutzer erstellt wird",
       "coursesVisibility": "Zeigen Sie Besuchern Kurse",
-      "coursesVisibilityDescription": "Ermöglichen Sie Besuchern, die Kursliste anzuzeigen und auf kostenlose Lektionen zuzugreifen, ohne sich anzumelden",
+      "coursesVisibilityDescription": "Erlaubt nicht angemeldeten Personen, die Kursliste zu durchsuchen und kostenlose Lektionen zu öffnen.",
       "modernCourseList": "Nutzen Sie die moderne Kurslistenansicht",
       "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten Hero und Top-Kurse.",
       "courseListLayout": "Kurslistenlayout",
@@ -4771,11 +4772,11 @@
         "availableCourses": "Verfügbare Kurse"
       },
       "courseDiscussions": "Kursdiskussionen aktivieren",
-      "courseDiscussionsDescription": "Eingeschriebenen Benutzern erlauben, Kursdiskussionen anzuzeigen und daran teilzunehmen",
+      "courseDiscussionsDescription": "Fügt jedem Kurs einen Diskussions-Tab hinzu, in dem eingeschriebene Nutzer Fragen stellen, antworten und reagieren können.",
       "calendar": "Kalender aktivieren",
       "calendarDescription": "Benutzern erlauben, geplante Ereignisse im Kalender anzuzeigen",
       "liveTraining": "Live-Schulung aktivieren",
-      "liveTrainingDescription": "Trainern erlauben, Live-Schulungen zu erstellen und durchzuführen",
+      "liveTrainingDescription": "Ermöglicht Trainern, Live-Online-Sitzungen zu planen und durchzuführen. Lernende sehen anstehende Sitzungen im Kalender und nehmen im Browser teil.",
       "liveTrainingMaxParallelSessions": "Maximale parallele Live-Schulungssitzungen",
       "liveTrainingMaxParallelSessionsDescription": "Begrenzen Sie, wie viele Live-Schulungssitzungen gleichzeitig aktiv sein können.",
       "liveTrainingTooltip": "Aktivieren Sie dies nur, wenn der Mandant trainergeführte Live-Sitzungen verwenden soll.",
@@ -4786,7 +4787,7 @@
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
       "publicCoursePreview": "Lektionen vor der Kurseinschreibung ansehen",
-      "publicCoursePreviewDescription": "Nutzer können Lektionen in kostenlosen öffentlichen Kursen ohne Einschreibung ansehen."
+      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
@@ -5991,11 +5992,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Aktivieren Sie den Abschnitt „Fragen und Antworten“.",
-        "description": "Aktivieren Sie den Abschnitt „Fragen und Antworten“. Wenn diese Option deaktiviert ist, ist der Abschnitt „Fragen und Antworten“ für alle Benutzer ausgeblendet."
+        "description": "Fügt einen Q&A-Bereich mit häufigen Fragen und Antworten hinzu. Wenn deaktiviert, ist er für alle ausgeblendet."
       },
       "qaPublic": {
-        "label": "Bereich „Fragen und Antworten“ für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den Abschnitt „Fragen und Antworten“ anzuzeigen (kann nur umgeschaltet werden, wenn der Abschnitt „Fragen und Antworten“ aktiviert ist)."
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können den Q&A-Bereich lesen. Verfügbar, sobald Q&A aktiviert ist."
       }
     },
     "toast": {
@@ -6011,11 +6012,11 @@
     "settings": {
       "newsEnabled": {
         "label": "News-Bereich aktivieren",
-        "description": "Aktivieren Sie den News-Bereich. Wenn die Funktion deaktiviert ist, ist der News-Bereich für alle Benutzer ausgeblendet."
+        "description": "Fügt einen Bereich für Neuigkeiten hinzu, in dem du Ankündigungen und Updates für Nutzer veröffentlichst. Wenn deaktiviert, ist der Bereich für alle ausgeblendet."
       },
       "newsPublic": {
-        "label": "News-Bereich für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den News-Bereich anzuzeigen (kann nur umgeschaltet werden, wenn der News-Bereich aktiviert ist)"
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können Neuigkeiten lesen. Verfügbar, sobald Neuigkeiten aktiviert sind."
       }
     },
     "toast": {
@@ -6031,11 +6032,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Aktivieren Sie den Wissensdatenbankbereich",
-        "description": "Aktivieren Sie den Wissensdatenbankbereich. Wenn diese Option deaktiviert ist, ist der Wissensdatenbankbereich für alle Benutzer ausgeblendet."
+        "description": "Fügt eine Wissensdatenbank hinzu, in der du Artikel wie Anleitungen, Abläufe und FAQs veröffentlichst. Wenn deaktiviert, ist sie für alle ausgeblendet."
       },
       "articlesPublic": {
-        "label": "Wissensdatenbankbereich für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den Wissensdatenbank-Abschnitt anzuzeigen (kann nur umgeschaltet werden, wenn der Wissensdatenbank-Abschnitt aktiviert ist)"
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können die Wissensdatenbank lesen. Verfügbar, sobald die Wissensdatenbank aktiviert ist."
       }
     },
     "toast": {
@@ -6051,7 +6052,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Entwicklungspfade aktivieren",
-        "description": "Aktivieren Sie Entwicklungspfade. Wenn deaktiviert, werden Entwicklungspfade fuer alle Benutzer ausgeblendet und blockiert."
+        "description": "Fasse Kurse zu Entwicklungspfaden zusammen, die Lernende Schritt für Schritt abschließen. Wenn deaktiviert, sind Entwicklungspfade ausgeblendet und ihre Seiten für alle gesperrt."
       }
     }
   },
@@ -9307,7 +9308,7 @@
         "updated": "Einstellungen der Bestenlisten aktualisiert.",
         "enabled": {
           "label": "Bestenlisten aktivieren",
-          "description": "Zeigt die Seite mit den Bestenlisten. Wenn deaktiviert, kann niemand Bestenlisten öffnen."
+          "description": "Fügt eine Ranglistenseite hinzu, die Lernende nach XP oder Erfolgen ordnet, pro Gruppe oder für die ganze Organisation. Wenn deaktiviert, kann niemand sie öffnen."
         },
         "visibility": {
           "label": "Sichtbarkeit für Lernende",
@@ -9328,7 +9329,7 @@
       "description": "Aktiviere Gamification für deine Organisation und konfiguriere die Erfolge, die Lernende erhalten können.",
       "enabled": {
         "label": "Gamification aktivieren",
-        "description": "Zeige Nutzern Level, XP, Erfolge und Belohnungsbenachrichtigungen. Belohnungen werden auch berechnet, wenn dies deaktiviert ist."
+        "description": "Zeigt Nutzern ihre Level, XP und Erfolge im Profil und im Dashboard und benachrichtigt bei jeder Belohnung. Der Fortschritt wird auch im deaktivierten Zustand gezählt."
       },
       "achievements": {
         "title": "Erfolge",
@@ -9540,5 +9541,49 @@
     "label": "Kursansicht",
     "catalogue": "Katalog",
     "table": "Tabelle"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Diese Funktion benötigt eine Integration, die noch nicht eingerichtet ist.",
+      "configure": "Integration einrichten"
+    },
+    "disable": {
+      "title": "„{{feature}}“ deaktivieren?",
+      "description": "Nutzer sehen die Funktion nicht mehr. Alle Daten bleiben gespeichert und sind nach dem erneuten Aktivieren wieder da.",
+      "confirm": "Deaktivieren"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Entwicklungspfade"
+      },
+      "gamification": {
+        "title": "Gamification"
+      },
+      "liveTraining": {
+        "title": "Live-Trainings"
+      },
+      "courseDiscussions": {
+        "title": "Kursdiskussionen"
+      },
+      "leaderboards": {
+        "title": "Ranglisten"
+      },
+      "news": {
+        "title": "Neuigkeiten"
+      },
+      "articles": {
+        "title": "Wissensdatenbank"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kurse für Besucher"
+      },
+      "publicCoursePreview": {
+        "title": "Öffentliche Kursvorschau"
+      }
+    },
+    "requiresGamification": "Aktiviere zuerst die Gamification."
   }
 }

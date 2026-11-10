@@ -48,6 +48,8 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useToast } from "~/components/ui/use-toast";
+import { GamificationFeatureGuard } from "~/Guards/GamificationFeatureGuard";
+import { GAMIFICATION_FEATURES } from "~/Guards/GamificationFeatureGuard.constants";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -79,7 +81,11 @@ const toNumberOrNull = (event: ChangeEvent<HTMLInputElement>) =>
 export default function AchievementFormPage() {
   const { id } = useParams();
 
-  return id ? <ExistingAchievementForm id={id} /> : <AchievementForm />;
+  return (
+    <GamificationFeatureGuard feature={GAMIFICATION_FEATURES.GAMIFICATION}>
+      {id ? <ExistingAchievementForm id={id} /> : <AchievementForm />}
+    </GamificationFeatureGuard>
+  );
 }
 
 function ExistingAchievementForm({ id }: { id: string }) {

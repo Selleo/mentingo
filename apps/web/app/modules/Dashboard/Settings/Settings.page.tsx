@@ -18,6 +18,7 @@ import { useTourSetup } from "../../Onboarding/hooks/useTourSetup";
 import { studentSettingsSteps } from "../../Onboarding/routes/student";
 
 import AccountTabContent from "./components/AccountTabContent";
+import { FeaturesTabContent } from "./components/admin/features/FeaturesTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { IntegrationsTabContent } from "./components/IntegrationsTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
@@ -126,6 +127,11 @@ export default function SettingsPage() {
                 globalSettings={globalSettings}
                 canManageEnvs={canManageEnvs}
               />
+            )
+          }
+          featuresContent={
+            globalSettings && (
+              <FeaturesTabContent globalSettings={globalSettings} canManageEnvs={canManageEnvs} />
             )
           }
           customizePlatformContent={
