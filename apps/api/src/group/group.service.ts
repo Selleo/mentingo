@@ -646,6 +646,8 @@ export class GroupService {
     switch (sort) {
       case GroupSortFields.name:
         return this.getLocalizedGroupName(language);
+      case GroupSortFields.characteristic:
+        return this.getLocalizedGroupCharacteristic(language);
       default:
         return groups.createdAt;
     }

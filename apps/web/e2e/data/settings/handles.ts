@@ -15,6 +15,8 @@ export const SETTINGS_PAGE_HANDLES = {
   PLATFORM_CUSTOMIZATION_CONTENT: "settings-platform-customization-content",
   FEATURES_TAB: "settings-features-tab",
   FEATURES_CONTENT: "settings-features-content",
+  FEATURE_DISABLE_DIALOG: "settings-feature-disable-dialog",
+  FEATURE_DISABLE_CONFIRM_BUTTON: "settings-feature-disable-confirm-button",
   NO_AVAILABLE_SETTINGS: "settings-no-available-settings",
   ORGANIZATION_WARNING_INDICATOR: "settings-organization-warning-indicator",
   LANGUAGE_SELECT: "settings-language-select",

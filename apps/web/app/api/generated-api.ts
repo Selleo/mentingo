@@ -47928,7 +47928,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        sort?: "name" | "createdAt";
+        sort?: "name" | "characteristic" | "createdAt";
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},

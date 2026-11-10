@@ -115,6 +115,8 @@ const Categories = () => {
   const deleteSelectedCategories = () => {
     const [firstSelectedCategory] = selectedCategories;
 
+    if (!firstSelectedCategory) return;
+
     if (selectedCategories.length === 1 && firstSelectedCategory) {
       deleteCategory(firstSelectedCategory, {
         onSuccess: () => setRowSelection({}),

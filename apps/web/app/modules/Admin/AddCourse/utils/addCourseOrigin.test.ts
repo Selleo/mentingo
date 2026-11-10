@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
+
 import {
   buildAddCourseFromCategoryPath,
   getAddCourseExitPath,
@@ -12,9 +14,9 @@ describe("addCourseOrigin", () => {
       .searchParams;
 
     expect(getAddCourseExitPath(fromCourses)).toBe("/courses");
-    expect(getAddCourseExitPath(new URLSearchParams())).toBe("/admin/courses");
+    expect(getAddCourseExitPath(new URLSearchParams())).toBe(COURSES_TABLE_PATH);
     expect(getAddCourseExitPath(new URLSearchParams({ from: "https://evil.test" }))).toBe(
-      "/admin/courses",
+      COURSES_TABLE_PATH,
     );
   });
 

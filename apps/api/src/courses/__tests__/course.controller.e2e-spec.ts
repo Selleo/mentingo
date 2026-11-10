@@ -13,6 +13,7 @@ import {
   SCORM_STANDARD,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
+  type CourseStatus,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
@@ -1129,19 +1130,42 @@ describe("CourseController (e2e)", () => {
       });
 
       describe("when user is student", () => {
-        it("returns 403 for unauthorized request", async () => {
+        it("returns only published courses and private courses the student is enrolled in", async () => {
           const category = await categoryFactory.create();
           const author = await userFactory.withAdminRole().create();
-          await courseFactory.create({ authorId: author.id, categoryId: category.id });
-          const user = await userFactory
+          const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
             .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          const createCourse = (overrides: { status: CourseStatus; isArchived?: boolean }) =>
+            courseFactory.create({
+              authorId: author.id,
+              categoryId: category.id,
+              thumbnailS3Key: null,
+              ...overrides,
+            });
 
-          await request(app.getHttpServer())
+          const publishedCourse = await createCourse({ status: COURSE_STATUSES.PUBLISHED });
+          const enrolledPrivateCourse = await createCourse({ status: COURSE_STATUSES.PRIVATE });
+          await createCourse({ status: COURSE_STATUSES.PRIVATE });
+          await createCourse({ status: COURSE_STATUSES.DRAFT });
+          await createCourse({ status: COURSE_STATUSES.PUBLISHED, isArchived: true });
+
+          await db.insert(studentCourses).values({
+            studentId: student.id,
+            courseId: enrolledPrivateCourse.id,
+            finishedChapterCount: 0,
+          });
+
+          const response = await request(app.getHttpServer())
             .get("/api/course/all")
-            .set("Cookie", await cookieFor(user, app))
-            .expect(403);
+            .query({ isArchived: "all" })
+            .set("Cookie", await cookieFor(student, app))
+            .expect(200);
+
+          expect(response.body.data.map((course: CourseTest) => course.id).sort()).toEqual(
+            [publishedCourse.id, enrolledPrivateCourse.id].sort(),
+          );
         });
       });
 

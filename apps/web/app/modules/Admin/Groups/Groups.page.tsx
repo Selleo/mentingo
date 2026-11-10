@@ -147,6 +147,7 @@ const Groups = (): ReactElement => {
             searchValue={tableState.searchInput}
             onSearchChange={tableState.setSearchInput}
             searchPlaceholder={t("common.other.search")}
+            searchTestId={GROUPS_PAGE_HANDLES.SEARCH_INPUT}
             canResetFilters={tableState.activeFilterCount > 0}
             onResetFilters={tableState.resetFilters}
           />

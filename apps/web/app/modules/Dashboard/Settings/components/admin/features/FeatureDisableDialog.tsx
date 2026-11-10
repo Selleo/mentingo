@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../../e2e/data/settings/handles";
+
 import type { PlatformFeature } from "./platformFeatures.types";
 
 type FeatureDisableDialogProps = {
@@ -26,7 +28,10 @@ export function FeatureDisableDialog({ feature, onCancel, onConfirm }: FeatureDi
 
   return (
     <Dialog open={Boolean(feature)} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className="max-w-md"
+        data-testid={SETTINGS_PAGE_HANDLES.FEATURE_DISABLE_DIALOG}
+      >
         <DialogHeader>
           <DialogTitle>
             {t("platformFeatures.disable.title", { feature: featureTitle })}
@@ -39,7 +44,11 @@ export function FeatureDisableDialog({ feature, onCancel, onConfirm }: FeatureDi
               {t("common.button.cancel")}
             </Button>
           </DialogClose>
-          <Button type="button" onClick={() => feature && onConfirm(feature)}>
+          <Button
+            type="button"
+            onClick={() => feature && onConfirm(feature)}
+            data-testid={SETTINGS_PAGE_HANDLES.FEATURE_DISABLE_CONFIRM_BUTTON}
+          >
             {t("platformFeatures.disable.confirm")}
           </Button>
         </DialogFooter>

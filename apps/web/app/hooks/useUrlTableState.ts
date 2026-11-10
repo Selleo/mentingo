@@ -1,6 +1,6 @@
 import { useSearchParams } from "@remix-run/react";
 import { functionalUpdate, type SortingState, type Updater } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ITEMS_PER_PAGE_OPTIONS,
@@ -110,7 +110,12 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
   const updateListParams = (values: UrlValues) =>
     updateUrlParams({ ...values, [TABLE_URL_PARAMS.PAGE]: undefined });
 
+  const lastUrlSearch = useRef(search);
+
   useEffect(() => {
+    if (lastUrlSearch.current === search) return;
+
+    lastUrlSearch.current = search;
     setSearchInput((currentInput) => (currentInput.trim() === search ? currentInput : search));
   }, [search]);
 

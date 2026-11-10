@@ -12,6 +12,7 @@ export type GroupRow = GetAllGroupsResponse["data"][number];
 /** Table columns sortable on the server, mapped to the API sort field they order by. */
 export const GROUPS_TABLE_SORT_FIELDS = {
   name: "name",
+  characteristic: "characteristic",
 } as const;
 
 type GetGroupsColumnsOptions = {
@@ -42,8 +43,11 @@ export const getGroupsColumns = ({
     },
     {
       accessorKey: "characteristic",
-      header: t("adminGroupsView.characteristic"),
-      enableSorting: false,
+      header: ({ column }) => (
+        <SortButton<GroupRow> testId={GROUPS_PAGE_HANDLES.SORT_CHARACTERISTIC} column={column}>
+          {t("adminGroupsView.characteristic")}
+        </SortButton>
+      ),
       cell: ({ row }) => (
         <span className="line-clamp-2 max-w-xl text-neutral-800">
           {row.original.characteristic}

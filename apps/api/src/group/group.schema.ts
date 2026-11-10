@@ -58,10 +58,15 @@ export const groupKeywordFilterSchema = Type.Object({
 
 export type GroupKeywordFilterBody = Static<typeof groupKeywordFilterSchema>;
 
-export const groupSortFields = ["name", "createdAt"] as const;
-export const groupSortFieldsOptions = Type.Union([Type.Literal("name"), Type.Literal("createdAt")]);
+export const groupSortFields = ["name", "characteristic", "createdAt"] as const;
+export const groupSortFieldsOptions = Type.Union([
+  Type.Literal("name"),
+  Type.Literal("characteristic"),
+  Type.Literal("createdAt"),
+]);
 export type GroupSortField = (typeof groupSortFields)[number];
 export const GroupSortFields: Record<GroupSortField, GroupSortField> = {
   name: "name",
+  characteristic: "characteristic",
   createdAt: "createdAt",
 };

@@ -36,9 +36,9 @@ test("admin can bulk delete categories from the categories list", async ({
         return existingCategories.every((category) => category === null);
       })
       .toBe(true);
-    await expect(page.getByTestId(CATEGORIES_PAGE_HANDLES.TABLE_BODY).getByRole("row")).toHaveCount(
-      0,
-    );
+    for (const category of categories) {
+      await expect(page.getByTestId(CATEGORIES_PAGE_HANDLES.row(category.id))).toHaveCount(0);
+    }
     await assertToastVisible(page, "Category deleted successfully", { optional: true });
   });
 });
