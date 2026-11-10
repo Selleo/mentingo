@@ -10,7 +10,7 @@ import {
   AUTH_TOKEN_PURPOSE,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import { authenticator } from "otplib";
 import request from "supertest";
 
@@ -715,6 +715,18 @@ describe("MFA enforcement", () => {
       .set("Authorization", `Bearer ${login.accessToken}`)
       .expect(201);
     expect(app.get(JwtService).decode(tokenFrom(pending))).not.toHaveProperty("permissions");
+  });
+
+  it("treats global settings without MFAEnforcedRoles as no enforced roles", async () => {
+    const { user } = await createAccount(false);
+    await db
+      .update(settings)
+      .set({ settings: sql`${settings.settings} - 'MFAEnforcedRoles'` })
+      .where(isNull(settings.userId));
+
+    const login = await auth.login({ email: user.email, password });
+
+    expect(login.shouldVerifyMFA).toBe(false);
   });
 
   it("rejects legacy credentials and expired challenges", async () => {
